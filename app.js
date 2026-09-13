@@ -35,6 +35,7 @@ function profileMessage(code){
   invalidId:{de:'Die Player ID sollte nur aus Zahlen bestehen.',en:'The Player ID should contain numbers only.',fr:'La Player ID doit contenir uniquement des chiffres.'},
   notFound:{de:'Spieler nicht gefunden. Bitte Name und Player ID prüfen.',en:'Player not found. Please check your name and Player ID.',fr:'Joueur introuvable. Vérifie ton nom et ta Player ID.'},
   saved:{de:'Im NRW-Spielerprofil gespeichert ✓',en:'Saved to your NRW member profile ✓',fr:'Enregistré dans ton profil NRW ✓'},
+  queued:{de:'Zur Prüfung gespeichert ✓',en:'Saved for review ✓',fr:'Enregistré pour vérification ✓'},
   error:{de:'Speichern gerade nicht möglich. Bitte später erneut versuchen.',en:'Could not save right now. Please try again later.',fr:'Enregistrement impossible pour le moment. Réessaie plus tard.'}
  };
  return (m[code]||m.error)[lang] || (m[code]||m.error).en;
@@ -80,7 +81,7 @@ document.getElementById('saveProfile').addEventListener('click',async()=>{
 
   localStorage.setItem(profileKey,JSON.stringify(profile));
   window.NRW_MEMBER_PROFILE_PAYLOAD=profile;
-  status.textContent=profileMessage('saved');
+  status.textContent=profileMessage(data?.queued?'queued':'saved');
   status.classList.add('success');
  }catch(e){
   console.error('NRW language profile save failed',e);
