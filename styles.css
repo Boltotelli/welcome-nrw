@@ -52,6 +52,8 @@ nav{
 .nav-cta{background:var(--ink);color:var(--bg)}
 .btn:hover,.nav-cta:hover{transform:translateY(-2px)}
 .btn-primary{color:white;background:linear-gradient(135deg,#5d79fa,#6b8cff 56%,#62d5e9);box-shadow:0 14px 34px rgba(90,121,248,.24)}
+.btn-dashboard{color:#fff;background:#18233e;border-color:#18233e;box-shadow:0 14px 34px rgba(24,35,62,.18)}
+html[data-theme="dark"] .btn-dashboard{background:#f5f7ff;color:#101827;border-color:#f5f7ff}
 .btn-soft{background:var(--surface);border-color:var(--line);color:var(--ink);box-shadow:var(--shadow2)}
 .eyebrow,.chip{
  display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--surface);
