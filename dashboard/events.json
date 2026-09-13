@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "kingdom": 1044,
   "timezone": "UTC",
-  "updatedAt": "2026-09-13T13:10:00Z",
+  "updatedAt": "2026-09-13T21:40:38Z",
   "events": [
     {
       "id": "alliance-brawl-2026-09",
@@ -72,6 +72,20 @@
         "de": ["Aena ist die Karawanen-Spezialistin.", "Priorisieren, wenn du im Handelsimperium aktiv eskortierst, überfällst, aktualisierst und verteidigst.", "Die Veröffentlichung ist für morgen per Ingame-Mitteilung bestätigt."],
         "en": ["Aena is the caravan specialist.", "Prioritize her if you actively escort, raid, refresh and defend during Merchant Empire.", "Her release tomorrow is confirmed by an in-game notice."],
         "fr": ["Aena est la spécialiste des caravanes.", "À prioriser si tu escortes, attaques, actualises et défends activement pendant l’Empire commercial.", "Sa sortie demain est confirmée par un message en jeu."]
+      }
+    },
+    {
+      "id": "isnor-master-2026-09-14",
+      "start": "2026-09-14",
+      "end": "2026-09-14",
+      "icon": "🧙",
+      "manual": true,
+      "confidence": "predicted",
+      "name": {"de": "Isnor · 8. Meister (voraussichtlich)", "en": "Isnor · 8th Master (expected)", "fr": "Isnor · 8e Maître (prévu)"},
+      "tips": {
+        "de": ["Wird ebenfalls für morgen erwartet, ist aber noch nicht bestätigt.", "Spezialist für Eternity’s Reach und Talismanmaterial.", "Meist die stärkere Langzeitwahl, weil Gouverneurs-Talismanmaterial dauerhaft wichtig bleibt."],
+        "en": ["Also expected tomorrow, but not yet confirmed.", "Specialist for Eternity’s Reach and charm materials.", "Usually the stronger long-term pick because Governor Charm materials remain important."],
+        "fr": ["Également attendu demain, mais pas encore confirmé.", "Spécialiste d’Eternity’s Reach et des matériaux de talismans.", "Souvent le meilleur choix à long terme, car ces matériaux restent importants."]
       }
     },
     {
