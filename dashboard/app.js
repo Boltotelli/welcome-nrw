@@ -46,6 +46,11 @@
     const plan=planFor(e,date),tips=(e.tips?.[lang]||e.tips?.en||[]).slice(0,3).join(' • ');
     return [eventIcon(e),safe(localized(e.name,lang)),safe(planCopy(plan,lang)||tips),status];
   }
+  function preparationTask(e,lang,date){
+    const prep=planFor(e,date)?.prepare,steps=prep?.steps?.[lang]||prep?.steps?.en||[];
+    if(!prep||!steps.length)return null;
+    return [eventIcon(e),safe(localized(prep.title,lang)||localized(e.name,lang)),safe(steps.join(' • ')),safe(localized(prep.status,lang))];
+  }
   function tomorrowEvent(e,lang,date){
     const plan=planFor(e,date),tips=(e.tips?.[lang]||e.tips?.en||[]).slice(0,3),source=e.sourceUrl?`<a href="${safe(e.sourceUrl)}" target="_blank" rel="noopener">Guide ↗</a>`:'';
     if(plan){
@@ -62,9 +67,9 @@
     document.getElementById('weekday').textContent=now.toLocaleDateString(locale,{weekday:'long',timeZone:'UTC'});
     document.getElementById('dateLabel').textContent=now.toLocaleDateString(locale,{day:'2-digit',month:'short',timeZone:'UTC'}).toUpperCase();
     const serverAge=Math.floor((todayUTC.getTime()-serverOpened)/day);document.querySelectorAll('[data-server-age]').forEach(el=>el.textContent=serverAge);
-    const todayKey=dateKey(todayUTC),tomorrowKey=dateKey(tomorrow),todayEvents=eventsFor(todayKey);let tasks=[...t.tasks];if(todayEvents.length)tasks=todayEvents.map(e=>eventTask(e,lang,t.today,todayKey)).concat(tasks);else if(todayKey==='2026-09-14')tasks=t.tomorrowItems.map(([icon,title,copy])=>[icon,title,copy,t.today]).concat(tasks);if(isBearDay(todayUTC))tasks.unshift(t.bearTask);if(todayKey==='2026-09-13')tasks.splice(1,0,t.specialTask);document.getElementById('todayTasks').innerHTML=tasks.map((x,i)=>card(x,i<Math.max(2,todayEvents.length))).join('');
-    const genTomorrow=tomorrowKey==='2026-09-14',tomorrowEvents=eventsFor(tomorrowKey);document.getElementById('tomorrowTitle').textContent=tomorrowEvents.length?tomorrow.toLocaleDateString(locale,{weekday:'long',day:'2-digit',month:'2-digit',timeZone:'UTC'}):(genTomorrow?t.nextHero:t.genericTomorrow);document.getElementById('tomorrowTasks').innerHTML=tomorrowEvents.length?tomorrowEvents.map(e=>tomorrowEvent(e,lang,tomorrowKey)).join(''):(genTomorrow?t.tomorrowItems:t.genericTomorrowItems).map(([icon,title,copy])=>`<div class="tomorrow-task"><span>${icon}</span><div><strong>${title}</strong><small>${copy}</small></div></div>`).join('');
-    const nextDay=nextBearAt(17,0),todayTrapEnd=new Date(todayUTC.getTime()+18.5*3600000),dateFmt=d=>d.toLocaleDateString(locale,{weekday:'long',day:'2-digit',month:'2-digit',timeZone:'UTC'});
+    const todayKey=dateKey(todayUTC),tomorrowKey=dateKey(tomorrow),todayEvents=eventsFor(todayKey),tomorrowEvents=eventsFor(tomorrowKey),todayTrapEnd=new Date(todayUTC.getTime()+18.5*3600000),preparations=tomorrowEvents.map(e=>preparationTask(e,lang,tomorrowKey)).filter(Boolean);let tasks=[...t.tasks];if(todayEvents.length)tasks=todayEvents.map(e=>eventTask(e,lang,t.today,todayKey)).concat(tasks);else if(todayKey==='2026-09-14')tasks=t.tomorrowItems.map(([icon,title,copy])=>[icon,title,copy,t.today]).concat(tasks);if(isBearDay(todayUTC)&&now<todayTrapEnd)tasks.unshift(t.bearTask);if(todayKey==='2026-09-13')tasks.push(t.specialTask);tasks=preparations.concat(tasks);document.getElementById('todayTasks').innerHTML=tasks.map((x,i)=>card(x,i<Math.max(2,preparations.length+todayEvents.length))).join('');
+    const genTomorrow=tomorrowKey==='2026-09-14';document.getElementById('tomorrowTitle').textContent=tomorrowEvents.length?tomorrow.toLocaleDateString(locale,{weekday:'long',day:'2-digit',month:'2-digit',timeZone:'UTC'}):(genTomorrow?t.nextHero:t.genericTomorrow);document.getElementById('tomorrowTasks').innerHTML=tomorrowEvents.length?tomorrowEvents.map(e=>tomorrowEvent(e,lang,tomorrowKey)).join(''):(genTomorrow?t.tomorrowItems:t.genericTomorrowItems).map(([icon,title,copy])=>`<div class="tomorrow-task"><span>${icon}</span><div><strong>${title}</strong><small>${copy}</small></div></div>`).join('');
+    const nextDay=nextBearAt(17,0),dateFmt=d=>d.toLocaleDateString(locale,{weekday:'long',day:'2-digit',month:'2-digit',timeZone:'UTC'});
     const followingBear=isBearDay(todayUTC)&&now<todayTrapEnd?new Date(todayUTC.getTime()+2*day):nextDay;
     document.getElementById('bearTag').textContent=isBearDay(todayUTC)&&now<todayTrapEnd?t.bearTodayTag:t.bearNextTag;
     document.getElementById('genTag').textContent=genTomorrow?t.genTomorrowTag:t.genNowTag;
