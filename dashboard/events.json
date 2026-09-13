@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "kingdom": 1044,
+  "timezone": "UTC",
+  "updatedAt": "2026-09-13T13:10:00Z",
+  "events": [
+    {
+      "id": "alliance-brawl-2026-09",
+      "start": "2026-09-14",
+      "end": "2026-09-20",
+      "icon": "⚔️",
+      "manual": true,
+      "confidence": "confirmed-ingame",
+      "name": {"de": "Allianzgemenge", "en": "Alliance Brawl", "fr": "Alliance Brawl"},
+      "tips": {
+        "de": ["Täglich zuerst die aktuelle Phase und ihre Punkteaufgaben prüfen.", "Nur Ressourcen einsetzen, die am jeweiligen Tag wirklich Punkte bringen.", "Persönliche Ziele und NRW-Absprachen vor unnötigen Ausgaben priorisieren."],
+        "en": ["Check the current stage and its scoring tasks first each day.", "Only use resources that actually score in the active stage.", "Prioritize personal milestones and NRW coordination before extra spending."],
+        "fr": ["Vérifie d’abord chaque jour la phase actuelle et ses tâches de points.", "Utilise uniquement les ressources qui rapportent pendant la phase active.", "Privilégie les paliers personnels et la coordination NRW avant les dépenses supplémentaires."]
+      },
+      "sourceUrl": "https://kingshotmastery.com/"
+    },
+    {
+      "id": "merchant-empire-2026-09",
+      "start": "2026-09-14",
+      "end": "2026-09-20",
+      "icon": "🏛️",
+      "manual": true,
+      "confidence": "confirmed-ingame",
+      "name": {"de": "Handelsimperium", "en": "Merchant Empire", "fr": "Empire commercial"},
+      "tips": {
+        "de": ["Täglich vier Karawanen senden und bis zu vier erfolgreiche Überfälle nutzen.", "Zuerst die Gratis-Aktualisierung und Karawanengutscheine verwenden; Edelsteine nur bewusst einsetzen.", "Für wertvolle Karawanen starke Allianzunterstützung anfordern und vor Überfällen Ladung sowie Feuersymbole prüfen."],
+        "en": ["Send four caravans daily and use up to four successful raids.", "Use the free refresh and Caravan Vouchers first; spend gems deliberately.", "Request strong alliance support for valuable caravans and check cargo plus fire icons before raiding."],
+        "fr": ["Envoie quatre caravanes par jour et utilise jusqu’à quatre raids réussis.", "Utilise d’abord l’actualisation gratuite et les bons de caravane ; dépense les gemmes avec prudence.", "Demande une forte assistance pour les caravanes précieuses et vérifie la cargaison ainsi que les icônes de feu avant un raid."]
+      },
+      "sourceUrl": "https://centurygames.helpshift.com/hc/en/140-kingshot/section/1501-merchant-empire/"
+    },
+    {
+      "id": "champagne-fair-2026-09",
+      "start": "2026-09-14",
+      "end": "2026-09-15",
+      "icon": "🥂",
+      "manual": true,
+      "confidence": "confirmed-ingame",
+      "name": {"de": "Champagne Fair · Splittertausch", "en": "Champagne Fair · Shard Exchange", "fr": "Champagne Fair · Échange de fragments"},
+      "tips": {
+        "de": ["Nur überschüssige heldenspezifische Splitter vollständig maximierter Helden tauschen.", "Tauschwerte und gesamten Shop vor dem ersten Umtausch vergleichen.", "Gutscheine bleiben erhalten – lieber sparen als niedrigwertige Belohnungen kaufen."],
+        "en": ["Only exchange excess hero-specific shards from fully maxed heroes.", "Compare exchange values and the full shop before making the first trade.", "Vouchers carry over, so saving is better than buying low-value rewards."],
+        "fr": ["Échange uniquement les fragments spécifiques excédentaires de héros entièrement maximisés.", "Compare les taux et toute la boutique avant le premier échange.", "Les bons sont conservés ; mieux vaut les garder que prendre des récompenses de faible valeur."]
+      },
+      "sourceUrl": "https://centurygames.helpshift.com/hc/en/140-kingshot/"
+    },
+    {
+      "id": "new-master-2026-09-14",
+      "start": "2026-09-14",
+      "end": "2026-09-14",
+      "icon": "🧙",
+      "manual": true,
+      "confidence": "confirmed-ingame",
+      "name": {"de": "Neuer Meister · Name offen", "en": "New Master · Name pending", "fr": "Nouveau Maître · Nom inconnu"},
+      "tips": {
+        "de": ["Vor dem Freischalten Fähigkeiten und benötigte Materialien im Spiel prüfen.", "Meister-Embleme, Manuskripte und Meister-Speedups bis zur Bewertung zurückhalten.", "NRW- oder Discord-Empfehlung abwarten, bevor seltene Materialien gebunden werden."],
+        "en": ["Check abilities and required materials in game before unlocking.", "Hold Master Emblems, Manuscripts and Master speedups until the new Master is evaluated.", "Wait for NRW or Discord guidance before committing rare materials."],
+        "fr": ["Vérifie les compétences et matériaux requis en jeu avant le déblocage.", "Garde emblèmes, manuscrits et accélérateurs de Maître jusqu’à l’évaluation.", "Attends les conseils NRW ou Discord avant d’engager des matériaux rares."]
+      }
+    },
+    {
+      "id": "hero-generation-6-1044",
+      "start": "2026-09-14",
+      "end": "2026-09-14",
+      "icon": "✨",
+      "manual": false,
+      "confidence": "public-timeline",
+      "name": {"de": "Generation 6 · Triton, Sophia & Yang", "en": "Generation 6 · Triton, Sophia & Yang", "fr": "Génération 6 · Triton, Sophia & Yang"},
+      "tips": {
+        "de": ["Nicht sofort Goldschlüssel oder universelle Splitter ausgeben.", "Erst Bezugswege und Event-Überschneidungen im Spiel prüfen.", "Für F2P die Investition auf einen klaren Haupthelden konzentrieren."],
+        "en": ["Do not spend Gold Keys or universal shards immediately.", "Check acquisition routes and event overlaps in game first.", "For F2P, focus investment on one clear priority hero."],
+        "fr": ["Ne dépense pas immédiatement les clés d’or ou fragments universels.", "Vérifie d’abord les méthodes d’obtention et les événements qui se chevauchent.", "En F2P, concentre l’investissement sur un héros prioritaire."]
+      },
+      "sourceUrl": "https://kingshot.net/nexus/1044"
+    }
+  ]
+}
