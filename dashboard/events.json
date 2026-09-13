@@ -21,10 +21,19 @@
       "dailyPlans": {
         "2026-09-14": {
           "points": {"de": "Punkte fürs Sammeln", "en": "Points for gathering", "fr": "Points pour la collecte"},
+          "prepare": {
+            "title": {"de": "Allianzgemenge jetzt vorbereiten", "en": "Prepare Alliance Brawl now", "fr": "Préparer Alliance Brawl maintenant"},
+            "status": {"de": "VOR RESET", "en": "BEFORE RESET", "fr": "AVANT RESET"},
+            "steps": {
+              "de": ["Schicke lange Sammler vor dem Reset los.", "Setze den Bison ein, sobald deine Truppen aktiv sammeln."],
+              "en": ["Send long gathering marches before reset.", "Use Bison as soon as your troops are actively gathering."],
+              "fr": ["Envoie de longues marches de collecte avant le reset.", "Utilise le Bison dès que tes troupes collectent activement."]
+            }
+          },
           "steps": {
-            "de": ["Schicke heute vor dem Reset lange Sammler los, damit sie morgen zurückkehren.", "Setze den Bison ein, sobald deine Truppen aktiv sammeln.", "Lass die Sammler erst nach dem Reset zurückkehren, damit die gesammelten Ressourcen morgen Punkte bringen."],
-            "en": ["Send long gathering marches before today’s reset so they return tomorrow.", "Use Bison as soon as your troops are actively gathering.", "Let the gatherers return only after reset so the collected resources score tomorrow."],
-            "fr": ["Envoie de longues marches de collecte avant le reset afin qu’elles reviennent demain.", "Utilise le Bison dès que tes troupes collectent activement.", "Ne laisse revenir les collecteurs qu’après le reset afin que les ressources rapportent des points demain."]
+            "de": ["Lass die vorbereiteten Sammler erst nach dem Reset zurückkehren, damit die gesammelten Ressourcen Punkte bringen."],
+            "en": ["Let the prepared gatherers return only after reset so the collected resources score."],
+            "fr": ["Ne laisse revenir les collecteurs préparés qu’après le reset afin que les ressources rapportent des points."]
           }
         }
       },
