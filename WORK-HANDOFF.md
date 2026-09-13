@@ -230,3 +230,7 @@ For every future production change:
 - verify affected production behavior
 - report success only after verification
 - if deployment fails, keep the last known-good production version intact and diagnose before retrying
+
+## Setup status
+- GitHub source and Vercel production project are connected.
+- Production alias: `https://welcome-nrw.vercel.app`
