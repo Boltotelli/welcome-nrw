@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "kingdom": 1044,
   "timezone": "UTC",
-  "updatedAt": "2026-09-13T21:40:38Z",
+  "updatedAt": "2026-09-13T21:45:26Z",
   "events": [
     {
       "id": "alliance-brawl-2026-09",
@@ -21,11 +21,10 @@
         "2026-09-14": {
           "points": {"de": "Punkte fürs Sammeln", "en": "Points for gathering", "fr": "Points pour la collecte"},
           "steps": {
-            "de": ["Schicke heute vor dem Reset lange Sammler los, damit sie morgen zurückkehren.", "Lass die normalen Sammler zuerst einlaufen und aktiviere danach den Bison.", "Ist ‚Griff des Titanen‘ auf 15 Stunden Abklingzeit, kannst du den Bison morgen ein zweites Mal nutzen."],
-            "en": ["Send long gathering marches before today’s reset so they return tomorrow.", "Let the normal gatherers return first, then activate Bison.", "If Grip of the Titan has a 15-hour cooldown, you can use Bison a second time tomorrow."],
-            "fr": ["Envoie de longues marches de collecte avant le reset afin qu’elles reviennent demain.", "Laisse d’abord revenir les collecteurs normaux, puis active le Bison.", "Si Poigne du Titan a un temps de recharge de 15 heures, tu pourras utiliser le Bison une deuxième fois demain."]
-          },
-          "note": {"de": "NRW-Tipp · abhängig von deiner Bison-Fähigkeitsstufe", "en": "NRW tip · depends on your Bison skill level", "fr": "Astuce NRW · dépend du niveau de compétence du Bison"}
+            "de": ["Schicke heute vor dem Reset lange Sammler los, damit sie morgen zurückkehren.", "Setze den Bison ein, sobald deine Truppen aktiv sammeln.", "Lass die Sammler erst nach dem Reset zurückkehren, damit die gesammelten Ressourcen morgen Punkte bringen."],
+            "en": ["Send long gathering marches before today’s reset so they return tomorrow.", "Use Bison as soon as your troops are actively gathering.", "Let the gatherers return only after reset so the collected resources score tomorrow."],
+            "fr": ["Envoie de longues marches de collecte avant le reset afin qu’elles reviennent demain.", "Utilise le Bison dès que tes troupes collectent activement.", "Ne laisse revenir les collecteurs qu’après le reset afin que les ressources rapportent des points demain."]
+          }
         }
       },
       "sourceUrl": "https://kingshotmastery.com/"
@@ -80,12 +79,12 @@
       "end": "2026-09-14",
       "icon": "🧙",
       "manual": true,
-      "confidence": "predicted",
-      "name": {"de": "Isnor · 8. Meister (voraussichtlich)", "en": "Isnor · 8th Master (expected)", "fr": "Isnor · 8e Maître (prévu)"},
+      "confidence": "confirmed-ingame",
+      "name": {"de": "Isnor · 8. Meister", "en": "Isnor · 8th Master", "fr": "Isnor · 8e Maître"},
       "tips": {
-        "de": ["Wird ebenfalls für morgen erwartet, ist aber noch nicht bestätigt.", "Spezialist für Eternity’s Reach und Talismanmaterial.", "Meist die stärkere Langzeitwahl, weil Gouverneurs-Talismanmaterial dauerhaft wichtig bleibt."],
-        "en": ["Also expected tomorrow, but not yet confirmed.", "Specialist for Eternity’s Reach and charm materials.", "Usually the stronger long-term pick because Governor Charm materials remain important."],
-        "fr": ["Également attendu demain, mais pas encore confirmé.", "Spécialiste d’Eternity’s Reach et des matériaux de talismans.", "Souvent le meilleur choix à long terme, car ces matériaux restent importants."]
+        "de": ["Die Veröffentlichung morgen ist per Ingame-Mitteilung bestätigt.", "Spezialist für Eternity’s Reach und Talismanmaterial.", "Meist die stärkere Langzeitwahl, weil Gouverneurs-Talismanmaterial dauerhaft wichtig bleibt."],
+        "en": ["Tomorrow’s release is confirmed by an in-game notice.", "Specialist for Eternity’s Reach and charm materials.", "Usually the stronger long-term pick because Governor Charm materials remain important."],
+        "fr": ["Sa sortie demain est confirmée par un message en jeu.", "Spécialiste d’Eternity’s Reach et des matériaux de talismans.", "Souvent le meilleur choix à long terme, car ces matériaux restent importants."]
       }
     },
     {
