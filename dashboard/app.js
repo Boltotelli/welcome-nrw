@@ -1,5 +1,6 @@
 (function(){
   const body=document.body,root=document.documentElement;
+  let eventFeed=[];
   const savedLang=localStorage.getItem('nrw_page_lang')||'en';
   const savedTheme=localStorage.getItem('nrw_theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
   body.dataset.lang=savedLang;root.lang=savedLang;root.dataset.theme=savedTheme;
@@ -31,6 +32,17 @@
 
   const anchor=Date.UTC(2026,8,13),day=86400000;
   const dateKey=d=>d.toISOString().slice(0,10);
+  const safe=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  const localized=(value,lang)=>typeof value==='string'?value:(value?.[lang]||value?.en||'');
+  const eventsFor=date=>eventFeed.filter(e=>e.start<=date&&(!e.end||e.end>=date));
+  function eventTask(e,lang,status){
+    const tips=(e.tips?.[lang]||e.tips?.en||[]).slice(0,3).join(' • ');
+    return [safe(e.icon||'📅'),safe(localized(e.name,lang)),safe(tips),status];
+  }
+  function tomorrowEvent(e,lang){
+    const tips=(e.tips?.[lang]||e.tips?.en||[]).slice(0,3).join(' • '),source=e.sourceUrl?`<a href="${e.sourceUrl}" target="_blank" rel="noopener">Guide ↗</a>`:'';
+    return `<div class="tomorrow-task"><span>${safe(e.icon||'📅')}</span><div><strong>${safe(localized(e.name,lang))}</strong><small>${safe(tips)}</small>${source}</div></div>`;
+  }
   const isBearDay=d=>Math.round((Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate())-anchor)/day)%2===0;
   function nextBearAt(hour,minute){let d=new Date();for(let add=0;add<4;add++){const x=new Date(Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate()+add,hour,minute));if(isBearDay(x)&&x>d)return x}return new Date(Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate()+2,hour,minute))}
   function fmtCountdown(target){let s=Math.max(0,Math.floor((target-Date.now())/1000)),days=Math.floor(s/86400);s%=86400;const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60;return (days?days+'d ':'')+[h,m,sec].map(v=>String(v).padStart(2,'0')).join(':')}
@@ -38,8 +50,8 @@
   function renderDynamic(){const lang=body.dataset.lang||'en',t=i18n[lang],now=new Date(),todayUTC=new Date(Date.UTC(now.getUTCFullYear(),now.getUTCMonth(),now.getUTCDate())),tomorrow=new Date(todayUTC.getTime()+day),locale=t.locale;
     document.getElementById('weekday').textContent=now.toLocaleDateString(locale,{weekday:'long',timeZone:'UTC'});
     document.getElementById('dateLabel').textContent=now.toLocaleDateString(locale,{day:'2-digit',month:'short',timeZone:'UTC'}).toUpperCase();
-    let tasks=[...t.tasks];if(dateKey(todayUTC)==='2026-09-14')tasks=t.tomorrowItems.map(([icon,title,copy])=>[icon,title,copy,t.today]).concat(tasks);if(isBearDay(todayUTC))tasks.unshift(t.bearTask);if(dateKey(todayUTC)==='2026-09-13')tasks.splice(1,0,t.specialTask);document.getElementById('todayTasks').innerHTML=tasks.map((x,i)=>card(x,i<2&&(isBearDay(todayUTC)||dateKey(todayUTC)==='2026-09-14'))).join('');
-    const genTomorrow=dateKey(tomorrow)==='2026-09-14';document.getElementById('tomorrowTitle').textContent=genTomorrow?t.nextHero:t.genericTomorrow;document.getElementById('tomorrowTasks').innerHTML=(genTomorrow?t.tomorrowItems:t.genericTomorrowItems).map(([icon,title,copy])=>`<div class="tomorrow-task"><span>${icon}</span><div><strong>${title}</strong><small>${copy}</small></div></div>`).join('');
+    const todayEvents=eventsFor(dateKey(todayUTC));let tasks=[...t.tasks];if(todayEvents.length)tasks=todayEvents.map(e=>eventTask(e,lang,t.today)).concat(tasks);else if(dateKey(todayUTC)==='2026-09-14')tasks=t.tomorrowItems.map(([icon,title,copy])=>[icon,title,copy,t.today]).concat(tasks);if(isBearDay(todayUTC))tasks.unshift(t.bearTask);if(dateKey(todayUTC)==='2026-09-13')tasks.splice(1,0,t.specialTask);document.getElementById('todayTasks').innerHTML=tasks.map((x,i)=>card(x,i<Math.max(2,todayEvents.length))).join('');
+    const genTomorrow=dateKey(tomorrow)==='2026-09-14',tomorrowEvents=eventsFor(dateKey(tomorrow));document.getElementById('tomorrowTitle').textContent=tomorrowEvents.length?tomorrow.toLocaleDateString(locale,{weekday:'long',day:'2-digit',month:'2-digit',timeZone:'UTC'}):(genTomorrow?t.nextHero:t.genericTomorrow);document.getElementById('tomorrowTasks').innerHTML=tomorrowEvents.length?tomorrowEvents.map(e=>tomorrowEvent(e,lang)).join(''):(genTomorrow?t.tomorrowItems:t.genericTomorrowItems).map(([icon,title,copy])=>`<div class="tomorrow-task"><span>${icon}</span><div><strong>${title}</strong><small>${copy}</small></div></div>`).join('');
     const nextDay=nextBearAt(17,0),todayTrapEnd=new Date(todayUTC.getTime()+18.5*3600000),dateFmt=d=>d.toLocaleDateString(locale,{weekday:'long',day:'2-digit',month:'2-digit',timeZone:'UTC'});
     const followingBear=isBearDay(todayUTC)&&now<todayTrapEnd?new Date(todayUTC.getTime()+2*day):nextDay;
     document.getElementById('bearTag').textContent=isBearDay(todayUTC)&&now<todayTrapEnd?t.bearTodayTag:t.bearNextTag;
@@ -51,5 +63,6 @@
   const profileKey='nrw_member_profile_v1',playerNameInput=document.getElementById('playerName'),playerIdInput=document.getElementById('playerId');try{const p=JSON.parse(localStorage.getItem(profileKey)||'null');if(p){playerNameInput.value=p.playerName||'';playerIdInput.value=p.playerId||'';document.querySelectorAll('#languageGrid input').forEach(i=>i.checked=(p.languages||[]).includes(i.value))}}catch(e){}
   const messages={de:{missing:'Bitte Name, Player ID und Sprache angeben.',invalid:'Die Player ID darf nur Zahlen enthalten.',saved:'Im NRW-Spielerprofil gespeichert ✓',queued:'Zur Prüfung gespeichert ✓',error:'Speichern gerade nicht möglich.'},en:{missing:'Please add name, Player ID and language.',invalid:'Player ID must contain numbers only.',saved:'Saved to your NRW member profile ✓',queued:'Saved for review ✓',error:'Could not save right now.'},fr:{missing:'Ajoute ton nom, Player ID et ta langue.',invalid:'La Player ID doit contenir uniquement des chiffres.',saved:'Enregistré dans ton profil NRW ✓',queued:'Enregistré pour vérification ✓',error:'Enregistrement impossible.'}};
   document.getElementById('saveProfile').addEventListener('click',async()=>{const lang=body.dataset.lang||'en',m=messages[lang],status=document.getElementById('saveStatus'),button=document.getElementById('saveProfile'),profile={schemaVersion:2,playerName:playerNameInput.value.trim(),playerId:playerIdInput.value.trim(),languages:[...document.querySelectorAll('#languageGrid input:checked')].map(i=>i.value),otherLanguage:'',source:'nrw-player-dashboard',updatedAt:new Date().toISOString()};status.className='';if(!profile.playerName||!profile.playerId||!profile.languages.length){status.textContent=m.missing;status.className='error';return}if(!/^\d+$/.test(profile.playerId)){status.textContent=m.invalid;status.className='error';return}button.disabled=true;try{const r=await fetch('https://bdzlgirowutasrsycjfj.supabase.co/functions/v1/nrw-welcome-language',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(profile)}),data=await r.json().catch(()=>({}));if(!r.ok||!data.ok)throw new Error();localStorage.setItem(profileKey,JSON.stringify(profile));status.textContent=data.queued?m.queued:m.saved;status.className='success'}catch(e){status.textContent=m.error;status.className='error'}finally{button.disabled=false}});
+  fetch('/dashboard/events.json',{cache:'no-store'}).then(r=>r.ok?r.json():Promise.reject()).then(data=>{eventFeed=Array.isArray(data.events)?data.events:[];renderDynamic()}).catch(()=>{});
   renderDynamic();tick();setInterval(tick,1000);setInterval(renderDynamic,60000);
 })();
