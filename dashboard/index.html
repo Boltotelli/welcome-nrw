@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0b1020">
+  <title>NRW Player Dashboard · Server 1044</title>
+  <meta name="description" content="Daily Kingshot event plan for NRW on Server 1044.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-lang="en">
+  <div class="ambient one"></div><div class="ambient two"></div>
+  <header class="topbar">
+    <a class="brand" href="/"><img src="../assets/nrw-banner.svg" alt="NRW"><span>[NRW]United<small>PLAYER DASHBOARD · K1044</small></span></a>
+    <nav aria-label="Dashboard controls">
+      <div class="lang-toggle"><button data-lang-btn="de">DE</button><button data-lang-btn="en">EN</button><button data-lang-btn="fr">FR</button></div>
+      <button class="icon-btn" id="themeBtn" aria-label="Change color scheme">☀</button>
+      <a class="discord" href="https://discord.gg/yxKza24dUv" target="_blank" rel="noopener">Discord ↗</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="intro">
+      <div>
+        <div class="live-pill"><i></i><span class="de">HEUTE · SERVER 1044</span><span class="en">TODAY · SERVER 1044</span><span class="fr">AUJOURD’HUI · SERVEUR 1044</span></div>
+        <h1><span class="de">Dein Plan.<br><em>Ein Blick.</em></span><span class="en">Your plan.<br><em>One glance.</em></span><span class="fr">Ton plan.<br><em>En un coup d’œil.</em></span></h1>
+      </div>
+      <div class="date-block"><span id="weekday">Sunday</span><strong id="dateLabel">13 SEP</strong><small>UTC · <span id="utcClock">00:00:00</span></small></div>
+    </section>
+
+    <section class="priority-grid">
+      <article class="focus-card bear-card">
+        <div class="card-head"><span class="tag hot"><span class="de">HEUTE</span><span class="en">TODAY</span><span class="fr">AUJOURD’HUI</span></span><img src="https://got-global-wiki.s3.us-west-1.amazonaws.com/wp-content/uploads/2026/01/jump_icon_40088.png" alt="Bear Trap"></div>
+        <p class="overline">BEAR TRAP</p><h2><span class="de">Bärenfalle</span><span class="en">Bear Trap</span><span class="fr">Piège à ours</span></h2>
+        <div class="trap-times">
+          <div><span>BT1 · 17:00 UTC</span><strong id="bt1Countdown">--:--:--</strong></div>
+          <div><span>BT2 · 18:30 UTC</span><strong id="bt2Countdown">--:--:--</strong></div>
+        </div>
+        <p class="muted" id="bearDateNote"></p>
+      </article>
+
+      <article class="focus-card gen-card">
+        <div class="card-head"><span class="tag new"><span class="de">MORGEN</span><span class="en">TOMORROW</span><span class="fr">DEMAIN</span></span><span class="gen-badge">GEN 6</span></div>
+        <p class="overline"><span class="de">NÄCHSTER MEILENSTEIN</span><span class="en">NEXT MILESTONE</span><span class="fr">PROCHAIN PALIER</span></p>
+        <h2><span class="de">Neue Helden</span><span class="en">New heroes</span><span class="fr">Nouveaux héros</span></h2>
+        <div class="hero-row">
+          <figure><img src="https://kingshotdata.com/uploads/2026/02/triton-full-image.webp" alt="Triton"><figcaption>Triton<small>Infantry</small></figcaption></figure>
+          <figure><img src="https://kingshotdata.com/uploads/2026/02/sophia-full-image.webp" alt="Sophia"><figcaption>Sophia<small>Cavalry</small></figcaption></figure>
+          <figure><img src="https://kingshotdata.com/uploads/2026/02/yang-full-image.webp" alt="Yang"><figcaption>Yang<small>Archer</small></figcaption></figure>
+        </div>
+        <div class="milestone-countdown"><span class="de">Start laut K1044-Timeline</span><span class="en">Start per K1044 timeline</span><span class="fr">Début selon la chronologie K1044</span><strong id="gen6Countdown">--</strong></div>
+      </article>
+    </section>
+
+    <section class="content-grid">
+      <div class="plan-column">
+        <div class="section-title"><div><span class="eyebrow"><span class="de">TAGESPLAN</span><span class="en">DAILY PLAN</span><span class="fr">PLAN DU JOUR</span></span><h2><span class="de">Was du heute tun solltest</span><span class="en">What to do today</span><span class="fr">Que faire aujourd’hui</span></h2></div><span class="source-state"><i></i><span class="de">Öffentlich geprüft</span><span class="en">Publicly checked</span><span class="fr">Vérifié publiquement</span></span></div>
+        <div class="task-list" id="todayTasks"></div>
+        <article class="tomorrow-card">
+          <div><span class="eyebrow"><span class="de">AUSBLICK</span><span class="en">LOOK AHEAD</span><span class="fr">APERÇU</span></span><h3 id="tomorrowTitle"></h3></div>
+          <div id="tomorrowTasks" class="tomorrow-tasks"></div>
+        </article>
+      </div>
+
+      <aside>
+        <div class="aside-title"><span class="eyebrow"><span class="de">ROADMAP</span><span class="en">ROADMAP</span><span class="fr">FEUILLE DE ROUTE</span></span><h2><span class="de">Was als Nächstes kommt</span><span class="en">What comes next</span><span class="fr">Ce qui arrive ensuite</span></h2></div>
+        <div class="timeline">
+          <article class="timeline-item active">
+            <div class="timeline-media trio"><img src="https://kingshotdata.com/uploads/2026/02/triton-full-image.webp" alt=""><img src="https://kingshotdata.com/uploads/2026/02/sophia-full-image.webp" alt=""><img src="https://kingshotdata.com/uploads/2026/02/yang-full-image.webp" alt=""></div>
+            <div><span class="timeline-date">14 SEP 2026</span><h3>Generation 6 · Heroes</h3><p>Triton · Sophia · Yang</p><strong data-count-to="2026-09-14T00:00:00Z"></strong></div>
+          </article>
+          <article class="timeline-item">
+            <div class="timeline-media pets"><img src="https://kingshotdata.com/uploads/2026/02/regal-white-lion-icon.webp" alt="Regal White Lion"><img src="https://kingshotdata.com/uploads/2026/02/ironclad-war-elephant-icon.webp" alt="Ironclad War Elephant"></div>
+            <div><span class="timeline-date"><span class="de">AB SERVERALTER ~350</span><span class="en">FROM SERVER AGE ~350</span><span class="fr">DÈS L’ÂGE SERVEUR ~350</span></span><h3>Generation 6 · Pets</h3><p>Regal White Lion · Ironclad War Elephant</p><strong class="check-game"><span class="de">Freischaltung im Spiel prüfen</span><span class="en">Verify unlock in game</span><span class="fr">Vérifier en jeu</span></strong></div>
+          </article>
+          <article class="timeline-item">
+            <div class="timeline-media master"><img src="https://kingshotdata.com/icons/master-cassia-avatar.png" alt="Cassia"></div>
+            <div><span class="timeline-date"><span class="de">TERMIN OFFEN</span><span class="en">DATE PENDING</span><span class="fr">DATE À CONFIRMER</span></span><h3><span class="de">Nächster Meister</span><span class="en">Next Master</span><span class="fr">Prochain Maître</span></h3><p><span class="de">Cassia ist aktuell der vierte bekannte Meister. Der nächste Release ist öffentlich noch nicht belastbar datiert.</span><span class="en">Cassia is currently the fourth known Master. The next release has no reliable public date yet.</span><span class="fr">Cassia est actuellement le quatrième Maître connu. La prochaine sortie n’a pas encore de date publique fiable.</span></p><strong class="watching"><span class="de">Wird beobachtet</span><span class="en">Being monitored</span><span class="fr">Sous surveillance</span></strong></div>
+          </article>
+        </div>
+      </aside>
+    </section>
+
+    <section class="profile-panel">
+      <div><span class="eyebrow"><span class="de">DEIN PROFIL</span><span class="en">YOUR PROFILE</span><span class="fr">TON PROFIL</span></span><h2><span class="de">Welche Sprachen sprichst du?</span><span class="en">Which languages do you speak?</span><span class="fr">Quelles langues parles-tu ?</span></h2><p><span class="de">Die Angabe landet im NRW-Spielerprofil. Nicht erkannte Spieler bleiben zur Prüfung gespeichert.</span><span class="en">This is saved to the NRW member profile. Unrecognized players remain queued for review.</span><span class="fr">L’information est enregistrée dans le profil NRW. Les joueurs non reconnus restent en attente de vérification.</span></p></div>
+      <div class="profile-form">
+        <div class="fields"><label><span><span class="de">Ingame-Name</span><span class="en">In-game name</span><span class="fr">Nom en jeu</span></span><input id="playerName" autocomplete="off" placeholder="Boltotelli"></label><label><span>Player ID</span><input id="playerId" inputmode="numeric" autocomplete="off" placeholder="123456789"></label></div>
+        <div class="language-grid" id="languageGrid"><label><input type="checkbox" value="de"><span>🇩🇪 Deutsch</span></label><label><input type="checkbox" value="en"><span>🇬🇧 English</span></label><label><input type="checkbox" value="tr"><span>🇹🇷 Türkçe</span></label><label><input type="checkbox" value="es"><span>🇪🇸 Español</span></label><label><input type="checkbox" value="fr"><span>🇫🇷 Français</span></label></div>
+        <div class="save-row"><button id="saveProfile" class="primary"><span class="de">Speichern</span><span class="en">Save</span><span class="fr">Enregistrer</span></button><span id="saveStatus"></span></div>
+      </div>
+    </section>
+
+    <section class="discord-callout"><div><span>NRW DISCORD</span><h2><span class="de">Änderungen kommen dort zuerst.</span><span class="en">Changes are posted there first.</span><span class="fr">Les changements y sont publiés en premier.</span></h2><p><span class="de">Das Dashboard hilft bei der Planung. Kurzfristige R4/R5-Ansagen im Discord haben immer Vorrang.</span><span class="en">The dashboard helps you plan. Last-minute R4/R5 announcements on Discord always take priority.</span><span class="fr">Le tableau de bord aide à planifier. Les annonces de dernière minute des R4/R5 sur Discord restent prioritaires.</span></p></div><a href="https://discord.gg/yxKza24dUv" target="_blank" rel="noopener"><span class="de">Discord öffnen</span><span class="en">Open Discord</span><span class="fr">Ouvrir Discord</span> ↗</a></section>
+  </main>
+
+  <footer><a href="/">← <span class="de">Zur Willkommensseite</span><span class="en">Back to welcome page</span><span class="fr">Retour à l’accueil</span></a><span><span class="de">Fan-Dashboard · Termine können abweichen</span><span class="en">Fan dashboard · Dates may vary</span><span class="fr">Tableau communautaire · Les dates peuvent varier</span></span></footer>
+  <script src="app.js"></script>
+</body>
+</html>
