@@ -13,19 +13,19 @@
     de:{locale:'de-DE',today:'Heute',tomorrow:'Morgen',done:'Täglich',important:'Wichtig',bearTodayTag:'HEUTE',bearNextTag:'NÄCHSTER TERMIN',genTomorrowTag:'MORGEN',genNowTag:'JETZT VERFÜGBAR',bearToday:'Heute ist Bärenfalle. Die nächste findet am {date} statt.',bearNext:'Nächste Bärenfalle: {date}. Danach wieder alle zwei Tage.',
       tasks:[],
       bearTask:['🐻','Bärenfalle vorbereiten','Märsche zurückholen, richtige Joiner-Helden setzen und kurz vor BT1/BT2 online sein. Discord-Ansagen beachten.','Wichtig'],
-      specialTask:['🤝','Neue Mitglieder herzlich begrüßen','Wir wollen unseren neuen Mitgliedern einen herzlichen Empfang bereiten. Begrüßt sie freundlich und unterstützt sie besonders bei ihren ersten Schritten in NRW.','Gemeinsam'],
+      specialTask:['<img src="https://kingshotdata.com/uploads/2025/09/kingdom-transfer-event-icon.webp" alt="">','Neue Mitglieder herzlich begrüßen','Wir wollen unseren neuen Mitgliedern einen herzlichen Empfang bereiten. Begrüßt sie freundlich und unterstützt sie besonders bei ihren ersten Schritten in NRW.','Gemeinsam'],
       nextHero:'Morgen auf Server 1044',tomorrowItems:[['⚔️','Allianzgemenge startet','Vor dem Einsatz von Ressourcen zuerst die aktiven Aufgaben und Belohnungsstufen prüfen.'],['🏛️','Handelsimperium startet','Tägliche und kostenlose Möglichkeiten früh mitnehmen; größere Ausgaben mit dem NRW-Plan abstimmen.'],['🧙','Neuer Meister','Per Ingame-Mitteilung für morgen angekündigt. Der Name wurde noch nicht veröffentlicht.'],['🔄','Helden-Splittertausch startet','Tauschbare Splitter und Konditionen zuerst kontrollieren. Wertvolle Splitter nicht ungeprüft einsetzen.'],['✨','Generation 6 wird freigeschaltet','Triton, Sophia und Yang kommen laut K1044-Timeline. Goldschlüssel und universelle Splitter zunächst zurückhalten.']],
       genericTomorrow:'Morgen vorbereiten',genericTomorrowItems:[['📅','Event-Vorschau prüfen','Nach dem täglichen Reset die aktuellen Events kontrollieren.'],['⏱️','Abschlüsse planen','Sammler und lange Truppenausbildungen erst nach dem nächsten Punkteplan abschließen.']]},
     en:{locale:'en-GB',today:'Today',tomorrow:'Tomorrow',done:'Daily',important:'Important',bearTodayTag:'TODAY',bearNextTag:'NEXT DATE',genTomorrowTag:'TOMORROW',genNowTag:'AVAILABLE NOW',bearToday:'Bear Trap is today. The next one is on {date}.',bearNext:'Next Bear Trap: {date}. Then again every two days.',
       tasks:[],
       bearTask:['🐻','Prepare for Bear Trap','Recall marches, set the correct joiner heroes and be online shortly before BT1/BT2. Follow Discord calls.','Important'],
-      specialTask:['🤝','Give new members a warm welcome','We want every new member to feel welcome. Greet them kindly and support them especially during their first steps with NRW.','Together'],
+      specialTask:['<img src="https://kingshotdata.com/uploads/2025/09/kingdom-transfer-event-icon.webp" alt="">','Give new members a warm welcome','We want every new member to feel welcome. Greet them kindly and support them especially during their first steps with NRW.','Together'],
       nextHero:'Tomorrow on Server 1044',tomorrowItems:[['⚔️','Alliance Brawl starts','Check the active tasks and reward tiers before spending resources.'],['🏛️','Trade Empire starts','Complete daily and free opportunities early; coordinate larger spending with the NRW plan.'],['🧙','New Master','Announced for tomorrow in an in-game notice. The name has not been revealed yet.'],['🔄','Hero Shard Exchange starts','Check eligible shards and exchange conditions first. Do not trade valuable shards blindly.'],['✨','Generation 6 unlocks','Triton, Sophia and Yang arrive according to the K1044 timeline. Hold Gold Keys and universal shards initially.']],
       genericTomorrow:'Prepare for tomorrow',genericTomorrowItems:[['📅','Check the event preview','Review the active events after daily reset.'],['⏱️','Plan completions','Only finish gatherers and long troop batches after checking the next scoring plan.']]},
     fr:{locale:'fr-FR',today:"Aujourd’hui",tomorrow:'Demain',done:'Quotidien',important:'Important',bearTodayTag:"AUJOURD’HUI",bearNextTag:'PROCHAINE DATE',genTomorrowTag:'DEMAIN',genNowTag:'DISPONIBLE',bearToday:'Le Piège à ours a lieu aujourd’hui. Le prochain sera le {date}.',bearNext:'Prochain Piège à ours : {date}. Puis tous les deux jours.',
       tasks:[],
       bearTask:['🐻','Préparer le Piège à ours','Rappelle les marches, choisis les bons héros et sois en ligne avant BT1/BT2. Suis les annonces Discord.','Important'],
-      specialTask:['🤝','Accueillir chaleureusement les nouveaux membres','Nous voulons offrir un accueil chaleureux à chaque nouveau membre. Salue-les avec gentillesse et aide-les surtout pendant leurs premiers pas chez NRW.','Ensemble'],
+      specialTask:['<img src="https://kingshotdata.com/uploads/2025/09/kingdom-transfer-event-icon.webp" alt="">','Accueillir chaleureusement les nouveaux membres','Nous voulons offrir un accueil chaleureux à chaque nouveau membre. Salue-les avec gentillesse et aide-les surtout pendant leurs premiers pas chez NRW.','Ensemble'],
       nextHero:'Demain sur le serveur 1044',tomorrowItems:[['⚔️',"L’Alliance Brawl commence",'Vérifie les tâches actives et les paliers de récompenses avant de dépenser des ressources.'],['🏛️',"L’Empire commercial commence",'Profite tôt des tâches quotidiennes et gratuites ; coordonne les grosses dépenses avec le plan NRW.'],['🧙','Nouveau Maître','Annoncé pour demain dans un message en jeu. Le nom n’a pas encore été révélé.'],['🔄',"L’échange de fragments commence",'Vérifie d’abord les fragments acceptés et les conditions. Ne dépense pas les fragments précieux sans contrôle.'],['✨','La génération 6 arrive','Triton, Sophia et Yang arrivent selon la chronologie K1044. Garde d’abord les clés d’or et fragments universels.']],
       genericTomorrow:'Préparer demain',genericTomorrowItems:[['📅',"Vérifier l’aperçu",'Consulte les événements actifs après le reset quotidien.'],['⏱️','Planifier les fins',"Ne termine collectes et longs entraînements qu’après avoir vérifié le prochain plan de points."]]}
   };
@@ -34,6 +34,7 @@
   const dateKey=d=>d.toISOString().slice(0,10);
   const safe=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   const localized=(value,lang)=>typeof value==='string'?value:(value?.[lang]||value?.en||'');
+  const eventIcon=e=>e.iconUrl?`<img class="event-icon" src="${safe(e.iconUrl)}" alt="">`:`<span>${safe(e.icon||'📅')}</span>`;
   const eventsFor=date=>eventFeed.filter(e=>e.start<=date&&(!e.end||e.end>=date));
   const planFor=(e,date)=>e.dailyPlans?.[date]||null;
   const planCopy=(plan,lang)=>{
@@ -43,15 +44,15 @@
   };
   function eventTask(e,lang,status,date){
     const plan=planFor(e,date),tips=(e.tips?.[lang]||e.tips?.en||[]).slice(0,3).join(' • ');
-    return [safe(e.icon||'📅'),safe(localized(e.name,lang)),safe(planCopy(plan,lang)||tips),status];
+    return [eventIcon(e),safe(localized(e.name,lang)),safe(planCopy(plan,lang)||tips),status];
   }
   function tomorrowEvent(e,lang,date){
     const plan=planFor(e,date),tips=(e.tips?.[lang]||e.tips?.en||[]).slice(0,3),source=e.sourceUrl?`<a href="${safe(e.sourceUrl)}" target="_blank" rel="noopener">Guide ↗</a>`:'';
     if(plan){
       const steps=(plan.steps?.[lang]||plan.steps?.en||[]).map((step,index)=>`<li><b>${index+1}</b><span>${safe(step)}</span></li>`).join('');
-      return `<article class="event-coach"><header><span>${safe(e.icon||'📅')}</span><div><strong>${safe(localized(e.name,lang))}</strong><em>🎯 ${safe(localized(plan.points,lang))}</em></div></header><ol>${steps}</ol>${plan.note?`<p>${safe(localized(plan.note,lang))}</p>`:''}${source}</article>`;
+      return `<article class="event-coach"><header>${eventIcon(e)}<div><strong>${safe(localized(e.name,lang))}</strong><em>🎯 ${safe(localized(plan.points,lang))}</em></div></header><ol>${steps}</ol>${plan.note?`<p>${safe(localized(plan.note,lang))}</p>`:''}${source}</article>`;
     }
-    return `<div class="tomorrow-task"><span>${safe(e.icon||'📅')}</span><div><strong>${safe(localized(e.name,lang))}</strong><small>${safe(tips.join(' • '))}</small>${source}</div></div>`;
+    return `<div class="tomorrow-task">${eventIcon(e)}<div><strong>${safe(localized(e.name,lang))}</strong><small>${safe(tips.join(' • '))}</small>${source}</div></div>`;
   }
   const isBearDay=d=>Math.round((Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate())-anchor)/day)%2===0;
   function nextBearAt(hour,minute){let d=new Date();for(let add=0;add<4;add++){const x=new Date(Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate()+add,hour,minute));if(isBearDay(x)&&x>d)return x}return new Date(Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate()+2,hour,minute))}
