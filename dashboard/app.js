@@ -1,7 +1,7 @@
 (function(){
   const body=document.body,root=document.documentElement;
   const savedLang=localStorage.getItem('nrw_page_lang')||'en';
-  const savedTheme=localStorage.getItem('nrw_theme')||'dark';
+  const savedTheme=localStorage.getItem('nrw_theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
   body.dataset.lang=savedLang;root.lang=savedLang;root.dataset.theme=savedTheme;
   const themeBtn=document.getElementById('themeBtn');
   const setThemeIcon=()=>themeBtn.textContent=root.dataset.theme==='dark'?'☀':'☾';setThemeIcon();
