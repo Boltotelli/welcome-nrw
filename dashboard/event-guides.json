@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-09-14T16:32:12.693Z",
+  "updatedAt": "2026-09-14T16:42:54.414Z",
   "kingdom": 1044,
   "languages": [
     "de",
@@ -1896,7 +1896,14 @@
       "mechanic": "Three-alliance map-control battle focused on routes, transit hubs, garrisons and the final Temple phase.",
       "confidence": "community-citing-official",
       "sourceUrl": "https://www.kingshotguide.com/events/tri-alliance-clash",
-      "researchStatus": "reviewed"
+      "researchStatus": "reviewed",
+      "guidancePolicy": "schedule-and-discord-only",
+      "staticStrategy": false,
+      "guidanceNote": {
+        "de": "Keine allgemeine Kampfstrategie anzeigen; die Anweisungen werden für jeden Kampf individuell über Discord festgelegt.",
+        "en": "Do not show a generic battle strategy; instructions are set individually for each battle on Discord.",
+        "fr": "Ne pas afficher de stratégie générale ; les consignes sont définies individuellement pour chaque combat sur Discord."
+      }
     },
     {
       "name": "Windward Voyage",
@@ -1951,12 +1958,17 @@
     {
       "name": "Steel Edge",
       "category": "resource-spending",
-      "dashboardEligible": "conditional-live-panel",
+      "dashboardEligible": "no-kvk-resource-spend-low-priority",
       "cadence": "2 days",
       "mechanic": "Four milestone tiers from version-sensitive development tasks. The active event panel is required before naming scoring actions.",
       "confidence": "community-low",
       "sourceUrl": "https://www.kingshotguide.com/events/steel-edge-event",
-      "researchStatus": "reviewed"
+      "researchStatus": "reviewed",
+      "nrwPolicy": {
+        "de": "Nicht automatisch im Dashboard priorisieren. Das Event kann wegen des Verbrauchs von KvK-Ressourcen ausgelassen werden.",
+        "en": "Do not prioritize automatically in the dashboard. The event may be skipped because it consumes KvK resources.",
+        "fr": "Ne pas prioriser automatiquement dans le tableau de bord. L’événement peut être ignoré car il consomme des ressources KvK."
+      }
     },
     {
       "name": "Buccaneer Bounty",
@@ -1971,22 +1983,32 @@
     {
       "name": "Stand of Arms",
       "category": "resource-spending",
-      "dashboardEligible": "conditional-live-panel",
+      "dashboardEligible": "no-kvk-resource-spend-low-priority",
       "cadence": "after Age of Truegold",
       "mechanic": "The documented variants score Governor Charm improvement or Forgehammers used on Mythic Hero Gear. Confirm the active panel before spending KvK resources.",
       "confidence": "community",
       "sourceUrl": "https://www.kingshotguide.com/events/stand-of-arms-event",
-      "researchStatus": "reviewed"
+      "researchStatus": "reviewed",
+      "nrwPolicy": {
+        "de": "Nicht automatisch im Dashboard priorisieren. Das Event kann wegen des Verbrauchs von KvK-Ressourcen ausgelassen werden.",
+        "en": "Do not prioritize automatically in the dashboard. The event may be skipped because it consumes KvK resources.",
+        "fr": "Ne pas prioriser automatiquement dans le tableau de bord. L’événement peut être ignoré car il consomme des ressources KvK."
+      }
     },
     {
       "name": "Grow Your Heroes",
       "category": "resource-spending",
-      "dashboardEligible": "conditional-live-panel",
+      "dashboardEligible": "no-kvk-resource-spend-low-priority",
       "cadence": "2 days; from Generation 2",
       "mechanic": "Use hero shards to increase hero star ranks and unlock milestones. Exact rarity values must come from the live panel.",
       "confidence": "community",
       "sourceUrl": "https://www.kingshotguide.com/events/grow-your-heroes-event",
-      "researchStatus": "reviewed"
+      "researchStatus": "reviewed",
+      "nrwPolicy": {
+        "de": "Nicht automatisch im Dashboard priorisieren. Das Event kann wegen des Verbrauchs von KvK-Ressourcen ausgelassen werden.",
+        "en": "Do not prioritize automatically in the dashboard. The event may be skipped because it consumes KvK resources.",
+        "fr": "Ne pas prioriser automatiquement dans le tableau de bord. L’événement peut être ignoré car il consomme des ressources KvK."
+      }
     },
     {
       "name": "Hall of Heroes",
@@ -2046,7 +2068,14 @@
       "mechanic": "Alliance execution event requiring predefined rally leaders, joiner groups, difficulty, healing limits and timing.",
       "confidence": "community-low",
       "sourceUrl": "https://www.kingshotguide.com/events/flamedragon-tyrant",
-      "researchStatus": "reviewed"
+      "researchStatus": "reviewed",
+      "guidancePolicy": "schedule-and-discord-only",
+      "staticStrategy": false,
+      "guidanceNote": {
+        "de": "Keine allgemeine Kampfstrategie anzeigen; die Anweisungen werden für jeden Kampf individuell über Discord festgelegt.",
+        "en": "Do not show a generic battle strategy; instructions are set individually for each battle on Discord.",
+        "fr": "Ne pas afficher de stratégie générale ; les consignes sont définies individuellement pour chaque combat sur Discord."
+      }
     },
     {
       "name": "Swordland Showdown",
@@ -2056,7 +2085,14 @@
       "mechanic": "Alliance-vs-alliance objective battlefield. Attendance, legion assignment, formation and officer calls matter more than generic daily tasks.",
       "confidence": "community",
       "sourceUrl": "https://kingshotmastery.com/guides/swordland-showdown-guide",
-      "researchStatus": "reviewed"
+      "researchStatus": "reviewed",
+      "guidancePolicy": "schedule-and-discord-only",
+      "staticStrategy": false,
+      "guidanceNote": {
+        "de": "Keine allgemeine Kampfstrategie anzeigen; die Anweisungen werden für jeden Kampf individuell über Discord festgelegt.",
+        "en": "Do not show a generic battle strategy; instructions are set individually for each battle on Discord.",
+        "fr": "Ne pas afficher de stratégie générale ; les consignes sont définies individuellement pour chaque combat sur Discord."
+      }
     },
     {
       "name": "Castle Battle",
@@ -2066,7 +2102,14 @@
       "mechanic": "Alliances contest the King’s Castle and turrets; dashboard guidance must use NRW/NAP battle assignments and live Discord calls.",
       "confidence": "known-mechanics",
       "sourceUrl": "https://kingshotmastery.com/guides/kingshot-castle-battle-guide",
-      "researchStatus": "reviewed"
+      "researchStatus": "reviewed",
+      "guidancePolicy": "schedule-and-discord-only",
+      "staticStrategy": false,
+      "guidanceNote": {
+        "de": "Keine allgemeine Kampfstrategie anzeigen; die Anweisungen werden für jeden Kampf individuell über Discord festgelegt.",
+        "en": "Do not show a generic battle strategy; instructions are set individually for each battle on Discord.",
+        "fr": "Ne pas afficher de stratégie générale ; les consignes sont définies individuellement pour chaque combat sur Discord."
+      }
     },
     {
       "name": "Fortress Battles",
@@ -2076,7 +2119,14 @@
       "mechanic": "R4/R5 sign up for Strongholds/Fortresses; occupation and battle participation determine buffs and seasonal points. Exact schedule must come from the game.",
       "confidence": "shared-mechanics-needs-kingshot-confirmation",
       "sourceUrl": null,
-      "researchStatus": "reviewed-no-direct-kingshot-source"
+      "researchStatus": "reviewed-no-direct-kingshot-source",
+      "guidancePolicy": "schedule-and-discord-only",
+      "staticStrategy": false,
+      "guidanceNote": {
+        "de": "Keine allgemeine Kampfstrategie anzeigen; die Anweisungen werden für jeden Kampf individuell über Discord festgelegt.",
+        "en": "Do not show a generic battle strategy; instructions are set individually for each battle on Discord.",
+        "fr": "Ne pas afficher de stratégie générale ; les consignes sont définies individuellement pour chaque combat sur Discord."
+      }
     },
     {
       "name": "Alliance Mobilization",
