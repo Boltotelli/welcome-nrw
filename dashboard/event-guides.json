@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-09-14T14:30:00Z",
+  "updatedAt": "2026-09-14T15:20:00Z",
   "kingdom": 1044,
   "languages": [
     "de",
@@ -11,11 +11,12 @@
   "sourcePolicy": {
     "priority": [
       "nrw-ingame",
-      "official-help",
+      "official-kingshot-release-notes",
       "kingshotdata",
       "cross-checked-community"
     ],
-    "note": "Exakte Punktewerte werden nur gespeichert, wenn sie durch aktuelle Ingame-Angaben oder belastbare, übereinstimmende Quellen gestützt sind. Bei Änderungen im Spiel hat der aktive Event-Bildschirm Vorrang."
+    "note": "Exakte Punktewerte werden nur gespeichert, wenn sie durch aktuelle Ingame-Angaben oder belastbare, übereinstimmende Quellen gestützt sind. Bei Änderungen im Spiel hat der aktive Event-Bildschirm Vorrang.",
+    "officialHelpCaveat": "The currently discoverable Century Games Help Center pages resolve to Whiteout Survival. They are not accepted as direct Kingshot evidence; shared mechanics must still be confirmed in Kingshot."
   },
   "sources": {
     "allianceBrawl": "https://kingshotdata.com/events/alliance-brawl-event/",
@@ -26,7 +27,6 @@
     "armament": "https://kingshotdata.com/events/armament-competition/",
     "merchant": "https://kingshotdata.com/events/merchant-empire-event/",
     "champagne": "https://kingshotdata.com/events/champagne-fair/",
-    "fishingHelp": "https://centurygames.helpshift.com/hc/en/140-kingshot/section/1399-fishing-tournament/",
     "mysticTrial": "https://kingshotdata.com/events/mystic-trial/",
     "cesare": "https://kingshotdata.com/events/cesares-fury/",
     "transfer": "https://kingshotdata.com/events/kingdom-transfer-event/",
@@ -1758,168 +1758,341 @@
   "catalogOnly": [
     {
       "name": "Fantasy Theater",
-      "researchStatus": "catalogued-needs-detailed-phase-review",
-      "dashboardEligible": "unknown"
+      "category": "seasonal-minigame",
+      "dashboardEligible": "contextual",
+      "cadence": "eligible kingdoms; live countdown",
+      "mechanic": "Fantasy Amulets fund exploration; Fantasy Tokens buy shop items; reaching normal floor 7 grants Fanstars for Fantasy Fortress.",
+      "confidence": "community-verified",
+      "sourceUrl": "https://www.kingshotguide.com/events/fantasy-theater",
+      "researchStatus": "reviewed"
     },
     {
       "name": "Twin Star Adventure",
-      "researchStatus": "catalogued-needs-detailed-phase-review",
-      "dashboardEligible": "unknown"
+      "category": "seasonal-team-minigame",
+      "dashboardEligible": "contextual",
+      "cadence": "server-dependent",
+      "mechanic": "Three-player team, dice-driven board movement, shared progress, Twinstar Coins, Lucky Pouches and Polar Shop.",
+      "confidence": "community-reported",
+      "sourceUrl": "https://www.kingshotguide.com/events/twin-star-adventure",
+      "researchStatus": "reviewed"
     },
     {
       "name": "Treasure Raiders",
-      "researchStatus": "catalogued-needs-detailed-phase-review",
-      "dashboardEligible": "unknown"
+      "category": "seasonal-minigame",
+      "dashboardEligible": "contextual",
+      "cadence": "3 days",
+      "mechanic": "Use pickaxes to reveal tiles; a floor ends when its Ultimate Treasure is found. Premium checkpoints occur every fifth floor; carry-over and the reported 14-tile guarantee require live confirmation.",
+      "confidence": "community-verified",
+      "sourceUrl": "https://www.kingshotguide.com/events/treasure-raiders",
+      "researchStatus": "reviewed"
     },
     {
       "name": "Football Fiesta",
-      "researchStatus": "catalogued-needs-detailed-phase-review",
-      "dashboardEligible": "unknown"
+      "category": "seasonal-spending-minigame",
+      "dashboardEligible": "contextual",
+      "cadence": "seasonal",
+      "mechanic": "Earn Energy Bars from activities, spend them on Green Arena shots, and collect Golden Shoe Points and chest progress.",
+      "confidence": "community",
+      "sourceUrl": "https://www.kingshotguide.com/events/football-fiesta",
+      "researchStatus": "reviewed"
     },
     {
       "name": "Treasure Cove",
-      "researchStatus": "catalogued-needs-detailed-phase-review",
-      "dashboardEligible": "unknown"
+      "category": "reward-progression",
+      "dashboardEligible": "contextual",
+      "cadence": "periodic; live panel required",
+      "mechanic": "Complete live event tasks for currency and milestone chests; exact scoring tasks and rotations are version-sensitive.",
+      "confidence": "community-low",
+      "sourceUrl": "https://www.kingshotguide.com/events/treasure-cove-event",
+      "researchStatus": "reviewed"
     },
     {
       "name": "Tri Alliance Clash",
-      "researchStatus": "catalogued-needs-detailed-phase-review",
-      "dashboardEligible": "unknown"
+      "category": "alliance-battlefield",
+      "dashboardEligible": "yes-event-day",
+      "cadence": "monthly; vote Mon-Tue, signup Wed-Thu, matchmaking Fri, battle Sat",
+      "mechanic": "Three-alliance map-control battle focused on routes, transit hubs, garrisons and the final Temple phase.",
+      "confidence": "community-citing-official",
+      "sourceUrl": "https://www.kingshotguide.com/events/tri-alliance-clash",
+      "researchStatus": "reviewed"
     },
     {
       "name": "Windward Voyage",
-      "researchStatus": "catalogued-needs-detailed-phase-review",
-      "dashboardEligible": "unknown"
+      "category": "seasonal-progression",
+      "dashboardEligible": "contextual",
+      "cadence": "server-dependent",
+      "mechanic": "Complete daily missions, manage route/ship progress and spend event currency only against a verified reward target. Exact tables remain unverified.",
+      "confidence": "community-low",
+      "sourceUrl": "https://www.kingshotguide.com/events/windward-voyage",
+      "researchStatus": "reviewed"
     },
     {
       "name": "Voyage of Light",
-      "researchStatus": "catalogued-needs-detailed-phase-review",
-      "dashboardEligible": "unknown"
+      "category": "hero-gear-progression",
+      "dashboardEligible": "contextual",
+      "cadence": "server-dependent",
+      "mechanic": "Keep Voyager Teams active, use compasses for milestone finishes, and decide whether to merge Tidal Treasures before collection closes.",
+      "confidence": "community",
+      "sourceUrl": "https://www.kingshotguide.com/events/voyage-of-light",
+      "researchStatus": "reviewed"
     },
     {
       "name": "Champion’s Way",
-      "researchStatus": "catalogued-needs-detailed-phase-review",
-      "dashboardEligible": "unknown"
+      "category": "stamina-rally",
+      "dashboardEligible": "yes-when-active",
+      "cadence": "3 days; reported every 2 weeks",
+      "mechanic": "Hunt beasts for Weapon Scraps, use scraps to find Elite Rebels, and defeat 1/3/5/7/10 Rebels for milestone chests; reported joiner reward limit is 50 daily.",
+      "confidence": "community-verified",
+      "sourceUrl": "https://www.kingshotguide.com/events/champions-way-event",
+      "researchStatus": "reviewed"
     },
     {
       "name": "Beast Whisperer",
-      "researchStatus": "catalogued-needs-detailed-phase-review",
-      "dashboardEligible": "unknown"
+      "category": "one-time-unlock",
+      "dashboardEligible": "no-server1044-outgrown",
+      "cadence": "one time near first pet unlock",
+      "mechanic": "Five-day introductory pet event for early kingdoms.",
+      "confidence": "community",
+      "sourceUrl": "https://www.kingshotguide.com/events/beast-whisperer-event",
+      "researchStatus": "reviewed"
     },
     {
       "name": "Path of Growth",
-      "researchStatus": "catalogued-needs-detailed-phase-review",
-      "dashboardEligible": "unknown"
+      "category": "one-time-beginner",
+      "dashboardEligible": "no-server1044-outgrown",
+      "cadence": "first 7 account days",
+      "mechanic": "Beginner tasks unlock daily and award progression rewards including Chenko shards.",
+      "confidence": "community",
+      "sourceUrl": "https://www.kingshotguide.com/events/path-of-growth-event",
+      "researchStatus": "reviewed"
     },
     {
       "name": "Steel Edge",
-      "researchStatus": "catalogued-needs-detailed-phase-review",
-      "dashboardEligible": "unknown"
+      "category": "resource-spending",
+      "dashboardEligible": "conditional-live-panel",
+      "cadence": "2 days",
+      "mechanic": "Four milestone tiers from version-sensitive development tasks. The active event panel is required before naming scoring actions.",
+      "confidence": "community-low",
+      "sourceUrl": "https://www.kingshotguide.com/events/steel-edge-event",
+      "researchStatus": "reviewed"
     },
     {
       "name": "Buccaneer Bounty",
-      "researchStatus": "catalogued-needs-detailed-phase-review",
-      "dashboardEligible": "unknown"
+      "category": "seasonal-chest-shop",
+      "dashboardEligible": "contextual",
+      "cadence": "7 days; reported every 4-6 weeks",
+      "mechanic": "Earn Corsair Keys, open chests for Pearls of Enigma, and exchange pearls in the Emporium of Enigma.",
+      "confidence": "community",
+      "sourceUrl": "https://kingshotdata.com/events/buccaneer-bounty-event/",
+      "researchStatus": "reviewed"
     },
     {
       "name": "Stand of Arms",
-      "researchStatus": "catalogued-needs-detailed-phase-review",
-      "dashboardEligible": "unknown"
+      "category": "resource-spending",
+      "dashboardEligible": "conditional-live-panel",
+      "cadence": "after Age of Truegold",
+      "mechanic": "The documented variants score Governor Charm improvement or Forgehammers used on Mythic Hero Gear. Confirm the active panel before spending KvK resources.",
+      "confidence": "community",
+      "sourceUrl": "https://www.kingshotguide.com/events/stand-of-arms-event",
+      "researchStatus": "reviewed"
     },
     {
       "name": "Grow Your Heroes",
-      "researchStatus": "catalogued-needs-detailed-phase-review",
-      "dashboardEligible": "unknown"
+      "category": "resource-spending",
+      "dashboardEligible": "conditional-live-panel",
+      "cadence": "2 days; from Generation 2",
+      "mechanic": "Use hero shards to increase hero star ranks and unlock milestones. Exact rarity values must come from the live panel.",
+      "confidence": "community",
+      "sourceUrl": "https://www.kingshotguide.com/events/grow-your-heroes-event",
+      "researchStatus": "reviewed"
     },
     {
       "name": "Hall of Heroes",
-      "researchStatus": "catalogued-needs-detailed-phase-review",
-      "dashboardEligible": "unknown"
+      "category": "hero-acquisition-shop",
+      "dashboardEligible": "contextual",
+      "cadence": "reported weekly Sunday-Tuesday",
+      "mechanic": "Spend Marks of Valor on generation-dependent Mythic heroes; read the hero and cost before committing.",
+      "confidence": "community",
+      "sourceUrl": "https://www.kingshotguide.com/events/hall-of-heroes",
+      "researchStatus": "reviewed"
     },
     {
       "name": "Defeat Nearby Beasts",
-      "researchStatus": "catalogued-needs-detailed-phase-review",
-      "dashboardEligible": "unknown"
+      "category": "stamina-points",
+      "dashboardEligible": "yes-when-active",
+      "cadence": "2 days",
+      "mechanic": "Solo beast hunts and alliance Terror rallies score toward four milestone tiers; exact point values depend on the live event.",
+      "confidence": "community",
+      "sourceUrl": "https://www.kingshotguide.com/events/defeat-nearby-beasts-event",
+      "researchStatus": "reviewed"
     },
     {
       "name": "Mystic Divination",
-      "researchStatus": "catalogued-needs-detailed-phase-review",
-      "dashboardEligible": "unknown"
+      "category": "chance-minigame",
+      "dashboardEligible": "contextual",
+      "cadence": "2 days; reported every 4 weeks",
+      "mechanic": "Select a wish reward, spend event currency on cup guesses, and stop when the next attempt no longer justifies the reward.",
+      "confidence": "community",
+      "sourceUrl": "https://kingshotdata.com/events/mystic-divination-event/",
+      "researchStatus": "reviewed"
     },
     {
       "name": "City Development",
-      "researchStatus": "catalogued-needs-detailed-phase-review",
-      "dashboardEligible": "unknown"
+      "category": "generic-development-card",
+      "dashboardEligible": "no-unverified",
+      "cadence": "unknown",
+      "mechanic": "No separate current Kingshot event rules were verified. Do not display or infer tasks from the title.",
+      "confidence": "unverified",
+      "sourceUrl": "https://www.kingshotguide.com/events",
+      "researchStatus": "reviewed-no-direct-kingshot-source"
     },
     {
       "name": "Hall of Governors",
-      "researchStatus": "catalogued-needs-detailed-phase-review",
-      "dashboardEligible": "unknown"
+      "category": "early-kingdom-points",
+      "dashboardEligible": "no-server1044-replaced",
+      "cadence": "early kingdoms; roughly biweekly varies",
+      "mechanic": "Stage-based early kingdom growth competition later replaced by Strongest Governor; exact stages vary by run.",
+      "confidence": "community",
+      "sourceUrl": "https://www.kingshotguide.com/events/hall-of-governors",
+      "researchStatus": "reviewed"
     },
     {
       "name": "Flamedragon Tyrant",
-      "researchStatus": "catalogued-needs-detailed-phase-review",
-      "dashboardEligible": "unknown"
+      "category": "alliance-battlefield",
+      "dashboardEligible": "yes-event-day",
+      "cadence": "live schedule required",
+      "mechanic": "Alliance execution event requiring predefined rally leaders, joiner groups, difficulty, healing limits and timing.",
+      "confidence": "community-low",
+      "sourceUrl": "https://www.kingshotguide.com/events/flamedragon-tyrant",
+      "researchStatus": "reviewed"
     },
     {
       "name": "Swordland Showdown",
-      "researchStatus": "catalogued-needs-detailed-phase-review",
-      "dashboardEligible": "unknown"
+      "category": "alliance-battlefield",
+      "dashboardEligible": "yes-registration-and-event-day",
+      "cadence": "monthly cycle; live schedule required",
+      "mechanic": "Alliance-vs-alliance objective battlefield. Attendance, legion assignment, formation and officer calls matter more than generic daily tasks.",
+      "confidence": "community",
+      "sourceUrl": "https://kingshotmastery.com/guides/swordland-showdown-guide",
+      "researchStatus": "reviewed"
     },
     {
       "name": "Castle Battle",
-      "researchStatus": "catalogued-needs-detailed-phase-review",
-      "dashboardEligible": "unknown"
+      "category": "kingdom-battlefield",
+      "dashboardEligible": "yes-event-day",
+      "cadence": "server schedule",
+      "mechanic": "Alliances contest the King’s Castle and turrets; dashboard guidance must use NRW/NAP battle assignments and live Discord calls.",
+      "confidence": "known-mechanics",
+      "sourceUrl": "https://kingshotmastery.com/guides/kingshot-castle-battle-guide",
+      "researchStatus": "reviewed"
     },
     {
       "name": "Fortress Battles",
-      "researchStatus": "catalogued-needs-detailed-phase-review",
-      "dashboardEligible": "unknown"
+      "category": "alliance-battlefield",
+      "dashboardEligible": "yes-event-day",
+      "cadence": "phased server schedule",
+      "mechanic": "R4/R5 sign up for Strongholds/Fortresses; occupation and battle participation determine buffs and seasonal points. Exact schedule must come from the game.",
+      "confidence": "shared-mechanics-needs-kingshot-confirmation",
+      "sourceUrl": null,
+      "researchStatus": "reviewed-no-direct-kingshot-source"
     },
     {
       "name": "Alliance Mobilization",
-      "researchStatus": "catalogued-needs-detailed-phase-review",
-      "dashboardEligible": "unknown"
+      "category": "alliance-missions",
+      "dashboardEligible": "performance-not-priority",
+      "cadence": "monthly/periodic; live schedule",
+      "mechanic": "Members accept limited alliance missions and score by completing the exact selected objective. Mission wording is the only safe source for requirements.",
+      "confidence": "known-mechanics",
+      "sourceUrl": "https://kingshotwiki.com/events/alliance-mobilization/",
+      "researchStatus": "reviewed"
     },
     {
       "name": "Frostfire Mine",
-      "researchStatus": "catalogued-needs-detailed-phase-review",
-      "dashboardEligible": "unknown"
+      "category": "solo-battlefield",
+      "dashboardEligible": "yes-event-day",
+      "cadence": "reported biweekly; register and play same day",
+      "mechanic": "Solo battlefield with guards, veins, skills and event-only troops; entry requires external deployments/scouting to be cleared.",
+      "confidence": "shared-mechanics-needs-kingshot-confirmation",
+      "sourceUrl": null,
+      "researchStatus": "reviewed-no-direct-kingshot-source"
     },
     {
       "name": "Canyon Clash",
-      "researchStatus": "catalogued-needs-detailed-phase-review",
-      "dashboardEligible": "unknown"
+      "category": "alliance-battlefield",
+      "dashboardEligible": "yes-event-day",
+      "cadence": "reported monthly",
+      "mechanic": "Three-faction building-control battlefield using fuel for deployment, revival and conscription. Exact Kingshot availability is unverified.",
+      "confidence": "shared-mechanics-needs-kingshot-confirmation",
+      "sourceUrl": null,
+      "researchStatus": "reviewed-no-direct-kingshot-source"
     },
     {
       "name": "Frostdragon Tyrant",
-      "researchStatus": "catalogued-needs-detailed-phase-review",
-      "dashboardEligible": "unknown"
+      "category": "large-alliance-battlefield",
+      "dashboardEligible": "no-unverified-kingshot",
+      "cadence": "unknown",
+      "mechanic": "No direct Kingshot source was verified. Whiteout Survival documentation must not be treated as Kingshot rules.",
+      "confidence": "unverified",
+      "sourceUrl": null,
+      "researchStatus": "reviewed-no-direct-kingshot-source"
     },
     {
       "name": "Treasure Hunter",
-      "researchStatus": "catalogued-needs-detailed-phase-review",
-      "dashboardEligible": "unknown"
+      "category": "tile-minigame",
+      "dashboardEligible": "contextual",
+      "cadence": "periodic",
+      "mechanic": "Use pickaxes to search rooms/floors and stop or advance around chosen rewards; live event rules decide carry-over and floor behavior.",
+      "confidence": "needs-kingshot-source",
+      "sourceUrl": null,
+      "researchStatus": "reviewed-no-direct-kingshot-source"
     },
     {
       "name": "Tundra Adventure",
-      "researchStatus": "catalogued-needs-detailed-phase-review",
-      "dashboardEligible": "unknown"
+      "category": "board-minigame",
+      "dashboardEligible": "contextual",
+      "cadence": "periodic",
+      "mechanic": "Dice-driven board event with tiles and chests. Carry-over and currency rules require Kingshot confirmation.",
+      "confidence": "needs-kingshot-source",
+      "sourceUrl": null,
+      "researchStatus": "reviewed-no-direct-kingshot-source"
     },
     {
       "name": "Vision of Dawn",
-      "researchStatus": "catalogued-needs-detailed-phase-review",
-      "dashboardEligible": "unknown"
+      "category": "seasonal-missions",
+      "dashboardEligible": "contextual",
+      "cadence": "periodic",
+      "mechanic": "Mission-based event with possible mission resets; no direct Kingshot source has yet verified the schedule or scoring table.",
+      "confidence": "needs-kingshot-source",
+      "sourceUrl": null,
+      "researchStatus": "reviewed-no-direct-kingshot-source"
     },
     {
       "name": "Tundra Trade Route",
-      "researchStatus": "catalogued-needs-detailed-phase-review",
-      "dashboardEligible": "unknown"
+      "category": "caravan",
+      "dashboardEligible": "no-duplicate-or-unverified",
+      "cadence": "unknown",
+      "mechanic": "Likely related to caravan/truck gameplay, but no direct Kingshot source was verified; do not duplicate Merchant Empire automatically.",
+      "confidence": "unverified",
+      "sourceUrl": null,
+      "researchStatus": "reviewed-no-direct-kingshot-source"
     },
     {
       "name": "Lantern of Blessings",
-      "researchStatus": "catalogued-needs-detailed-phase-review",
-      "dashboardEligible": "unknown"
+      "category": "seasonal-reward",
+      "dashboardEligible": "contextual",
+      "cadence": "seasonal",
+      "mechanic": "Seasonal blessing/reward event. Exact currencies, claim limits and carry-over require a direct Kingshot source.",
+      "confidence": "needs-kingshot-source",
+      "sourceUrl": null,
+      "researchStatus": "reviewed-no-direct-kingshot-source"
     }
-  ]
+  ],
+  "researchSummary": {
+    "reviewed": 33,
+    "detailedCore": 18,
+    "dashboardRelevant": 9,
+    "contextual": 14,
+    "excludedOrUnverified": 6,
+    "conditional": 4
+  }
 }
