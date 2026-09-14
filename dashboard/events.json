@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "kingdom": 1044,
   "timezone": "UTC",
-  "updatedAt": "2026-09-14T12:12:00Z",
+  "updatedAt": "2026-09-14T12:42:00Z",
   "events": [
     {
       "id": "kingdom-transfer-2026-09-1044",
@@ -101,13 +101,22 @@
           },
           "steps": {
             "de": [
-              "Setze den Bison heute erneut ein, solange deine Truppen aktiv sammeln."
+              "Nutze deine Trucks.",
+              "Lass die vor dem Reset gestarteten Sammler erst nach dem Reset zurückkehren – erst dann zählen die gesammelten Ressourcen.",
+              "Schicke danach einen neuen Sammelmarsch los. Die vor dem Reset aktivierte Bison-Fähigkeit wird sofort ausgelöst und der Marsch kehrt direkt vollständig gesammelt zurück.",
+              "Sobald der tatsächliche Bison-Cooldown abgelaufen ist, nutze Bison erneut und schicke einen weiteren Sammelmarsch für eine zweite Sofort-Sammlung."
             ],
             "en": [
-              "Use Bison again today while your troops are actively gathering."
+              "Use your trucks.",
+              "Let the gatherers sent before reset return only after reset – only then do the gathered resources score.",
+              "Then send one new gathering march. The Bison ability activated before reset triggers immediately, and the march returns at once with a full load.",
+              "Once Bison’s actual cooldown has ended, use Bison again and send another gathering march for a second instant collection."
             ],
             "fr": [
-              "Utilise de nouveau le Bison aujourd’hui pendant que tes troupes collectent activement."
+              "Utilise tes camions.",
+              "Laisse les collecteurs envoyés avant le reset revenir uniquement après le reset – les ressources ne rapportent des points qu’à ce moment-là.",
+              "Envoie ensuite une nouvelle marche de collecte. La compétence du Bison activée avant le reset se déclenche immédiatement et la marche revient aussitôt avec une collecte complète.",
+              "Lorsque le véritable temps de recharge du Bison est terminé, utilise-le de nouveau et envoie une autre marche pour une deuxième collecte instantanée."
             ]
           }
         }
