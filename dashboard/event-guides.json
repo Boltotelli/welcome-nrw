@@ -1,0 +1,1925 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-09-14T14:30:00Z",
+  "kingdom": 1044,
+  "languages": [
+    "de",
+    "en",
+    "fr"
+  ],
+  "purpose": "Zentrale, quellenbasierte Wissensbasis für den NRW Event-Coach. Termine bleiben in events.json; diese Datei beschreibt Mechaniken, Punktequellen und NRW-Tipps.",
+  "sourcePolicy": {
+    "priority": [
+      "nrw-ingame",
+      "official-help",
+      "kingshotdata",
+      "cross-checked-community"
+    ],
+    "note": "Exakte Punktewerte werden nur gespeichert, wenn sie durch aktuelle Ingame-Angaben oder belastbare, übereinstimmende Quellen gestützt sind. Bei Änderungen im Spiel hat der aktive Event-Bildschirm Vorrang."
+  },
+  "sources": {
+    "allianceBrawl": "https://kingshotdata.com/events/alliance-brawl-event/",
+    "allianceBrawlPoints": "https://www.kingshotguide.org/guide/kingshot-alliance-brawl",
+    "kvk": "https://kingshotdata.com/events/kingdom-of-power-kvk-event/",
+    "kvkCrosscheck": "https://kingshotmastery.com/guides/kingshot-kvk-prep-guide",
+    "strongestGovernor": "https://www.kingshotguide.org/guide/kingshot-strongest-governor",
+    "armament": "https://kingshotdata.com/events/armament-competition/",
+    "merchant": "https://kingshotdata.com/events/merchant-empire-event/",
+    "champagne": "https://kingshotdata.com/events/champagne-fair/",
+    "fishingHelp": "https://centurygames.helpshift.com/hc/en/140-kingshot/section/1399-fishing-tournament/",
+    "mysticTrial": "https://kingshotdata.com/events/mystic-trial/",
+    "cesare": "https://kingshotdata.com/events/cesares-fury/",
+    "transfer": "https://kingshotdata.com/events/kingdom-transfer-event/",
+    "heroRoulette": "https://kingshotdata.com/events/hero-roulette/"
+  },
+  "actionDictionary": {
+    "truckEscort": {
+      "de": "Eine Karawane eskortieren",
+      "en": "Escort one caravan",
+      "fr": "Escorter une caravane"
+    },
+    "truckRaid": {
+      "de": "Eine Karawane erfolgreich überfallen",
+      "en": "Successfully raid one caravan",
+      "fr": "Piller une caravane avec succès"
+    },
+    "truegoldBuilding": {
+      "de": "Truegold für ein Gebäude-Upgrade einsetzen",
+      "en": "Use Truegold on a building upgrade",
+      "fr": "Utiliser du Truegold pour améliorer un bâtiment"
+    },
+    "temperedTruegold": {
+      "de": "Tempered Truegold für ein Gebäude-Upgrade einsetzen",
+      "en": "Use Tempered Truegold on a building upgrade",
+      "fr": "Utiliser du Truegold trempé pour améliorer un bâtiment"
+    },
+    "truegoldDust": {
+      "de": "Truegold Dust für Forschung einsetzen",
+      "en": "Use Truegold Dust for research",
+      "fr": "Utiliser de la poussière de Truegold pour la recherche"
+    },
+    "constructionSpeedup": {
+      "de": "Bau-Beschleuniger verwenden",
+      "en": "Use construction speedups",
+      "fr": "Utiliser des accélérateurs de construction"
+    },
+    "researchSpeedup": {
+      "de": "Forschungs-Beschleuniger verwenden",
+      "en": "Use research speedups",
+      "fr": "Utiliser des accélérateurs de recherche"
+    },
+    "trainingSpeedup": {
+      "de": "Ausbildungs-/Beförderungs-Beschleuniger verwenden",
+      "en": "Use troop training or promotion speedups",
+      "fr": "Utiliser des accélérateurs d’entraînement ou de promotion"
+    },
+    "masterSkillSpeedup": {
+      "de": "Meisterfähigkeiten beschleunigen",
+      "en": "Use Master Skill speedups",
+      "fr": "Utiliser des accélérateurs de compétence de Maître"
+    },
+    "wildernessGathering": {
+      "de": "Ressourcen in der Wildnis sammeln",
+      "en": "Gather resources in the Wilderness",
+      "fr": "Collecter des ressources dans la nature"
+    },
+    "intelComplete": {
+      "de": "Intel-Mission abschließen",
+      "en": "Complete an Intel Mission",
+      "fr": "Terminer une mission de renseignement"
+    },
+    "heroRoulette": {
+      "de": "Heldenroulette drehen",
+      "en": "Spin Hero Roulette",
+      "fr": "Faire tourner la Roulette des héros"
+    },
+    "rareShard": {
+      "de": "Seltenen Heldensplitter zum Aufstieg verwenden",
+      "en": "Use a Rare Hero Shard for ascension",
+      "fr": "Utiliser un fragment de héros rare pour l’ascension"
+    },
+    "epicShard": {
+      "de": "Epischen Heldensplitter zum Aufstieg verwenden",
+      "en": "Use an Epic Hero Shard for ascension",
+      "fr": "Utiliser un fragment de héros épique pour l’ascension"
+    },
+    "mythicShard": {
+      "de": "Mythischen Heldensplitter zum Aufstieg verwenden",
+      "en": "Use a Mythic Hero Shard for ascension",
+      "fr": "Utiliser un fragment de héros mythique pour l’ascension"
+    },
+    "petAdvance": {
+      "de": "Pet-Aufstiegswert erhöhen",
+      "en": "Increase Pet Advancement score",
+      "fr": "Augmenter le score de progression du familier"
+    },
+    "commonTaming": {
+      "de": "Gewöhnliche Zähmungsmarke verwenden",
+      "en": "Use a Common Taming Mark",
+      "fr": "Utiliser une marque d’apprivoisement commune"
+    },
+    "advancedTaming": {
+      "de": "Fortgeschrittene Zähmungsmarke verwenden",
+      "en": "Use an Advanced Taming Mark",
+      "fr": "Utiliser une marque d’apprivoisement avancée"
+    },
+    "charmScore": {
+      "de": "Maximalen Gouverneursamulett-Wert erhöhen",
+      "en": "Increase maximum Governor Charm score",
+      "fr": "Augmenter le score maximal des charmes du gouverneur"
+    },
+    "governorGearScore": {
+      "de": "Maximalen Gouverneursausrüstungs-Wert erhöhen",
+      "en": "Increase maximum Governor Gear score",
+      "fr": "Augmenter le score maximal de l’équipement du gouverneur"
+    },
+    "forgehammer": {
+      "de": "Heldenausrüstungs-Schmiedehammer verwenden",
+      "en": "Use a Hero Gear Forgehammer",
+      "fr": "Utiliser un marteau de forge d’équipement de héros"
+    },
+    "widget": {
+      "de": "Widget für exklusive Heldenausrüstung verwenden",
+      "en": "Use a Hero Exclusive Gear Widget",
+      "fr": "Utiliser un widget d’équipement exclusif de héros"
+    },
+    "mithril": {
+      "de": "Mithril verwenden",
+      "en": "Use Mithril",
+      "fr": "Utiliser du mithril"
+    },
+    "masterEmblem": {
+      "de": "Meisteremblem verwenden",
+      "en": "Use a Master Emblem",
+      "fr": "Utiliser un emblème de Maître"
+    },
+    "masterManuscript": {
+      "de": "Meistermanuskript verwenden",
+      "en": "Use a Master’s Manuscript",
+      "fr": "Utiliser un manuscrit de Maître"
+    },
+    "trainTroops": {
+      "de": "Truppen ausbilden oder befördern",
+      "en": "Train or promote troops",
+      "fr": "Entraîner ou promouvoir des troupes"
+    },
+    "beasts": {
+      "de": "Bestien besiegen",
+      "en": "Defeat beasts",
+      "fr": "Vaincre des bêtes"
+    },
+    "terrors": {
+      "de": "Terror-Rally starten und besiegen",
+      "en": "Call a rally and defeat a Terror",
+      "fr": "Lancer un ralliement et vaincre une Terreur"
+    },
+    "gems": {
+      "de": "Edelsteine verwenden",
+      "en": "Spend gems",
+      "fr": "Dépenser des gemmes"
+    }
+  },
+  "events": [
+    {
+      "id": "alliance-brawl",
+      "names": {
+        "de": "Allianzgemenge",
+        "en": "Alliance Brawl",
+        "fr": "Alliance Brawl"
+      },
+      "category": "points-competition",
+      "cadence": {
+        "type": "official-cycle",
+        "duration": "6.5 days",
+        "phases": 6
+      },
+      "confidence": "cross-checked-community",
+      "objective": {
+        "de": "Als Allianz täglich mehr Punkte als der Gegner erzielen; die letzte Phase ist besonders stark gewichtet.",
+        "en": "Outscore the opposing alliance each day; the final phase carries the most weight.",
+        "fr": "Dépasser l’alliance adverse chaque jour ; la dernière phase a le poids le plus élevé."
+      },
+      "globalNrwRules": {
+        "de": [
+          "Keine Ressourcen einsetzen, die für die KvK-Vorbereitung benötigt werden.",
+          "Trucks an allen sechs Wertungstagen nutzen."
+        ],
+        "en": [
+          "Do not spend resources needed for KvK Preparation.",
+          "Use caravans on all six scoring days."
+        ],
+        "fr": [
+          "Ne dépense pas les ressources nécessaires à la préparation KvK.",
+          "Utilise les caravanes pendant les six jours de score."
+        ]
+      },
+      "phases": [
+        {
+          "day": 1,
+          "id": "rise-of-city",
+          "horns": 1,
+          "scoring": [
+            {
+              "action": "truckEscort",
+              "points": 10000
+            },
+            {
+              "action": "truckRaid",
+              "points": 10000
+            },
+            {
+              "action": "truegoldBuilding",
+              "points": 1250
+            },
+            {
+              "action": "constructionSpeedup",
+              "unit": "1 minute",
+              "points": 18
+            },
+            {
+              "action": "researchSpeedup",
+              "unit": "1 minute",
+              "points": 18
+            },
+            {
+              "action": "trainingSpeedup",
+              "unit": "1 minute",
+              "points": 18
+            },
+            {
+              "action": "wildernessGathering",
+              "points": "resource-dependent"
+            },
+            {
+              "action": "gems",
+              "unit": "1 gem",
+              "points": 1
+            }
+          ],
+          "nrw": {
+            "de": [
+              "Heute sammeln und Trucks nutzen; Truegold und große Beschleuniger für KvK sparen."
+            ],
+            "en": [
+              "Gather and use caravans today; save Truegold and major speedups for KvK."
+            ],
+            "fr": [
+              "Collecte et utilise les caravanes aujourd’hui ; garde le Truegold et les accélérateurs importants pour le KvK."
+            ]
+          }
+        },
+        {
+          "day": 2,
+          "id": "hero-development",
+          "horns": 2,
+          "scoring": [
+            {
+              "action": "truckEscort",
+              "points": 10000
+            },
+            {
+              "action": "truckRaid",
+              "points": 10000
+            },
+            {
+              "action": "rareShard",
+              "points": 210
+            },
+            {
+              "action": "epicShard",
+              "points": 750
+            },
+            {
+              "action": "mythicShard",
+              "points": 1875
+            },
+            {
+              "action": "truegoldBuilding",
+              "points": 1250
+            },
+            {
+              "action": "constructionSpeedup",
+              "unit": "1 minute",
+              "points": 18
+            },
+            {
+              "action": "researchSpeedup",
+              "unit": "1 minute",
+              "points": 18
+            },
+            {
+              "action": "trainingSpeedup",
+              "unit": "1 minute",
+              "points": 18
+            },
+            {
+              "action": "intelComplete",
+              "points": 3000
+            },
+            {
+              "action": "gems",
+              "unit": "1 gem",
+              "points": 1
+            }
+          ],
+          "nrw": {
+            "de": [
+              "Intel-Missionen nach dem Reset abschließen; Heldensplitter und Truegold für KvK sparen."
+            ],
+            "en": [
+              "Complete prepared Intel Missions after reset; save Hero Shards and Truegold for KvK."
+            ],
+            "fr": [
+              "Termine les missions de renseignement préparées après le reset ; garde les fragments de héros et le Truegold pour le KvK."
+            ]
+          }
+        },
+        {
+          "day": 3,
+          "id": "pet-training",
+          "horns": 2,
+          "scoring": [
+            {
+              "action": "truckEscort",
+              "points": 10000
+            },
+            {
+              "action": "truckRaid",
+              "points": 10000
+            },
+            {
+              "action": "charmScore",
+              "unit": "1 score",
+              "points": 45
+            },
+            {
+              "action": "petAdvance",
+              "unit": "1 score",
+              "points": 30
+            },
+            {
+              "action": "advancedTaming",
+              "points": 9370
+            },
+            {
+              "action": "commonTaming",
+              "points": 680
+            },
+            {
+              "action": "wildernessGathering",
+              "points": "resource-dependent"
+            },
+            {
+              "action": "gems",
+              "unit": "1 gem",
+              "points": 1
+            }
+          ],
+          "nrw": {
+            "de": [
+              "Trucks und Sammeln nutzen; Pet- und Amulettmaterial für KvK sparen."
+            ],
+            "en": [
+              "Use caravans and gathering; save Pet and Charm materials for KvK."
+            ],
+            "fr": [
+              "Utilise les caravanes et la collecte ; garde les matériaux de familier et de charme pour le KvK."
+            ]
+          }
+        },
+        {
+          "day": 4,
+          "id": "gear-enhancement",
+          "horns": 2,
+          "scoring": [
+            {
+              "action": "trainTroops",
+              "points": "troop-tier-dependent"
+            },
+            {
+              "action": "charmScore",
+              "unit": "1 score",
+              "points": 45
+            },
+            {
+              "action": "forgehammer",
+              "points": 1875
+            },
+            {
+              "action": "widget",
+              "points": 3750
+            },
+            {
+              "action": "mithril",
+              "points": 18750
+            },
+            {
+              "action": "intelComplete",
+              "points": 3000
+            },
+            {
+              "action": "gems",
+              "unit": "1 gem",
+              "points": 1
+            }
+          ],
+          "nrw": {
+            "de": [
+              "Intel-Missionen nutzen. Truppen rechtzeitig mit Adliger-Berater-Posten und 3.000-Edelstein-Ausbildungsbonus vorbereiten; Forgehammer, Widgets, Mithril und Amulette für KvK sparen."
+            ],
+            "en": [
+              "Use Intel Missions. Prepare troop completion with the Noble Advisor appointment and the 3,000-gem training boost; save Forgehammers, Widgets, Mithril and Charms for KvK."
+            ],
+            "fr": [
+              "Utilise les missions de renseignement. Prépare la fin des entraînements avec le poste de Conseiller noble et le bonus d’entraînement à 3 000 gemmes ; garde marteaux, widgets, mithril et charmes pour le KvK."
+            ]
+          }
+        },
+        {
+          "day": 5,
+          "id": "trade-baron",
+          "horns": 2,
+          "scoring": [
+            {
+              "action": "truckEscort",
+              "points": 10000
+            },
+            {
+              "action": "truckRaid",
+              "points": 10000
+            },
+            {
+              "action": "governorGearScore",
+              "unit": "1 score",
+              "points": 22
+            },
+            {
+              "action": "truegoldBuilding",
+              "points": 1250
+            },
+            {
+              "action": "constructionSpeedup",
+              "unit": "1 minute",
+              "points": 18
+            },
+            {
+              "action": "researchSpeedup",
+              "unit": "1 minute",
+              "points": 18
+            },
+            {
+              "action": "trainingSpeedup",
+              "unit": "1 minute",
+              "points": 18
+            },
+            {
+              "action": "beasts",
+              "points": "beast-level-dependent"
+            },
+            {
+              "action": "terrors",
+              "points": 15000
+            }
+          ],
+          "nrw": {
+            "de": [
+              "Trucks, Bestien und Terrors nutzen; Gouverneursausrüstung, Truegold und Beschleuniger für KvK sparen."
+            ],
+            "en": [
+              "Use caravans, beasts and Terrors; save Governor Gear, Truegold and speedups for KvK."
+            ],
+            "fr": [
+              "Utilise les caravanes, bêtes et Terreurs ; garde équipement du gouverneur, Truegold et accélérateurs pour le KvK."
+            ]
+          }
+        },
+        {
+          "day": 6,
+          "id": "full-scale",
+          "horns": 4,
+          "scoring": [
+            {
+              "action": "truckEscort"
+            },
+            {
+              "action": "truckRaid"
+            },
+            {
+              "action": "charmScore"
+            },
+            {
+              "action": "governorGearScore"
+            },
+            {
+              "action": "forgehammer"
+            },
+            {
+              "action": "widget"
+            },
+            {
+              "action": "mithril"
+            },
+            {
+              "action": "rareShard"
+            },
+            {
+              "action": "epicShard"
+            },
+            {
+              "action": "mythicShard"
+            },
+            {
+              "action": "petAdvance"
+            },
+            {
+              "action": "commonTaming"
+            },
+            {
+              "action": "advancedTaming"
+            },
+            {
+              "action": "constructionSpeedup"
+            },
+            {
+              "action": "researchSpeedup"
+            },
+            {
+              "action": "trainingSpeedup"
+            },
+            {
+              "action": "beasts"
+            },
+            {
+              "action": "terrors"
+            }
+          ],
+          "pointsNotice": "Values vary by action; verify the active event panel.",
+          "nrw": {
+            "de": [
+              "Nur Trucks, Bestien und Terrors nutzen; sämtliche KvK-relevanten Entwicklungsressourcen sparen."
+            ],
+            "en": [
+              "Use only caravans, beasts and Terrors; save all KvK-relevant development resources."
+            ],
+            "fr": [
+              "Utilise uniquement les caravanes, bêtes et Terreurs ; garde toutes les ressources de développement nécessaires au KvK."
+            ]
+          }
+        }
+      ],
+      "sources": [
+        "allianceBrawl",
+        "allianceBrawlPoints"
+      ]
+    },
+    {
+      "id": "kingdom-of-power-prep",
+      "names": {
+        "de": "KvK-Vorbereitung",
+        "en": "Kingdom of Power Preparation",
+        "fr": "Préparation du Royaume de puissance"
+      },
+      "category": "kingdom-competition",
+      "cadence": {
+        "type": "fixed-cycle",
+        "cycleDays": 28,
+        "phases": 5
+      },
+      "confidence": "cross-checked-community",
+      "objective": {
+        "de": "Fünf Tage lang die richtigen Ressourcen am richtigen Tag einsetzen und mehr Königreichspunkte als der Gegner erzielen.",
+        "en": "Spend the right resources on the right day across five stages and outscore the opposing kingdom.",
+        "fr": "Utiliser les bonnes ressources au bon jour pendant cinq phases et dépasser le royaume adverse."
+      },
+      "phases": [
+        {
+          "day": 1,
+          "id": "city-construction",
+          "scoring": [
+            {
+              "action": "charmScore",
+              "unit": "1 score",
+              "points": 70
+            },
+            {
+              "action": "truegoldBuilding",
+              "points": 2000
+            },
+            {
+              "action": "truegoldDust",
+              "points": 1000
+            },
+            {
+              "action": "temperedTruegold",
+              "points": 30000
+            },
+            {
+              "action": "constructionSpeedup",
+              "unit": "1 minute",
+              "points": 30
+            },
+            {
+              "action": "researchSpeedup",
+              "unit": "1 minute",
+              "points": 30
+            },
+            {
+              "action": "trainingSpeedup",
+              "unit": "1 minute",
+              "points": 30
+            },
+            {
+              "action": "masterSkillSpeedup",
+              "unit": "1 minute",
+              "points": 30
+            },
+            {
+              "action": "intelComplete",
+              "points": 6000
+            }
+          ]
+        },
+        {
+          "day": 2,
+          "id": "basic-skills",
+          "scoring": [
+            {
+              "action": "truegoldBuilding",
+              "points": 2000
+            },
+            {
+              "action": "truegoldDust",
+              "points": 1000
+            },
+            {
+              "action": "temperedTruegold",
+              "points": 30000
+            },
+            {
+              "action": "constructionSpeedup",
+              "unit": "1 minute",
+              "points": 30
+            },
+            {
+              "action": "researchSpeedup",
+              "unit": "1 minute",
+              "points": 30
+            },
+            {
+              "action": "trainingSpeedup",
+              "unit": "1 minute",
+              "points": 30
+            },
+            {
+              "action": "masterSkillSpeedup",
+              "unit": "1 minute",
+              "points": 30
+            },
+            {
+              "action": "heroRoulette",
+              "points": 8000
+            },
+            {
+              "action": "rareShard",
+              "points": 350
+            },
+            {
+              "action": "epicShard",
+              "points": 1220
+            },
+            {
+              "action": "mythicShard",
+              "points": 3040
+            },
+            {
+              "action": "wildernessGathering",
+              "points": "resource-dependent"
+            },
+            {
+              "action": "masterEmblem",
+              "points": 6000
+            },
+            {
+              "action": "masterManuscript",
+              "points": 60
+            }
+          ]
+        },
+        {
+          "day": 3,
+          "id": "pet-training",
+          "scoring": [
+            {
+              "action": "petAdvance",
+              "unit": "1 score",
+              "points": 50
+            },
+            {
+              "action": "advancedTaming",
+              "points": 15000
+            },
+            {
+              "action": "commonTaming",
+              "points": 1150
+            },
+            {
+              "action": "charmScore",
+              "unit": "1 score",
+              "points": 70
+            },
+            {
+              "action": "heroRoulette",
+              "points": 8000
+            },
+            {
+              "action": "rareShard",
+              "points": 350
+            },
+            {
+              "action": "epicShard",
+              "points": 1220
+            },
+            {
+              "action": "mythicShard",
+              "points": 3040
+            },
+            {
+              "action": "intelComplete",
+              "points": 6000
+            },
+            {
+              "action": "masterEmblem",
+              "points": 6000
+            },
+            {
+              "action": "masterManuscript",
+              "points": 60
+            }
+          ]
+        },
+        {
+          "day": 4,
+          "id": "hero-development",
+          "scoring": [
+            {
+              "action": "charmScore",
+              "unit": "1 score",
+              "points": 70
+            },
+            {
+              "action": "forgehammer",
+              "points": 4000
+            },
+            {
+              "action": "widget",
+              "points": 8000
+            },
+            {
+              "action": "mithril",
+              "points": 40000
+            },
+            {
+              "action": "trainTroops",
+              "points": "troop-tier-dependent"
+            },
+            {
+              "action": "wildernessGathering",
+              "points": "resource-dependent"
+            }
+          ]
+        },
+        {
+          "day": 5,
+          "id": "power-boost",
+          "scoring": [
+            {
+              "action": "petAdvance",
+              "unit": "1 score",
+              "points": 50
+            },
+            {
+              "action": "advancedTaming",
+              "points": 15000
+            },
+            {
+              "action": "commonTaming",
+              "points": 1150
+            },
+            {
+              "action": "mithril",
+              "points": 40000
+            },
+            {
+              "action": "governorGearScore",
+              "unit": "1 score",
+              "points": 36
+            },
+            {
+              "action": "forgehammer",
+              "points": 4000
+            },
+            {
+              "action": "widget",
+              "points": 8000
+            },
+            {
+              "action": "truegoldBuilding",
+              "points": 2000
+            },
+            {
+              "action": "truegoldDust",
+              "points": 1000
+            },
+            {
+              "action": "temperedTruegold",
+              "points": 30000
+            },
+            {
+              "action": "constructionSpeedup",
+              "unit": "1 minute",
+              "points": 30
+            },
+            {
+              "action": "researchSpeedup",
+              "unit": "1 minute",
+              "points": 30
+            },
+            {
+              "action": "trainingSpeedup",
+              "unit": "1 minute",
+              "points": 30
+            },
+            {
+              "action": "masterSkillSpeedup",
+              "unit": "1 minute",
+              "points": 30
+            },
+            {
+              "action": "intelComplete",
+              "points": 6000
+            },
+            {
+              "action": "wildernessGathering",
+              "points": "resource-dependent"
+            }
+          ]
+        }
+      ],
+      "battleAlert": {
+        "de": "Vor Öffnung des gegnerischen Königreichs Schild aktivieren, Lazarett leeren und Discord-Anweisungen beachten.",
+        "en": "Activate a shield before cross-kingdom access opens, clear the infirmary and follow Discord instructions.",
+        "fr": "Active un bouclier avant l’ouverture inter-royaumes, vide l’infirmerie et suis les consignes Discord."
+      },
+      "sources": [
+        "kvk",
+        "kvkCrosscheck"
+      ]
+    },
+    {
+      "id": "strongest-governor",
+      "names": {
+        "de": "Stärkster Gouverneur",
+        "en": "Strongest Governor",
+        "fr": "Gouverneur le plus puissant"
+      },
+      "category": "cross-kingdom-points",
+      "cadence": {
+        "type": "official-cycle",
+        "duration": "7 days",
+        "phases": 7
+      },
+      "confidence": "community",
+      "objective": {
+        "de": "In sieben Tagesphasen Entwicklungs- und Kampfaufgaben für persönliche und serverübergreifende Ranglisten erfüllen.",
+        "en": "Complete development and combat tasks across seven daily stages for personal and cross-kingdom rankings.",
+        "fr": "Réaliser des tâches de développement et de combat pendant sept phases quotidiennes."
+      },
+      "phases": [
+        {
+          "day": 1,
+          "id": "city-construction",
+          "scoring": [
+            {
+              "action": "truegoldBuilding",
+              "points": 2000
+            },
+            {
+              "action": "charmScore",
+              "unit": "1 score",
+              "points": 70
+            },
+            {
+              "action": "constructionSpeedup",
+              "unit": "1 minute",
+              "points": 30
+            },
+            {
+              "action": "researchSpeedup",
+              "unit": "1 minute",
+              "points": 30
+            },
+            {
+              "action": "trainingSpeedup",
+              "unit": "1 minute",
+              "points": 30
+            }
+          ]
+        },
+        {
+          "day": 2,
+          "id": "hero-development",
+          "scoring": [
+            {
+              "action": "mithril",
+              "points": 40000
+            },
+            {
+              "action": "widget",
+              "points": 8000
+            },
+            {
+              "action": "heroRoulette",
+              "points": 8000
+            },
+            {
+              "action": "forgehammer",
+              "points": 4000
+            },
+            {
+              "action": "mythicShard",
+              "points": 3040
+            },
+            {
+              "action": "truegoldBuilding",
+              "points": 2000
+            },
+            {
+              "action": "epicShard",
+              "points": 1220
+            },
+            {
+              "action": "rareShard",
+              "points": 350
+            },
+            {
+              "action": "constructionSpeedup",
+              "unit": "1 minute",
+              "points": 30
+            },
+            {
+              "action": "researchSpeedup",
+              "unit": "1 minute",
+              "points": 30
+            },
+            {
+              "action": "trainingSpeedup",
+              "unit": "1 minute",
+              "points": 30
+            }
+          ]
+        },
+        {
+          "day": 3,
+          "id": "basic-skills",
+          "scoring": [
+            {
+              "action": "advancedTaming",
+              "points": 15000
+            },
+            {
+              "action": "heroRoulette",
+              "points": 8000
+            },
+            {
+              "action": "mythicShard",
+              "points": 3040
+            },
+            {
+              "action": "epicShard",
+              "points": 1220
+            },
+            {
+              "action": "commonTaming",
+              "points": 1150
+            },
+            {
+              "action": "rareShard",
+              "points": 350
+            },
+            {
+              "action": "charmScore",
+              "unit": "1 score",
+              "points": 70
+            },
+            {
+              "action": "petAdvance",
+              "unit": "1 score",
+              "points": 50
+            }
+          ]
+        },
+        {
+          "day": 4,
+          "id": "combat-training",
+          "scoring": [
+            {
+              "action": "mithril",
+              "points": 40000
+            },
+            {
+              "action": "widget",
+              "points": 8000
+            },
+            {
+              "action": "forgehammer",
+              "points": 4000
+            },
+            {
+              "action": "charmScore",
+              "unit": "1 score",
+              "points": 70
+            },
+            {
+              "action": "trainTroops",
+              "points": "troop-tier-dependent"
+            }
+          ]
+        },
+        {
+          "day": 5,
+          "id": "basic-skills-2",
+          "scoring": [
+            {
+              "action": "mithril",
+              "points": 40000
+            },
+            {
+              "action": "widget",
+              "points": 8000
+            },
+            {
+              "action": "forgehammer",
+              "points": 4000
+            },
+            {
+              "action": "truegoldBuilding",
+              "points": 2000
+            },
+            {
+              "action": "constructionSpeedup",
+              "unit": "1 minute",
+              "points": 30
+            },
+            {
+              "action": "researchSpeedup",
+              "unit": "1 minute",
+              "points": 30
+            },
+            {
+              "action": "trainingSpeedup",
+              "unit": "1 minute",
+              "points": 30
+            }
+          ]
+        },
+        {
+          "day": 6,
+          "id": "combat-training-2",
+          "scoring": [
+            {
+              "action": "governorGearScore",
+              "unit": "1 score",
+              "points": 36
+            },
+            {
+              "action": "trainTroops",
+              "points": "troop-tier-dependent"
+            }
+          ]
+        },
+        {
+          "day": 7,
+          "id": "hero-development-2",
+          "scoring": [
+            {
+              "action": "advancedTaming",
+              "points": 15000
+            },
+            {
+              "action": "mythicShard",
+              "points": 3040
+            },
+            {
+              "action": "truegoldBuilding",
+              "points": 2000
+            },
+            {
+              "action": "epicShard",
+              "points": 1220
+            },
+            {
+              "action": "commonTaming",
+              "points": 1150
+            },
+            {
+              "action": "rareShard",
+              "points": 350
+            },
+            {
+              "action": "petAdvance",
+              "unit": "1 score",
+              "points": 50
+            },
+            {
+              "action": "governorGearScore",
+              "unit": "1 score",
+              "points": 36
+            },
+            {
+              "action": "constructionSpeedup",
+              "unit": "1 minute",
+              "points": 30
+            },
+            {
+              "action": "researchSpeedup",
+              "unit": "1 minute",
+              "points": 30
+            },
+            {
+              "action": "trainingSpeedup",
+              "unit": "1 minute",
+              "points": 30
+            },
+            {
+              "action": "wildernessGathering",
+              "points": "resource-dependent"
+            }
+          ]
+        }
+      ],
+      "nrwRule": {
+        "de": "Nur lohnende Minimalziele erreichen; KvK-Ressourcen nicht für Ranglisten verbrauchen.",
+        "en": "Only reach worthwhile minimum milestones; do not spend KvK resources for rankings.",
+        "fr": "Atteins seulement les paliers minimaux rentables ; ne dépense pas les ressources KvK pour le classement."
+      },
+      "sources": [
+        "strongestGovernor"
+      ]
+    },
+    {
+      "id": "armament-competition",
+      "names": {
+        "de": "Rüstungswettbewerb",
+        "en": "Armament Competition",
+        "fr": "Compétition d’armement"
+      },
+      "category": "resource-spending",
+      "cadence": {
+        "type": "official-cycle",
+        "type1": "Monday-Tuesday",
+        "type2": "Friday"
+      },
+      "confidence": "public-timeline",
+      "objective": {
+        "de": "Je nach aktiver Variante Punkte durch die im Event-Bildschirm genannten Ausrüstungs-, Amulett- oder Truegold-Aktionen erzielen.",
+        "en": "Score through the gear, charm or Truegold actions shown for the active variant.",
+        "fr": "Marquer des points grâce aux actions d’équipement, de charme ou de Truegold de la variante active."
+      },
+      "scoringPolicy": "Do not infer the active scoring resource from the reward type. Read the current event panel.",
+      "nrwRule": {
+        "de": "Das Event kann ausgelassen werden. Wenn trotzdem teilgenommen wird, sind 60.000 Gesamtpunkte die strikte Obergrenze – keine Empfehlung. Keinen Tracker-Hinweis anzeigen.",
+        "en": "The event may be skipped. If participating, 60,000 total points is the strict hard cap, not a recommendation. Do not show a tracker reference.",
+        "fr": "L’événement peut être ignoré. En cas de participation, 60 000 points au total constituent la limite stricte, pas une recommandation. Ne pas afficher de référence au tracker."
+      },
+      "limits": {
+        "hardCap": 60000,
+        "strict": true
+      },
+      "sources": [
+        "armament"
+      ]
+    },
+    {
+      "id": "officer-project",
+      "names": {
+        "de": "Offiziersprojekt",
+        "en": "Officer Project",
+        "fr": "Projet d’officier"
+      },
+      "category": "resource-spending",
+      "cadence": {
+        "type": "official-cycle"
+      },
+      "confidence": "needs-ingame-verification",
+      "objective": {
+        "de": "Punkteaufgaben erfüllen; Varianten belohnen unter anderem Schmiedehämmer oder Amulettdesigns.",
+        "en": "Complete scoring tasks; variants reward items such as Forgehammers or Charm Designs.",
+        "fr": "Réaliser les tâches de score ; certaines variantes récompensent notamment marteaux de forge ou plans de charme."
+      },
+      "scoringPolicy": "Exact scoring actions must be taken from the active event panel; reward type must not be treated as the spent resource.",
+      "nrwRule": {
+        "de": "Nur lohnende Minimalbelohnung; KvK-Ressourcen schonen. Die 3×-Grenze gilt strikt, sobald der konkrete Gesamtwert von NRW festgelegt ist.",
+        "en": "Only pursue worthwhile minimum rewards and save KvK resources. The 3× limit is strict once NRW has defined the exact total.",
+        "fr": "Vise seulement les récompenses minimales rentables et garde les ressources KvK. La limite 3× est stricte dès que NRW a fixé le total exact."
+      },
+      "sources": []
+    },
+    {
+      "id": "golden-glaives",
+      "names": {
+        "de": "Goldene Glefen",
+        "en": "Golden Glaives",
+        "fr": "Glaives dorés"
+      },
+      "category": "intel",
+      "cadence": {
+        "type": "overlap",
+        "duration": "3 days",
+        "context": "KvK Preparation"
+      },
+      "confidence": "community",
+      "objective": {
+        "de": "Intel-Missionen abschließen, Dim Goldstones erhalten und im Event-Shop tauschen.",
+        "en": "Complete Intel Missions, earn Dim Goldstones and exchange them in the event shop.",
+        "fr": "Terminer des missions de renseignement, obtenir des Dim Goldstones et les échanger."
+      },
+      "scoring": [
+        {
+          "action": "intelComplete",
+          "reward": "Dim Goldstones"
+        }
+      ],
+      "prepPlans": {
+        "completionOnly": {
+          "de": [
+            "00:00-Missionen abschließen und abholen.",
+            "08:00-Missionen abschließen und abholen.",
+            "16:00-Missionen offenlassen; nach 16:00 UTC Pans Zusatzmission aktivieren und offenlassen.",
+            "Nach dem Reset beide vorbereiteten Missionsgruppen abschließen und abholen."
+          ],
+          "en": [
+            "Complete and claim 00:00 missions.",
+            "Complete and claim 08:00 missions.",
+            "Leave 16:00 missions unfinished; activate Pan’s extra mission after 16:00 UTC and leave it unfinished.",
+            "After reset, complete and claim both prepared mission groups."
+          ],
+          "fr": [
+            "Termine et récupère les missions de 00:00.",
+            "Termine et récupère les missions de 08:00.",
+            "Laisse les missions de 16:00 inachevées ; active la mission supplémentaire de Pan après 16:00 UTC et laisse-la ouverte.",
+            "Après le reset, termine et récupère les deux groupes préparés."
+          ]
+        },
+        "completionAndClaimOverlapNote": {
+          "de": "Nur wenn ein gleichzeitig laufendes Event ausdrücklich Punkte fürs Abholen gibt, darf die 08:00-Belohnung zurückgehalten werden.",
+          "en": "Hold the 08:00 reward only if an overlapping event explicitly scores reward claims.",
+          "fr": "Ne retiens la récompense de 08:00 que si un événement simultané accorde explicitement des points pour la récupération."
+        }
+      },
+      "sources": []
+    },
+    {
+      "id": "merchant-empire",
+      "names": {
+        "de": "Handelsimperium",
+        "en": "Merchant Empire",
+        "fr": "Empire commercial"
+      },
+      "category": "caravan",
+      "cadence": {
+        "type": "official-cycle",
+        "duration": "7 days",
+        "escortWindow": "first 6 days plus rollover"
+      },
+      "confidence": "public-timeline",
+      "objective": {
+        "de": "Karawanen eskortieren, passende Ziele überfallen und die Fracht erfolgreich sichern.",
+        "en": "Escort caravans, raid suitable targets and secure cargo.",
+        "fr": "Escorter des caravanes, piller des cibles adaptées et sécuriser la cargaison."
+      },
+      "nrwGuide": {
+        "de": [
+          "Erst etwa zehn Stunden nach dem Reset mit dem Senden beginnen; dann finden erfahrungsgemäß weniger Angriffe statt.",
+          "Täglich vier Karawanen senden und bis zu vier erfolgreiche Überfälle nutzen.",
+          "Gratis-Aktualisierung und Gutscheine zuerst verwenden.",
+          "Bei wertvoller Fracht Allianzunterstützung anfordern."
+        ],
+        "en": [
+          "Wait about ten hours after reset before sending; attacks are usually less frequent later.",
+          "Send four caravans daily and use up to four successful raids.",
+          "Use the free refresh and vouchers first.",
+          "Request alliance support for valuable cargo."
+        ],
+        "fr": [
+          "Attends environ dix heures après le reset avant d’envoyer ; les attaques sont généralement moins fréquentes ensuite.",
+          "Envoie quatre caravanes par jour et effectue jusqu’à quatre raids réussis.",
+          "Utilise d’abord l’actualisation gratuite et les bons.",
+          "Demande le soutien de l’alliance pour une cargaison précieuse."
+        ]
+      },
+      "sources": [
+        "merchant"
+      ]
+    },
+    {
+      "id": "fishing-tournament",
+      "names": {
+        "de": "Fischerturnier",
+        "en": "Fishing Tournament",
+        "fr": "Tournoi de pêche"
+      },
+      "category": "minigame",
+      "cadence": {
+        "type": "periodic-unknown"
+      },
+      "confidence": "official-mechanics-plus-nrw",
+      "objective": {
+        "de": "Wertvolle Fische und Gegenstände fangen, Tiefen freischalten und Turnierbelohnungen maximieren.",
+        "en": "Catch valuable fish and objects, unlock depths and maximize tournament rewards.",
+        "fr": "Attraper des poissons et objets précieux, débloquer les profondeurs et maximiser les récompenses."
+      },
+      "nrwGuide": {
+        "de": [
+          "Jede Tiefe hat eigene Fische; nach rechts schwimmenden Fischen links ausweichen.",
+          "Der Fang-Trigger liegt am Fischmaul, am Kopf des Tauchers oder in der Objektmitte; durch Schwänze kann der Haken passieren.",
+          "Leuchtende Fische und Gegenstände priorisieren.",
+          "Verbesserungen: zuerst Leine, dann Haken, zuletzt Gewicht.",
+          "Bei schlechtem Fang pausieren und zurückziehen, um ohne Ticketverlust neu zu starten.",
+          "Spezialgegenstände bleiben nach Turnierende erhalten."
+        ],
+        "en": [
+          "Each depth has its own fish; move left to avoid fish swimming right.",
+          "The catch trigger is the fish’s mouth, diver’s head or object center; the hook can pass through tails.",
+          "Prioritize glowing fish and objects.",
+          "Upgrade line first, then hook, then weight.",
+          "Pause and withdraw after a bad catch to restart without losing a ticket.",
+          "Special items carry over after the tournament."
+        ],
+        "fr": [
+          "Chaque profondeur a ses poissons ; déplace le crochet à gauche pour éviter ceux qui nagent à droite.",
+          "Le déclencheur est la bouche du poisson, la tête du plongeur ou le centre de l’objet ; le crochet traverse les queues.",
+          "Priorise les poissons et objets lumineux.",
+          "Améliore d’abord la ligne, puis le crochet, puis le poids.",
+          "Après une mauvaise prise, mets en pause et retire-toi pour recommencer sans perdre de ticket.",
+          "Les objets spéciaux sont conservés après le tournoi."
+        ]
+      },
+      "sources": [
+        "fishingHelp"
+      ]
+    },
+    {
+      "id": "viking-vengeance",
+      "names": {
+        "de": "Wikinger-Vergeltung",
+        "en": "Viking Vengeance",
+        "fr": "Vengeance viking"
+      },
+      "category": "alliance-defense",
+      "cadence": {
+        "type": "alliance-scheduled"
+      },
+      "confidence": "nrw-ingame",
+      "objective": {
+        "de": "Wellen gemeinsam verteidigen; mindestens 50 % der Angreifer töten. Nach zwei persönlichen Niederlagen enden die Angriffe, Verstärkungspunkte bleiben möglich.",
+        "en": "Defend waves together; kill at least 50% of attackers. After two personal defeats, attacks stop, but reinforcement points remain possible.",
+        "fr": "Défendre les vagues ensemble ; éliminer au moins 50 % des attaquants. Après deux défaites personnelles, les attaques cessent, mais les renforts peuvent encore rapporter."
+      },
+      "nrwGuide": {
+        "de": [
+          "Alle Truppen aus der eigenen Stadt zu anderen Mitgliedern schicken; nur die drei stärksten Helden bleiben ohne Truppen zurück.",
+          "Stadtfeuer löschen.",
+          "Bei Welle 10 und 20 Truppen zum Allianz-HQ schicken.",
+          "Während des Events nicht heilen.",
+          "Wer offline ist, verstärkt vorher andere Mitglieder; gegenseitige Verstärkung absprechen."
+        ],
+        "en": [
+          "Send all troops out of your city to reinforce members; leave only the three strongest heroes with no troops.",
+          "Extinguish city fires.",
+          "Send troops to Alliance HQ for waves 10 and 20.",
+          "Do not heal during the event.",
+          "If offline, reinforce members beforehand and arrange reciprocal reinforcement."
+        ],
+        "fr": [
+          "Envoie toutes les troupes hors de ta ville pour renforcer les membres ; laisse seulement les trois meilleurs héros sans troupes.",
+          "Éteins les incendies de la ville.",
+          "Envoie les troupes au QG d’alliance aux vagues 10 et 20.",
+          "Ne soigne pas pendant l’événement.",
+          "Si tu es absent, renforce des membres à l’avance et organise des renforts réciproques."
+        ]
+      },
+      "sources": []
+    },
+    {
+      "id": "eternitys-reach",
+      "names": {
+        "de": "Eternity’s Reach",
+        "en": "Eternity’s Reach",
+        "fr": "Eternity’s Reach"
+      },
+      "category": "timed-minigame",
+      "cadence": {
+        "type": "scheduled-slots"
+      },
+      "confidence": "nrw-tested",
+      "objective": {
+        "de": "Durch Wachen XP für den Fähigkeitenbaum gewinnen und Orichalcum über Adern/Aderausbrüche sammeln.",
+        "en": "Earn skill-tree XP from guards and collect Orichalcum through veins and vein outbursts.",
+        "fr": "Gagner de l’XP d’arbre de compétences sur les gardes et récolter de l’Orichalcum dans les filons."
+      },
+      "skillPath": [
+        "right",
+        "right",
+        "left",
+        "left",
+        "right"
+      ],
+      "nrwGuide": {
+        "de": [
+          "Herauszoomen und einen wenig besetzten Bereich wählen.",
+          "Cäsars Wachen priorisieren, besonders Level 2, bis Fähigkeit 3 erreicht ist.",
+          "Ab Fähigkeit 3: fast alle Märsche weiter für Wachen; jede Minute einen Marsch kurz in eine Ader schicken, um den 5.000-Orichalcum-Trigger auszulösen.",
+          "Fähigkeit 5 nur während eines Aderausbruchs aktivieren und alle Märsche in Ausbrüche schicken.",
+          "Nach Aktivierung von Fähigkeit 5 die Truppen bis zum Ende des fünfminütigen Cooldowns nicht zurückrufen."
+        ],
+        "en": [
+          "Zoom out and choose a less crowded area.",
+          "Prioritize Caesar’s Guards, especially level 2, until Skill 3.",
+          "From Skill 3 onward, keep most marches on guards and send one march briefly to a vein each minute for the 5,000-Orichalcum trigger.",
+          "Activate Skill 5 only during a vein outburst and send all marches to outbursts.",
+          "After activating Skill 5, do not recall until its five-minute cooldown has elapsed."
+        ],
+        "fr": [
+          "Dézoome et choisis une zone peu occupée.",
+          "Priorise les gardes de César, surtout niveau 2, jusqu’à la compétence 3.",
+          "Dès la compétence 3, garde presque toutes les marches sur les gardes et envoie brièvement une marche dans un filon chaque minute pour déclencher 5 000 Orichalcum.",
+          "Active la compétence 5 uniquement pendant une éruption de filon et envoie toutes les marches.",
+          "Après activation, ne rappelle pas les troupes avant la fin du délai de cinq minutes."
+        ]
+      },
+      "sources": []
+    },
+    {
+      "id": "cesares-fury",
+      "names": {
+        "de": "Cäsars Zorn",
+        "en": "Cesare’s Fury",
+        "fr": "Fureur de César"
+      },
+      "category": "alliance-pve",
+      "cadence": {
+        "type": "monthly"
+      },
+      "confidence": "public-timeline-plus-nrw",
+      "objective": {
+        "de": "Cäsars Rebellen bis Stufe 50 besiegen; Kapitäne gemeinschaftlich freischalten und bekämpfen.",
+        "en": "Defeat Cesare’s Rebels up to level 50 and coordinate alliance Captains.",
+        "fr": "Vaincre les rebelles de César jusqu’au niveau 50 et coordonner les Capitaines."
+      },
+      "captainRule": {
+        "de": [
+          "Kapitäne zuerst mit genau einer Truppe ohne Helden angreifen.",
+          "Warten, bis alle aktiven Mitglieder einen Treffer gesetzt haben.",
+          "Erst danach mit vollen Truppen beenden."
+        ],
+        "en": [
+          "Attack Captains first with exactly one troop and no hero.",
+          "Wait until every active member has landed one hit.",
+          "Only then finish with full troops."
+        ],
+        "fr": [
+          "Attaque d’abord les Capitaines avec exactement une troupe et sans héros.",
+          "Attends que chaque membre actif ait porté un coup.",
+          "Termine ensuite avec des troupes complètes."
+        ]
+      },
+      "sources": [
+        "cesare"
+      ]
+    },
+    {
+      "id": "alliance-championship",
+      "names": {
+        "de": "Allianzmeisterschaft",
+        "en": "Alliance Championship",
+        "fr": "Championnat d’alliance"
+      },
+      "category": "alliance-pvp",
+      "cadence": {
+        "type": "weekly",
+        "registrationDays": [
+          "Monday",
+          "Tuesday"
+        ]
+      },
+      "confidence": "nrw",
+      "objective": {
+        "de": "Für die Allianz anmelden; Führung verteilt die registrierten Teams anschließend auf drei Reihen.",
+        "en": "Register for the alliance; leadership later distributes registered squads across three lanes.",
+        "fr": "S’inscrire pour l’alliance ; les responsables répartissent ensuite les escouades sur trois lignes."
+      },
+      "nrwGuide": {
+        "de": [
+          "Vor der Anmeldung Pet-Buffs aktivieren.",
+          "Ab 250 Mio. Spielerkraft: 60/40/0 mit defensiven Helden; bei Bedarf Ausrüstung tauschen.",
+          "Unter 250 Mio. Spielerkraft: 50/20/30 mit den drei besten Helden.",
+          "Nur in der Mitte anmelden."
+        ],
+        "en": [
+          "Activate Pet Buffs before registering.",
+          "At 250M power or above: 60/40/0 with defensive heroes; move gear if needed.",
+          "Below 250M power: 50/20/30 with the three best heroes.",
+          "Register only in the middle lane."
+        ],
+        "fr": [
+          "Active les bonus de familier avant l’inscription.",
+          "À partir de 250 M de puissance : 60/40/0 avec des héros défensifs ; transfère l’équipement si nécessaire.",
+          "Sous 250 M : 50/20/30 avec les trois meilleurs héros.",
+          "Inscris-toi uniquement dans la ligne centrale."
+        ]
+      },
+      "sources": []
+    },
+    {
+      "id": "mystic-trial",
+      "names": {
+        "de": "Mythische Prüfung",
+        "en": "Mystic Trial",
+        "fr": "Épreuve mythique"
+      },
+      "category": "pve",
+      "cadence": {
+        "type": "weekly-rotation",
+        "weekdayMappingConfidence": "needs-ingame-verification"
+      },
+      "confidence": "public-mechanics-plus-nrw-formations",
+      "objective": {
+        "de": "Zonen mit passenden Helden und Truppenverhältnissen abschließen; nach Freischaltung bereits besiegte Stufen raiden.",
+        "en": "Clear zones with suitable heroes and troop ratios; raid cleared stages after unlocking the feature.",
+        "fr": "Terminer les zones avec les héros et ratios adaptés ; piller les étapes déjà terminées après déblocage."
+      },
+      "formations": {
+        "colosseum": "50/10/40",
+        "forestOfLife": "50/15/35",
+        "crystalCave": "60/20/20",
+        "moltenFort": "60/15/25",
+        "knowledgeNetwork": "50/20/30",
+        "radiantPeak": {
+          "team1": "50/20/30",
+          "team2": "50/35/15",
+          "special": "Swap the cavalry hero between Team 1 and Team 2."
+        }
+      },
+      "notes": {
+        "de": [
+          "Pet-Fähigkeiten werden im Wald des Lebens und am Strahlenden Gipfel automatisch aktiviert; keinen Cooldown dafür verbrauchen."
+        ],
+        "en": [
+          "Pet skills activate automatically in Forest of Life and Radiant Peak; do not consume their cooldown manually."
+        ],
+        "fr": [
+          "Les compétences de familier s’activent automatiquement dans la Forêt de la vie et au Pic radieux ; ne consomme pas leur délai manuellement."
+        ]
+      },
+      "sources": [
+        "mysticTrial"
+      ]
+    },
+    {
+      "id": "kill-event",
+      "names": {
+        "de": "Kill-Event",
+        "en": "Kill Event",
+        "fr": "Événement d’élimination"
+      },
+      "category": "pvp",
+      "cadence": {
+        "type": "event-center"
+      },
+      "confidence": "nrw-law",
+      "objective": {
+        "de": "Punkte durch erlaubte Kämpfe erzielen, ohne die Servergesetze zu verletzen.",
+        "en": "Score through permitted combat without violating server laws.",
+        "fr": "Marquer par les combats autorisés sans enfreindre les lois du serveur."
+      },
+      "emergencyAlert": {
+        "de": "Kein Schild erforderlich. Nicht außerhalb des Allianz-Hubs sammeln. Stadtangriffe sind verboten; Ausnahmen gelten nur für Städte ohne Allianz, Ein-Mitglied-Allianzen und KOK. Lazarett freihalten.",
+        "en": "No shield is required. Do not gather outside the Alliance Hub. City attacks are forbidden except against unallied cities, one-member alliances and KOK. Keep the infirmary clear.",
+        "fr": "Aucun bouclier requis. Ne collecte pas hors du Hub d’alliance. Les attaques de villes sont interdites sauf contre les villes sans alliance, les alliances à un membre et KOK. Garde l’infirmerie libre."
+      },
+      "sourceUrl": "/server-laws/"
+    },
+    {
+      "id": "bear-trap",
+      "names": {
+        "de": "Bärenfalle",
+        "en": "Bear Trap",
+        "fr": "Piège à ours"
+      },
+      "category": "alliance-rally",
+      "cadence": {
+        "type": "fixed",
+        "everyDays": 2,
+        "timesUTC": [
+          "17:00",
+          "18:30"
+        ]
+      },
+      "confidence": "nrw-fixed",
+      "objective": {
+        "de": "Mit abgestimmten Rally-Leadern, Joiner-Helden und Formationen maximalen Allianzschaden erzielen.",
+        "en": "Maximize alliance damage with coordinated rally leaders, joiner heroes and formations.",
+        "fr": "Maximiser les dégâts d’alliance avec meneurs, héros de participation et formations coordonnés."
+      },
+      "nrwGuide": {
+        "de": [
+          "Märsche rechtzeitig zurückholen.",
+          "Richtige Joiner-Helden setzen.",
+          "Kurz vor BT1/BT2 online sein und Discord-Ansagen beachten."
+        ],
+        "en": [
+          "Recall marches in time.",
+          "Set the correct joiner heroes.",
+          "Be online shortly before BT1/BT2 and follow Discord calls."
+        ],
+        "fr": [
+          "Rappelle les marches à temps.",
+          "Place les bons héros de participation.",
+          "Sois en ligne peu avant BT1/BT2 et suis les consignes Discord."
+        ]
+      }
+    },
+    {
+      "id": "kingdom-transfer",
+      "names": {
+        "de": "Königreichstransfer",
+        "en": "Kingdom Transfer",
+        "fr": "Transfert de royaume"
+      },
+      "category": "migration",
+      "cadence": {
+        "type": "periodic",
+        "publicEstimateDays": "40-60"
+      },
+      "confidence": "public-timeline",
+      "objective": {
+        "de": "Spieler können während mehrerer Phasen in ein berechtigtes Königreich wechseln.",
+        "en": "Players can move to an eligible kingdom through multiple phases.",
+        "fr": "Les joueurs peuvent rejoindre un royaume admissible au fil de plusieurs phases."
+      },
+      "nrwGuide": {
+        "de": [
+          "Neue Mitglieder freundlich begrüßen und besonders bei ihren ersten Schritten in NRW unterstützen."
+        ],
+        "en": [
+          "Give new members a warm welcome and support their first steps with NRW."
+        ],
+        "fr": [
+          "Accueille chaleureusement les nouveaux membres et aide-les lors de leurs premiers pas chez NRW."
+        ]
+      },
+      "sources": [
+        "transfer"
+      ]
+    },
+    {
+      "id": "champagne-fair",
+      "names": {
+        "de": "Champagne Fair",
+        "en": "Champagne Fair",
+        "fr": "Foire au champagne"
+      },
+      "category": "exchange",
+      "cadence": {
+        "type": "periodic"
+      },
+      "confidence": "public-timeline",
+      "objective": {
+        "de": "Überschüssige Splitter und Bücher gegen Gutscheine tauschen und diese im Shop einsetzen.",
+        "en": "Exchange excess shards and books for vouchers and spend them in the shop.",
+        "fr": "Échanger les fragments et livres excédentaires contre des bons à dépenser dans la boutique."
+      },
+      "nrwGuide": {
+        "de": [
+          "Nur überschüssige Splitter vollständig maximierter Helden tauschen.",
+          "Vor dem ersten Tausch Werte und Shop vergleichen.",
+          "Gutscheine verfallen nicht; niedrigwertige Käufe auslassen."
+        ],
+        "en": [
+          "Only exchange excess shards from fully maxed heroes.",
+          "Compare values and the full shop before exchanging.",
+          "Vouchers do not expire; skip low-value purchases."
+        ],
+        "fr": [
+          "Échange uniquement les fragments excédentaires de héros maximisés.",
+          "Compare les valeurs et toute la boutique avant l’échange.",
+          "Les bons n’expirent pas ; évite les achats de faible valeur."
+        ]
+      },
+      "sources": [
+        "champagne"
+      ]
+    },
+    {
+      "id": "hero-roulette",
+      "names": {
+        "de": "Heldenroulette",
+        "en": "Hero Roulette",
+        "fr": "Roulette des héros"
+      },
+      "category": "hero-acquisition",
+      "cadence": {
+        "type": "overlap",
+        "duration": "3 days",
+        "startsOnMajorEventDay": 2
+      },
+      "confidence": "public-timeline",
+      "objective": {
+        "de": "Mit Glückschips oder Edelsteinen Splitter des aktuellen Roulette-Helden erhalten.",
+        "en": "Use Lucky Chips or gems to obtain shards for the current Roulette hero.",
+        "fr": "Utiliser des jetons ou des gemmes pour obtenir des fragments du héros actuel."
+      },
+      "mechanics": {
+        "dailyFreeSpins": 1,
+        "maxSpinsPerDay": 150,
+        "milestones": [
+          5,
+          15,
+          35,
+          70,
+          120
+        ]
+      },
+      "sources": [
+        "heroRoulette"
+      ]
+    }
+  ],
+  "catalogOnly": [
+    {
+      "name": "Fantasy Theater",
+      "researchStatus": "catalogued-needs-detailed-phase-review",
+      "dashboardEligible": "unknown"
+    },
+    {
+      "name": "Twin Star Adventure",
+      "researchStatus": "catalogued-needs-detailed-phase-review",
+      "dashboardEligible": "unknown"
+    },
+    {
+      "name": "Treasure Raiders",
+      "researchStatus": "catalogued-needs-detailed-phase-review",
+      "dashboardEligible": "unknown"
+    },
+    {
+      "name": "Football Fiesta",
+      "researchStatus": "catalogued-needs-detailed-phase-review",
+      "dashboardEligible": "unknown"
+    },
+    {
+      "name": "Treasure Cove",
+      "researchStatus": "catalogued-needs-detailed-phase-review",
+      "dashboardEligible": "unknown"
+    },
+    {
+      "name": "Tri Alliance Clash",
+      "researchStatus": "catalogued-needs-detailed-phase-review",
+      "dashboardEligible": "unknown"
+    },
+    {
+      "name": "Windward Voyage",
+      "researchStatus": "catalogued-needs-detailed-phase-review",
+      "dashboardEligible": "unknown"
+    },
+    {
+      "name": "Voyage of Light",
+      "researchStatus": "catalogued-needs-detailed-phase-review",
+      "dashboardEligible": "unknown"
+    },
+    {
+      "name": "Champion’s Way",
+      "researchStatus": "catalogued-needs-detailed-phase-review",
+      "dashboardEligible": "unknown"
+    },
+    {
+      "name": "Beast Whisperer",
+      "researchStatus": "catalogued-needs-detailed-phase-review",
+      "dashboardEligible": "unknown"
+    },
+    {
+      "name": "Path of Growth",
+      "researchStatus": "catalogued-needs-detailed-phase-review",
+      "dashboardEligible": "unknown"
+    },
+    {
+      "name": "Steel Edge",
+      "researchStatus": "catalogued-needs-detailed-phase-review",
+      "dashboardEligible": "unknown"
+    },
+    {
+      "name": "Buccaneer Bounty",
+      "researchStatus": "catalogued-needs-detailed-phase-review",
+      "dashboardEligible": "unknown"
+    },
+    {
+      "name": "Stand of Arms",
+      "researchStatus": "catalogued-needs-detailed-phase-review",
+      "dashboardEligible": "unknown"
+    },
+    {
+      "name": "Grow Your Heroes",
+      "researchStatus": "catalogued-needs-detailed-phase-review",
+      "dashboardEligible": "unknown"
+    },
+    {
+      "name": "Hall of Heroes",
+      "researchStatus": "catalogued-needs-detailed-phase-review",
+      "dashboardEligible": "unknown"
+    },
+    {
+      "name": "Defeat Nearby Beasts",
+      "researchStatus": "catalogued-needs-detailed-phase-review",
+      "dashboardEligible": "unknown"
+    },
+    {
+      "name": "Mystic Divination",
+      "researchStatus": "catalogued-needs-detailed-phase-review",
+      "dashboardEligible": "unknown"
+    },
+    {
+      "name": "City Development",
+      "researchStatus": "catalogued-needs-detailed-phase-review",
+      "dashboardEligible": "unknown"
+    },
+    {
+      "name": "Hall of Governors",
+      "researchStatus": "catalogued-needs-detailed-phase-review",
+      "dashboardEligible": "unknown"
+    },
+    {
+      "name": "Flamedragon Tyrant",
+      "researchStatus": "catalogued-needs-detailed-phase-review",
+      "dashboardEligible": "unknown"
+    },
+    {
+      "name": "Swordland Showdown",
+      "researchStatus": "catalogued-needs-detailed-phase-review",
+      "dashboardEligible": "unknown"
+    },
+    {
+      "name": "Castle Battle",
+      "researchStatus": "catalogued-needs-detailed-phase-review",
+      "dashboardEligible": "unknown"
+    },
+    {
+      "name": "Fortress Battles",
+      "researchStatus": "catalogued-needs-detailed-phase-review",
+      "dashboardEligible": "unknown"
+    },
+    {
+      "name": "Alliance Mobilization",
+      "researchStatus": "catalogued-needs-detailed-phase-review",
+      "dashboardEligible": "unknown"
+    },
+    {
+      "name": "Frostfire Mine",
+      "researchStatus": "catalogued-needs-detailed-phase-review",
+      "dashboardEligible": "unknown"
+    },
+    {
+      "name": "Canyon Clash",
+      "researchStatus": "catalogued-needs-detailed-phase-review",
+      "dashboardEligible": "unknown"
+    },
+    {
+      "name": "Frostdragon Tyrant",
+      "researchStatus": "catalogued-needs-detailed-phase-review",
+      "dashboardEligible": "unknown"
+    },
+    {
+      "name": "Treasure Hunter",
+      "researchStatus": "catalogued-needs-detailed-phase-review",
+      "dashboardEligible": "unknown"
+    },
+    {
+      "name": "Tundra Adventure",
+      "researchStatus": "catalogued-needs-detailed-phase-review",
+      "dashboardEligible": "unknown"
+    },
+    {
+      "name": "Vision of Dawn",
+      "researchStatus": "catalogued-needs-detailed-phase-review",
+      "dashboardEligible": "unknown"
+    },
+    {
+      "name": "Tundra Trade Route",
+      "researchStatus": "catalogued-needs-detailed-phase-review",
+      "dashboardEligible": "unknown"
+    },
+    {
+      "name": "Lantern of Blessings",
+      "researchStatus": "catalogued-needs-detailed-phase-review",
+      "dashboardEligible": "unknown"
+    }
+  ]
+}
