@@ -58,3 +58,35 @@ main,footer{max-width:1320px;margin:0 auto;padding-left:28px;padding-right:28px}
 .tomorrow-card{display:block}.tomorrow-card>div:first-child{margin-bottom:14px}.tomorrow-tasks{display:grid;gap:10px}.tomorrow-tasks .event-card{background:rgba(8,14,30,.28);border-color:rgba(255,255,255,.12);box-shadow:none}.tomorrow-tasks .event-card h3,.tomorrow-tasks .action-block li{color:#fff}.tomorrow-tasks .event-card-icon,.tomorrow-tasks .score-focus,.tomorrow-tasks .prepare-box{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.1)}.tomorrow-tasks .law-limit{background:rgba(255,110,125,.08);border-color:rgba(255,110,125,.2)}.tomorrow-tasks .event-card details ul,.tomorrow-tasks .prepare-box p,.tomorrow-tasks .law-limit p{color:#b9c4dc}
 .release-details{padding:0 0 70px}.release-details>.section-title{margin-bottom:18px}.release-details .gen-card{width:100%;min-height:auto}.release-details .hero-row{max-width:720px}.release-details .hero-briefs{gap:10px}.release-details .hero-briefs p{padding:12px;font-size:11px;line-height:1.5}.release-details .hero-briefs b{font-size:12px;margin-bottom:5px}
 @media(max-width:680px){.section-lead{font-size:12px}.event-card{padding:16px;border-radius:19px}.event-card>header{grid-template-columns:44px minmax(0,1fr);gap:10px}.event-card-icon{width:44px;height:44px}.verified-badge{grid-column:2;justify-self:start;margin-top:-5px}.event-card h3{font-size:18px}.score-focus{align-items:flex-start;flex-direction:column;gap:3px}.score-focus strong{text-align:left}.law-limit{gap:10px}.tomorrow-card{padding:16px}.release-details{padding-bottom:52px}.release-details .hero-row{max-width:none}}
+
+/* Compact event accordion */
+.event-card{padding:0}
+.event-card-summary{display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:12px;align-items:center;padding:17px 20px;list-style:none;cursor:pointer;position:relative;z-index:1}
+.event-card-summary::-webkit-details-marker{display:none}.event-card-summary::marker{content:""}
+.event-card-summary:focus-visible{outline:3px solid color-mix(in srgb,var(--brand) 50%,transparent);outline-offset:-3px;border-radius:22px}
+.event-card-meta{display:flex;align-items:center;justify-content:flex-end;gap:10px}.event-card-meta .verified-badge{align-self:center}
+.expand-copy{color:var(--muted);font-size:12px;font-weight:850}.when-open{display:none}.event-card[open] .when-closed{display:none}.event-card[open] .when-open{display:inline}
+.event-chevron{width:11px;height:11px;border-right:2px solid var(--brand);border-bottom:2px solid var(--brand);transform:rotate(45deg);transition:transform .22s ease}.event-card[open] .event-chevron{transform:rotate(225deg)}
+.event-card-body{padding:16px 20px 20px;border-top:1px solid var(--line);animation:event-reveal .2s ease both}
+.event-card[open]{box-shadow:0 18px 44px rgba(0,0,0,.11)}
+.event-notes{margin-top:15px;padding:13px 14px;border-radius:14px;background:var(--surface2);border:1px solid var(--line)}
+.event-notes h4{margin:0 0 8px;color:var(--brand);font-size:13px;letter-spacing:.03em}.event-notes ul{display:grid;gap:7px;margin:0;padding-left:18px;color:var(--muted);font-size:14px;line-height:1.5}
+.action-block li{font-size:14px}.prepare-box p,.law-limit p{font-size:13px}.score-focus strong{font-size:14px}
+.tomorrow-tasks .event-card-body{border-top-color:rgba(255,255,255,.12)}.tomorrow-tasks .event-notes{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.1)}.tomorrow-tasks .event-notes ul{color:#b9c4dc}
+@keyframes event-reveal{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+
+/* Swipeable, flippable Gen 6 hero cards */
+.hero-swipe-hint{margin:0 0 10px;color:var(--muted);font-size:13px;font-weight:800}
+.hero-swipe{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(230px,31%);gap:12px;overflow-x:auto;overscroll-behavior-inline:contain;scroll-snap-type:inline mandatory;scroll-padding-inline:2px;padding:2px 2px 10px;scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--brand) 42%,transparent) transparent}
+.hero-flip{height:360px;padding:0;border:0;border-radius:22px;background:transparent;color:inherit;font:inherit;perspective:1200px;scroll-snap-align:start;cursor:pointer;text-align:left}
+.hero-flip-inner{display:block;width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform .48s cubic-bezier(.2,.75,.25,1)}.hero-flip.is-flipped .hero-flip-inner{transform:rotateY(180deg)}
+.hero-face{position:absolute;inset:0;display:block;overflow:hidden;border:1px solid var(--line);border-radius:22px;background:linear-gradient(155deg,var(--surface2),color-mix(in srgb,var(--surface) 78%,var(--brand) 22%));box-shadow:0 16px 34px rgba(0,0,0,.16);backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.hero-front img{width:100%;height:100%;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 18px 18px rgba(0,0,0,.3))}
+.hero-name{position:absolute;left:14px;right:14px;bottom:14px;padding:11px 12px;border-radius:14px;background:rgba(8,13,25,.78);backdrop-filter:blur(10px);color:#fff;font-size:19px;font-weight:950}.hero-name small{display:block;margin-top:2px;color:#b9c5dc;font-size:13px;font-weight:750}
+.flip-cue{position:absolute;right:13px;top:13px;width:34px;height:34px;display:grid;place-items:center;border-radius:50%;background:rgba(8,13,25,.7);color:#fff;font-size:20px;font-weight:900}
+.hero-back{transform:rotateY(180deg);overflow-y:auto;padding:20px;background:linear-gradient(145deg,color-mix(in srgb,var(--surface2) 84%,var(--brand) 16%),var(--surface));font-size:14px;line-height:1.55;color:var(--muted)}
+.hero-back strong{display:block;margin-bottom:12px;color:var(--ink);font-size:18px;line-height:1.2}.hero-back em{display:grid;place-items:center;width:32px;height:32px;margin:16px 0 0 auto;border-radius:50%;background:color-mix(in srgb,var(--brand) 14%,var(--surface));color:var(--brand);font-size:19px;font-style:normal}
+.hero-flip:focus-visible{outline:3px solid var(--brand);outline-offset:3px}
+.release-details .hero-swipe{grid-auto-columns:minmax(260px,32%)}
+@media(max-width:680px){.event-card{padding:0;border-radius:19px}.event-card-summary{grid-template-columns:44px minmax(0,1fr) auto;padding:14px 15px;gap:10px}.event-card-body{padding:14px 15px 17px}.event-card-meta{gap:8px}.event-card-meta .verified-badge{display:none}.expand-copy{display:none}.action-block li{font-size:14px}.hero-swipe{grid-auto-columns:82%;margin-right:-15px}.release-details .hero-swipe{grid-auto-columns:82%}.hero-flip{height:390px}.hero-back{padding:18px}.hero-swipe-hint{font-size:12px}}
+@media(prefers-reduced-motion:reduce){.hero-flip-inner,.event-chevron{transition:none}.event-card-body{animation:none}}
