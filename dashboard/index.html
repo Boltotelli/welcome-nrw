@@ -45,7 +45,7 @@
       <div class="date-block"><span id="weekday">Sunday</span><strong id="dateLabel">13 SEP</strong><small>UTC · <span id="utcClock">00:00:00</span></small></div>
     </section>
 
-    <section class="priority-grid">
+    <section class="priority-grid" id="priorityGrid">
       <article class="focus-card bear-card">
         <div class="card-head"><span class="tag hot" id="bearTag">TODAY</span><img src="https://got-global-wiki.s3.us-west-1.amazonaws.com/wp-content/uploads/2026/01/jump_icon_40088.png" alt="Bear Trap"></div>
         <p class="overline">BEAR TRAP</p><h2><span class="de">Bärenfalle</span><span class="en">Bear Trap</span><span class="fr">Piège à ours</span></h2>
@@ -56,7 +56,7 @@
         <p class="muted" id="bearDateNote"></p>
       </article>
 
-      <article class="focus-card gen-card">
+      <article class="focus-card gen-card" id="gen6Card">
         <div class="card-head"><span class="tag new" id="genTag">TOMORROW</span><span class="gen-badge">GEN 6</span></div>
         <p class="overline"><span class="de">NÄCHSTER MEILENSTEIN</span><span class="en">NEXT MILESTONE</span><span class="fr">PROCHAIN PALIER</span></p>
         <h2><span class="de">Neue Helden</span><span class="en">New heroes</span><span class="fr">Nouveaux héros</span></h2>
@@ -76,8 +76,9 @@
 
     <section class="content-grid">
       <div class="plan-column">
-        <div class="section-title"><div><span class="eyebrow"><span class="de">JETZT</span><span class="en">NOW</span><span class="fr">MAINTENANT</span></span><h2><span class="de">Was du jetzt tun solltest</span><span class="en">What to do now</span><span class="fr">Que faire maintenant</span></h2></div><span class="source-state"><i></i><span class="de">Öffentlich geprüft</span><span class="en">Publicly checked</span><span class="fr">Vérifié publiquement</span></span></div>
-        <div class="task-list" id="todayTasks"></div>
+        <div class="section-title"><div><span class="eyebrow"><span class="de">DEIN TAGESPLAN</span><span class="en">YOUR DAILY PLAN</span><span class="fr">TON PROGRAMME DU JOUR</span></span><h2><span class="de">Deine Events heute</span><span class="en">Your events today</span><span class="fr">Tes événements aujourd’hui</span></h2></div><span class="source-state"><i></i><span class="de">NRW-geprüft</span><span class="en">Checked by NRW</span><span class="fr">Vérifié par NRW</span></span></div>
+        <p class="section-lead"><span class="de">Jede Kachel sagt dir konkret, was jetzt sinnvoll ist. NRW- und Discord-Ansagen haben Vorrang.</span><span class="en">Each card tells you what is worth doing now. NRW and Discord calls take priority.</span><span class="fr">Chaque carte indique clairement quoi faire maintenant. Les consignes NRW et Discord restent prioritaires.</span></p>
+        <div class="event-board" id="todayEvents"></div>
         <article class="tomorrow-card">
           <div><span class="eyebrow"><span class="de">NACH DEM NÄCHSTEN SERVER-RESET</span><span class="en">AFTER THE NEXT SERVER RESET</span><span class="fr">APRÈS LE PROCHAIN RESET SERVEUR</span></span><h3 id="tomorrowTitle"></h3></div>
           <div id="tomorrowTasks" class="tomorrow-tasks"></div>
@@ -109,6 +110,11 @@
           </article>
         </div>
       </aside>
+    </section>
+
+    <section class="release-details" id="releaseDetails">
+      <div class="section-title"><div><span class="eyebrow"><span class="de">NEU AUF K1044</span><span class="en">NEW ON K1044</span><span class="fr">NOUVEAU SUR K1044</span></span><h2><span class="de">Helden im Überblick</span><span class="en">Hero overview</span><span class="fr">Aperçu des héros</span></h2></div></div>
+      <div id="releaseLower"></div>
     </section>
 
     <section class="profile-panel">
