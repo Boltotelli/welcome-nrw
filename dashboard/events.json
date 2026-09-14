@@ -2,8 +2,24 @@
   "schemaVersion": 2,
   "kingdom": 1044,
   "timezone": "UTC",
-  "updatedAt": "2026-09-13T21:57:12Z",
+  "updatedAt": "2026-09-14T00:17:40Z",
   "events": [
+    {
+      "id": "kingdom-transfer-2026-09-1044",
+      "start": "2026-09-13",
+      "end": "2026-09-19",
+      "icon": "🔄",
+      "iconUrl": "https://kingshotdata.com/uploads/2025/09/kingdom-transfer-event-icon.webp",
+      "manual": true,
+      "confidence": "public-timeline",
+      "name": {"de": "Königreichstransfer", "en": "Kingdom Transfer", "fr": "Transfert de royaume"},
+      "tips": {
+        "de": ["Vortransfer bis 15.09.; Einladungsphase am 16.–17.09.; offener Transfer am 18.–19.09.", "Begrüßt neue Mitglieder freundlich und helft ihnen besonders bei ihren ersten Schritten in NRW.", "Discord-Absprachen für Einladungen, Aufnahme und Unterstützung haben Vorrang."],
+        "en": ["Pre-Transfer through 15 Sep; Invitational Transfer on 16–17 Sep; Open Transfer on 18–19 Sep.", "Give new members a warm welcome and support them especially during their first steps with NRW.", "Discord coordination for invitations, onboarding and support takes priority."],
+        "fr": ["Pré-transfert jusqu’au 15/09 ; phase sur invitation les 16–17/09 ; transfert ouvert les 18–19/09.", "Accueillez chaleureusement les nouveaux membres et aidez-les surtout pendant leurs premiers pas chez NRW.", "La coordination Discord pour les invitations, l’accueil et l’aide reste prioritaire."]
+      },
+      "sourceUrl": "https://kingshot.net/nexus/1044"
+    },
     {
       "id": "alliance-brawl-2026-09",
       "start": "2026-09-14",
