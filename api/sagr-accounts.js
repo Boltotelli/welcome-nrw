@@ -10,8 +10,8 @@ async function fetchPlayer(id) {
   const sign = createHash('md5').update(base + API_KEY).digest('hex');
   const response = await fetch(API_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: `sign=${sign}&${base}`,
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ fid: id, time: String(time), sign }),
     signal: AbortSignal.timeout(8000)
   });
   if (!response.ok) throw new Error(`Kingshot API ${response.status}`);
@@ -27,6 +27,11 @@ module.exports = async function handler(req, res) {
   }
 
   const results = await Promise.allSettled(PLAYER_IDS.map(fetchPlayer));
+  results.forEach((result, index) => {
+    if (result.status === 'rejected') {
+      console.warn('Kingshot player lookup failed', PLAYER_IDS[index], result.reason?.message);
+    }
+  });
   const players = results
     .filter(result => result.status === 'fulfilled')
     .map(result => result.value);
