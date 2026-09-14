@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-09-14T16:19:21.628Z",
+  "updatedAt": "2026-09-14T16:29:42.557Z",
   "kingdom": 1044,
   "languages": [
     "de",
@@ -30,7 +30,13 @@
     "mysticTrial": "https://kingshotdata.com/events/mystic-trial/",
     "cesare": "https://kingshotdata.com/events/cesares-fury/",
     "transfer": "https://kingshotdata.com/events/kingdom-transfer-event/",
-    "heroRoulette": "https://kingshotdata.com/events/hero-roulette/"
+    "heroRoulette": "https://kingshotdata.com/events/hero-roulette/",
+    "officerProject": {
+      "title": "Officer Project Event",
+      "url": "https://kingshotdata.com/events/officer-project-event/",
+      "type": "community-database",
+      "verifiedAt": "2026-09-14"
+    }
   },
   "actionDictionary": {
     "truckEscort": {
@@ -1210,19 +1216,93 @@
       "cadence": {
         "type": "official-cycle"
       },
-      "confidence": "needs-ingame-verification",
+      "confidence": "public-timeline-plus-nrw-limits",
       "objective": {
         "de": "Punkteaufgaben erfüllen; Varianten belohnen unter anderem Schmiedehämmer oder Amulettdesigns.",
         "en": "Complete scoring tasks; variants reward items such as Forgehammers or Charm Designs.",
         "fr": "Réaliser les tâches de score ; certaines variantes récompensent notamment marteaux de forge ou plans de charme."
       },
-      "scoringPolicy": "Exact scoring actions must be taken from the active event panel; reward type must not be treated as the spent resource.",
+      "scoringPolicy": "Forgehammer and Charm Designs identify the two event variants/final milestone rewards, not automatically the resources being spent.",
       "nrwRule": {
-        "de": "Nur lohnende Minimalbelohnung; KvK-Ressourcen schonen. Die 3×-Grenze gilt strikt, sobald der konkrete Gesamtwert von NRW festgelegt ist.",
-        "en": "Only pursue worthwhile minimum rewards and save KvK resources. The 3× limit is strict once NRW has defined the exact total.",
-        "fr": "Vise seulement les récompenses minimales rentables et garde les ressources KvK. La limite 3× est stricte dès que NRW a fixé le total exact."
+        "de": "Das Event kann ausgelassen werden. 310.000 Punkte bei der Forgehammer-Variante beziehungsweise 453.000 Punkte bei der Charm-Design-Variante sind strikte Maximalgrenzen, keine Empfehlungen. Danach sofort stoppen und KvK-Ressourcen sparen.",
+        "en": "The event may be skipped. 310,000 points for the Forgehammer variant and 453,000 points for the Charm Designs variant are strict maximum limits, not recommendations. Stop immediately at the limit and save KvK resources.",
+        "fr": "L’événement peut être ignoré. 310 000 points pour la variante Marteaux de forge et 453 000 points pour la variante Plans de charme sont des limites maximales strictes, pas des recommandations. Arrête-toi immédiatement à la limite et conserve les ressources KvK."
       },
-      "sources": []
+      "sources": [
+        "officerProject"
+      ],
+      "variants": {
+        "forgehammer": {
+          "reward": "Forgehammers",
+          "strictMaximum": 310000,
+          "maximumSource": "NRW / Server 1044",
+          "points": [
+            {
+              "action": "Increase Governor Gear Charm maximum score by 1",
+              "points": 70
+            },
+            {
+              "action": "Use 1 Hero Gear Forgehammer",
+              "points": 6000
+            },
+            {
+              "action": "Use 1 Mithril",
+              "points": 60000
+            },
+            {
+              "action": "Use 1 Hero Exclusive Gear Widget",
+              "points": 12000
+            },
+            {
+              "action": "Train or promote 1 troop",
+              "pointsByLevel": {
+                "1": 1,
+                "2": 2,
+                "3": 3,
+                "4": 4,
+                "5": 6,
+                "6": 9,
+                "7": 12,
+                "8": 17,
+                "9": 22,
+                "10": 30,
+                "11": 37
+              }
+            }
+          ]
+        },
+        "charmDesign": {
+          "reward": "Charm Designs",
+          "strictMaximum": 453000,
+          "maximumSource": "NRW / Server 1044",
+          "points": [
+            {
+              "action": "Increase Governor Gear maximum score by 1",
+              "points": 70
+            },
+            {
+              "action": "Use 1 Rare Hero Shard to ascend heroes",
+              "points": 350
+            },
+            {
+              "action": "Use 1 Epic Hero Shard to ascend heroes",
+              "points": 1220
+            },
+            {
+              "action": "Use 1 Mythic Hero Shard to ascend heroes",
+              "points": 3040
+            },
+            {
+              "action": "Use 1 Hero Gear Forgehammer",
+              "points": 6000
+            },
+            {
+              "action": "Use 1 Hero Exclusive Gear Widget",
+              "points": 12000
+            }
+          ]
+        }
+      }
     },
     {
       "id": "golden-glaives",
