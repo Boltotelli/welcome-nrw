@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-labelledby="title desc">
+  <title id="title">NRW Player Dashboard</title>
+  <desc id="desc">Person silhouette behind the NRW wordmark</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#07142f"/>
+      <stop offset="1" stop-color="#0d2147"/>
+    </linearGradient>
+    <linearGradient id="person" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#20b7f4"/>
+      <stop offset=".52" stop-color="#49dfe5"/>
+      <stop offset="1" stop-color="#a8f4ae"/>
+    </linearGradient>
+    <linearGradient id="word" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#786bff"/>
+      <stop offset=".48" stop-color="#42d7ee"/>
+      <stop offset="1" stop-color="#b7f3a7"/>
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="1024" rx="210" fill="url(#bg)"/>
+  <circle cx="512" cy="302" r="190" fill="url(#person)"/>
+  <path d="M126 846c0-176 113-315 286-365 62 43 138 43 200 0 173 50 286 189 286 365 0 34-27 61-61 61H187c-34 0-61-27-61-61Z" fill="url(#person)"/>
+  <text x="512" y="780" text-anchor="middle" font-family="Arial Black,Inter,Arial,sans-serif" font-size="304" font-weight="950" letter-spacing="-25" fill="url(#word)" stroke="#081733" stroke-width="18" paint-order="stroke fill" stroke-linejoin="round">NRW</text>
+</svg>
