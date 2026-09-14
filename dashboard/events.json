@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "kingdom": 1044,
   "timezone": "UTC",
-  "updatedAt": "2026-09-14T10:38:44Z",
+  "updatedAt": "2026-09-14T11:17:16Z",
   "events": [
     {
       "id": "kingdom-transfer-2026-09-1044",
@@ -179,6 +179,71 @@
       "sourceUrl": "https://centurygames.helpshift.com/hc/en/140-kingshot/"
     },
     {
+      "id": "fishing-tournament-2026-09-15",
+      "start": "2026-09-15",
+      "end": "2026-09-17",
+      "endConfidence": "predicted",
+      "icon": "🎣",
+      "manual": true,
+      "confidence": "confirmed-ingame",
+      "name": {
+        "de": "Fischerturnier",
+        "en": "Fishing Tournament",
+        "fr": "Tournoi de pêche"
+      },
+      "tips": {
+        "de": [
+          "Der Start am 15.09. wurde ingame bestätigt; das genaue Ende bitte im Spiel prüfen.",
+          "Leuchtende Fische und Gegenstände priorisieren.",
+          "Spezialgegenstände bleiben für spätere Turniere erhalten."
+        ],
+        "en": [
+          "The 15 Sep start was confirmed in game; check the exact end in game.",
+          "Prioritize glowing fish and objects.",
+          "Special items carry over to later tournaments."
+        ],
+        "fr": [
+          "Le début du 15/09 est confirmé en jeu ; vérifie la fin exacte dans le jeu.",
+          "Priorise les poissons et objets lumineux.",
+          "Les objets spéciaux sont conservés pour les prochains tournois."
+        ]
+      },
+      "sourceUrl": "https://centurygames.helpshift.com/hc/en/140-kingshot/section/1399-fishing-tournament/"
+    },
+    {
+      "id": "viking-vengeance-2026-09-22",
+      "start": "2026-09-22",
+      "end": "2026-09-22",
+      "icon": "🛡️",
+      "manual": false,
+      "confidence": "predicted",
+      "name": {"de": "Wikinger-Vergeltung", "en": "Viking Vengeance", "fr": "Vengeance viking"},
+      "tips": {"de": [], "en": [], "fr": []},
+      "sourceUrl": "https://kingshotguide.net/guides/viking-vengeance-expert-guide-beginner-to-advanced/"
+    },
+    {
+      "id": "eternitys-reach-2026-09-22",
+      "start": "2026-09-22",
+      "end": "2026-09-22",
+      "icon": "♾️",
+      "manual": false,
+      "confidence": "predicted",
+      "name": {"de": "Eternity’s Reach", "en": "Eternity’s Reach", "fr": "Eternity’s Reach"},
+      "tips": {"de": [], "en": [], "fr": []},
+      "sourceUrl": "https://centurygames.helpshift.com/hc/en/140-kingshot/section/1421-eternity-s-reach/"
+    },
+    {
+      "id": "viking-vengeance-2026-09-24",
+      "start": "2026-09-24",
+      "end": "2026-09-24",
+      "icon": "🛡️",
+      "manual": false,
+      "confidence": "predicted",
+      "name": {"de": "Wikinger-Vergeltung", "en": "Viking Vengeance", "fr": "Vengeance viking"},
+      "tips": {"de": [], "en": [], "fr": []},
+      "sourceUrl": "https://kingshotguide.net/guides/viking-vengeance-expert-guide-beginner-to-advanced/"
+    },
+    {
       "id": "new-master-2026-09-14",
       "start": "2026-09-14",
       "end": "2026-09-14",
@@ -208,7 +273,8 @@
         ]
       },
       "sourceUrl": "https://kingshotoptimizer.com/masters/aena/",
-      "featuredUntil": "2026-10-12"
+      "featuredUntil": "2026-10-12",
+      "display": "timeline-only"
     },
     {
       "id": "isnor-master-2026-09-14",
@@ -240,7 +306,8 @@
         ]
       },
       "sourceUrl": "https://kingshotoptimizer.com/masters/isnor/",
-      "featuredUntil": "2026-10-12"
+      "featuredUntil": "2026-10-12",
+      "display": "timeline-only"
     },
     {
       "id": "hero-generation-6-1044",
@@ -272,7 +339,8 @@
         ]
       },
       "sourceUrl": "https://kingshot.net/nexus/1044",
-      "featuredUntil": "2026-10-12"
+      "featuredUntil": "2026-10-12",
+      "display": "timeline-only"
     }
   ]
 }
