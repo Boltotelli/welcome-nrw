@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "kingdom": 1044,
   "timezone": "UTC",
-  "updatedAt": "2026-09-14T11:17:16Z",
+  "updatedAt": "2026-09-14T12:12:00Z",
   "events": [
     {
       "id": "kingdom-transfer-2026-09-1044",
@@ -19,19 +19,13 @@
       },
       "tips": {
         "de": [
-          "Vortransfer bis 15.09.; Einladungsphase am 16.–17.09.; offener Transfer am 18.–19.09.",
-          "Begrüßt neue Mitglieder freundlich und helft ihnen besonders bei ihren ersten Schritten in NRW.",
-          "Discord-Absprachen für Einladungen, Aufnahme und Unterstützung haben Vorrang."
+          "Begrüßt neue Mitglieder freundlich und helft ihnen besonders bei ihren ersten Schritten in NRW."
         ],
         "en": [
-          "Pre-Transfer through 15 Sep; Invitational Transfer on 16–17 Sep; Open Transfer on 18–19 Sep.",
-          "Give new members a warm welcome and support them especially during their first steps with NRW.",
-          "Discord coordination for invitations, onboarding and support takes priority."
+          "Give new members a warm welcome and support them especially during their first steps with NRW."
         ],
         "fr": [
-          "Pré-transfert jusqu’au 15/09 ; phase sur invitation les 16–17/09 ; transfert ouvert les 18–19/09.",
-          "Accueillez chaleureusement les nouveaux membres et aidez-les surtout pendant leurs premiers pas chez NRW.",
-          "La coordination Discord pour les invitations, l’accueil et l’aide reste prioritaire."
+          "Accueillez chaleureusement les nouveaux membres et aidez-les surtout pendant leurs premiers pas chez NRW."
         ]
       },
       "sourceUrl": "https://kingshot.net/nexus/1044"
@@ -75,9 +69,9 @@
           },
           "prepare": {
             "title": {
-              "de": "Allianzgemenge jetzt vorbereiten",
-              "en": "Prepare Alliance Brawl now",
-              "fr": "Préparer Alliance Brawl maintenant"
+              "de": "Intel-Missionen für morgen vorbereiten",
+              "en": "Prepare Intel Missions for tomorrow",
+              "fr": "Préparer les missions de renseignement pour demain"
             },
             "status": {
               "de": "VOR RESET",
@@ -86,33 +80,104 @@
             },
             "steps": {
               "de": [
-                "Schicke lange Sammler vor dem Reset los.",
-                "Setze den Bison ein, sobald deine Truppen aktiv sammeln."
+                "00:00-UTC-Missionen abschließen und Belohnungen abholen.",
+                "08:00-UTC-Missionen abschließen, die Belohnungen aber nicht abholen.",
+                "16:00-UTC-Missionen weder abschließen noch abholen; nach 16:00 UTC Pans zusätzliche Intel-Mission aktivieren.",
+                "Nach dem nächsten Reset die vorbereiteten Missionen abschließen und alle zurückgehaltenen Belohnungen abholen."
               ],
               "en": [
-                "Send long gathering marches before reset.",
-                "Use Bison as soon as your troops are actively gathering."
+                "Complete and claim the 00:00 UTC missions.",
+                "Complete the 08:00 UTC missions, but do not claim their rewards.",
+                "Neither complete nor claim the 16:00 UTC missions; activate Pan’s extra Intel Mission after 16:00 UTC.",
+                "After the next reset, complete the prepared missions and claim all held rewards."
               ],
               "fr": [
-                "Envoie de longues marches de collecte avant le reset.",
-                "Utilise le Bison dès que tes troupes collectent activement."
+                "Termine et récupère les missions de 00:00 UTC.",
+                "Termine les missions de 08:00 UTC, mais ne récupère pas leurs récompenses.",
+                "Ne termine ni ne récupère les missions de 16:00 UTC ; active la mission supplémentaire de Pan après 16:00 UTC.",
+                "Après le prochain reset, termine les missions préparées et récupère toutes les récompenses conservées."
               ]
             }
           },
           "steps": {
             "de": [
-              "Lass die vorbereiteten Sammler erst nach dem Reset zurückkehren, damit die gesammelten Ressourcen Punkte bringen."
+              "Setze den Bison heute erneut ein, solange deine Truppen aktiv sammeln."
             ],
             "en": [
-              "Let the prepared gatherers return only after reset so the collected resources score."
+              "Use Bison again today while your troops are actively gathering."
             ],
             "fr": [
-              "Ne laisse revenir les collecteurs préparés qu’après le reset afin que les ressources rapportent des points."
+              "Utilise de nouveau le Bison aujourd’hui pendant que tes troupes collectent activement."
             ]
           }
         }
       },
       "sourceUrl": "https://kingshotmastery.com/"
+    },
+    {
+      "id": "armament-competition-charms-2026-09-14",
+      "start": "2026-09-14",
+      "end": "2026-09-15",
+      "icon": "🛡️",
+      "iconUrl": "https://kingshotdata.com/uploads/2025/04/city-development-event-icon.webp",
+      "manual": true,
+      "confidence": "confirmed-ingame",
+      "name": {
+        "de": "Rüstungswettbewerb · Amulette",
+        "en": "Armament Competition · Charms",
+        "fr": "Compétition d’armement · Charmes"
+      },
+      "dailyPlans": {
+        "2026-09-14": {
+          "points": {
+            "de": "Erhöhung des maximalen Gouverneursamulett-Werts",
+            "en": "Increasing maximum Governor Charm score",
+            "fr": "Augmentation du score maximal des charmes du gouverneur"
+          },
+          "steps": {
+            "de": [
+              "Verbessere Gouverneursamulette nur bis zur nächsten lohnenden persönlichen Belohnungsstufe.",
+              "Prüfe vor weiteren Verbesserungen den NRW-Zielwert im NAP Event Tracker.",
+              "Die 3×-Grenze ist strikt: Danach sofort stoppen und Amulettmaterialien für KvK sparen."
+            ],
+            "en": [
+              "Upgrade Governor Charms only to the next worthwhile personal reward tier.",
+              "Check the NRW target in the NAP Event Tracker before making more upgrades.",
+              "The 3× limit is strict: stop immediately afterwards and save Charm materials for KvK."
+            ],
+            "fr": [
+              "Améliore les charmes du gouverneur uniquement jusqu’au prochain palier personnel rentable.",
+              "Vérifie l’objectif NRW dans le NAP Event Tracker avant toute amélioration supplémentaire.",
+              "La limite de 3× est stricte : arrête-toi immédiatement ensuite et garde les matériaux de charme pour le KvK."
+            ]
+          }
+        },
+        "2026-09-15": {
+          "points": {
+            "de": "Erhöhung des maximalen Gouverneursamulett-Werts",
+            "en": "Increasing maximum Governor Charm score",
+            "fr": "Augmentation du score maximal des charmes du gouverneur"
+          },
+          "steps": {
+            "de": [
+              "Nutze nur noch Amulettverbesserungen, wenn dir eine lohnende persönliche Belohnungsstufe fehlt.",
+              "Prüfe vorher den NRW-Zielwert im NAP Event Tracker und stoppe spätestens an der strikten 3×-Grenze.",
+              "Spare alle übrigen Amulettmaterialien für KvK."
+            ],
+            "en": [
+              "Only make further Charm upgrades if a worthwhile personal reward tier is still within reach.",
+              "Check the NRW target in the NAP Event Tracker first and stop no later than the strict 3× limit.",
+              "Save all remaining Charm materials for KvK."
+            ],
+            "fr": [
+              "N’améliore encore les charmes que si un palier personnel rentable reste accessible.",
+              "Vérifie d’abord l’objectif NRW dans le NAP Event Tracker et arrête-toi au plus tard à la limite stricte de 3×.",
+              "Garde tous les matériaux de charme restants pour le KvK."
+            ]
+          }
+        }
+      },
+      "sourceUrl": "https://kingshotdata.com/events/armament-competition/"
     },
     {
       "id": "merchant-empire-2026-09",
@@ -184,6 +249,7 @@
       "end": "2026-09-17",
       "endConfidence": "predicted",
       "icon": "🎣",
+      "iconUrl": "https://cacle.kingshotguide.org/cdn-cgi/image/width=240,height=240,fit=cover,gravity=center,quality=85,format=webp/guideImage/fishing-event-kingshot/fishing-event-kingshot-guide.png",
       "manual": true,
       "confidence": "confirmed-ingame",
       "name": {
