@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "kingdom": 1044,
   "timezone": "UTC",
-  "updatedAt": "2026-09-14T00:17:40Z",
+  "updatedAt": "2026-09-14T10:38:44Z",
   "events": [
     {
       "id": "kingdom-transfer-2026-09-1044",
@@ -12,11 +12,27 @@
       "iconUrl": "https://kingshotdata.com/uploads/2025/09/kingdom-transfer-event-icon.webp",
       "manual": true,
       "confidence": "public-timeline",
-      "name": {"de": "Königreichstransfer", "en": "Kingdom Transfer", "fr": "Transfert de royaume"},
+      "name": {
+        "de": "Königreichstransfer",
+        "en": "Kingdom Transfer",
+        "fr": "Transfert de royaume"
+      },
       "tips": {
-        "de": ["Vortransfer bis 15.09.; Einladungsphase am 16.–17.09.; offener Transfer am 18.–19.09.", "Begrüßt neue Mitglieder freundlich und helft ihnen besonders bei ihren ersten Schritten in NRW.", "Discord-Absprachen für Einladungen, Aufnahme und Unterstützung haben Vorrang."],
-        "en": ["Pre-Transfer through 15 Sep; Invitational Transfer on 16–17 Sep; Open Transfer on 18–19 Sep.", "Give new members a warm welcome and support them especially during their first steps with NRW.", "Discord coordination for invitations, onboarding and support takes priority."],
-        "fr": ["Pré-transfert jusqu’au 15/09 ; phase sur invitation les 16–17/09 ; transfert ouvert les 18–19/09.", "Accueillez chaleureusement les nouveaux membres et aidez-les surtout pendant leurs premiers pas chez NRW.", "La coordination Discord pour les invitations, l’accueil et l’aide reste prioritaire."]
+        "de": [
+          "Vortransfer bis 15.09.; Einladungsphase am 16.–17.09.; offener Transfer am 18.–19.09.",
+          "Begrüßt neue Mitglieder freundlich und helft ihnen besonders bei ihren ersten Schritten in NRW.",
+          "Discord-Absprachen für Einladungen, Aufnahme und Unterstützung haben Vorrang."
+        ],
+        "en": [
+          "Pre-Transfer through 15 Sep; Invitational Transfer on 16–17 Sep; Open Transfer on 18–19 Sep.",
+          "Give new members a warm welcome and support them especially during their first steps with NRW.",
+          "Discord coordination for invitations, onboarding and support takes priority."
+        ],
+        "fr": [
+          "Pré-transfert jusqu’au 15/09 ; phase sur invitation les 16–17/09 ; transfert ouvert les 18–19/09.",
+          "Accueillez chaleureusement les nouveaux membres et aidez-les surtout pendant leurs premiers pas chez NRW.",
+          "La coordination Discord pour les invitations, l’accueil et l’aide reste prioritaire."
+        ]
       },
       "sourceUrl": "https://kingshot.net/nexus/1044"
     },
@@ -28,28 +44,71 @@
       "iconUrl": "https://kingshotdata.com/uploads/2025/07/alliance-brawl-event-icon.webp",
       "manual": true,
       "confidence": "confirmed-ingame",
-      "name": {"de": "Allianzgemenge", "en": "Alliance Brawl", "fr": "Alliance Brawl"},
+      "name": {
+        "de": "Allianzgemenge",
+        "en": "Alliance Brawl",
+        "fr": "Alliance Brawl"
+      },
       "tips": {
-        "de": ["Täglich zuerst die aktuelle Phase und ihre Punkteaufgaben prüfen.", "Nur Ressourcen einsetzen, die am jeweiligen Tag wirklich Punkte bringen.", "Persönliche Ziele und NRW-Absprachen vor unnötigen Ausgaben priorisieren."],
-        "en": ["Check the current stage and its scoring tasks first each day.", "Only use resources that actually score in the active stage.", "Prioritize personal milestones and NRW coordination before extra spending."],
-        "fr": ["Vérifie d’abord chaque jour la phase actuelle et ses tâches de points.", "Utilise uniquement les ressources qui rapportent pendant la phase active.", "Privilégie les paliers personnels et la coordination NRW avant les dépenses supplémentaires."]
+        "de": [
+          "Täglich zuerst die aktuelle Phase und ihre Punkteaufgaben prüfen.",
+          "Nur Ressourcen einsetzen, die am jeweiligen Tag wirklich Punkte bringen.",
+          "Persönliche Ziele und NRW-Absprachen vor unnötigen Ausgaben priorisieren."
+        ],
+        "en": [
+          "Check the current stage and its scoring tasks first each day.",
+          "Only use resources that actually score in the active stage.",
+          "Prioritize personal milestones and NRW coordination before extra spending."
+        ],
+        "fr": [
+          "Vérifie d’abord chaque jour la phase actuelle et ses tâches de points.",
+          "Utilise uniquement les ressources qui rapportent pendant la phase active.",
+          "Privilégie les paliers personnels et la coordination NRW avant les dépenses supplémentaires."
+        ]
       },
       "dailyPlans": {
         "2026-09-14": {
-          "points": {"de": "Punkte fürs Sammeln", "en": "Points for gathering", "fr": "Points pour la collecte"},
+          "points": {
+            "de": "Punkte fürs Sammeln",
+            "en": "Points for gathering",
+            "fr": "Points pour la collecte"
+          },
           "prepare": {
-            "title": {"de": "Allianzgemenge jetzt vorbereiten", "en": "Prepare Alliance Brawl now", "fr": "Préparer Alliance Brawl maintenant"},
-            "status": {"de": "VOR RESET", "en": "BEFORE RESET", "fr": "AVANT RESET"},
+            "title": {
+              "de": "Allianzgemenge jetzt vorbereiten",
+              "en": "Prepare Alliance Brawl now",
+              "fr": "Préparer Alliance Brawl maintenant"
+            },
+            "status": {
+              "de": "VOR RESET",
+              "en": "BEFORE RESET",
+              "fr": "AVANT RESET"
+            },
             "steps": {
-              "de": ["Schicke lange Sammler vor dem Reset los.", "Setze den Bison ein, sobald deine Truppen aktiv sammeln."],
-              "en": ["Send long gathering marches before reset.", "Use Bison as soon as your troops are actively gathering."],
-              "fr": ["Envoie de longues marches de collecte avant le reset.", "Utilise le Bison dès que tes troupes collectent activement."]
+              "de": [
+                "Schicke lange Sammler vor dem Reset los.",
+                "Setze den Bison ein, sobald deine Truppen aktiv sammeln."
+              ],
+              "en": [
+                "Send long gathering marches before reset.",
+                "Use Bison as soon as your troops are actively gathering."
+              ],
+              "fr": [
+                "Envoie de longues marches de collecte avant le reset.",
+                "Utilise le Bison dès que tes troupes collectent activement."
+              ]
             }
           },
           "steps": {
-            "de": ["Lass die vorbereiteten Sammler erst nach dem Reset zurückkehren, damit die gesammelten Ressourcen Punkte bringen."],
-            "en": ["Let the prepared gatherers return only after reset so the collected resources score."],
-            "fr": ["Ne laisse revenir les collecteurs préparés qu’après le reset afin que les ressources rapportent des points."]
+            "de": [
+              "Lass die vorbereiteten Sammler erst nach dem Reset zurückkehren, damit die gesammelten Ressourcen Punkte bringen."
+            ],
+            "en": [
+              "Let the prepared gatherers return only after reset so the collected resources score."
+            ],
+            "fr": [
+              "Ne laisse revenir les collecteurs préparés qu’après le reset afin que les ressources rapportent des points."
+            ]
           }
         }
       },
@@ -63,11 +122,27 @@
       "iconUrl": "https://kingshotdata.com/uploads/2025/07/merchant-empire-event-icon.webp",
       "manual": true,
       "confidence": "confirmed-ingame",
-      "name": {"de": "Handelsimperium", "en": "Merchant Empire", "fr": "Empire commercial"},
+      "name": {
+        "de": "Handelsimperium",
+        "en": "Merchant Empire",
+        "fr": "Empire commercial"
+      },
       "tips": {
-        "de": ["Täglich vier Karawanen senden und bis zu vier erfolgreiche Überfälle nutzen.", "Zuerst die Gratis-Aktualisierung und Karawanengutscheine verwenden; Edelsteine nur bewusst einsetzen.", "Für wertvolle Karawanen starke Allianzunterstützung anfordern und vor Überfällen Ladung sowie Feuersymbole prüfen."],
-        "en": ["Send four caravans daily and use up to four successful raids.", "Use the free refresh and Caravan Vouchers first; spend gems deliberately.", "Request strong alliance support for valuable caravans and check cargo plus fire icons before raiding."],
-        "fr": ["Envoie quatre caravanes par jour et utilise jusqu’à quatre raids réussis.", "Utilise d’abord l’actualisation gratuite et les bons de caravane ; dépense les gemmes avec prudence.", "Demande une forte assistance pour les caravanes précieuses et vérifie la cargaison ainsi que les icônes de feu avant un raid."]
+        "de": [
+          "Täglich vier Karawanen senden und bis zu vier erfolgreiche Überfälle nutzen.",
+          "Zuerst die Gratis-Aktualisierung und Karawanengutscheine verwenden; Edelsteine nur bewusst einsetzen.",
+          "Für wertvolle Karawanen starke Allianzunterstützung anfordern und vor Überfällen Ladung sowie Feuersymbole prüfen."
+        ],
+        "en": [
+          "Send four caravans daily and use up to four successful raids.",
+          "Use the free refresh and Caravan Vouchers first; spend gems deliberately.",
+          "Request strong alliance support for valuable caravans and check cargo plus fire icons before raiding."
+        ],
+        "fr": [
+          "Envoie quatre caravanes par jour et utilise jusqu’à quatre raids réussis.",
+          "Utilise d’abord l’actualisation gratuite et les bons de caravane ; dépense les gemmes avec prudence.",
+          "Demande une forte assistance pour les caravanes précieuses et vérifie la cargaison ainsi que les icônes de feu avant un raid."
+        ]
       },
       "sourceUrl": "https://centurygames.helpshift.com/hc/en/140-kingshot/section/1501-merchant-empire/"
     },
@@ -79,11 +154,27 @@
       "iconUrl": "https://kingshotdata.com/uploads/2025/04/champagne-fair-event-icon.webp",
       "manual": true,
       "confidence": "confirmed-ingame",
-      "name": {"de": "Champagne Fair · Splittertausch", "en": "Champagne Fair · Shard Exchange", "fr": "Champagne Fair · Échange de fragments"},
+      "name": {
+        "de": "Champagne Fair · Splittertausch",
+        "en": "Champagne Fair · Shard Exchange",
+        "fr": "Champagne Fair · Échange de fragments"
+      },
       "tips": {
-        "de": ["Nur überschüssige heldenspezifische Splitter vollständig maximierter Helden tauschen.", "Tauschwerte und gesamten Shop vor dem ersten Umtausch vergleichen.", "Gutscheine bleiben erhalten – lieber sparen als niedrigwertige Belohnungen kaufen."],
-        "en": ["Only exchange excess hero-specific shards from fully maxed heroes.", "Compare exchange values and the full shop before making the first trade.", "Vouchers carry over, so saving is better than buying low-value rewards."],
-        "fr": ["Échange uniquement les fragments spécifiques excédentaires de héros entièrement maximisés.", "Compare les taux et toute la boutique avant le premier échange.", "Les bons sont conservés ; mieux vaut les garder que prendre des récompenses de faible valeur."]
+        "de": [
+          "Nur überschüssige heldenspezifische Splitter vollständig maximierter Helden tauschen.",
+          "Tauschwerte und gesamten Shop vor dem ersten Umtausch vergleichen.",
+          "Gutscheine bleiben erhalten – lieber sparen als niedrigwertige Belohnungen kaufen."
+        ],
+        "en": [
+          "Only exchange excess hero-specific shards from fully maxed heroes.",
+          "Compare exchange values and the full shop before making the first trade.",
+          "Vouchers carry over, so saving is better than buying low-value rewards."
+        ],
+        "fr": [
+          "Échange uniquement les fragments spécifiques excédentaires de héros entièrement maximisés.",
+          "Compare les taux et toute la boutique avant le premier échange.",
+          "Les bons sont conservés ; mieux vaut les garder que prendre des récompenses de faible valeur."
+        ]
       },
       "sourceUrl": "https://centurygames.helpshift.com/hc/en/140-kingshot/"
     },
@@ -94,13 +185,30 @@
       "icon": "🧙",
       "manual": true,
       "confidence": "confirmed-ingame",
-      "name": {"de": "Aena · 7. Meister", "en": "Aena · 7th Master", "fr": "Aena · 7e Maître"},
-      "tips": {
-        "de": ["Aena ist heute auf Server 1044 eingetroffen.", "Sie ist die Karawanen-Spezialistin: für Eskorte, Überfälle, Aktualisierungen und Verteidigung im Handelsimperium.", "Die Veröffentlichung wurde im Spiel bestätigt."],
-        "en": ["Aena arrived on Server 1044 today.", "She is the caravan specialist for escorts, raids, refreshes and defense during Merchant Empire.", "The release was confirmed in game."],
-        "fr": ["Aena est arrivée aujourd’hui sur le serveur 1044.", "Elle est la spécialiste des caravanes : escortes, raids, actualisations et défense pendant l’Empire commercial.", "La sortie a été confirmée en jeu."]
+      "name": {
+        "de": "Aena · 7. Meister",
+        "en": "Aena · 7th Master",
+        "fr": "Aena · 7e Maître"
       },
-      "sourceUrl": "https://kingshotoptimizer.com/masters/aena/"
+      "tips": {
+        "de": [
+          "Aena ist heute auf Server 1044 eingetroffen.",
+          "Sie ist die Karawanen-Spezialistin: für Eskorte, Überfälle, Aktualisierungen und Verteidigung im Handelsimperium.",
+          "Die Veröffentlichung wurde im Spiel bestätigt."
+        ],
+        "en": [
+          "Aena arrived on Server 1044 today.",
+          "She is the caravan specialist for escorts, raids, refreshes and defense during Merchant Empire.",
+          "The release was confirmed in game."
+        ],
+        "fr": [
+          "Aena est arrivée aujourd’hui sur le serveur 1044.",
+          "Elle est la spécialiste des caravanes : escortes, raids, actualisations et défense pendant l’Empire commercial.",
+          "La sortie a été confirmée en jeu."
+        ]
+      },
+      "sourceUrl": "https://kingshotoptimizer.com/masters/aena/",
+      "featuredUntil": "2026-10-12"
     },
     {
       "id": "isnor-master-2026-09-14",
@@ -109,28 +217,62 @@
       "icon": "🧙",
       "manual": true,
       "confidence": "confirmed-ingame",
-      "name": {"de": "Isnor · 8. Meister", "en": "Isnor · 8th Master", "fr": "Isnor · 8e Maître"},
-      "tips": {
-        "de": ["Isnor ist heute auf Server 1044 eingetroffen.", "Spezialist für Eternity’s Reach und Talismanmaterial.", "Meist die stärkere Langzeitwahl, weil Gouverneurs-Talismanmaterial dauerhaft wichtig bleibt."],
-        "en": ["Isnor arrived on Server 1044 today.", "Specialist for Eternity’s Reach and charm materials.", "Usually the stronger long-term pick because Governor Charm materials remain important."],
-        "fr": ["Isnor est arrivé aujourd’hui sur le serveur 1044.", "Spécialiste d’Eternity’s Reach et des matériaux de talismans.", "Souvent le meilleur choix à long terme, car ces matériaux restent importants."]
+      "name": {
+        "de": "Isnor · 8. Meister",
+        "en": "Isnor · 8th Master",
+        "fr": "Isnor · 8e Maître"
       },
-      "sourceUrl": "https://kingshotoptimizer.com/masters/isnor/"
+      "tips": {
+        "de": [
+          "Isnor ist heute auf Server 1044 eingetroffen.",
+          "Spezialist für Eternity’s Reach und Talismanmaterial.",
+          "Meist die stärkere Langzeitwahl, weil Gouverneurs-Talismanmaterial dauerhaft wichtig bleibt."
+        ],
+        "en": [
+          "Isnor arrived on Server 1044 today.",
+          "Specialist for Eternity’s Reach and charm materials.",
+          "Usually the stronger long-term pick because Governor Charm materials remain important."
+        ],
+        "fr": [
+          "Isnor est arrivé aujourd’hui sur le serveur 1044.",
+          "Spécialiste d’Eternity’s Reach et des matériaux de talismans.",
+          "Souvent le meilleur choix à long terme, car ces matériaux restent importants."
+        ]
+      },
+      "sourceUrl": "https://kingshotoptimizer.com/masters/isnor/",
+      "featuredUntil": "2026-10-12"
     },
     {
       "id": "hero-generation-6-1044",
       "start": "2026-09-14",
       "end": "2026-09-14",
       "icon": "✨",
-      "manual": false,
+      "manual": true,
       "confidence": "public-timeline",
-      "name": {"de": "Generation 6 · Triton, Sophia & Yang", "en": "Generation 6 · Triton, Sophia & Yang", "fr": "Génération 6 · Triton, Sophia & Yang"},
-      "tips": {
-        "de": ["Nicht sofort Goldschlüssel oder universelle Splitter ausgeben.", "Erst Bezugswege und Event-Überschneidungen im Spiel prüfen.", "Für F2P die Investition auf einen klaren Haupthelden konzentrieren."],
-        "en": ["Do not spend Gold Keys or universal shards immediately.", "Check acquisition routes and event overlaps in game first.", "For F2P, focus investment on one clear priority hero."],
-        "fr": ["Ne dépense pas immédiatement les clés d’or ou fragments universels.", "Vérifie d’abord les méthodes d’obtention et les événements qui se chevauchent.", "En F2P, concentre l’investissement sur un héros prioritaire."]
+      "name": {
+        "de": "Generation 6 · Triton, Sophia & Yang",
+        "en": "Generation 6 · Triton, Sophia & Yang",
+        "fr": "Génération 6 · Triton, Sophia & Yang"
       },
-      "sourceUrl": "https://kingshot.net/nexus/1044"
+      "tips": {
+        "de": [
+          "Nicht sofort Goldschlüssel oder universelle Splitter ausgeben.",
+          "Erst Bezugswege und Event-Überschneidungen im Spiel prüfen.",
+          "Für F2P die Investition auf einen klaren Haupthelden konzentrieren."
+        ],
+        "en": [
+          "Do not spend Gold Keys or universal shards immediately.",
+          "Check acquisition routes and event overlaps in game first.",
+          "For F2P, focus investment on one clear priority hero."
+        ],
+        "fr": [
+          "Ne dépense pas immédiatement les clés d’or ou fragments universels.",
+          "Vérifie d’abord les méthodes d’obtention et les événements qui se chevauchent.",
+          "En F2P, concentre l’investissement sur un héros prioritaire."
+        ]
+      },
+      "sourceUrl": "https://kingshot.net/nexus/1044",
+      "featuredUntil": "2026-10-12"
     }
   ]
 }
