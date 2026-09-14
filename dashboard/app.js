@@ -30,6 +30,40 @@
       genericTomorrow:'Préparer demain',genericTomorrowItems:[['📅',"Vérifier l’aperçu",'Consulte les événements actifs après le reset quotidien.'],['⏱️','Planifier les fins',"Ne termine collectes et longs entraînements qu’après avoir vérifié le prochain plan de points."]]}
   };
 
+  const mythicTrialTasks=(lang,weekday)=>{
+    const copy={
+      de:{
+        status:'MYTHISCHE PRÜFUNG',
+        colosseum:['🏟️','Kolosseum','Formation 50/10/40 · Infanterie/Kavallerie/Bogenschützen.'],
+        forest:['🌳','Wald des Lebens','Formation 50/15/35 · Infanterie/Kavallerie/Bogenschützen.'],
+        crystal:['💎','Kristallhöhle','Formation 60/20/20 · Infanterie/Kavallerie/Bogenschützen.'],
+        molten:['🌋','Schmelzfestung','Formation 60/15/25 · Infanterie/Kavallerie/Bogenschützen.'],
+        knowledge:['🧠','Wissensnetzwerk','Formation 50/20/30 · Infanterie/Kavallerie/Bogenschützen.'],
+        radiant:['☀️','Strahlender Gipfel','Team 1: 50/20/30. Tausche die Kavalleriehelden von Team 1 und Team 2. Stelle Team 2 anschließend auf 50/35/15.']
+      },
+      en:{
+        status:'MYTHIC TRIAL',
+        colosseum:['🏟️','Colosseum','Formation 50/10/40 · Infantry/Cavalry/Archers.'],
+        forest:['🌳','Forest of Life','Formation 50/15/35 · Infantry/Cavalry/Archers.'],
+        crystal:['💎','Crystal Cave','Formation 60/20/20 · Infantry/Cavalry/Archers.'],
+        molten:['🌋','Molten Fort','Formation 60/15/25 · Infantry/Cavalry/Archers.'],
+        knowledge:['🧠','Knowledge Network','Formation 50/20/30 · Infantry/Cavalry/Archers.'],
+        radiant:['☀️','Radiant Peak','Team 1: 50/20/30. Swap the cavalry heroes from Team 1 and Team 2, then change Team 2 to 50/35/15.']
+      },
+      fr:{
+        status:'ÉPREUVE MYTHIQUE',
+        colosseum:['🏟️','Colisée','Formation 50/10/40 · Infanterie/Cavalerie/Archers.'],
+        forest:['🌳','Forêt de la vie','Formation 50/15/35 · Infanterie/Cavalerie/Archers.'],
+        crystal:['💎','Grotte de cristal','Formation 60/20/20 · Infanterie/Cavalerie/Archers.'],
+        molten:['🌋','Forteresse en fusion','Formation 60/15/25 · Infanterie/Cavalerie/Archers.'],
+        knowledge:['🧠','Réseau du savoir','Formation 50/20/30 · Infanterie/Cavalerie/Archers.'],
+        radiant:['☀️','Pic radieux','Équipe 1 : 50/20/30. Échange les héros de cavalerie des équipes 1 et 2, puis règle l’équipe 2 sur 50/35/15.']
+      }
+    }[lang]||copy.en;
+    const keys=weekday===0?['radiant']:(weekday<=2?['colosseum']:(weekday<=4?['forest','crystal']:['knowledge','molten']));
+    return keys.map(key=>[copy[key][0],copy[key][1],copy[key][2],copy.status]);
+  };
+
   const anchor=Date.UTC(2026,8,13),serverOpened=Date.UTC(2025,8,21),day=86400000,kvkCycle=28*day,kvkPrepDuration=5*day+22*3600000,kvkPrepBase=Date.UTC(2026,9,5);
   const dateKey=d=>d.toISOString().slice(0,10);
   const safe=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
@@ -69,7 +103,7 @@
     document.getElementById('dateLabel').textContent=now.toLocaleDateString(locale,{day:'2-digit',month:'short',timeZone:'UTC'}).toUpperCase();
     const kvk=kvkPrepWindow(now);document.getElementById('kvkStartLabel').textContent=kvk.start.toLocaleDateString(locale,{day:'2-digit',month:'short',year:'numeric',timeZone:'UTC'}).toUpperCase()+' · 00:00 UTC';
     const serverAge=Math.floor((todayUTC.getTime()-serverOpened)/day);document.querySelectorAll('[data-server-age]').forEach(el=>el.textContent=serverAge);
-    const todayKey=dateKey(todayUTC),tomorrowKey=dateKey(tomorrow),todayEvents=eventsFor(todayKey),tomorrowEvents=eventsFor(tomorrowKey),todayTrapEnd=new Date(todayUTC.getTime()+18.5*3600000),preparations=tomorrowEvents.map(e=>preparationTask(e,lang,tomorrowKey)).filter(Boolean);let tasks=[...t.tasks];if(todayEvents.length)tasks=todayEvents.map(e=>eventTask(e,lang,t.today,todayKey)).concat(tasks);else if(todayKey==='2026-09-14')tasks=t.tomorrowItems.map(([icon,title,copy])=>[icon,title,copy,t.today]).concat(tasks);if(isBearDay(todayUTC)&&now<todayTrapEnd)tasks.unshift(t.bearTask);if(todayKey==='2026-09-13')tasks.push(t.specialTask);tasks=preparations.concat(tasks);document.getElementById('todayTasks').innerHTML=tasks.map((x,i)=>card(x,i<Math.max(2,preparations.length+todayEvents.length))).join('');
+    const todayKey=dateKey(todayUTC),tomorrowKey=dateKey(tomorrow),todayEvents=eventsFor(todayKey),tomorrowEvents=eventsFor(tomorrowKey),todayTrapEnd=new Date(todayUTC.getTime()+18.5*3600000),preparations=tomorrowEvents.map(e=>preparationTask(e,lang,tomorrowKey)).filter(Boolean);let tasks=[...t.tasks];if(todayEvents.length)tasks=todayEvents.map(e=>eventTask(e,lang,t.today,todayKey)).concat(tasks);else if(todayKey==='2026-09-14')tasks=t.tomorrowItems.map(([icon,title,copy])=>[icon,title,copy,t.today]).concat(tasks);if(isBearDay(todayUTC)&&now<todayTrapEnd)tasks.unshift(t.bearTask);if(todayKey==='2026-09-13')tasks.push(t.specialTask);tasks=tasks.concat(mythicTrialTasks(lang,todayUTC.getUTCDay()));tasks=preparations.concat(tasks);document.getElementById('todayTasks').innerHTML=tasks.map((x,i)=>card(x,i<Math.max(2,preparations.length+todayEvents.length))).join('');
     const genTomorrow=tomorrowKey==='2026-09-14';document.getElementById('tomorrowTitle').textContent=tomorrowEvents.length?tomorrow.toLocaleDateString(locale,{weekday:'long',day:'2-digit',month:'2-digit',timeZone:'UTC'}):(genTomorrow?t.nextHero:t.genericTomorrow);document.getElementById('tomorrowTasks').innerHTML=tomorrowEvents.length?tomorrowEvents.map(e=>tomorrowEvent(e,lang,tomorrowKey)).join(''):(genTomorrow?t.tomorrowItems:t.genericTomorrowItems).map(([icon,title,copy])=>`<div class="tomorrow-task"><span>${icon}</span><div><strong>${title}</strong><small>${copy}</small></div></div>`).join('');
     const nextDay=nextBearAt(17,0),dateFmt=d=>d.toLocaleDateString(locale,{weekday:'long',day:'2-digit',month:'2-digit',timeZone:'UTC'});
     const followingBear=isBearDay(todayUTC)&&now<todayTrapEnd?new Date(todayUTC.getTime()+2*day):nextDay;
