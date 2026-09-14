@@ -128,6 +128,60 @@
       "scores": {"de": ["Login- und Rathausstufen", "Eroberungsfortschritt, Helden- und Truppenentwicklung", "Bestien, Forschung, Bau und weitere vorgegebene Startaufgaben"], "en": ["Login and Town Center milestones", "Conquest progress, Hero and troop development", "Beasts, research, construction and other listed launch tasks"], "fr": ["Connexion et niveaux du Centre-ville", "Progression Conquête, héros et troupes", "Bêtes, recherche, construction et autres tâches initiales"]},
       "note": {"de": "Einmaliges Anfänger-Event; nicht Teil des K1044-Zyklus.", "en": "One-time beginner event; not part of K1044’s cycle.", "fr": "Événement débutant unique, hors du cycle K1044."},
       "sourceUrl": "https://kingshotdata.com/events/path-of-growth-event/"
+    },
+    {
+      "id": "bear-hunt",
+      "icon": "🐻",
+      "name": {"de": "Bärenfalle", "en": "Bear Hunt", "fr": "Piège à ours"},
+      "goal": {"de": "In 30 Minuten durch Allianz-Rallyes möglichst viel Gesamtschaden verursachen.", "en": "Deal as much total damage as possible through alliance rallies in 30 minutes.", "fr": "Infliger un maximum de dégâts via les rallyes d’alliance en 30 minutes."},
+      "scores": {"de": ["Die Wertung entspricht dem verursachten Schaden", "Offensive Werte – besonders Lethality, Angriff und Bogenschützerschaden – erhöhen den Score", "Nur bis zu vier passende erste Joiner-Skills wirken zusätzlich auf eine Rally"], "en": ["Score is based on damage dealt", "Offensive stats—especially Lethality, Attack and Archer damage—increase score", "Only up to four eligible first-position joiner skills add to a rally"], "fr": ["Le score dépend des dégâts infligés", "Les stats offensives, surtout Létalité, Attaque et dégâts des archers, augmentent le score", "Jusqu’à quatre compétences éligibles du premier héros des participants s’ajoutent au rallye"]},
+      "note": {"de": "Gesundheit und Verteidigung erhöhen den Bärenschaden nicht; Löwe und Elefant daher für PvP/Garnison sparen.", "en": "Health and Defense do not raise Bear damage; save Lion and Elephant for PvP/garrison.", "fr": "Santé et Défense n’augmentent pas les dégâts sur l’Ours ; garde Lion et Éléphant pour le JcJ/garnison."},
+      "sourceUrl": "https://kingshotworld.com/guides/events-bear-hunt-damage-guide/"
+    },
+    {
+      "id": "viking-vengeance",
+      "icon": "🪓",
+      "name": {"de": "Wikinger-Rache", "en": "Viking Vengeance", "fr": "Vengeance viking"},
+      "goal": {"de": "20 Angriffswellen als Allianz abwehren und möglichst viele Wikingertruppen töten.", "en": "Defend 20 alliance waves and kill as many Viking troops as possible.", "fr": "Défendre 20 vagues en alliance et éliminer un maximum de troupes vikings."},
+      "scores": {"de": ["Punkte entstehen durch getötete Wikinger in der eigenen Stadt und als Verstärkung bei anderen", "Wellen 7, 14 und 17 greifen nur Spieler an, die online sind", "Wellen 10 und 20 greifen das Allianz-HQ an"], "en": ["Points come from Vikings killed in your city and by your troops reinforcing others", "Waves 7, 14 and 17 target online players only", "Waves 10 and 20 target Alliance HQ"], "fr": ["Les points viennent des Vikings tués dans ta ville et par tes renforts chez les autres", "Les vagues 7, 14 et 17 ciblent uniquement les joueurs en ligne", "Les vagues 10 et 20 ciblent le QG d’alliance"]},
+      "note": {"de": "Starke gegenseitige Verstärkung bringt mehr Allianzpunkte als volle Eigenverteidigung; Heilung nur nach NRW-Ansage.", "en": "Strong mutual reinforcement scores better than full home defense; heal only per NRW call.", "fr": "Les renforts mutuels rapportent mieux qu’une défense personnelle pleine ; soigne uniquement selon les consignes NRW."},
+      "sourceUrl": "https://www.kingshot.wiki/events/viking-vengeance"
+    },
+    {
+      "id": "cesares-fury",
+      "icon": "🗡️",
+      "name": {"de": "Cesares Zorn", "en": "Cesare’s Fury", "fr": "Fureur de Cesare"},
+      "goal": {"de": "Eine gewählte Schwierigkeit mit 50 aufsteigenden Rebellen abschließen und Allianz-Kapitäne besiegen.", "en": "Clear a chosen difficulty through 50 escalating Rebels and defeat Alliance Captains.", "fr": "Terminer une difficulté avec 50 rebelles croissants et vaincre les Capitaines d’alliance."},
+      "scores": {"de": ["Fortschritt durch jeden besiegten Cesare-Rebellen bis Stufe 50", "Kapitäne geben Allianzbelohnungen; dafür mindestens einmal Schaden verursachen", "Hilfeanfragen mit Cesare-Abkommen ersetzen schwierige eigene Kämpfe"], "en": ["Progress comes from each defeated Cesare Rebel through level 50", "Captains grant alliance rewards; deal damage at least once to qualify", "Help requests using Cesare Accords can clear difficult personal fights"], "fr": ["Progression par chaque rebelle de Cesare vaincu jusqu’au niveau 50", "Les Capitaines donnent des récompenses d’alliance ; inflige au moins une fois des dégâts", "Les demandes d’aide avec Accords de Cesare peuvent remplacer les combats difficiles"]},
+      "note": {"de": "Kein klassisches Ressourcen-Punktesystem; Schwierigkeit nicht höher wählen, als sicher abgeschlossen werden kann.", "en": "No classic resource-point table; do not pick a difficulty you cannot reliably finish.", "fr": "Pas de tableau de points par ressource ; choisis une difficulté terminable avec certitude."},
+      "sourceUrl": "https://kingshotdata.com/events/cesares-fury/"
+    },
+    {
+      "id": "hero-roulette",
+      "icon": "🎡",
+      "name": {"de": "Heldenroulette", "en": "Hero Roulette", "fr": "Roulette des héros"},
+      "goal": {"de": "Mit Gratisdrehungen, Glückschips oder Edelsteinen Fragmente des aktuellen Roulette-Helden erhalten.", "en": "Use free spins, Lucky Chips or gems to obtain shards for the current Roulette Hero.", "fr": "Utiliser tours gratuits, jetons chanceux ou gemmes pour obtenir les fragments du héros actuel."},
+      "scores": {"de": ["Eigene Dreh-Meilensteine bei 5, 15, 35, 70 und 120 Drehungen", "In KvK/Stärkster Gouverneur kann jede Drehung zusätzlich Eventpunkte geben", "Drei tägliche Gratisdrehungen innerhalb des dreitägigen Events"], "en": ["Spin milestones at 5, 15, 35, 70 and 120 spins", "During KvK/Strongest Governor, each spin may also score in the active stage", "Three daily free spins across the three-day event"], "fr": ["Paliers à 5, 15, 35, 70 et 120 tours", "Pendant KvK/Strongest Governor, chaque tour peut aussi marquer dans la phase active", "Trois tours gratuits sur les trois jours"]},
+      "note": {"de": "Die große Effizienzschwelle liegt bei 120 Drehungen; darüber sinkt der Gegenwert meist deutlich.", "en": "The main efficiency breakpoint is 120 spins; value usually drops beyond it.", "fr": "Le principal seuil d’efficacité est 120 tours ; la valeur baisse généralement ensuite."},
+      "sourceUrl": "https://kingshotdata.com/events/hero-roulette/"
+    },
+    {
+      "id": "champagne-fair",
+      "icon": "🥂",
+      "name": {"de": "Champagne Fair · Splittertausch", "en": "Champagne Fair · Shard Exchange", "fr": "Champagne Fair · Échange de fragments"},
+      "goal": {"de": "Überschüssige Heldenfragmente und Skillbücher in Gutscheine und gezielte Belohnungen tauschen.", "en": "Exchange excess Hero shards and skill books for vouchers and selected rewards.", "fr": "Échanger fragments et livres excédentaires contre des bons et récompenses ciblées."},
+      "scores": {"de": ["Kein Punkte- oder Ranglistenevent", "Fortschritt entsteht durch eingetauschte Gegenstände und ausgegebene Fair-Gutscheine", "Nur wirklich überschüssige Fragmente vollständig ausgebauter Helden verwenden"], "en": ["No point or leaderboard scoring", "Progress comes from exchanged items and spent Fair Vouchers", "Only use truly excess shards from fully built Heroes"], "fr": ["Pas de points ni classement", "La progression vient des objets échangés et des bons dépensés", "Utilise uniquement les fragments réellement excédentaires de héros terminés"]},
+      "note": {"de": "Gutscheine bleiben erhalten – im Zweifel für bessere Angebote sparen.", "en": "Vouchers carry over—save them for better offers when unsure.", "fr": "Les bons sont conservés ; garde-les pour de meilleures offres en cas de doute."},
+      "sourceUrl": "https://kingshotdata.com/events/champagne-fair/"
+    },
+    {
+      "id": "mystic-trial",
+      "icon": "🔮",
+      "name": {"de": "Mystische Prüfung", "en": "Mystic Trial", "fr": "Épreuve mystique"},
+      "goal": {"de": "Kampfstufen mit begrenzten Versuchen abschließen und Prüfungswährung für den Shop verdienen.", "en": "Clear combat stages with limited attempts and earn Trial currency for the shop.", "fr": "Terminer des niveaux de combat avec des essais limités et gagner la monnaie de l’épreuve."},
+      "scores": {"de": ["Fortschritt durch erfolgreich abgeschlossene Prüfungsstufen", "Belohnungen und Shopwährung steigen mit dem erreichten Abschnitt", "Kein Ressourcen-Ausgabe-Punktesystem"], "en": ["Progress through successfully cleared Trial stages", "Rewards and shop currency improve with the section reached", "No resource-spending point table"], "fr": ["Progression par les niveaux de l’épreuve terminés", "Récompenses et monnaie augmentent avec la section atteinte", "Pas de tableau de points par dépense de ressources"]},
+      "note": {"de": "Aufstellung und Buff-Auswahl zwischen den Kämpfen optimieren; Versuche nicht blind verbrauchen.", "en": "Optimize formation and buff choices between fights; do not waste attempts blindly.", "fr": "Optimise formation et bonus entre les combats ; ne gaspille pas les essais."},
+      "sourceUrl": "https://kingshotdata.com/events/mystic-trial/"
     }
   ]
 }
