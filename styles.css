@@ -482,3 +482,54 @@ html[data-theme="dark"] .discord-step-icon{background:rgba(88,101,242,.17)!impor
  .prison-visual{min-height:365px}
  .prison-art img{object-position:center top}
 }
+
+
+/* Compact mobile event schedule */
+@media(max-width:680px){
+ .schedule{gap:10px}
+ .time-card{
+  min-height:0;
+  padding:14px 15px;
+  border-radius:18px;
+  display:grid;
+  grid-template-columns:52px minmax(0,1fr);
+  grid-template-rows:auto auto auto;
+  column-gap:13px;
+  row-gap:1px;
+  align-items:center;
+ }
+ .time-card:after{width:82px;height:82px;right:-32px;bottom:-39px}
+ .time-card .time-icon{
+  grid-column:1;
+  grid-row:1/4;
+  width:52px;
+  height:52px;
+  align-self:center;
+ }
+ .time-card .time-icon img{width:48px;height:48px}
+ .time-card b{
+  grid-column:2;
+  grid-row:1;
+  margin:0;
+  font-size:17px;
+  line-height:1.2;
+ }
+ .time-card small{
+  grid-column:2;
+  grid-row:2;
+  margin-top:2px;
+  font-size:11px;
+ }
+ .time-card .times{
+  grid-column:2;
+  grid-row:3;
+  margin:7px 0 0;
+  padding:0;
+  gap:6px;
+ }
+ .time-pill{
+  padding:6px 8px;
+  font-size:11px;
+  white-space:nowrap;
+ }
+}
