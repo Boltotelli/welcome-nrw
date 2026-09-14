@@ -105,3 +105,21 @@ document.getElementById('copyHello')?.addEventListener('click', async ()=>{
  catch(e){ status.textContent=document.body.dataset.lang==='en'?'Select the text above':document.body.dataset.lang==='fr'?'Sélectionne le texte ci-dessus':'Text oben markieren'; }
  setTimeout(()=>status.textContent='',2600);
 });
+
+
+async function refreshSagrAccountNames(){
+ try{
+  const response=await fetch('/api/sagr-accounts',{headers:{'Accept':'application/json'}});
+  if(!response.ok) return;
+  const payload=await response.json();
+  const names=new Map((payload.players||[]).map(player=>[String(player.id),player.nickname]));
+  document.querySelectorAll('.outlaw-accounts [data-player-id]').forEach(card=>{
+   const name=names.get(card.dataset.playerId);
+   const target=card.querySelector('[data-player-name]');
+   if(name && target) target.textContent=name;
+  });
+ }catch(error){
+  console.warn('Sagr account names could not be refreshed',error);
+ }
+}
+refreshSagrAccountNames();
