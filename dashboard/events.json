@@ -96,10 +96,11 @@
       "confidence": "confirmed-ingame",
       "name": {"de": "Aena · 7. Meister", "en": "Aena · 7th Master", "fr": "Aena · 7e Maître"},
       "tips": {
-        "de": ["Aena ist die Karawanen-Spezialistin.", "Priorisieren, wenn du im Handelsimperium aktiv eskortierst, überfällst, aktualisierst und verteidigst.", "Die Veröffentlichung ist für morgen per Ingame-Mitteilung bestätigt."],
-        "en": ["Aena is the caravan specialist.", "Prioritize her if you actively escort, raid, refresh and defend during Merchant Empire.", "Her release tomorrow is confirmed by an in-game notice."],
-        "fr": ["Aena est la spécialiste des caravanes.", "À prioriser si tu escortes, attaques, actualises et défends activement pendant l’Empire commercial.", "Sa sortie demain est confirmée par un message en jeu."]
-      }
+        "de": ["Aena ist heute auf Server 1044 eingetroffen.", "Sie ist die Karawanen-Spezialistin: für Eskorte, Überfälle, Aktualisierungen und Verteidigung im Handelsimperium.", "Die Veröffentlichung wurde im Spiel bestätigt."],
+        "en": ["Aena arrived on Server 1044 today.", "She is the caravan specialist for escorts, raids, refreshes and defense during Merchant Empire.", "The release was confirmed in game."],
+        "fr": ["Aena est arrivée aujourd’hui sur le serveur 1044.", "Elle est la spécialiste des caravanes : escortes, raids, actualisations et défense pendant l’Empire commercial.", "La sortie a été confirmée en jeu."]
+      },
+      "sourceUrl": "https://kingshotoptimizer.com/masters/aena/"
     },
     {
       "id": "isnor-master-2026-09-14",
@@ -110,10 +111,11 @@
       "confidence": "confirmed-ingame",
       "name": {"de": "Isnor · 8. Meister", "en": "Isnor · 8th Master", "fr": "Isnor · 8e Maître"},
       "tips": {
-        "de": ["Die Veröffentlichung morgen ist per Ingame-Mitteilung bestätigt.", "Spezialist für Eternity’s Reach und Talismanmaterial.", "Meist die stärkere Langzeitwahl, weil Gouverneurs-Talismanmaterial dauerhaft wichtig bleibt."],
-        "en": ["Tomorrow’s release is confirmed by an in-game notice.", "Specialist for Eternity’s Reach and charm materials.", "Usually the stronger long-term pick because Governor Charm materials remain important."],
-        "fr": ["Sa sortie demain est confirmée par un message en jeu.", "Spécialiste d’Eternity’s Reach et des matériaux de talismans.", "Souvent le meilleur choix à long terme, car ces matériaux restent importants."]
-      }
+        "de": ["Isnor ist heute auf Server 1044 eingetroffen.", "Spezialist für Eternity’s Reach und Talismanmaterial.", "Meist die stärkere Langzeitwahl, weil Gouverneurs-Talismanmaterial dauerhaft wichtig bleibt."],
+        "en": ["Isnor arrived on Server 1044 today.", "Specialist for Eternity’s Reach and charm materials.", "Usually the stronger long-term pick because Governor Charm materials remain important."],
+        "fr": ["Isnor est arrivé aujourd’hui sur le serveur 1044.", "Spécialiste d’Eternity’s Reach et des matériaux de talismans.", "Souvent le meilleur choix à long terme, car ces matériaux restent importants."]
+      },
+      "sourceUrl": "https://kingshotoptimizer.com/masters/isnor/"
     },
     {
       "id": "hero-generation-6-1044",
