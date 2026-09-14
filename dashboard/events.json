@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "kingdom": 1044,
   "timezone": "UTC",
-  "updatedAt": "2026-09-14T12:42:00Z",
+  "updatedAt": "2026-09-14T12:00:08Z",
   "events": [
     {
       "id": "kingdom-transfer-2026-09-1044",
@@ -81,21 +81,21 @@
             "steps": {
               "de": [
                 "00:00-UTC-Missionen abschließen und Belohnungen abholen.",
-                "08:00-UTC-Missionen abschließen, die Belohnungen aber nicht abholen.",
-                "16:00-UTC-Missionen weder abschließen noch abholen; nach 16:00 UTC Pans zusätzliche Intel-Mission aktivieren.",
-                "Nach dem nächsten Reset die vorbereiteten Missionen abschließen und alle zurückgehaltenen Belohnungen abholen."
+                "08:00-UTC-Missionen abschließen und Belohnungen abholen.",
+                "16:00-UTC-Missionen nicht abschließen; nach 16:00 UTC Pans zusätzliche Intel-Mission aktivieren und ebenfalls offen lassen.",
+                "Nach dem nächsten Reset die 16:00-UTC-Missionen und Pans zusätzliche Mission abschließen und Belohnungen abholen."
               ],
               "en": [
                 "Complete and claim the 00:00 UTC missions.",
-                "Complete the 08:00 UTC missions, but do not claim their rewards.",
-                "Neither complete nor claim the 16:00 UTC missions; activate Pan’s extra Intel Mission after 16:00 UTC.",
-                "After the next reset, complete the prepared missions and claim all held rewards."
+                "Complete and claim the 08:00 UTC missions.",
+                "Do not complete the 16:00 UTC missions; activate Pan’s extra Intel Mission after 16:00 UTC and leave it unfinished as well.",
+                "After the next reset, complete the 16:00 UTC missions and Pan’s extra mission, then claim their rewards."
               ],
               "fr": [
                 "Termine et récupère les missions de 00:00 UTC.",
-                "Termine les missions de 08:00 UTC, mais ne récupère pas leurs récompenses.",
-                "Ne termine ni ne récupère les missions de 16:00 UTC ; active la mission supplémentaire de Pan après 16:00 UTC.",
-                "Après le prochain reset, termine les missions préparées et récupère toutes les récompenses conservées."
+                "Termine et récupère les missions de 08:00 UTC.",
+                "Ne termine pas les missions de 16:00 UTC ; active la mission supplémentaire de Pan après 16:00 UTC et laisse-la également inachevée.",
+                "Après le prochain reset, termine les missions de 16:00 UTC et la mission supplémentaire de Pan, puis récupère leurs récompenses."
               ]
             }
           },
@@ -145,22 +145,30 @@
           },
           "steps": {
             "de": [
-              "Verbessere Gouverneursamulette nur bis zur nächsten lohnenden persönlichen Belohnungsstufe.",
-              "Prüfe vor weiteren Verbesserungen den NRW-Zielwert im NAP Event Tracker.",
-              "Die 3×-Grenze ist strikt: Danach sofort stoppen und Amulettmaterialien für KvK sparen."
+              "Dieses Event kann vollständig ausgelassen werden – die Belohnungen sind den Einsatz der Amulettmaterialien nicht wert.",
+              "Wenn du trotzdem Punkte machst, stoppe spätestens bei insgesamt 60.000 Punkten.",
+              "60.000 Punkte sind die strikte 3×-Gesamtgrenze und ausdrücklich keine Empfehlung."
             ],
             "en": [
-              "Upgrade Governor Charms only to the next worthwhile personal reward tier.",
-              "Check the NRW target in the NAP Event Tracker before making more upgrades.",
-              "The 3× limit is strict: stop immediately afterwards and save Charm materials for KvK."
+              "This event can be skipped completely – the rewards are not worth spending Charm materials.",
+              "If you score anyway, stop at 60,000 total points at the latest.",
+              "60,000 points is the strict 3× total limit and explicitly not a recommendation."
             ],
             "fr": [
-              "Améliore les charmes du gouverneur uniquement jusqu’au prochain palier personnel rentable.",
-              "Vérifie l’objectif NRW dans le NAP Event Tracker avant toute amélioration supplémentaire.",
-              "La limite de 3× est stricte : arrête-toi immédiatement ensuite et garde les matériaux de charme pour le KvK."
+              "Cet événement peut être entièrement ignoré : les récompenses ne valent pas les matériaux de charme dépensés.",
+              "Si tu marques malgré tout des points, arrête-toi au plus tard à 60 000 points au total.",
+              "60 000 points constituent la limite totale stricte de 3× et ne sont explicitement pas une recommandation."
             ]
-          }
-        },
+          },
+          "limits": {
+              "hardCap": 60000,
+              "note": {
+                "de": "60.000 Punkte sind die strikte Gesamtgrenze (3×) – keine Empfehlung. Das Event kann vollständig ausgelassen werden.",
+                "en": "60,000 points is the strict total limit (3×), not a recommendation. The event can be skipped completely.",
+                "fr": "60 000 points constituent la limite totale stricte (3×), pas une recommandation. L’événement peut être entièrement ignoré."
+              }
+            }
+          },
         "2026-09-15": {
           "points": {
             "de": "Erhöhung des maximalen Gouverneursamulett-Werts",
@@ -169,23 +177,31 @@
           },
           "steps": {
             "de": [
-              "Nutze nur noch Amulettverbesserungen, wenn dir eine lohnende persönliche Belohnungsstufe fehlt.",
-              "Prüfe vorher den NRW-Zielwert im NAP Event Tracker und stoppe spätestens an der strikten 3×-Grenze.",
-              "Spare alle übrigen Amulettmaterialien für KvK."
+              "Dieses Event kann vollständig ausgelassen werden – die Belohnungen sind den Einsatz der Amulettmaterialien nicht wert.",
+              "Wenn du trotzdem Punkte machst, stoppe spätestens bei insgesamt 60.000 Punkten.",
+              "60.000 Punkte sind die strikte 3×-Gesamtgrenze und ausdrücklich keine Empfehlung."
             ],
             "en": [
-              "Only make further Charm upgrades if a worthwhile personal reward tier is still within reach.",
-              "Check the NRW target in the NAP Event Tracker first and stop no later than the strict 3× limit.",
-              "Save all remaining Charm materials for KvK."
+              "This event can be skipped completely – the rewards are not worth spending Charm materials.",
+              "If you score anyway, stop at 60,000 total points at the latest.",
+              "60,000 points is the strict 3× total limit and explicitly not a recommendation."
             ],
             "fr": [
-              "N’améliore encore les charmes que si un palier personnel rentable reste accessible.",
-              "Vérifie d’abord l’objectif NRW dans le NAP Event Tracker et arrête-toi au plus tard à la limite stricte de 3×.",
-              "Garde tous les matériaux de charme restants pour le KvK."
+              "Cet événement peut être entièrement ignoré : les récompenses ne valent pas les matériaux de charme dépensés.",
+              "Si tu marques malgré tout des points, arrête-toi au plus tard à 60 000 points au total.",
+              "60 000 points constituent la limite totale stricte de 3× et ne sont explicitement pas une recommandation."
             ]
+          },
+          "limits": {
+              "hardCap": 60000,
+              "note": {
+                "de": "60.000 Punkte sind die strikte Gesamtgrenze (3×) – keine Empfehlung. Das Event kann vollständig ausgelassen werden.",
+                "en": "60,000 points is the strict total limit (3×), not a recommendation. The event can be skipped completely.",
+                "fr": "60 000 points constituent la limite totale stricte (3×), pas une recommandation. L’événement peut être entièrement ignoré."
+              }
+            }
           }
-        }
-      },
+        },
       "sourceUrl": "https://kingshotdata.com/events/armament-competition/"
     },
     {
@@ -203,16 +219,19 @@
       },
       "tips": {
         "de": [
+          "Warte nach dem täglichen Reset ungefähr zehn Stunden, bevor du deine Karawanen sendest; später finden erfahrungsgemäß weniger Angriffe statt.",
           "Täglich vier Karawanen senden und bis zu vier erfolgreiche Überfälle nutzen.",
           "Zuerst die Gratis-Aktualisierung und Karawanengutscheine verwenden; Edelsteine nur bewusst einsetzen.",
           "Für wertvolle Karawanen starke Allianzunterstützung anfordern und vor Überfällen Ladung sowie Feuersymbole prüfen."
         ],
         "en": [
+          "Wait about ten hours after the daily reset before sending your caravans; fewer attacks usually happen later.",
           "Send four caravans daily and use up to four successful raids.",
           "Use the free refresh and Caravan Vouchers first; spend gems deliberately.",
           "Request strong alliance support for valuable caravans and check cargo plus fire icons before raiding."
         ],
         "fr": [
+          "Attends environ dix heures après le reset quotidien avant d’envoyer tes caravanes ; les attaques sont généralement moins nombreuses plus tard.",
           "Envoie quatre caravanes par jour et utilise jusqu’à quatre raids réussis.",
           "Utilise d’abord l’actualisation gratuite et les bons de caravane ; dépense les gemmes avec prudence.",
           "Demande une forte assistance pour les caravanes précieuses et vérifie la cargaison ainsi que les icônes de feu avant un raid."
