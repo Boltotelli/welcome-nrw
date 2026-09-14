@@ -8,7 +8,7 @@
   "theme_color": "#0b1020",
   "icons": [
     {
-      "src": "/assets/nrw-banner.svg",
+      "src": "/assets/nrw-dashboard-icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any"
