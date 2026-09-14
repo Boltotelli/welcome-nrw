@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-09-14T15:20:00Z",
+  "updatedAt": "2026-09-14T16:19:21.628Z",
   "kingdom": 1044,
   "languages": [
     "de",
@@ -2094,5 +2094,16 @@
     "contextual": 14,
     "excludedOrUnverified": 6,
     "conditional": 4
+  },
+  "displayPolicy": {
+    "mode": "schedule-gated",
+    "knowledgeBaseIsNotSchedule": true,
+    "rules": [
+      "Entries in events and catalogOnly are reference knowledge and must never become visible by their presence alone.",
+      "An event card may render only when a matching dated occurrence in dashboard/events.json covers the requested UTC date, or when an explicitly implemented recurring schedule resolves to that date.",
+      "Predicted occurrences require an explicit dated feed entry with confidence predicted and must be labelled as expected.",
+      "Entries without a matching occurrence, or with cadence unknown/server-dependent/live schedule required, remain hidden.",
+      "Today and tomorrow are evaluated independently; preparation advice may appear one day early only when the dated occurrence explicitly contains that preparation plan."
+    ]
   }
 }
