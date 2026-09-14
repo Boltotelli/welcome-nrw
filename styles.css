@@ -349,3 +349,108 @@ html[data-theme="dark"] .discord-step-icon{background:rgba(88,101,242,.17)!impor
  color:var(--muted);font-size:11px;line-height:1.55
 }
 .event-time-note b{color:var(--ink)}
+
+
+/* Server watchlist · prison-style safety card */
+.outlaw-card{
+ border-color:color-mix(in srgb,#e35d68 42%,var(--line));
+ background:
+  radial-gradient(circle at 8% 12%,rgba(227,93,104,.10),transparent 34%),
+  linear-gradient(135deg,color-mix(in srgb,var(--surface) 96%,#e35d68 4%),var(--surface));
+}
+.outlaw-card::before{
+ content:"";position:absolute;inset:0 auto 0 0;width:5px;
+ background:linear-gradient(180deg,#ff8791,#c63f4c);
+}
+.outlaw-layout{display:grid;grid-template-columns:minmax(230px,300px) 1fr;gap:26px;align-items:stretch}
+.prison-visual{
+ min-height:315px;border-radius:20px;padding:17px;position:relative;overflow:hidden;
+ display:flex;flex-direction:column;align-items:center;justify-content:center;
+ color:#fff;text-align:center;
+ background:
+  radial-gradient(circle at 50% 45%,rgba(126,146,201,.28),transparent 34%),
+  linear-gradient(145deg,#2b3249 0%,#171d2f 55%,#101522 100%);
+ box-shadow:inset 0 0 0 1px rgba(255,255,255,.08),0 18px 42px rgba(22,27,45,.22);
+}
+.prison-visual::before{
+ content:"";position:absolute;inset:0;
+ background:linear-gradient(120deg,transparent 0 46%,rgba(255,255,255,.045) 46% 53%,transparent 53% 100%);
+ pointer-events:none;
+}
+.prison-label{
+ position:absolute;top:14px;left:14px;right:14px;padding:7px 10px;border-radius:10px;
+ background:rgba(231,84,96,.18);border:1px solid rgba(255,135,145,.28);
+ color:#ffabb2;font-size:10px;font-weight:950;letter-spacing:.14em;
+}
+.prison-cell{
+ width:150px;height:150px;margin:30px 0 14px;position:relative;overflow:hidden;
+ border:9px solid #4c5369;border-radius:72px 72px 23px 23px;
+ background:linear-gradient(180deg,#252c45,#111626);
+ box-shadow:inset 0 -16px 25px rgba(0,0,0,.28),0 15px 28px rgba(0,0,0,.24);
+}
+.prison-cell i{
+ position:absolute;z-index:4;top:-5px;bottom:-5px;width:9px;border-radius:5px;
+ background:linear-gradient(90deg,#343a50,#747b91 48%,#343a50);
+ box-shadow:0 0 0 1px rgba(10,12,20,.4);
+}
+.prison-cell i:nth-of-type(1){left:18px}
+.prison-cell i:nth-of-type(2){left:55px}
+.prison-cell i:nth-of-type(3){right:55px}
+.prison-cell i:nth-of-type(4){right:18px}
+.prison-person{
+ position:absolute;z-index:2;top:32px;left:50%;transform:translateX(-50%);
+ width:48px;height:48px;border-radius:50%;display:block;overflow:hidden;
+ color:#78839f;font-size:76px;line-height:18px;
+}
+.prison-body{
+ position:absolute;z-index:2;left:50%;bottom:12px;transform:translateX(-50%);
+ width:92px;height:65px;border-radius:46px 46px 12px 12px;
+ background:linear-gradient(150deg,#6d7895,#424b67);
+}
+.prison-cell b{
+ position:absolute;z-index:6;left:50%;bottom:5px;transform:translateX(-50%);
+ width:42px;height:42px;border-radius:13px;display:grid;place-items:center;
+ background:#5a274f;border:3px solid #a85e92;font-size:18px;
+ box-shadow:0 7px 16px rgba(0,0,0,.32);
+}
+.prison-visual>strong{font-size:29px;letter-spacing:.04em;line-height:1}
+.prison-visual>small{margin-top:7px;color:#aeb8d0;font-size:10px;font-weight:900;letter-spacing:.13em}
+.outlaw-copy{padding:4px 4px 4px 0;align-self:center}
+.outlaw-heading{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:15px}
+.outlaw-alert{
+ display:inline-flex;align-items:center;gap:8px;color:#cf4653;
+ font-size:10px;font-weight:950;letter-spacing:.1em;
+}
+.outlaw-alert>span:first-child{
+ width:25px;height:25px;border-radius:9px;display:grid;place-items:center;
+ color:#fff;background:linear-gradient(145deg,#f2737e,#bd3543);font-size:14px;
+ box-shadow:0 7px 16px rgba(198,63,76,.18);
+}
+.outlaw-copy h3{font-size:25px}
+.outlaw-copy p b{color:var(--ink)}
+.outlaw-accounts{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:17px}
+.outlaw-accounts>div{
+ min-width:0;padding:11px 12px;border-radius:13px;
+ background:color-mix(in srgb,#e35d68 7%,var(--surface2));
+ border:1px solid color-mix(in srgb,#e35d68 22%,var(--line));
+}
+.outlaw-accounts span{display:block;color:#cf4653;font-size:9px;font-weight:950;letter-spacing:.08em}
+.outlaw-accounts strong{display:block;margin:2px 0 5px;font-size:15px;overflow-wrap:anywhere}
+.outlaw-accounts small{display:block;color:var(--muted);font-size:9px;font-weight:800;letter-spacing:.03em}
+.outlaw-action{
+ display:flex;align-items:flex-start;gap:10px;margin-top:14px;padding:12px 13px;border-radius:13px;
+ color:var(--muted);background:color-mix(in srgb,var(--brand) 8%,var(--surface2));
+ font-size:11px;line-height:1.55;
+}
+.outlaw-action>span:first-child{font-size:18px;line-height:1.2}
+.outlaw-action b{color:var(--ink)}
+@media(max-width:760px){
+ .outlaw-card{padding:17px}
+ .outlaw-layout{grid-template-columns:1fr;gap:20px}
+ .prison-visual{min-height:285px}
+ .outlaw-copy{padding:0}
+ .outlaw-copy h3{font-size:22px}
+ .outlaw-accounts{grid-template-columns:1fr}
+ .outlaw-accounts>div{display:grid;grid-template-columns:55px 1fr auto;align-items:center;gap:8px}
+ .outlaw-accounts strong,.outlaw-accounts small{margin:0}
+}
