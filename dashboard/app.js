@@ -1,6 +1,6 @@
 (function(){
   const body=document.body,root=document.documentElement;
-  let eventFeed=[];
+  let eventFeed=[],eventKnowledge=[];
   const savedLang=localStorage.getItem('nrw_page_lang')||'en';
   const savedTheme=localStorage.getItem('nrw_theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
   body.dataset.lang=savedLang;root.lang=savedLang;root.dataset.theme=savedTheme;
@@ -59,6 +59,14 @@
     }
     return `<div class="tomorrow-task">${eventIcon(e)}<div><strong>${safe(localized(e.name,lang))}</strong><small>${safe(tips.join(' • '))}</small>${source}</div></div>`;
   }
+  function renderEventGuide(){
+    const lang=body.dataset.lang||'en',query=(document.getElementById('eventSearch')?.value||'').trim().toLocaleLowerCase(),grid=document.getElementById('eventGuide');
+    if(!grid)return;
+    const labels={de:{goal:'Ziel',points:'Das bringt Fortschritt / Punkte',details:'Details öffnen',empty:'Kein passendes Event gefunden.'},en:{goal:'Goal',points:'What scores / advances progress',details:'Open details',empty:'No matching event found.'},fr:{goal:'Objectif',points:'Ce qui rapporte / fait progresser',details:'Ouvrir les détails',empty:'Aucun événement correspondant.'}}[lang];
+    const matches=eventKnowledge.filter(e=>[localized(e.name,lang),localized(e.goal,lang),...(e.scores?.[lang]||e.scores?.en||[])].join(' ').toLocaleLowerCase().includes(query));
+    grid.innerHTML=matches.length?matches.map(e=>`<details class="event-guide-card"><summary><span class="guide-icon">${safe(e.icon||'📅')}</span><span><strong>${safe(localized(e.name,lang))}</strong><small>${safe(localized(e.goal,lang))}</small></span><em>${labels.details}</em></summary><div class="guide-body"><b>${labels.points}</b><ul>${(e.scores?.[lang]||e.scores?.en||[]).map(x=>`<li>${safe(x)}</li>`).join('')}</ul>${e.note?`<p>${safe(localized(e.note,lang))}</p>`:''}<a href="${safe(e.sourceUrl)}" target="_blank" rel="noopener">Source ↗</a></div></details>`).join(''):`<p class="guide-empty">${labels.empty}</p>`;
+    const search=document.getElementById('eventSearch');if(search)search.placeholder={de:'Name oder Punktequelle …',en:'Name or scoring source …',fr:'Nom ou source de points …'}[lang];
+  }
   const isBearDay=d=>Math.round((Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate())-anchor)/day)%2===0;
   function kvkPrepWindow(now){let start=kvkPrepBase;while(now.getTime()>=start+kvkPrepDuration)start+=kvkCycle;return{start:new Date(start),active:now.getTime()>=start}}
   function nextBearAt(hour,minute){let d=new Date();for(let add=0;add<4;add++){const x=new Date(Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate()+add,hour,minute));if(isBearDay(x)&&x>d)return x}return new Date(Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate()+2,hour,minute))}
@@ -75,13 +83,15 @@
     const followingBear=isBearDay(todayUTC)&&now<todayTrapEnd?new Date(todayUTC.getTime()+2*day):nextDay;
     document.getElementById('bearTag').textContent=isBearDay(todayUTC)&&now<todayTrapEnd?t.bearTodayTag:t.bearNextTag;
     document.getElementById('genTag').textContent=genTomorrow?t.genTomorrowTag:t.genNowTag;
-    document.getElementById('bearDateNote').textContent=(isBearDay(todayUTC)&&now<todayTrapEnd?t.bearToday:t.bearNext).replace('{date}',dateFmt(followingBear));
+    document.getElementById('bearDateNote').textContent=(isBearDay(todayUTC)&&now<todayTrapEnd?t.bearToday:t.bearNext).replace('{date}',dateFmt(followingBear));renderEventGuide();
   }
   function tick(){const now=new Date(),kvk=kvkPrepWindow(now);document.getElementById('utcClock').textContent=now.toLocaleTimeString('en-GB',{hour12:false,timeZone:'UTC'});document.getElementById('kvkPrepCountdown').textContent=kvk.active?({de:'PREP LÄUFT',en:'PREP ACTIVE',fr:'PREP EN COURS'}[body.dataset.lang]||'PREP ACTIVE'):fmtCountdown(kvk.start);document.getElementById('bt1Countdown').textContent=fmtCountdown(nextBearAt(17,0));document.getElementById('bt2Countdown').textContent=fmtCountdown(nextBearAt(18,30));const gen6=new Date('2026-09-14T00:00:00Z');document.getElementById('gen6Countdown').textContent=gen6>now?fmtCountdown(gen6):({de:'Freigeschaltet',en:'Unlocked',fr:'Débloqué'}[body.dataset.lang]||'Unlocked');document.querySelectorAll('[data-count-to]').forEach(el=>{const d=new Date(el.dataset.countTo);el.textContent=d>now?fmtCountdown(d):({de:'Jetzt verfügbar',en:'Available now',fr:'Disponible'}[body.dataset.lang]||'Available now')})}
 
   const profileKey='nrw_member_profile_v1',playerNameInput=document.getElementById('playerName'),playerIdInput=document.getElementById('playerId');try{const p=JSON.parse(localStorage.getItem(profileKey)||'null');if(p){playerNameInput.value=p.playerName||'';playerIdInput.value=p.playerId||'';document.querySelectorAll('#languageGrid input').forEach(i=>i.checked=(p.languages||[]).includes(i.value))}}catch(e){}
   const messages={de:{missing:'Bitte Name, Player ID und Sprache angeben.',invalid:'Die Player ID darf nur Zahlen enthalten.',saved:'Im NRW-Spielerprofil gespeichert ✓',queued:'Zur Prüfung gespeichert ✓',error:'Speichern gerade nicht möglich.'},en:{missing:'Please add name, Player ID and language.',invalid:'Player ID must contain numbers only.',saved:'Saved to your NRW member profile ✓',queued:'Saved for review ✓',error:'Could not save right now.'},fr:{missing:'Ajoute ton nom, Player ID et ta langue.',invalid:'La Player ID doit contenir uniquement des chiffres.',saved:'Enregistré dans ton profil NRW ✓',queued:'Enregistré pour vérification ✓',error:'Enregistrement impossible.'}};
   document.getElementById('saveProfile').addEventListener('click',async()=>{const lang=body.dataset.lang||'en',m=messages[lang],status=document.getElementById('saveStatus'),button=document.getElementById('saveProfile'),profile={schemaVersion:2,playerName:playerNameInput.value.trim(),playerId:playerIdInput.value.trim(),languages:[...document.querySelectorAll('#languageGrid input:checked')].map(i=>i.value),otherLanguage:'',source:'nrw-player-dashboard',updatedAt:new Date().toISOString()};status.className='';if(!profile.playerName||!profile.playerId||!profile.languages.length){status.textContent=m.missing;status.className='error';return}if(!/^\d+$/.test(profile.playerId)){status.textContent=m.invalid;status.className='error';return}button.disabled=true;try{const r=await fetch('https://bdzlgirowutasrsycjfj.supabase.co/functions/v1/nrw-welcome-language',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(profile)}),data=await r.json().catch(()=>({}));if(!r.ok||!data.ok)throw new Error();localStorage.setItem(profileKey,JSON.stringify(profile));status.textContent=data.queued?m.queued:m.saved;status.className='success'}catch(e){status.textContent=m.error;status.className='error'}finally{button.disabled=false}});
+  const eventSearch=document.getElementById('eventSearch');if(eventSearch)eventSearch.addEventListener('input',renderEventGuide);
   fetch('/dashboard/events.json',{cache:'no-store'}).then(r=>r.ok?r.json():Promise.reject()).then(data=>{eventFeed=Array.isArray(data.events)?data.events:[];renderDynamic()}).catch(()=>{});
+  fetch('/dashboard/event-guide.json',{cache:'no-store'}).then(r=>r.ok?r.json():Promise.reject()).then(data=>{eventKnowledge=Array.isArray(data.events)?data.events:[];renderEventGuide()}).catch(()=>{});
   renderDynamic();tick();setInterval(tick,1000);setInterval(renderDynamic,60000);
 })();
