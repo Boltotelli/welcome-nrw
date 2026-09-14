@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-09-14T16:29:42.557Z",
+  "updatedAt": "2026-09-14T16:32:12.693Z",
   "kingdom": 1044,
   "languages": [
     "de",
@@ -1224,9 +1224,9 @@
       },
       "scoringPolicy": "Forgehammer and Charm Designs identify the two event variants/final milestone rewards, not automatically the resources being spent.",
       "nrwRule": {
-        "de": "Das Event kann ausgelassen werden. 310.000 Punkte bei der Forgehammer-Variante beziehungsweise 453.000 Punkte bei der Charm-Design-Variante sind strikte Maximalgrenzen, keine Empfehlungen. Danach sofort stoppen und KvK-Ressourcen sparen.",
-        "en": "The event may be skipped. 310,000 points for the Forgehammer variant and 453,000 points for the Charm Designs variant are strict maximum limits, not recommendations. Stop immediately at the limit and save KvK resources.",
-        "fr": "L’événement peut être ignoré. 310 000 points pour la variante Marteaux de forge et 453 000 points pour la variante Plans de charme sont des limites maximales strictes, pas des recommandations. Arrête-toi immédiatement à la limite et conserve les ressources KvK."
+        "de": "Der einfache Zielwert beträgt 310.000 Punkte bei der Forgehammer-Variante beziehungsweise 453.000 Punkte bei der Charm-Design-Variante. Die strikte Law-14-Grenze liegt bei 3×: 930.000 beziehungsweise 1.359.000 Punkte. 3× ist keine Empfehlung; lohnende Minimalbelohnung erreichen oder das Event auslassen und KvK-Ressourcen sparen.",
+        "en": "The base target is 310,000 points for the Forgehammer variant and 453,000 points for the Charm Designs variant. The strict Law 14 limit is 3×: 930,000 and 1,359,000 points respectively. 3× is not a recommendation; reach only a worthwhile minimum reward or skip the event and save KvK resources.",
+        "fr": "L’objectif simple est de 310 000 points pour la variante Marteaux de forge et de 453 000 points pour la variante Plans de charme. La limite stricte Law 14 est de 3× : 930 000 et 1 359 000 points. 3× n’est pas une recommandation ; atteins seulement une récompense minimale rentable ou ignore l’événement et conserve les ressources KvK."
       },
       "sources": [
         "officerProject"
@@ -1234,8 +1234,8 @@
       "variants": {
         "forgehammer": {
           "reward": "Forgehammers",
-          "strictMaximum": 310000,
-          "maximumSource": "NRW / Server 1044",
+          "strictMaximum": 930000,
+          "maximumSource": "NRW / Server 1044: strict Law 14 limit equals 3 × target score",
           "points": [
             {
               "action": "Increase Governor Gear Charm maximum score by 1",
@@ -1269,12 +1269,13 @@
                 "11": 37
               }
             }
-          ]
+          ],
+          "targetScore": 310000
         },
         "charmDesign": {
           "reward": "Charm Designs",
-          "strictMaximum": 453000,
-          "maximumSource": "NRW / Server 1044",
+          "strictMaximum": 1359000,
+          "maximumSource": "NRW / Server 1044: strict Law 14 limit equals 3 × target score",
           "points": [
             {
               "action": "Increase Governor Gear maximum score by 1",
@@ -1300,7 +1301,8 @@
               "action": "Use 1 Hero Exclusive Gear Widget",
               "points": 12000
             }
-          ]
+          ],
+          "targetScore": 453000
         }
       }
     },
