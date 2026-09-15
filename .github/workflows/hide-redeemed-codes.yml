@@ -1,0 +1,45 @@
+name: Hide redeemed gift codes
+
+on:
+  push:
+    paths:
+      - '.github/workflows/hide-redeemed-codes.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Hide card when every current code is redeemed
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('dashboard/codes.js')
+          text = path.read_text(encoding='utf-8')
+          old = """    const codes=Array.isArray(payload?.codes)?payload.codes:[];\n    const sourceName=payload?.primarySource?.name||'';"""
+          new = """    const codes=Array.isArray(payload?.codes)?payload.codes:[];\n    const allRedeemed=!loading&&!loadError&&codes.length>0&&codes.every(item=>isRedeemed(typeof item==='string'?item:item.code));\n    card.hidden=loading||allRedeemed;\n    const sourceName=payload?.primarySource?.name||'';"""
+          if old not in text:
+              raise SystemExit('render anchor not found')
+          text = text.replace(old, new, 1)
+          old_listener = """      setRedeemed(code,input.checked);\n      const item=input.closest('.gift-code-item');\n      if(item)item.classList.toggle('is-redeemed',input.checked);\n      const label=input.closest('.gift-redeemed');\n      if(label){const value=input.checked?text().redeemed:text().mark;label.title=value;label.setAttribute('aria-label',value)}"""
+          new_listener = """      setRedeemed(code,input.checked);\n      render();"""
+          if old_listener not in text:
+              raise SystemExit('checkbox listener anchor not found')
+          text = text.replace(old_listener, new_listener, 1)
+          path.write_text(text, encoding='utf-8')
+          PY
+      - name: Commit patch
+        shell: bash
+        run: |
+          git config user.name 'NRW Dashboard Bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add dashboard/codes.js
+          git commit -m 'Hide gift codes after all are redeemed'
+          git push origin HEAD:main
