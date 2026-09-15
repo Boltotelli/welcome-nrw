@@ -1,0 +1,45 @@
+name: Patch dashboard gift codes
+
+on:
+  push:
+    paths:
+      - '.github/workflows/patch-dashboard-codes.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Load gift code card script
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('dashboard/index.html')
+          text = path.read_text(encoding='utf-8')
+          script = '  <script defer src="/dashboard/codes.js?v=20260915a"></script>\n'
+          if '/dashboard/codes.js' not in text:
+              if '</body>' not in text:
+                  raise SystemExit('dashboard/index.html has no </body> marker')
+              text = text.replace('</body>', script + '</body>', 1)
+              path.write_text(text, encoding='utf-8')
+          PY
+      - name: Commit patch
+        shell: bash
+        run: |
+          if git diff --quiet -- dashboard/index.html; then
+            echo 'Dashboard already loads codes.js'
+            exit 0
+          fi
+          git config user.name 'NRW Dashboard Bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add dashboard/index.html
+          git commit -m 'Load gift code card on player dashboard'
+          git push origin HEAD:main
