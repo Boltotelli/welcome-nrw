@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "kingdom": 1044,
   "timezone": "UTC",
-  "updatedAt": "2026-09-14T12:13:14Z",
+  "updatedAt": "2026-09-15T00:12:15Z",
   "events": [
     {
       "id": "kingdom-transfer-2026-09-1044",
@@ -119,6 +119,65 @@
               "Lorsque le véritable temps de recharge du Bison est terminé, utilise-le de nouveau et envoie une autre marche pour une deuxième collecte instantanée."
             ]
           }
+        },
+        "2026-09-15": {
+          "points": {
+            "de": "Intel-Missionen abschließen (3.000 Punkte), Trucks senden und überfallen (je 10.000 Punkte)",
+            "en": "Complete Intel Missions (3,000 points), escort and raid trucks (10,000 points each)",
+            "fr": "Terminer les missions de renseignement (3 000 points), escorter et attaquer des camions (10 000 points chacun)"
+          },
+          "prepare": {
+            "title": {
+              "de": "Sammler und Bison für morgen vorbereiten",
+              "en": "Prepare gatherers and Bison for tomorrow",
+              "fr": "Préparer les collecteurs et le Bison pour demain"
+            },
+            "status": {
+              "de": "VOR RESET",
+              "en": "BEFORE RESET",
+              "fr": "AVANT RESET"
+            },
+            "steps": {
+              "de": [
+                "Schicke kurz vor dem Reset lange Sammelmärsche los, sodass sie erst nach dem Reset zurückkehren.",
+                "Aktiviere Bison, sobald deine Truppen aktiv sammeln; dadurch beginnt seine Abklingzeit bereits vor dem Reset.",
+                "Rufe die Sammler vor dem Reset nicht zurück. Nach dem Reset zählen die zurückgebrachten Ressourcen für Tag 3.",
+                "Schicke danach erneut einen Sammelmarsch: Die vorbereitete Bison-Fähigkeit lässt ihn sofort vollständig gesammelt zurückkehren. Nach Ablauf des tatsächlichen Cooldowns kannst du Bison erneut für eine weitere Sofort-Sammlung nutzen."
+              ],
+              "en": [
+                "Shortly before reset, send long gathering marches so they return only after reset.",
+                "Activate Bison once your troops are actively gathering; this starts its cooldown before reset.",
+                "Do not recall the gatherers before reset. After reset, the returned resources score for Day 3.",
+                "Then send another gathering march: the prepared Bison ability makes it return immediately with a full load. Once the actual cooldown ends, use Bison again for another instant collection."
+              ],
+              "fr": [
+                "Peu avant le reset, envoie de longues marches de collecte afin qu’elles ne reviennent qu’après le reset.",
+                "Active le Bison lorsque tes troupes collectent activement ; son temps de recharge commence ainsi avant le reset.",
+                "Ne rappelle pas les collecteurs avant le reset. Après le reset, les ressources rapportées comptent pour le jour 3.",
+                "Envoie ensuite une nouvelle marche de collecte : la compétence préparée du Bison la fait revenir immédiatement avec une collecte complète. Une fois le véritable temps de recharge terminé, utilise de nouveau le Bison pour une autre collecte instantanée."
+              ]
+            }
+          },
+          "steps": {
+            "de": [
+              "Schließe nach dem Reset zuerst die zurückgehaltenen 16:00-UTC-Intel-Missionen und Pans zusätzliche Mission ab.",
+              "Punkte entstehen beim Abschließen der Mission, nicht beim Abholen der Belohnung. Jede abgeschlossene Intel-Mission bringt 3.000 Punkte.",
+              "Erledige anschließend die neu erscheinenden Intel-Missionen und nutze deine täglichen Trucks; Senden und erfolgreicher Überfall bringen jeweils 10.000 Punkte.",
+              "Nutze keine Heldensplitter, Truegold, Truegold-Staub, Speedups, Meistermaterialien oder Edelsteine nur für das Allianzgemenge – diese KvK-Ressourcen sparen."
+            ],
+            "en": [
+              "After reset, first complete the held 16:00 UTC Intel Missions and Pan’s extra mission.",
+              "Points are awarded when a mission is completed, not when its reward is claimed. Each completed Intel Mission gives 3,000 points.",
+              "Then complete the newly appearing Intel Missions and use your daily trucks; escorting and a successful raid each give 10,000 points.",
+              "Do not spend Hero Shards, Truegold, Truegold Dust, speedups, Master materials or gems just for Alliance Brawl—save these KvK resources."
+            ],
+            "fr": [
+              "Après le reset, termine d’abord les missions de renseignement de 16:00 UTC conservées ainsi que la mission supplémentaire de Pan.",
+              "Les points sont accordés lorsque la mission est terminée, et non lors de la récupération de la récompense. Chaque mission terminée rapporte 3 000 points.",
+              "Termine ensuite les nouvelles missions de renseignement et utilise tes camions quotidiens ; une escorte et un raid réussi rapportent chacun 10 000 points.",
+              "Ne dépense pas de fragments de héros, de Truegold, de poussière de Truegold, d’accélérateurs, de matériaux de Maître ou de gemmes uniquement pour l’Alliance Brawl : garde ces ressources pour le KvK."
+            ]
+          }
         }
       },
       "sourceUrl": "https://kingshotmastery.com/"
@@ -161,14 +220,14 @@
             ]
           },
           "limits": {
-              "hardCap": 60000,
-              "note": {
-                "de": "60.000 Punkte sind die strikte Gesamtgrenze (3×) – keine Empfehlung. Das Event kann vollständig ausgelassen werden.",
-                "en": "60,000 points is the strict total limit (3×), not a recommendation. The event can be skipped completely.",
-                "fr": "60 000 points constituent la limite totale stricte (3×), pas une recommandation. L’événement peut être entièrement ignoré."
-              }
+            "hardCap": 60000,
+            "note": {
+              "de": "60.000 Punkte sind die strikte Gesamtgrenze (3×) – keine Empfehlung. Das Event kann vollständig ausgelassen werden.",
+              "en": "60,000 points is the strict total limit (3×), not a recommendation. The event can be skipped completely.",
+              "fr": "60 000 points constituent la limite totale stricte (3×), pas une recommandation. L’événement peut être entièrement ignoré."
             }
-          },
+          }
+        },
         "2026-09-15": {
           "points": {
             "de": "Erhöhung des maximalen Gouverneursamulett-Werts",
@@ -193,15 +252,15 @@
             ]
           },
           "limits": {
-              "hardCap": 60000,
-              "note": {
-                "de": "60.000 Punkte sind die strikte Gesamtgrenze (3×) – keine Empfehlung. Das Event kann vollständig ausgelassen werden.",
-                "en": "60,000 points is the strict total limit (3×), not a recommendation. The event can be skipped completely.",
-                "fr": "60 000 points constituent la limite totale stricte (3×), pas une recommandation. L’événement peut être entièrement ignoré."
-              }
+            "hardCap": 60000,
+            "note": {
+              "de": "60.000 Punkte sind die strikte Gesamtgrenze (3×) – keine Empfehlung. Das Event kann vollständig ausgelassen werden.",
+              "en": "60,000 points is the strict total limit (3×), not a recommendation. The event can be skipped completely.",
+              "fr": "60 000 points constituent la limite totale stricte (3×), pas une recommandation. L’événement peut être entièrement ignoré."
             }
           }
-        },
+        }
+      },
       "sourceUrl": "https://kingshotdata.com/events/armament-competition/"
     },
     {
@@ -311,8 +370,16 @@
       "icon": "🛡️",
       "manual": false,
       "confidence": "predicted",
-      "name": {"de": "Wikinger-Vergeltung", "en": "Viking Vengeance", "fr": "Vengeance viking"},
-      "tips": {"de": [], "en": [], "fr": []},
+      "name": {
+        "de": "Wikinger-Vergeltung",
+        "en": "Viking Vengeance",
+        "fr": "Vengeance viking"
+      },
+      "tips": {
+        "de": [],
+        "en": [],
+        "fr": []
+      },
       "sourceUrl": "https://kingshotguide.net/guides/viking-vengeance-expert-guide-beginner-to-advanced/"
     },
     {
@@ -322,8 +389,16 @@
       "icon": "♾️",
       "manual": false,
       "confidence": "predicted",
-      "name": {"de": "Eternity’s Reach", "en": "Eternity’s Reach", "fr": "Eternity’s Reach"},
-      "tips": {"de": [], "en": [], "fr": []},
+      "name": {
+        "de": "Eternity’s Reach",
+        "en": "Eternity’s Reach",
+        "fr": "Eternity’s Reach"
+      },
+      "tips": {
+        "de": [],
+        "en": [],
+        "fr": []
+      },
       "sourceUrl": "https://centurygames.helpshift.com/hc/en/140-kingshot/section/1421-eternity-s-reach/"
     },
     {
@@ -333,8 +408,16 @@
       "icon": "🛡️",
       "manual": false,
       "confidence": "predicted",
-      "name": {"de": "Wikinger-Vergeltung", "en": "Viking Vengeance", "fr": "Vengeance viking"},
-      "tips": {"de": [], "en": [], "fr": []},
+      "name": {
+        "de": "Wikinger-Vergeltung",
+        "en": "Viking Vengeance",
+        "fr": "Vengeance viking"
+      },
+      "tips": {
+        "de": [],
+        "en": [],
+        "fr": []
+      },
       "sourceUrl": "https://kingshotguide.net/guides/viking-vengeance-expert-guide-beginner-to-advanced/"
     },
     {
