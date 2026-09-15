@@ -95,6 +95,8 @@
     if(!card)return;
     const t=text();
     const codes=Array.isArray(payload?.codes)?payload.codes:[];
+    const allRedeemed=!loading&&!loadError&&codes.length>0&&codes.every(item=>isRedeemed(typeof item==='string'?item:item.code));
+    card.hidden=loading||allRedeemed;
     const sourceName=payload?.primarySource?.name||'';
     const updated=formatUpdated(payload?.updatedAt);
 
@@ -153,10 +155,7 @@
     card.querySelectorAll('[data-redeemed-code]').forEach(input=>input.addEventListener('change',()=>{
       const code=input.dataset.redeemedCode;
       setRedeemed(code,input.checked);
-      const item=input.closest('.gift-code-item');
-      if(item)item.classList.toggle('is-redeemed',input.checked);
-      const label=input.closest('.gift-redeemed');
-      if(label){const value=input.checked?text().redeemed:text().mark;label.title=value;label.setAttribute('aria-label',value)}
+      render();
     }));
   }
 
