@@ -123,3 +123,20 @@ async function refreshSagrAccountNames(){
  }
 }
 refreshSagrAccountNames();
+
+(function add555ChatCulture(){
+ const grid=document.querySelector('.transfer-summary');
+ if(!grid || document.getElementById('nrw555Culture')) return;
+ const card=document.createElement('article');
+ card.id='nrw555Culture';
+ card.className='know-card wide';
+ card.innerHTML=`
+  <div class="know-top"><div class="know-icon">😂</div><span class="know-no">05</span></div>
+  <h3 class="de">Warum schreibt bei uns jeder „555+“?</h3>
+  <h3 class="en">Why does everyone here write “555+”?</h3>
+  <h3 class="fr">Pourquoi tout le monde écrit « 555+ » ici ?</h3>
+  <p class="de">In Thailand wird die <b>5 wie „ha“</b> ausgesprochen. Deshalb bedeutet <b>555</b> so viel wie „hahaha“ – und <b>555+</b> einfach: noch mehr Lachen. Poneglyph und Akuma haben das bei uns geprägt; irgendwann hat NRW es übernommen. Wenn du also 555+ im Chat siehst: Jemand lacht. 😄</p>
+  <p class="en">In Thai, the number <b>5 is pronounced “ha”</b>. That makes <b>555</b> the equivalent of “hahaha” — and <b>555+</b> simply means even more laughing. Poneglyph and Akuma brought it into our chat culture, and NRW eventually adopted it. So when you see 555+ in chat: someone is laughing. 😄</p>
+  <p class="fr">En thaï, le chiffre <b>5 se prononce « ha »</b>. Ainsi, <b>555</b> signifie « hahaha » — et <b>555+</b> veut simplement dire encore plus de rire. Poneglyph et Akuma ont popularisé cette habitude chez nous, puis NRW l’a adoptée. Si tu vois 555+ dans le chat : quelqu’un rigole. 😄</p>`;
+ grid.appendChild(card);
+})();
