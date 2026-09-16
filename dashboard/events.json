@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "kingdom": 1044,
   "timezone": "UTC",
-  "updatedAt": "2026-09-15T00:12:15Z",
+  "updatedAt": "2026-09-16T00:16:35Z",
   "events": [
     {
       "id": "kingdom-transfer-2026-09-1044",
@@ -176,6 +176,71 @@
               "Les points sont accordés lorsque la mission est terminée, et non lors de la récupération de la récompense. Chaque mission terminée rapporte 3 000 points.",
               "Termine ensuite les nouvelles missions de renseignement et utilise tes camions quotidiens ; une escorte et un raid réussi rapportent chacun 10 000 points.",
               "Ne dépense pas de fragments de héros, de Truegold, de poussière de Truegold, d’accélérateurs, de matériaux de Maître ou de gemmes uniquement pour l’Alliance Brawl : garde ces ressources pour le KvK."
+            ]
+          }
+        },
+        "2026-09-16": {
+          "points": {
+            "de": "Sammeln (2 Punkte je 2.000 Brot/Holz, 400 Stein oder 100 Eisen), Trucks (je 10.000 Punkte), fortgeschrittene/gewöhnliche Zähmungsmarken (9.370/680), Amulettwert (45 pro Punkt) und Pet-Fortschritt (30 pro Punkt)",
+            "en": "Gathering (2 points per 2,000 Bread/Wood, 400 Stone or 100 Iron), trucks (10,000 points each), Advanced/Common Taming Marks (9,370/680), Charm score (45 per point) and Pet Advancement (30 per point)",
+            "fr": "Collecte (2 points pour 2 000 Pain/Bois, 400 Pierre ou 100 Fer), camions (10 000 points chacun), marques de dressage avancées/ordinaires (9 370/680), score de charme (45 par point) et progression de familier (30 par point)"
+          },
+          "prepare": {
+            "title": {
+              "de": "Intel-Missionen und Truppentraining für morgen vorbereiten",
+              "en": "Prepare Intel Missions and troop training for tomorrow",
+              "fr": "Préparer les missions de renseignement et l’entraînement pour demain"
+            },
+            "status": {
+              "de": "HEUTE VORBEREITEN",
+              "en": "PREPARE TODAY",
+              "fr": "PRÉPARER AUJOURD’HUI"
+            },
+            "steps": {
+              "de": [
+                "00:00-UTC- und 08:00-UTC-Intel-Missionen abschließen und Belohnungen abholen.",
+                "16:00-UTC-Missionen nicht abschließen; nach 16:00 UTC Pans zusätzliche Intel-Mission aktivieren und ebenfalls offen lassen.",
+                "Reserviere rechtzeitig einen passenden Termin für den Ministerposten „Edler Berater“.",
+                "Nur wenn du ohnehin Truppen ausbildest: Morgen vor dem Abschließen der Truppen den Ministerbonus mit dem Trainingsbonus für 3.000 Edelsteine kombinieren.",
+                "Nach dem nächsten Reset zuerst die zurückgehaltenen Intel-Missionen abschließen; danach die für Tag 4 geplanten Truppen fertigstellen."
+              ],
+              "en": [
+                "Complete and claim the 00:00 UTC and 08:00 UTC Intel Missions.",
+                "Do not complete the 16:00 UTC missions; after 16:00 UTC, activate Pan’s extra Intel Mission and leave it unfinished as well.",
+                "Reserve a suitable Noble Advisor ministerial time slot early.",
+                "Only if you are training troops anyway: tomorrow, combine the minister bonus with the 3,000-gem training boost before completing the troops.",
+                "After the next reset, complete the held Intel Missions first, then finish the troops planned for Day 4."
+              ],
+              "fr": [
+                "Termine et récupère les missions de renseignement de 00:00 UTC et de 08:00 UTC.",
+                "Ne termine pas les missions de 16:00 UTC ; après 16:00 UTC, active la mission supplémentaire de Pan et laisse-la également inachevée.",
+                "Réserve suffisamment tôt un créneau adapté pour le poste ministériel de Noble Conseiller.",
+                "Seulement si tu entraînes déjà des troupes : demain, combine le bonus ministériel avec le bonus d’entraînement à 3 000 gemmes avant de terminer les troupes.",
+                "Après le prochain reset, termine d’abord les missions de renseignement conservées, puis les troupes prévues pour le jour 4."
+              ]
+            }
+          },
+          "steps": {
+            "de": [
+              "Lass die vor dem Reset gestarteten Sammler jetzt zurückkehren – die mitgebrachten Ressourcen zählen für Tag 3.",
+              "Schicke danach sofort einen neuen Sammelmarsch los: Die vor dem Reset aktivierte Bison-Fähigkeit wird ausgelöst und lässt ihn direkt vollständig gesammelt zurückkehren.",
+              "Sobald Bisons tatsächliche Abklingzeit abgelaufen ist, nutze ihn erneut für eine weitere Sofort-Sammlung.",
+              "Nutze deine täglichen Trucks; Senden und erfolgreicher Überfall bringen jeweils 10.000 Punkte.",
+              "Verbrauche keine Zähmungsmarken, Amulettmaterialien, Pet-Ressourcen oder Edelsteine nur für das Allianzgemenge – diese KvK-Ressourcen sparen."
+            ],
+            "en": [
+              "Let the gatherers sent before reset return now—the resources they bring back score for Day 3.",
+              "Immediately send another gathering march: the Bison ability activated before reset triggers and makes it return at once with a full load.",
+              "Once Bison’s actual cooldown has ended, use it again for another instant collection.",
+              "Use your daily trucks; escorting and a successful raid each give 10,000 points.",
+              "Do not spend Taming Marks, Charm materials, Pet resources or gems just for Alliance Brawl—save these KvK resources."
+            ],
+            "fr": [
+              "Laisse maintenant revenir les collecteurs envoyés avant le reset : les ressources rapportées comptent pour le jour 3.",
+              "Envoie immédiatement une nouvelle marche de collecte : la compétence du Bison activée avant le reset se déclenche et la fait revenir aussitôt avec une collecte complète.",
+              "Lorsque le véritable temps de recharge du Bison est terminé, utilise-le de nouveau pour une autre collecte instantanée.",
+              "Utilise tes camions quotidiens ; une escorte et un raid réussi rapportent chacun 10 000 points.",
+              "Ne dépense pas de marques de dressage, de matériaux de charme, de ressources de familiers ou de gemmes uniquement pour l’Alliance Brawl : garde ces ressources pour le KvK."
             ]
           }
         }
