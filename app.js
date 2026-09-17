@@ -106,23 +106,82 @@ document.getElementById('copyHello')?.addEventListener('click', async ()=>{
  setTimeout(()=>status.textContent='',2600);
 });
 
+let sagrWatchlistPlayers=new Map();
+
+function sagrLang(){
+ const value=document.body?.dataset?.lang||document.documentElement.lang||'en';
+ return ['de','en','fr'].includes(value)?value:'en';
+}
+
+function sagrLocationAge(value){
+ const parsed=Date.parse(value||'');
+ if(!Number.isFinite(parsed)) return '';
+ const diff=Math.max(0,Date.now()-parsed);
+ const minutes=Math.floor(diff/60000);
+ const hours=Math.floor(diff/3600000);
+ const days=Math.floor(diff/86400000);
+ const lang=sagrLang();
+ if(minutes<2) return {de:'gerade erfasst',en:'just located',fr:'localisé à l’instant'}[lang];
+ if(minutes<60) return {de:`vor ${minutes} Min.`,en:`${minutes}m ago`,fr:`il y a ${minutes} min`}[lang];
+ if(hours<24) return {de:`vor ${hours} Std.`,en:`${hours}h ago`,fr:`il y a ${hours} h`}[lang];
+ return {de:`vor ${days} Tg.`,en:`${days}d ago`,fr:`il y a ${days} j`}[lang];
+}
+
+function ensureSagrLocationStyles(){
+ if(document.getElementById('sagrLocationStyles')) return;
+ const style=document.createElement('style');
+ style.id='sagrLocationStyles';
+ style.textContent=`
+ .outlaw-location{display:flex;flex-direction:column;gap:2px;margin-top:7px;padding:7px 9px;border-radius:10px;background:color-mix(in srgb,var(--surface2) 72%,transparent);border:1px solid var(--line)}
+ .outlaw-location b{font-size:11px;letter-spacing:.01em;color:var(--ink)}
+ .outlaw-location small{font-size:8px;color:var(--muted);line-height:1.35}
+ .outlaw-location.is-missing b{color:var(--muted)}
+ `;
+ document.head.appendChild(style);
+}
+
+function renderSagrLocations(){
+ ensureSagrLocationStyles();
+ const lang=sagrLang();
+ const missing={de:'📍 Standort derzeit nicht erfasst',en:'📍 Location currently unavailable',fr:'📍 Position actuellement indisponible'}[lang];
+ const lastSeen={de:'Zuletzt auf der Karte erfasst',en:'Last located on the map',fr:'Dernière position relevée'}[lang];
+ document.querySelectorAll('.outlaw-accounts [data-player-id]').forEach(card=>{
+  const player=sagrWatchlistPlayers.get(card.dataset.playerId);
+  if(!player) return;
+  const nameTarget=card.querySelector('[data-player-name]');
+  if(player.nickname&&nameTarget) nameTarget.textContent=player.nickname;
+  let location=card.querySelector('[data-player-location]');
+  if(!location){
+   location=document.createElement('span');
+   location.dataset.playerLocation='';
+   location.className='outlaw-location';
+   const idLine=card.querySelector('small');
+   if(idLine) card.insertBefore(location,idLine); else card.appendChild(location);
+  }
+  if(player.locationAvailable&&Number.isFinite(Number(player.x))&&Number.isFinite(Number(player.y))){
+   location.classList.remove('is-missing');
+   const age=sagrLocationAge(player.locationUpdatedAt);
+   location.innerHTML=`<b>📍 X: ${Number(player.x)} · Y: ${Number(player.y)}</b><small>${lastSeen}${age?` · ${age}`:''}</small>`;
+  }else{
+   location.classList.add('is-missing');
+   location.innerHTML=`<b>${missing}</b>`;
+  }
+ });
+}
 
 async function refreshSagrAccountNames(){
  try{
-  const response=await fetch('/api/sagr-accounts',{headers:{'Accept':'application/json'}});
+  const response=await fetch('/api/sagr-accounts',{headers:{'Accept':'application/json'},cache:'no-store'});
   if(!response.ok) return;
   const payload=await response.json();
-  const names=new Map((payload.players||[]).map(player=>[String(player.id),player.nickname]));
-  document.querySelectorAll('.outlaw-accounts [data-player-id]').forEach(card=>{
-   const name=names.get(card.dataset.playerId);
-   const target=card.querySelector('[data-player-name]');
-   if(name && target) target.textContent=name;
-  });
+  sagrWatchlistPlayers=new Map((payload.players||[]).map(player=>[String(player.id),player]));
+  renderSagrLocations();
  }catch(error){
-  console.warn('Sagr account names could not be refreshed',error);
+  console.warn('Sagr account data could not be refreshed',error);
  }
 }
 refreshSagrAccountNames();
+window.addEventListener('nrw-lang-change',renderSagrLocations);
 
 (function add555ChatCulture(){
  const grid=document.querySelector('.transfer-summary');
