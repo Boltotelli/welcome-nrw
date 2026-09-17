@@ -140,3 +140,11 @@ refreshSagrAccountNames();
   <p class="fr">En thaï, le chiffre <b>5 se prononce « ha »</b>. Ainsi, <b>555</b> signifie « hahaha » — et <b>555+</b> veut simplement dire encore plus de rire. Poneglyph et Akuma ont popularisé cette habitude chez nous, puis NRW l’a adoptée. Si tu vois 555+ dans le chat : quelqu’un rigole. 😄</p>`;
  grid.appendChild(card);
 })();
+
+(function useCurrentDiscordInvite(){
+ const currentDiscord='https://discord.gg/cZp27eVYXC';
+ const apply=()=>document.querySelectorAll('a[href*="discord.gg"]').forEach(link=>{link.href=currentDiscord});
+ apply();
+ const observer=new MutationObserver(()=>apply());
+ observer.observe(document.body,{childList:true,subtree:true});
+})();
