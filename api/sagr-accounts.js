@@ -28,11 +28,13 @@ function toIsoTimestamp(value) {
 
 function normalizeMember(member) {
   const id = String(member.governor_id || member.fid || '');
-  const x = Number(member.x);
-  const y = Number(member.y);
-  const mapKid = Number(member.map_kid);
-  const hasCoordinates = Number.isFinite(x) && Number.isFinite(y) && x >= 0 && y >= 0;
-  const isKingdom1044 = !Number.isFinite(mapKid) || mapKid === 1044;
+  const hasRawCoordinates = member.x !== null && member.x !== undefined && member.y !== null && member.y !== undefined;
+  const x = hasRawCoordinates ? Number(member.x) : null;
+  const y = hasRawCoordinates ? Number(member.y) : null;
+  const rawMapKid = member.map_kid;
+  const mapKid = rawMapKid === null || rawMapKid === undefined ? null : Number(rawMapKid);
+  const hasCoordinates = hasRawCoordinates && Number.isFinite(x) && Number.isFinite(y) && x >= 0 && y >= 0;
+  const isKingdom1044 = mapKid === null || mapKid === 1044;
 
   return {
     id,
