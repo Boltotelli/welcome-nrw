@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "kingdom": 1044,
   "timezone": "UTC",
-  "updatedAt": "2026-09-16T00:16:35Z",
+  "updatedAt": "2026-09-17T00:17:06Z",
   "events": [
     {
       "id": "kingdom-transfer-2026-09-1044",
@@ -241,6 +241,68 @@
               "Lorsque le véritable temps de recharge du Bison est terminé, utilise-le de nouveau pour une autre collecte instantanée.",
               "Utilise tes camions quotidiens ; une escorte et un raid réussi rapportent chacun 10 000 points.",
               "Ne dépense pas de marques de dressage, de matériaux de charme, de ressources de familiers ou de gemmes uniquement pour l’Alliance Brawl : garde ces ressources pour le KvK."
+            ]
+          }
+        },
+        "2026-09-17": {
+          "points": {
+            "de": "Intel-Missionen (3.000 Punkte), Trucks (je 10.000), Truppenausbildung (1–30 Punkte je Truppe nach Stufe), Amulettwert (45 je Punkt), Forgehammer (1.875), Widgets (3.750), Mithril (18.750) und Edelsteine (1 je Edelstein)",
+            "en": "Intel Missions (3,000 points), trucks (10,000 each), troop training (1–30 points per troop by level), Charm score (45 per point), Forgehammers (1,875), Widgets (3,750), Mithril (18,750) and gems (1 per gem)",
+            "fr": "Missions de renseignement (3 000 points), camions (10 000 chacun), entraînement de troupes (1–30 points par troupe selon le niveau), score de charme (45 par point), Marteaux de forge (1 875), Widgets (3 750), Mithril (18 750) et gemmes (1 par gemme)"
+          },
+          "prepare": {
+            "title": {
+              "de": "Ausdauer für Bestien und Schrecken morgen vorbereiten",
+              "en": "Prepare stamina for Beasts and Terrors tomorrow",
+              "fr": "Préparer l’endurance pour les Bêtes et Terreurs de demain"
+            },
+            "status": {
+              "de": "HEUTE VORBEREITEN",
+              "en": "PREPARE TODAY",
+              "fr": "PRÉPARER AUJOURD’HUI"
+            },
+            "steps": {
+              "de": [
+                "Spare heute deine Ausdauerkanister; verbrauche sie nicht nur für gewöhnliche Jagden.",
+                "Halte für den nächsten Reset freie Märsche bereit.",
+                "Morgen zuerst Schrecken-Rallys starten (15.000 Punkte), danach möglichst hochstufige Bestien jagen (bis zu 6.000 Punkte für Level 26–30).",
+                "Auch morgen keine Truegold-, Ausrüstungs- oder Speedup-Ressourcen nur für das Allianzgemenge verbrauchen."
+              ],
+              "en": [
+                "Save your stamina cans today; do not spend them only on routine hunts.",
+                "Keep marches available for the next reset.",
+                "Tomorrow, call Terror rallies first (15,000 points), then hunt the highest-level Beasts available (up to 6,000 points for levels 26–30).",
+                "Tomorrow, do not spend Truegold, gear or speedup resources just for Alliance Brawl."
+              ],
+              "fr": [
+                "Garde aujourd’hui tes réserves d’endurance ; ne les dépense pas uniquement pour des chasses ordinaires.",
+                "Garde des marches disponibles pour le prochain reset.",
+                "Demain, lance d’abord des rallies contre les Terreurs (15 000 points), puis chasse les Bêtes du niveau le plus élevé possible (jusqu’à 6 000 points pour les niveaux 26–30).",
+                "Demain également, ne dépense pas de Truegold, de ressources d’équipement ou d’accélérateurs uniquement pour l’Alliance Brawl."
+              ]
+            }
+          },
+          "steps": {
+            "de": [
+              "Schließe nach dem Reset zuerst die zurückgehaltenen 16:00-UTC-Intel-Missionen und Pans zusätzliche Mission ab; jede abgeschlossene Mission bringt 3.000 Punkte.",
+              "Erledige danach die neuen Intel-Missionen und nutze deine täglichen Trucks; Senden und erfolgreicher Überfall bringen jeweils 10.000 Punkte.",
+              "Nur wenn du ohnehin Truppen ausbildest oder beförderst: Sichere dir den Ministerposten „Edler Berater“, aktiviere vor dem Start der Ausbildung den Trainingsbonus für 3.000 Edelsteine und stelle sicher, dass die Truppen heute fertig werden.",
+              "Nutze Trainings-Speedups nur für ohnehin geplante Truppen – nicht allein für das Allianzgemenge.",
+              "Verbrauche keine Amulettmaterialien, Forgehammer, Widgets, Mithril oder Edelsteine nur für das Allianzgemenge; diese KvK-Ressourcen sparen."
+            ],
+            "en": [
+              "After reset, first complete the held 16:00 UTC Intel Missions and Pan’s extra mission; each completed mission gives 3,000 points.",
+              "Then complete the new Intel Missions and use your daily trucks; escorting and a successful raid each give 10,000 points.",
+              "Only if you are training or promoting troops anyway: secure the Noble Advisor ministerial post, activate the 3,000-gem training boost before starting training, and ensure the troops finish today.",
+              "Use training speedups only for troops you already planned—not solely for Alliance Brawl.",
+              "Do not spend Charm materials, Forgehammers, Widgets, Mithril or gems just for Alliance Brawl; save these KvK resources."
+            ],
+            "fr": [
+              "Après le reset, termine d’abord les missions de renseignement de 16:00 UTC conservées ainsi que la mission supplémentaire de Pan ; chaque mission terminée rapporte 3 000 points.",
+              "Termine ensuite les nouvelles missions de renseignement et utilise tes camions quotidiens ; une escorte et un raid réussi rapportent chacun 10 000 points.",
+              "Seulement si tu entraînes ou promeus déjà des troupes : obtiens le poste ministériel de Noble Conseiller, active le bonus d’entraînement à 3 000 gemmes avant de lancer l’entraînement et assure-toi que les troupes terminent aujourd’hui.",
+              "Utilise des accélérateurs d’entraînement uniquement pour des troupes déjà prévues, pas seulement pour l’Alliance Brawl.",
+              "Ne dépense pas de matériaux de charme, de Marteaux de forge, de Widgets, de Mithril ou de gemmes uniquement pour l’Alliance Brawl ; garde ces ressources pour le KvK."
             ]
           }
         }
