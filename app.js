@@ -136,6 +136,13 @@ function ensureSagrLocationStyles(){
  .outlaw-location b{font-size:11px;letter-spacing:.01em;color:var(--ink)}
  .outlaw-location small{font-size:8px;color:var(--muted);line-height:1.35}
  .outlaw-location.is-missing b{color:var(--muted)}
+ @media(max-width:760px){
+  .outlaw-accounts>div{grid-template-columns:68px minmax(0,1fr) auto;gap:6px}
+  .outlaw-accounts>div>span:first-child{white-space:nowrap}
+  .outlaw-location{margin-left:-7px;padding:7px 7px}
+  .outlaw-location:not(.is-missing) b{font-size:10.5px;white-space:nowrap}
+  .outlaw-location small{font-size:7.5px;white-space:nowrap}
+ }
  `;
  document.head.appendChild(style);
 }
