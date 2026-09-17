@@ -183,3 +183,84 @@
 
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
+
+(function dashboardSafetyAndDiscord(){
+  const DISCORD_URL='https://discord.gg/cZp27eVYXC';
+  const DAY=86400000;
+  const warningCopy={
+    de:{tag:'MORGEN · KILL EVENT',title:'⚠ Ab dem nächsten Reset nicht sammeln',text:'Heute darfst du noch sammeln. Sorge aber dafür, dass alle Sammler vor dem Reset zurück sind. Ab dem nächsten Reset läuft das Kill Event: Dann gar nicht sammeln.'},
+    en:{tag:'TOMORROW · KILL EVENT',title:'⚠ Do not gather after the next reset',text:'You can still gather today, but make sure every gathering march is back before reset. The Kill Event starts at the next reset: do not gather at all during the event.'},
+    fr:{tag:'DEMAIN · KILL EVENT',title:'⚠ Ne collecte plus après le prochain reset',text:'Tu peux encore collecter aujourd’hui, mais assure-toi que toutes les marches de collecte soient revenues avant le reset. Le Kill Event commence au prochain reset : ne collecte pas du tout pendant l’événement.'}
+  };
+  let eventFeedCache=null;
+
+  function lang(){const value=document.body?.dataset?.lang||document.documentElement.lang||'en';return warningCopy[value]?value:'en'}
+  function dateKey(d){return d.toISOString().slice(0,10)}
+  function currentUtcDay(){const now=new Date();return new Date(Date.UTC(now.getUTCFullYear(),now.getUTCMonth(),now.getUTCDate()))}
+  function isKillEvent(e){const value=`${e?.id||''} ${e?.name?.en||''}`.toLowerCase();return value.includes('kill-event')||value.includes('kill event')}
+  function activeOn(e,date){return e?.start<=date&&(!e?.end||e.end>=date)}
+
+  function updateDiscordLinks(){
+    document.querySelectorAll('a[href*="discord.gg"]').forEach(link=>{if(link.href!==DISCORD_URL)link.href=DISCORD_URL});
+  }
+
+  function injectSafetyStyles(){
+    if(document.getElementById('killEventPreWarningStyles'))return;
+    const style=document.createElement('style');
+    style.id='killEventPreWarningStyles';
+    style.textContent=`
+      .kill-prewarning{margin:0 0 18px;padding:16px 18px;border:1px solid color-mix(in srgb,var(--red) 48%,var(--line));border-radius:21px;background:linear-gradient(130deg,color-mix(in srgb,var(--surface) 88%,var(--red) 12%),var(--surface));box-shadow:var(--shadow2);display:flex;align-items:flex-start;gap:13px}
+      .kill-prewarning-icon{width:43px;height:43px;border-radius:14px;background:color-mix(in srgb,var(--red) 14%,var(--surface2));display:grid;place-items:center;font-size:22px;flex:0 0 auto}
+      .kill-prewarning-copy{min-width:0}.kill-prewarning-tag{display:block;color:var(--red);font-size:9px;font-weight:950;letter-spacing:.1em}.kill-prewarning h3{margin:3px 0 5px;font-size:19px;letter-spacing:-.035em}.kill-prewarning p{margin:0;color:var(--muted);font-size:12px;line-height:1.55;font-weight:650}
+      @media(max-width:680px){.kill-prewarning{padding:13px 14px;border-radius:17px;gap:10px}.kill-prewarning-icon{width:37px;height:37px;border-radius:12px;font-size:19px}.kill-prewarning h3{font-size:16px}.kill-prewarning p{font-size:11px}}
+    `;
+    document.head.appendChild(style);
+  }
+
+  async function loadEventFeed(){
+    if(eventFeedCache)return eventFeedCache;
+    try{
+      const response=await fetch('/dashboard/events.json',{cache:'no-store'});
+      if(!response.ok)throw new Error(`events ${response.status}`);
+      const data=await response.json();
+      eventFeedCache=Array.isArray(data?.events)?data.events:[];
+    }catch(error){
+      console.warn('Kill Event prewarning feed unavailable',error);
+      eventFeedCache=[];
+    }
+    return eventFeedCache;
+  }
+
+  async function renderKillPreWarning(){
+    injectSafetyStyles();
+    const today=currentUtcDay(),tomorrow=dateKey(new Date(today.getTime()+DAY));
+    const events=await loadEventFeed();
+    const killTomorrow=events.some(e=>isKillEvent(e)&&activeOn(e,tomorrow));
+    let box=document.getElementById('killEventPreWarning');
+    if(!killTomorrow){box?.remove();return}
+    const anchor=document.getElementById('priorityRail')||document.getElementById('todayEvents');
+    if(!anchor)return;
+    if(!box){
+      box=document.createElement('section');
+      box.id='killEventPreWarning';
+      box.className='kill-prewarning';
+      box.setAttribute('role','alert');
+      anchor.parentNode.insertBefore(box,anchor);
+    }
+    const t=warningCopy[lang()]||warningCopy.en;
+    box.innerHTML=`<div class="kill-prewarning-icon" aria-hidden="true">⚠️</div><div class="kill-prewarning-copy"><span class="kill-prewarning-tag">${t.tag}</span><h3>${t.title}</h3><p>${t.text}</p></div>`;
+  }
+
+  function refresh(){updateDiscordLinks();renderKillPreWarning()}
+  function init(){
+    refresh();
+    const observer=new MutationObserver(mutations=>{
+      if(mutations.some(m=>m.type==='attributes'&&m.attributeName==='data-lang'))renderKillPreWarning();
+      if(mutations.some(m=>m.type==='childList'))updateDiscordLinks();
+    });
+    observer.observe(document.body,{attributes:true,attributeFilter:['data-lang'],childList:true,subtree:true});
+    setInterval(()=>{eventFeedCache=null;refresh()},60000);
+  }
+
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
+})();
