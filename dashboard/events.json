@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "kingdom": 1044,
   "timezone": "UTC",
-  "updatedAt": "2026-09-17T00:17:06Z",
+  "updatedAt": "2026-09-18T00:15:26Z",
   "events": [
     {
       "id": "kingdom-transfer-2026-09-1044",
@@ -303,6 +303,68 @@
               "Seulement si tu entraînes ou promeus déjà des troupes : obtiens le poste ministériel de Noble Conseiller, active le bonus d’entraînement à 3 000 gemmes avant de lancer l’entraînement et assure-toi que les troupes terminent aujourd’hui.",
               "Utilise des accélérateurs d’entraînement uniquement pour des troupes déjà prévues, pas seulement pour l’Alliance Brawl.",
               "Ne dépense pas de matériaux de charme, de Marteaux de forge, de Widgets, de Mithril ou de gemmes uniquement pour l’Alliance Brawl ; garde ces ressources pour le KvK."
+            ]
+          }
+        },
+        "2026-09-18": {
+          "points": {
+            "de": "Schrecken-Rallys (15.000 Punkte), Trucks (je 10.000), Bestien (4.000–6.000 nach Level), gehärtetes Truegold (18.750), Truegold (1.250), Truegold-Staub (625), Gouverneursausrüstung (22 je Wertungspunkt), Speedups (18 je Minute) und Edelsteine (1 je Edelstein)",
+            "en": "Terror rallies (15,000 points), trucks (10,000 each), Beasts (4,000–6,000 by level), Tempered Truegold (18,750), Truegold (1,250), Truegold Dust (625), Governor Gear (22 per score point), speedups (18 per minute) and gems (1 per gem)",
+            "fr": "Rallies contre les Terreurs (15 000 points), camions (10 000 chacun), Bêtes (4 000–6 000 selon le niveau), Truegold trempé (18 750), Truegold (1 250), poussière de Truegold (625), équipement du gouverneur (22 par point de score), accélérateurs (18 par minute) et gemmes (1 par gemme)"
+          },
+          "prepare": {
+            "title": {
+              "de": "Ausdauer und Märsche für Tag 6 bereithalten",
+              "en": "Keep stamina and marches ready for Day 6",
+              "fr": "Garder l’endurance et les marches prêtes pour le jour 6"
+            },
+            "status": {
+              "de": "FÜR MORGEN",
+              "en": "FOR TOMORROW",
+              "fr": "POUR DEMAIN"
+            },
+            "steps": {
+              "de": [
+                "Spare deine Ausdauerkanister; nutze heute vorzugsweise natürliche Ausdauer.",
+                "Halte zum nächsten Reset freie Märsche für neue Trucks, Schrecken-Rallys und Bestien bereit.",
+                "Beginne Tag 6 erneut mit Trucks und Jagd, bevor du überhaupt über Materialeinsatz nachdenkst.",
+                "Heldensplitter, Truegold, Ausrüstungs-, Amulett- und Pet-Materialien sowie Speedups bleiben für KvK reserviert."
+              ],
+              "en": [
+                "Save your stamina cans; preferably use natural stamina today.",
+                "Keep marches available at the next reset for new trucks, Terror rallies and Beasts.",
+                "Start Day 6 with trucks and hunting again before considering any material spending.",
+                "Keep Hero Shards, Truegold, gear, Charm and Pet materials, and speedups reserved for KvK."
+              ],
+              "fr": [
+                "Garde tes réserves d’endurance ; utilise de préférence l’endurance naturelle aujourd’hui.",
+                "Garde des marches disponibles au prochain reset pour les nouveaux camions, les rallies contre les Terreurs et les Bêtes.",
+                "Commence de nouveau le jour 6 avec les camions et la chasse avant d’envisager toute dépense de matériaux.",
+                "Conserve les fragments de héros, le Truegold, les matériaux d’équipement, de charme et de familiers ainsi que les accélérateurs pour le KvK."
+              ]
+            }
+          },
+          "steps": {
+            "de": [
+              "Nutze zuerst deine täglichen Trucks; Senden und erfolgreicher Überfall bringen jeweils 10.000 Punkte.",
+              "Setze danach natürliche Ausdauer ein: Starte Schrecken-Rallys für 15.000 Punkte und jage möglichst Bestien der Level 26–30 für 6.000 Punkte.",
+              "Falls keine hochstufige Bestie verfügbar ist, zählen auch niedrigere Level mit 4.000 bis 5.500 Punkten.",
+              "Verbrauche kein gehärtetes Truegold, Truegold, Truegold-Staub, Gouverneursausrüstung, Speedups oder Edelsteine nur für das Allianzgemenge.",
+              "Nutze Ausdauerkanister nur, wenn die zusätzliche Jagd unabhängig vom Gemenge sinnvoll ist; KvK-Vorräte haben Vorrang."
+            ],
+            "en": [
+              "Use your daily trucks first; escorting and a successful raid each give 10,000 points.",
+              "Then use natural stamina: call Terror rallies for 15,000 points and hunt level 26–30 Beasts where possible for 6,000 points.",
+              "If no high-level Beast is available, lower levels still give 4,000 to 5,500 points.",
+              "Do not spend Tempered Truegold, Truegold, Truegold Dust, Governor Gear resources, speedups or gems just for Alliance Brawl.",
+              "Use stamina cans only when the extra hunting is worthwhile independently of Brawl; KvK reserves take priority."
+            ],
+            "fr": [
+              "Utilise d’abord tes camions quotidiens ; une escorte et un raid réussi rapportent chacun 10 000 points.",
+              "Utilise ensuite l’endurance naturelle : lance des rallies contre les Terreurs pour 15 000 points et chasse si possible des Bêtes de niveau 26–30 pour 6 000 points.",
+              "Si aucune Bête de haut niveau n’est disponible, les niveaux inférieurs rapportent tout de même 4 000 à 5 500 points.",
+              "Ne dépense pas de Truegold trempé, de Truegold, de poussière de Truegold, de ressources d’équipement du gouverneur, d’accélérateurs ou de gemmes uniquement pour l’Alliance Brawl.",
+              "Utilise les réserves d’endurance seulement si la chasse supplémentaire est utile indépendamment de l’Alliance Brawl ; les réserves KvK restent prioritaires."
             ]
           }
         }
