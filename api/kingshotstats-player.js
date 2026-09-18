@@ -1,3 +1,4 @@
+// LocationBot DNS bridge v2
 const https = require('https');
 
 const VERIFY_BASE = 'https://bdzlgirowutasrsycjfj.supabase.co/functions/v1/discord-location-bot';
