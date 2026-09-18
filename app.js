@@ -107,6 +107,8 @@ document.getElementById('copyHello')?.addEventListener('click', async ()=>{
 });
 
 let sagrWatchlistPlayers=new Map();
+let sagrCheckedAt=null;
+const sagrPositionStateKey='nrw_sagr_position_history_v1';
 
 function sagrLang(){
  const value=document.body?.dataset?.lang||document.documentElement.lang||'en';
@@ -121,10 +123,41 @@ function sagrLocationAge(value){
  const hours=Math.floor(diff/3600000);
  const days=Math.floor(diff/86400000);
  const lang=sagrLang();
- if(minutes<2) return {de:'gerade erfasst',en:'just located',fr:'localisé à l’instant'}[lang];
+ if(minutes<2) return {de:'gerade eben',en:'just now',fr:'à l’instant'}[lang];
  if(minutes<60) return {de:`vor ${minutes} Min.`,en:`${minutes}m ago`,fr:`il y a ${minutes} min`}[lang];
  if(hours<24) return {de:`vor ${hours} Std.`,en:`${hours}h ago`,fr:`il y a ${hours} h`}[lang];
  return {de:`vor ${days} Tg.`,en:`${days}d ago`,fr:`il y a ${days} j`}[lang];
+}
+
+function sagrDurationSince(value){
+ const parsed=Date.parse(value||'');
+ if(!Number.isFinite(parsed)) return '';
+ const diff=Math.max(0,Date.now()-parsed);
+ const minutes=Math.floor(diff/60000);
+ const hours=Math.floor(diff/3600000);
+ const days=Math.floor(diff/86400000);
+ const lang=sagrLang();
+ if(minutes<2) return {de:'wenigen Augenblicken',en:'a moment',fr:'un instant'}[lang];
+ if(minutes<60) return {de:`${minutes} Min.`,en:`${minutes}m`,fr:`${minutes} min`}[lang];
+ if(hours<24) return {de:`${hours} Std.`,en:`${hours}h`,fr:`${hours} h`}[lang];
+ return {de:`${days} Tg.`,en:`${days}d`,fr:`${days} j`}[lang];
+}
+
+function sagrPositionChangedAt(player){
+ if(!player?.locationAvailable || !Number.isFinite(Number(player.x)) || !Number.isFinite(Number(player.y))) return null;
+ let state={};
+ try{ state=JSON.parse(localStorage.getItem(sagrPositionStateKey)||'{}')||{}; }catch(e){ state={}; }
+ const id=String(player.id);
+ const x=Number(player.x), y=Number(player.y);
+ const previous=state[id];
+ const same=previous && Number(previous.x)===x && Number(previous.y)===y;
+ if(!same){
+  state[id]={x,y,changedAt:player.locationUpdatedAt||sagrCheckedAt||new Date().toISOString()};
+ }else if(!previous.changedAt){
+  previous.changedAt=player.locationUpdatedAt||sagrCheckedAt||new Date().toISOString();
+ }
+ try{ localStorage.setItem(sagrPositionStateKey,JSON.stringify(state)); }catch(e){}
+ return state[id]?.changedAt||null;
 }
 
 function ensureSagrLocationStyles(){
@@ -134,7 +167,7 @@ function ensureSagrLocationStyles(){
  style.textContent=`
  .outlaw-location{display:flex;flex-direction:column;gap:2px;margin-top:7px;padding:7px 9px;border-radius:10px;background:color-mix(in srgb,var(--surface2) 72%,transparent);border:1px solid var(--line)}
  .outlaw-location b{font-size:11px;letter-spacing:.01em;color:var(--ink)}
- .outlaw-location small{font-size:8px;color:var(--muted);line-height:1.35}
+ .outlaw-location small{font-size:8px;color:var(--muted);line-height:1.35;display:block}
  .outlaw-location.is-missing b{color:var(--muted)}
  @media(max-width:760px){
   .outlaw-accounts>div{grid-template-columns:68px minmax(0,1fr) auto;gap:6px}
@@ -151,7 +184,10 @@ function renderSagrLocations(){
  ensureSagrLocationStyles();
  const lang=sagrLang();
  const missing={de:'📍 Standort derzeit nicht erfasst',en:'📍 Location currently unavailable',fr:'📍 Position actuellement indisponible'}[lang];
- const lastSeen={de:'Zuletzt auf der Karte erfasst',en:'Last located on the map',fr:'Dernière position relevée'}[lang];
+ const tcLabel=level=>level?`TC ${level}`:'TC ?';
+ const positionChangedLabel={de:'unverändert',en:'unchanged',fr:'inchangée'}[lang];
+ const kssLabel={de:'KSS-Karte',en:'KSS map',fr:'carte KSS'}[lang];
+ const checkedLabel={de:'geprüft',en:'checked',fr:'vérifié'}[lang];
  document.querySelectorAll('.outlaw-accounts [data-player-id]').forEach(card=>{
   const player=sagrWatchlistPlayers.get(card.dataset.playerId);
   if(!player) return;
@@ -165,13 +201,21 @@ function renderSagrLocations(){
    const idLine=card.querySelector('small');
    if(idLine) card.insertBefore(location,idLine); else card.appendChild(location);
   }
+  const tc=Number(player.townCenterLevel);
+  const tcText=tcLabel(Number.isFinite(tc)&&tc>0?tc:null);
+  const checkedAge=sagrLocationAge(sagrCheckedAt);
+  const sourceAge=sagrLocationAge(player.locationUpdatedAt);
   if(player.locationAvailable&&Number.isFinite(Number(player.x))&&Number.isFinite(Number(player.y))){
    location.classList.remove('is-missing');
-   const age=sagrLocationAge(player.locationUpdatedAt);
-   location.innerHTML=`<b>📍 X: ${Number(player.x)} · Y: ${Number(player.y)}</b><small>${lastSeen}${age?` · ${age}`:''}</small>`;
+   const changedAt=sagrPositionChangedAt(player);
+   const unchangedFor=sagrDurationSince(changedAt);
+   const positionLine=unchangedFor
+    ? (lang==='de'?`seit ${unchangedFor} ${positionChangedLabel}`:lang==='fr'?`${positionChangedLabel} depuis ${unchangedFor}`:`${positionChangedLabel} for ${unchangedFor}`)
+    : positionChangedLabel;
+   location.innerHTML=`<b>📍 X: ${Number(player.x)} · Y: ${Number(player.y)}</b><small>${tcText} · ${positionLine}</small><small>${kssLabel}${sourceAge?` ${sourceAge}`:''}${checkedAge?` · ${checkedLabel} ${checkedAge}`:''}</small>`;
   }else{
    location.classList.add('is-missing');
-   location.innerHTML=`<b>${missing}</b>`;
+   location.innerHTML=`<b>${missing}</b><small>${tcText}${checkedAge?` · ${checkedLabel} ${checkedAge}`:''}</small>`;
   }
  });
 }
@@ -181,6 +225,7 @@ async function refreshSagrAccountNames(){
   const response=await fetch('/api/sagr-accounts',{headers:{'Accept':'application/json'},cache:'no-store'});
   if(!response.ok) return;
   const payload=await response.json();
+  sagrCheckedAt=payload.checkedAt||payload.updatedAt||new Date().toISOString();
   sagrWatchlistPlayers=new Map((payload.players||[]).map(player=>[String(player.id),player]));
   renderSagrLocations();
  }catch(error){
@@ -188,6 +233,7 @@ async function refreshSagrAccountNames(){
  }
 }
 refreshSagrAccountNames();
+setInterval(refreshSagrAccountNames,5*60*1000);
 window.addEventListener('nrw-lang-change',renderSagrLocations);
 
 (function add555ChatCulture(){
