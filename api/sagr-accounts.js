@@ -35,11 +35,14 @@ function normalizeMember(member) {
   const mapKid = rawMapKid === null || rawMapKid === undefined ? null : Number(rawMapKid);
   const hasCoordinates = hasRawCoordinates && Number.isFinite(x) && Number.isFinite(y) && x >= 0 && y >= 0;
   const isKingdom1044 = mapKid === null || mapKid === 1044;
+  const rawTownCenterLevel = member.town_center_level ?? member.tc_level ?? member.furnace_level;
+  const townCenterLevel = rawTownCenterLevel === null || rawTownCenterLevel === undefined ? null : Number(rawTownCenterLevel);
 
   return {
     id,
     nickname: member.nick_name || member.name || '',
     alliance: member.alliance_abbr || '',
+    townCenterLevel: Number.isFinite(townCenterLevel) && townCenterLevel > 0 ? townCenterLevel : null,
     x: hasCoordinates && isKingdom1044 ? x : null,
     y: hasCoordinates && isKingdom1044 ? y : null,
     mapKid: Number.isFinite(mapKid) ? mapKid : null,
@@ -82,6 +85,7 @@ module.exports = async function handler(req, res) {
   });
 
   const players = [...byId.values()];
+  const checkedAt = new Date().toISOString();
   res.setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=900');
-  return res.status(200).json({ players, updatedAt: new Date().toISOString() });
+  return res.status(200).json({ players, checkedAt, updatedAt: checkedAt });
 };
