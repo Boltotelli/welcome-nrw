@@ -1,4 +1,4 @@
-// LocationBot DNS bridge v2
+// LocationBot DNS bridge v3
 const https = require('https');
 
 const VERIFY_BASE = 'https://bdzlgirowutasrsycjfj.supabase.co/functions/v1/discord-location-bot';
@@ -7,33 +7,58 @@ const API_HOST = 'api.kingshotstats.com';
 let cachedIp = null;
 let cachedIpAt = 0;
 
-async function resolveApiIp() {
-  if (cachedIp && Date.now() - cachedIpAt < 5 * 60 * 1000) return cachedIp;
+async function queryDoh(host, provider) {
+  const url = provider === 'cloudflare'
+    ? 'https://cloudflare-dns.com/dns-query?name=' + encodeURIComponent(host) + '&type=A'
+    : 'https://dns.google/resolve?name=' + encodeURIComponent(host) + '&type=A';
 
-  const providers = [
-    'https://cloudflare-dns.com/dns-query?name=' + encodeURIComponent(API_HOST) + '&type=A',
-    'https://dns.google/resolve?name=' + encodeURIComponent(API_HOST) + '&type=A'
-  ];
+  const response = await fetch(url, {
+    headers: { Accept: 'application/dns-json' },
+    signal: AbortSignal.timeout(5000)
+  });
+  if (!response.ok) throw new Error(provider + '_doh_' + response.status);
 
-  for (const url of providers) {
+  const payload = await response.json();
+  const answers = Array.isArray(payload?.Answer) ? payload.Answer : [];
+  return answers;
+}
+
+async function resolveHost(host, depth = 0) {
+  if (depth > 5) throw new Error('dns_cname_depth');
+
+  const providers = ['cloudflare', 'google'];
+  const errors = [];
+
+  for (const provider of providers) {
     try {
-      const response = await fetch(url, {
-        headers: { Accept: 'application/dns-json' },
-        signal: AbortSignal.timeout(5000)
-      });
-      if (!response.ok) continue;
-      const payload = await response.json();
-      const answers = Array.isArray(payload?.Answer) ? payload.Answer : [];
-      const record = answers.find(item => Number(item?.type) === 1 && /^\d{1,3}(?:\.\d{1,3}){3}$/.test(String(item?.data || '')));
-      if (record?.data) {
-        cachedIp = String(record.data);
-        cachedIpAt = Date.now();
-        return cachedIp;
+      const answers = await queryDoh(host, provider);
+
+      const a = answers.find(item =>
+        Number(item?.type) === 1 &&
+        /^\d{1,3}(?:\.\d{1,3}){3}$/.test(String(item?.data || ''))
+      );
+      if (a?.data) return String(a.data);
+
+      const cname = answers.find(item => Number(item?.type) === 5 && item?.data);
+      if (cname?.data) {
+        const next = String(cname.data).replace(/\.$/, '');
+        return await resolveHost(next, depth + 1);
       }
-    } catch {}
+
+      errors.push(provider + ':no_a_or_cname');
+    } catch (error) {
+      errors.push(provider + ':' + (error?.message || String(error)));
+    }
   }
 
-  throw new Error('dns_over_https_failed');
+  throw new Error('dns_over_https_failed|' + host + '|' + errors.join(','));
+}
+
+async function resolveApiIp() {
+  if (cachedIp && Date.now() - cachedIpAt < 5 * 60 * 1000) return cachedIp;
+  cachedIp = await resolveHost(API_HOST);
+  cachedIpAt = Date.now();
+  return cachedIp;
 }
 
 function fetchViaIp(ip, id, authorization) {
