@@ -1,16 +1,16 @@
-// LocationBot DNS bridge v3
+// LocationBot DNS bridge v4
 const https = require('https');
 
 const VERIFY_BASE = 'https://bdzlgirowutasrsycjfj.supabase.co/functions/v1/discord-location-bot';
 const API_HOST = 'api.kingshotstats.com';
 
-let cachedIp = null;
-let cachedIpAt = 0;
+let cachedAddress = null;
+let cachedAddressAt = 0;
 
-async function queryDoh(host, provider) {
+async function queryDoh(host, provider, type) {
   const url = provider === 'cloudflare'
-    ? 'https://cloudflare-dns.com/dns-query?name=' + encodeURIComponent(host) + '&type=A'
-    : 'https://dns.google/resolve?name=' + encodeURIComponent(host) + '&type=A';
+    ? 'https://cloudflare-dns.com/dns-query?name=' + encodeURIComponent(host) + '&type=' + type
+    : 'https://dns.google/resolve?name=' + encodeURIComponent(host) + '&type=' + type;
 
   const response = await fetch(url, {
     headers: { Accept: 'application/dns-json' },
@@ -19,53 +19,62 @@ async function queryDoh(host, provider) {
   if (!response.ok) throw new Error(provider + '_doh_' + response.status);
 
   const payload = await response.json();
-  const answers = Array.isArray(payload?.Answer) ? payload.Answer : [];
-  return answers;
+  return Array.isArray(payload?.Answer) ? payload.Answer : [];
 }
 
 async function resolveHost(host, depth = 0) {
   if (depth > 5) throw new Error('dns_cname_depth');
 
   const providers = ['cloudflare', 'google'];
+  const queryTypes = ['A', 'AAAA'];
   const errors = [];
 
   for (const provider of providers) {
-    try {
-      const answers = await queryDoh(host, provider);
+    for (const queryType of queryTypes) {
+      try {
+        const answers = await queryDoh(host, provider, queryType);
 
-      const a = answers.find(item =>
-        Number(item?.type) === 1 &&
-        /^\d{1,3}(?:\.\d{1,3}){3}$/.test(String(item?.data || ''))
-      );
-      if (a?.data) return String(a.data);
+        const a = answers.find(item =>
+          Number(item?.type) === 1 &&
+          /^\d{1,3}(?:\.\d{1,3}){3}$/.test(String(item?.data || ''))
+        );
+        if (a?.data) return { address: String(a.data), family: 4 };
 
-      const cname = answers.find(item => Number(item?.type) === 5 && item?.data);
-      if (cname?.data) {
-        const next = String(cname.data).replace(/\.$/, '');
-        return await resolveHost(next, depth + 1);
+        const aaaa = answers.find(item =>
+          Number(item?.type) === 28 &&
+          String(item?.data || '').includes(':')
+        );
+        if (aaaa?.data) return { address: String(aaaa.data), family: 6 };
+
+        const cname = answers.find(item => Number(item?.type) === 5 && item?.data);
+        if (cname?.data) {
+          const next = String(cname.data).replace(/\.$/, '');
+          return await resolveHost(next, depth + 1);
+        }
+
+        errors.push(provider + ':' + queryType + ':empty');
+      } catch (error) {
+        errors.push(provider + ':' + queryType + ':' + (error?.message || String(error)));
       }
-
-      errors.push(provider + ':no_a_or_cname');
-    } catch (error) {
-      errors.push(provider + ':' + (error?.message || String(error)));
     }
   }
 
   throw new Error('dns_over_https_failed|' + host + '|' + errors.join(','));
 }
 
-async function resolveApiIp() {
-  if (cachedIp && Date.now() - cachedIpAt < 5 * 60 * 1000) return cachedIp;
-  cachedIp = await resolveHost(API_HOST);
-  cachedIpAt = Date.now();
-  return cachedIp;
+async function resolveApiAddress() {
+  if (cachedAddress && Date.now() - cachedAddressAt < 5 * 60 * 1000) return cachedAddress;
+  cachedAddress = await resolveHost(API_HOST);
+  cachedAddressAt = Date.now();
+  return cachedAddress;
 }
 
-function fetchViaIp(ip, id, authorization) {
+function fetchViaAddress(target, id, authorization) {
   return new Promise((resolve, reject) => {
     const request = https.request({
       protocol: 'https:',
-      hostname: ip,
+      hostname: target.address,
+      family: target.family,
       port: 443,
       method: 'GET',
       path: '/v1/players/' + encodeURIComponent(id) + '?include=base',
@@ -126,8 +135,8 @@ module.exports = async function handler(req, res) {
       return res.status(403).json({ error: 'forbidden' });
     }
 
-    const ip = await resolveApiIp();
-    const upstream = await fetchViaIp(ip, id, authorization);
+    const target = await resolveApiAddress();
+    const upstream = await fetchViaAddress(target, id, authorization);
 
     res.setHeader('Cache-Control', 'no-store');
     res.setHeader('Content-Type', upstream.contentType);
