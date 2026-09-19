@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "kingdom": 1044,
   "timezone": "UTC",
-  "updatedAt": "2026-09-18T00:15:26Z",
+  "updatedAt": "2026-09-19T00:16:51Z",
   "events": [
     {
       "id": "kingdom-transfer-2026-09-1044",
@@ -365,6 +365,68 @@
               "Si aucune Bête de haut niveau n’est disponible, les niveaux inférieurs rapportent tout de même 4 000 à 5 500 points.",
               "Ne dépense pas de Truegold trempé, de Truegold, de poussière de Truegold, de ressources d’équipement du gouverneur, d’accélérateurs ou de gemmes uniquement pour l’Alliance Brawl.",
               "Utilise les réserves d’endurance seulement si la chasse supplémentaire est utile indépendamment de l’Alliance Brawl ; les réserves KvK restent prioritaires."
+            ]
+          }
+        },
+        "2026-09-19": {
+          "points": {
+            "de": "Gesamtwettbewerb: Schrecken-Rallys (15.000), Trucks (je 10.000), Bestien (4.000–6.000), Mithril und gehärtetes Truegold (je 18.750), Zähmungsmarken (9.370/680), Widgets (3.750), Forgehammer und mythische Splitter (je 1.875), Truegold (1.250), epische Splitter (750), Truegold-Staub (625), seltene Splitter (210), Amulettwert (45), Pet-Fortschritt (30), Ausrüstungswert (22), Speedups (18 je Minute) und Edelsteine (1 je Edelstein)",
+            "en": "Full-Scale Competition: Terror rallies (15,000), trucks (10,000 each), Beasts (4,000–6,000), Mithril and Tempered Truegold (18,750 each), Taming Marks (9,370/680), Widgets (3,750), Forgehammers and Mythic Shards (1,875 each), Truegold (1,250), Epic Shards (750), Truegold Dust (625), Rare Shards (210), Charm score (45), Pet Advancement (30), Gear score (22), speedups (18 per minute) and gems (1 per gem)",
+            "fr": "Compétition générale : rallies contre les Terreurs (15 000), camions (10 000 chacun), Bêtes (4 000–6 000), Mithril et Truegold trempé (18 750 chacun), marques de dressage (9 370/680), Widgets (3 750), Marteaux de forge et fragments mythiques (1 875 chacun), Truegold (1 250), fragments épiques (750), poussière de Truegold (625), fragments rares (210), score de charme (45), progression de familier (30), score d’équipement (22), accélérateurs (18 par minute) et gemmes (1 par gemme)"
+          },
+          "prepare": {
+            "title": {
+              "de": "Finalphase nach dem nächsten Reset fortsetzen",
+              "en": "Continue the final stage after the next reset",
+              "fr": "Continuer la phase finale après le prochain reset"
+            },
+            "status": {
+              "de": "36-STUNDEN-PHASE",
+              "en": "36-HOUR STAGE",
+              "fr": "PHASE DE 36 HEURES"
+            },
+            "steps": {
+              "de": [
+                "Der letzte Gemenge-Tag dauert 36 Stunden und läuft nach dem nächsten Reset weiter.",
+                "Spare Ausdauerkanister und halte freie Märsche für die neuen täglichen Trucks bereit.",
+                "Nutze morgen nach dem Reset zuerst die neuen Trucks, danach natürliche Ausdauer für Schrecken und hochstufige Bestien.",
+                "Prüfe den Ingame-Countdown und erledige diese kostenlosen Punkte rechtzeitig vor dem tatsächlichen Eventende."
+              ],
+              "en": [
+                "The final Brawl day lasts 36 hours and continues after the next reset.",
+                "Save stamina cans and keep marches available for the new daily trucks.",
+                "After tomorrow’s reset, use the new trucks first, then natural stamina on Terrors and high-level Beasts.",
+                "Check the in-game countdown and complete these free scoring actions before the event actually ends."
+              ],
+              "fr": [
+                "Le dernier jour de l’Alliance Brawl dure 36 heures et continue après le prochain reset.",
+                "Garde les réserves d’endurance et des marches disponibles pour les nouveaux camions quotidiens.",
+                "Après le reset de demain, utilise d’abord les nouveaux camions, puis l’endurance naturelle contre les Terreurs et les Bêtes de haut niveau.",
+                "Vérifie le compte à rebours en jeu et réalise ces actions gratuites avant la fin effective de l’événement."
+              ]
+            }
+          },
+          "steps": {
+            "de": [
+              "Wenn möglich, warte im Handelsimperium ungefähr zehn Stunden nach dem Reset, bevor du deine Karawanen sendest; später finden erfahrungsgemäß weniger Angriffe statt.",
+              "Nutze deine täglichen Trucks; Senden und erfolgreicher Überfall bringen jeweils 10.000 Punkte.",
+              "Setze anschließend natürliche Ausdauer ein: Schrecken-Rallys bringen 15.000 Punkte, Bestien der Level 26–30 jeweils 6.000 Punkte.",
+              "Die Finalphase dauert 36 Stunden – es besteht kein Grund, heute KvK-Vorräte zu verbrennen.",
+              "Verbrauche keine Helden-, Truegold-, Ausrüstungs-, Amulett- oder Pet-Materialien, Speedups, Mithril oder Edelsteine nur für das Allianzgemenge."
+            ],
+            "en": [
+              "If possible, wait about ten hours after reset before sending Merchant Empire caravans; fewer attacks usually happen later.",
+              "Use your daily trucks; escorting and a successful raid each give 10,000 points.",
+              "Then use natural stamina: Terror rallies give 15,000 points, while level 26–30 Beasts give 6,000 each.",
+              "The final stage lasts 36 hours—there is no reason to burn KvK reserves today.",
+              "Do not spend Hero, Truegold, gear, Charm or Pet materials, speedups, Mithril or gems just for Alliance Brawl."
+            ],
+            "fr": [
+              "Si possible, attends environ dix heures après le reset avant d’envoyer tes caravanes de l’Empire commercial ; les attaques sont généralement moins nombreuses plus tard.",
+              "Utilise tes camions quotidiens ; une escorte et un raid réussi rapportent chacun 10 000 points.",
+              "Utilise ensuite l’endurance naturelle : les rallies contre les Terreurs rapportent 15 000 points et les Bêtes de niveau 26–30 rapportent 6 000 points chacune.",
+              "La phase finale dure 36 heures : il n’y a aucune raison de brûler les réserves KvK aujourd’hui.",
+              "Ne dépense pas de fragments de héros, de Truegold, de matériaux d’équipement, de charme ou de familiers, d’accélérateurs, de Mithril ou de gemmes uniquement pour l’Alliance Brawl."
             ]
           }
         }
