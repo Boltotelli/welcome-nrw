@@ -1,22 +1,53 @@
-const PLAYER_IDS = new Set(['152066464', '295632062', '295189783']);
-const ALLIANCE_TAGS = ['MAD', 'cZp'];
+const PLAYER_IDS = ['152066464', '295632062', '295189783'];
+const CENTRAL_URL = 'https://bdzlgirowutasrsycjfj.supabase.co/functions/v1/kingshot-data';
+
+function normalizeCentral(player) {
+  const x = player?.x == null ? null : Number(player.x);
+  const y = player?.y == null ? null : Number(player.y);
+  const tc = player?.tcLevel == null ? null : Number(player.tcLevel);
+  return {
+    id: String(player?.playerId || ''),
+    nickname: player?.name || '',
+    alliance: player?.alliance || '',
+    townCenterLevel: Number.isFinite(tc) && tc > 0 ? tc : null,
+    x: Number.isFinite(x) ? x : null,
+    y: Number.isFinite(y) ? y : null,
+    mapKid: 1044,
+    locationUpdatedAt: player?.locationUpdatedAt || null,
+    locationAvailable: Number.isFinite(x) && Number.isFinite(y),
+    shieldState: player?.shieldState || 'unknown',
+    shieldEndAt: player?.shieldEndAt || null,
+    shieldUpdatedAt: player?.shieldUpdatedAt || null,
+    source: player?.source || 'kingshot-cache'
+  };
+}
+
+async function fetchCentral() {
+  const url = new URL(CENTRAL_URL);
+  url.searchParams.set('player_ids', PLAYER_IDS.join(','));
+  const response = await fetch(url, {
+    headers: { Accept: 'application/json' },
+    signal: AbortSignal.timeout(12000),
+    cache: 'no-store'
+  });
+  if (!response.ok) throw new Error(`Kingshot data ${response.status}`);
+  const payload = await response.json();
+  if (!payload?.ok || !Array.isArray(payload.players)) throw new Error('Invalid Kingshot data response');
+  return payload.players.map(normalizeCentral).filter(player => player.id);
+}
 
 async function fetchAlliance(tag) {
   const url = new URL('https://kingshotstats.com/api/alliances/lookup');
   url.searchParams.set('kid', '1044');
   url.searchParams.set('slug', tag);
   url.searchParams.set('refresh', '1');
-
   const response = await fetch(url, {
-    headers: { 'Accept': 'application/json' },
+    headers: { Accept: 'application/json' },
     signal: AbortSignal.timeout(10000)
   });
   if (!response.ok) throw new Error(`KingshotStats ${response.status}`);
-
   const payload = await response.json();
-  if (!payload?.ok || !Array.isArray(payload.members)) {
-    throw new Error('Invalid roster response');
-  }
+  if (!payload?.ok || !Array.isArray(payload.members)) throw new Error('Invalid roster response');
   return payload.members;
 }
 
@@ -26,29 +57,41 @@ function toIsoTimestamp(value) {
   return new Date(seconds * 1000).toISOString();
 }
 
-function normalizeMember(member) {
+function normalizeFallback(member) {
   const id = String(member.governor_id || member.fid || '');
-  const hasRawCoordinates = member.x !== null && member.x !== undefined && member.y !== null && member.y !== undefined;
-  const x = hasRawCoordinates ? Number(member.x) : null;
-  const y = hasRawCoordinates ? Number(member.y) : null;
-  const rawMapKid = member.map_kid;
-  const mapKid = rawMapKid === null || rawMapKid === undefined ? null : Number(rawMapKid);
-  const hasCoordinates = hasRawCoordinates && Number.isFinite(x) && Number.isFinite(y) && x >= 0 && y >= 0;
-  const isKingdom1044 = mapKid === null || mapKid === 1044;
-  const rawTownCenterLevel = member.town_center_level ?? member.tc_level ?? member.furnace_level;
-  const townCenterLevel = rawTownCenterLevel === null || rawTownCenterLevel === undefined ? null : Number(rawTownCenterLevel);
-
+  const x = member.x == null ? null : Number(member.x);
+  const y = member.y == null ? null : Number(member.y);
+  const tcRaw = member.town_center_level ?? member.tc_level ?? member.furnace_level;
+  const tc = tcRaw == null ? null : Number(tcRaw);
   return {
     id,
     nickname: member.nick_name || member.name || '',
     alliance: member.alliance_abbr || '',
-    townCenterLevel: Number.isFinite(townCenterLevel) && townCenterLevel > 0 ? townCenterLevel : null,
-    x: hasCoordinates && isKingdom1044 ? x : null,
-    y: hasCoordinates && isKingdom1044 ? y : null,
-    mapKid: Number.isFinite(mapKid) ? mapKid : null,
+    townCenterLevel: Number.isFinite(tc) && tc > 0 ? tc : null,
+    x: Number.isFinite(x) ? x : null,
+    y: Number.isFinite(y) ? y : null,
+    mapKid: 1044,
     locationUpdatedAt: toIsoTimestamp(member.map_updated_at),
-    locationAvailable: Boolean(hasCoordinates && isKingdom1044)
+    locationAvailable: Number.isFinite(x) && Number.isFinite(y),
+    shieldState: 'unknown',
+    shieldEndAt: null,
+    shieldUpdatedAt: null,
+    source: 'kingshotstats_fallback'
   };
+}
+
+async function fetchFallback() {
+  const tags = ['MAD', 'cZp'];
+  const results = await Promise.allSettled(tags.map(fetchAlliance));
+  const byId = new Map();
+  for (const result of results) {
+    if (result.status !== 'fulfilled') continue;
+    for (const member of result.value) {
+      const player = normalizeFallback(member);
+      if (PLAYER_IDS.includes(player.id) && player.nickname) byId.set(player.id, player);
+    }
+  }
+  return [...byId.values()];
 }
 
 module.exports = async function handler(req, res) {
@@ -57,35 +100,24 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: 'method_not_allowed' });
   }
 
-  const results = await Promise.allSettled(ALLIANCE_TAGS.map(fetchAlliance));
-  const byId = new Map();
+  let players = [];
+  let source = 'kingshot-data';
+  try {
+    players = await fetchCentral();
+  } catch (error) {
+    console.warn('Central Kingshot data unavailable', error?.message);
+  }
 
-  results
-    .filter(result => result.status === 'fulfilled')
-    .flatMap(result => result.value)
-    .map(normalizeMember)
-    .filter(player => PLAYER_IDS.has(player.id) && player.nickname)
-    .forEach(player => {
-      const previous = byId.get(player.id);
-      if (!previous) {
-        byId.set(player.id, player);
-        return;
-      }
-      const previousTime = Date.parse(previous.locationUpdatedAt || '') || 0;
-      const playerTime = Date.parse(player.locationUpdatedAt || '') || 0;
-      if ((!previous.locationAvailable && player.locationAvailable) || playerTime > previousTime) {
-        byId.set(player.id, player);
-      }
-    });
-
-  results.forEach((result, index) => {
-    if (result.status === 'rejected') {
-      console.warn('Watchlist roster lookup failed', ALLIANCE_TAGS[index], result.reason?.message);
+  if (!players.length) {
+    source = 'kingshotstats-fallback';
+    try {
+      players = await fetchFallback();
+    } catch (error) {
+      console.warn('Fallback roster lookup failed', error?.message);
     }
-  });
+  }
 
-  const players = [...byId.values()];
   const checkedAt = new Date().toISOString();
-  res.setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=900');
-  return res.status(200).json({ players, checkedAt, updatedAt: checkedAt });
+  res.setHeader('Cache-Control', 'public, s-maxage=120, stale-while-revalidate=600');
+  return res.status(200).json({ players, checkedAt, updatedAt: checkedAt, source });
 };
