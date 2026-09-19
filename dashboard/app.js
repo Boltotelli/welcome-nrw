@@ -195,9 +195,55 @@
   const showHero=index=>{resetHeroFaces();heroDeck.classList.add('has-interacted');updateHeroControls(index);heroDeck.scrollTo({left:heroIndex*(heroDeck.clientWidth+12),behavior:'smooth'})};
   heroCards.forEach(card=>card.addEventListener('click',()=>{heroDeck.classList.add('has-interacted');const next=!card.classList.contains('is-flipped');resetHeroFaces();if(next){card.classList.add('is-flipped');card.setAttribute('aria-pressed','true')}}));
   heroDeck.addEventListener('pointerdown',()=>heroDeck.classList.add('has-interacted'),{once:true});heroDeck.addEventListener('scroll',()=>{clearTimeout(heroScrollTimer);heroScrollTimer=setTimeout(()=>{const index=Math.round(heroDeck.scrollLeft/Math.max(1,heroDeck.clientWidth));if(index!==heroIndex)resetHeroFaces();updateHeroControls(index)},80)},{passive:true});document.getElementById('heroPrev').addEventListener('click',()=>showHero(heroIndex-1));document.getElementById('heroNext').addEventListener('click',()=>showHero(heroIndex+1));updateHeroControls(0);
-  const profileKey='nrw_member_profile_v1',playerNameInput=document.getElementById('playerName'),playerIdInput=document.getElementById('playerId');try{const p=JSON.parse(localStorage.getItem(profileKey)||'null');if(p){playerNameInput.value=p.playerName||'';playerIdInput.value=p.playerId||'';document.querySelectorAll('#languageGrid input').forEach(i=>i.checked=(p.languages||[]).includes(i.value))}}catch(e){}
+  const profileKey='nrw_member_profile_v1',playerNameInput=document.getElementById('playerName'),playerIdInput=document.getElementById('playerId');
+  try{
+    const p=JSON.parse(localStorage.getItem(profileKey)||'null');
+    if(p){
+      playerNameInput.value=p.playerName||'';
+      playerIdInput.value=p.playerId||'';
+      document.querySelectorAll('#languageGrid input').forEach(i=>i.checked=(p.languages||[]).includes(i.value));
+    }
+  }catch(e){}
   const messages={de:{missing:'Bitte Name, Player ID und Sprache angeben.',invalid:'Die Player ID darf nur Zahlen enthalten.',saved:'Im NRW-Spielerprofil gespeichert ✓',queued:'Zur Prüfung gespeichert ✓',error:'Speichern gerade nicht möglich.'},en:{missing:'Please add name, Player ID and language.',invalid:'Player ID must contain numbers only.',saved:'Saved to your NRW member profile ✓',queued:'Saved for review ✓',error:'Could not save right now.'},fr:{missing:'Ajoute ton nom, Player ID et ta langue.',invalid:'La Player ID doit contenir uniquement des chiffres.',saved:'Enregistré dans ton profil NRW ✓',queued:'Enregistré pour vérification ✓',error:'Enregistrement impossible.'}};
-  document.getElementById('saveProfile').addEventListener('click',async()=>{const lang=body.dataset.lang||'en',m=messages[lang],status=document.getElementById('saveStatus'),button=document.getElementById('saveProfile'),profile={schemaVersion:2,playerName:playerNameInput.value.trim(),playerId:playerIdInput.value.trim(),languages:[...document.querySelectorAll('#languageGrid input:checked')].map(i=>i.value),otherLanguage:'',source:'nrw-player-dashboard',updatedAt:new Date().toISOString()};status.className='';if(!profile.playerName||!profile.playerId||!profile.languages.length){status.textContent=m.missing;status.className='error';return}if(!/^\d+$/.test(profile.playerId)){status.textContent=m.invalid;status.className='error';return}button.disabled=true;try{const r=await fetch('https://bdzlgirowutasrsycjfj.supabase.co/functions/v1/nrw-welcome-language',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(profile)}),data=await r.json().catch(()=>({}));if(!r.ok||!data.ok)throw new Error();localStorage.setItem(profileKey,JSON.stringify(profile));status.textContent=data.queued?m.queued:m.saved;status.className='success'}catch(e){status.textContent=m.error;status.className='error'}finally{button.disabled=false}});
+  const kingshotDataUrl='https://bdzlgirowutasrsycjfj.supabase.co/functions/v1/kingshot-data';
+  async function resolveDashboardPlayer(playerId){
+    const id=String(playerId||'').trim();
+    if(!/^\d+$/.test(id)) return null;
+    try{
+      const r=await fetch(`${kingshotDataUrl}?player_id=${encodeURIComponent(id)}`,{headers:{Accept:'application/json'},cache:'no-store'});
+      if(!r.ok) return null;
+      const data=await r.json();
+      const player=Array.isArray(data?.players)?data.players[0]:null;
+      if(player?.name){
+        playerNameInput.value=player.name;
+        const liveBits=[player.alliance?[`[${player.alliance}]`]:[],player.tcLevel?[`TC${player.tcLevel}`]:[]].flat();
+        playerNameInput.title=liveBits.length?`Live Kingshot data · ${liveBits.join(' · ')}`:'Live Kingshot data';
+      }
+      return player;
+    }catch(e){ return null; }
+  }
+  playerIdInput.addEventListener('blur',()=>{resolveDashboardPlayer(playerIdInput.value)});
+  if(playerIdInput.value) resolveDashboardPlayer(playerIdInput.value);
+  document.getElementById('saveProfile').addEventListener('click',async()=>{
+    const lang=body.dataset.lang||'en',m=messages[lang],status=document.getElementById('saveStatus'),button=document.getElementById('saveProfile');
+    const playerId=playerIdInput.value.trim();
+    const languages=[...document.querySelectorAll('#languageGrid input:checked')].map(i=>i.value);
+    status.className='';
+    if(!playerId||!languages.length){status.textContent=m.missing;status.className='error';return}
+    if(!/^\d+$/.test(playerId)){status.textContent=m.invalid;status.className='error';return}
+    button.disabled=true;
+    try{
+      const live=await resolveDashboardPlayer(playerId);
+      const playerName=(live?.name||playerNameInput.value.trim());
+      if(!playerName){status.textContent=m.missing;status.className='error';return}
+      const profile={schemaVersion:3,playerName,playerId,languages,otherLanguage:'',source:'nrw-player-dashboard',updatedAt:new Date().toISOString(),liveAlliance:live?.alliance||null,liveTcLevel:live?.tcLevel||null};
+      const r=await fetch('https://bdzlgirowutasrsycjfj.supabase.co/functions/v1/nrw-welcome-language',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(profile)});
+      const data=await r.json().catch(()=>({}));
+      if(!r.ok||!data.ok)throw new Error();
+      localStorage.setItem(profileKey,JSON.stringify(profile));
+      status.textContent=data.queued?m.queued:m.saved;status.className='success';
+    }catch(e){status.textContent=m.error;status.className='error'}finally{button.disabled=false}
+  });
   Promise.allSettled([fetch('/dashboard/events.json',{cache:'no-store'}).then(r=>r.ok?r.json():Promise.reject()),fetch('/dashboard/event-guides.json',{cache:'no-store'}).then(r=>r.ok?r.json():Promise.reject())]).then(([feedResult,guideResult])=>{if(feedResult.status==='fulfilled')eventFeed=Array.isArray(feedResult.value.events)?feedResult.value.events:[];if(guideResult.status==='fulfilled')eventGuideDb=guideResult.value||eventGuideDb;renderDynamic()});
   renderDynamic();tick();setInterval(tick,1000);setInterval(renderDynamic,60000);
 })();
