@@ -186,8 +186,20 @@ function renderSagrLocations(){
  const missing={de:'📍 Standort derzeit nicht erfasst',en:'📍 Location currently unavailable',fr:'📍 Position actuellement indisponible'}[lang];
  const tcLabel=level=>level?`TC ${level}`:'TC ?';
  const positionChangedLabel={de:'unverändert',en:'unchanged',fr:'inchangée'}[lang];
- const kssLabel={de:'KSS-Karte',en:'KSS map',fr:'carte KSS'}[lang];
+ const mapLabel={de:'MightPulse-Karte',en:'MightPulse map',fr:'carte MightPulse'}[lang];
  const checkedLabel={de:'geprüft',en:'checked',fr:'vérifié'}[lang];
+ const safe=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+ const shieldLabel=player=>{
+  const state=String(player?.shieldState||'unknown');
+  if(state==='active'){
+   const end=Date.parse(player?.shieldEndAt||'');
+   const minutes=Number.isFinite(end)?Math.max(0,Math.ceil((end-Date.now())/60000)):null;
+   if(minutes!=null) return {de:`🛡️ Schild · ~${minutes} Min.`,en:`🛡️ Shield · ~${minutes}m`,fr:`🛡️ Bouclier · ~${minutes} min`}[lang];
+   return {de:'🛡️ Schild aktiv',en:'🛡️ Shield active',fr:'🛡️ Bouclier actif'}[lang];
+  }
+  if(state==='none') return {de:'⭕ Kein Schild',en:'⭕ No shield',fr:'⭕ Sans bouclier'}[lang];
+  return {de:'❔ Schild unbekannt',en:'❔ Shield unknown',fr:'❔ Bouclier inconnu'}[lang];
+ };
  document.querySelectorAll('.outlaw-accounts [data-player-id]').forEach(card=>{
   const player=sagrWatchlistPlayers.get(card.dataset.playerId);
   if(!player) return;
@@ -205,6 +217,8 @@ function renderSagrLocations(){
   const tcText=tcLabel(Number.isFinite(tc)&&tc>0?tc:null);
   const checkedAge=sagrLocationAge(sagrCheckedAt);
   const sourceAge=sagrLocationAge(player.locationUpdatedAt);
+  const allianceText=player.alliance?`[${safe(player.alliance)}]`:'—';
+  const shieldText=shieldLabel(player);
   if(player.locationAvailable&&Number.isFinite(Number(player.x))&&Number.isFinite(Number(player.y))){
    location.classList.remove('is-missing');
    const changedAt=sagrPositionChangedAt(player);
@@ -212,10 +226,10 @@ function renderSagrLocations(){
    const positionLine=unchangedFor
     ? (lang==='de'?`seit ${unchangedFor} ${positionChangedLabel}`:lang==='fr'?`${positionChangedLabel} depuis ${unchangedFor}`:`${positionChangedLabel} for ${unchangedFor}`)
     : positionChangedLabel;
-   location.innerHTML=`<b>📍 X: ${Number(player.x)} · Y: ${Number(player.y)}</b><small>${tcText} · ${positionLine}</small><small>${kssLabel}${sourceAge?` ${sourceAge}`:''}${checkedAge?` · ${checkedLabel} ${checkedAge}`:''}</small>`;
+   location.innerHTML=`<b>📍 X: ${Number(player.x)} · Y: ${Number(player.y)}</b><small>${allianceText} · ${tcText} · ${shieldText}</small><small>${positionLine} · ${mapLabel}${sourceAge?` ${sourceAge}`:''}${checkedAge?` · ${checkedLabel} ${checkedAge}`:''}</small>`;
   }else{
    location.classList.add('is-missing');
-   location.innerHTML=`<b>${missing}</b><small>${tcText}${checkedAge?` · ${checkedLabel} ${checkedAge}`:''}</small>`;
+   location.innerHTML=`<b>${missing}</b><small>${allianceText} · ${tcText} · ${shieldText}${checkedAge?` · ${checkedLabel} ${checkedAge}`:''}</small>`;
   }
  });
 }
