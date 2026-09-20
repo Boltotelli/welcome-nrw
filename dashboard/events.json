@@ -91,9 +91,9 @@
             ]
           },
           "note": {
-            "de": "Der Start am 21.09. ist für Server 1044 bestätigt. Weitere Eventtage ergänzen wir nach bestätigtem Ablauf.",
-            "en": "The 21 Sep start is confirmed for Server 1044. Further days will be added once their schedule is confirmed.",
-            "fr": "Le début du 21 septembre est confirmé pour le serveur 1044. Les jours suivants seront ajoutés dès confirmation du calendrier."
+            "de": "Der Start am 21.09. ist für Server 1044 bestätigt. Das genaue Eventende bitte im Spiel prüfen; weitere Eventtage ergänzen wir nach Bestätigung.",
+            "en": "The 21 Sep start is confirmed for Server 1044. Check the exact end in game; further days will be added once confirmed.",
+            "fr": "Le début du 21 septembre est confirmé pour le serveur 1044. Vérifie la fin exacte en jeu ; les jours suivants seront ajoutés dès confirmation."
           }
         }
       }
