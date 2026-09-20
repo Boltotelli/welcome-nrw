@@ -2,8 +2,102 @@
   "schemaVersion": 2,
   "kingdom": 1044,
   "timezone": "UTC",
-  "updatedAt": "2026-09-20T00:15:59Z",
+  "updatedAt": "2026-09-20T11:25:26Z",
   "events": [
+    {
+      "id": "golden-glaives-prep-2026-09-20",
+      "start": "2026-09-20",
+      "end": "2026-09-20",
+      "icon": "⚔️",
+      "manual": true,
+      "confidence": "confirmed-ingame",
+      "name": {
+        "de": "Golden Glaives · Vorbereitung",
+        "en": "Golden Glaives · Preparation",
+        "fr": "Golden Glaives · Préparation"
+      },
+      "dailyPlans": {
+        "2026-09-20": {
+          "points": {
+            "de": "Intel-Missionen für den Start am 21.09. vorbereiten",
+            "en": "Prepare Intel Missions for the 21 Sep start",
+            "fr": "Préparer les missions de renseignement pour le début du 21 septembre"
+          },
+          "steps": {
+            "de": [
+              "00:00 UTC: Intel-Missionen abschließen und Belohnungen abholen.",
+              "08:00 UTC: Intel-Missionen abschließen, Belohnungen aber NICHT abholen.",
+              "16:00 UTC: Intel-Missionen weder abschließen noch Belohnungen abholen. Danach Pans zusätzliche Intel-Mission aktivieren und ebenfalls offen lassen.",
+              "Vor dem Reset nichts von den zurückgehaltenen Missionen abholen. Nach dem Reset am 21.09. vorbereitete 08:00-Belohnungen abholen und die 16:00-/Pan-Missionen abschließen und abholen."
+            ],
+            "en": [
+              "00:00 UTC: complete Intel Missions and claim rewards.",
+              "08:00 UTC: complete Intel Missions, but do NOT claim rewards.",
+              "16:00 UTC: neither complete nor claim Intel Missions. Then activate Pan’s extra Intel Mission and leave it unfinished as well.",
+              "Do not claim held missions before reset. After the 21 Sep reset, claim held 08:00 rewards and complete and claim the 16:00/Pan missions."
+            ],
+            "fr": [
+              "00:00 UTC : termine les missions de renseignement et récupère les récompenses.",
+              "08:00 UTC : termine les missions, mais NE récupère PAS les récompenses.",
+              "16:00 UTC : ne termine ni ne récupère les missions. Active ensuite la mission supplémentaire de Pan et laisse-la inachevée.",
+              "Ne récupère pas les missions retenues avant le reset. Après celui du 21 septembre, récupère les récompenses de 08:00, puis termine et récupère les missions de 16:00 et de Pan."
+            ]
+          },
+          "note": {
+            "de": "NRW-Tipp für den kompletten Vortag. Falls du die frühen Missionen bereits abgeholt hast: Die 16:00-Missionen und Pan kannst du trotzdem noch vorbereiten.",
+            "en": "NRW preparation for the full day before the event. If you already claimed earlier missions, you can still prepare the 16:00 and Pan missions.",
+            "fr": "Préparation NRW pour toute la veille. Si tu as déjà récupéré les premières missions, tu peux toujours préparer celles de 16:00 et de Pan."
+          }
+        }
+      }
+    },
+    {
+      "id": "golden-glaives-2026-09-21",
+      "start": "2026-09-21",
+      "end": "2026-09-21",
+      "icon": "⚔️",
+      "manual": true,
+      "confidence": "confirmed-ingame",
+      "name": {
+        "de": "Golden Glaives · Start",
+        "en": "Golden Glaives · Start",
+        "fr": "Golden Glaives · Début"
+      },
+      "dailyPlans": {
+        "2026-09-21": {
+          "points": {
+            "de": "Golden Glaives startet nach dem Reset · vorbereitete Intel-Missionen nutzen",
+            "en": "Golden Glaives starts at reset · use prepared Intel Missions",
+            "fr": "Golden Glaives commence au reset · utilise les missions préparées"
+          },
+          "steps": {
+            "de": [
+              "Ab 00:00 UTC: Golden Glaives ist gestartet. Zuerst die zurückgehaltenen Belohnungen der 08:00-UTC-Missionen abholen.",
+              "Die vom Vortag offenen 16:00-UTC-Missionen und Pans zusätzliche Mission abschließen und Belohnungen abholen.",
+              "Prüfe danach die aktuelle Golden-Glaives-Phase im Spiel. Für weitere Intel-Vorbereitung gelten die jeweiligen 00:00-/08:00-/16:00-UTC-Schritte.",
+              "Nutze keine zusätzlichen KvK-Ressourcen nur wegen Golden Glaives; NRW-/Discord-Ansagen haben Vorrang."
+            ],
+            "en": [
+              "From 00:00 UTC: Golden Glaives has started. First claim the held rewards from the 08:00 UTC missions.",
+              "Complete and claim the unfinished 16:00 UTC missions and Pan’s extra mission prepared the day before.",
+              "Then check the active Golden Glaives stage in game. For further Intel preparation, follow the relevant 00:00/08:00/16:00 UTC steps.",
+              "Do not spend extra KvK resources just for Golden Glaives; NRW/Discord announcements take priority."
+            ],
+            "fr": [
+              "À partir de 00:00 UTC : Golden Glaives a commencé. Récupère d’abord les récompenses conservées des missions de 08:00 UTC.",
+              "Termine et récupère les missions de 16:00 UTC et la mission supplémentaire de Pan préparées la veille.",
+              "Vérifie ensuite la phase actuelle de Golden Glaives en jeu. Pour la prochaine préparation, suis les étapes correspondantes de 00:00/08:00/16:00 UTC.",
+              "Ne dépense pas de ressources KvK supplémentaires uniquement pour Golden Glaives ; les consignes NRW/Discord sont prioritaires."
+            ]
+          },
+          "note": {
+            "de": "Der Start am 21.09. ist für Server 1044 bestätigt. Weitere Eventtage ergänzen wir nach bestätigtem Ablauf.",
+            "en": "The 21 Sep start is confirmed for Server 1044. Further days will be added once their schedule is confirmed.",
+            "fr": "Le début du 21 septembre est confirmé pour le serveur 1044. Les jours suivants seront ajoutés dès confirmation du calendrier."
+          }
+        }
+      }
+    },
     {
       "id": "kingdom-transfer-2026-09-1044",
       "start": "2026-09-13",
