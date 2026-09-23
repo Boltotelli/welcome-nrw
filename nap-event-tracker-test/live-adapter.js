@@ -61,10 +61,12 @@ setTimeout(boot,0);document.querySelector('#languagePicker')?.addEventListener('
 const NAP_LOGO_CODES2=new Set(['NRW','THM','NWO','NwO','CWR','PxR']);
 function allianceLogoUrl2(code){return NAP_LOGO_CODES2.has(String(code||''))?'./assets/alliance/'+encodeURIComponent(String(code))+'.png':null}
 function allianceLogo2(code,cls){
- const u=allianceLogoUrl2(code);return u?'<img class="'+(cls||'alliance-logo-img')+'" src="'+E(u)+'" alt="'+E(code)+'">':'';
+ const u=allianceLogoUrl2(code),k=cls||'alliance-logo-img';
+ const size=k==='alliance-user-logo'?'width:24px;height:28px;max-width:24px;max-height:28px;':k==='alliance-top-logo'?'width:22px;height:26px;max-width:22px;max-height:26px;':'width:18px;height:22px;max-width:18px;max-height:22px;';
+ return u?'<img class="'+k+'" style="'+size+'object-fit:contain;display:block;pointer-events:none;position:static;flex:none" src="'+E(u)+'" alt="'+E(code)+'">':'';
 }
 function allianceBadge2(code){
- const u=allianceLogoUrl2(code);return '<span class="alliance-logo-badge">'+(u?'<img src="'+E(u)+'" alt="">':'')+'<b>'+E(code||'–')+'</b></span>';
+ const u=allianceLogoUrl2(code);return '<span class="alliance-logo-badge">'+(u?'<img style="width:15px;height:18px;max-width:15px;max-height:18px;object-fit:contain;pointer-events:none;position:static;flex:none" src="'+E(u)+'" alt="">':'')+'<b>'+E(code||'–')+'</b></span>';
 }
 
 const PHASES2={
