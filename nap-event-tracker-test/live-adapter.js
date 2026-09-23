@@ -208,9 +208,9 @@ function renderNapLive(){
  }
  if(liveNapTab==='exclusions'){
    body.innerHTML='<div class="live-panel-grid"><section class="card"><div class="card-head"><div><div class="card-title">Aktive Exclusions</div></div><span class="pill red">'+S.e.length+'</span></div><div class="card-body live-list">'+
-   (S.e.length?S.e.map(x=>napRow2(x.player_name,(x.alliance_code||'')+' · Stufe '+x.level,'<span class="pill">'+(x.end_at?E(D(x.end_at)):'∞')+'</span>')).join(''):'<div class="live-empty-state">Keine aktive Exclusion.</div>')+
+   (S.e.length?S.e.map(x=>napRow2(x.player_name,(x.alliance_code||'')+' · Stufe '+x.level,(x.alliance_code===S.a&&x.id?'<div class="hero-actions"><span class="pill">'+(x.end_at?E(D(x.end_at)):'∞')+'</span><button class="btn small secondary live-end-exclusion" data-id="'+E(x.id)+'">Exclusion beenden</button></div>':'<span class="pill">'+(x.end_at?E(D(x.end_at)):'∞')+'</span>'))).join(''):'<div class="live-empty-state">Keine aktive Exclusion.</div>')+
    '</div></section><section class="card"><div class="card-head"><div><div class="card-title">Manuelle Exclusion</div><div class="card-sub">Wie in 1.0: zusätzliche NAP-Exclusion anlegen.</div></div></div><div class="card-body"><form id="liveExclusionForm" class="live-form"><label>Spieler<input id="liveExPlayer" required></label><div class="live-form-row"><label>Stufe<select id="liveExLevel"><option value="3">3 · 24h</option><option value="4">4 · Extended</option></select></label><label>Ende<input id="liveExEnd" type="datetime-local"></label></div><button class="btn primary" type="submit">Exclusion speichern</button><div id="liveExStatus" class="live-status"></div></form></div></section></div>';
-   document.getElementById('liveExclusionForm').onsubmit=saveManualExclusion2;return;
+   document.getElementById('liveExclusionForm').onsubmit=saveManualExclusion2;document.querySelectorAll('.live-end-exclusion').forEach(b=>b.onclick=()=>endExclusion2(b.dataset.id));return;
  }
  if(liveNapTab==='bans'){
    const can=!!S.profile?.can_manage_bans;
@@ -225,6 +225,10 @@ function renderNapLive(){
 }
 async function saveSpending2(e){e.preventDefault();const out=document.getElementById('liveSpendStatus');out.textContent='Speichere …';try{await rpc('create_nap_spending_exclusion',{p_player_id:document.getElementById('liveSpendPlayer').value,p_starts_at:new Date(document.getElementById('liveSpendStart').value).toISOString(),p_ends_at:new Date(document.getElementById('liveSpendEnd').value).toISOString(),p_reason:document.getElementById('liveSpendReason').value.trim()||null});await load();renderNapLive()}catch(err){out.textContent=err.message||String(err)}}
 async function endSpending2(id){if(!confirm('Spending Exclusion beenden?'))return;try{await rpc('end_nap_spending_exclusion',{p_id:id});await load();renderNapLive()}catch(err){alert(err.message||String(err))}}
+async function endExclusion2(id){
+ if(!confirm('Diese NAP Exclusion jetzt beenden?'))return;
+ try{await upd('sanctions',id,{completed:true});await load();renderNapLive();renderNotifications2();renderHomeFull2()}catch(err){alert(err.message||String(err))}
+}
 async function saveManualExclusion2(e){
  e.preventDefault();const out=document.getElementById('liveExStatus');out.textContent='Speichere …';
  try{const name=document.getElementById('liveExPlayer').value.trim(),level=Number(document.getElementById('liveExLevel').value),end=document.getElementById('liveExEnd').value;await rpc('create_manual_nap_exclusion',{p_player_name:name,p_level:level,p_started_at:new Date().toISOString(),p_end_at:end?new Date(end).toISOString():null});await load();out.textContent='✓ Gespeichert';renderNapLive()}catch(err){out.textContent=err.message||String(err)}
@@ -553,8 +557,8 @@ async function saveViolationEdit2(e,old){
  if(!special&&(!target||!(score>target*mult))){out.textContent='Der korrigierte Wert ist kein Verstoß mehr. Nutze „Verstoß löschen“. ';return}
  out.textContent='Speichere …';
  try{
-  await rpc('update_violation_fast',{p_id:old.id,p_player_name:document.getElementById('liveVioPlayer').value.trim(),p_event_name:event,p_phase_name:phase,p_kind:special?'swordland':'overspend',p_score:special?null:score,p_target_value:target,p_occurred_at:new Date(document.getElementById('liveVioOccurred').value).toISOString(),p_expiry_days:Number(S.settings?.violation_expiry_days||30),p_note:document.getElementById('liveVioNote').value.trim()||null});
-  document.getElementById('liveViolationEditModal')?.remove();await load();await openProfile2(document.getElementById('liveVioPlayer')?.value||old.player_name);
+  const editedPlayer=document.getElementById('liveVioPlayer').value.trim();await rpc('update_violation_fast',{p_id:old.id,p_player_name:editedPlayer,p_event_name:event,p_phase_name:phase,p_kind:special?'swordland':'overspend',p_score:special?null:score,p_target_value:target,p_occurred_at:new Date(document.getElementById('liveVioOccurred').value).toISOString(),p_expiry_days:Number(S.settings?.violation_expiry_days||30),p_note:document.getElementById('liveVioNote').value.trim()||null});
+  document.getElementById('liveViolationEditModal')?.remove();await load();await openProfile2(editedPlayer||old.player_name);
  }catch(err){out.textContent=err.message||String(err)}
 }
 async function deleteViolation2(v){
