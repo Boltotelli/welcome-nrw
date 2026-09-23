@@ -288,7 +288,7 @@ async function renderKvkLive(){
  const v=document.getElementById('view-kvk');if(!v)return;v.innerHTML='<div class="hero"><div><div class="kicker">KVK · LIVE</div><h1>KvK & Law 9</h1><p>Snapshot, Prep-Scores, normalisiertes Ranking und Top-200-Performance.</p></div></div><div class="live-empty-state">KvK-Daten werden geladen …</div>';
  try{
   const [law,perf]=await Promise.all([rpc('get_law9_dashboard',{}),rpc('get_performance_dashboard',{})]);S.law9=law;S.performance=perf;
-  const cycle=law?.cycle||{},ranking=law?.ranking||[],base=law?.baselines||[];
+  const cycle=law?.cycle||{},ranking=law?.ranking||[],base=law?.baselines||[],memberPlan=law?.member_plan||[],canEditMembers=!!law?.can_edit_member_counts;
   v.innerHTML='<div class="hero"><div><div class="kicker">KVK · LIVE</div><h1>KvK & Law 9</h1><p>'+E(D(cycle.prep_start))+' · '+E(law?.formula||'')+'</p></div></div>'+
    '<div class="live-stat-grid"><div class="live-stat"><b>'+E(cycle.snapshot_status||'–')+'</b><small>Snapshot</small></div><div class="live-stat"><b>'+N(cycle.baseline_count||0)+'</b><small>Baselines</small></div><div class="live-stat"><b>'+N(cycle.score_count||0)+'</b><small>Prep Scores</small></div><div class="live-stat"><b>'+N(perf?.kvk?.known_top200_players||0)+'</b><small>Top-200 Spieler</small></div></div>'+
    '<div class="live-panel-grid"><section class="card"><div class="card-head"><div><div class="card-title">Law-9 Ranking</div><div class="card-sub">Prep Score / ((Power^0.7) × (Members^0.3))</div></div></div><div class="card-body live-list">'+
@@ -296,12 +296,20 @@ async function renderKvkLive(){
    '</div></section><section class="card"><div class="card-head"><div><div class="card-title">Snapshot / Baseline</div><div class="card-sub">'+E(cycle.baseline_locked?'eingefroren':'noch offen')+'</div></div></div><div class="card-body live-list">'+
    (base.length?base.map(r=>'<div class="live-row"><div><b>'+E(r.alliance_code)+'</b><small>'+E(D(r.captured_at))+'</small></div><div style="text-align:right"><strong>'+N(r.alliance_power)+'</strong><small>'+N(r.member_count)+' Mitglieder</small></div></div>').join(''):'<div class="live-empty-state">Noch kein Snapshot.</div>')+
    '</div></section></div>'+
+   '<section class="card" style="margin-top:14px"><div class="card-head"><div><div class="card-title">Mitgliederplaner</div><div class="card-sub">Tracker-Zahl prüfen und vor dem Snapshot bei Bedarf korrigieren.</div></div><span class="pill '+(cycle.baseline_locked?'green':'gold')+'">'+E(cycle.baseline_locked?'Snapshot eingefroren':'noch editierbar')+'</span></div><div class="card-body live-list">'+
+   (memberPlan.length?memberPlan.map(r=>'<form class="live-row live-member-plan" data-code="'+E(r.alliance_code)+'"><div><b>'+E(r.alliance_code)+'</b><small>Tracker '+N(r.tracker_member_count)+' · '+(r.overridden?'manuell überschrieben':'kein Override')+(r.frozen_member_count!=null?' · eingefroren '+N(r.frozen_member_count):'')+'</small></div><input style="width:100px" inputmode="numeric" value="'+E(r.effective_member_count??r.tracker_member_count??'')+'" '+(!canEditMembers||cycle.baseline_locked?'disabled':'')+'><button class="btn small secondary" '+(!canEditMembers||cycle.baseline_locked?'disabled':'')+'>Speichern</button></form>').join(''):'<div class="live-empty-state">Kein Mitgliederplan vorhanden.</div>')+
+   '</div></section>'+
    '<section class="card" style="margin-top:14px"><div class="card-head"><div><div class="card-title">Prep Scores</div><div class="card-sub">'+E(cycle.score_entry_open?'Eingabe offen':'Eingabe noch gesperrt')+'</div></div></div><div class="card-body"><div class="live-list">'+
    ranking.map(r=>'<form class="live-row live-prep-score" data-code="'+E(r.alliance_code)+'"><div><b>'+E(r.alliance_code)+'</b><small>'+N(r.member_count)+' Mitglieder</small></div><input style="width:150px" inputmode="numeric" value="'+E(r.prep_score??'')+'" '+(cycle.score_entry_open?'':'disabled')+'><button class="btn small primary" '+(cycle.score_entry_open?'':'disabled')+'>Speichern</button></form>').join('')+
    '</div></div></section><div id="liveKvkTop" style="margin-top:14px"></div>';
-  v.querySelectorAll('.live-prep-score').forEach(form=>form.onsubmit=savePrepScore2);
+  v.querySelectorAll('.live-member-plan').forEach(form=>form.onsubmit=saveMemberPlan2);v.querySelectorAll('.live-prep-score').forEach(form=>form.onsubmit=savePrepScore2);
   if(perf?.kvk?.event?.id)loadKvkTop2(perf.kvk.event.id);
  }catch(err){v.innerHTML+='<div class="live-empty-state">'+E(err.message||String(err))+'</div>'}
+}
+async function saveMemberPlan2(e){
+ e.preventDefault();const form=e.currentTarget,count=Number(String(form.querySelector('input').value||'').replace(/\D/g,''));
+ if(!Number.isInteger(count)||count<0||count>200){alert('Mitgliederzahl prüfen.');return}
+ try{await rpc('set_law9_member_override',{p_cycle_id:S.law9.cycle.id,p_alliance_code:form.dataset.code,p_member_count:count});await renderKvkLive()}catch(err){alert(err.message||String(err))}
 }
 async function savePrepScore2(e){
  e.preventDefault();const form=e.currentTarget,score=Number(String(form.querySelector('input').value||'').replace(/\D/g,''));try{await rpc('upsert_law9_prep_score',{p_cycle_id:S.law9.cycle.id,p_alliance_code:form.dataset.code,p_prep_score:score});await renderKvkLive()}catch(err){alert(err.message||String(err))}
