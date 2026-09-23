@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "kingdom": 1044,
   "timezone": "UTC",
-  "updatedAt": "2026-09-23T00:12:53Z",
+  "updatedAt": "2026-09-23T12:07:31Z",
   "events": [
     {
       "id": "golden-glaives-prep-2026-09-20",
@@ -55,14 +55,14 @@
     {
       "id": "golden-glaives-2026-09-21",
       "start": "2026-09-21",
-      "end": "2026-09-21",
+      "end": "2026-09-23",
       "icon": "⚔️",
       "manual": true,
       "confidence": "confirmed-ingame",
       "name": {
-        "de": "Golden Glaives · Start",
-        "en": "Golden Glaives · Start",
-        "fr": "Golden Glaives · Début"
+        "de": "Golden Glaives",
+        "en": "Golden Glaives",
+        "fr": "Golden Glaives"
       },
       "dailyPlans": {
         "2026-09-21": {
@@ -768,25 +768,6 @@
         ]
       },
       "sourceUrl": "https://centurygames.helpshift.com/hc/en/140-kingshot/section/1399-fishing-tournament/"
-    },
-    {
-      "id": "viking-vengeance-2026-09-24",
-      "start": "2026-09-24",
-      "end": "2026-09-24",
-      "icon": "🛡️",
-      "manual": false,
-      "confidence": "predicted",
-      "name": {
-        "de": "Wikinger-Vergeltung",
-        "en": "Viking Vengeance",
-        "fr": "Vengeance viking"
-      },
-      "tips": {
-        "de": [],
-        "en": [],
-        "fr": []
-      },
-      "sourceUrl": "https://kingshotguide.net/guides/viking-vengeance-expert-guide-beginner-to-advanced/"
     },
     {
       "id": "new-master-2026-09-14",
