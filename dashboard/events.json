@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "kingdom": 1044,
   "timezone": "UTC",
-  "updatedAt": "2026-09-20T11:25:26Z",
+  "updatedAt": "2026-09-23T00:12:53Z",
   "events": [
     {
       "id": "golden-glaives-prep-2026-09-20",
@@ -768,44 +768,6 @@
         ]
       },
       "sourceUrl": "https://centurygames.helpshift.com/hc/en/140-kingshot/section/1399-fishing-tournament/"
-    },
-    {
-      "id": "viking-vengeance-2026-09-22",
-      "start": "2026-09-22",
-      "end": "2026-09-22",
-      "icon": "🛡️",
-      "manual": false,
-      "confidence": "predicted",
-      "name": {
-        "de": "Wikinger-Vergeltung",
-        "en": "Viking Vengeance",
-        "fr": "Vengeance viking"
-      },
-      "tips": {
-        "de": [],
-        "en": [],
-        "fr": []
-      },
-      "sourceUrl": "https://kingshotguide.net/guides/viking-vengeance-expert-guide-beginner-to-advanced/"
-    },
-    {
-      "id": "eternitys-reach-2026-09-22",
-      "start": "2026-09-22",
-      "end": "2026-09-22",
-      "icon": "♾️",
-      "manual": false,
-      "confidence": "predicted",
-      "name": {
-        "de": "Eternity’s Reach",
-        "en": "Eternity’s Reach",
-        "fr": "Eternity’s Reach"
-      },
-      "tips": {
-        "de": [],
-        "en": [],
-        "fr": []
-      },
-      "sourceUrl": "https://centurygames.helpshift.com/hc/en/140-kingshot/section/1421-eternity-s-reach/"
     },
     {
       "id": "viking-vengeance-2026-09-24",
