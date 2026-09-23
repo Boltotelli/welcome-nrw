@@ -72,7 +72,7 @@ async function loadAvatars(){
 function addLiveCss(){
  if(document.getElementById('n2LiveCss'))return;
  const s=document.createElement('style');s.id='n2LiveCss';s.textContent=
- '.live-avatar{overflow:hidden}.live-avatar img{width:100%;height:100%;object-fit:cover;display:block}.alliance-top-logo{width:22px;height:26px;object-fit:contain;display:block}.alliance-user-logo{width:24px;height:28px;object-fit:contain;display:block}.alliance-logo-badge{display:inline-flex;align-items:center;gap:5px;min-height:24px;padding:3px 7px;border:1px solid var(--line);border-radius:999px;background:var(--panel-3);font-size:9px;font-weight:900;white-space:nowrap;vertical-align:middle}.alliance-logo-badge img{width:15px;height:18px;object-fit:contain}.alliance-badge,.user-pill{display:flex;align-items:center;gap:7px}.profile-alliance-line{display:flex;align-items:center;gap:6px;flex-wrap:wrap}.live-transfer-route{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:4px}.live-transfer-route>small{margin-left:2px}'+
+ '.live-avatar{overflow:hidden}.live-avatar img{width:100%;height:100%;object-fit:cover;display:block}.alliance-top-logo{width:22px;height:26px;object-fit:contain;display:block}.alliance-user-logo{width:24px;height:28px;object-fit:contain;display:block}.alliance-logo-badge{display:inline-flex;align-items:center;gap:5px;min-height:24px;padding:3px 7px;border:1px solid var(--line);border-radius:999px;background:var(--panel-3);font-size:9px;font-weight:900;white-space:nowrap;vertical-align:middle}.alliance-logo-badge img{width:15px;height:18px;object-fit:contain}.alliance-badge,.user-pill{display:flex;align-items:center;gap:7px}.profile-alliance-line{display:flex;align-items:center;gap:6px;flex-wrap:wrap}.live-transfer-route{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:4px}.live-transfer-route>small{margin-left:2px}.live-language-editor{margin-top:12px;padding:10px 11px;border:1px solid var(--line);border-radius:11px;background:var(--panel-2)}.live-language-editor summary{cursor:pointer;font-size:10px;font-weight:850}.live-language-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:10px}.live-language-option{display:flex!important;align-items:center!important;gap:6px!important;padding:7px 8px;border:1px solid var(--line);border-radius:9px;background:var(--panel);font-size:9px!important;color:var(--text)!important}.live-language-option input{width:auto!important;min-height:0!important}@media(max-width:700px){.live-language-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}'+
  '.live-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 14px;padding:5px;background:var(--panel);border:1px solid var(--line);border-radius:14px;width:max-content;max-width:100%}'+
  '.live-tab{border:0;background:transparent;color:var(--muted);font:inherit;font-weight:850;font-size:10px;padding:8px 12px;border-radius:9px;cursor:pointer}.live-tab.active{background:var(--panel-3);color:var(--text);box-shadow:inset 0 0 0 1px var(--line)}'+
  '.live-panel-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(300px,.75fr);gap:14px;align-items:start}'+
@@ -435,6 +435,41 @@ async function toggleFeature2(which){const f=S.features||{kvk_top200_enabled:tru
 
 
 /* === PLAYER FILES + NOTIFICATIONS + VIEW ROUTER LIVE V2 === */
+const LANG_OPTIONS2=[
+ ['de','Deutsch'],['en','English'],['fr','Français'],['es','Español'],['tr','Türkçe'],
+ ['it','Italiano'],['pt','Português'],['pl','Polski'],['nl','Nederlands'],['sv','Svenska'],
+ ['no','Norsk'],['da','Dansk'],['fi','Suomi'],['cs','Čeština'],['hu','Magyar'],['ro','Română'],
+ ['bg','Български'],['ru','Русский'],['uk','Українська'],['ar','العربية'],['fa','فارسی'],
+ ['he','עברית'],['zh','中文'],['ja','日本語'],['ko','한국어'],['id','Bahasa Indonesia'],
+ ['ms','Bahasa Melayu'],['vi','Tiếng Việt'],['th','ไทย'],['duck','Duck']
+];
+function languageName2(code){return LANG_OPTIONS2.find(x=>x[0]===String(code||'').toLowerCase())?.[1]||String(code||'')}
+async function renderWelcomeLanguageQueue2(){
+ if(S.a!=='NRW')return;
+ document.getElementById('liveWelcomeLanguageQueue')?.remove();
+ const grid=document.getElementById('playerGrid');if(!grid?.parentElement)return;
+ const panel=document.createElement('details');panel.id='liveWelcomeLanguageQueue';panel.className='card';panel.style.marginBottom='12px';
+ panel.innerHTML='<summary style="display:flex;justify-content:space-between;align-items:center;gap:10px;cursor:pointer;padding:12px 14px"><span><b>🌐 Offene Spracheingaben</b><small style="display:block;color:var(--muted);margin-top:2px">Nicht automatisch zugeordnete Angaben aus der NRW-Welcome-Seite.</small></span><span class="pill gold" id="liveWelcomeLangCount">…</span></summary><div class="card-body live-list" id="liveWelcomeLangBody"><div class="live-empty-state">Wird geladen …</div></div>';
+ grid.parentElement.insertBefore(panel,grid);
+ try{
+   const rows=await tab('welcome_language_submissions','select=id,player_name,player_id,languages,status,first_submitted_at,last_submitted_at,submission_count&status=eq.pending&order=last_submitted_at.desc');
+   document.getElementById('liveWelcomeLangCount').textContent=String(rows?.length||0);
+   const body=document.getElementById('liveWelcomeLangBody');
+   body.innerHTML=(rows||[]).length?rows.map(r=>'<div class="live-row"><div><b>'+E(r.player_name||'–')+'</b><small>Player ID '+E(r.player_id||'–')+' · '+E(D(r.last_submitted_at))+' · '+E((r.languages||[]).map(languageName2).join(' / '))+'</small></div><span class="pill gold">'+E(r.submission_count||1)+'×</span></div>').join(''):'<div class="live-empty-state">Keine offenen Spracheingaben.</div>';
+ }catch(err){document.getElementById('liveWelcomeLangBody').innerHTML='<div class="live-empty-state">'+E(err.message||String(err))+'</div>'}
+}
+function languageEditor2(P){
+ const selected=new Set((P.languages||[]).map(x=>String(x).toLowerCase()));
+ return '<details class="live-language-editor"><summary>🌐 Sprachen bearbeiten</summary><div class="live-language-grid">'+LANG_OPTIONS2.map(x=>'<label class="live-language-option"><input type="checkbox" value="'+E(x[0])+'" '+(selected.has(x[0])?'checked':'')+'><span>'+E(x[1])+'</span></label>').join('')+'</div><div class="hero-actions" style="margin-top:10px"><button type="button" class="btn secondary" id="liveSaveLanguages">Sprachen speichern</button><span id="liveLanguageStatus" class="live-status"></span></div></details>';
+}
+async function saveLanguages2(P){
+ const out=document.getElementById('liveLanguageStatus'),langs=[...document.querySelectorAll('.live-language-option input:checked')].map(x=>x.value);if(out)out.textContent='Speichere …';
+ try{
+   const rows=await upd('players',P.id,{languages:langs}),updated=rows?.[0]||{...P,languages:langs},idx=S.p.findIndex(x=>x.id===P.id);if(idx>=0)S.p[idx]=updated;
+   if(out)out.textContent='✓ Gespeichert';
+   const line=document.querySelector('.profile-alliance-line');if(line)line.innerHTML='Player ID '+E(updated.game_id||'–')+' · '+allianceBadge2(S.a)+' · '+E(langs.map(languageName2).join(' / ')||'–');
+ }catch(err){if(out)out.textContent=err.message||String(err)}
+}
 function renderPlayers2(){
  const g=document.getElementById('playerGrid');if(!g)return;
  g.innerHTML=S.p.map(P=>{
@@ -445,7 +480,7 @@ function renderPlayers2(){
    '<div class="metric-row"><div class="metric"><b>'+V.length+'</b><span>Verstöße</span></div><div class="metric"><b>'+l+'</b><span>Stufe</span></div><div class="metric"><b>'+E(val)+'</b><span>Status</span></div></div>'+
    '<div class="player-card-foot">'+(att?'<span class="pill gold">Swordland / TriAlliance</span>':'<span></span>')+'<span class="muted tiny">'+(last?E(D(last.occurred_at)):'–')+'</span></div></div>';
  }).join('')||'<div class="live-empty-state">Keine Spieler.</div>';
- g.querySelectorAll('[data-p]').forEach(c=>c.onclick=()=>openProfile2(c.dataset.p));if(typeof applyPlayerFilters==='function')applyPlayerFilters();
+ g.querySelectorAll('[data-p]').forEach(c=>c.onclick=()=>openProfile2(c.dataset.p));if(typeof applyPlayerFilters==='function')applyPlayerFilters();renderWelcomeLanguageQueue2();
 }
 function profileStage2(l){
  const labs=['Kontakt','R1','24h NAP OUT','Extended'];
@@ -466,8 +501,8 @@ async function openProfile2(name){
 async function paintProfileTab2(name,tab){
  const body=document.getElementById('liveProfileBody');if(!body)return;const P=p(name),V=vv(name),X=ss(name),l=level(name),latest=X[0];
  if(tab==='overview'){
-  body.innerHTML='<div class="live-panel-grid"><section class="card"><div class="card-head"><div><div class="card-title">Übersicht</div></div></div><div class="card-body"><div class="live-stat-grid"><div class="live-stat"><b>'+V.length+'</b><small>Verstöße gesamt</small></div><div class="live-stat"><b>'+V.filter(active).length+'</b><small>aktiv</small></div><div class="live-stat"><b>'+l+'</b><small>aktuelle Stufe</small></div><div class="live-stat"><b>'+E((P.languages||[]).join(' / ')||'–')+'</b><small>Sprachen</small></div></div><form id="livePlayerIdForm" class="live-form"><label>Player ID<input id="livePlayerId" value="'+E(P.game_id||'')+'" inputmode="numeric"></label><button class="btn secondary">Player ID speichern</button><div id="livePlayerIdStatus" class="live-status"></div></form></div></section><section>'+ (latest?profileActionCard2(latest):'<div class="live-empty-state">Keine Maßnahme vorhanden.</div>') +'</section></div>';
-  document.getElementById('livePlayerIdForm').onsubmit=async e=>{e.preventDefault();const out=document.getElementById('livePlayerIdStatus');try{const d=await rpc('set_player_game_id',{p_player_name:name,p_game_id:document.getElementById('livePlayerId').value.replace(/\D/g,'')});if(d){const i=S.p.findIndex(x=>x.id===P.id);if(i>=0)S.p[i]=d}out.textContent='✓ Gespeichert';await loadAvatars();renderPlayers2()}catch(err){out.textContent=err.message||String(err)}};return;
+  body.innerHTML='<div class="live-panel-grid"><section class="card"><div class="card-head"><div><div class="card-title">Übersicht</div></div></div><div class="card-body"><div class="live-stat-grid"><div class="live-stat"><b>'+V.length+'</b><small>Verstöße gesamt</small></div><div class="live-stat"><b>'+V.filter(active).length+'</b><small>aktiv</small></div><div class="live-stat"><b>'+l+'</b><small>aktuelle Stufe</small></div><div class="live-stat"><b>'+E((P.languages||[]).map(languageName2).join(' / ')||'–')+'</b><small>Sprachen</small></div></div>'+languageEditor2(P)+'<form id="livePlayerIdForm" class="live-form"><label>Player ID<input id="livePlayerId" value="'+E(P.game_id||'')+'" inputmode="numeric"></label><button class="btn secondary">Player ID speichern</button><div id="livePlayerIdStatus" class="live-status"></div></form></div></section><section>'+ (latest?profileActionCard2(latest):'<div class="live-empty-state">Keine Maßnahme vorhanden.</div>') +'</section></div>';
+  document.getElementById('liveSaveLanguages')?.addEventListener('click',()=>saveLanguages2(P));document.getElementById('livePlayerIdForm').onsubmit=async e=>{e.preventDefault();const out=document.getElementById('livePlayerIdStatus');try{const d=await rpc('set_player_game_id',{p_player_name:name,p_game_id:document.getElementById('livePlayerId').value.replace(/\D/g,'')});if(d){const i=S.p.findIndex(x=>x.id===P.id);if(i>=0)S.p[i]=d}out.textContent='✓ Gespeichert';await loadAvatars();renderPlayers2()}catch(err){out.textContent=err.message||String(err)}};return;
  }
  if(tab==='violations'){
   body.innerHTML='<div class="live-list">'+(V.length?V.map(v=>'<article class="card" data-live-vio="'+E(v.id)+'"><div class="card-head"><div><div class="card-title">'+E(v.event_name||'–')+' · '+E(v.phase_name||'')+'</div><div class="card-sub">'+E(D(v.occurred_at))+' · '+E(v.source_type||'manual')+'</div></div><span class="pill '+(v.kind==='swordland'?'blue':'red')+'">'+(v.kind==='overspend'&&v.target_value?(Number(v.score)/Number(v.target_value)).toFixed(2)+'×':'Attendance')+'</span></div><div class="card-body"><div class="action-date-grid"><div><span>Punkte</span><b>'+N(v.score)+'</b></div><div><span>Grenze</span><b>'+(v.target_value?N(Number(v.target_value)*3):'–')+'</b></div><div><span>Kontakt</span><b>'+(v.contacted?'✓':'offen')+'</b></div></div>'+(v.note?'<div class="live-note" style="margin-top:10px">'+E(v.note)+'</div>':'')+'<div class="live-evidence" data-vio="'+E(v.id)+'"></div></div></article>').join(''):'<div class="live-empty-state">Keine Verstöße.</div>')+'</div>';
