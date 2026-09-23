@@ -46,3 +46,4 @@ jobs:
       - name: Deploy V2
         id: deployment
         uses: actions/deploy-pages@v4
+# Refresh isolated V2: mobile header, notifications, profile tabs, Crown and KvK dates
