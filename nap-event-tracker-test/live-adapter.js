@@ -8,6 +8,8 @@ const T={de:{login:'Anmelden',alliance:'Allianz',password:'Passwort',hint:'Ein z
 const t=k=>(T[L()]||T.de)[k]||k, E=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 const loc=()=>({de:'de-DE',en:'en-US',fr:'fr-FR',es:'es-ES'}[L()]||'de-DE');
 const N=n=>Number(n||0).toLocaleString(loc()), D=x=>x?new Date(x).toLocaleString(loc(),{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'–';
+function monthYear2(x){if(!x)return '';const d=new Date(x);return Number.isFinite(d.getTime())?d.toLocaleDateString(loc(),{month:'long',year:'numeric'}):''}
+function performanceDate2(e){return monthYear2(e?.period_start||e?.period_end)||String(e?.label||'').trim()}
 function dur(ms){ms=Math.max(0,ms||0);return Math.floor(ms/3600000)+'h '+String(Math.floor(ms%3600000/60000)).padStart(2,'0')+'m'}
 function save(s){ses=s;try{s?localStorage.setItem(C.s,JSON.stringify(s)):localStorage.removeItem(C.s)}catch{}}
 async function q(url,opt={}){const r=await fetch(url,opt),z=await r.text();let d;try{d=z?JSON.parse(z):null}catch{d=z}if(!r.ok)throw Error(d?.message||d?.error_description||d?.error||z||('HTTP '+r.status));return d}
@@ -605,9 +607,9 @@ async function paintProfileTab2(name,tab){
 }
 function liveNotifications2(){
  const rows=[];
- for(const x of S.o||[])rows.push({cat:'nap',title:(x.alliance_code||'')+' · '+(x.player_name||'–'),copy:'Stufe '+x.level+' · '+dur(Number(x.overdue_seconds||0)*1000)+' überfällig',go:'nap'});
- for(const a of actions()){const z=new Date((a.s||a.v)?.created_at||(a.v?.occurred_at)||0).getTime()+86400000-Date.now();if(z>0&&z<=21600000)rows.push({cat:'alliance',title:a.name,copy:'Stufe '+a.l+' · '+dur(z)+' verbleibend',go:'home'})}
- for(const x of S.t||[])rows.push({cat:'alliance',title:x.player_name||'–',copy:(x.from_alliance||'POOL')+' → '+(x.to_alliance||'POOL'),go:'home'});
+ for(const x of S.o||[])rows.push({key:'nap|'+String(x.sanction_id||x.alliance_code+'|'+x.player_name+'|'+x.level),cat:'nap',title:(x.alliance_code||'')+' · '+(x.player_name||'–'),copy:'Stufe '+x.level+' · '+dur(Number(x.overdue_seconds||0)*1000)+' überfällig',go:'nap'});
+ for(const a of actions()){const z=new Date((a.s||a.v)?.created_at||(a.v?.occurred_at)||0).getTime()+86400000-Date.now();if(z>0&&z<=21600000)rows.push({key:'action|'+String(a.s?.id||a.v?.id||a.name),cat:'alliance',title:a.name,copy:'Stufe '+a.l+' · '+dur(z)+' verbleibend',go:'home'})}
+ for(const x of S.t||[])rows.push({key:'transfer|'+String(x.candidate_id||x.id||x.player_name),cat:'alliance',title:x.player_name||'–',copy:(x.from_alliance||'POOL')+' → '+(x.to_alliance||'POOL'),go:'home'});
  return rows;
 }
 function renderNotifications2(){
@@ -663,7 +665,7 @@ renderHome=renderHomeFull2;renderPlayers=renderPlayers2;openProfile=openProfile2
 /* === FINAL BOOT + LIVE NOTIFICATION STATE V2 === */
 let liveNotificationFilter='all';
 function notificationReadSet2(){try{return new Set(JSON.parse(localStorage.getItem('nap2_read_'+S.a)||'[]'))}catch{return new Set()}}
-function notificationId2(x){return [x.cat,x.title,x.copy,x.go].join('|')}
+function notificationId2(x){return x.key||[x.cat,x.title,x.go].join('|')}
 const baseRenderNotifications2=renderNotifications2;
 renderNotifications2=function(){
  const list=document.getElementById('notificationList'),badge=document.querySelector('#bellBtn .badge-count'),filters=document.getElementById('notificationFilters'),mark=document.getElementById('markAllRead');if(!list)return;
@@ -674,6 +676,8 @@ renderNotifications2=function(){
  list.querySelectorAll('[data-live-notify]').forEach(b=>b.onclick=()=>{const r=notificationReadSet2();r.add(b.dataset.liveNid);localStorage.setItem('nap2_read_'+S.a,JSON.stringify([...r]));setView(b.dataset.liveNotify);document.getElementById('notificationPanel')?.classList.remove('show');document.getElementById('overlay')?.classList.remove('show');renderNotifications2()});
  if(mark){const clone=mark.cloneNode(true);mark.replaceWith(clone);clone.onclick=()=>{const r=notificationReadSet2();for(const x of all)r.add(notificationId2(x));localStorage.setItem('nap2_read_'+S.a,JSON.stringify([...r]));renderNotifications2()}}
 };
+renderNotifications=()=>renderNotifications2();
+updateBellCount=()=>renderNotifications2();
 addLiveCss();neutralizeMocks();
 document.getElementById('languagePicker')?.addEventListener('change',()=>setTimeout(()=>{if(S.a){const active=document.querySelector('.view.active')?.id?.replace('view-','')||'home';setView(active)}},0));
 
