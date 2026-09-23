@@ -276,4 +276,73 @@ async function loadKvkTop2(id){
  try{const d=await rpc('get_kvk_full_ranking',{p_performance_event_id:id}),rows=Array.isArray(d)?d:(d?.rows||[]);box.innerHTML='<section class="card"><div class="card-head"><div><div class="card-title">KvK Prep · Top 200</div><div class="card-sub">Bekannte Serverränge 1–200</div></div><span class="pill">'+rows.length+'</span></div><div class="card-body live-list">'+(rows.length?rows.slice(0,200).map(r=>'<div class="live-row"><div><b>#'+E(r.server_rank||'–')+' · '+E(r.name||'–')+'</b><small>'+E(r.source_type||'')+'</small></div><strong>'+N(r.score)+'</strong></div>').join(''):'<div class="live-empty-state">Keine Top-200-Daten.</div>')+'</div></section>'}catch(err){box.innerHTML='<div class="live-empty-state">'+E(err.message||String(err))+'</div>'}
 }
 
+
+/* === LAWS LIVE V2 === */
+let liveLawTab='book',liveLawSearch='',liveLawCategory='';
+async function signStorage2(bucket,path){
+ const d=await q(C.u+'/storage/v1/object/sign/'+bucket+'/'+path,{method:'POST',headers:await h(true),body:JSON.stringify({expiresIn:300})});
+ const u=d?.signedURL||d?.signedUrl;return u?(u.startsWith('http')?u:C.u+'/storage/v1'+u):null;
+}
+async function uploadStorage2(bucket,path,file){
+ const r=await fetch(C.u+'/storage/v1/object/'+bucket+'/'+path,{method:'POST',headers:{...(await h()),'Content-Type':file.type||'application/octet-stream','x-upsert':'false'},body:file});
+ if(!r.ok)throw Error((await r.text())||('Upload '+r.status));return r.json().catch(()=>({}));
+}
+async function loadLaws2(){
+ const [laws,cases,evidence]=await Promise.all([rpc('get_current_nap_laws_v2',{p_language:L()}),tab('nap_law_violations','select=*&order=occurred_at.desc'),tab('nap_law_evidence','select=*&order=created_at.asc')]);
+ S.laws=laws||[];S.lawCases=cases||[];S.lawEvidence=evidence||[];
+}
+async function renderLawsLive(){
+ const v=document.getElementById('view-laws');if(!v)return;
+ v.innerHTML='<div class="hero"><div><div class="kicker">LAWS · LIVE</div><h1>Lawbook und Fälle.</h1><p>Aktuelle Law-Versionen, Ausnahmen, Sanktionen, private Fälle und Evidence.</p></div></div><div class="live-empty-state">Laws werden geladen …</div>';
+ try{
+  await loadLaws2();
+  v.innerHTML='<div class="hero"><div><div class="kicker">LAWS · LIVE</div><h1>Lawbook und Fälle.</h1><p>Aktuelle Versionen aus der Datenbank.</p></div></div>'+
+   '<div class="live-tabs"><button class="live-tab '+(liveLawTab==='book'?'active':'')+'" data-live-lawtab="book">Lawbook</button><button class="live-tab '+(liveLawTab==='cases'?'active':'')+'" data-live-lawtab="cases">NAP Verstöße <span class="tab-count">'+S.lawCases.length+'</span></button></div><div id="liveLawBody"></div>';
+  v.querySelectorAll('[data-live-lawtab]').forEach(b=>b.onclick=()=>{liveLawTab=b.dataset.liveLawtab;paintLaws2()});paintLaws2();
+ }catch(err){v.innerHTML+='<div class="live-empty-state">'+E(err.message||String(err))+'</div>'}
+}
+function paintLaws2(){
+ const box=document.getElementById('liveLawBody');if(!box)return;
+ document.querySelectorAll('[data-live-lawtab]').forEach(b=>b.classList.toggle('active',b.dataset.liveLawtab===liveLawTab));
+ if(liveLawTab==='cases'){
+   box.innerHTML='<div class="live-list">'+(S.lawCases.length?S.lawCases.map(ca=>{
+    const law=S.laws.find(l=>String(l.law_key)===String(ca.law_key)),files=S.lawEvidence.filter(x=>x.violation_id===ca.id);
+    return '<article class="card"><div class="card-head"><div><div class="card-title">Law '+E(law?.display_number||ca.law_key)+' · '+E(law?.title||'')+'</div><div class="card-sub">'+E(ca.subject_label||ca.player_name||ca.subject_alliance||'–')+' · '+E(D(ca.occurred_at))+'</div></div><span class="pill">'+E(ca.status||'open')+'</span></div><div class="card-body"><p style="margin-top:0">'+E(ca.description||'')+'</p>'+(ca.evidence_note?'<div class="live-note">'+E(ca.evidence_note)+'</div>':'')+(files.length?'<div class="hero-actions" style="margin-top:10px">'+files.map(f=>'<button class="btn small secondary live-law-file" data-path="'+E(f.storage_path)+'">📎 '+E(f.file_name||'Evidence')+'</button>').join('')+'</div>':'')+'</div></article>';
+   }).join(''):'<div class="live-empty-state">Noch keine Fälle.</div>')+'</div>';
+   box.querySelectorAll('.live-law-file').forEach(b=>b.onclick=async()=>{try{const u=await signStorage2('nap-law-evidence',b.dataset.path);if(u)window.open(u,'_blank','noopener')}catch(err){alert(err.message||String(err))}});
+   return;
+ }
+ const cats=[...new Set(S.laws.map(l=>l.category).filter(Boolean))],qv=liveLawSearch.toLowerCase(),rows=S.laws.filter(l=>(!liveLawCategory||l.category===liveLawCategory)&&(!qv||(String(l.display_number)+' '+l.title+' '+(l.short_summary||'')).toLowerCase().includes(qv)));
+ box.innerHTML='<div class="toolbar"><div class="toolbar-left"><input class="filter-input" id="liveLawSearch" placeholder="Law suchen …" value="'+E(liveLawSearch)+'"><select class="compact-select" id="liveLawCat"><option value="">Alle Bereiche</option>'+cats.map(c=>'<option value="'+E(c)+'" '+(liveLawCategory===c?'selected':'')+'>'+E(c)+'</option>').join('')+'</select></div></div>'+
+ '<div class="law-list-2">'+(rows.length?rows.map(l=>'<article class="law-card-2"><button class="law-card-toggle live-law-toggle" type="button"><span><b>LAW '+E(l.display_number)+' · '+E(l.title)+'</b><small>'+E(l.short_summary||'')+'</small></span><span class="chev">⌄</span></button><div class="law-card-detail"><div class="law-meta"><span class="pill">'+E(l.category||'')+'</span><span class="pill">v'+E(l.version)+'</span></div><p>'+E(l.full_text||'')+'</p>'+
+ ((Array.isArray(l.exceptions)&&l.exceptions.length)?'<div class="live-note"><b>Ausnahmen</b><br>'+l.exceptions.map(E).join('<br>')+'</div>':'')+
+ ((Array.isArray(l.penalties)&&l.penalties.length)?'<div class="live-note" style="margin-top:8px"><b>Sanktionen</b><br>'+l.penalties.map(E).join('<br>')+'</div>':'')+
+ (l.trackable&&String(l.law_key)!=='14'?'<div class="hero-actions" style="margin-top:10px"><button class="btn primary live-report-law" data-law="'+E(l.law_key)+'">NAP-Verstoß melden</button></div>':'')+
+ (String(l.law_key)==='14'?'<div class="hero-actions" style="margin-top:10px"><button class="btn primary" data-go="add">Zum Eintragen</button></div>':'')+
+ '</div></article>').join(''):'<div class="live-empty-state">Keine Laws gefunden.</div>')+'</div>';
+ document.getElementById('liveLawSearch').oninput=e=>{liveLawSearch=e.target.value;paintLaws2()};document.getElementById('liveLawCat').onchange=e=>{liveLawCategory=e.target.value;paintLaws2()};
+ box.querySelectorAll('.live-law-toggle').forEach(b=>b.onclick=()=>b.closest('.law-card-2').classList.toggle('open'));
+ box.querySelectorAll('.live-report-law').forEach(b=>b.onclick=()=>openLawReport2(b.dataset.law));
+}
+function openLawReport2(key){
+ const l=S.laws.find(x=>String(x.law_key)===String(key));if(!l)return;
+ let modal=document.getElementById('liveLawModal');modal?.remove();modal=document.createElement('div');modal.id='liveLawModal';modal.className='modal-backdrop';
+ modal.innerHTML='<div class="modal-card"><div class="modal-head"><div><b>Law '+E(l.display_number)+' melden</b><small>Fall bleibt für die meldende Allianz privat.</small></div><button class="icon-btn" id="liveLawClose">×</button></div><form id="liveLawForm" class="live-form">'+
+ '<div class="live-form-row"><label>Verursacher / Beschuldigter<input id="liveLawSubject" required></label><label>Player ID<input id="liveLawSubjectId"></label></div>'+
+ '<div class="live-form-row"><label>Betroffene Partei<input id="liveLawAffected"></label><label>Betroffene Player ID<input id="liveLawAffectedId"></label></div>'+
+ '<label>Zeitpunkt<input id="liveLawOccurred" type="datetime-local" required></label><label>Beschreibung<textarea id="liveLawDesc" required></textarea></label><label>Evidence-Notiz<textarea id="liveLawNote"></textarea></label><label>Screenshots / Evidence<input id="liveLawFiles" type="file" accept="image/png,image/jpeg,image/webp" multiple></label>'+
+ '<button class="btn primary" type="submit">Fall speichern</button><div id="liveLawStatus" class="live-status"></div></form></div>';document.body.appendChild(modal);
+ const d=new Date(Date.now()-new Date().getTimezoneOffset()*60000);document.getElementById('liveLawOccurred').value=d.toISOString().slice(0,16);document.getElementById('liveLawClose').onclick=()=>modal.remove();modal.onclick=e=>{if(e.target===modal)modal.remove()};document.getElementById('liveLawForm').onsubmit=e=>saveLawReport2(e,l);
+}
+async function saveLawReport2(e,l){
+ e.preventDefault();const out=document.getElementById('liveLawStatus'),files=[...document.getElementById('liveLawFiles').files];out.textContent='Speichere …';
+ try{
+  for(const f of files)if(!['image/png','image/jpeg','image/webp'].includes(f.type)||f.size>8388608)throw Error('Nur PNG/JPG/WebP, max. 8 MB.');
+  const d=await rpc('record_nap_law_violation_v2',{p_law_key:l.law_key,p_subject_label:document.getElementById('liveLawSubject').value.trim(),p_subject_game_id:document.getElementById('liveLawSubjectId').value.trim()||null,p_affected_party:document.getElementById('liveLawAffected').value.trim()||null,p_affected_game_id:document.getElementById('liveLawAffectedId').value.trim()||null,p_occurred_at:new Date(document.getElementById('liveLawOccurred').value).toISOString(),p_description:document.getElementById('liveLawDesc').value.trim(),p_evidence_note:document.getElementById('liveLawNote').value.trim()||null,p_sanction_type:null,p_sanction_start:null,p_sanction_end:null});
+  const vid=d?.id;if(!vid)throw Error('Fall-ID fehlt.');const uid=ses?.user?.id||'user';
+  for(const file of files){const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,'_'),path=uid+'/'+vid+'/'+Date.now()+'-'+safe;await uploadStorage2('nap-law-evidence',path,file);await ins('nap_law_evidence',{violation_id:vid,storage_path:path,file_name:file.name,mime_type:file.type,size_bytes:file.size})}
+  document.getElementById('liveLawModal')?.remove();liveLawTab='cases';await renderLawsLive();
+ }catch(err){out.textContent=err.message||String(err)}
+}
+
 })();
