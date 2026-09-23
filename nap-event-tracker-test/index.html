@@ -420,6 +420,15 @@ tr:hover td{background:color-mix(in srgb,var(--panel-2) 65%,transparent)}
   .more-label{font-size:9.5px}
   .more-icon{font-size:16px}
 }
+
+@media (min-width:901px){
+  .sidebar:hover{--sidebar:var(--sidebar-open)}
+  .sidebar:hover .brandtext,
+  .sidebar:hover .nav-label,
+  .sidebar:hover .concept{opacity:1;transform:none}
+  .sidebar:hover .nav-section{opacity:.9}
+  .sidebar:hover~.shell{margin-left:var(--sidebar-open)}
+}
 </style>
 </head>
 <body>
