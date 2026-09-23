@@ -145,4 +145,61 @@ async function loadScreenImporter2(){
 }
 window.addEventListener('message',async e=>{if(e.data?.type==='nap-screen-import-saved'){await load();renderHome();renderPlayers()}});
 
+
+/* === NAP CENTER LIVE V2 === */
+let liveNapTab='overview';
+function napRow2(title,sub,right,cls){
+ return '<div class="live-row"><div><b>'+E(title)+'</b><small>'+E(sub||'')+'</small></div><div>'+ (right||'') +'</div></div>';
+}
+function renderNapLive(){
+ const v=document.getElementById('view-nap');if(!v)return;
+ const now=Date.now(),activeSpend=(S.spend||[]).filter(x=>!x.ended_at&&(!x.ends_at||new Date(x.ends_at).getTime()>now));
+ const tabs=[['overview','Übersicht'],['alerts','24h Meldungen'],['exclusions','Exclusions'],['bans','NAP Bans'],['spending','Spending Exclusions']];
+ v.innerHTML='<div class="hero"><div><div class="kicker">NAP CENTER · LIVE</div><h1>NAP-weite Transparenz, private Details getrennt.</h1><p>Exclusions, Bans, Spending Exclusions und überfällige Maßnahmen an einem Ort.</p></div></div>'+
+ '<div class="live-tabs">'+tabs.map(x=>'<button class="live-tab '+(liveNapTab===x[0]?'active':'')+'" data-live-naptab="'+x[0]+'">'+x[1]+'</button>').join('')+'</div><div id="liveNapBody"></div>';
+ v.querySelectorAll('[data-live-naptab]').forEach(b=>b.onclick=()=>{liveNapTab=b.dataset.liveNaptab;renderNapLive()});
+ const body=document.getElementById('liveNapBody');
+ if(liveNapTab==='overview'){
+   body.innerHTML='<div class="live-stat-grid">'+
+    '<div class="live-stat"><b>'+S.o.length+'</b><small>24h überfällig</small></div>'+
+    '<div class="live-stat"><b>'+S.e.length+'</b><small>aktive NAP OUT</small></div>'+
+    '<div class="live-stat"><b>'+S.bans.length+'</b><small>aktive Bans</small></div>'+
+    '<div class="live-stat"><b>'+activeSpend.length+'</b><small>Spending Exclusions</small></div></div>'+
+    '<div class="live-panel-grid"><section class="card"><div class="card-head"><div><div class="card-title">NAP-Benachrichtigungen</div><div class="card-sub">Maßnahmen anderer NAP-Allianzen, die nach 24h nicht umgesetzt wurden.</div></div></div><div class="card-body live-list">'+
+    (S.o.length?S.o.slice(0,8).map(x=>napRow2((x.alliance_code||'')+' · '+(x.player_name||'–'),'Stufe '+x.level+' · seit '+dur(Number(x.overdue_seconds||0)*1000),'<span class="pill red">überfällig</span>')).join(''):'<div class="live-empty-state">Keine überfälligen NAP-Maßnahmen.</div>')+
+    '</div></section><section class="card"><div class="card-head"><div><div class="card-title">Aktive NAP OUTs</div><div class="card-sub">NAP-weit sichtbare Ausschlüsse.</div></div></div><div class="card-body live-list">'+
+    (S.e.length?S.e.slice(0,8).map(x=>napRow2(x.player_name,(x.alliance_code||'')+' · Stufe '+x.level+(x.end_at?' · Ende '+D(x.end_at):''),'<span class="pill red">NAP OUT</span>')).join(''):'<div class="live-empty-state">Keine aktive NAP Exclusion.</div>')+
+    '</div></section></div>';
+   return;
+ }
+ if(liveNapTab==='alerts'){
+   body.innerHTML='<section class="card"><div class="card-head"><div><div class="card-title">Überfällige Maßnahmen</div><div class="card-sub">Nur notwendige NAP-Informationen, keine privaten Verstoßdetails.</div></div><span class="pill red">'+S.o.length+'</span></div><div class="card-body live-list">'+
+   (S.o.length?S.o.map(x=>napRow2((x.alliance_code||'')+' · '+(x.player_name||'–'),'Stufe '+x.level+' · erstellt '+D(x.action_created_at),'<span class="pill red">'+E(dur(Number(x.overdue_seconds||0)*1000))+'</span>')).join(''):'<div class="live-empty-state">Keine überfälligen Maßnahmen.</div>')+'</div></section>';return;
+ }
+ if(liveNapTab==='exclusions'){
+   body.innerHTML='<div class="live-panel-grid"><section class="card"><div class="card-head"><div><div class="card-title">Aktive Exclusions</div></div><span class="pill red">'+S.e.length+'</span></div><div class="card-body live-list">'+
+   (S.e.length?S.e.map(x=>napRow2(x.player_name,(x.alliance_code||'')+' · Stufe '+x.level,'<span class="pill">'+(x.end_at?E(D(x.end_at)):'∞')+'</span>')).join(''):'<div class="live-empty-state">Keine aktive Exclusion.</div>')+
+   '</div></section><section class="card"><div class="card-head"><div><div class="card-title">Manuelle Exclusion</div><div class="card-sub">Wie in 1.0: zusätzliche NAP-Exclusion anlegen.</div></div></div><div class="card-body"><form id="liveExclusionForm" class="live-form"><label>Spieler<input id="liveExPlayer" required></label><div class="live-form-row"><label>Stufe<select id="liveExLevel"><option value="3">3 · 24h</option><option value="4">4 · Extended</option></select></label><label>Ende<input id="liveExEnd" type="datetime-local"></label></div><button class="btn primary" type="submit">Exclusion speichern</button><div id="liveExStatus" class="live-status"></div></form></div></section></div>';
+   document.getElementById('liveExclusionForm').onsubmit=saveManualExclusion2;return;
+ }
+ if(liveNapTab==='bans'){
+   const can=!!S.profile?.can_manage_bans;
+   body.innerHTML='<div class="live-panel-grid"><section class="card"><div class="card-head"><div><div class="card-title">NAP Bans</div><div class="card-sub">Aktive permanente NAP-Bans.</div></div><span class="pill red">'+S.bans.length+'</span></div><div class="card-body live-list">'+
+   (S.bans.length?S.bans.map(x=>napRow2(x.player_name,(x.former_alliance||'–')+(x.player_game_id?' · ID '+x.player_game_id:'')+(x.reason?' · '+x.reason:''),can?'<button class="btn small secondary live-end-ban" data-id="'+E(x.id)+'">deaktivieren</button>':'<span class="pill red">BAN</span>')).join(''):'<div class="live-empty-state">Keine aktiven NAP Bans.</div>')+
+   '</div></section>'+(can?'<section class="card"><div class="card-head"><div><div class="card-title">Ban hinzufügen</div></div></div><div class="card-body"><form id="liveBanForm" class="live-form"><label>Spieler<input id="liveBanPlayer" required></label><label>Player ID<input id="liveBanId"></label><label>Frühere Allianz<input id="liveBanAlliance"></label><label>Grund<textarea id="liveBanReason" required></textarea></label><button class="btn primary" type="submit">NAP Ban speichern</button><div id="liveBanStatus" class="live-status"></div></form></div></section>':'')+'</div>';
+   document.querySelectorAll('.live-end-ban').forEach(b=>b.onclick=()=>endBan2(b.dataset.id));document.getElementById('liveBanForm')?.addEventListener('submit',saveBan2);return;
+ }
+ body.innerHTML='<section class="card"><div class="card-head"><div><div class="card-title">NAP Spending Exclusions</div><div class="card-sub">Spieler, die für den angegebenen Zeitraum von Spending-Regeln ausgenommen sind.</div></div><span class="pill gold">'+activeSpend.length+'</span></div><div class="card-body live-list">'+
+ (S.spend.length?S.spend.map(x=>napRow2(x.player_name,(x.owner_alliance||'')+(x.player_game_id?' · ID '+x.player_game_id:'')+(x.reason?' · '+x.reason:''),'<span class="pill '+(!x.ended_at&&(!x.ends_at||new Date(x.ends_at)>new Date())?'gold':'')+'">'+E(x.ended_at?'beendet':x.ends_at?D(x.ends_at):'aktiv')+'</span>')).join(''):'<div class="live-empty-state">Keine Spending Exclusions vorhanden.</div>')+'</div></section>';
+}
+async function saveManualExclusion2(e){
+ e.preventDefault();const out=document.getElementById('liveExStatus');out.textContent='Speichere …';
+ try{const name=document.getElementById('liveExPlayer').value.trim(),level=Number(document.getElementById('liveExLevel').value),end=document.getElementById('liveExEnd').value;await rpc('create_manual_nap_exclusion',{p_player_name:name,p_level:level,p_started_at:new Date().toISOString(),p_end_at:end?new Date(end).toISOString():null});await load();out.textContent='✓ Gespeichert';renderNapLive()}catch(err){out.textContent=err.message||String(err)}
+}
+async function saveBan2(e){
+ e.preventDefault();const out=document.getElementById('liveBanStatus');out.textContent='Speichere …';
+ try{await ins('nap_bans',{player_name:document.getElementById('liveBanPlayer').value.trim(),player_game_id:document.getElementById('liveBanId').value.trim()||null,former_alliance:document.getElementById('liveBanAlliance').value.trim()||null,reason:document.getElementById('liveBanReason').value.trim(),active:true});await load();renderNapLive()}catch(err){out.textContent=err.message||String(err)}
+}
+async function endBan2(id){if(!confirm('NAP Ban deaktivieren?'))return;await upd('nap_bans',id,{active:false,updated_at:new Date().toISOString()});await load();renderNapLive()}
+
 })();
