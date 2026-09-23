@@ -481,4 +481,22 @@ setView=function(name){
 };
 renderHome=renderHomeFull2;renderPlayers=renderPlayers2;openProfile=openProfile2;
 
+
+/* === FINAL BOOT + LIVE NOTIFICATION STATE V2 === */
+let liveNotificationFilter='all';
+function notificationReadSet2(){try{return new Set(JSON.parse(localStorage.getItem('nap2_read_'+S.a)||'[]'))}catch{return new Set()}}
+function notificationId2(x){return [x.cat,x.title,x.copy,x.go].join('|')}
+const baseRenderNotifications2=renderNotifications2;
+renderNotifications2=function(){
+ const list=document.getElementById('notificationList'),badge=document.querySelector('#bellBtn .badge-count'),filters=document.getElementById('notificationFilters'),mark=document.getElementById('markAllRead');if(!list)return;
+ const all=liveNotifications2(),read=notificationReadSet2(),rows=all.filter(x=>liveNotificationFilter==='all'||x.cat===liveNotificationFilter),unread=all.filter(x=>!read.has(notificationId2(x))).length;
+ if(badge){badge.textContent=unread;badge.style.display=unread?'grid':'none'}
+ if(filters){filters.innerHTML='<button class="notification-filter '+(liveNotificationFilter==='all'?'active':'')+'" data-live-nf="all">Alle</button><button class="notification-filter '+(liveNotificationFilter==='nap'?'active':'')+'" data-live-nf="nap">NAP</button><button class="notification-filter '+(liveNotificationFilter==='alliance'?'active':'')+'" data-live-nf="alliance">Meine Allianz</button>';filters.querySelectorAll('[data-live-nf]').forEach(b=>b.onclick=()=>{liveNotificationFilter=b.dataset.liveNf;renderNotifications2()})}
+ list.innerHTML=rows.length?rows.map(x=>{const id=notificationId2(x),isRead=read.has(id);return '<button class="notification-item '+(isRead?'':'unread')+'" data-live-notify="'+E(x.go)+'" data-live-nid="'+E(id)+'"><span class="notification-dot"></span><span><b>'+E(x.title)+'</b><small>'+E(x.copy)+'</small></span></button>'}).join(''):'<div class="live-empty-state">Keine Meldungen.</div>';
+ list.querySelectorAll('[data-live-notify]').forEach(b=>b.onclick=()=>{const r=notificationReadSet2();r.add(b.dataset.liveNid);localStorage.setItem('nap2_read_'+S.a,JSON.stringify([...r]));setView(b.dataset.liveNotify);document.getElementById('notificationPanel')?.classList.remove('show');document.getElementById('overlay')?.classList.remove('show');renderNotifications2()});
+ if(mark){const clone=mark.cloneNode(true);mark.replaceWith(clone);clone.onclick=()=>{const r=notificationReadSet2();for(const x of all)r.add(notificationId2(x));localStorage.setItem('nap2_read_'+S.a,JSON.stringify([...r]));renderNotifications2()}}
+};
+addLiveCss();neutralizeMocks();
+document.getElementById('languagePicker')?.addEventListener('change',()=>setTimeout(()=>{if(S.a){const active=document.querySelector('.view.active')?.id?.replace('view-','')||'home';setView(active)}},0));
+
 })();
