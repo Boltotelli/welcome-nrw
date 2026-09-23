@@ -55,14 +55,14 @@
     {
       "id": "golden-glaives-2026-09-21",
       "start": "2026-09-21",
-      "end": "2026-09-23",
+      "end": "2026-09-21",
       "icon": "⚔️",
       "manual": true,
       "confidence": "confirmed-ingame",
       "name": {
-        "de": "Golden Glaives",
-        "en": "Golden Glaives",
-        "fr": "Golden Glaives"
+        "de": "Golden Glaives · Start",
+        "en": "Golden Glaives · Start",
+        "fr": "Golden Glaives · Début"
       },
       "dailyPlans": {
         "2026-09-21": {
@@ -92,9 +92,9 @@
             ]
           },
           "note": {
-            "de": "Der Start am 21.09. ist für Server 1044 bestätigt. Das genaue Eventende bitte im Spiel prüfen; weitere Eventtage ergänzen wir nach Bestätigung.",
-            "en": "The 21 Sep start is confirmed for Server 1044. Check the exact end in game; further days will be added once confirmed.",
-            "fr": "Le début du 21 septembre est confirmé pour le serveur 1044. Vérifie la fin exacte en jeu ; les jours suivants seront ajoutés dès confirmation."
+            "de": "Der Start am 21.09. ist für Server 1044 bestätigt. Die automatische Zykluslogik führt Golden Glaives danach über die beiden weiteren Kalendertage fort.",
+            "en": "The 21 Sep start is confirmed for Server 1044. The automatic cycle logic carries Golden Glaives through the following two calendar days.",
+            "fr": "Le début du 21 septembre est confirmé pour le serveur 1044. La logique automatique poursuit Golden Glaives pendant les deux jours calendaires suivants."
           }
         }
       },
