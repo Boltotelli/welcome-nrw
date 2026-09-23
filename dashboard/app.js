@@ -69,7 +69,7 @@
     return {id,start,end,icon,confidence:'public-timeline',name,rhythmCoach,...extra};
   }
 
-  function strongestGovernorCoach(dayNo){
+  function strongestGovernorCoach(dayNo,date){
     const plans={
       de:[
         ['Stadtentwicklung','Truegold, Amulettwert sowie Bau-/Forschungs-/Trainings-Speedups.'],
@@ -103,7 +103,11 @@
     for(const lang of ['de','en','fr']){
       const p=plans[lang][dayNo-1];
       const save=lang==='de'?'Nur lohnende Minimalziele erreichen; keine KvK-Vorräte für die Rangliste verbrennen.':lang==='fr'?'Atteins seulement les paliers rentables ; ne brûle pas les réserves KvK pour le classement.':'Reach only worthwhile milestones; do not burn KvK reserves for ranking.';
-      coach[lang]={points:p[1],steps:[p[0]+': '+p[1],save],details:[lang==='de'?('Strongest Governor · Tag '+dayNo+' von 7'):lang==='fr'?('Strongest Governor · jour '+dayNo+' sur 7'):('Strongest Governor · Day '+dayNo+' of 7')]};
+      const steps=[p[0]+': '+p[1],save];
+      if((date==='2026-09-22'||date==='2026-09-23')&&(dayNo===2||dayNo===3)){
+        steps.push(lang==='de'?'Einmalige 1044-Ausnahme für diesen SG: An Tag 2 und 3 sind bis zu 4× des jeweiligen Mindestziels erlaubt.':lang==='fr'?'Exception unique 1044 pour ce SG : aux jours 2 et 3, jusqu’à 4× l’objectif minimum correspondant est autorisé.':'One-off 1044 exception for this SG: on Days 2 and 3, up to 4× the respective minimum target is allowed.');
+      }
+      coach[lang]={points:p[1],steps,details:[lang==='de'?('Strongest Governor · Tag '+dayNo+' von 7'):lang==='fr'?('Strongest Governor · jour '+dayNo+' sur 7'):('Strongest Governor · Day '+dayNo+' of 7')]};
     }
     return coach;
   }
@@ -193,7 +197,7 @@
     }
     if(cycleDay>=7&&cycleDay<=13){
       const sgDay=cycleDay-6;
-      result.push(makeCycleEvent('rhythm-strongest-governor-'+at(7),at(7),at(13),{de:'Stärkster Gouverneur',en:'Strongest Governor',fr:'Gouverneur le plus puissant'},'🏅',strongestGovernorCoach(sgDay),{sourceUrl:'https://kingshotdata.com/events/strongest-governor-event/'}));
+      result.push(makeCycleEvent('rhythm-strongest-governor-'+at(7),at(7),at(13),{de:'Stärkster Gouverneur',en:'Strongest Governor',fr:'Gouverneur le plus puissant'},'🏅',strongestGovernorCoach(sgDay,date),{sourceUrl:'https://kingshotdata.com/events/strongest-governor-event/'}));
     }
     if(cycleDay>=14&&cycleDay<=19){
       const mobilizeCoach={
