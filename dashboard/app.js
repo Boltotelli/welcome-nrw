@@ -23,7 +23,7 @@
   const eventsFor=date=>{const listed=eventFeed.filter(e=>!isRelease(e)&&!guideSuppresses(e)&&e.start<=date&&(!e.end||e.end>=date)),kinds=new Set(listed.map(eventKind));return listed.concat(officialRhythmFor(date).filter(e=>!guideSuppresses(e)&&!kinds.has(eventKind(e))))};
   const isBearDay=d=>Math.round((Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate())-anchor)/day)%2===0;
   const num=value=>new Intl.NumberFormat('de-DE').format(value);
-  function eventKind(e){const value=`${e.id||''} ${localized(e.name,'en')}`.toLowerCase();if(value.includes('alliance-brawl')||value.includes('alliance brawl'))return'brawl';if(value.includes('kingdom-of-power')||value.includes('kvk'))return'kvk';if(value.includes('strongest-governor')||value.includes('strongest governor'))return'strongest';if(value.includes('fishing')||value.includes('fischer'))return'fishing';if(value.includes('viking'))return'viking';if(value.includes('eternity'))return'eternity';if(value.includes('cesare'))return'cesare';if(value.includes('golden-glaives')||value.includes('golden glaives'))return'golden';if(value.includes('kill-event')||value.includes('kill event'))return'kill';if(value.includes('officer-project')||value.includes('officer project'))return'officer';if(value.includes('armament'))return'armament';if(value.includes('merchant empire')||value.includes('handelsimperium')||value.includes('empire commercial'))return'merchant';if(value.includes('alliance-championship')||value.includes('alliance championship'))return'championship';if(value.includes('bear-trap')||value.includes('bear trap'))return'bear';if(value.includes('champagne'))return'champagne';if(value.includes('roulette'))return'roulette';if(value.includes('transfer'))return'transfer';return'generic'}
+  function eventKind(e){const value=`${e.id||''} ${localized(e.name,'en')}`.toLowerCase();if(value.includes('alliance-brawl')||value.includes('alliance brawl'))return'brawl';if(value.includes('kingdom-of-power')||value.includes('kvk'))return'kvk';if(value.includes('strongest-governor')||value.includes('strongest governor'))return'strongest';if(value.includes('fishing')||value.includes('fischer'))return'fishing';if(value.includes('viking'))return'viking';if(value.includes('eternity'))return'eternity';if(value.includes('cesare'))return'cesare';if(value.includes('golden-glaives')||value.includes('golden glaives'))return'golden';if(value.includes('kill-event')||value.includes('kill event'))return'kill';if(value.includes('officer-project')||value.includes('officer project'))return'officer';if(value.includes('armament'))return'armament';if(value.includes('alliance-mobilization')||value.includes('alliance mobilization')||value.includes('allianz-mobilisierung'))return'mobilization';if(value.includes('merchant empire')||value.includes('handelsimperium')||value.includes('empire commercial'))return'merchant';if(value.includes('alliance-championship')||value.includes('alliance championship'))return'championship';if(value.includes('bear-trap')||value.includes('bear trap'))return'bear';if(value.includes('champagne'))return'champagne';if(value.includes('roulette'))return'roulette';if(value.includes('transfer'))return'transfer';return'generic'}
   const guideIdByKind={brawl:'alliance-brawl',kvk:'kingdom-of-power-prep',strongest:'strongest-governor',armament:'armament-competition',officer:'officer-project',golden:'golden-glaives',merchant:'merchant-empire',fishing:'fishing-tournament',viking:'viking-vengeance',eternity:'eternitys-reach',cesare:'cesares-fury',championship:'alliance-championship',kill:'kill-event',bear:'bear-trap',transfer:'kingdom-transfer',champagne:'champagne-fair',roulette:'hero-roulette'};
   const normGuideName=value=>String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/gi,' ').trim().toLowerCase();
   function guideRecordFor(e){const detailed=eventGuideDb.events||[],id=String(e.id||''),direct=detailed.find(g=>id===g.id||id.startsWith(`${g.id}-`));if(direct)return direct;const mapped=guideIdByKind[eventKind(e)];if(mapped){const hit=detailed.find(g=>g.id===mapped);if(hit)return hit}const eventName=normGuideName(localized(e.name,'en')).split(' type ')[0].split(' 20')[0];return(eventGuideDb.catalogOnly||[]).find(g=>{const name=normGuideName(g.name);return eventName===name||eventName.startsWith(name+' ')})||null}
@@ -65,15 +65,164 @@
       :{target:typeOne?310000:453000,hardCap:typeOne?930000:1359000,note:{de:'Die 3×-Grenze ist keine Empfehlung. Erreiche nur eine lohnende Belohnungsstufe oder lasse das Event aus und spare danach für KvK.',en:'The 3× limit is not a recommendation. Reach only a worthwhile reward tier or skip the event, then save for KvK.',fr:"La limite de 3× n’est pas une recommandation. Atteins seulement un palier rentable ou ignore l’événement, puis économise pour le KvK."}};
     return{id:`rhythm-${kind}-${start}`,start,end:dateKey(new Date(new Date(`${start}T00:00:00Z`).getTime()+day)),iconUrl,confidence:'public-timeline',name:copy.name,sourceUrl,rhythmCoach:{de:{points:copy.points.de,steps:steps.de,details:[copy.reward.de],limits:eventLimits},en:{points:copy.points.en,steps:steps.en,details:[copy.reward.en],limits:eventLimits},fr:{points:copy.points.fr,steps:steps.fr,details:[copy.reward.fr],limits:eventLimits}}};
   }
+  function makeCycleEvent(id,start,end,name,icon,rhythmCoach,extra={}){
+    return {id,start,end,icon,confidence:'public-timeline',name,rhythmCoach,...extra};
+  }
+
+  function strongestGovernorCoach(dayNo){
+    const plans={
+      de:[
+        ['Stadtentwicklung','Truegold, Amulettwert sowie Bau-/Forschungs-/Trainings-Speedups.'],
+        ['Heldenentwicklung','Mithril, Widgets, Heldenroulette, Schmiedehämmer, Heldensplitter, Truegold und Speedups.'],
+        ['Grundfertigkeiten','Zähmungsmarken, Heldenroulette, Heldensplitter, Amulettwert und Pet-Fortschritt.'],
+        ['Kampftraining','Mithril, Widgets, Schmiedehämmer, Amulettwert und Truppenausbildung/-beförderung.'],
+        ['Grundfertigkeiten II','Mithril, Widgets, Schmiedehämmer, Truegold und Speedups.'],
+        ['Kampftraining II','Gouverneursausrüstung sowie Truppenausbildung/-beförderung.'],
+        ['Heldenentwicklung II','Zähmungsmarken, Heldensplitter, Truegold, Pet-Fortschritt, Gouverneursausrüstung, Speedups und Sammeln.']
+      ],
+      en:[
+        ['City Construction','Truegold, Charm score and construction/research/training speedups.'],
+        ['Hero Development','Mithril, Widgets, Hero Roulette, Forgehammers, Hero Shards, Truegold and speedups.'],
+        ['Basic Skills','Taming Marks, Hero Roulette, Hero Shards, Charm score and Pet advancement.'],
+        ['Combat Training','Mithril, Widgets, Forgehammers, Charm score and troop training/promotion.'],
+        ['Basic Skills II','Mithril, Widgets, Forgehammers, Truegold and speedups.'],
+        ['Combat Training II','Governor Gear and troop training/promotion.'],
+        ['Hero Development II','Taming Marks, Hero Shards, Truegold, Pet advancement, Governor Gear, speedups and gathering.']
+      ],
+      fr:[
+        ['Développement urbain','Truegold, score de charmes et accélérateurs de construction/recherche/entraînement.'],
+        ['Développement des héros','Mithril, Widgets, Roulette des héros, Marteaux de forge, fragments, Truegold et accélérateurs.'],
+        ['Compétences de base','Marques de dressage, Roulette, fragments, score de charmes et progression des familiers.'],
+        ['Entraînement au combat','Mithril, Widgets, Marteaux, score de charmes et entraînement/promotion des troupes.'],
+        ['Compétences de base II','Mithril, Widgets, Marteaux, Truegold et accélérateurs.'],
+        ['Entraînement au combat II','Équipement du gouverneur et entraînement/promotion des troupes.'],
+        ['Développement des héros II','Marques de dressage, fragments, Truegold, familiers, équipement, accélérateurs et collecte.']
+      ]
+    };
+    const coach={};
+    for(const lang of ['de','en','fr']){
+      const p=plans[lang][dayNo-1];
+      const save=lang==='de'?'Nur lohnende Minimalziele erreichen; keine KvK-Vorräte für die Rangliste verbrennen.':lang==='fr'?'Atteins seulement les paliers rentables ; ne brûle pas les réserves KvK pour le classement.':'Reach only worthwhile milestones; do not burn KvK reserves for ranking.';
+      coach[lang]={points:p[1],steps:[p[0]+': '+p[1],save],details:[lang==='de'?('Strongest Governor · Tag '+dayNo+' von 7'):lang==='fr'?('Strongest Governor · jour '+dayNo+' sur 7'):('Strongest Governor · Day '+dayNo+' of 7')]};
+    }
+    return coach;
+  }
+
+  function kvkPrepCoach(dayNo){
+    const plans={
+      de:[
+        ['Stadtentwicklung','Intel-Missionen, Truegold/Truegold-Staub/gehärtetes Truegold, Amulettwert und Speedups.'],
+        ['Grundfertigkeiten','Heldensplitter, Heldenroulette, Meistermaterialien, Truegold, Speedups und Sammeln.'],
+        ['Pet-Training','Zähmungsmarken, Pet-Fortschritt, Amulette, Heldensplitter, Heldenroulette und Intel-Missionen.'],
+        ['Ausrüstung & Truppen','Mithril, Widgets, Schmiedehämmer, Amulette sowie Truppenausbildung/-beförderung.'],
+        ['Finale','Alle relevanten Kategorien sind geöffnet; verbliebene Vorräte gezielt nach NRW-/Discord-Plan einsetzen.']
+      ],
+      en:[
+        ['City Construction','Intel Missions, Truegold/Truegold Dust/Tempered Truegold, Charm score and speedups.'],
+        ['Basic Skills','Hero Shards, Hero Roulette, Master materials, Truegold, speedups and gathering.'],
+        ['Pet Training','Taming Marks, Pet advancement, Charms, Hero Shards, Hero Roulette and Intel Missions.'],
+        ['Gear & Troops','Mithril, Widgets, Forgehammers, Charms and troop training/promotion.'],
+        ['Finale','All major categories are open; spend remaining reserves only according to the NRW/Discord plan.']
+      ],
+      fr:[
+        ['Développement urbain','Missions de renseignement, Truegold/poussière/Truegold renforcé, charmes et accélérateurs.'],
+        ['Compétences de base','Fragments, Roulette, matériaux de Maître, Truegold, accélérateurs et collecte.'],
+        ['Familiers','Marques de dressage, progression, charmes, fragments, Roulette et missions de renseignement.'],
+        ['Équipement & troupes','Mithril, Widgets, Marteaux, charmes et entraînement/promotion des troupes.'],
+        ['Finale','Toutes les grandes catégories sont ouvertes ; utilise les réserves restantes selon le plan NRW/Discord.']
+      ]
+    };
+    const coach={};
+    for(const lang of ['de','en','fr']){
+      const p=plans[lang][dayNo-1];
+      coach[lang]={points:p[1],steps:[p[0]+': '+p[1],lang==='de'?'Vor größeren Ausgaben zuerst NRW-/Discord-Absprachen prüfen.':lang==='fr'?'Avant toute grosse dépense, vérifie les consignes NRW/Discord.':'Check NRW/Discord coordination before major spending.'],details:[lang==='de'?('KvK-Vorbereitung · Tag '+dayNo+' von 5'):lang==='fr'?('Préparation KvK · jour '+dayNo+' sur 5'):('KvK Preparation · Day '+dayNo+' of 5')]};
+    }
+    return coach;
+  }
+
   function officialRhythmFor(date){
     const d=new Date(`${date}T00:00:00Z`),cycleAnchor=Date.UTC(2026,8,14),elapsed=Math.floor((d.getTime()-cycleAnchor)/day),cycleDay=((elapsed%28)+28)%28,cycleStart=d.getTime()-cycleDay*day;
-    const slots=[
+    const at=n=>dateKey(new Date(cycleStart+n*day));
+    const result=[];
+
+    // Light-week side events. Type B deliberately spills into SG/KvK day 1.
+    const sideSlots=[
       {from:0,to:1,kind:'armament',type:1},
       {from:2,to:3,kind:'officer',type:1},
       {from:4,to:5,kind:'armament',type:2},
-      {from:6,to:7,kind:'officer',type:2}
+      {from:6,to:7,kind:'officer',type:2},
+      {from:14,to:15,kind:'armament',type:1},
+      {from:16,to:17,kind:'officer',type:1},
+      {from:18,to:19,kind:'armament',type:2},
+      {from:20,to:21,kind:'officer',type:2}
     ];
-    return slots.filter(slot=>cycleDay>=slot.from&&cycleDay<=slot.to).map(slot=>rhythmEvent(slot.kind,slot.type,dateKey(new Date(cycleStart+slot.from*day))))
+    for(const slot of sideSlots){
+      if(cycleDay>=slot.from&&cycleDay<=slot.to) result.push(rhythmEvent(slot.kind,slot.type,at(slot.from)));
+    }
+
+    // Main 28-day wheel.
+    if(cycleDay<=6){
+      result.push(makeCycleEvent('rhythm-alliance-brawl-'+at(0),at(0),at(6),{de:'Allianzgemenge',en:'Alliance Brawl',fr:'Alliance Brawl'},'⚔️',null));
+      result.push(makeCycleEvent('rhythm-merchant-empire-'+at(0),at(0),at(6),{de:'Handelsimperium',en:'Merchant Empire',fr:'Empire commercial'},'🏛️',null));
+    }
+    if(cycleDay>=7&&cycleDay<=13){
+      const sgDay=cycleDay-6;
+      result.push(makeCycleEvent('rhythm-strongest-governor-'+at(7),at(7),at(13),{de:'Stärkster Gouverneur',en:'Strongest Governor',fr:'Gouverneur le plus puissant'},'🏅',strongestGovernorCoach(sgDay),{sourceUrl:'https://kingshotdata.com/events/strongest-governor-event/'}));
+    }
+    if(cycleDay>=14&&cycleDay<=19){
+      const mobilizeCoach={
+        de:{points:'Allianz-Mobilisierung · Vorräte für KvK schonen',steps:['Nur kostenlose bzw. ohnehin geplante Aufgaben erledigen.','Truegold, Splitter, Pet-, Ausrüstungs- und Speedup-Vorräte für die kommende KvK-Vorbereitung halten.'],details:['Tag 20 des Zyklus enthüllt das KvK-Matchmaking.']},
+        en:{points:'Alliance Mobilization · preserve reserves for KvK',steps:['Do only free tasks or actions you planned anyway.','Hold Truegold, shards, Pet, gear and speedup reserves for the upcoming KvK Preparation.'],details:['Cycle day 20 reveals KvK matchmaking.']},
+        fr:{points:'Mobilisation d’alliance · garde les réserves pour le KvK',steps:['Fais seulement les tâches gratuites ou déjà prévues.','Garde Truegold, fragments, ressources de familiers/équipement et accélérateurs pour la préparation KvK.'],details:['Le jour 20 du cycle révèle le matchmaking KvK.']}
+      };
+      result.push(makeCycleEvent('rhythm-alliance-mobilization-'+at(14),at(14),at(19),{de:'Allianz-Mobilisierung',en:'Alliance Mobilization',fr:'Mobilisation d’alliance'},'📣',mobilizeCoach));
+    }
+    if(cycleDay===20){
+      const prepCoach={
+        de:{points:'Morgen beginnt die KvK-Vorbereitung',steps:['Ab 08:00 UTC Intel-Missionen nicht mehr abschließen, damit sie für Tag 1 bereitstehen.','KvK-Vorräte heute vollständig halten und Matchmaking/Discord prüfen.'],details:['Ruhiger Zwischentag vor der fünf­tägigen Vorbereitung.']},
+        en:{points:'KvK Preparation starts tomorrow',steps:['From 08:00 UTC, stop completing Intel Missions so they bank for Day 1.','Hold all KvK reserves today and check matchmaking/Discord.'],details:['Quiet bridge day before the five-day Preparation phase.']},
+        fr:{points:'La préparation KvK commence demain',steps:['À partir de 08:00 UTC, ne termine plus les missions de renseignement afin de les conserver pour le jour 1.','Garde toutes les réserves KvK et vérifie le matchmaking/Discord.'],details:['Journée calme avant les cinq jours de préparation.']}
+      };
+      result.push(makeCycleEvent('rhythm-kvk-prep-warning-'+at(20),at(20),at(20),{de:'KvK · Vorbereitung morgen',en:'KvK · Preparation tomorrow',fr:'KvK · Préparation demain'},'🛡️',prepCoach));
+    }
+    if(cycleDay>=21&&cycleDay<=25){
+      const prepDay=cycleDay-20;
+      result.push(makeCycleEvent('rhythm-kingdom-of-power-prep-'+at(21),at(21),at(25),{de:'KvK-Vorbereitung',en:'Kingdom of Power Preparation',fr:'Préparation KvK'},'👑',kvkPrepCoach(prepDay)));
+    }
+    if(cycleDay>=26&&cycleDay<=27){
+      const battleCoach={
+        de:{points:'KvK-Kampfwochenende',steps:['Vor Öffnung des gegnerischen Königreichs Schild aktivieren und Krankenstation freihalten.','Castle-Battle- und NAP-Anweisungen auf Discord befolgen; keine unkoordinierten Stadtangriffe.'],details:['Die Kampfphase folgt direkt auf die fünf Prep-Tage.']},
+        en:{points:'KvK battle weekend',steps:['Activate a shield before cross-kingdom access opens and keep the infirmary clear.','Follow Castle Battle and NAP instructions on Discord; no uncoordinated city attacks.'],details:['The battle phase follows the five Preparation days.']},
+        fr:{points:'Week-end de bataille KvK',steps:['Active un bouclier avant l’ouverture inter-royaumes et garde l’infirmerie libre.','Suis les consignes Castle Battle/NAP sur Discord ; aucune attaque de ville non coordonnée.'],details:['La phase de combat suit directement les cinq jours de préparation.']}
+      };
+      result.push(makeCycleEvent('rhythm-kvk-battle-'+at(26),at(26),at(27),{de:'KvK · Kampfwochenende',en:'KvK · Battle Weekend',fr:'KvK · Week-end de bataille'},'🏰',battleCoach));
+    }
+
+    // Golden Glaives overlaps the Monday start of SG and KvK Prep.
+    for(const from of [7,21]){
+      if(cycleDay>=from&&cycleDay<=from+2){
+        result.push(makeCycleEvent('rhythm-golden-glaives-'+at(from),at(from),at(from+2),{de:'Golden Glaives',en:'Golden Glaives',fr:'Golden Glaives'},'⚔️',null,{iconUrl:'https://kingshotdata.com/uploads/2025/05/golden-glaives-event-icon.webp'}));
+      }
+    }
+
+    // Hero Roulette begins on day 2 of SG/KvK and lasts three days.
+    for(const from of [8,22]){
+      if(cycleDay>=from&&cycleDay<=from+2){
+        result.push(makeCycleEvent('rhythm-hero-roulette-'+at(from),at(from),at(from+2),{de:'Heldenroulette',en:'Hero Roulette',fr:'Roulette des héros'},'🎡',null));
+      }
+    }
+
+    // Periodic light-week companions. Marked predicted so players know to verify in game.
+    for(const from of [0,14]){
+      if(cycleDay>=from&&cycleDay<=from+1){
+        result.push({...makeCycleEvent('rhythm-champagne-fair-'+at(from),at(from),at(from+1),{de:'Champagne Fair',en:'Champagne Fair',fr:'Champagne Fair'},'🥂',null),confidence:'predicted'});
+      }
+      if(cycleDay>=from+1&&cycleDay<=from+3){
+        result.push({...makeCycleEvent('rhythm-fishing-'+at(from+1),at(from+1),at(from+3),{de:'Fischerturnier',en:'Fishing Tournament',fr:'Tournoi de pêche'},'🎣',null),confidence:'predicted'});
+      }
+    }
+
+    return result;
   }
 
   const brawlCopy={
@@ -169,7 +318,7 @@
     }
   };
   function whyFor(e,coach,lang){const kind=eventKind(e),all=[...(coach.steps||[]),...(coach.details||[]),...(coach.prepare?.steps||[])].join(' ').toLowerCase();if(kind==='brawl'&&all.includes('bison'))return whyText[lang].bison;if(kind==='brawl'&&(all.includes('intel')||all.includes('geheimdienst')||all.includes('renseignement')))return whyText[lang].intel;if(kind==='armament')return whyText[lang].armament;if(kind==='merchant')return whyText[lang].merchant;return''}
-  function priorityCards(date,lang,now){const rank={kill:120,brawl:110,armament:100,officer:90,viking:85,eternity:80,merchant:70,fishing:55,cesare:50,golden:145,transfer:20,generic:30};return eventsFor(date).map(e=>{const coach=coachFor(e,date,lang)||{steps:[],details:[]},kind=eventKind(e);let action=coach.prepare?.steps?.length?`${coach.prepare.title}: ${coach.prepare.steps[0]}`:(coach.steps?.[0]||coach.details?.[0]||'');if(kind==='merchant'&&now.getUTCHours()>=10&&coach.steps?.[1])action=coach.steps[1];return{e,action,score:(rank[kind]||30)+(coach.prepare?.steps?.length?25:0)+(coach.limits?20:0)}}).filter(x=>x.action).sort((a,b)=>b.score-a.score).slice(0,3)}
+  function priorityCards(date,lang,now){const rank={kvk:170,strongest:160,golden:145,brawl:130,mobilization:115,armament:100,officer:90,viking:85,eternity:80,merchant:70,fishing:55,cesare:50,roulette:50,transfer:20,generic:30};return eventsFor(date).map(e=>{const coach=coachFor(e,date,lang)||{steps:[],details:[]},kind=eventKind(e);let action=coach.prepare?.steps?.length?`${coach.prepare.title}: ${coach.prepare.steps[0]}`:(coach.steps?.[0]||coach.details?.[0]||'');if(kind==='merchant'&&now.getUTCHours()>=10&&coach.steps?.[1])action=coach.steps[1];return{e,action,score:(rank[kind]||30)+(coach.prepare?.steps?.length?25:0)+(coach.limits?20:0)}}).filter(x=>x.action).sort((a,b)=>b.score-a.score).slice(0,3)}
   function renderPriorities(date,lang,now){const rail=document.getElementById('priorityRail'),items=priorityCards(date,lang,now);rail.hidden=!items.length;document.getElementById('priorityItems').innerHTML=items.map(({e,action},index)=>`<button class="priority-item" type="button" data-priority-key="today:${safe(date)}:${safe(e.id)}"><span class="priority-number">0${index+1}</span><span class="priority-icon">${eventIcon(e)}</span><span><strong>${safe(localized(e.name,lang))}</strong><small>${safe(action)}</small></span><i aria-hidden="true">→</i></button>`).join('')}
   function bindPriorityCards(){document.querySelectorAll('[data-priority-key]').forEach(button=>button.addEventListener('click',()=>{const card=document.querySelector(`[data-event-key="${CSS.escape(button.dataset.priorityKey)}"]`);if(!card)return;card.open=true;card.scrollIntoView({behavior:'smooth',block:'start'})}))}
 
