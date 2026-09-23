@@ -108,6 +108,32 @@
     return coach;
   }
 
+  function goldenGlaivesCoach(dayNo){
+    const coach={};
+    for(const lang of ['de','en','fr']){
+      if(dayNo===3){
+        coach[lang]={
+          points:lang==='de'?'Einlösetag · keine neuen Dim Goldstones mehr':lang==='fr'?'Jour d’échange · plus de nouveaux Dim Goldstones':'Redemption day · no new Dim Goldstones',
+          steps:[
+            lang==='de'?'Verbleibende Dim Goldstones heute im Event-Shop ausgeben.':lang==='fr'?'Dépense aujourd’hui les Dim Goldstones restants dans la boutique.':'Spend any remaining Dim Goldstones in the event shop today.',
+            lang==='de'?'Heute werden keine neuen Dim Goldstones mehr gesammelt; ungenutzte Steine werden nach Eventende automatisch umgewandelt.':lang==='fr'?'Aucun nouveau Dim Goldstone ne peut être obtenu aujourd’hui ; les pierres restantes seront converties automatiquement après l’événement.':'No new Dim Goldstones can be collected today; unused stones are converted automatically after the event.'
+          ],
+          details:[lang==='de'?'Golden Glaives · Tag 3 von 3':lang==='fr'?'Golden Glaives · jour 3 sur 3':'Golden Glaives · Day 3 of 3']
+        };
+      }else{
+        coach[lang]={
+          points:lang==='de'?'Intel-Missionen und Golden Glaives für Dim Goldstones':lang==='fr'?'Missions de renseignement et Golden Glaives pour les Dim Goldstones':'Intel Missions and Golden Glaives for Dim Goldstones',
+          steps:[
+            lang==='de'?'Intel-Missionen abschließen und Golden Glaives jagen, um Dim Goldstones zu sammeln.':lang==='fr'?'Termine les missions de renseignement et chasse les Golden Glaives pour obtenir des Dim Goldstones.':'Complete Intel Missions and hunt Golden Glaives to collect Dim Goldstones.',
+            lang==='de'?'Shop-Belohnungen gezielt einlösen; Goldstones nicht bis nach Eventende liegen lassen.':lang==='fr'?'Échange les récompenses utiles et ne garde pas les Goldstones après la fin.':'Redeem useful shop rewards and do not leave Goldstones unused after the event.'
+          ],
+          details:[lang==='de'?('Golden Glaives · Sammeltag '+dayNo+' von 2'):lang==='fr'?('Golden Glaives · collecte '+dayNo+' sur 2'):('Golden Glaives · collection day '+dayNo+' of 2')]
+        };
+      }
+    }
+    return coach;
+  }
+
   function kvkPrepCoach(dayNo){
     const plans={
       de:[
@@ -201,7 +227,7 @@
     // Golden Glaives overlaps the Monday start of SG and KvK Prep.
     for(const from of [7,21]){
       if(cycleDay>=from&&cycleDay<=from+2){
-        result.push(makeCycleEvent('rhythm-golden-glaives-'+at(from),at(from),at(from+2),{de:'Golden Glaives',en:'Golden Glaives',fr:'Golden Glaives'},'⚔️',null,{iconUrl:'https://kingshotdata.com/uploads/2025/05/golden-glaives-event-icon.webp'}));
+        result.push(makeCycleEvent('rhythm-golden-glaives-'+at(from),at(from),at(from+2),{de:'Golden Glaives',en:'Golden Glaives',fr:'Golden Glaives'},'⚔️',goldenGlaivesCoach(cycleDay-from+1),{iconUrl:'https://kingshotdata.com/uploads/2025/05/golden-glaives-event-icon.webp'}));
       }
     }
 
@@ -296,7 +322,7 @@
     }
   };
   function planFromFeed(e,date,lang){const plan=e.dailyPlans?.[date];if(!plan)return null;return{points:localized(plan.points,lang),steps:plan.steps?.[lang]||plan.steps?.en||[],prepare:plan.prepare?{title:localized(plan.prepare.title,lang),steps:plan.prepare.steps?.[lang]||plan.prepare.steps?.en||[]}:null,details:plan.note?[localized(plan.note,lang)]:[],limits:plan.limits||null}}
-  function coachFor(e,date,lang){const kind=eventKind(e),manual=kind==='brawl'?brawlPlan(e,date,lang):(guides[kind]?.[lang]||null),feed=planFromFeed(e,date,lang),rhythm=e.rhythmCoach?.[lang]||e.rhythmCoach?.en,tips=e.tips?.[lang]||e.tips?.en||[],knowledge=knowledgeCoachFor(e,lang),selected=(kind==='golden'&&feed?feed:(manual||feed||rhythm||{steps:tips.slice(0,3),details:tips.slice(3)})),chosen={...selected,steps:[...(selected.steps||[])],details:[...(selected.details||[])]};if(feed&&manual){chosen.prepare=feed.prepare||chosen.prepare;if(feed.points&&!chosen.points)chosen.points=feed.points}if(knowledge){if(!chosen.steps.length)chosen.steps=[...knowledge.steps];const additions=[...(knowledge.details||[])];for(const detail of additions){if(detail&&!chosen.details.includes(detail))chosen.details.push(detail)}}return chosen}
+  function coachFor(e,date,lang){const kind=eventKind(e),manual=kind==='brawl'?brawlPlan(e,date,lang):(guides[kind]?.[lang]||null),feed=planFromFeed(e,date,lang),rhythm=e.rhythmCoach?.[lang]||e.rhythmCoach?.en,tips=e.tips?.[lang]||e.tips?.en||[],knowledge=knowledgeCoachFor(e,lang),selected=(kind==='golden'?(feed||rhythm||manual||{steps:tips.slice(0,3),details:tips.slice(3)}):(manual||feed||rhythm||{steps:tips.slice(0,3),details:tips.slice(3)})),chosen={...selected,steps:[...(selected.steps||[])],details:[...(selected.details||[])]};if(feed&&manual){chosen.prepare=feed.prepare||chosen.prepare;if(feed.points&&!chosen.points)chosen.points=feed.points}if(knowledge){if(!chosen.steps.length)chosen.steps=[...knowledge.steps];const additions=[...(knowledge.details||[])];for(const detail of additions){if(detail&&!chosen.details.includes(detail))chosen.details.push(detail)}}return chosen}
   const whyText={
     de:{
       bison:'Der Cooldown läuft bereits, während deine vorbereiteten Truppen sammeln. So verlierst du am Punktetag keine Wartezeit: Nach ihrer Rückkehr kannst du Bison früher für eine Sofort-Sammlung und nach dem nächsten Cooldown erneut nutzen.',
