@@ -202,4 +202,78 @@ async function saveBan2(e){
 }
 async function endBan2(id){if(!confirm('NAP Ban deaktivieren?'))return;await upd('nap_bans',id,{active:false,updated_at:new Date().toISOString()});await load();renderNapLive()}
 
+
+/* === PERFORMANCE + KVK LIVE V2 === */
+function perfTopList2(rows,kvk){
+ if(!Array.isArray(rows)||!rows.length)return '<div class="live-empty-state">Keine Daten vorhanden.</div>';
+ return '<div class="live-list">'+rows.map((r,i)=>'<div class="live-row"><div><b>#'+(r.alliance_rank||i+1)+' · '+E(r.name||'–')+'</b><small>'+E(r.source_type||'')+(kvk&&r.server_rank?' · Server #'+E(r.server_rank):'')+'</small></div><strong>'+N(r.score)+'</strong></div>').join('')+'</div>';
+}
+async function renderPerformanceLive(){
+ const v=document.getElementById('view-performance');if(!v)return;
+ v.innerHTML='<div class="hero"><div><div class="kicker">PERFORMANCE · LIVE</div><h1>Performance ohne Dashboard-Überladung.</h1><p>Alliance Mobilization und KvK Top 200 mit echten Daten, Rankings und manueller Korrektur.</p></div></div><div class="live-empty-state">Performance wird geladen …</div>';
+ try{
+  const d=await rpc('get_performance_dashboard',{});S.performance=d||null;
+  const m=d?.mobilization,k=d?.kvk;
+  v.innerHTML='<div class="hero"><div><div class="kicker">PERFORMANCE · LIVE</div><h1>Performance ohne Dashboard-Überladung.</h1><p>'+E(S.a)+' · höchste Werte pro Spieler</p></div><div class="hero-actions"><button class="btn secondary" id="livePerfManual">Manuell ergänzen / korrigieren</button></div></div>'+
+   '<div class="live-panel-grid"><section class="card"><div class="card-head"><div><div class="card-title">Alliance Mobilization</div><div class="card-sub">'+E(m?.event?.label||'')+'</div></div></div><div class="card-body">'+
+   '<div class="live-stat-grid"><div class="live-stat"><b>'+N(m?.recorded_players||0)+'</b><small>erfasste Spieler</small></div><div class="live-stat"><b>'+N(m?.total_score||0)+'</b><small>Gesamtscore</small></div><div class="live-stat"><b>'+N(m?.average_score||0)+'</b><small>Ø Score</small></div><div class="live-stat"><b>'+N(m?.roster_players||0)+'</b><small>Roster</small></div></div>'+perfTopList2(m?.top5,false)+'<div class="hero-actions" style="margin-top:10px"><button class="btn tertiary live-full-ranking" data-type="mob">Vollständiges Ranking</button></div></div></section>'+
+   '<section class="card"><div class="card-head"><div><div class="card-title">KvK Prep · Top 200</div><div class="card-sub">'+E(k?.event?.label||'')+'</div></div></div><div class="card-body">'+
+   '<div class="live-stat-grid"><div class="live-stat"><b>'+N(k?.known_top200_players||0)+'</b><small>Top-200 Spieler</small></div><div class="live-stat"><b>'+N(k?.known_top200_score||0)+'</b><small>bekannter Score</small></div><div class="live-stat"><b>'+N(k?.alliance_prep_score||0)+'</b><small>Alliance Prep</small></div><div class="live-stat"><b>'+E(S.a)+'</b><small>Allianz</small></div></div>'+perfTopList2(k?.top5,true)+'<div class="hero-actions" style="margin-top:10px"><button class="btn tertiary live-full-ranking" data-type="kvk">Vollständiges Ranking</button></div></div></section></div><div id="livePerformanceExtra" style="margin-top:14px"></div>';
+  document.getElementById('livePerfManual').onclick=openManualPerformance2;
+  v.querySelectorAll('.live-full-ranking').forEach(b=>b.onclick=()=>loadFullPerformance2(b.dataset.type));
+ }catch(err){v.innerHTML+='<div class="live-empty-state">'+E(err.message||String(err))+'</div>'}
+}
+async function loadFullPerformance2(type){
+ const out=document.getElementById('livePerformanceExtra');if(!out)return;out.innerHTML='<div class="live-empty-state">Ranking wird geladen …</div>';
+ try{
+   const ev=type==='kvk'?S.performance?.kvk?.event:S.performance?.mobilization?.event;if(!ev?.id)throw Error('Kein Performance-Durchlauf vorhanden.');
+   const d=await rpc(type==='kvk'?'get_kvk_full_ranking':'get_mobilization_full_ranking',{p_performance_event_id:ev.id}),rows=Array.isArray(d)?d:(d?.rows||[]);
+   out.innerHTML='<section class="card"><div class="card-head"><div><div class="card-title">'+(type==='kvk'?'KvK Prep · Top 200':'Alliance Mobilization')+'</div><div class="card-sub">'+E(ev.label||'')+'</div></div><span class="pill">'+rows.length+'</span></div><div class="card-body live-list">'+
+   (rows.length?rows.map((r,i)=>'<div class="live-row"><div><b>#'+E(r.server_rank||r.alliance_rank||i+1)+' · '+E(r.name||'–')+'</b><small>'+E(r.source_type||'')+'</small></div><strong>'+N(r.score)+'</strong></div>').join(''):'<div class="live-empty-state">Keine Daten.</div>')+'</div></section>';
+ }catch(err){out.innerHTML='<div class="live-empty-state">'+E(err.message||String(err))+'</div>'}
+}
+async function openManualPerformance2(){
+ const out=document.getElementById('livePerformanceExtra');if(!out)return;out.innerHTML='<div class="live-empty-state">Optionen werden geladen …</div>';
+ try{
+  const o=await rpc('get_performance_import_options',{}),mob=o?.mobilization||[],kvk=o?.kvk||[];
+  out.innerHTML='<section class="card"><div class="card-head"><div><div class="card-title">Performance manuell ergänzen / korrigieren</div><div class="card-sub">Manuelle Werte haben für Spieler + Durchlauf Vorrang.</div></div></div><div class="card-body"><form id="livePerfForm" class="live-form">'+
+   '<label>Spieler<select id="livePerfPlayer">'+S.p.map(p=>'<option value="'+E(p.id)+'">'+E(p.name||p.player_name)+'</option>').join('')+'</select></label>'+
+   '<label>Typ<select id="livePerfType"><option value="alliance_mobilization">Alliance Mobilization</option><option value="kvk_prep">KvK Prep</option></select></label>'+
+   '<label>Durchlauf<select id="livePerfOcc"></select></label><div class="live-form-row"><label>Score<input id="livePerfScore" inputmode="numeric"></label><label>Serverrang 1–200<input id="livePerfRank" inputmode="numeric"></label></div><label>Notiz<textarea id="livePerfNote"></textarea></label><button class="btn primary" type="submit">Speichern</button><div id="livePerfStatus" class="live-status"></div></form></div></section>';
+  const typ=document.getElementById('livePerfType'),occ=document.getElementById('livePerfOcc'),rank=document.getElementById('livePerfRank');
+  function paint(){const isK=typ.value==='kvk_prep',arr=isK?kvk:mob;occ.innerHTML=arr.map(x=>'<option value="'+E(isK?x.cycle_id:x.event_schedule_id)+'">'+E(D(isK?x.prep_start:x.begin_at))+'</option>').join('');rank.disabled=!isK}
+  typ.onchange=paint;paint();document.getElementById('livePerfForm').onsubmit=saveManualPerformance2;
+ }catch(err){out.innerHTML='<div class="live-empty-state">'+E(err.message||String(err))+'</div>'}
+}
+async function saveManualPerformance2(e){
+ e.preventDefault();const out=document.getElementById('livePerfStatus'),type=document.getElementById('livePerfType').value,isK=type==='kvk_prep',score=Number(String(document.getElementById('livePerfScore').value||'').replace(/\D/g,'')),rank=Number(String(document.getElementById('livePerfRank').value||'').replace(/\D/g,''));out.textContent='Speichere …';
+ try{if(!Number.isFinite(score)||score<0)throw Error('Score prüfen.');if(isK&&(rank<1||rank>200))throw Error('KvK benötigt Serverrang 1–200.');await rpc('add_manual_player_performance',{p_performance_type:type,p_player_id:document.getElementById('livePerfPlayer').value,p_event_schedule_id:isK?null:Number(document.getElementById('livePerfOcc').value),p_cycle_id:isK?document.getElementById('livePerfOcc').value:null,p_score:score,p_server_rank:isK?rank:null,p_note:document.getElementById('livePerfNote').value.trim()||null});out.textContent='✓ Gespeichert';await renderPerformanceLive()}catch(err){out.textContent=err.message||String(err)}
+}
+async function renderKvkLive(){
+ const v=document.getElementById('view-kvk');if(!v)return;v.innerHTML='<div class="hero"><div><div class="kicker">KVK · LIVE</div><h1>KvK & Law 9</h1><p>Snapshot, Prep-Scores, normalisiertes Ranking und Top-200-Performance.</p></div></div><div class="live-empty-state">KvK-Daten werden geladen …</div>';
+ try{
+  const [law,perf]=await Promise.all([rpc('get_law9_dashboard',{}),rpc('get_performance_dashboard',{})]);S.law9=law;S.performance=perf;
+  const cycle=law?.cycle||{},ranking=law?.ranking||[],base=law?.baselines||[];
+  v.innerHTML='<div class="hero"><div><div class="kicker">KVK · LIVE</div><h1>KvK & Law 9</h1><p>'+E(D(cycle.prep_start))+' · '+E(law?.formula||'')+'</p></div></div>'+
+   '<div class="live-stat-grid"><div class="live-stat"><b>'+E(cycle.snapshot_status||'–')+'</b><small>Snapshot</small></div><div class="live-stat"><b>'+N(cycle.baseline_count||0)+'</b><small>Baselines</small></div><div class="live-stat"><b>'+N(cycle.score_count||0)+'</b><small>Prep Scores</small></div><div class="live-stat"><b>'+N(perf?.kvk?.known_top200_players||0)+'</b><small>Top-200 Spieler</small></div></div>'+
+   '<div class="live-panel-grid"><section class="card"><div class="card-head"><div><div class="card-title">Law-9 Ranking</div><div class="card-sub">Prep Score / ((Power^0.7) × (Members^0.3))</div></div></div><div class="card-body live-list">'+
+   (ranking.length?ranking.map(r=>'<div class="live-row"><div><b>'+(r.rank?'#'+r.rank+' · ':'')+E(r.alliance_code)+'</b><small>Power '+N(r.alliance_power)+' · '+N(r.member_count)+' Mitglieder</small></div><div style="text-align:right"><strong>'+N(r.prep_score||0)+'</strong><small>'+((r.normalized_score==null)?'–':Number(r.normalized_score).toFixed(4))+'</small></div></div>').join(''):'<div class="live-empty-state">Noch kein Ranking.</div>')+
+   '</div></section><section class="card"><div class="card-head"><div><div class="card-title">Snapshot / Baseline</div><div class="card-sub">'+E(cycle.baseline_locked?'eingefroren':'noch offen')+'</div></div></div><div class="card-body live-list">'+
+   (base.length?base.map(r=>'<div class="live-row"><div><b>'+E(r.alliance_code)+'</b><small>'+E(D(r.captured_at))+'</small></div><div style="text-align:right"><strong>'+N(r.alliance_power)+'</strong><small>'+N(r.member_count)+' Mitglieder</small></div></div>').join(''):'<div class="live-empty-state">Noch kein Snapshot.</div>')+
+   '</div></section></div>'+
+   '<section class="card" style="margin-top:14px"><div class="card-head"><div><div class="card-title">Prep Scores</div><div class="card-sub">'+E(cycle.score_entry_open?'Eingabe offen':'Eingabe noch gesperrt')+'</div></div></div><div class="card-body"><div class="live-list">'+
+   ranking.map(r=>'<form class="live-row live-prep-score" data-code="'+E(r.alliance_code)+'"><div><b>'+E(r.alliance_code)+'</b><small>'+N(r.member_count)+' Mitglieder</small></div><input style="width:150px" inputmode="numeric" value="'+E(r.prep_score??'')+'" '+(cycle.score_entry_open?'':'disabled')+'><button class="btn small primary" '+(cycle.score_entry_open?'':'disabled')+'>Speichern</button></form>').join('')+
+   '</div></div></section><div id="liveKvkTop" style="margin-top:14px"></div>';
+  v.querySelectorAll('.live-prep-score').forEach(form=>form.onsubmit=savePrepScore2);
+  if(perf?.kvk?.event?.id)loadKvkTop2(perf.kvk.event.id);
+ }catch(err){v.innerHTML+='<div class="live-empty-state">'+E(err.message||String(err))+'</div>'}
+}
+async function savePrepScore2(e){
+ e.preventDefault();const form=e.currentTarget,score=Number(String(form.querySelector('input').value||'').replace(/\D/g,''));try{await rpc('upsert_law9_prep_score',{p_cycle_id:S.law9.cycle.id,p_alliance_code:form.dataset.code,p_prep_score:score});await renderKvkLive()}catch(err){alert(err.message||String(err))}
+}
+async function loadKvkTop2(id){
+ const box=document.getElementById('liveKvkTop');if(!box)return;
+ try{const d=await rpc('get_kvk_full_ranking',{p_performance_event_id:id}),rows=Array.isArray(d)?d:(d?.rows||[]);box.innerHTML='<section class="card"><div class="card-head"><div><div class="card-title">KvK Prep · Top 200</div><div class="card-sub">Bekannte Serverränge 1–200</div></div><span class="pill">'+rows.length+'</span></div><div class="card-body live-list">'+(rows.length?rows.slice(0,200).map(r=>'<div class="live-row"><div><b>#'+E(r.server_rank||'–')+' · '+E(r.name||'–')+'</b><small>'+E(r.source_type||'')+'</small></div><strong>'+N(r.score)+'</strong></div>').join(''):'<div class="live-empty-state">Keine Top-200-Daten.</div>')+'</div></section>'}catch(err){box.innerHTML='<div class="live-empty-state">'+E(err.message||String(err))+'</div>'}
+}
+
 })();
