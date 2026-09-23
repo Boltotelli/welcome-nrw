@@ -357,6 +357,19 @@ async function p2RenderProfileTab(name,tab){const body=document.getElementById('
  if(tab==='comments'){body.innerHTML='<section class="p2-panel"><div class="p2-panel-body"><form id="p2CommentForm" class="p2-comment-form"><textarea id="p2CommentText" maxlength="1000" placeholder="'+v2esc(p2t('commentPlaceholder'))+'"></textarea><button class="v2-btn primary" type="submit">'+v2esc(p2t('saveComment'))+'</button></form><div id="p2Comments"><div class="p2-empty">'+v2esc(p2t('loading'))+'</div></div></div></section>';const load=async()=>{const box=document.getElementById('p2Comments'),{data,error}=await sbClient.rpc('get_player_file_comments',{p_player_id:player.id});if(error){box.innerHTML='<div class="p2-empty">'+v2esc(error.message)+'</div>';return}const rows=data||[];box.innerHTML=rows.length?rows.map(c=>'<article class="p2-comment"><div><b>'+v2esc(c.author_alliance||state.alliance)+'</b><small>'+v2esc(v2date(c.created_at))+'</small></div><p>'+v2esc(c.comment)+'</p></article>').join(''):'<div class="p2-empty">'+v2esc(p2t('noComments'))+'</div>'};await load();document.getElementById('p2CommentForm')?.addEventListener('submit',async e=>{e.preventDefault();const inp=document.getElementById('p2CommentText'),txt=inp.value.trim();if(!txt)return;const {error}=await sbClient.rpc('add_player_file_comment',{p_player_id:player.id,p_comment:txt});if(error){alert(error.message);return}inp.value='';load()});return}
  if(tab==='history'){const events=[...vs.map(v=>({date:v.occurred_at||v.created_at,title:v.event_name,sub:localizedStoredPhase(v.phase_name),kind:'violation'})),...ss.map(s=>({date:s.created_at,title:p2t('stage')+' '+s.level+' · '+v2LevelLabel(Number(s.level)),sub:s.completed?p2t('completed'):p2t('pending'),kind:'action'}))].filter(x=>x.date).sort((a,b)=>new Date(b.date)-new Date(a.date));body.innerHTML='<div class="p2-history">'+(events.length?events.map(x=>'<div class="p2-history-row"><div class="p2-history-dot '+x.kind+'"></div><div><b>'+v2esc(x.title||'–')+'</b><small>'+v2esc(x.sub||'')+'</small></div><time>'+v2esc(v2date(x.date))+'</time></div>').join(''):'<div class="p2-empty">–</div>')+'</div>';return}}
 function renderPlayerDetailV2(name){p2ProfileShell(name,p2CurrentTab||'overview');p2RenderProfileTab(name,p2CurrentTab||'overview')}
+
+const p2PrevSetView=setView;
+setView=function(view){
+  if(view==='players')p2CurrentPlayer=null;
+  else if(view!=='players')p2CurrentPlayer=null;
+  return p2PrevSetView(view);
+};
+const p2PrevDashboard=renderDashboard;
+renderDashboard=function(){
+  p2SetTopbar(state?.alliance||'NAP Event Tracker');
+  return p2PrevDashboard();
+};
+
 const p2PreviousRenderPlayerDetail=renderPlayerDetail;renderPlayerDetail=function(name){return renderPlayerDetailV2(name)};
 const p2PreviousRender=render;render=function(){if(state?.view==='players'&&!p2CurrentPlayer)return renderPlayersV2();return p2PreviousRender()};
 
