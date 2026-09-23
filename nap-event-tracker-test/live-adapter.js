@@ -143,7 +143,7 @@ async function loadScreenImporter2(){
    fr.addEventListener('load',()=>{status.textContent='✓ Importer bereit';try{const sel=fr.contentDocument?.querySelector('#event'),wanted=document.getElementById('liveScreenEvent')?.value;if(sel&&wanted){const opt=[...sel.options].find(o=>String(o.textContent||'').includes(wanted));if(opt){sel.value=opt.value;sel.dispatchEvent(new Event('change',{bubbles:true}))}}}catch(e){console.warn('screen event sync',e)}});
  }catch(err){status.textContent=err.message||String(err)}
 }
-window.addEventListener('message',async e=>{if(e.data?.type==='nap-screen-import-saved'){await load();renderHome();renderPlayers()}});
+window.addEventListener('message',async e=>{if(e.data?.type==='nap-screen-import-saved'){await load();renderHome();renderPlayers();const current=document.querySelector('.view.active')?.id?.replace('view-','');if(current==='performance')await renderPerformanceLive();else if(current==='kvk')await renderKvkLive()}});
 
 
 /* === NAP CENTER LIVE V2 === */
@@ -217,14 +217,37 @@ async function renderPerformanceLive(){
  try{
   const d=await rpc('get_performance_dashboard',{});S.performance=d||null;
   const m=d?.mobilization,k=d?.kvk;
-  v.innerHTML='<div class="hero"><div><div class="kicker">PERFORMANCE · LIVE</div><h1>Performance ohne Dashboard-Überladung.</h1><p>'+E(S.a)+' · höchste Werte pro Spieler</p></div><div class="hero-actions"><button class="btn secondary" id="livePerfManual">Manuell ergänzen / korrigieren</button></div></div>'+
+  v.innerHTML='<div class="hero"><div><div class="kicker">PERFORMANCE · LIVE</div><h1>Performance ohne Dashboard-Überladung.</h1><p>'+E(S.a)+' · höchste Werte pro Spieler</p></div><div class="hero-actions"><button class="btn primary" id="livePerfScreen">ScreenRecording importieren</button><button class="btn secondary" id="livePerfManual">Manuell ergänzen / korrigieren</button></div></div>'+
    '<div class="live-panel-grid"><section class="card"><div class="card-head"><div><div class="card-title">Alliance Mobilization</div><div class="card-sub">'+E(m?.event?.label||'')+'</div></div></div><div class="card-body">'+
    '<div class="live-stat-grid"><div class="live-stat"><b>'+N(m?.recorded_players||0)+'</b><small>erfasste Spieler</small></div><div class="live-stat"><b>'+N(m?.total_score||0)+'</b><small>Gesamtscore</small></div><div class="live-stat"><b>'+N(m?.average_score||0)+'</b><small>Ø Score</small></div><div class="live-stat"><b>'+N(m?.roster_players||0)+'</b><small>Roster</small></div></div>'+perfTopList2(m?.top5,false)+'<div class="hero-actions" style="margin-top:10px"><button class="btn tertiary live-full-ranking" data-type="mob">Vollständiges Ranking</button></div></div></section>'+
    '<section class="card"><div class="card-head"><div><div class="card-title">KvK Prep · Top 200</div><div class="card-sub">'+E(k?.event?.label||'')+'</div></div></div><div class="card-body">'+
    '<div class="live-stat-grid"><div class="live-stat"><b>'+N(k?.known_top200_players||0)+'</b><small>Top-200 Spieler</small></div><div class="live-stat"><b>'+N(k?.known_top200_score||0)+'</b><small>bekannter Score</small></div><div class="live-stat"><b>'+N(k?.alliance_prep_score||0)+'</b><small>Alliance Prep</small></div><div class="live-stat"><b>'+E(S.a)+'</b><small>Allianz</small></div></div>'+perfTopList2(k?.top5,true)+'<div class="hero-actions" style="margin-top:10px"><button class="btn tertiary live-full-ranking" data-type="kvk">Vollständiges Ranking</button></div></div></section></div><div id="livePerformanceExtra" style="margin-top:14px"></div>';
+  document.getElementById('livePerfScreen').onclick=openPerformanceScreenImport2;
   document.getElementById('livePerfManual').onclick=openManualPerformance2;
   v.querySelectorAll('.live-full-ranking').forEach(b=>b.onclick=()=>loadFullPerformance2(b.dataset.type));
  }catch(err){v.innerHTML+='<div class="live-empty-state">'+E(err.message||String(err))+'</div>'}
+}
+async function openPerformanceScreenImport2(){
+ const out=document.getElementById('livePerformanceExtra');if(!out)return;
+ out.innerHTML='<div class="live-empty-state">Performance-ScreenRecording wird geladen …</div>';
+ try{
+   const r=await fetch(C.u+'/functions/v1/screen-import-standalone-live-v16',{cache:'no-store'});
+   if(!r.ok)throw Error('Importer '+r.status);
+   const html=await r.text();
+   out.innerHTML='<section class="card"><div class="card-head"><div><div class="card-title">Performance ScreenRecording</div><div class="card-sub">Alliance Mobilization oder KvK Top 200 direkt aus dem bestehenden Importer.</div></div><button class="btn small secondary" id="liveClosePerfImporter">Schließen</button></div><div class="card-body"><div id="livePerfImportStatus" class="live-status">Importer wird vorbereitet …</div><div id="livePerfImportHost"></div></div></section>';
+   const host=document.getElementById('livePerfImportHost'),status=document.getElementById('livePerfImportStatus');
+   const fr=document.createElement('iframe');fr.className='live-import-frame';fr.srcdoc=html;host.appendChild(fr);
+   document.getElementById('liveClosePerfImporter').onclick=()=>out.innerHTML='';
+   fr.addEventListener('load',()=>{
+     status.textContent='✓ Importer bereit · Performance-Modus';
+     try{
+       const doc=fr.contentDocument,mode=doc?.querySelector('#modePerf');
+       if(mode&&!mode.classList.contains('active'))mode.click();
+       const controls=doc?.querySelector('#perfControls');
+       if(controls){controls.classList.remove('hidden');controls.style.display=''}
+     }catch(e){console.warn('performance importer mode',e)}
+   });
+ }catch(err){out.innerHTML='<div class="live-empty-state">'+E(err.message||String(err))+'</div>'}
 }
 async function loadFullPerformance2(type){
  const out=document.getElementById('livePerformanceExtra');if(!out)return;out.innerHTML='<div class="live-empty-state">Ranking wird geladen …</div>';
