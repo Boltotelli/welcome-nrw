@@ -511,6 +511,57 @@ function renderPlayers2(){
  }).join('')||'<div class="live-empty-state">Keine Spieler.</div>';
  g.querySelectorAll('[data-p]').forEach(c=>c.onclick=()=>openProfile2(c.dataset.p));if(typeof applyPlayerFilters==='function')applyPlayerFilters();renderWelcomeLanguageQueue2();
 }
+function violationRule2(v){
+ const phases=PHASES2[v.event_name]||[];
+ return phases.find(x=>x[0]===v.phase_name)||[v.phase_name||'general',v.phase_name||'General',v.target_value??null];
+}
+function openViolationEditor2(id){
+ const v=S.v.find(x=>String(x.id)===String(id));if(!v)return;
+ document.getElementById('liveViolationEditModal')?.remove();
+ const modal=document.createElement('div');modal.id='liveViolationEditModal';modal.className='modal-backdrop';
+ const events=Object.keys(PHASES2),date=new Date(v.occurred_at);const local=new Date(date.getTime()-date.getTimezoneOffset()*60000).toISOString().slice(0,16);
+ modal.innerHTML='<div class="modal-card"><div class="modal-head"><div><b>Verstoß korrigieren</b><small>'+E(v.player_name)+' · '+E(v.event_name||'')+'</small></div><button class="icon-btn" id="liveVioEditClose">×</button></div>'+
+ '<form id="liveVioEditForm" class="live-form"><label>Spieler<input id="liveVioPlayer" value="'+E(v.player_name)+'" required></label>'+
+ '<label>Event<select id="liveVioEvent">'+events.map(ev=>'<option '+(ev===v.event_name?'selected':'')+'>'+E(ev)+'</option>').join('')+'</select></label>'+
+ '<label>Phase<select id="liveVioPhase"></select></label>'+
+ '<div class="live-form-row" id="liveVioScoreRow"><label>Ziel<input id="liveVioTarget" inputmode="numeric" value="'+E(v.target_value??'')+'"></label><label>Punkte<input id="liveVioScore" inputmode="numeric" value="'+E(v.score??'')+'"></label></div>'+
+ '<div id="liveVioThreshold" class="live-note"></div><label>Zeitpunkt<input id="liveVioOccurred" type="datetime-local" value="'+E(local)+'"></label><label>Notiz<textarea id="liveVioNote" maxlength="500">'+E(v.note||'')+'</textarea></label>'+
+ '<div class="hero-actions"><button class="btn primary" type="submit">Änderungen speichern</button><button class="btn danger" id="liveDeleteViolation" type="button">Verstoß löschen</button></div><div id="liveVioEditStatus" class="live-status"></div></form></div>';
+ document.body.appendChild(modal);
+ const event=document.getElementById('liveVioEvent'),phase=document.getElementById('liveVioPhase');
+ function sync(){
+   const ev=event.value,arr=PHASES2[ev]||[['general','General',null]],old=phase.value||v.phase_name;
+   phase.innerHTML=arr.map(x=>'<option value="'+E(x[0])+'" '+(x[0]===old?'selected':'')+'>'+E(x[1])+'</option>').join('');
+   if(!arr.some(x=>x[0]===phase.value))phase.value=arr[0][0];
+   const special=ev==='Swordland Showdown'||ev==='Tri-Alliance Clash';
+   document.getElementById('liveVioScoreRow').hidden=special;document.getElementById('liveVioThreshold').hidden=special;
+   if(ev!==v.event_name){const t=targetFor2(ev,phase.value);document.getElementById('liveVioTarget').value=t??''}
+   updateViolationEditPreview2(v);
+ }
+ event.onchange=sync;phase.onchange=()=>updateViolationEditPreview2(v);document.getElementById('liveVioTarget').oninput=()=>updateViolationEditPreview2(v);document.getElementById('liveVioScore').oninput=()=>updateViolationEditPreview2(v);
+ document.getElementById('liveVioEditClose').onclick=()=>modal.remove();modal.onclick=e=>{if(e.target===modal)modal.remove()};
+ document.getElementById('liveVioEditForm').onsubmit=e=>saveViolationEdit2(e,v);
+ document.getElementById('liveDeleteViolation').onclick=()=>deleteViolation2(v);
+ sync();
+}
+function updateViolationEditPreview2(original){
+ const ev=document.getElementById('liveVioEvent')?.value||'',ph=document.getElementById('liveVioPhase')?.value||'',target=Number(String(document.getElementById('liveVioTarget')?.value||'').replace(/\D/g,'')),score=Number(String(document.getElementById('liveVioScore')?.value||'').replace(/\D/g,'')),source=S.eventOptions?.find(x=>x.event_name===ev)?.source_event_id,mult=phaseMultiplier2(ev,ph,source),box=document.getElementById('liveVioThreshold');
+ if(!box||box.hidden)return;box.textContent=target?'Grenze '+N(target*mult)+' ('+mult+'×)'+(score?(' · '+(score>target*mult?'Verstoß':'kein Verstoß')):''):'Zielwert fehlt';
+}
+async function saveViolationEdit2(e,old){
+ e.preventDefault();const out=document.getElementById('liveVioEditStatus'),event=document.getElementById('liveVioEvent').value,phase=document.getElementById('liveVioPhase').value,special=event==='Swordland Showdown'||event==='Tri-Alliance Clash',target=special?null:Number(String(document.getElementById('liveVioTarget').value||'').replace(/\D/g,'')),score=special?0:Number(String(document.getElementById('liveVioScore').value||'').replace(/\D/g,'')),source=S.eventOptions?.find(x=>x.event_name===event)?.source_event_id,mult=phaseMultiplier2(event,phase,source);
+ if(!special&&(!target||!(score>target*mult))){out.textContent='Der korrigierte Wert ist kein Verstoß mehr. Nutze „Verstoß löschen“. ';return}
+ out.textContent='Speichere …';
+ try{
+  await rpc('update_violation_fast',{p_id:old.id,p_player_name:document.getElementById('liveVioPlayer').value.trim(),p_event_name:event,p_phase_name:phase,p_kind:special?'swordland':'overspend',p_score:special?null:score,p_target_value:target,p_occurred_at:new Date(document.getElementById('liveVioOccurred').value).toISOString(),p_expiry_days:Number(S.settings?.violation_expiry_days||30),p_note:document.getElementById('liveVioNote').value.trim()||null});
+  document.getElementById('liveViolationEditModal')?.remove();await load();await openProfile2(document.getElementById('liveVioPlayer')?.value||old.player_name);
+ }catch(err){out.textContent=err.message||String(err)}
+}
+async function deleteViolation2(v){
+ if(!confirm('Verstoß von '+v.player_name+' wirklich löschen? Die zugehörige Maßnahme wird neu berechnet.'))return;
+ const out=document.getElementById('liveVioEditStatus');if(out)out.textContent='Lösche …';
+ try{await rpc('delete_violation_fast',{p_id:v.id});document.getElementById('liveViolationEditModal')?.remove();await load();renderHomeFull2();renderPlayers2();await openProfile2(v.player_name)}catch(err){if(out)out.textContent=err.message||String(err)}
+}
 function profileStage2(l){
  const labs=['Kontakt','R1','24h NAP OUT','Extended'];
  return '<div class="stage-progress"><div class="stage-progress-bar"><div class="stage-progress-fill" style="width:'+([0,12,38,66,100][l]||0)+'%"></div><div class="stage-marks">'+labs.map((_,i)=>'<span class="stage-mark '+(i+1<l?'done':i+1===l?'current':'')+'">'+(i+1)+'</span>').join('')+'</div></div><div class="stage-progress-labels">'+labs.map((x,i)=>'<span><b>'+E(x)+'</b><span>'+(i+1<l?'✓':i+1===l?'aktuell':'')+'</span></span>').join('')+'</div></div>';
@@ -535,8 +586,8 @@ async function paintProfileTab2(name,tab){
   document.getElementById('liveSaveLanguages')?.addEventListener('click',()=>saveLanguages2(P));bindProfileR1Timers2();document.getElementById('livePlayerIdForm').onsubmit=async e=>{e.preventDefault();const out=document.getElementById('livePlayerIdStatus');try{const d=await rpc('set_player_game_id',{p_player_name:name,p_game_id:document.getElementById('livePlayerId').value.replace(/\D/g,'')});if(d){const i=S.p.findIndex(x=>x.id===P.id);if(i>=0)S.p[i]=d}out.textContent='✓ Gespeichert';await loadAvatars();renderPlayers2()}catch(err){out.textContent=err.message||String(err)}};return;
  }
  if(tab==='violations'){
-  body.innerHTML='<div class="live-list">'+(V.length?V.map(v=>'<article class="card" data-live-vio="'+E(v.id)+'"><div class="card-head"><div><div class="card-title">'+E(v.event_name||'–')+' · '+E(v.phase_name||'')+'</div><div class="card-sub">'+E(D(v.occurred_at))+' · '+E(v.source_type||'manual')+'</div></div><span class="pill '+(v.kind==='swordland'?'blue':'red')+'">'+(v.kind==='overspend'&&v.target_value?(Number(v.score)/Number(v.target_value)).toFixed(2)+'×':'Attendance')+'</span></div><div class="card-body"><div class="action-date-grid"><div><span>Punkte</span><b>'+N(v.score)+'</b></div><div><span>Grenze</span><b>'+(v.target_value?N(Number(v.target_value)*3):'–')+'</b></div><div><span>Kontakt</span><b>'+(v.contacted?'✓':'offen')+'</b></div></div>'+(v.note?'<div class="live-note" style="margin-top:10px">'+E(v.note)+'</div>':'')+'<div class="live-evidence" data-vio="'+E(v.id)+'"></div></div></article>').join(''):'<div class="live-empty-state">Keine Verstöße.</div>')+'</div>';
-  try{const ev=await rpc('get_player_screen_evidence',{p_player_id:P.id});for(const x of ev||[]){const box=body.querySelector('[data-vio="'+CSS.escape(String(x.violation_id))+'"]');if(!box)continue;const u=await signStorage2('screen-violation-evidence',x.storage_path);if(u)box.innerHTML='<a class="btn small secondary" target="_blank" rel="noopener" href="'+E(u)+'">Evidence · '+E(Number(x.frame_time_seconds||0).toFixed(1))+'s</a>'}}catch(e){console.warn(e)}return;
+  body.innerHTML='<div class="live-list">'+(V.length?V.map(v=>'<article class="card" data-live-vio="'+E(v.id)+'"><div class="card-head"><div><div class="card-title">'+E(v.event_name||'–')+' · '+E(v.phase_name||'')+'</div><div class="card-sub">'+E(D(v.occurred_at))+' · '+E(v.source_type||'manual')+'</div></div><div class="hero-actions"><span class="pill '+(v.kind==='swordland'?'blue':'red')+'">'+(v.kind==='overspend'&&v.target_value?(Number(v.score)/Number(v.target_value)).toFixed(2)+'×':'Attendance')+'</span><button class="btn small secondary live-edit-violation" data-id="'+E(v.id)+'">✎ Korrigieren</button></div></div><div class="card-body"><div class="action-date-grid"><div><span>Punkte</span><b>'+N(v.score)+'</b></div><div><span>Grenze</span><b>'+(v.target_value?N(Number(v.target_value)*3):'–')+'</b></div><div><span>Kontakt</span><b>'+(v.contacted?'✓':'offen')+'</b></div></div>'+(v.note?'<div class="live-note" style="margin-top:10px">'+E(v.note)+'</div>':'')+'<div class="live-evidence" data-vio="'+E(v.id)+'"></div></div></article>').join(''):'<div class="live-empty-state">Keine Verstöße.</div>')+'</div>';
+  try{const ev=await rpc('get_player_screen_evidence',{p_player_id:P.id});for(const x of ev||[]){const box=body.querySelector('[data-vio="'+CSS.escape(String(x.violation_id))+'"]');if(!box)continue;const u=await signStorage2('screen-violation-evidence',x.storage_path);if(u)box.innerHTML='<a class="btn small secondary" target="_blank" rel="noopener" href="'+E(u)+'">Evidence · '+E(Number(x.frame_time_seconds||0).toFixed(1))+'s</a>'}}catch(e){console.warn(e)}body.querySelectorAll('.live-edit-violation').forEach(b=>b.onclick=()=>openViolationEditor2(b.dataset.id));return;
  }
  if(tab==='actions'){body.innerHTML='<div class="live-list">'+(X.length?X.map(profileActionCard2).join(''):'<div class="live-empty-state">Keine Maßnahmen.</div>')+'</div>';bindProfileR1Timers2();return}
  if(tab==='performance'){body.innerHTML='<div class="live-empty-state">Performance wird geladen …</div>';try{const rows=await rpc('get_player_performance_history',{p_player_id:P.id});body.innerHTML='<div class="live-list">'+((rows||[]).length?rows.map(r=>'<div class="live-row"><div><b>'+E(r.performance_type==='kvk_prep'?'KvK Prep':'Alliance Mobilization')+'</b><small>'+E(r.label||r.event_name||'')+(r.server_rank?' · Server #'+E(r.server_rank):'')+' · '+E(r.source_type||'')+'</small></div><strong>'+N(r.score)+'</strong></div>').join(''):'<div class="live-empty-state">Keine Performance-Daten.</div>')+'</div>'}catch(err){body.innerHTML='<div class="live-empty-state">'+E(err.message||String(err))+'</div>'}return}
