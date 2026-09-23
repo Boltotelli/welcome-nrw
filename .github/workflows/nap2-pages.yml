@@ -1,0 +1,48 @@
+name: NAP Tracker V2 — GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/nap2-pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: nap2-pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout isolated V2 branch
+        uses: actions/checkout@v4
+        with:
+          ref: fix/nap2-navigation-mobile
+      - name: Validate and stage V2
+        shell: bash
+        run: |
+          test -s nap-event-tracker-test/index.html
+          test -s nap-event-tracker-test/live-adapter.js
+          mkdir -p "$RUNNER_TEMP/nap2-site"
+          cp -R nap-event-tracker-test/. "$RUNNER_TEMP/nap2-site/"
+          touch "$RUNNER_TEMP/nap2-site/.nojekyll"
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+      - name: Upload V2 artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: ${{ runner.temp }}/nap2-site
+      - name: Deploy V2
+        id: deployment
+        uses: actions/deploy-pages@v4
