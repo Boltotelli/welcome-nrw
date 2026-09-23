@@ -20,3 +20,5 @@ Isolated test frontend for the Kingshot 1044 NAP Event Tracker.
 - initial KvK/Performance 2.0 views
 
 The production app is not changed by files in this directory.
+
+Last deploy trigger: 2026-09-23T12:59Z
