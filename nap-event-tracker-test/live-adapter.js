@@ -107,7 +107,10 @@ function addLiveCss(){
  '@media(max-width:900px){.live-panel-grid{grid-template-columns:1fr}.live-stat-grid{grid-template-columns:repeat(2,1fr)}.live-form-row{grid-template-columns:1fr}.live-import-frame{min-height:580px}}';
  document.head.appendChild(s);
 }
-function phaseMultiplier2(event,phase,sourceId){return event==='Strongest Governor'&&String(sourceId)==='2304001'&&(phase==='sg2'||phase==='sg3')?4:3}
+function phaseMultiplier2(event,phase,dateValue){
+ const raw=String(dateValue||''),day=raw.length>=10?raw.slice(0,10):'';
+ return event==='Strongest Governor'&&((phase==='sg2'&&day==='2026-09-22')||(phase==='sg3'&&day==='2026-09-23'))?4:3
+}
 function targetFor2(event,phase){const cfg=S.settings?.event_targets||{},p=(PHASES2[event]||[]).find(x=>x[0]===phase);return cfg[phase]??p?.[2]??null}
 function neutralizeMocks(){
  const concept=document.querySelector('.concept');if(concept)concept.textContent='NAP Event Tracker 2.0 · TEST';
@@ -146,20 +149,20 @@ async function setupAddData2(){
    if(ph)ph.innerHTML=phases.map(x=>'<option value="'+E(x[0])+'">'+E(x[1])+'</option>').join('');
    updateManualPreview2(source);
  }
- me?.addEventListener('change',syncPhases);document.getElementById('liveManualPhase')?.addEventListener('change',()=>updateManualPreview2(S.eventOptions.find(x=>x.event_name===me?.value)?.source_event_id));document.getElementById('liveManualScore')?.addEventListener('input',()=>updateManualPreview2(S.eventOptions.find(x=>x.event_name===me?.value)?.source_event_id));
+ me?.addEventListener('change',syncPhases);document.getElementById('liveManualPhase')?.addEventListener('change',()=>updateManualPreview2(S.eventOptions.find(x=>x.event_name===me?.value)?.source_event_id));document.getElementById('liveManualScore')?.addEventListener('input',()=>updateManualPreview2(S.eventOptions.find(x=>x.event_name===me?.value)?.source_event_id));document.getElementById('liveManualOccurred')?.addEventListener('change',()=>updateManualPreview2());
  syncPhases();
  document.getElementById('liveManualForm')?.addEventListener('submit',saveManualViolation2);
  document.getElementById('liveLoadImporter')?.addEventListener('click',loadScreenImporter2);
 }
 function updateManualPreview2(sourceId){
- const event=document.getElementById('liveManualEvent')?.value||'',phase=document.getElementById('liveManualPhase')?.value||'',score=Number(String(document.getElementById('liveManualScore')?.value||'').replace(/\D/g,'')),target=targetFor2(event,phase),mult=phaseMultiplier2(event,phase,sourceId),limit=target==null?null:Number(target)*mult;
+ const event=document.getElementById('liveManualEvent')?.value||'',phase=document.getElementById('liveManualPhase')?.value||'',score=Number(String(document.getElementById('liveManualScore')?.value||'').replace(/\D/g,'')),target=targetFor2(event,phase),occurredValue=document.getElementById('liveManualOccurred')?.value||'',mult=phaseMultiplier2(event,phase,occurredValue),limit=target==null?null:Number(target)*mult;
  const text=target==null?event+': Anwesenheits-Sonderfall':'Ziel '+N(target)+' · aktuelle Grenze '+N(limit)+' ('+mult+'×)'+(Number.isFinite(score)&&score>0?' · '+(score>limit?'Verstoß':'kein Verstoß'):'');
  const a=document.getElementById('liveManualPreview'),b=document.getElementById('liveRuleCard');if(a)a.textContent=text;if(b)b.textContent=text;
 }
 async function saveManualViolation2(e){
  e.preventDefault();const out=document.getElementById('liveManualStatus');out.textContent='Speichere …';
  try{
-   const player=document.getElementById('liveManualPlayer').value,event=document.getElementById('liveManualEvent').value,phase=document.getElementById('liveManualPhase').value,note=document.getElementById('liveManualNote').value.trim()||null,occurred=new Date(document.getElementById('liveManualOccurred').value).toISOString(),source=S.eventOptions.find(x=>x.event_name===event)?.source_event_id,target=targetFor2(event,phase),score=Number(String(document.getElementById('liveManualScore').value||'').replace(/\D/g,'')),kind=(event==='Swordland Showdown'||event==='Tri-Alliance Clash')?'swordland':'overspend',mult=phaseMultiplier2(event,phase,source);
+   const player=document.getElementById('liveManualPlayer').value,event=document.getElementById('liveManualEvent').value,phase=document.getElementById('liveManualPhase').value,note=document.getElementById('liveManualNote').value.trim()||null,occurred=new Date(document.getElementById('liveManualOccurred').value).toISOString(),source=S.eventOptions.find(x=>x.event_name===event)?.source_event_id,target=targetFor2(event,phase),score=Number(String(document.getElementById('liveManualScore').value||'').replace(/\D/g,'')),kind=(event==='Swordland Showdown'||event==='Tri-Alliance Clash')?'swordland':'overspend',mult=phaseMultiplier2(event,phase,document.getElementById('liveManualOccurred').value);
    if(kind==='overspend'&&(!Number.isFinite(score)||score<=Number(target||0)*mult))throw Error('Punkte müssen über '+mult+'× Ziel liegen.');
    await rpc('record_violation_fast',{p_player_name:player,p_event_name:event,p_phase_name:phase,p_kind:kind,p_score:kind==='swordland'?0:score,p_target_value:target,p_occurred_at:occurred,p_expiry_days:Number(S.settings?.violation_expiry_days||30),p_note:note});
    out.textContent='✓ Gespeichert';await load();renderHome();renderPlayers();document.getElementById('liveManualScore').value='';
@@ -542,18 +545,18 @@ function openViolationEditor2(id){
    if(ev!==v.event_name){const t=targetFor2(ev,phase.value);document.getElementById('liveVioTarget').value=t??''}
    updateViolationEditPreview2(v);
  }
- event.onchange=sync;phase.onchange=()=>updateViolationEditPreview2(v);document.getElementById('liveVioTarget').oninput=()=>updateViolationEditPreview2(v);document.getElementById('liveVioScore').oninput=()=>updateViolationEditPreview2(v);
+ event.onchange=sync;phase.onchange=()=>updateViolationEditPreview2(v);document.getElementById('liveVioTarget').oninput=()=>updateViolationEditPreview2(v);document.getElementById('liveVioScore').oninput=()=>updateViolationEditPreview2(v);document.getElementById('liveVioOccurred').onchange=()=>updateViolationEditPreview2(v);
  document.getElementById('liveVioEditClose').onclick=()=>modal.remove();modal.onclick=e=>{if(e.target===modal)modal.remove()};
  document.getElementById('liveVioEditForm').onsubmit=e=>saveViolationEdit2(e,v);
  document.getElementById('liveDeleteViolation').onclick=()=>deleteViolation2(v);
  sync();
 }
 function updateViolationEditPreview2(original){
- const ev=document.getElementById('liveVioEvent')?.value||'',ph=document.getElementById('liveVioPhase')?.value||'',target=Number(String(document.getElementById('liveVioTarget')?.value||'').replace(/\D/g,'')),score=Number(String(document.getElementById('liveVioScore')?.value||'').replace(/\D/g,'')),source=S.eventOptions?.find(x=>x.event_name===ev)?.source_event_id,mult=phaseMultiplier2(ev,ph,source),box=document.getElementById('liveVioThreshold');
+ const ev=document.getElementById('liveVioEvent')?.value||'',ph=document.getElementById('liveVioPhase')?.value||'',target=Number(String(document.getElementById('liveVioTarget')?.value||'').replace(/\D/g,'')),score=Number(String(document.getElementById('liveVioScore')?.value||'').replace(/\D/g,'')),source=S.eventOptions?.find(x=>x.event_name===ev)?.source_event_id,mult=phaseMultiplier2(ev,ph,document.getElementById('liveVioOccurred')?.value||''),box=document.getElementById('liveVioThreshold');
  if(!box||box.hidden)return;box.textContent=target?'Grenze '+N(target*mult)+' ('+mult+'×)'+(score?(' · '+(score>target*mult?'Verstoß':'kein Verstoß')):''):'Zielwert fehlt';
 }
 async function saveViolationEdit2(e,old){
- e.preventDefault();const out=document.getElementById('liveVioEditStatus'),event=document.getElementById('liveVioEvent').value,phase=document.getElementById('liveVioPhase').value,special=event==='Swordland Showdown'||event==='Tri-Alliance Clash',target=special?null:Number(String(document.getElementById('liveVioTarget').value||'').replace(/\D/g,'')),score=special?0:Number(String(document.getElementById('liveVioScore').value||'').replace(/\D/g,'')),source=S.eventOptions?.find(x=>x.event_name===event)?.source_event_id,mult=phaseMultiplier2(event,phase,source);
+ e.preventDefault();const out=document.getElementById('liveVioEditStatus'),event=document.getElementById('liveVioEvent').value,phase=document.getElementById('liveVioPhase').value,special=event==='Swordland Showdown'||event==='Tri-Alliance Clash',target=special?null:Number(String(document.getElementById('liveVioTarget').value||'').replace(/\D/g,'')),score=special?0:Number(String(document.getElementById('liveVioScore').value||'').replace(/\D/g,'')),source=S.eventOptions?.find(x=>x.event_name===event)?.source_event_id,mult=phaseMultiplier2(event,phase,document.getElementById('liveVioOccurred').value);
  if(!special&&(!target||!(score>target*mult))){out.textContent='Der korrigierte Wert ist kein Verstoß mehr. Nutze „Verstoß löschen“. ';return}
  out.textContent='Speichere …';
  try{
