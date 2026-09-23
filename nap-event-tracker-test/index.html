@@ -486,6 +486,34 @@ img[src*="./assets/alliance/"]{
  body .n2login .n2grid input,body .n2login .n2grid select{min-height:48px;font-size:16px}
  body .n2login .n2grid button{min-height:48px;font-size:15px}
 }
+
+/* V2 violation evidence and compact mobile alliance login */
+.live-violation-comment{margin-top:12px;white-space:normal;overflow-wrap:anywhere}
+.live-violation-comment b,.live-violation-proof>b{display:block;font-size:11px;font-weight:900;margin-bottom:7px;color:var(--muted)}
+.live-violation-comment p{margin:0;white-space:pre-wrap;font-size:12px;line-height:1.5}
+.live-violation-proof{margin-top:14px;min-width:0}
+.live-evidence{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(200px,100%),1fr));gap:10px;margin-top:8px;min-width:0}
+.live-evidence-image{display:flex;flex-direction:column;gap:7px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--panel-2);color:var(--text);font-size:11px;text-decoration:none}
+.live-evidence-image img{display:block;width:100%;max-width:100%;height:auto;max-height:380px;object-fit:contain;background:#0b111b}
+.live-evidence-image span{padding:0 10px 10px;overflow-wrap:anywhere}
+.live-player-comments{margin-top:14px}
+[data-view="crown"][hidden],[data-go="crown"][hidden]{display:none!important}
+.n2alliance-select{position:absolute!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none!important}
+.n2alliance-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.n2alliance-choice{min-height:40px;border:1px solid var(--line);border-radius:10px;background:var(--panel-2);color:var(--text);font:inherit;font-size:13px;font-weight:900;cursor:pointer;touch-action:manipulation}
+.n2alliance-choice.active{color:var(--gold-2);border-color:var(--gold);box-shadow:inset 0 0 0 1px var(--gold)}
+.n2alliance-choice:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+@media(max-width:620px){
+ body .n2login{display:flex;box-sizing:border-box;align-items:flex-start;justify-content:center;inset:0;height:100dvh;min-height:0;padding:12px max(12px,env(safe-area-inset-right)) 12px max(12px,env(safe-area-inset-left));overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain}
+ body .n2login .n2box{width:100%;max-width:420px;max-height:none;overflow:visible;margin:auto 0;padding:16px 18px}
+ body .n2login .n2box h2{margin:3px 0;font-size:23px}
+ body .n2login .n2box p{margin:6px 0;font-size:12px;line-height:1.35}
+ body .n2login .n2grid{gap:8px;margin-top:10px}
+ body .n2login .n2grid label{gap:4px}
+ body .n2login .n2grid input{min-height:44px}
+ body .n2login .n2grid button.btn{min-height:46px}
+ body .n2login .n2alliance-choice{min-height:44px}
+}
 </style>
 </head>
 <body>
