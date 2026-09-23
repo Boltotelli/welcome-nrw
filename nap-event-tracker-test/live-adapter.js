@@ -35,4 +35,52 @@ async function load(){const a=encodeURIComponent(S.a);const [p1,v,x,e,o,tr,bans,
 async function enter(expected){const P=await tab('profiles','select=alliance_code,can_manage_bans,is_admin&limit=1'),prof=P?.[0]||null,a=prof?.alliance_code;if(!a)throw Error('Account incomplete');if(expected&&expected!==a)throw Error('Wrong alliance');S.a=a;S.profile=prof;await load();n2login.hidden=true;document.body.classList.remove('n2lock');decorate();renderHome();renderPlayers();if(typeof applyTranslations==='function')applyTranslations()}
 async function boot(){css();login();document.body.classList.add('n2lock');if(!await token())return;try{await enter()}catch{save(null)}}
 setTimeout(boot,0);document.querySelector('#languagePicker')?.addEventListener('change',()=>setTimeout(()=>{if(S.a){decorate();renderHome();renderPlayers()}},0));
+
+/* === LIVE HELPERS V2 === */
+const PHASES2={
+ 'Strongest Governor':[['sg1','Day 1',333000],['sg2','Day 2',312000],['sg3','Day 3',362000],['sg4','Day 4',250000],['sg5','Day 5',296000],['sg6','Day 6',380000],['sg7','Day 7',345000]],
+ 'Alliance Brawl':[['b1','Day 1',125000],['b2','Day 2',125000],['b3','Day 3',125000],['b4','Day 4',125000],['b5','Day 5',187500],['b6','Day 6',187500]],
+ 'Officer Project':[['op1','Charms',310000],['op2','Forgehammers',453000]],
+ 'Armament Competition':[['ac1','Phase 1',20000],['ac2','Truegold',38000]],
+ 'Swordland Showdown':[['sword','Attendance',null]],
+ 'Tri-Alliance Clash':[['tri','Attendance',null]]
+};
+async function ins(n,b){return q(C.u+'/rest/v1/'+n,{method:'POST',headers:{...(await h(true)),Prefer:'return=representation'},body:JSON.stringify(b)})}
+function avatarHtml(P,cls){
+ const id=String(P?.game_id||P?.player_game_id||''),u=S.avatars?.[id],name=P?.name||P?.player_name||'?';
+ cls=cls||'player-avatar';
+ return u?'<div class="'+cls+' live-avatar"><img src="'+E(u)+'" alt=""></div>':'<div class="'+cls+'">'+E((name[0]||'?').toUpperCase())+'</div>';
+}
+async function loadAvatars(){
+ const ids=[...new Set((S.p||[]).map(x=>String(x.game_id||'')).filter(x=>/^\\d{5,20}$/.test(x)))];
+ for(let i=0;i<ids.length;i+=20){
+   try{
+     const z=await q(C.u+'/functions/v1/kingshot-data?player_ids='+encodeURIComponent(ids.slice(i,i+20).join(',')),{headers:{apikey:C.k}});
+     for(const p of z?.players||[])if(p?.playerId&&p?.avatarUrl)S.avatars[String(p.playerId)]=p.avatarUrl;
+   }catch(e){console.warn('avatar load',e)}
+ }
+}
+function addLiveCss(){
+ if(document.getElementById('n2LiveCss'))return;
+ const s=document.createElement('style');s.id='n2LiveCss';s.textContent=
+ '.live-avatar{overflow:hidden}.live-avatar img{width:100%;height:100%;object-fit:cover;display:block}'+
+ '.live-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 14px;padding:5px;background:var(--panel);border:1px solid var(--line);border-radius:14px;width:max-content;max-width:100%}'+
+ '.live-tab{border:0;background:transparent;color:var(--muted);font:inherit;font-weight:850;font-size:10px;padding:8px 12px;border-radius:9px;cursor:pointer}.live-tab.active{background:var(--panel-3);color:var(--text);box-shadow:inset 0 0 0 1px var(--line)}'+
+ '.live-panel-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(300px,.75fr);gap:14px;align-items:start}'+
+ '.live-form{display:grid;gap:10px}.live-form label{display:grid;gap:5px;color:var(--muted);font-size:9px;font-weight:800}.live-form input,.live-form select,.live-form textarea{width:100%;border:1px solid var(--line);border-radius:10px;background:var(--panel-2);color:var(--text);padding:9px 10px;min-height:38px}.live-form textarea{min-height:84px;resize:vertical}'+
+ '.live-form-row{display:grid;grid-template-columns:1fr 1fr;gap:9px}.live-note{padding:10px 11px;border:1px dashed var(--line);border-radius:11px;color:var(--muted);font-size:9px;line-height:1.5}'+
+ '.live-import-frame{width:100%;min-height:690px;border:1px solid var(--line);border-radius:14px;background:var(--panel-2)}'+
+ '.live-stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:13px}.live-stat{padding:12px;border:1px solid var(--line);border-radius:13px;background:var(--panel)}.live-stat b{font-size:20px;display:block}.live-stat small{color:var(--muted);font-size:8px;text-transform:uppercase;letter-spacing:.06em}'+
+ '.live-list{display:grid;gap:7px}.live-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:11px;background:var(--panel-2)}.live-row small{display:block;color:var(--muted);font-size:8px;margin-top:3px}'+
+ '.live-empty-state{padding:24px;text-align:center;border:1px dashed var(--line);border-radius:13px;color:var(--muted);font-size:10px;background:var(--panel)}'+
+ '.live-status{font-size:9px;color:var(--muted);min-height:16px}'+
+ '@media(max-width:900px){.live-panel-grid{grid-template-columns:1fr}.live-stat-grid{grid-template-columns:repeat(2,1fr)}.live-form-row{grid-template-columns:1fr}.live-import-frame{min-height:580px}}';
+ document.head.appendChild(s);
+}
+function phaseMultiplier2(event,phase,sourceId){return event==='Strongest Governor'&&String(sourceId)==='2304001'&&(phase==='sg2'||phase==='sg3')?4:3}
+function targetFor2(event,phase){const cfg=S.settings?.event_targets||{},p=(PHASES2[event]||[]).find(x=>x[0]===phase);return cfg[phase]??p?.[2]??null}
+function neutralizeMocks(){
+ const concept=document.querySelector('.concept');if(concept)concept.textContent='NAP Event Tracker 2.0 · TEST';
+}
+
 })();
