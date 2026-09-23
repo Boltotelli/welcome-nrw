@@ -16,7 +16,7 @@ async function h(json=false){const a=await token();return {apikey:C.k,...(a?{Aut
 async function tab(n,s=''){return q(C.u+'/rest/v1/'+n+(s?'?'+s:''),{headers:await h()})}
 async function rpc(n,b={}){return q(C.u+'/rest/v1/rpc/'+n,{method:'POST',headers:await h(true),body:JSON.stringify(b)})}
 async function upd(n,id,b){return q(C.u+'/rest/v1/'+n+'?id=eq.'+encodeURIComponent(id),{method:'PATCH',headers:{...(await h(true)),Prefer:'return=minimal'},body:JSON.stringify(b)})}
-function css(){const s=document.createElement('style');s.textContent=`body.n2lock .app{filter:blur(5px)}.n2login{position:fixed;inset:0;z-index:999;background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(16px);display:grid;place-items:center;padding:18px}.n2login[hidden]{display:none}.n2box{width:min(420px,100%);padding:24px;border:1px solid var(--line);border-radius:22px;background:var(--panel);box-shadow:var(--shadow)}.n2box h2{margin:5px 0}.n2box p{color:var(--muted);font-size:11px}.n2grid{display:grid;gap:10px;margin-top:16px}.n2grid label{display:grid;gap:5px;font-size:10px;color:var(--muted);font-weight:800}.n2grid input,.n2grid select{min-height:42px;border:1px solid var(--line);border-radius:11px;background:var(--panel-2);color:var(--text);padding:9px 11px}.n2err{min-height:16px;color:var(--red);font-size:10px}.n2live{font-size:8px;padding:4px 7px;border-radius:999px;background:var(--green);color:#08140d;font-weight:900}.n2empty{padding:18px;text-align:center;color:var(--muted);font-size:10px}.user-pill{cursor:pointer}@media(min-width:801px){.sidebar:hover{--sidebar:var(--sidebar-open)}.sidebar:hover~.shell{margin-left:var(--sidebar-open)}.sidebar:hover .brandtext,.sidebar:hover .nav-label{opacity:1;transform:none}.sidebar:hover .nav-section,.sidebar:hover .concept{opacity:.9}}`;document.head.appendChild(s)}
+function css(){const s=document.createElement('style');s.textContent=`body.n2lock .app{filter:blur(5px);pointer-events:none}.n2login{position:fixed;inset:0;z-index:999;background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(16px);display:grid;place-items:center;padding:18px}.n2login[hidden]{display:none}.n2box{width:min(420px,100%);padding:24px;border:1px solid var(--line);border-radius:22px;background:var(--panel);box-shadow:var(--shadow)}.n2box h2{margin:5px 0}.n2box p{color:var(--muted);font-size:11px}.n2grid{display:grid;gap:10px;margin-top:16px}.n2grid label{display:grid;gap:5px;font-size:10px;color:var(--muted);font-weight:800}.n2grid input,.n2grid select{min-height:42px;border:1px solid var(--line);border-radius:11px;background:var(--panel-2);color:var(--text);padding:9px 11px}.n2err{min-height:16px;color:var(--red);font-size:10px}.n2live{font-size:8px;padding:4px 7px;border-radius:999px;background:var(--green);color:#08140d;font-weight:900}.n2empty{padding:18px;text-align:center;color:var(--muted);font-size:10px}.user-pill{cursor:pointer}@media(min-width:801px){.sidebar:hover{--sidebar:var(--sidebar-open)}.sidebar:hover~.shell{margin-left:var(--sidebar-open)}.sidebar:hover .brandtext,.sidebar:hover .nav-label{opacity:1;transform:none}.sidebar:hover .nav-section,.sidebar:hover .concept{opacity:.9}}`;document.head.appendChild(s)}
 function login(){const d=document.createElement('div');d.id='n2login';d.className='n2login';d.innerHTML=`<div class="n2box"><div class="kicker">NAP Event Tracker 2.0 · TEST</div><h2>Kingdom 1044</h2><p>${E(t('hint'))}</p><form class="n2grid" id="n2form"><label>${E(t('alliance'))}<select id="n2a"><option>NRW</option><option>THM</option><option>NWO</option><option>NwO</option><option>CWR</option><option>PxR</option></select></label><label>${E(t('password'))}<input id="n2p" type="password" required></label><div id="n2e" class="n2err"></div><button class="btn primary">${E(t('login'))}</button></form></div>`;document.body.appendChild(d);document.querySelector('#n2form').onsubmit=async e=>{e.preventDefault();const a=n2a.value,p=n2p.value;try{const z=await q(C.u+'/auth/v1/token?grant_type=password',{method:'POST',headers:{apikey:C.k,'Content-Type':'application/json'},body:JSON.stringify({email:a.toLowerCase()+'@nap-tracker.invalid',password:p})});save({...z,expires_at:Math.floor(Date.now()/1000)+(z.expires_in||3600)});await enter(a)}catch(x){n2e.textContent=t('fail')+' '+x.message}}}
 function active(v){return !v.expires_at||new Date(v.expires_at)>new Date()}
 function p(name){return S.p.find(x=>(x.name||x.player_name)===name)||{}}
@@ -732,53 +732,6 @@ function wrapTranslation2(fn,id){return function(...args){const r=fn.apply(this,
 renderAddLive=wrapTranslation2(renderAddLive,'view-add');renderNapLive=wrapTranslation2(renderNapLive,'view-nap');renderKvkLive=wrapTranslation2(renderKvkLive,'view-kvk');renderLawsLive=wrapTranslation2(renderLawsLive,'view-laws');renderPerformanceLive=wrapTranslation2(renderPerformanceLive,'view-performance');renderCrownLive=wrapTranslation2(renderCrownLive,'view-crown');renderActivityLive=wrapTranslation2(renderActivityLive,'view-activity');renderSettingsLive=wrapTranslation2(renderSettingsLive,'view-settings');renderHomeFull2=wrapTranslation2(renderHomeFull2,'view-home');renderPlayers2=wrapTranslation2(renderPlayers2,'view-players');renderHome=renderHomeFull2;renderPlayers=renderPlayers2;
 
 
-/* === CLICK FAILSAFE V2 === */
-document.body.classList.remove('n2lock');
-const appRoot=document.querySelector('.app');
-if(appRoot)appRoot.style.pointerEvents='auto';
-
-document.addEventListener('click',function(e){
-  const nav=e.target.closest('[data-view],[data-go]');
-  if(nav){
-    const name=nav.dataset.view||nav.dataset.go;
-    if(name){
-      e.preventDefault();
-      try{setView(name)}catch(err){console.error('NAP2 setView',err)}
-      return;
-    }
-  }
-
-  const bell=e.target.closest('#bellBtn');
-  if(bell){
-    e.preventDefault();
-    const panel=document.getElementById('notificationPanel');
-    const ov=document.getElementById('overlay');
-    panel?.classList.toggle('show');
-    ov?.classList.toggle('show',panel?.classList.contains('show'));
-    try{renderNotifications2()}catch(err){console.error('NAP2 notifications',err)}
-    return;
-  }
-
-  const theme=e.target.closest('#themeToggle');
-  if(theme){
-    e.preventDefault();
-    const html=document.documentElement;
-    const next=html.dataset.theme==='light'?'dark':'light';
-    html.dataset.theme=next;
-    try{localStorage.setItem('nap2_theme',next)}catch{}
-    return;
-  }
-
-  if(e.target.id==='overlay'){
-    document.getElementById('notificationPanel')?.classList.remove('show');
-    document.getElementById('moreSheet')?.classList.remove('show');
-    e.target.classList.remove('show');
-  }
-},true);
-
-window.addEventListener('load',()=>{
-  document.body.classList.remove('n2lock');
-  const a=document.querySelector('.app');if(a)a.style.pointerEvents='auto';
-});
+/* Navigation: the validated v7 inline handler delegates to the live setView override. */
 
 })();
