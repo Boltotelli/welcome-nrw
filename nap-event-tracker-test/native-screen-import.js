@@ -241,7 +241,15 @@ async function analyze(){
  let url,video,worker;
  try{
   progress(0,1,0);
-  const members=await roster();r.fileHash=await sha256(file);
+  let members=await roster();
+  if(r.kind==='perf'&&$('#nocrType',root).value==='alliance_mobilization'&&perfOcc()?.event_schedule_id){
+   try{
+    const extras=await rpc('get_performance_candidate_roster',{p_event_schedule_id:perfOcc().event_schedule_id});
+    const ids=new Set(members.map(x=>String(x.player_game_id||x.player_id)));
+    for(const p of extras||[]){const id=String(p.player_game_id||p.player_id);if(!ids.has(id)){members.push(p);ids.add(id)}}
+   }catch(e){console.warn('Performance transfer roster unavailable',e)}
+  }
+  r.fileHash=await sha256(file);
   worker=await ensureWorker();
   video=document.createElement('video');url=await metadata(video,file);
   if(r!==run)return;
