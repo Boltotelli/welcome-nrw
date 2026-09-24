@@ -262,11 +262,12 @@ async function analyze(){
   const dur=video.duration;
   const count=Math.min(46,Math.max(1,Math.floor(dur/.85)));
   const times=Array.from({length:count},(_,i)=>Math.min(Math.max(0,dur-.08),.25+i*Math.max(.85,(dur-.5)/Math.max(1,count))));
-  const best=new Map(),unmatched=new Map();
+  const best=new Map(),unmatched=new Map();r.frames=[];
   for(let i=0;i<times.length;i++){
    if(run!==r)break;
    const sec=times[i];await seek(video,sec);
    const canvas=frameCanvas(video);
+   if(r.frames.length<12&&i%Math.max(1,Math.floor(times.length/12))===0)r.frames.push({time:sec,image:canvas.toDataURL('image/jpeg',.72)});
    const text=(await worker.recognize(canvas)).data?.text||'';
    const rows=extractRows(text);
    let still=null;
@@ -297,7 +298,7 @@ async function analyze(){
    });
   }
   progress(2,100,r.hits.length);
-  showReview(r);status(r.hits.length?tr('ready'):tr('nohits'),!r.hits.length);
+  showReview(r);status(r.hits.length?tr('ready'):reviewText('nothing'),false);
  }catch(e){console.error('native screen OCR',e);status(tr('error')+': '+(e.message||e),true)}
  finally{if(url)URL.revokeObjectURL(url);if(video){video.removeAttribute('src');video.load()}r.busy=false;if(root.isConnected){btn.disabled=false;$('#nocrSave',root).disabled=!r.hits?.length}}
 }
@@ -391,7 +392,7 @@ async function save(){
 }
 function mount(root,kind,allowed=[]){
  if(run?.busy)return;
- run={root,kind,allowed,hits:[],unmatched:[],occurrences:[],members:[],busy:false,preview:null,fileHash:null};
+ run={root,kind,allowed,hits:[],unmatched:[],frames:[],occurrences:[],members:[],busy:false,preview:null,fileHash:null};
  shell(root,kind);
  const r=run;$('#nocrAnalyze',root).onclick=analyze;$('#nocrSave',root).onclick=save;
  if(kind==='law'){
