@@ -124,11 +124,7 @@ function renderAddLive(){
  const v=document.getElementById('view-add');if(!v)return;
  v.innerHTML='<div class="hero"><div><div class="kicker">2.0 · LIVE</div><h1>Verstoß erfassen</h1><p>ScreenRecording und manuelle Eingabe sind getrennt, nutzen aber dieselben aktuellen Eventfreigaben und Regeln.</p></div></div>'+
  '<div class="live-tabs"><button class="live-tab active" data-addmode="screen">ScreenRecording</button><button class="live-tab" data-addmode="manual">Manuell</button></div>'+
- '<div id="addScreenPanel"><div class="live-panel-grid"><section class="card"><div class="card-head"><div><div class="card-title">ScreenRecording</div><div class="card-sub">Event auswählen, anschließend Video importieren und Treffer prüfen.</div></div></div><div class="card-body live-form">'+
- '<label>Event<select id="liveScreenEvent"><option value="">Verfügbare Events werden geladen …</option></select></label>'+
- '<div class="live-note">Videoanalyse direkt in der V2 · keine zweite Anmeldung. TriAlliance und Swordland werden ausschließlich manuell erfasst.</div>'+
- '<button id="liveLoadImporter" class="btn primary" type="button">Video auswählen</button><div id="liveImporterStatus" class="live-status"></div></div></section>'+
- '</div><div id="liveImporterHost" style="margin-top:14px"></div></div>'+
+ '<div id="addScreenPanel"><section class="card"><div class="card-head"><div><div class="card-title">ScreenRecording</div><div class="card-sub">Event und Tag auswählen · Video prüfen · Treffer speichern.</div></div></div><div class="card-body"><div id="liveImporterHost">Verfügbare Events werden geladen …</div></div></section></div>'+
  '<div id="addManualPanel" hidden><div class="live-panel-grid"><section class="card"><div class="card-head"><div><div class="card-title">Manuell eintragen</div><div class="card-sub">Nur aktuell freigegebene Events.</div></div></div><div class="card-body"><form id="liveManualForm" class="live-form">'+
  '<label>Spieler<select id="liveManualPlayer"></select></label><label>Event<select id="liveManualEvent"></select></label><label>Phase<select id="liveManualPhase"></select></label>'+
  '<div class="live-form-row"><label>Punkte<input id="liveManualScore" inputmode="numeric"></label><label>Zeitpunkt<input id="liveManualOccurred" type="datetime-local"></label></div>'+
@@ -143,10 +139,8 @@ async function setupAddData2(){
  S.eventOptions=opts;window.NAP_V2_SCREEN_OPTIONS=opts.filter(x=>['Strongest Governor','Alliance Brawl','Officer Project','Armament Competition'].includes(x.event_name));
  const eventNames=[...new Set(opts.map(x=>x.event_name).filter(Boolean))];
  const options=eventNames.length?eventNames.map(x=>'<option value="'+E(x)+'">'+E(x)+'</option>').join(''):'<option value="">Kein Event freigegeben</option>';
- const screenNames=[...new Set(window.NAP_V2_SCREEN_OPTIONS.map(x=>x.event_name))];
- const screenOptions=screenNames.length?screenNames.map(x=>'<option value="'+E(x)+'">'+E(x)+'</option>').join(''):'<option value="">Kein Event freigegeben</option>';
- const se=document.getElementById('liveScreenEvent'),me=document.getElementById('liveManualEvent');if(se)se.innerHTML=screenOptions;if(me)me.innerHTML=options;
- window.NAP_NATIVE_IMPORTER?.initLaw?.();
+ const me=document.getElementById('liveManualEvent');if(me)me.innerHTML=options;
+ if(document.getElementById('liveImporterHost'))window.NAP_NATIVE_IMPORTER?.openLaw?.(true);
  const player=document.getElementById('liveManualPlayer');if(player)player.innerHTML=S.p.map(p=>'<option value="'+E(p.name||p.player_name)+'">'+E(p.name||p.player_name)+' · '+E(p.game_id||'–')+'</option>').join('');
  const occ=document.getElementById('liveManualOccurred');if(occ){const d=new Date(Date.now()-new Date().getTimezoneOffset()*60000);occ.value=d.toISOString().slice(0,16)}
  function syncPhases(){
@@ -157,7 +151,6 @@ async function setupAddData2(){
  me?.addEventListener('change',syncPhases);document.getElementById('liveManualPhase')?.addEventListener('change',()=>updateManualPreview2(S.eventOptions.find(x=>x.event_name===me?.value)?.source_event_id));document.getElementById('liveManualScore')?.addEventListener('input',()=>updateManualPreview2(S.eventOptions.find(x=>x.event_name===me?.value)?.source_event_id));document.getElementById('liveManualOccurred')?.addEventListener('change',()=>updateManualPreview2());
  syncPhases();
  document.getElementById('liveManualForm')?.addEventListener('submit',saveManualViolation2);
- document.getElementById('liveLoadImporter')?.addEventListener('click',loadScreenImporter2);
 }
 function updateManualPreview2(sourceId){
  const event=document.getElementById('liveManualEvent')?.value||'',phase=document.getElementById('liveManualPhase')?.value||'',score=Number(String(document.getElementById('liveManualScore')?.value||'').replace(/\D/g,'')),target=targetFor2(event,phase),occurredValue=document.getElementById('liveManualOccurred')?.value||'',mult=phaseMultiplier2(event,phase,occurredValue),limit=target==null?null:Number(target)*mult;
