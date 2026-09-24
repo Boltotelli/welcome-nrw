@@ -78,3 +78,51 @@
 
 .nocr-check-result.update{border-color:color-mix(in srgb,#d9b45a 54%,var(--line));background:color-mix(in srgb,#d9b45a 11%,var(--panel))}
 .nocr-check-result.update strong{color:var(--gold)}
+
+/* Review outcome hierarchy: whole cards remain distinguishable in light/dark mode. */
+.nocr-hit.nocr-hit--new{
+  border:1.5px solid #e87979;
+  border-inline-start:5px solid #ef7272;
+  background:color-mix(in srgb,#ef7272 12%,var(--panel-2));
+}
+.nocr-hit.nocr-hit--new .nocr-check-result{
+  border-color:color-mix(in srgb,#ef7272 72%,var(--line));
+  background:color-mix(in srgb,#ef7272 19%,var(--panel));
+}
+.nocr-hit.nocr-hit--new .nocr-check-result strong{color:var(--red)}
+.nocr-hit.nocr-hit--new input[type=checkbox]{accent-color:#ef7272}
+.nocr-hit.nocr-hit--update{
+  border:1.5px solid #d3aa49;
+  border-inline-start:5px solid #d9b45a;
+  background:color-mix(in srgb,#d9b45a 12%,var(--panel-2));
+}
+.nocr-hit.nocr-hit--update .nocr-check-result{
+  border-color:color-mix(in srgb,#d9b45a 72%,var(--line));
+  background:color-mix(in srgb,#d9b45a 19%,var(--panel));
+}
+.nocr-hit.nocr-hit--update .nocr-check-result strong{color:var(--gold)}
+.nocr-hit.nocr-hit--update input[type=checkbox]{accent-color:#d9b45a}
+.nocr-hit.nocr-hit--already{
+  border:1.5px solid #55b78c;
+  border-inline-start:5px solid #5fc28e;
+  background:color-mix(in srgb,#5fc28e 10%,var(--panel-2));
+}
+.nocr-hit.nocr-hit--already .nocr-check-result{
+  border-color:color-mix(in srgb,#5fc28e 56%,var(--line));
+  background:color-mix(in srgb,#5fc28e 13%,var(--panel));
+}
+.nocr-hit.nocr-hit--already .nocr-check-result strong{color:var(--green)}
+.nocr-check-result.already{border-color:color-mix(in srgb,#5fc28e 50%,var(--line));background:color-mix(in srgb,#5fc28e 10%,var(--panel))}
+.nocr-check-result.already strong{color:var(--green)}
+.nocr-hit--already .nocr-hit-check{opacity:.9}
+.nocr-exempt-compact{
+ margin:14px 0 4px;border:1px solid var(--line);border-radius:13px;
+ background:var(--panel-2);color:var(--muted);padding:11px 13px;font-size:12px;
+}
+.nocr-exempt-compact summary{cursor:pointer;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.nocr-exempt-compact summary strong{color:var(--text);font-size:12px}
+.nocr-exempt-compact summary span:last-child{font-size:11px}
+.nocr-exempt-icon{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:color-mix(in srgb,#6e9fd4 13%,var(--panel));color:var(--blue);font-weight:800}
+.nocr-exempt-compact p{margin:12px 0 6px;font-size:11px}
+.nocr-exempt-names{display:flex;gap:6px;flex-wrap:wrap;margin:9px 0 0}
+.nocr-exempt-names span{padding:5px 8px;border-radius:8px;background:var(--panel);font-size:11px;color:var(--muted)}
