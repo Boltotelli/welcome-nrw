@@ -29,7 +29,12 @@ function translate(raw,l){
   else if((m=value.match(/^(\d+) Maßnahmen über der 24h-Frist$/)))out=m[1]+' '+word.measures;
   else if((m=value.match(/^Eigene Maßnahme: (.+)$/)))out=word.myAction+' '+m[1];
   else if((m=value.match(/^nur (.+) betreffend$/)))out=word.from+' '+m[1];
-  else if((m=value.match(/^Stufe\s+(\d+)(?:\s*·\s*(.*))?$/)))out=word.level+' '+m[1]+(m[2]?' · '+(map[m[2]]||m[2]):'');
+  else if((m=value.match(/^(?:Stufe|Level|Niveau|Nivel)\\s+(\\d+)(?:\\s*·\\s*(.*))?$/))){
+   const suffix=m[2]||'',over=suffix.match(/^seit\\s+(\\d+h\\s+\\d+m)$/);
+   out=word.level+' '+m[1]+(suffix?' · '+(over
+    ?(l==='en'?'overdue by ':l==='fr'?'en retard de ':'vencido por ')+over[1]
+    :(map[reverse.get(suffix)||suffix]||suffix)):'');
+  }
   else if((m=value.match(/^(\d+h\s+\d+m)\s+(überfällig|verbleibend)$/)))out=m[1]+' '+(m[2]==='überfällig'?word.overdue:word.remaining);
   else if((m=value.match(/^(\d+h\s+\d+m) über 24h-Frist \(laut Tracker\)$/)))out=m[1]+' '+map['über 24h-Frist (laut Tracker)'];
   else if((m=value.match(/^(.+?) · (\d+h\s+\d+m) über 24h-Frist\. Nur die betroffene Allianz kann die Umsetzung im Spiel bestätigen\.$/)))
@@ -38,6 +43,17 @@ function translate(raw,l){
    out=m[1]+' · '+m[3]+' '+(m[2]==='noch'?word.before:word.after);
   else if((m=value.match(/^(.+?) · (\d+h\s+\d+m) über 24h-Frist \(laut Tracker\)$/)))
    out=m[1]+' · '+m[2]+' '+map['über 24h-Frist (laut Tracker)'];
+ }
+ if(out===undefined&&l!=='de'){
+  // Icon-bearing summary labels are DOM text nodes, not separate icon elements.
+  const icon=value.match(/^([↻✓🌐✎⚠🔔＋☑➕]+\\s*)(.+)$/u);
+  if(icon){const key=reverse.get(icon[2])||icon[2];if(map[key])out=icon[1]+map[key]}
+  // Alliance tag + known audit action: never modify the alliance or player name.
+  const entry=value.match(/^([^·]{2,30}) · (.+)$/);
+  const audit=/^(?:Spielername geändert|Verstoß aktualisiert|Verstoß eingetragen|Kontaktstatus geändert|ScreenRecording erfasst|ScreenRecording aktualisiert|Eintrag gelöscht|Allianzwechsel|Spielerstatus geändert|Spieler-ID aktualisiert|Aktenkommentar hinzugefügt|Maßnahme aktualisiert|Einstellungen aktualisiert|NAP Exclusion eingetragen|KvK Prep Score gespeichert)$/;
+  if(out===undefined&&entry&&audit.test(entry[2])&&map[entry[2]])out=entry[1]+' · '+map[entry[2]];
+  const members=value.match(/^(\\d[\\d.,\\s]*) Mitglieder$/);
+  if(out===undefined&&members)out=members[1]+' '+map['Mitglieder'];
  }
  return out===undefined?raw:raw.replace(value,out);
 }
