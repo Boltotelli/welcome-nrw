@@ -376,11 +376,11 @@ function initLaw(){
  [...picker.options].forEach(o=>{if(o.value&&!EVENTS.includes(o.value))o.remove()});
  picker.onchange=()=>{if(run?.kind==='law'&&run.root.isConnected){$('#nocrEvent',run.root).value=picker.value;lawOccurrence()}};
 }
-function openLaw(){
+function openLaw(silent=false){
  const root=$('#liveImporterHost'),allowed=window.NAP_V2_SCREEN_OPTIONS||[];
  if(!root)return;
  mount(root,'law',allowed.filter(x=>EVENTS.includes(x.event_name)));
- root.scrollIntoView({behavior:'smooth',block:'nearest'});
+ if(!silent)root.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 function openPerformance(){
  const root=$('#livePerformanceExtra');if(!root)return;
