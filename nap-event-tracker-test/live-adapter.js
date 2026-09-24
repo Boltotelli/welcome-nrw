@@ -502,13 +502,28 @@ async function renderCrownLive(){
    '</div></section></div>');
  }catch(err){v.innerHTML+='<div class="live-empty-state">'+E(err.message||String(err))+'</div>'}
 }
-let activityType2='all',activityAlliance2='all';
+let activityType2='all',activityAlliance2='all',activityOffset2=0,activityMore2=false,activityLoading2=false;
 function activityCategory2(a){const s=String(a?.action||'').toLowerCase();if(s.includes('screen')||s.includes('import')||s.includes('upload'))return'uploads';if(s.includes('player')||s.includes('roster')||s.includes('alliance_updated'))return'players';if(s.includes('event')||s.includes('settings'))return'events';if(s.includes('delete'))return'deleted';if(s.includes('violation')||s.includes('sanction')||s.includes('exclusion')||s.includes('ban'))return'violations';return'all'}
 function activityTitle2(a){const act=String(a?.action||''),map={violation_created:'Verstoß eingetragen',violation_created_vnext:'Verstoß eingetragen',violation_updated:'Verstoß aktualisiert',violation_details_updated:'Verstoß aktualisiert',violation_contact_updated:'Kontaktstatus geändert',violation_deleted:'Eintrag gelöscht',player_id_updated:'Spieler-ID aktualisiert',player_alliance_updated:'Allianzwechsel',player_status_updated:'Spielerstatus geändert',player_name_updated:'Spielername geändert',player_file_comment_added:'Aktenkommentar hinzugefügt',sanction_updated:'Maßnahme aktualisiert',alliance_settings_updated:'Einstellungen aktualisiert',screen_recording_import:'ScreenRecording Import',screen_import_occurrence_created:'ScreenRecording erfasst',screen_import_occurrence_updated:'ScreenRecording aktualisiert',performance_screen_import:'Performance ScreenRecording',manual_nap_exclusion_created_v3:'NAP Exclusion eingetragen',performance_manual_snapshot_added:'Performance manuell korrigiert',performance_feature_settings_updated:'Performance-Anzeige geändert',law9_prep_score_saved:'KvK Prep Score gespeichert'};return map[act]||act.replaceAll('_',' ')}
 function activityMeta2(a){const d=a?.details||{},p={...(d.public||{}),...(d.private||{}),...d},bits=[];if(p.player_name)bits.push(p.player_name);if(p.event_name)bits.push(p.event_name);if(p.phase_name)bits.push(p.phase_name);if(p.from_alliance&&p.to_alliance)bits.push(p.from_alliance+' → '+p.to_alliance);if(p.score!=null)bits.push(N(p.score));return bits.join(' · ')}
 async function renderActivityLive(){
  const v=document.getElementById('view-activity');if(!v)return;v.innerHTML='<div class="hero"><div><div class="kicker">AKTIVITÄT · LIVE</div><h1>Filterbarer Audit-Feed.</h1><p>Uploads, Spieleränderungen, Verstöße und Maßnahmen.</p></div></div><div class="live-empty-state">Aktivität wird geladen …</div>';
- try{const d=await rpc('get_activity_log',{p_limit:250,p_offset:0,p_alliance:null,p_action:null});S.activity=Array.isArray(d)?d:[];paintActivity2()}catch(err){v.innerHTML+='<div class="live-empty-state">'+E(err.message||String(err))+'</div>'}
+ try{const d=await rpc('get_activity_log',{p_limit:250,p_offset:0,p_alliance:null,p_action:null});S.activity=Array.isArray(d)?d:[];activityOffset2=S.activity.length;activityMore2=S.activity.length===250;paintActivity2()}catch(err){v.innerHTML+='<div class="live-empty-state">'+E(err.message||String(err))+'</div>'}
+}
+async function loadMoreActivity2(){
+ if(activityLoading2||!activityMore2)return;
+ activityLoading2=true;
+ const btn=document.getElementById('liveActivityMore');
+ if(btn){btn.disabled=true;btn.textContent='Lade weitere Einträge …'}
+ try{
+  const d=await rpc('get_activity_log',{p_limit:250,p_offset:activityOffset2,p_alliance:null,p_action:null});
+  const page=Array.isArray(d)?d:[];
+  const known=new Set((S.activity||[]).map(x=>String(x.id)));
+  S.activity.push(...page.filter(x=>!known.has(String(x.id))));
+  activityOffset2+=page.length;activityMore2=page.length===250;
+  paintActivity2();
+ }catch(err){if(btn){btn.disabled=false;btn.textContent='Weitere Einträge laden';}alert(err.message||String(err))}
+ finally{activityLoading2=false}
 }
 function paintActivity2(){
  const v=document.getElementById('view-activity');if(!v)return;
@@ -518,9 +533,10 @@ function paintActivity2(){
  v.innerHTML='<div class="hero"><div><div class="kicker">AKTIVITÄT · LIVE</div><h1>Filterbarer Audit-Feed.</h1><p>Uploads, Spieleränderungen, Verstöße und Maßnahmen.</p></div><div class="hero-actions"><button id="liveActivityRefresh" class="btn secondary">↻ Aktualisieren</button></div></div>'+
  '<div class="toolbar"><div class="toolbar-left">'+types.map(x=>'<button class="filter-chip '+(activityType2===x[0]?'active':'')+'" data-acttype="'+x[0]+'">'+x[1]+'</button>').join('')+'</div><div class="toolbar-right"><label class="live-activity-alliance-label"><span>Allianz</span><select id="liveActivityAlliance" aria-label="Allianz"><option value="all">Alle Allianzen</option>'+alliances.map(a=>'<option value="'+E(a)+'" '+(activityAlliance2===a?'selected':'')+'>'+E(a)+'</option>').join('')+'</select></label></div></div>'+
  '<div class="live-note live-audit-scope">NAP-weites Aktivitätsprotokoll: Bei anderen Allianzen werden ausschließlich öffentliche Log-Informationen angezeigt. Private Verstoßdetails, Gründe und Kommentare bleiben verborgen.</div>'+
- '<section class="card"><div class="card-body live-list">'+(rows.length?rows.map(a=>'<div class="live-row"><div><b>'+E(a.alliance_code||'System')+' · '+E(activityTitle2(a))+'</b><small>'+E(activityMeta2(a))+'</small></div><time class="muted tiny">'+E(D(a.created_at))+'</time></div>').join(''):'<div class="live-empty-state">Keine Aktivitäten für diesen Filter.</div>')+'</div></section>';
+ '<section class="card"><div class="card-body live-list">'+(rows.length?rows.map(a=>'<div class="live-row"><div><b>'+E(a.alliance_code||'System')+' · '+E(activityTitle2(a))+'</b><small>'+E(activityMeta2(a))+'</small></div><time class="muted tiny">'+E(D(a.created_at))+'</time></div>').join(''):'<div class="live-empty-state">Keine Aktivitäten für diesen Filter.</div>')+'</div></section>'+(activityMore2?'<div class="hero-actions" style="margin-top:14px"><button type="button" class="btn secondary" id="liveActivityMore">Weitere Einträge laden</button></div>':'');
  v.querySelectorAll('[data-acttype]').forEach(b=>b.onclick=()=>{activityType2=b.dataset.acttype;paintActivity2()});
  v.querySelector('#liveActivityAlliance')?.addEventListener('change',e=>{activityAlliance2=e.target.value;paintActivity2()});
+ document.getElementById('liveActivityMore')?.addEventListener('click',loadMoreActivity2);
  document.getElementById('liveActivityRefresh').onclick=renderActivityLive;
 }
 function settingTargetRows2(){
