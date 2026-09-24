@@ -139,11 +139,7 @@ function renderAddLive(){
  const v=document.getElementById('view-add');if(!v)return;
  v.innerHTML='<div class="hero"><div><div class="kicker">2.0 · LIVE</div><h1>Verstoß erfassen</h1><p>ScreenRecording und manuelle Eingabe sind getrennt, nutzen aber dieselben aktuellen Eventfreigaben und Regeln.</p></div></div>'+
  '<div class="live-tabs"><button class="live-tab active" data-addmode="screen">ScreenRecording</button><button class="live-tab" data-addmode="manual">Manuell</button></div>'+
- '<div id="addScreenPanel"><div class="live-panel-grid"><section class="card"><div class="card-head"><div><div class="card-title">ScreenRecording</div><div class="card-sub">Event auswählen, anschließend Video importieren und Treffer prüfen.</div></div></div><div class="card-body live-form">'+
- '<label>Event<select id="liveScreenEvent"><option value="">Verfügbare Events werden geladen …</option></select></label>'+
- '<div class="live-note">Der bestehende ScreenRecording-Importer wird in die 2.0 eingebettet. Serverweites 1044-Roster-Matching und Evidence bleiben erhalten.</div>'+
- '<button id="liveLoadImporter" class="btn primary" type="button">Importer laden</button><div id="liveImporterStatus" class="live-status"></div></div></section>'+
- '<section class="card"><div class="card-head"><div><div class="card-title">Import-Status</div><div class="card-sub">Nach dem Speichern werden die Tracker-Daten automatisch neu geladen.</div></div></div><div class="card-body"><div class="live-empty-state">Noch kein ScreenRecording geöffnet.</div></div></section></div><div id="liveImporterHost" style="margin-top:14px"></div></div>'+
+ '<div id="addScreenPanel"><section class="card"><div class="card-head"><div><div class="card-title">ScreenRecording</div><div class="card-sub">Event und Tag auswählen · Video prüfen · Treffer speichern.</div></div></div><div class="card-body"><div id="liveImporterHost">Verfügbare Events werden geladen …</div></div></section></div>'+
  '<div id="addManualPanel" hidden><div class="live-panel-grid"><section class="card"><div class="card-head"><div><div class="card-title">Manuell eintragen</div><div class="card-sub">Nur aktuell freigegebene Events.</div></div></div><div class="card-body"><form id="liveManualForm" class="live-form">'+
  '<label>Spieler<select id="liveManualPlayer"></select></label><label>Event<select id="liveManualEvent"></select></label><label>Phase<select id="liveManualPhase"></select></label>'+
  '<div class="live-form-row"><label>Punkte<input id="liveManualScore" inputmode="numeric"></label><label>Zeitpunkt<input id="liveManualOccurred" type="datetime-local"></label></div>'+
@@ -155,10 +151,11 @@ function renderAddLive(){
 }
 async function setupAddData2(){
  let opts=[];try{opts=await rpc('get_open_event_entry_options',{})||[]}catch(e){console.warn(e)}
- S.eventOptions=opts;
+ S.eventOptions=opts;window.NAP_V2_SCREEN_OPTIONS=opts.filter(x=>['Strongest Governor','Alliance Brawl','Officer Project','Armament Competition'].includes(x.event_name));
  const eventNames=[...new Set(opts.map(x=>x.event_name).filter(Boolean))];
  const options=eventNames.length?eventNames.map(x=>'<option value="'+E(x)+'">'+E(x)+'</option>').join(''):'<option value="">Kein Event freigegeben</option>';
- const se=document.getElementById('liveScreenEvent'),me=document.getElementById('liveManualEvent');if(se)se.innerHTML=options;if(me)me.innerHTML=options;
+ const me=document.getElementById('liveManualEvent');if(me)me.innerHTML=options;
+ if(document.getElementById('liveImporterHost'))window.NAP_NATIVE_IMPORTER?.openLaw?.(true);
  const player=document.getElementById('liveManualPlayer');if(player)player.innerHTML=S.p.map(p=>'<option value="'+E(p.name||p.player_name)+'">'+E(p.name||p.player_name)+' · '+E(p.game_id||'–')+'</option>').join('');
  const occ=document.getElementById('liveManualOccurred');if(occ){const d=new Date(Date.now()-new Date().getTimezoneOffset()*60000);occ.value=d.toISOString().slice(0,16)}
  function syncPhases(){
@@ -169,7 +166,6 @@ async function setupAddData2(){
  me?.addEventListener('change',syncPhases);document.getElementById('liveManualPhase')?.addEventListener('change',()=>updateManualPreview2(S.eventOptions.find(x=>x.event_name===me?.value)?.source_event_id));document.getElementById('liveManualScore')?.addEventListener('input',()=>updateManualPreview2(S.eventOptions.find(x=>x.event_name===me?.value)?.source_event_id));document.getElementById('liveManualOccurred')?.addEventListener('change',()=>updateManualPreview2());
  syncPhases();
  document.getElementById('liveManualForm')?.addEventListener('submit',saveManualViolation2);
- document.getElementById('liveLoadImporter')?.addEventListener('click',loadScreenImporter2);
 }
 function updateManualPreview2(sourceId){
  const event=document.getElementById('liveManualEvent')?.value||'',phase=document.getElementById('liveManualPhase')?.value||'',score=Number(String(document.getElementById('liveManualScore')?.value||'').replace(/\D/g,'')),target=targetFor2(event,phase),occurredValue=document.getElementById('liveManualOccurred')?.value||'',mult=phaseMultiplier2(event,phase,occurredValue),limit=target==null?null:Number(target)*mult;
@@ -186,12 +182,7 @@ async function saveManualViolation2(e){
  }catch(err){out.textContent=err.message||String(err)}
 }
 async function loadScreenImporter2(){
- const host=document.getElementById('liveImporterHost'),status=document.getElementById('liveImporterStatus');if(!host)return;status.textContent='Importer wird geladen …';host.innerHTML='';
- try{
-   const r=await fetch(C.u+'/functions/v1/screen-import-standalone-live-v16',{cache:'no-store'});if(!r.ok)throw Error('Importer '+r.status);const html=await r.text();
-   const fr=document.createElement('iframe');fr.id='screenImportFrame';fr.className='live-import-frame';fr.srcdoc=html;host.appendChild(fr);
-   fr.addEventListener('load',()=>{status.textContent='✓ Importer bereit';try{const sel=fr.contentDocument?.querySelector('#event'),wanted=document.getElementById('liveScreenEvent')?.value;if(sel&&wanted){const opt=[...sel.options].find(o=>String(o.textContent||'').includes(wanted));if(opt){sel.value=opt.value;sel.dispatchEvent(new Event('change',{bubbles:true}))}}}catch(e){console.warn('screen event sync',e)}});
- }catch(err){status.textContent=err.message||String(err)}
+ window.NAP_NATIVE_IMPORTER?.openLaw?.();
 }
 window.addEventListener('message',async e=>{if(e.data?.type==='nap-screen-import-saved'){await load();renderHome();renderPlayers();const current=document.querySelector('.view.active')?.id?.replace('view-','');if(current==='performance')await renderPerformanceLive();else if(current==='kvk')await renderKvkLive()}});
 
@@ -282,26 +273,9 @@ async function renderPerformanceLive(){
  }catch(err){v.innerHTML+='<div class="live-empty-state">'+E(err.message||String(err))+'</div>'}
 }
 async function openPerformanceScreenImport2(){
- const out=document.getElementById('livePerformanceExtra');if(!out)return;
- out.innerHTML='<div class="live-empty-state">Performance-ScreenRecording wird geladen …</div>';
- try{
-   const r=await fetch(C.u+'/functions/v1/screen-import-standalone-live-v16',{cache:'no-store'});
-   if(!r.ok)throw Error('Importer '+r.status);
-   const html=await r.text();
-   out.innerHTML='<section class="card"><div class="card-head"><div><div class="card-title">Performance ScreenRecording</div><div class="card-sub">Alliance Mobilization oder KvK Top 200 direkt aus dem bestehenden Importer.</div></div><button class="btn small secondary" id="liveClosePerfImporter">Schließen</button></div><div class="card-body"><div id="livePerfImportStatus" class="live-status">Importer wird vorbereitet …</div><div id="livePerfImportHost"></div></div></section>';
-   const host=document.getElementById('livePerfImportHost'),status=document.getElementById('livePerfImportStatus');
-   const fr=document.createElement('iframe');fr.className='live-import-frame';fr.srcdoc=html;host.appendChild(fr);
-   document.getElementById('liveClosePerfImporter').onclick=()=>out.innerHTML='';
-   fr.addEventListener('load',()=>{
-     status.textContent='✓ Importer bereit · Performance-Modus';
-     try{
-       const doc=fr.contentDocument,mode=doc?.querySelector('#modePerf');
-       if(mode&&!mode.classList.contains('active'))mode.click();
-       const controls=doc?.querySelector('#perfControls');
-       if(controls){controls.classList.remove('hidden');controls.style.display=''}
-     }catch(e){console.warn('performance importer mode',e)}
-   });
- }catch(err){out.innerHTML='<div class="live-empty-state">'+E(err.message||String(err))+'</div>'}
+ const out=document.getElementById('livePerformanceExtra');
+ if(!window.NAP_NATIVE_IMPORTER){if(out)out.textContent='Importer nicht geladen. Bitte Seite aktualisieren.';return}
+ window.NAP_NATIVE_IMPORTER.openPerformance();
 }
 async function loadFullPerformance2(type){
  const out=document.getElementById('livePerformanceExtra');if(!out)return;out.innerHTML='<div class="live-empty-state">Ranking wird geladen …</div>';
