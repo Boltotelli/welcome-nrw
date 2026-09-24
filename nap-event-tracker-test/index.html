@@ -385,6 +385,13 @@ tr:hover td{background:color-mix(in srgb,var(--panel-2) 65%,transparent)}
 .live-activity-alliance-label select{box-sizing:border-box;min-height:39px;min-width:130px;max-width:100%;padding:7px 28px 7px 10px;border:1px solid var(--line);border-radius:11px;background:var(--panel-2);color:var(--text);font:inherit}
 .live-audit-scope{margin:10px 0 14px;font-size:12px;line-height:1.5}
 @media(max-width:700px){.live-activity-alliance-label{width:100%}.live-activity-alliance-label select{flex:1;min-width:0}.toolbar .toolbar-right{min-width:0;max-width:100%}}
+
+/* Explicit post-contact spending confirmation in ScreenRecording review */
+.nocr-post-contact-confirm{display:flex;align-items:flex-start;gap:10px;margin-top:10px;padding:11px 12px;border:1px solid var(--gold);border-radius:12px;background:color-mix(in srgb,var(--gold) 8%,var(--panel-2));cursor:pointer}
+.nocr-post-contact-confirm input{margin-top:2px;flex:none}
+.nocr-post-contact-confirm span{display:grid;gap:3px}
+.nocr-post-contact-confirm strong{font-size:11px}
+.nocr-post-contact-confirm small{font-size:9px;line-height:1.4;color:var(--muted)}
 </style>
 
 <style id="v4-home-notification-styles">
@@ -1609,7 +1616,7 @@ document.getElementById('settingsSaveDemo')?.addEventListener('click',()=>{
 
 </script>
 <script src="./live-adapter.js?v=20260924-audit-all-pages"></script>
-<script src="./native-screen-import.js?v=20260924-date-login-counts"></script>
+<script src="./native-screen-import.js?v=20260924-post-contact-confirmation"></script>
 <script src="./live-translations-v2.js?v=20260924-i18n-last-reported-items"></script>
 </body>
 </html>
