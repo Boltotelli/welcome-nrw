@@ -365,7 +365,8 @@ function showReview(r){
  [r.preview.updates,reviewText('updateCount')],
  [r.preview.already_recorded,reviewText('alreadyCount')]
  ].filter(x=>Number(x[0])>0).map(x=>points(x[0])+' '+x[1]):[];
- $('#nocrCount',root).textContent=r.hits.length+' '+tr('found')+(counts.length?' · '+counts.join(' · '):'');
+ const visibleCount=r.hits.filter(h=>r.kind!=='law'||statuses.get(String(h.player?.player_game_id||h.player?.player_id||''))?.status!=='exempt').length;
+ $('#nocrCount',root).textContent=visibleCount+' '+tr('found')+(counts.length?' · '+counts.join(' · '):'');
  $('#nocrResults',root).innerHTML=r.hits.map((h,i)=>{
   const lookup=statuses.get(String(h.player?.player_game_id||h.player?.player_id||''));
   if(r.kind==='law'&&lookup?.status==='exempt')return '';
