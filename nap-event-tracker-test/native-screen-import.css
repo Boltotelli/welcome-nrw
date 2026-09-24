@@ -42,3 +42,30 @@
 .nocr-unmatched button{width:100%;margin-top:7px}
 .nocr-hit:has([data-rank]){grid-template-columns:minmax(150px,1fr) 120px 88px 100px}
 @media(max-width:690px){.nocr-hit:has([data-rank]){grid-template-columns:minmax(0,1fr) minmax(80px,105px)}}
+
+/* Readable OCR review: statuses explain what will happen, rather than raw RPC codes. */
+.nocr-hit{grid-template-columns:minmax(140px,1fr) minmax(104px,140px) minmax(155px,1.2fr)}
+.nocr-hit:has([data-rank]){grid-template-columns:minmax(140px,1fr) minmax(100px,120px) minmax(70px,85px) minmax(155px,1.1fr)}
+.nocr-hit>input[data-score]{min-height:40px;text-align:right;letter-spacing:.01em;font-size:14px;font-variant-numeric:tabular-nums}
+.nocr-check-result{display:grid;gap:4px;border-radius:11px;border:1px solid var(--line);padding:9px 11px;background:var(--panel);line-height:1.35}
+.nocr-check-result strong{font-size:12px}
+.nocr-check-result small{font-size:11px;color:var(--muted);line-height:1.45}
+.nocr-check-result.danger{border-color:color-mix(in srgb,#ef7272 52%,var(--line));background:color-mix(in srgb,#ef7272 10%,var(--panel));}
+.nocr-check-result.danger strong{color:var(--red)}
+.nocr-check-result.exempt{border-color:color-mix(in srgb,#6e9fd4 55%,var(--line));background:color-mix(in srgb,#6e9fd4 13%,var(--panel))}
+.nocr-check-result.exempt strong{color:var(--blue)}
+.nocr-check-result.warning{border-color:color-mix(in srgb,#d9b45a 52%,var(--line));background:color-mix(in srgb,#d9b45a 9%,var(--panel))}
+.nocr-check-result.warning strong{color:var(--gold)}
+.nocr-add-missing{margin-top:14px;padding:15px;border:1px solid var(--line);border-radius:15px;background:var(--panel-2)}
+.nocr-add-missing summary{font-size:13px;font-weight:800;cursor:pointer;color:var(--text)}
+.nocr-add-missing p{font-size:11px;color:var(--muted);line-height:1.5}
+.nocr-add-missing label{display:grid;gap:6px;margin-top:11px;font-size:11px;font-weight:700;color:var(--muted)}
+.nocr-add-missing input,.nocr-add-missing select{width:100%;min-width:0;min-height:43px;border-radius:10px;border:1px solid var(--line);padding:8px 11px;background:var(--panel);color:var(--text);font:inherit}
+.nocr-add-missing img{width:min(100%,510px);max-height:280px;object-fit:contain;display:block;margin:11px auto;border-radius:9px}
+.nocr-add-missing button{width:100%;margin-top:12px;min-height:43px}
+@media(max-width:690px){
+ .nocr-hit,.nocr-hit:has([data-rank]){grid-template-columns:minmax(0,1fr) minmax(105px,125px)}
+ .nocr-hit>.nocr-check-result{grid-column:1/-1}
+ .nocr-hit:has([data-rank])>input[data-rank]{grid-column:2;grid-row:2}
+ .nocr-hit:has([data-rank])>.nocr-check-result{grid-row:auto}
+}
