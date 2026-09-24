@@ -514,6 +514,34 @@ img[src*="./assets/alliance/"]{
  body .n2login .n2grid button.btn{min-height:46px}
  body .n2login .n2alliance-choice{min-height:44px}
 }
+
+/* Small-screen login must use the visual viewport, never the desktop app width. */
+@media (max-width:900px){
+ html,body{max-width:100%;overflow-x:clip}
+ body #n2login[hidden]{display:none!important}
+ body #n2login:not([hidden]){
+  position:fixed!important;inset:0!important;top:0!important;left:0!important;right:0!important;bottom:0!important;
+  width:100vw!important;max-width:100vw!important;height:100dvh!important;min-height:100dvh!important;
+  box-sizing:border-box!important;margin:0!important;
+  padding:12px max(12px,env(safe-area-inset-right)) 12px max(12px,env(safe-area-inset-left))!important;
+  display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:flex-start!important;
+  overflow-x:hidden!important;overflow-y:auto!important;transform:none!important;
+ }
+ body #n2login .n2box{
+  position:relative!important;flex:0 0 auto!important;box-sizing:border-box!important;min-width:0!important;
+  width:min(100%,420px)!important;max-width:100%!important;height:auto!important;max-height:none!important;
+  margin:auto 0!important;padding:18px!important;overflow:visible!important;transform:none!important;
+ }
+ body #n2login .n2grid,body #n2login .n2grid>*{min-width:0!important;max-width:100%!important}
+ body #n2login .n2grid input,body #n2login .n2grid button,body #n2login .n2grid select{
+  box-sizing:border-box!important;min-width:0!important;max-width:100%!important;width:100%!important;
+ }
+ body #n2login .n2alliance-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;min-width:0!important}
+ body #n2login .n2alliance-choice{width:100%!important;min-width:0!important;min-height:46px!important}
+ body #n2login .n2box .kicker{font-size:10px!important;letter-spacing:.08em!important;overflow-wrap:anywhere}
+ body #n2login .n2box h2{font-size:clamp(21px,6vw,27px)!important;overflow-wrap:anywhere}
+ body #n2login .n2box p{overflow-wrap:anywhere}
+}
 </style>
 <link rel="stylesheet" href="./native-screen-import.css?v=20260924-review-colors3">
 </head>
