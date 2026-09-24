@@ -468,3 +468,7 @@ body{background:var(--v2-bg)!important}
   .p2-stage-wrap{padding:12px 8px}.p2-stage-node small{font-size:7px}
   .p2-record-meta{grid-template-columns:1fr}.p2-profile-tabs{width:100%}
 }
+
+/* Real Kingshot avatars on both the player grid and profile. */
+.p2-avatar,.p2-profile-avatar{overflow:hidden;flex:none}
+.p2-avatar img,.p2-profile-avatar img{display:block;width:100%;height:100%;object-fit:cover;border-radius:inherit}
