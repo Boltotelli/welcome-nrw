@@ -88,7 +88,7 @@ function extractRows(text){
  for(let i=0;i<lines.length;i++){
   let line=lines[i];
   let m=line.match(/(\d{1,3}(?:[.,\s]\d{3}){1,4}|\d{4,12})\s*$/);
-  if(!m&&i+1<lines.length&&/^\d{1,3}(?:[.,\s]\d{3})+|\d{4,12}$/.test(lines[i+1])){
+  if(!m&&i+1<lines.length&&/^(?:\d{1,3}(?:[.,\s]\d{3})+|\d{4,12})$/.test(lines[i+1])){
    line+=' '+lines[++i];m=line.match(/(\d{1,3}(?:[.,\s]\d{3}){1,4}|\d{4,12})\s*$/);
   }
   if(!m)continue;
@@ -192,10 +192,12 @@ function setLawPhase(){
  const r=run;if(!r||r.kind!=='law')return;
  const root=r.root,event=$('#nocrEvent',root).value,occ=selectedOcc(),phase=$('#nocrPhase',root);
  const list=(PHASES[event]||[]).filter(p=>!occ?.phase_hint||p[0]===occ.phase_hint);
+ const previous=phase.value;
  phase.innerHTML=list.map(p=>{
   const n=Number(p[0].slice(2)),day=(event==='Strongest Governor'||event==='Alliance Brawl')&&occ?dayUTC(occ.begin_at,n-1):'';
   return selectOption(p[1]+(day?' · '+day:''),p[0]);
  }).join('');
+ if(list.some(p=>p[0]===previous))phase.value=previous;
  if(event==='Strongest Governor'||event==='Alliance Brawl'){
   const first=phase.value,offset=Number(first.slice(2))-1;
   const suggested=occ?dayUTC(occ.begin_at,offset):dayUTC(new Date());
@@ -364,7 +366,7 @@ function mount(root,kind,allowed=[]){
   $('#nocrEvent',root).innerHTML=EVENTS.filter(n=>allowed.some(o=>o.event_name===n)).map(x=>selectOption(x,x)).join('');
   if(event&&EVENTS.includes(event))$('#nocrEvent',root).value=event;
   $('#nocrEvent',root).onchange=lawOccurrence;$('#nocrOcc',root).onchange=setLawPhase;
-  $('#nocrPhase',root).onchange=setLawPhase;
+  $('#nocrPhase',root).onchange=()=>{const occ=selectedOcc(),phase=$('#nocrPhase',root).value,event=$('#nocrEvent',root).value;if(occ&&(event==='Strongest Governor'||event==='Alliance Brawl'))$('#nocrDay',root).value=dayUTC(occ.begin_at,Number(phase.slice(2))-1);};
   lawOccurrence();
  }else{$('#nocrType',root).onchange=performanceOptions;performanceOptions()}
 }
