@@ -51,3 +51,5 @@ jobs:
 # Publish V2 evidence/login/Crown + adapter cache refresh 2026-09-24
 
 # Deploy isolated V2 native OCR, SG days, manual attendance and performance import 2026-09-24
+
+# Publish OCR statuses, dotted scores and manually added players 2026-09-24
