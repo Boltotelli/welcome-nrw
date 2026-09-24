@@ -400,17 +400,20 @@ function showReview(r){
 }
 async function save(){
  const r=run,root=r.root;if(r.busy)return;
+ let scoreError=false,rankError=false;
  const selected=r.hits.filter((h,i)=>{
   const c=$('[data-hit="'+i+'"]',root);
   if(!c?.checked)return false;
-  const score=Number($('[data-score="'+i+'"]',root)?.value);
-  if(!Number.isSafeInteger(score)||score<0)return false;h.score=score;
+  const score=parsePoints($('[data-score="'+i+'"]',root)?.value);
+  if(score===null){scoreError=true;return false}h.score=score;
   if(r.kind==='perf'&&$('#nocrType',root).value==='kvk_prep'){
-   const rank=Number($('[data-rank="'+i+'"]',root)?.value);
-   if(!Number.isInteger(rank)||rank<1||rank>200)return false;h.rank=rank;
+   const field=$('[data-rank="'+i+'"]',root);
+   const rank=field?.value?.trim()?Number(field.value):NaN;
+   if(!Number.isInteger(rank)||rank<1||rank>200){rankError=true;return false}h.rank=rank;
   }
   return true;
  });
+ if(scoreError||rankError){$('#nocrSaveStatus',root).textContent=reviewText(scoreError?'invalidScore':'missingRank');return}
  if(!selected.length){$('#nocrSaveStatus',root).textContent=tr('nohits');return}
  r.busy=true;$('#nocrSave',root).disabled=true;
  const out=$('#nocrSaveStatus',root);out.textContent=tr('saving');
