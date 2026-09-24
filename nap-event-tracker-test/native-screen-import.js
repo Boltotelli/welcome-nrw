@@ -380,10 +380,12 @@ function showReview(r){
  }).join('')+
  (r.unmatched.length?'<details class="nocr-unmatched"><summary>'+esc(tr('unmatched'))+' ('+r.unmatched.length+')</summary>'+
  '<label>'+esc(tr('unmatched'))+'<select id="nocrUnknown">'+r.unmatched.map((x,i)=>selectOption(x.raw,i)).join('')+'</select></label>'+
- '<label>'+esc(tr('selectPlayer'))+'<select id="nocrMapPlayer"><option value="">–</option>'+r.members.map((p,i)=>selectOption(p.player_name+' · '+(p.alliance_code||'')+' · '+(p.player_game_id||''),i)).join('')+'</select></label>'+
+ '<label>'+esc(reviewText('chooseAlliance'))+'<select id="nocrMapAlliance"><option value="">– '+esc(reviewText('chooseAlliance'))+' –</option>'+allianceOptions(r.members)+'</select></label>'+ 
+ '<label>'+esc(tr('selectPlayer'))+'<select id="nocrMapPlayer"><option value="">–</option></select></label>'+
  '<button class="btn secondary" type="button" id="nocrMapConfirm">'+esc(tr('assign'))+'</button></details>':'')+
- '<details class="nocr-add-missing" id="nocrAddMissing" '+(!r.hits.length?'open':'')+'><summary>'+esc(reviewText('addPlayer'))+'</summary>'+
+ '<details class="nocr-add-missing" id="nocrAddMissing" '+(r.addOpen||!r.hits.length?'open':'')+'><summary>'+esc(reviewText('addPlayer'))+'</summary>'+
  '<p>'+esc(reviewText('addHint'))+'</p>'+
+ '<label>'+esc(reviewText('chooseAlliance'))+'<select id="nocrNewAlliance"><option value="">– '+esc(reviewText('chooseAlliance'))+' –</option>'+allianceOptions(r.members)+'</select></label>'+ 
  '<label>'+esc(reviewText('search'))+'<input type="search" id="nocrSearchRoster" placeholder="'+esc(reviewText('search'))+'"></label>'+
  '<label>'+esc(tr('selectPlayer'))+'<select id="nocrNewPlayer"><option value="">–</option></select></label>'+
  '<label>'+esc(tr('score'))+'<input type="text" inputmode="numeric" autocomplete="off" id="nocrNewScore" placeholder="'+esc(reviewText('scorePlaceholder'))+'"></label>'+
@@ -406,6 +408,25 @@ function showReview(r){
   h.score=value;
   if(r.kind==='law'){status(reviewText('preview'));await refreshReview(r)}
  }));
+ const mapAlliance=$('#nocrMapAlliance',root),mapPlayer=$('#nocrMapPlayer',root);
+ if(mapAlliance&&mapPlayer){
+  const populate=()=>{
+   const code=mapAlliance.value;
+   mapPlayer.innerHTML='<option value="">–</option>'+alphabeticalRoster(r.members)
+    .filter(({p})=>code&&p.alliance_code===code)
+    .map(({p,i})=>selectOption(p.player_name+' · '+(p.player_game_id||''),i)).join('');
+  };
+  mapAlliance.onchange=populate;
+  const detected=r.unmatched[0]?.alliance;
+  if(detected&&orderedAlliances(r.members).some(a=>a.toLowerCase()===String(detected).toLowerCase()))
+   mapAlliance.value=orderedAlliances(r.members).find(a=>a.toLowerCase()===String(detected).toLowerCase());
+  populate();
+  $('#nocrUnknown',root)?.addEventListener('change',()=>{
+   const candidate=r.unmatched[Number($('#nocrUnknown',root).value)]?.alliance;
+   const code=orderedAlliances(r.members).find(a=>a.toLowerCase()===String(candidate||'').toLowerCase());
+   if(code){mapAlliance.value=code;populate()}
+  });
+ }
  const mapButton=$('#nocrMapConfirm',root);
  if(mapButton)mapButton.onclick=()=>{
   const index=Number($('#nocrUnknown',root).value),playerIndex=$('#nocrMapPlayer',root).value;
@@ -420,12 +441,16 @@ function showReview(r){
   r.unmatched.splice(index,1);
   r.hits.sort((x,y)=>y.score-x.score);refreshReview(r);
  };
- const sel=$('#nocrNewPlayer',root);
+ const sel=$('#nocrNewPlayer',root),alliance=$('#nocrNewAlliance',root);
  const filter=$('#nocrSearchRoster',root);
- const list=()=>{const q=norm(filter.value);const options=r.members.map((p,i)=>({p,i})).filter(x=>!q||norm(x.p.player_name+' '+x.p.player_game_id+' '+x.p.alliance_code).includes(q)).slice(0,350);
-  sel.innerHTML='<option value="">–</option>'+options.map(x=>selectOption(x.p.player_name+' · '+(x.p.alliance_code||'')+' · '+(x.p.player_game_id||''),x.i)).join('');
+ const list=()=>{
+  const q=norm(filter.value),code=alliance.value;
+  const options=alphabeticalRoster(r.members).filter(({p})=>code&&p.alliance_code===code&&(!q||norm(p.player_name+' '+p.player_game_id).includes(q)));
+  sel.innerHTML='<option value="">–</option>'+options.map(({p,i})=>selectOption(p.player_name+' · '+(p.player_game_id||''),i)).join('');
  };
- list();filter.addEventListener('input',list);
+ list();filter.addEventListener('input',list);alliance.addEventListener('change',list);
+ const missingDetails=$('#nocrAddMissing',root);
+ missingDetails.addEventListener('toggle',()=>{r.addOpen=missingDetails.open});
  const frame=$('#nocrNewFrame',root);
  if(frame)frame.onchange=()=>{$('#nocrFramePreview',root).src=r.frames[Number(frame.value)]?.image||''};
  $('#nocrNewScore',root).addEventListener('blur',e=>{const value=parsePoints(e.target.value);if(value!==null)e.target.value=points(value)});
@@ -445,7 +470,7 @@ function showReview(r){
   if(old)r.hits=r.hits.filter(x=>x!==old);
   const proof=r.frames[Number(frame?.value||0)]||null;
   r.hits.push({player:p,name:p.player_name,alliance:p.alliance_code,score,rank,time:proof?.time??0,image:proof?.image||null,manual:true});
-  r.hits.sort((a,b)=>b.score-a.score);refreshReview(r);
+  r.hits.sort((a,b)=>b.score-a.score);r.addOpen=true;refreshReview(r);
  };
  $('#nocrSave',root).disabled=!r.hits.length;
 }
@@ -514,7 +539,7 @@ async function save(){
 }
 function mount(root,kind,allowed=[]){
  if(run?.busy)return;
- run={root,kind,allowed,hits:[],unmatched:[],frames:[],occurrences:[],members:[],selection:new Map(),busy:false,preview:null,fileHash:null};
+ run={root,kind,allowed,hits:[],unmatched:[],frames:[],occurrences:[],members:[],selection:new Map(),addOpen:false,busy:false,preview:null,fileHash:null};
  shell(root,kind);
  const r=run;$('#nocrAnalyze',root).onclick=analyze;$('#nocrSave',root).onclick=save;
  if(kind==='law'){
