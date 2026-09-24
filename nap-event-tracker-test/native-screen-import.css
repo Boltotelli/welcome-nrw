@@ -75,3 +75,6 @@
 .nocr-review-title{flex-wrap:wrap}.nocr-review-title strong{max-width:100%;line-height:1.5}
 .nocr-unmatched label{display:grid;gap:6px;margin:11px 0}
 .nocr-unmatched select{min-height:43px}
+
+.nocr-check-result.update{border-color:color-mix(in srgb,#d9b45a 54%,var(--line));background:color-mix(in srgb,#d9b45a 11%,var(--panel))}
+.nocr-check-result.update strong{color:var(--gold)}
