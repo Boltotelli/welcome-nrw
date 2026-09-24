@@ -93,19 +93,81 @@ const PHASES2={
  'Tri-Alliance Clash':[['tri','Attendance',null]]
 };
 async function ins(n,b){return q(C.u+'/rest/v1/'+n,{method:'POST',headers:{...(await h(true)),Prefer:'return=representation'},body:JSON.stringify(b)})}
-function avatarHtml(P,cls){
- const id=String(P?.game_id||P?.player_game_id||''),u=S.avatars?.[id],name=P?.name||P?.player_name||'?';
- cls=cls||'player-avatar';
- const attr=id?' data-nap-player-avatar="'+E(id)+'"':'';
- return u&&/^https:\/\//i.test(u)?'<div class="'+cls+' live-avatar"'+attr+'><img src="'+E(u)+'" loading="lazy" referrerpolicy="no-referrer" alt=""></div>':'<div class="'+cls+'"'+attr+'>'+E((name[0]||'?').toUpperCase())+'</div>';
+const avatarObjects2=new Map(),avatarPending2=new Map(),avatarFailures2=new Set();
+let avatarObserver2=null;
+function playerInitial2(id){
+ const P=S.p.find(p=>String(p.game_id||p.player_game_id||'')===id);
+ return String(P?.name||P?.player_name||'?').trim().slice(0,1).toUpperCase()||'?';
+}
+function avatarFallback2(el){
+ if(!el?.isConnected)return;
+ const id=el.dataset.napPlayerAvatar;
+ el.replaceChildren(document.createTextNode(playerInitial2(id)));
+ el.classList.remove('live-avatar');
+ el.dataset.napAvatarState='fallback';
+}
+async function avatarObject2(id){
+ if(avatarObjects2.has(id))return avatarObjects2.get(id);
+ if(avatarFailures2.has(id))return null;
+ if(avatarPending2.has(id))return avatarPending2.get(id);
+ const promise=(async()=>{
+  const res=await fetch(C.u+'/functions/v1/nap-player-avatar-v2?player_id='+encodeURIComponent(id),{
+   method:'GET',headers:await h(),signal:AbortSignal.timeout(15000)
+  });
+  if(!res.ok)throw Error('Avatar source '+res.status);
+  const blob=await res.blob();
+  if(!blob.type.startsWith('image/')||blob.size<1||blob.size>3000000)throw Error('Invalid avatar');
+  const obj=URL.createObjectURL(blob);
+  avatarObjects2.set(id,obj);
+  return obj;
+ })().catch(e=>{
+  avatarFailures2.add(id);
+  console.warn('Avatar unavailable for player '+id,e?.message||e);
+  return null;
+ }).finally(()=>avatarPending2.delete(id));
+ avatarPending2.set(id,promise);
+ return promise;
+}
+async function showAvatar2(el){
+ if(!el?.isConnected||el.querySelector('img'))return;
+ const id=String(el.dataset.napPlayerAvatar||'');
+ if(!S.avatars[id]||avatarFailures2.has(id))return;
+ const src=await avatarObject2(id);
+ if(!el.isConnected)return;
+ if(!src){avatarFallback2(el);return}
+ const image=document.createElement('img');
+ image.alt='';image.decoding='async';image.loading='lazy';
+ image.onerror=()=>{avatarFailures2.add(id);avatarFallback2(el)};
+ image.src=src;
+ el.replaceChildren(image);
+ el.classList.add('live-avatar');
+ el.dataset.napAvatarState='loaded';
 }
 function refreshAvatarNodes2(){
+ if(!avatarObserver2&&'IntersectionObserver' in window){
+  avatarObserver2=new IntersectionObserver(entries=>{
+   for(const entry of entries)if(entry.isIntersecting){
+    avatarObserver2.unobserve(entry.target);
+    entry.target.dataset.napAvatarState='';
+    showAvatar2(entry.target);
+   }
+  },{rootMargin:'160px'});
+ }
  document.querySelectorAll('[data-nap-player-avatar]').forEach(el=>{
-  const id=el.dataset.napPlayerAvatar,url=S.avatars?.[id];
-  if(!url||!/^https:\/\//i.test(url)||el.querySelector('img'))return;
-  const img=document.createElement('img');img.alt='';img.loading='lazy';img.decoding='async';img.referrerPolicy='no-referrer';
-  img.src=url;el.textContent='';el.classList.add('live-avatar');el.appendChild(img);
+  const id=String(el.dataset.napPlayerAvatar||'');
+  if(!S.avatars[id]||el.querySelector('img')||el.dataset.napAvatarState==='waiting')return;
+  if(avatarFailures2.has(id)){avatarFallback2(el);return}
+  el.dataset.napAvatarState='waiting';
+  if(avatarObserver2)avatarObserver2.observe(el);
+  else showAvatar2(el);
  });
+}
+window.NAP2_REFRESH_PLAYER_AVATARS=refreshAvatarNodes2;
+function avatarHtml(P,cls){
+ const id=String(P?.game_id||P?.player_game_id||''),name=P?.name||P?.player_name||'?';
+ cls=cls||'player-avatar';
+ if(id)queueMicrotask(refreshAvatarNodes2);
+ return '<div class="'+cls+'"'+(id?' data-nap-player-avatar="'+E(id)+'"':'')+'>'+E((name[0]||'?').toUpperCase())+'</div>';
 }
 async function loadAvatars(){
  const ids=[...new Set((S.p||[]).map(x=>String(x.game_id||'')).filter(x=>/^\d{5,20}$/.test(x)))];
