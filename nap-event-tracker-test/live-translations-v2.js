@@ -31,9 +31,12 @@ function translate(raw,l){
   else if((m=value.match(/^nur (.+) betreffend$/)))out=word.from+' '+m[1];
   else if((m=value.match(/^(?:Stufe|Level|Niveau|Nivel)\s+(\d+)(?:\s*·\s*(.*))?$/))){
    const suffix=m[2]||'',over=suffix.match(/^seit\s+(\d+h\s+\d+m)$/);
-   out=word.level+' '+m[1]+(suffix?' · '+(over
+   const deadline=suffix.match(/^(\d+h\s+\d+m)\s+über 24h-Frist\s+\(laut Tracker\)$/);
+   const status=over
     ?(l==='en'?'overdue by ':l==='fr'?'en retard de ':'vencido por ')+over[1]
-    :(map[reverse.get(suffix)||suffix]||suffix)):'');
+    :deadline?deadline[1]+' '+map['über 24h-Frist (laut Tracker)']
+    :(map[reverse.get(suffix)||suffix]||suffix);
+   out=word.level+' '+m[1]+(suffix?' · '+status:'');
   }
   else if((m=value.match(/^(\d+h\s+\d+m)\s+(überfällig|verbleibend)$/)))out=m[1]+' '+(m[2]==='überfällig'?word.overdue:word.remaining);
   else if((m=value.match(/^(\d+h\s+\d+m) über 24h-Frist \(laut Tracker\)$/)))out=m[1]+' '+map['über 24h-Frist (laut Tracker)'];
@@ -54,6 +57,22 @@ function translate(raw,l){
   if(out===undefined&&entry&&audit.test(entry[2])&&map[entry[2]])out=entry[1]+' · '+map[entry[2]];
   const members=value.match(/^(\d[\d.,\s]*) Mitglieder$/);
   if(out===undefined&&members)out=members[1]+' '+map['Mitglieder'];
+  // Dynamic alliance names and scores are data. Translate only the known UI
+  // fragments around them, never the alliance code or player content.
+  const homePrivate=value.match(/^(Spieler und Punkte · private Details bleiben bei)\s+(.+)$/);
+  if(out===undefined&&homePrivate)out=map[homePrivate[1]]+' '+homePrivate[2];
+  const homeTransfer=value.match(/^(nur Quelle oder Ziel)\s+(.+)$/);
+  if(out===undefined&&homeTransfer)out=map[homeTransfer[1]]+' '+homeTransfer[2];
+  const perf=value.match(/^([^·]{2,30}) · höchste Werte pro Spieler$/);
+  if(out===undefined&&perf)out=perf[1]+' · '+map['höchste Werte pro Spieler'];
+  const known=value.match(/^(Bekannte Serverränge 1–200)( · .+)?$/);
+  if(out===undefined&&known)out=map[known[1]]+(known[2]||'');
+  const planner=value.match(/^Tracker\s+([\d.,\s]+)\s*·\s*(kein Override|manuell überschrieben)(?:\s*·\s*eingefroren\s+([\d.,\s]+))?$/);
+  if(out===undefined&&planner)out=map['Tracker']+' '+planner[1].trim()+' · '+map[planner[2]]+
+    (planner[3]?' · '+map['eingefroren']+' '+planner[3].trim():'');
+  // Some summaries are rendered as single text nodes with values appended.
+  const notification=value.match(/^(\d+h\s+\d+m)\s+über 24h-Frist\s+\(laut Tracker\)$/);
+  if(out===undefined&&notification)out=notification[1]+' '+map['über 24h-Frist (laut Tracker)'];
  }
  return out===undefined?raw:raw.replace(value,out);
 }
