@@ -67,7 +67,7 @@ async function syncCrownVisibility2(){
  if(!permitted&&document.getElementById('view-crown')?.classList.contains('active'))setView('home');
 }
 function decorate(){const ab=document.querySelector('.alliance-badge');if(ab)ab.innerHTML=allianceLogo2(S.a,'alliance-top-logo')+'<span>'+E(S.a)+'</span>';document.querySelectorAll('[data-current-alliance]').forEach(x=>x.textContent=S.a);const u=document.querySelector('.user-pill');if(u){u.innerHTML=allianceLogo2(S.a,'alliance-user-logo')+'<span>'+E(S.a)+'</span> <span class="n2live">'+E(t('live'))+'</span>';u.title=t('logout');u.onclick=()=>{if(confirm(t('logout')+'?')){save(null);location.reload()}}}}
-async function load(){const a=encodeURIComponent(S.a);const [p1,v,x,e,o,tr,bans,spend,settings]=await Promise.all([tab('players','select=*&alliance_code=eq.'+a+'&order=name.asc'),tab('violations','select=*&alliance_code=eq.'+a+'&order=occurred_at.desc'),tab('sanctions','select=*&alliance_code=eq.'+a+'&order=created_at.desc'),rpc('get_public_nap_exclusions',{}),rpc('get_nap_overdue_action_notifications',{}),rpc('get_my_roster_transfer_candidates',{}),tab('nap_bans','select=*&active=eq.true&order=created_at.desc').catch(()=>[]),rpc('get_public_nap_spending_exclusions',{}).catch(()=>[]),tab('alliance_settings','select=*&alliance_code=eq.'+a+'&limit=1').catch(()=>[])]);S.p=(p1||[]).filter(r=>r.alliance_code===S.a);S.v=(v||[]).filter(r=>r.alliance_code===S.a);S.x=(x||[]).filter(r=>r.alliance_code===S.a);S.e=e||[];S.o=o||[];S.t=(tr||[]).filter(r=>r.from_alliance===S.a||r.to_alliance===S.a);S.bans=bans||[];S.spend=spend||[];S.settings=settings?.[0]||null;await loadAvatars().catch(()=>{})}
+async function load(){const a=encodeURIComponent(S.a);const [p1,v,x,e,o,tr,bans,spend,settings]=await Promise.all([tab('players','select=*&alliance_code=eq.'+a+'&order=name.asc'),tab('violations','select=*&alliance_code=eq.'+a+'&order=occurred_at.desc'),tab('sanctions','select=*&alliance_code=eq.'+a+'&order=created_at.desc'),rpc('get_public_nap_exclusions',{}),rpc('get_nap_overdue_action_notifications',{}),rpc('get_my_roster_transfer_candidates',{}),tab('nap_bans','select=*&active=eq.true&order=created_at.desc').catch(()=>[]),rpc('get_public_nap_spending_exclusions',{}).catch(()=>[]),tab('alliance_settings','select=*&alliance_code=eq.'+a+'&limit=1').catch(()=>[])]);S.p=(p1||[]).filter(r=>r.alliance_code===S.a);S.v=(v||[]).filter(r=>r.alliance_code===S.a);S.x=(x||[]).filter(r=>r.alliance_code===S.a);S.e=e||[];S.o=o||[];S.t=(tr||[]).filter(r=>r.from_alliance===S.a||r.to_alliance===S.a);S.bans=bans||[];S.spend=spend||[];S.settings=settings?.[0]||null;window.NAP2_PLAYER_AVATARS=S.avatars;loadAvatars().catch(e=>console.warn('avatar load',e))}
 async function enter(expected){const P=await tab('profiles','select=alliance_code,can_manage_bans,is_admin&limit=1'),prof=P?.[0]||null,a=prof?.alliance_code;if(!a)throw Error('Account incomplete');if(expected&&expected!==a)throw Error('Wrong alliance');S.a=a;S.profile=prof;await load();await syncCrownVisibility2();n2login.hidden=true;document.body.classList.remove('n2lock');decorate();renderHome();renderPlayers();if(typeof applyTranslations==='function')applyTranslations()}
 async function boot(){css();login();document.body.classList.add('n2lock');if(!await token())return;try{await enter()}catch{save(null)}}
 setTimeout(boot,0);document.querySelector('#languagePicker')?.addEventListener('change',()=>setTimeout(()=>{if(S.a){decorate();renderHome();renderPlayers()}},0));
@@ -96,14 +96,25 @@ async function ins(n,b){return q(C.u+'/rest/v1/'+n,{method:'POST',headers:{...(a
 function avatarHtml(P,cls){
  const id=String(P?.game_id||P?.player_game_id||''),u=S.avatars?.[id],name=P?.name||P?.player_name||'?';
  cls=cls||'player-avatar';
- return u?'<div class="'+cls+' live-avatar"><img src="'+E(u)+'" alt=""></div>':'<div class="'+cls+'">'+E((name[0]||'?').toUpperCase())+'</div>';
+ const attr=id?' data-nap-player-avatar="'+E(id)+'"':'';
+ return u&&/^https:\/\//i.test(u)?'<div class="'+cls+' live-avatar"'+attr+'><img src="'+E(u)+'" loading="lazy" referrerpolicy="no-referrer" alt=""></div>':'<div class="'+cls+'"'+attr+'>'+E((name[0]||'?').toUpperCase())+'</div>';
+}
+function refreshAvatarNodes2(){
+ document.querySelectorAll('[data-nap-player-avatar]').forEach(el=>{
+  const id=el.dataset.napPlayerAvatar,url=S.avatars?.[id];
+  if(!url||!/^https:\/\//i.test(url)||el.querySelector('img'))return;
+  const img=document.createElement('img');img.alt='';img.loading='lazy';img.decoding='async';img.referrerPolicy='no-referrer';
+  img.src=url;el.textContent='';el.classList.add('live-avatar');el.appendChild(img);
+ });
 }
 async function loadAvatars(){
- const ids=[...new Set((S.p||[]).map(x=>String(x.game_id||'')).filter(x=>/^\\d{5,20}$/.test(x)))];
+ const ids=[...new Set((S.p||[]).map(x=>String(x.game_id||'')).filter(x=>/^\d{5,20}$/.test(x)))];
  for(let i=0;i<ids.length;i+=20){
    try{
      const z=await q(C.u+'/functions/v1/kingshot-data?player_ids='+encodeURIComponent(ids.slice(i,i+20).join(',')),{headers:{apikey:C.k}});
-     for(const p of z?.players||[])if(p?.playerId&&p?.avatarUrl)S.avatars[String(p.playerId)]=p.avatarUrl;
+     for(const p of z?.players||[])if(p?.playerId&&p?.avatarUrl&&/^https:\/\//i.test(p.avatarUrl))S.avatars[String(p.playerId)]=p.avatarUrl;
+     window.NAP2_PLAYER_AVATARS=S.avatars;
+     refreshAvatarNodes2();
    }catch(e){console.warn('avatar load',e)}
  }
 }
