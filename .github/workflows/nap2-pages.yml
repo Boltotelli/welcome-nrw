@@ -81,3 +81,4 @@ jobs:
 # Deploy verified complete V2 locale fixes and paginated all-alliance audit 2026-09-24
 
 # Deploy explicit post-contact spending confirmation flow 2026-09-24
+# Publish NRW V2 without Shared Spending demo; isolated branch, Pages only 2026-09-24
