@@ -1,7 +1,7 @@
 (()=>{'use strict';
 if(window.NAP2_LIVE_ADAPTER)return;window.NAP2_LIVE_ADAPTER=true;
 const C={u:'https://bdzlgirowutasrsycjfj.supabase.co',k:'sb_publishable_8i1ismeQtj9WM-xVN_Vm0w_Tj7AvVtL',s:'nap_v4_supabase_session'};
-const S={a:null,profile:null,p:[],v:[],x:[],e:[],o:[],t:[],bans:[],spend:[],settings:null,avatars:{},laws:[],lawCases:[],lawEvidence:[],performance:null,crown:null,activity:[],eventOptions:[],features:null,law9:null};
+const S={a:null,profile:null,p:[],v:[],x:[],e:[],o:[],t:[],bans:[],spend:[],reviews:[],settings:null,avatars:{},laws:[],lawCases:[],lawEvidence:[],performance:null,crown:null,activity:[],eventOptions:[],features:null,law9:null};
 let ses=null;try{ses=JSON.parse(localStorage.getItem(C.s)||'null')}catch{}
 const L=()=>window.currentLang||document.querySelector('#languagePicker')?.value||'de';
 const T={de:{login:'Anmelden',alliance:'Allianz',password:'Passwort',hint:'Ein zentraler Login pro Allianz. Private Daten bleiben innerhalb der eigenen Allianz.',fail:'Login fehlgeschlagen.',logout:'Abmelden',live:'LIVE DATEN',open:'Öffnen',contact:'Kontaktiert',r1:'R1 umgesetzt',nap:'24h NAP OUT aktivieren',none:'Keine Einträge.',actions:'offen',over:'überfällig',left:'verbleibend'},en:{login:'Sign in',alliance:'Alliance',password:'Password',hint:'One central login per alliance. Private data stays within your alliance.',fail:'Login failed.',logout:'Sign out',live:'LIVE DATA',open:'Open',contact:'Contacted',r1:'R1 implemented',nap:'Activate 24h NAP OUT',none:'No entries.',actions:'open',over:'overdue',left:'remaining'},fr:{login:'Connexion',alliance:'Alliance',password:'Mot de passe',hint:'Un login central par alliance. Les données privées restent dans votre alliance.',fail:'Échec de connexion.',logout:'Déconnexion',live:'DONNÉES LIVE',open:'Ouvrir',contact:'Contacté',r1:'R1 appliqué',nap:'Activer NAP OUT 24 h',none:'Aucune entrée.',actions:'ouvert',over:'en retard',left:'restant'},es:{login:'Iniciar sesión',alliance:'Alianza',password:'Contraseña',hint:'Un login central por alianza. Los datos privados permanecen en tu alianza.',fail:'Error de inicio de sesión.',logout:'Cerrar sesión',live:'DATOS LIVE',open:'Abrir',contact:'Contactado',r1:'R1 aplicado',nap:'Activar NAP OUT 24 h',none:'No hay entradas.',actions:'abiertas',over:'vencido',left:'restante'}};
@@ -52,7 +52,29 @@ async function doAct(k,id){
  await load();renderHome();renderPlayers()
 }
 function decorate(){const ab=document.querySelector('.alliance-badge');if(ab)ab.innerHTML=allianceLogo2(S.a,'alliance-top-logo')+'<span>'+E(S.a)+'</span>';document.querySelectorAll('[data-current-alliance]').forEach(x=>x.textContent=S.a);const u=document.querySelector('.user-pill');if(u){u.innerHTML=allianceLogo2(S.a,'alliance-user-logo')+'<span>'+E(S.a)+'</span> <span class="n2live">'+E(t('live'))+'</span>';u.title=t('logout');u.onclick=()=>{if(confirm(t('logout')+'?')){save(null);location.reload()}}}}
-async function load(){const a=encodeURIComponent(S.a);const [p1,v,x,e,o,tr,bans,spend,settings]=await Promise.all([tab('players','select=*&alliance_code=eq.'+a+'&order=name.asc'),tab('violations','select=*&alliance_code=eq.'+a+'&order=occurred_at.desc'),tab('sanctions','select=*&alliance_code=eq.'+a+'&order=created_at.desc'),rpc('get_public_nap_exclusions',{}),rpc('get_nap_overdue_action_notifications_v2',{}),rpc('get_my_roster_transfer_candidates',{}),tab('nap_bans','select=*&active=eq.true&order=created_at.desc').catch(()=>[]),rpc('get_public_nap_spending_exclusions',{}).catch(()=>[]),tab('alliance_settings','select=*&alliance_code=eq.'+a+'&limit=1').catch(()=>[])]);S.p=(p1||[]).filter(r=>r.alliance_code===S.a);S.v=(v||[]).filter(r=>r.alliance_code===S.a);S.x=(x||[]).filter(r=>r.alliance_code===S.a);S.e=e||[];S.o=o||[];S.t=(tr||[]).filter(r=>r.from_alliance===S.a||r.to_alliance===S.a);S.bans=bans||[];S.spend=spend||[];S.settings=settings?.[0]||null;window.NAP2_PLAYER_AVATARS=S.avatars;loadAvatars().catch(e=>console.warn('avatar load',e))}
+async function load(){
+ const a=encodeURIComponent(S.a);
+ const [p1,v,x,e,o,tr,bans,spend,settings,reviews]=await Promise.all([
+  tab('players','select=*&alliance_code=eq.'+a+'&order=name.asc'),
+  tab('violations','select=*&alliance_code=eq.'+a+'&order=occurred_at.desc'),
+  tab('sanctions','select=*&alliance_code=eq.'+a+'&order=created_at.desc'),
+  rpc('get_public_nap_exclusions',{}),
+  rpc('get_nap_overdue_action_notifications_v2',{}),
+  rpc('get_my_roster_transfer_candidates',{}),
+  tab('nap_bans','select=*&active=eq.true&order=created_at.desc').catch(()=>[]),
+  rpc('get_public_nap_spending_exclusions',{}).catch(()=>[]),
+  tab('alliance_settings','select=*&alliance_code=eq.'+a+'&limit=1').catch(()=>[]),
+  rpc('get_pending_post_contact_spending_reviews',{}).catch(()=>[])
+ ]);
+ S.p=(p1||[]).filter(r=>r.alliance_code===S.a);
+ S.v=(v||[]).filter(r=>r.alliance_code===S.a);
+ S.x=(x||[]).filter(r=>r.alliance_code===S.a);
+ S.e=e||[];S.o=o||[];
+ S.t=(tr||[]).filter(r=>r.from_alliance===S.a||r.to_alliance===S.a);
+ S.bans=bans||[];S.spend=spend||[];S.reviews=reviews||[];S.settings=settings?.[0]||null;
+ window.NAP2_PLAYER_AVATARS=S.avatars;
+ loadAvatars().catch(e=>console.warn('avatar load',e));
+}
 async function enter(expected){const P=await tab('profiles','select=alliance_code,can_manage_bans,is_admin&limit=1'),prof=P?.[0]||null,a=prof?.alliance_code;if(!a)throw Error('Account incomplete');if(expected&&expected!==a)throw Error('Wrong alliance');S.a=a;S.profile=prof;await load();n2login.hidden=true;document.body.classList.remove('n2lock');decorate();renderHome();renderPlayers();if(typeof applyTranslations==='function')applyTranslations()}
 async function boot(){css();login();document.body.classList.add('n2lock');if(!await token())return;try{await enter()}catch{save(null)}}
 setTimeout(boot,0);document.querySelector('#languagePicker')?.addEventListener('change',()=>setTimeout(()=>{if(S.a){decorate();renderHome();renderPlayers()}},0));
@@ -695,6 +717,12 @@ async function paintProfileTab2(name,tab){
 }
 function liveNotifications2(){
  const rows=[];
+ for(const r of S.reviews||[])rows.push({
+  cat:'alliance',
+  title:(r.player_name||'–')+' · Prüfung erforderlich',
+  copy:(r.event_name||'Event')+' · '+(r.phase_name||'')+' · '+N(r.score)+' Punkte nach Kontakt erkannt. Höherer OCR-Wert allein ist kein Beweis.',
+  go:'home'
+ });
  for(const x of S.o||[])rows.push({cat:'nap',title:(x.alliance_code||'')+' · '+(x.player_name||'–'),copy:'Stufe '+x.level+' · '+dur(Number(x.overdue_seconds||0)*1000)+' über 24h-Frist (laut Tracker)',go:'nap'});
  for(const a of actions()){const z=new Date((a.s||a.v)?.created_at||(a.v?.occurred_at)||0).getTime()+86400000-Date.now();if(z>0&&z<=21600000)rows.push({cat:'alliance',title:a.name,copy:'Stufe '+a.l+' · '+dur(z)+' verbleibend',go:'home'})}
  for(const x of S.t||[])rows.push({cat:'alliance',title:x.player_name||'–',copy:(x.from_alliance||'POOL')+' → '+(x.to_alliance||'POOL'),go:'home'});
@@ -719,6 +747,29 @@ async function confirmTransfer2(id){
 async function markTransferTemporary2(id){
  if(!confirm('Temporären Wechsel wirklich nicht bestätigen? Die Spielerakte bleibt in der Heimatallianz; der Hinweis wird 7 Tage ausgeblendet.'))return;
  try{await rpc('mark_roster_transfer_temporary',{p_candidate_id:id});await load();renderHomeFull2();renderNotifications2()}catch(err){alert(err.message||String(err))}
+}
+function postContactReviewCard2(r){
+ const P=p(r.player_name),source=r.detected_by_alliance&&r.detected_by_alliance!==S.a?r.detected_by_alliance:'ScreenRecording';
+ const date=r.recording_day?new Date(String(r.recording_day)+'T00:00:00Z').toLocaleDateString(loc()):'–';
+ return '<div class="action-item home-v2-action post-contact-review-card"><div><div class="player-line">'+avatarHtml(P,'player-avatar')+
+  '<div><div class="player-name">'+E(r.player_name||'–')+'</div><div class="player-id">ID '+E(r.player_game_id||P.game_id||'–')+' · '+E(r.event_name||'')+' · '+E(r.phase_name||'')+' · '+E(date)+'</div></div></div>'+
+  '<div class="live-note" style="margin-top:9px"><b>Neuer Score nach Kontakt erkannt</b><br>'+
+  'OCR '+N(r.score)+(r.warning_score!=null?' · Kontakt-Score '+N(r.warning_score):'')+
+  '. Ein höherer OCR-Wert allein ist kein Beweis für weiteres Ausgeben. Quelle: '+E(source)+'.</div></div>'+
+  '<div class="action-right"><span class="pill gold">Prüfung offen</span><div class="home-action-buttons">'+
+  '<button class="btn small primary live-post-contact-confirm" type="button" data-review-id="'+E(r.review_id)+'">Weiteres Ausgeben bestätigen</button>'+
+  '<button class="btn small secondary live-post-contact-dismiss" type="button" data-review-id="'+E(r.review_id)+'">Ohne Bestätigung schließen</button>'+
+  '</div></div></div>';
+}
+async function resolvePostContactReview2(id,confirmSpend){
+ const question=confirmSpend
+  ?'Nur bestätigen, wenn sicher ist, dass der Spieler nach der Kontaktaufnahme erneut ausgegeben hat. Dadurch kann die nächste Sanktionsstufe entstehen. Bestätigen?'
+  :'Diesen Prüffall ohne weitere Sanktionsstufe schließen?';
+ if(!window.confirm(question))return;
+ try{
+  await rpc('resolve_post_contact_spending_review',{p_review_id:id,p_confirm:!!confirmSpend});
+  await load();renderHomeFull2();renderPlayers2();renderNotifications2();
+ }catch(err){alert(err.message||String(err))}
 }
 function homeV2Stages2(level){
  return '<div class="home-v2-stages" aria-label="Law 14 · '+E(String(level||1))+'">'+[1,2,3,4].map(n=>
@@ -755,11 +806,13 @@ function renderHomeFull2(){
  v.innerHTML='<div class="hero"><div><div class="kicker">Kingdom 1044 · '+E(S.a)+'</div><h1>Dein NAP-Lagebild auf einen Blick.</h1><p>Eigene Maßnahmen, NAP-weite Hinweise und relevante Allianzwechsel – sauber nach Zuständigkeit getrennt.</p></div><div class="hero-actions"><button class="btn primary" data-go="add">＋ Verstoß eintragen</button><button class="btn secondary" data-go="players">Spielerakten</button></div></div>'+
  homeV2PriorityPanels2(A)+
  '<div class="grid stat-grid home-kpis"><div class="stat-card"><div class="stat-top"><span>Eigene offene Maßnahmen</span></div><div class="stat-value">'+A.length+'</div><div class="stat-sub">'+E(S.a)+'</div></div><div class="stat-card"><div class="stat-top"><span>NAP-weit überfällig*</span></div><div class="stat-value">'+S.o.length+'</div><div class="stat-sub">*laut Tracker · 24h-Frist</div></div><div class="stat-card"><div class="stat-top"><span>Aktive NAP OUT</span></div><div class="stat-value">'+S.e.length+'</div><div class="stat-sub">NAP-weit</div></div><div class="stat-card"><div class="stat-top"><span>Allianzwechsel</span></div><div class="stat-value">'+S.t.length+'</div><div class="stat-sub">nur '+E(S.a)+' betreffend</div></div></div>'+
- '<div class="home-main-grid"><div class="stack"><section class="card home-v2-action-panel"><div class="card-head"><div><div class="card-title">Mein Handlungsbedarf</div><div class="card-sub">Spieler, aktuelle Stufe und nächste Aktion</div></div><span class="pill gold">'+A.length+' offen</span></div><div class="card-body">'+(A.length?A.map(a=>{const P=p(a.name),lab=a.l===1?'Stufe 1 · Kontakt':a.l===2?'Stufe 2 · R1':a.l===3?'Stufe 3 · 24h NAP OUT':'Stufe 4 · Extended',b=a.l===1?'<button class="btn small primary n2act" data-k="contact" data-id="'+E(a.v.id)+'">'+E(t('contact'))+'</button>':a.l===2?(a.s?.completed&&(!a.s.started_at||!a.s.end_at)?'<div class="r1-home-timer"><input class="r1-home-end" type="datetime-local"><button class="btn small primary live-r1-timer" data-id="'+E(a.s.id)+'">Timer setzen</button></div>':'<button class="btn small primary n2act" data-k="r1" data-id="'+E(a.s.id)+'">'+E(t('r1'))+'</button>'):a.l===3?'<button class="btn small primary n2act" data-k="nap" data-id="'+E(a.s.id)+'">'+E(t('nap'))+'</button>':'';return '<div class="action-item home-v2-action"><div><div class="player-line">'+avatarHtml(P,'player-avatar')+'<div><div class="player-name">'+E(a.name)+'</div><div class="player-id">ID '+E(P.game_id||'–')+' · '+E(S.a)+'</div></div></div>'+homeV2Stages2(a.l)+'</div><div class="action-right"><span class="pill gold">'+E(lab)+'</span><span class="deadline">'+E(dl(a))+'</span><div class="home-action-buttons">'+b+'<button class="mini-link n2open" data-p="'+E(a.name)+'">Öffnen</button></div></div></div>'}).join(''):'<div class="live-empty-state">✓ Aktuell kein eigener Handlungsbedarf.</div>')+'</div></section>'+
+ '<div class="home-main-grid"><div class="stack">'+
+ (S.reviews.length?'<section class="card post-contact-review-panel"><div class="card-head"><div><div class="card-title">Weiteres Ausgeben prüfen</div><div class="card-sub">Nur '+E(S.a)+' kann diese Fälle bestätigen und damit eine weitere Sanktionsstufe auslösen.</div></div><span class="pill gold">'+S.reviews.length+' offen</span></div><div class="card-body">'+S.reviews.map(postContactReviewCard2).join('')+'</div></section>':'')+
+ '<section class="card home-v2-action-panel"><div class="card-head"><div><div class="card-title">Mein Handlungsbedarf</div><div class="card-sub">Spieler, aktuelle Stufe und nächste Aktion</div></div><span class="pill gold">'+A.length+' offen</span></div><div class="card-body">'+(A.length?A.map(a=>{const P=p(a.name),lab=a.l===1?'Stufe 1 · Kontakt':a.l===2?'Stufe 2 · R1':a.l===3?'Stufe 3 · 24h NAP OUT':'Stufe 4 · Extended',b=a.l===1?'<button class="btn small primary n2act" data-k="contact" data-id="'+E(a.v.id)+'">'+E(t('contact'))+'</button>':a.l===2?(a.s?.completed&&(!a.s.started_at||!a.s.end_at)?'<div class="r1-home-timer"><input class="r1-home-end" type="datetime-local"><button class="btn small primary live-r1-timer" data-id="'+E(a.s.id)+'">Timer setzen</button></div>':'<button class="btn small primary n2act" data-k="r1" data-id="'+E(a.s.id)+'">'+E(t('r1'))+'</button>'):a.l===3?'<button class="btn small primary n2act" data-k="nap" data-id="'+E(a.s.id)+'">'+E(t('nap'))+'</button>':'';return '<div class="action-item home-v2-action"><div><div class="player-line">'+avatarHtml(P,'player-avatar')+'<div><div class="player-name">'+E(a.name)+'</div><div class="player-id">ID '+E(P.game_id||'–')+' · '+E(S.a)+'</div></div></div>'+homeV2Stages2(a.l)+'</div><div class="action-right"><span class="pill gold">'+E(lab)+'</span><span class="deadline">'+E(dl(a))+'</span><div class="home-action-buttons">'+b+'<button class="mini-link n2open" data-p="'+E(a.name)+'">Öffnen</button></div></div></div>'}).join(''):'<div class="live-empty-state">✓ Aktuell kein eigener Handlungsbedarf.</div>')+'</div></section>'+
  '<section class="card home-v2-recent"><div class="card-head"><div><div class="card-title">Letzte eigene Verfehlungen</div><div class="card-sub">Spieler und Punkte · private Details bleiben bei '+E(S.a)+'</div></div>'+(recent.length>4?'<button class="btn small secondary home-v2-expand" type="button" aria-expanded="false">Alle '+recent.length+' anzeigen</button>':'')+'</div><div class="card-body live-list">'+(recent.length?recent.map(homeV2RecentButton2).join(''):'<div class="live-empty-state">Keine Verfehlungen.</div>')+'</div></section></div>'+
  '<div class="stack"><section class="card"><div class="card-head"><div><div class="card-title">🔔 NAP-Benachrichtigungen</div><div class="card-sub">24h-Frist überschritten · laut Tracker</div></div><span class="pill red">'+S.o.length+'</span></div><div class="card-body live-list">'+(S.o.length?S.o.slice(0,6).map(x=>'<div class="live-row"><div><b>'+E(x.alliance_code)+' · '+E(x.player_name||'–')+'</b><small>Stufe '+E(x.level)+'</small></div><span class="pill red">'+E(dur(Number(x.overdue_seconds||0)*1000))+'</span></div>').join(''):'<div class="live-empty-state">Keine überfälligen Maßnahmen.</div>')+'</div></section>'+
  '<section class="card"><div class="card-head"><div><div class="card-title">Allianzwechsel</div><div class="card-sub">nur Quelle oder Ziel '+E(S.a)+'</div></div><span class="pill">'+S.t.length+'</span></div><div class="card-body live-list">'+(S.t.length?S.t.map(transferRow2).join(''):'<div class="live-empty-state">Keine relevanten Wechsel.</div>')+'</div></section><section class="card" id="liveHomePerformance"><div class="card-body"><div class="live-empty-state">Performance wird geladen …</div></div></section></div></div>';
- v.querySelectorAll('[data-home-nap-alert]').forEach(b=>b.onclick=()=>setView('nap'));v.querySelectorAll('.n2act').forEach(b=>b.onclick=()=>doAct(b.dataset.k,b.dataset.id));v.querySelectorAll('.live-r1-timer').forEach(b=>b.onclick=()=>setR1Timer2(b.dataset.id,b.closest('.r1-home-timer')?.querySelector('.r1-home-end')));v.querySelectorAll('.n2open').forEach(b=>b.onclick=()=>openProfile2(b.dataset.p));v.querySelectorAll('.home-v2-expand').forEach(b=>b.onclick=()=>{const card=b.closest('.home-v2-recent'),expanded=card.classList.toggle('expanded');b.setAttribute('aria-expanded',String(expanded));b.textContent=expanded?'Weniger anzeigen':'Alle '+recent.length+' anzeigen'});v.querySelectorAll('.live-transfer-confirm').forEach(b=>b.onclick=()=>confirmTransfer2(b.dataset.id));v.querySelectorAll('.live-transfer-temp').forEach(b=>b.onclick=()=>markTransferTemporary2(b.dataset.id));renderHomePerformance2();renderNotifications2();
+ v.querySelectorAll('[data-home-nap-alert]').forEach(b=>b.onclick=()=>setView('nap'));v.querySelectorAll('.n2act').forEach(b=>b.onclick=()=>doAct(b.dataset.k,b.dataset.id));v.querySelectorAll('.live-r1-timer').forEach(b=>b.onclick=()=>setR1Timer2(b.dataset.id,b.closest('.r1-home-timer')?.querySelector('.r1-home-end')));v.querySelectorAll('.n2open').forEach(b=>b.onclick=()=>openProfile2(b.dataset.p));v.querySelectorAll('.home-v2-expand').forEach(b=>b.onclick=()=>{const card=b.closest('.home-v2-recent'),expanded=card.classList.toggle('expanded');b.setAttribute('aria-expanded',String(expanded));b.textContent=expanded?'Weniger anzeigen':'Alle '+recent.length+' anzeigen'});v.querySelectorAll('.live-transfer-confirm').forEach(b=>b.onclick=()=>confirmTransfer2(b.dataset.id));v.querySelectorAll('.live-transfer-temp').forEach(b=>b.onclick=()=>markTransferTemporary2(b.dataset.id));v.querySelectorAll('.live-post-contact-confirm').forEach(b=>b.onclick=()=>resolvePostContactReview2(b.dataset.reviewId,true));v.querySelectorAll('.live-post-contact-dismiss').forEach(b=>b.onclick=()=>resolvePostContactReview2(b.dataset.reviewId,false));renderHomePerformance2();renderNotifications2();
 }
 async function renderHomePerformance2(){
  const box=document.getElementById('liveHomePerformance');if(!box)return;try{const d=await rpc('get_performance_dashboard',{}),m=d?.mobilization,k=d?.kvk;box.innerHTML='<div class="card-head"><div><div class="card-title">Performance</div><div class="card-sub">kompakter Überblick</div></div><button class="mini-link" data-go="performance">Öffnen</button></div><div class="card-body live-list">'+(m?'<div class="live-row"><div><b>Alliance Mobilization</b><small>'+E(m.event?.label||'')+'</small></div><strong>'+N(m.total_score||0)+'</strong></div>':'')+(k?'<div class="live-row"><div><b>KvK Top 200</b><small>'+E(k.event?.label||'')+'</small></div><strong>'+N(k.known_top200_score||0)+'</strong></div>':'')+'</div>'}catch{box.innerHTML='<div class="card-body"><div class="live-empty-state">Keine Performance-Daten.</div></div>'}}
