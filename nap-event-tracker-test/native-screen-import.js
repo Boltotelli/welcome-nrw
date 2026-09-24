@@ -68,7 +68,16 @@ async function rpc(name,body={}){
 async function roster(){
  if(rosterPromise)return rosterPromise;
  rosterPromise=(async()=>{
-  const [rows,own]=await Promise.all([rpc('get_nap_screen_import_directory_test'),rpc('get_own_player_identity_directory')]);
+  const [rows,own,alliances]=await Promise.all([
+   rpc('get_nap_screen_import_directory_test'),
+   rpc('get_own_player_identity_directory'),
+   (async()=>{try{
+    const res=await fetch(API+'/rest/v1/alliance_registry?select=alliance_code,power&enabled=eq.true&limit=1000',{headers:await headers(false)});
+    if(!res.ok)throw Error('Alliance power not available');
+    return await res.json();
+   }catch(e){console.warn('Alliance power sort fallback',e);return []}})()
+  ]);
+  alliancePower=new Map((alliances||[]).filter(x=>x.alliance_code&&Number(x.power)>0).map(x=>[x.alliance_code,Number(x.power)]));
   const aliases=new Map((own||[]).map(x=>[String(x.player_game_id),x.aliases||[]]));
   return (rows||[]).map(x=>({...x,aliases:aliases.get(String(x.player_game_id))||[],player_id:x.player_id||null}));
  })().catch(e=>{rosterPromise=null;throw e});
