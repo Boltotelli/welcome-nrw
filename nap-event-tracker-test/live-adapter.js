@@ -721,16 +721,18 @@ function sharedSpendingPanel2(violations){
  return '<section class="card live-shared-spending"><div class="card-head"><div><div class="card-title">'+E(w.title)+'</div><div class="card-sub">'+E(w.sub)+'</div></div></div><div class="card-body live-list">'+
  days.map(([day,entries])=>{
    const date=new Date(day+'T00:00:00Z').toLocaleDateString(loc());
-   const selected=entries.slice(0,5).map(v=>String(v.id));
-   const existing=(S.shared||[]).find(x=>
-     x.player_id===entries[0].player_id &&
-     Array.isArray(x.violation_ids)&&x.violation_ids.length===selected.length &&
-     selected.every(id=>x.violation_ids.some(y=>String(y)===id))
-   );
+   const allIds=new Set(entries.map(v=>String(v.id)));
+   const existing=(S.shared||[]).filter(x=>
+     x.player_id===entries[0].player_id && String(x.violation_day)===day &&
+     Array.isArray(x.violation_ids) && x.violation_ids.length>=2 &&
+     x.violation_ids.every(id=>allIds.has(String(id)))
+   ).sort((a,b)=>Number(b.status==='shared')-Number(a.status==='shared')||
+     new Date(b.updated_at||0)-new Date(a.updated_at||0))[0];
+   const selected=existing?existing.violation_ids.map(String):entries.slice(0,5).map(v=>String(v.id));
    const status=existing?.status||'pending';
    return '<form class="live-shared-form live-form" data-shared-day="'+E(day)+'" style="padding:11px;border:1px solid var(--line);border-radius:12px">'+
     '<b>'+E(date)+' · '+E(w.select)+'</b>'+
-    entries.map((v,i)=>'<label class="live-shared-choice" style="display:flex;flex-direction:row;align-items:center;gap:9px"><input style="width:auto;min-height:0" type="checkbox" class="live-shared-violation" data-event="'+E(v.event_name||'')+'" value="'+E(v.id)+'" '+(i<5?'checked':'')+'><span>'+E(v.event_name||'–')+' · '+E(v.phase_name||'')+' · '+N(v.score)+'</span></label>').join('')+
+    entries.map((v,i)=>'<label class="live-shared-choice" style="display:flex;flex-direction:row;align-items:center;gap:9px"><input style="width:auto;min-height:0" type="checkbox" class="live-shared-violation" data-event="'+E(v.event_name||'')+'" value="'+E(v.id)+'" '+(selected.includes(String(v.id))?'checked':'')+'><span>'+E(v.event_name||'–')+' · '+E(v.phase_name||'')+' · '+N(v.score)+'</span></label>').join('')+
     '<select class="live-shared-status" aria-label="'+E(w.title)+'">'+
       ['pending','shared','separate'].map(k=>'<option value="'+k+'" '+(status===k?'selected':'')+'>'+E(w[k])+'</option>').join('')+
     '</select>'+
