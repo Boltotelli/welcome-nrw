@@ -342,9 +342,9 @@ function p2CurrentLevel(name){const active=p2ActiveViolations(name).length;const
 function p2Initial(name){const s=String(name||'?').trim();return (s[0]||'?').toUpperCase()}
 function p2AvatarHtml(player,large=false){
  const name=p2PlayerName(player),id=String(player?.game_id||player?.player_game_id||'');
- const url=window.NAP2_PLAYER_AVATARS?.[id],cl=large?'p2-profile-avatar':'p2-avatar';
- return '<div class="'+cl+'"'+(id?' data-nap-player-avatar="'+v2esc(id)+'"':'')+'>'+
-  (url&&/^https:\/\//i.test(url)?'<img src="'+v2esc(url)+'" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer">':v2esc(p2Initial(name)))+'</div>';
+ const cl=large?'p2-profile-avatar':'p2-avatar';
+ if(id)queueMicrotask(()=>window.NAP2_REFRESH_PLAYER_AVATARS?.());
+ return '<div class="'+cl+'"'+(id?' data-nap-player-avatar="'+v2esc(id)+'"':'')+'>'+v2esc(p2Initial(name))+'</div>';
 }
 function p2CardStatus(name){const level=p2CurrentLevel(name),s=p2Sanctions(name).find(x=>Number(x.level)===level),active=p2ActiveViolations(name);if(level===0)return {value:'–',label:p2t('stage')};if(level===1)return {value:active.some(v=>!v.contacted)?p2t('open'):'✓',label:p2t('contact')};if(level===2){const d=s?v2Deadline(s):null;return {value:d&&!d.over?v2duration(d.seconds):p2t('open'),label:p2t('deadline')}}if(level===3){if(s?.started_at&&s?.end_at)return {value:v2duration(Math.max(0,(new Date(s.end_at)-Date.now())/1000)),label:p2t('napOut')};return {value:p2t('open'),label:p2t('napOut')}}return {value:p2t('open'),label:'Extended'}}
 function p2PlayerRecords(){const map=new Map();(ownPlayers?.()||[]).forEach(p=>map.set(p2PlayerName(p),p));(ownViolations?.()||[]).forEach(v=>{if(v.player_name&&!map.has(v.player_name))map.set(v.player_name,{name:v.player_name,game_id:'',alliance_code:state.alliance})});return [...map.values()].filter(p=>p2PlayerName(p))}
