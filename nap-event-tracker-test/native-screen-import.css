@@ -1,0 +1,39 @@
+/* Native V2 OCR: no embedded V1 page, no secondary login. */
+.nocr-layout{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;margin-top:12px}
+.nocr-panel{min-width:0;border:1px solid var(--line);border-radius:17px;background:var(--panel);padding:18px}
+.nocr-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.nocr-fields label{display:grid;gap:7px;font-size:12px;font-weight:750;color:var(--muted)}
+.nocr-fields select,.nocr-fields input{width:100%;min-width:0;min-height:46px;font:inherit;color:var(--text);background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:9px 11px}
+.nocr-file{position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:5px;min-height:155px;margin-top:14px;padding:19px;border:1.5px dashed #d9b75a;border-radius:15px;color:var(--text);background:color-mix(in srgb,#d9b75a 8%,var(--panel));cursor:pointer;text-align:center}
+.nocr-file-icon{display:grid;place-items:center;width:46px;height:46px;border-radius:14px;background:color-mix(in srgb,#d9b75a 24%,var(--panel));color:#d9b75a;font-size:28px}
+.nocr-file strong{font-size:15px}.nocr-file small{max-width:100%;overflow-wrap:anywhere;font-size:12px;color:var(--muted)}
+.nocr-file input{position:absolute;width:100%;height:100%;inset:0;opacity:0;cursor:pointer}
+.nocr-note{color:var(--muted);font-size:11px;line-height:1.5;margin:13px 0}
+.nocr-analyze{width:100%;min-height:50px;font-size:14px!important}
+.nocr-status{font-size:12px;min-height:22px;line-height:1.5;margin-top:12px;overflow-wrap:anywhere}
+.nocr-status.error{color:var(--red)}
+.nocr-progress h3{font-size:19px;margin:0}.nocr-progress p{font-size:12px;color:var(--muted)}
+.nocr-bar{height:12px;width:100%;border-radius:99px;overflow:hidden;background:var(--panel-3);margin-top:22px}
+.nocr-bar span{display:block;width:0;height:100%;border-radius:99px;background:linear-gradient(90deg,#edce76,#d9af4d);transition:width .22s ease}
+.nocr-progress-foot{display:flex;justify-content:space-between;gap:8px;margin-top:11px;align-items:center}
+.nocr-progress-foot b{font-size:17px;color:#d9b75a}.nocr-progress-foot span{color:var(--muted);font-size:12px}
+.nocr-stages{display:grid;gap:12px;margin-top:19px;color:var(--muted);font-size:12px}
+.nocr-stages>div{padding:8px 12px;border-radius:10px}.nocr-stages>div.active{color:var(--text);background:var(--panel-3);font-weight:750}
+.nocr-review{margin-top:14px}.nocr-review-title{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.nocr-review-title h3{margin:0;font-size:18px}.nocr-review-title strong{font-size:12px;color:var(--muted)}
+.nocr-hit{display:grid;grid-template-columns:minmax(140px,1fr) 125px 95px;align-items:center;gap:10px;border:1px solid var(--line);border-radius:13px;background:var(--panel-2);padding:12px;margin-top:10px}
+.nocr-hit-check{display:flex;align-items:center;gap:10px;min-width:0}.nocr-hit-check input{width:19px;height:19px;flex:none;accent-color:#d9b75a}
+.nocr-hit-check span{min-width:0}.nocr-hit-check strong{display:block;overflow-wrap:anywhere}.nocr-hit-check small{display:block;color:var(--muted);font-size:10px;margin-top:3px}
+.nocr-hit>input[type=number]{min-width:0;width:100%;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px;color:var(--text);font-size:12px}
+.nocr-result-state{color:var(--muted);font-size:10px;overflow-wrap:anywhere}
+.nocr-hit details{grid-column:1/-1;color:var(--muted);font-size:11px}.nocr-hit details img{width:min(100%,550px);max-height:340px;object-fit:contain;border-radius:10px;margin-top:8px}
+.nocr-unmatched{padding:12px;margin-top:12px;border:1px solid var(--line);border-radius:12px;color:var(--muted);font-size:11px}
+.nocr-unmatched p{overflow-wrap:anywhere;margin:8px 0}
+.nocr-save-row{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:16px}.nocr-save-row .nocr-status{flex:1;min-width:200px}
+@media(max-width:690px){
+.nocr-panel{padding:13px;border-radius:14px}.nocr-fields{grid-template-columns:1fr;gap:11px}
+.nocr-hit{grid-template-columns:minmax(0,1fr) minmax(90px,110px);gap:8px}
+.nocr-hit .nocr-result-state{grid-column:1/-1}.nocr-hit details{grid-column:1/-1}
+.nocr-save-row{flex-direction:column;align-items:stretch}.nocr-save-row button{width:100%}
+.nocr-save-row .nocr-status{min-width:0}
+}
