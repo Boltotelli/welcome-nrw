@@ -69,3 +69,9 @@
  .nocr-hit:has([data-rank])>input[data-rank]{grid-column:2;grid-row:2}
  .nocr-hit:has([data-rank])>.nocr-check-result{grid-row:auto}
 }
+
+.nocr-score-change{display:flex;flex-wrap:wrap;gap:5px 12px;margin-top:7px;padding-top:7px;border-top:1px solid var(--line);font-size:11px}
+.nocr-score-change span{white-space:normal}.nocr-score-change b{font-variant-numeric:tabular-nums}
+.nocr-review-title{flex-wrap:wrap}.nocr-review-title strong{max-width:100%;line-height:1.5}
+.nocr-unmatched label{display:grid;gap:6px;margin:11px 0}
+.nocr-unmatched select{min-height:43px}
