@@ -20,9 +20,27 @@ const WORDS={
  fr:{event:'Événement',day:'Jour / phase',occ:'Session',date:'Jour de vidéo (UTC)',file:'Choisir une vidéo',analyze:'Analyser',review:'Vérifier les résultats',save:'Enregistrer les résultats vérifiés',choose:'Choisissez événement, jour et vidéo.',prep:'Préparation vidéo',recognize:'Reconnaissance des joueurs et scores',check:'Préparation des résultats',ready:'Terminé. Vérifiez les valeurs.',video:'La vidéo reste sur votre appareil. Seuls les résultats vérifiés et les preuves sont enregistrés.',found:'Joueurs détectés',score:'Points',rank:'Rang',name:'Joueur',alliance:'Alliance',unmatched:'Association incertaine : vérification manuelle',nohits:'Aucun résultat fiable.',error:'Échec de l’analyse',saving:'Enregistrement …',done:'Import terminé',upload:'Enregistrement des preuves …',duplicate:'Vidéo déjà importée.',type:'Type de performance',needRank:'KvK Top 200 : rangs 1–200 uniquement.',prohibit:'TriAlliance et Swordland : saisie manuelle uniquement.',wrongDay:'Jour hors de cet événement.',retry:'Analyser à nouveau',missingEvent:'Aucune session trouvée.',frame:'Image',result:'Vérification serveur',invalid:'Choisissez le jour réel de l’événement.',assign:'Associer un joueur',selectPlayer:'Choisir un joueur',manual:'Associé manuellement'},
  es:{event:'Evento',day:'Día / fase',occ:'Edición del evento',date:'Día del vídeo (UTC)',file:'Elegir vídeo',analyze:'Analizar vídeo',review:'Revisar resultados',save:'Guardar resultados revisados',choose:'Selecciona evento, día y vídeo.',prep:'Preparando vídeo',recognize:'Reconociendo jugadores y puntos',check:'Preparando resultados',ready:'Listo. Revisa los valores.',video:'El vídeo permanece en tu dispositivo. Solo se guardan resultados revisados y capturas de prueba.',found:'Jugadores detectados',score:'Puntos',rank:'Puesto',name:'Jugador',alliance:'Alianza',unmatched:'Sin coincidencia segura: revisar manualmente',nohits:'No hay resultados claros.',error:'Error de análisis',saving:'Guardando resultados …',done:'Importación completada',upload:'Guardando pruebas …',duplicate:'Vídeo ya importado.',type:'Tipo de rendimiento',needRank:'KvK Top 200: solo puestos del 1 al 200.',prohibit:'TriAlliance y Swordland solo se registran manualmente.',wrongDay:'Día fuera del evento.',retry:'Analizar de nuevo',missingEvent:'No hay ninguna edición disponible.',frame:'Imagen',result:'Comprobación servidor',invalid:'Selecciona el día real del evento.',assign:'Asignar jugador',selectPlayer:'Seleccionar jugador',manual:'Asignado manualmente'}
 };
-const REVIEW_WORDS={"de":{"violation":["Verstoß erkannt","Über der geltenden Grenze. Kann als Verstoß gespeichert werden."],"update":["Höherer Wert erkannt","Ein bestehender Eintrag wird nur bei höherem Punktestand aktualisiert."],"exempt":["Ausgenommen","Für diesen Spieler gilt eine Spending Exclusion. Kein Law-14-Verstoß."],"already_recorded":["Bereits erfasst","Für dieses Event liegt bereits ein gleicher oder höherer Wert vor."],"below_limit":["Innerhalb der Grenze","Der Punktestand überschreitet die geltende Grenze nicht."],"target_missing":["Zielwert fehlt","Bitte den Zielwert in den Einstellungen prüfen; kein automatischer Verstoß."],"unresolved":["Nicht zugeordnet","Bitte den Spieler vor dem Speichern prüfen."],"performance":["Performance erkannt","Punkte prüfen und bei Bedarf korrigieren."],"addPlayer":"Fehlenden Spieler hinzufügen","addHint":"Fehlt jemand vollständig im OCR? Wähle den Spieler aus dem Server-Roster und trage die Punkte selbst ein.","search":"Spielername, ID oder Allianz suchen","scorePlaceholder":"z. B. 1.234.567","evidence":"Beweisbild aus dem Video","add":"Spieler übernehmen","invalidScore":"Bitte eine gültige ganze Punktzahl eingeben.","higher":"Für diesen Spieler ist bereits ein gleicher oder höherer Wert vorhanden.","missingPlayer":"Bitte einen Spieler aus der Liste auswählen.","missingRank":"Bitte einen KvK-Rang von 1 bis 200 eingeben.","manual":"Manuell ergänzt","preview":"Prüfung wird aktualisiert …","nothing":"Noch kein Spieler erkannt. Du kannst unten Spieler manuell ergänzen."},"en":{"violation":["Violation detected","Above the applicable limit. Can be saved as a violation."],"update":["Higher score detected","An existing entry is updated only when the score is higher."],"exempt":["Exempt","An active spending exclusion applies. No Law 14 violation."],"already_recorded":["Already recorded","An equal or higher score is already recorded for this event."],"below_limit":["Within the limit","This score does not exceed the applicable limit."],"target_missing":["Target missing","Check the target in settings; no automatic violation."],"unresolved":["Unmatched","Review the player before saving."],"performance":["Performance detected","Review and correct the score if needed."],"addPlayer":"Add a missing player","addHint":"Missing from OCR entirely? Pick the player from the kingdom roster and enter the score.","search":"Search name, ID or alliance","scorePlaceholder":"e.g. 1.234.567","evidence":"Evidence frame from the video","add":"Add player","invalidScore":"Enter a valid whole-number score.","higher":"An equal or higher score is already present for this player.","missingPlayer":"Choose a player from the list.","missingRank":"Enter a KvK rank from 1 to 200.","manual":"Added manually","preview":"Refreshing rule check …","nothing":"No player recognized yet. You can add a player manually below."},"fr":{"violation":["Infraction détectée","Au-dessus de la limite. Peut être enregistrée."],"update":["Score supérieur détecté","Le score existant n’est modifié que si le nouveau est supérieur."],"exempt":["Exempté","Exclusion des dépenses active. Pas d’infraction Law 14."],"already_recorded":["Déjà enregistré","Un score égal ou supérieur existe déjà pour cet événement."],"below_limit":["Dans la limite","Le score ne dépasse pas le plafond applicable."],"target_missing":["Objectif manquant","Vérifier l’objectif dans les paramètres ; pas d’infraction automatique."],"unresolved":["Non attribué","Vérifier le joueur avant enregistrement."],"performance":["Performance détectée","Vérifier et corriger le score si nécessaire."],"addPlayer":"Ajouter un joueur manquant","addHint":"Joueur absent de l’OCR ? Choisissez-le dans la liste du royaume et saisissez ses points.","search":"Rechercher nom, ID ou alliance","scorePlaceholder":"ex. 1.234.567","evidence":"Image de preuve de la vidéo","add":"Ajouter le joueur","invalidScore":"Saisir un score entier valide.","higher":"Un score égal ou supérieur existe déjà pour ce joueur.","missingPlayer":"Choisissez un joueur.","missingRank":"Saisissez un rang KvK entre 1 et 200.","manual":"Ajouté manuellement","preview":"Actualisation du contrôle …","nothing":"Aucun joueur reconnu. Vous pouvez en ajouter manuellement."},"es":{"violation":["Infracción detectada","Supera el límite aplicable. Se puede guardar."],"update":["Puntuación superior","Solo se actualiza si el nuevo valor es más alto."],"exempt":["Exento","Tiene una exclusión de gasto activa. No hay infracción de Law 14."],"already_recorded":["Ya registrado","Ya existe una puntuación igual o mayor en este evento."],"below_limit":["Dentro del límite","No supera el límite aplicable."],"target_missing":["Falta objetivo","Revisa el objetivo en ajustes; no hay infracción automática."],"unresolved":["Sin asignar","Revisa el jugador antes de guardar."],"performance":["Rendimiento detectado","Revisa y corrige la puntuación si es necesario."],"addPlayer":"Añadir jugador omitido","addHint":"¿No aparece en el OCR? Selecciona al jugador de la lista del reino e introduce sus puntos.","search":"Buscar nombre, ID o alianza","scorePlaceholder":"p. ej. 1.234.567","evidence":"Captura de prueba del vídeo","add":"Añadir jugador","invalidScore":"Introduce una puntuación entera válida.","higher":"Ya existe una puntuación igual o mayor para este jugador.","missingPlayer":"Selecciona un jugador.","missingRank":"Introduce un puesto KvK entre 1 y 200.","manual":"Añadido manualmente","preview":"Actualizando comprobación …","nothing":"Ningún jugador reconocido aún. Puedes añadir uno manualmente."}};
+const REVIEW_WORDS={"de":{"violation":["Verstoß erkannt","Über der geltenden Grenze. Kann als Verstoß gespeichert werden."],"update":["Bereits erfasst · Punkte aktualisieren","Der Verstoß ist bereits erfasst. Nur die höhere Punktzahl wird übernommen – keine neue Sanktionsstufe."],"exempt":["Ausgenommen","Für diesen Spieler gilt eine Spending Exclusion. Kein Law-14-Verstoß."],"already_recorded":["Bereits erfasst · kein Update","Ein gleicher oder höherer Wert ist bereits gespeichert. Kein weiterer Verstoß."],"below_limit":["Innerhalb der Grenze","Der Punktestand überschreitet die geltende Grenze nicht."],"target_missing":["Zielwert fehlt","Bitte den Zielwert in den Einstellungen prüfen; kein automatischer Verstoß."],"unresolved":["Nicht zugeordnet","Bitte den Spieler vor dem Speichern prüfen."],"performance":["Performance erkannt","Punkte prüfen und bei Bedarf korrigieren."],"addPlayer":"Fehlenden Spieler hinzufügen","addHint":"Fehlt jemand vollständig im OCR? Wähle den Spieler aus dem Server-Roster und trage die Punkte selbst ein.","search":"Spielername, ID oder Allianz suchen","scorePlaceholder":"z. B. 1.234.567","evidence":"Beweisbild aus dem Video","add":"Spieler übernehmen","invalidScore":"Bitte eine gültige ganze Punktzahl eingeben.","higher":"Für diesen Spieler ist bereits ein gleicher oder höherer Wert vorhanden.","missingPlayer":"Bitte einen Spieler aus der Liste auswählen.","missingRank":"Bitte einen KvK-Rang von 1 bis 200 eingeben.","manual":"Manuell ergänzt","preview":"Prüfung wird aktualisiert …","nothing":"Noch kein Spieler erkannt. Du kannst unten Spieler manuell ergänzen.","was":"Bisheriger Höchstwert","now":"Neuer Wert","newCount":"Neue Verstöße","updateCount":"Punkte-Updates","alreadyCount":"Bereits erfasst","noChanges":"Keine neuen Verstöße oder höheren Punktzahlen zu speichern.","chooseAlliance":"Allianz auswählen","alliancePower":"Allianzkraft","notAvailable":"Ohne Kraftwert"},"en":{"violation":["Violation detected","Above the applicable limit. Can be saved as a violation."],"update":["Already tracked · update points","The violation is already recorded. Only the higher score will be saved; no new sanction step."],"exempt":["Exempt","An active spending exclusion applies. No Law 14 violation."],"already_recorded":["Already tracked · no update","An equal or higher score is already stored. No additional violation."],"below_limit":["Within the limit","This score does not exceed the applicable limit."],"target_missing":["Target missing","Check the target in settings; no automatic violation."],"unresolved":["Unmatched","Review the player before saving."],"performance":["Performance detected","Review and correct the score if needed."],"addPlayer":"Add a missing player","addHint":"Missing from OCR entirely? Pick the player from the kingdom roster and enter the score.","search":"Search name, ID or alliance","scorePlaceholder":"e.g. 1.234.567","evidence":"Evidence frame from the video","add":"Add player","invalidScore":"Enter a valid whole-number score.","higher":"An equal or higher score is already present for this player.","missingPlayer":"Choose a player from the list.","missingRank":"Enter a KvK rank from 1 to 200.","manual":"Added manually","preview":"Refreshing rule check …","nothing":"No player recognized yet. You can add a player manually below.","was":"Previous highest score","now":"New score","newCount":"New violations","updateCount":"Score updates","alreadyCount":"Already tracked","noChanges":"No new violations or higher scores to save.","chooseAlliance":"Choose alliance","alliancePower":"Alliance power","notAvailable":"No power data"},"fr":{"violation":["Infraction détectée","Au-dessus de la limite. Peut être enregistrée."],"update":["Déjà enregistré · points actualisés","L’infraction est déjà enregistrée. Seul le score supérieur sera enregistré, sans nouvelle sanction."],"exempt":["Exempté","Exclusion des dépenses active. Pas d’infraction Law 14."],"already_recorded":["Déjà enregistré · aucun changement","Un score égal ou supérieur existe déjà. Pas de nouvelle infraction."],"below_limit":["Dans la limite","Le score ne dépasse pas le plafond applicable."],"target_missing":["Objectif manquant","Vérifier l’objectif dans les paramètres ; pas d’infraction automatique."],"unresolved":["Non attribué","Vérifier le joueur avant enregistrement."],"performance":["Performance détectée","Vérifier et corriger le score si nécessaire."],"addPlayer":"Ajouter un joueur manquant","addHint":"Joueur absent de l’OCR ? Choisissez-le dans la liste du royaume et saisissez ses points.","search":"Rechercher nom, ID ou alliance","scorePlaceholder":"ex. 1.234.567","evidence":"Image de preuve de la vidéo","add":"Ajouter le joueur","invalidScore":"Saisir un score entier valide.","higher":"Un score égal ou supérieur existe déjà pour ce joueur.","missingPlayer":"Choisissez un joueur.","missingRank":"Saisissez un rang KvK entre 1 et 200.","manual":"Ajouté manuellement","preview":"Actualisation du contrôle …","nothing":"Aucun joueur reconnu. Vous pouvez en ajouter manuellement.","was":"Meilleur score précédent","now":"Nouveau score","newCount":"Nouvelles infractions","updateCount":"Scores actualisés","alreadyCount":"Déjà enregistrés","noChanges":"Aucune nouvelle infraction ni hausse à enregistrer.","chooseAlliance":"Choisir une alliance","alliancePower":"Puissance d’alliance","notAvailable":"Puissance inconnue"},"es":{"violation":["Infracción detectada","Supera el límite aplicable. Se puede guardar."],"update":["Ya registrado · actualizar puntos","La infracción ya consta. Solo se guardará la puntuación mayor, sin otra sanción."],"exempt":["Exento","Tiene una exclusión de gasto activa. No hay infracción de Law 14."],"already_recorded":["Ya registrado · sin cambios","Ya hay una puntuación igual o superior. No hay una infracción adicional."],"below_limit":["Dentro del límite","No supera el límite aplicable."],"target_missing":["Falta objetivo","Revisa el objetivo en ajustes; no hay infracción automática."],"unresolved":["Sin asignar","Revisa el jugador antes de guardar."],"performance":["Rendimiento detectado","Revisa y corrige la puntuación si es necesario."],"addPlayer":"Añadir jugador omitido","addHint":"¿No aparece en el OCR? Selecciona al jugador de la lista del reino e introduce sus puntos.","search":"Buscar nombre, ID o alianza","scorePlaceholder":"p. ej. 1.234.567","evidence":"Captura de prueba del vídeo","add":"Añadir jugador","invalidScore":"Introduce una puntuación entera válida.","higher":"Ya existe una puntuación igual o mayor para este jugador.","missingPlayer":"Selecciona un jugador.","missingRank":"Introduce un puesto KvK entre 1 y 200.","manual":"Añadido manualmente","preview":"Actualizando comprobación …","nothing":"Ningún jugador reconocido aún. Puedes añadir uno manualmente.","was":"Máxima puntuación anterior","now":"Nueva puntuación","newCount":"Nuevas infracciones","updateCount":"Puntos actualizados","alreadyCount":"Ya registrados","noChanges":"No hay nuevas infracciones ni puntuaciones superiores.","chooseAlliance":"Seleccionar alianza","alliancePower":"Poder de alianza","notAvailable":"Poder desconocido"}};
 const reviewText=(key)=>((REVIEW_WORDS[lng()]||REVIEW_WORDS.de)[key]||key);
 const points=n=>Number(n).toLocaleString('de-DE');
+const NAP_ORDER=['NWO','THM','CWR','NRW','PxR','NwO'];
+let alliancePower=new Map();
+const alphabeticalRoster=members=>members.map((p,i)=>({p,i})).sort((a,b)=>String(a.p.player_name||'').localeCompare(String(b.p.player_name||''),'de',{sensitivity:'base',numeric:true})||String(a.p.player_game_id||'').localeCompare(String(b.p.player_game_id||''),'de',{numeric:true}));
+function orderedAlliances(members){
+ const names=[...new Set(members.map(p=>p.alliance_code).filter(Boolean))];
+ return names.sort((a,b)=>{
+  const pa=Number(alliancePower.get(a)||0),pb=Number(alliancePower.get(b)||0);
+  if(pa>0&&pb>0&&pa!==pb)return pb-pa;
+  if(pa>0)return -1;if(pb>0)return 1;
+  const ai=NAP_ORDER.indexOf(a),bi=NAP_ORDER.indexOf(b);
+  if(ai>=0&&bi>=0)return ai-bi;
+  if(ai>=0)return -1;if(bi>=0)return 1;
+  return a.localeCompare(b,'de',{sensitivity:'base',numeric:true});
+ });
+}
+function allianceOptions(members){
+ return orderedAlliances(members).map(a=>selectOption(a+(alliancePower.get(a)?' · '+reviewText('alliancePower')+' '+points(alliancePower.get(a)):'') ,a)).join('');
+}
 const parsePoints=raw=>{const x=String(raw??'').trim();if(!/^(?:\d+|\d{1,3}(?:\.\d{3})+)$/.test(x))return null;const n=Number(x.replace(/\./g,''));return Number.isSafeInteger(n)&&n>=0?n:null};
 const $=(s,root=document)=>root.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
@@ -50,7 +68,16 @@ async function rpc(name,body={}){
 async function roster(){
  if(rosterPromise)return rosterPromise;
  rosterPromise=(async()=>{
-  const [rows,own]=await Promise.all([rpc('get_nap_screen_import_directory_test'),rpc('get_own_player_identity_directory')]);
+  const [rows,own,alliances]=await Promise.all([
+   rpc('get_nap_screen_import_directory_test'),
+   rpc('get_own_player_identity_directory'),
+   (async()=>{try{
+    const res=await fetch(API+'/rest/v1/alliance_registry?select=alliance_code,power&enabled=eq.true&limit=1000',{headers:await headers(false)});
+    if(!res.ok)throw Error('Alliance power not available');
+    return await res.json();
+   }catch(e){console.warn('Alliance power sort fallback',e);return []}})()
+  ]);
+  alliancePower=new Map((alliances||[]).filter(x=>x.alliance_code&&Number(x.power)>0).map(x=>[x.alliance_code,Number(x.power)]));
   const aliases=new Map((own||[]).map(x=>[String(x.player_game_id),x.aliases||[]]));
   return (rows||[]).map(x=>({...x,aliases:aliases.get(String(x.player_game_id))||[],player_id:x.player_id||null}));
  })().catch(e=>{rosterPromise=null;throw e});
@@ -307,8 +334,13 @@ function reviewStatus(h,r,entry){
  const state=r.kind==='perf'?'performance':entry?.status||'unresolved';
  const dict=reviewText(state);
  const label=Array.isArray(dict)?dict:[String(state),''];
- const tone=['violation','update'].includes(state)?'danger':state==='exempt'?'exempt':state==='target_missing'||state==='unresolved'?'warning':'neutral';
- return '<div class="nocr-check-result '+tone+'"><strong>'+esc(label[0])+'</strong><small>'+esc(label[1])+'</small></div>';
+ // The preview supplies a prior-event highest score where available.
+ const previous=entry?.existing_score==null?null:Number(entry.existing_score);
+ const current=Number(h.score);
+ const showDiff=['update','already_recorded'].includes(state)&&Number.isFinite(previous)&&Number.isFinite(current)&&previous>=0;
+ const details=showDiff?'<div class="nocr-score-change"><span>'+esc(reviewText('was'))+': <b>'+points(previous)+'</b></span><span>'+esc(reviewText('now'))+': <b>'+points(current)+'</b></span></div>':'';
+ const tone=state==='violation'?'danger':state==='update'?'update':state==='exempt'?'exempt':state==='target_missing'||state==='unresolved'?'warning':'neutral';
+ return '<div class="nocr-check-result '+tone+'"><strong>'+esc(label[0])+'</strong><small>'+esc(label[1])+'</small>'+details+'</div>';
 }
 async function refreshReview(r){
  if(r.kind==='law'){
@@ -327,11 +359,19 @@ async function refreshReview(r){
 }
 function showReview(r){
  const root=r.root,preview=r.preview?.results||[],statuses=new Map(preview.map(x=>[String(x.player_game_id||x.player_id||''),x]));
- $('#nocrReview',root).hidden=false;$('#nocrCount',root).textContent=r.hits.length+' '+tr('found');
+ $('#nocrReview',root).hidden=false;
+ const counts=r.kind==='law'&&r.preview?[
+ [r.preview.violations,reviewText('newCount')],
+ [r.preview.updates,reviewText('updateCount')],
+ [r.preview.already_recorded,reviewText('alreadyCount')]
+ ].filter(x=>Number(x[0])>0).map(x=>points(x[0])+' '+x[1]):[];
+ $('#nocrCount',root).textContent=r.hits.length+' '+tr('found')+(counts.length?' · '+counts.join(' · '):'');
  $('#nocrResults',root).innerHTML=r.hits.map((h,i)=>{
   const st=statuses.get(String(h.player?.player_game_id||h.player?.player_id||'')),label=st?.status||'';
   const allowed=r.kind==='perf'||['violation','update'].includes(label);
-  return '<article class="nocr-hit"><label class="nocr-hit-check"><input type="checkbox" data-hit="'+i+'" '+(allowed?'checked':'')+'>'+
+  const key=String(h.player?.player_game_id||h.player?.player_id||'');
+  const checked=r.selection?.has(key)?r.selection.get(key):allowed;
+  return '<article class="nocr-hit"><label class="nocr-hit-check"><input type="checkbox" data-hit="'+i+'" '+(checked?'checked':'')+'>'+
    '<span><strong>'+esc(h.player.player_name)+'</strong><small>'+esc(h.player.alliance_code||'')+' · '+esc(h.player.player_game_id||'')+(h.manual?' · '+esc(reviewText('manual')):'')+'</small></span></label>'+
    '<input type="text" inputmode="numeric" autocomplete="off" data-score="'+i+'" value="'+esc(points(h.score))+'" aria-label="'+esc(tr('score'))+'">'+
    (r.kind==='perf'&&$('#nocrType',root).value==='kvk_prep'?'<input type="number" min="1" max="200" step="1" data-rank="'+i+'" value="'+esc(h.rank||'')+'" aria-label="'+esc(tr('rank'))+'">':'')+
@@ -340,10 +380,12 @@ function showReview(r){
  }).join('')+
  (r.unmatched.length?'<details class="nocr-unmatched"><summary>'+esc(tr('unmatched'))+' ('+r.unmatched.length+')</summary>'+
  '<label>'+esc(tr('unmatched'))+'<select id="nocrUnknown">'+r.unmatched.map((x,i)=>selectOption(x.raw,i)).join('')+'</select></label>'+
- '<label>'+esc(tr('selectPlayer'))+'<select id="nocrMapPlayer"><option value="">–</option>'+r.members.map((p,i)=>selectOption(p.player_name+' · '+(p.alliance_code||'')+' · '+(p.player_game_id||''),i)).join('')+'</select></label>'+
+ '<label>'+esc(reviewText('chooseAlliance'))+'<select id="nocrMapAlliance"><option value="">– '+esc(reviewText('chooseAlliance'))+' –</option>'+allianceOptions(r.members)+'</select></label>'+ 
+ '<label>'+esc(tr('selectPlayer'))+'<select id="nocrMapPlayer"><option value="">–</option></select></label>'+
  '<button class="btn secondary" type="button" id="nocrMapConfirm">'+esc(tr('assign'))+'</button></details>':'')+
- '<details class="nocr-add-missing" id="nocrAddMissing" '+(!r.hits.length?'open':'')+'><summary>'+esc(reviewText('addPlayer'))+'</summary>'+
+ '<details class="nocr-add-missing" id="nocrAddMissing" '+(r.addOpen||!r.hits.length?'open':'')+'><summary>'+esc(reviewText('addPlayer'))+'</summary>'+
  '<p>'+esc(reviewText('addHint'))+'</p>'+
+ '<label>'+esc(reviewText('chooseAlliance'))+'<select id="nocrNewAlliance"><option value="">– '+esc(reviewText('chooseAlliance'))+' –</option>'+allianceOptions(r.members)+'</select></label>'+ 
  '<label>'+esc(reviewText('search'))+'<input type="search" id="nocrSearchRoster" placeholder="'+esc(reviewText('search'))+'"></label>'+
  '<label>'+esc(tr('selectPlayer'))+'<select id="nocrNewPlayer"><option value="">–</option></select></label>'+
  '<label>'+esc(tr('score'))+'<input type="text" inputmode="numeric" autocomplete="off" id="nocrNewScore" placeholder="'+esc(reviewText('scorePlaceholder'))+'"></label>'+
@@ -351,10 +393,40 @@ function showReview(r){
  (r.frames.length?'<label>'+esc(reviewText('evidence'))+'<select id="nocrNewFrame">'+r.frames.map((f,i)=>selectOption(f.time.toFixed(1)+' s',i)).join('')+'</select></label><img id="nocrFramePreview" src="'+r.frames[0].image+'" alt="'+esc(tr('frame'))+'">':'')+
  '<button type="button" class="btn secondary" id="nocrNewAdd">'+esc(reviewText('add'))+'</button>'+
  '<div class="nocr-status" id="nocrNewStatus" role="status"></div></details>';
- root.querySelectorAll('[data-score]').forEach(input=>input.addEventListener('blur',()=>{
-  const value=parsePoints(input.value);
-  if(value!==null)input.value=points(value);
+ root.querySelectorAll('[data-hit]').forEach(checkbox=>checkbox.addEventListener('change',()=>{
+  const h=r.hits[Number(checkbox.dataset.hit)];
+  if(!h)return;
+  r.selection??=new Map();
+  r.selection.set(String(h.player?.player_game_id||h.player?.player_id||''),checkbox.checked);
  }));
+ root.querySelectorAll('[data-score]').forEach(input=>input.addEventListener('blur',async()=>{
+  const value=parsePoints(input.value);
+  if(value===null)return;
+  input.value=points(value);
+  const h=r.hits[Number(input.dataset.score)];
+  if(!h||h.score===value)return;
+  h.score=value;
+  if(r.kind==='law'){status(reviewText('preview'));await refreshReview(r)}
+ }));
+ const mapAlliance=$('#nocrMapAlliance',root),mapPlayer=$('#nocrMapPlayer',root);
+ if(mapAlliance&&mapPlayer){
+  const populate=()=>{
+   const code=mapAlliance.value;
+   mapPlayer.innerHTML='<option value="">–</option>'+alphabeticalRoster(r.members)
+    .filter(({p})=>code&&p.alliance_code===code)
+    .map(({p,i})=>selectOption(p.player_name+' · '+(p.player_game_id||''),i)).join('');
+  };
+  mapAlliance.onchange=populate;
+  const detected=r.unmatched[0]?.alliance;
+  if(detected&&orderedAlliances(r.members).some(a=>a.toLowerCase()===String(detected).toLowerCase()))
+   mapAlliance.value=orderedAlliances(r.members).find(a=>a.toLowerCase()===String(detected).toLowerCase());
+  populate();
+  $('#nocrUnknown',root)?.addEventListener('change',()=>{
+   const candidate=r.unmatched[Number($('#nocrUnknown',root).value)]?.alliance;
+   const code=orderedAlliances(r.members).find(a=>a.toLowerCase()===String(candidate||'').toLowerCase());
+   if(code){mapAlliance.value=code;populate()}
+  });
+ }
  const mapButton=$('#nocrMapConfirm',root);
  if(mapButton)mapButton.onclick=()=>{
   const index=Number($('#nocrUnknown',root).value),playerIndex=$('#nocrMapPlayer',root).value;
@@ -369,12 +441,16 @@ function showReview(r){
   r.unmatched.splice(index,1);
   r.hits.sort((x,y)=>y.score-x.score);refreshReview(r);
  };
- const sel=$('#nocrNewPlayer',root);
+ const sel=$('#nocrNewPlayer',root),alliance=$('#nocrNewAlliance',root);
  const filter=$('#nocrSearchRoster',root);
- const list=()=>{const q=norm(filter.value);const options=r.members.map((p,i)=>({p,i})).filter(x=>!q||norm(x.p.player_name+' '+x.p.player_game_id+' '+x.p.alliance_code).includes(q)).slice(0,350);
-  sel.innerHTML='<option value="">–</option>'+options.map(x=>selectOption(x.p.player_name+' · '+(x.p.alliance_code||'')+' · '+(x.p.player_game_id||''),x.i)).join('');
+ const list=()=>{
+  const q=norm(filter.value),code=alliance.value;
+  const options=alphabeticalRoster(r.members).filter(({p})=>code&&p.alliance_code===code&&(!q||norm(p.player_name+' '+p.player_game_id).includes(q)));
+  sel.innerHTML='<option value="">–</option>'+options.map(({p,i})=>selectOption(p.player_name+' · '+(p.player_game_id||''),i)).join('');
  };
- list();filter.addEventListener('input',list);
+ list();filter.addEventListener('input',list);alliance.addEventListener('change',list);
+ const missingDetails=$('#nocrAddMissing',root);
+ missingDetails.addEventListener('toggle',()=>{r.addOpen=missingDetails.open});
  const frame=$('#nocrNewFrame',root);
  if(frame)frame.onchange=()=>{$('#nocrFramePreview',root).src=r.frames[Number(frame.value)]?.image||''};
  $('#nocrNewScore',root).addEventListener('blur',e=>{const value=parsePoints(e.target.value);if(value!==null)e.target.value=points(value)});
@@ -394,7 +470,7 @@ function showReview(r){
   if(old)r.hits=r.hits.filter(x=>x!==old);
   const proof=r.frames[Number(frame?.value||0)]||null;
   r.hits.push({player:p,name:p.player_name,alliance:p.alliance_code,score,rank,time:proof?.time??0,image:proof?.image||null,manual:true});
-  r.hits.sort((a,b)=>b.score-a.score);refreshReview(r);
+  r.hits.sort((a,b)=>b.score-a.score);r.addOpen=true;refreshReview(r);
  };
  $('#nocrSave',root).disabled=!r.hits.length;
 }
@@ -431,7 +507,7 @@ async function save(){
    });
    const wanted=new Set(selected.map(h=>String(h.player.player_game_id||h.player.player_id)));
    const allowed=(checked.results||[]).filter(x=>wanted.has(String(x.player_game_id||x.player_id))&&['violation','update'].includes(x.status));
-   if(!allowed.length){out.textContent=tr('nohits');return}
+   if(!allowed.length){out.textContent=reviewText('noChanges');return}
    args.p_hits=selected.filter(h=>allowed.some(x=>String(x.player_game_id||x.player_id)===String(h.player.player_game_id||h.player.player_id))).map(hitPayload);
    response=await rpc('import_screen_recording_nap_occurrence_v2',args);
    const evidenceRows=(response.results||[]).filter(x=>['created','updated'].includes(x.status)&&x.violation_id);
@@ -463,7 +539,7 @@ async function save(){
 }
 function mount(root,kind,allowed=[]){
  if(run?.busy)return;
- run={root,kind,allowed,hits:[],unmatched:[],frames:[],occurrences:[],members:[],busy:false,preview:null,fileHash:null};
+ run={root,kind,allowed,hits:[],unmatched:[],frames:[],occurrences:[],members:[],selection:new Map(),addOpen:false,busy:false,preview:null,fileHash:null};
  shell(root,kind);
  const r=run;$('#nocrAnalyze',root).onclick=analyze;$('#nocrSave',root).onclick=save;
  if(kind==='law'){
