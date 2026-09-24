@@ -347,6 +347,38 @@ tr:hover td{background:color-mix(in srgb,var(--panel-2) 65%,transparent)}
 @media(max-width:900px){.review-row{grid-template-columns:72px minmax(0,1fr) auto}.review-score{grid-column:2}.review-row>.pill{grid-column:3;grid-row:1}.review-check,.review-row>.btn{grid-column:2/4;justify-self:start}.screen-review-footer{align-items:stretch;flex-direction:column}.selected-event-banner{grid-template-columns:1fr}.selected-event-banner .pill{justify-self:start}.action-date-grid,.meta-list{grid-template-columns:1fr 1fr}}
 @media(max-width:620px){.review-row{grid-template-columns:62px minmax(0,1fr)}.review-row>.pill,.review-check,.review-row>.btn{grid-column:2}.review-score{grid-column:2}.transfer-main{align-items:flex-start;flex-direction:column}.action-date-grid,.meta-list{grid-template-columns:1fr}.violation-detail-row{grid-template-columns:64px minmax(0,1fr)}.violation-detail-row>.pill{grid-column:2;justify-self:start}.history-line{grid-template-columns:14px minmax(0,1fr)}.history-line>.pill{grid-column:2;justify-self:start}}
 
+
+/* V2-inspired Home: actionable player cards, compact stage context and real portraits. */
+.home-v2-action-panel .card-body{display:grid;gap:10px}
+.home-v2-action{border:1px solid var(--line);border-radius:14px;background:var(--panel-2);padding:13px;gap:12px}
+.home-v2-action .player-avatar{flex:none;width:42px;height:42px;border-radius:12px}
+.home-v2-action .player-line{min-width:0}
+.home-v2-action .player-name{overflow-wrap:anywhere}
+.home-v2-stages{display:flex;align-items:center;gap:5px;margin:11px 0 0;max-width:210px}
+.home-v2-stage{display:grid;place-items:center;flex:none;width:20px;height:20px;border:1px solid var(--line);border-radius:50%;color:var(--muted);background:var(--panel);font-size:9px;font-weight:850}
+.home-v2-stage.done{border-color:var(--green);background:color-mix(in srgb,var(--green) 14%,var(--panel));color:var(--green)}
+.home-v2-stage.current{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 18%,var(--panel));color:var(--gold);box-shadow:0 0 0 3px color-mix(in srgb,var(--gold) 10%,transparent)}
+.home-v2-stage-line{height:2px;flex:1;min-width:7px;background:var(--line)}
+.home-v2-action .action-right{gap:7px;min-width:0}
+.home-v2-recent-item{display:flex;align-items:center;justify-content:space-between;width:100%;gap:12px;text-align:left;font:inherit;color:var(--text);cursor:pointer}
+.home-v2-recent-item:hover{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 6%,var(--panel-2))}
+.home-v2-recent-person{display:flex;align-items:center;gap:10px;min-width:0}
+.home-v2-recent-person .player-avatar{width:39px;height:39px;flex:none;border-radius:12px}
+.home-v2-recent-copy{display:grid;gap:3px;min-width:0}
+.home-v2-recent-copy b{overflow-wrap:anywhere}
+.home-v2-recent-copy small{font-size:10px;line-height:1.35;color:var(--muted)}
+.home-v2-recent-item>strong{flex:none;font-variant-numeric:tabular-nums}
+.home-v2-recent:not(.expanded) .home-v2-recent-item:nth-child(n+5){display:none}
+.home-v2-expand{white-space:nowrap}
+@media(max-width:700px){
+.home-v2-action{flex-wrap:wrap}.home-v2-action .action-right{width:100%;align-items:flex-start}
+.home-v2-action .home-action-buttons{display:flex;gap:8px;flex-wrap:wrap}
+.home-v2-recent-item{padding:11px 9px;gap:8px}
+.home-v2-recent-person .player-avatar{width:36px;height:36px}
+.home-v2-recent-copy small{font-size:9px}
+.home-v2-recent-item>strong{font-size:12px}
+.home-v2-recent .card-head{gap:8px;flex-wrap:wrap}
+}
 </style>
 
 <style id="v4-home-notification-styles">
@@ -1501,7 +1533,7 @@ document.getElementById('settingsSaveDemo')?.addEventListener('click',()=>{
 });
 
 </script>
-<script src="./live-adapter.js?v=20260924-avatars-api-fallback"></script>
+<script src="./live-adapter.js?v=20260924-redirect-home-v2"></script>
 <script src="./native-screen-import.js?v=20260924-date-login-counts"></script>
 </body>
 </html>
