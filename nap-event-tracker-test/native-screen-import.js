@@ -339,7 +339,7 @@ function reviewStatus(h,r,entry){
  const current=Number(h.score);
  const showDiff=['update','already_recorded'].includes(state)&&Number.isFinite(previous)&&Number.isFinite(current)&&previous>=0;
  const details=showDiff?'<div class="nocr-score-change"><span>'+esc(reviewText('was'))+': <b>'+points(previous)+'</b></span><span>'+esc(reviewText('now'))+': <b>'+points(current)+'</b></span></div>':'';
- const tone=['violation','update'].includes(state)?'danger':state==='exempt'?'exempt':state==='target_missing'||state==='unresolved'?'warning':'neutral';
+ const tone=state==='violation'?'danger':state==='update'?'update':state==='exempt'?'exempt':state==='target_missing'||state==='unresolved'?'warning':'neutral';
  return '<div class="nocr-check-result '+tone+'"><strong>'+esc(label[0])+'</strong><small>'+esc(label[1])+'</small>'+details+'</div>';
 }
 async function refreshReview(r){
