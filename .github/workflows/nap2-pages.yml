@@ -79,3 +79,5 @@ jobs:
 # Publish verified V2 i18n and privacy-filtered kingdom audit feed 2026-09-24
 
 # Deploy verified complete V2 locale fixes and paginated all-alliance audit 2026-09-24
+
+# Deploy explicit post-contact spending confirmation flow 2026-09-24
