@@ -65,3 +65,5 @@ jobs:
 # Publish consistent stage-1 contact, Kingshot avatars and simplified player filters 2026-09-24
 
 # Deploy secure avatar proxy loading and resilient picture fallback 2026-09-24
+
+# Deploy API fallback for expired avatar CDN links and V7 mockup reference 2026-09-24
