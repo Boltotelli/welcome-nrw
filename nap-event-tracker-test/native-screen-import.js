@@ -191,13 +191,20 @@ function selectedOcc(){return run?.occurrences?.find(o=>String(o.event_schedule_
 function setLawPhase(){
  const r=run;if(!r||r.kind!=='law')return;
  const root=r.root,event=$('#nocrEvent',root).value,occ=selectedOcc(),phase=$('#nocrPhase',root);
- const list=(PHASES[event]||[]).filter(p=>!occ?.phase_hint||p[0]===occ.phase_hint);
+ const list=(PHASES[event]||[]).filter(p=>{
+  if(occ?.phase_hint&&p[0]!==occ.phase_hint)return false;
+  if((event==='Strongest Governor'||event==='Alliance Brawl')&&occ){
+   return validDay(dayUTC(occ.begin_at,Number(p[0].slice(2))-1),occ);
+  }
+  return true;
+ });
  const previous=phase.value;
  phase.innerHTML=list.map(p=>{
   const n=Number(p[0].slice(2)),day=(event==='Strongest Governor'||event==='Alliance Brawl')&&occ?dayUTC(occ.begin_at,n-1):'';
   return selectOption(p[1]+(day?' · '+day:''),p[0]);
  }).join('');
  if(list.some(p=>p[0]===previous))phase.value=previous;
+ else if(list.length)phase.value=list[list.length-1][0];
  if(event==='Strongest Governor'||event==='Alliance Brawl'){
   const first=phase.value,offset=Number(first.slice(2))-1;
   const suggested=occ?dayUTC(occ.begin_at,offset):dayUTC(new Date());
@@ -207,6 +214,8 @@ function setLawPhase(){
   $('#nocrDay',root).value=dayNum(now)>=dayNum(start)&&dayNum(now)<=dayNum(end)?now:end;
  }
  const input=$('#nocrDay',root);input.min=occ?dayUTC(occ.begin_at):'';input.max=occ?dayUTC(new Date(Math.min(Date.now(),Date.parse(occ.end_at)-1000))):dayUTC(new Date());
+ input.readOnly=event==='Strongest Governor'||event==='Alliance Brawl';
+ input.title=input.readOnly?'Date is determined by the selected event day.':'';
 }
 async function performanceOptions(){
  const r=run,root=r.root;if(!root.isConnected)return;
