@@ -24,19 +24,27 @@ const REVIEW_WORDS={"de":{"violation":["Verstoß erkannt","Über der geltenden G
 const POST_CONTACT_WORDS={
  de:{
   title:'Weiteres Ausgeben nach Kontakt bestätigen',
-  hint:'Nur bestätigen, wenn sicher ist, dass der Spieler nach der Kontaktaufnahme erneut ausgegeben hat. Ein höherer OCR-Wert allein ist kein Beweis.'
+  hint:'Nur bestätigen, wenn sicher ist, dass der Spieler nach der Kontaktaufnahme erneut ausgegeben hat. Ein höherer OCR-Wert allein ist kein Beweis.',
+  ownerTitle:'Prüfung durch zuständige Allianz erforderlich',
+  ownerHint:'Score und Beweis werden gespeichert. Nur die zuständige Allianz kann bestätigen, ob nach dem Kontakt erneut ausgegeben wurde.'
  },
  en:{
   title:'Confirm additional spending after contact',
-  hint:'Only confirm if you know the player spent again after being contacted. A higher OCR score alone is not proof.'
+  hint:'Only confirm if you know the player spent again after being contacted. A higher OCR score alone is not proof.',
+  ownerTitle:'Review by the responsible alliance required',
+  ownerHint:'The score and evidence will be saved. Only the responsible alliance can confirm additional spending after contact.'
  },
  fr:{
   title:'Confirmer des dépenses supplémentaires après contact',
-  hint:'Confirmez uniquement si vous savez que le joueur a de nouveau dépensé après avoir été contacté. Un score OCR plus élevé ne constitue pas une preuve.'
+  hint:'Confirmez uniquement si vous savez que le joueur a de nouveau dépensé après avoir été contacté. Un score OCR plus élevé ne constitue pas une preuve.',
+  ownerTitle:'Vérification par l’alliance responsable requise',
+  ownerHint:'Le score et la preuve seront enregistrés. Seule l’alliance responsable peut confirmer de nouvelles dépenses après le contact.'
  },
  es:{
   title:'Confirmar gasto adicional después del contacto',
-  hint:'Confirma solo si sabes que el jugador volvió a gastar después del contacto. Una puntuación OCR más alta por sí sola no es una prueba.'
+  hint:'Confirma solo si sabes que el jugador volvió a gastar después del contacto. Una puntuación OCR más alta por sí sola no es una prueba.',
+  ownerTitle:'Se requiere revisión de la alianza responsable',
+  ownerHint:'Se guardarán la puntuación y la prueba. Solo la alianza responsable puede confirmar un gasto adicional después del contacto.'
  }
 };
 function postContactText(key){const d=POST_CONTACT_WORDS[lang()]||POST_CONTACT_WORDS.en;return d[key]||key}
@@ -401,6 +409,7 @@ function showReview(r){
    (r.kind==='perf'&&$('#nocrType',root).value==='kvk_prep'?'<input type="number" min="1" max="200" step="1" data-rank="'+i+'" value="'+esc(h.rank||'')+'" aria-label="'+esc(tr('rank'))+'">':'')+
    reviewStatus(h,r,st)+
    (r.kind==='law'&&st?.post_contact_confirmation_required?'<label class="nocr-post-contact-confirm"><input type="checkbox" data-post-contact-confirm="'+i+'" '+(h.postContactConfirmed?'checked':'')+'><span><strong>'+esc(postContactText('title'))+'</strong><small>'+esc(postContactText('hint'))+'</small></span></label>':'')+
+   (r.kind==='law'&&st?.post_contact_owner_review_required?'<div class="nocr-post-contact-confirm nocr-post-contact-owner"><span><strong>'+esc(postContactText('ownerTitle'))+' · '+esc(st.post_contact_confirmation_owner_alliance||h.player.alliance_code||'')+'</strong><small>'+esc(postContactText('ownerHint'))+'</small></span></div>':'')+
    (h.image?'<details><summary>'+esc(tr('frame'))+'</summary><img src="'+h.image+'" alt="'+esc(tr('frame'))+'"></details>':'')+'</article>'
  }).join('')+
  (r.kind==='law'&&preview.some(x=>x.status==='exempt')?'<details class="nocr-exempt-compact"><summary><span class="nocr-exempt-icon" aria-hidden="true">✓</span><strong>'+preview.filter(x=>x.status==='exempt').length+' '+esc(reviewText('exemptCollapsed'))+'</strong><span>'+esc(reviewText('exemptShort'))+'</span></summary><p>'+esc(reviewText('exemptNote'))+'</p><div class="nocr-exempt-names">'+preview.filter(x=>x.status==='exempt').map(x=>'<span>'+esc(x.player_name||'')+'</span>').join('')+'</div></details>':'')+
