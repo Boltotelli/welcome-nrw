@@ -303,30 +303,98 @@ async function analyze(){
  finally{if(url)URL.revokeObjectURL(url);if(video){video.removeAttribute('src');video.load()}r.busy=false;if(root.isConnected){btn.disabled=false;$('#nocrSave',root).disabled=!r.hits?.length}}
 }
 function hitPayload(h){return {player_id:h.player?.player_id||null,player_game_id:h.player?.player_game_id||null,player_name:h.player?.player_name||h.name,detected_alliance:h.alliance||h.player?.alliance_code||null,score:h.score,server_rank:h.rank||null}}
+function reviewStatus(h,r,entry){
+ const state=r.kind==='perf'?'performance':entry?.status||'unresolved';
+ const dict=reviewText(state);
+ const label=Array.isArray(dict)?dict:[String(state),''];
+ const tone=['violation','update'].includes(state)?'danger':state==='exempt'?'exempt':state==='target_missing'||state==='unresolved'?'warning':'neutral';
+ return '<div class="nocr-check-result '+tone+'"><strong>'+esc(label[0])+'</strong><small>'+esc(label[1])+'</small></div>';
+}
+async function refreshReview(r){
+ if(r.kind==='law'){
+  const o=selectedOcc();
+  if(!o)return;
+  const payload=r.hits.map(hitPayload);
+  try{
+   r.preview=await rpc('preview_screen_recording_nap_occurrence_v2',{
+    p_event_schedule_id:o.event_schedule_id,p_event_name:$('#nocrEvent',r.root).value,
+    p_phase_name:$('#nocrPhase',r.root).value,p_recording_day:$('#nocrDay',r.root).value,
+    p_recording_captured_at:null,p_hits:payload
+   });
+  }catch(e){r.preview=null;status((e.message||String(e)),true)}
+ }
+ if(r===run&&r.root.isConnected)showReview(r);
+}
 function showReview(r){
  const root=r.root,preview=r.preview?.results||[],statuses=new Map(preview.map(x=>[String(x.player_game_id||x.player_id||''),x]));
  $('#nocrReview',root).hidden=false;$('#nocrCount',root).textContent=r.hits.length+' '+tr('found');
  $('#nocrResults',root).innerHTML=r.hits.map((h,i)=>{
   const st=statuses.get(String(h.player?.player_game_id||h.player?.player_id||'')),label=st?.status||'';
-  const allowed=r.kind==='perf'||['violation','update'].includes(label)||!!h.manual;
+  const allowed=r.kind==='perf'||['violation','update'].includes(label);
   return '<article class="nocr-hit"><label class="nocr-hit-check"><input type="checkbox" data-hit="'+i+'" '+(allowed?'checked':'')+'>'+
-   '<span><strong>'+esc(h.player.player_name)+'</strong><small>'+esc(h.player.alliance_code||'')+' · '+esc(h.player.player_game_id||'')+'</small></span></label>'+
-   '<input type="number" min="0" step="1" data-score="'+i+'" value="'+esc(h.score)+'" aria-label="'+esc(tr('score'))+'">'+
+   '<span><strong>'+esc(h.player.player_name)+'</strong><small>'+esc(h.player.alliance_code||'')+' · '+esc(h.player.player_game_id||'')+(h.manual?' · '+esc(reviewText('manual')):'')+'</small></span></label>'+
+   '<input type="text" inputmode="numeric" autocomplete="off" data-score="'+i+'" value="'+esc(points(h.score))+'" aria-label="'+esc(tr('score'))+'">'+
    (r.kind==='perf'&&$('#nocrType',root).value==='kvk_prep'?'<input type="number" min="1" max="200" step="1" data-rank="'+i+'" value="'+esc(h.rank||'')+'" aria-label="'+esc(tr('rank'))+'">':'')+
-   '<span class="nocr-result-state">'+esc(label)+'</span>'+
+   reviewStatus(h,r,st)+
    (h.image?'<details><summary>'+esc(tr('frame'))+'</summary><img src="'+h.image+'" alt="'+esc(tr('frame'))+'"></details>':'')+'</article>'
  }).join('')+
  (r.unmatched.length?'<details class="nocr-unmatched"><summary>'+esc(tr('unmatched'))+' ('+r.unmatched.length+')</summary>'+
  '<label>'+esc(tr('unmatched'))+'<select id="nocrUnknown">'+r.unmatched.map((x,i)=>selectOption(x.raw,i)).join('')+'</select></label>'+
  '<label>'+esc(tr('selectPlayer'))+'<select id="nocrMapPlayer"><option value="">–</option>'+r.members.map((p,i)=>selectOption(p.player_name+' · '+(p.alliance_code||'')+' · '+(p.player_game_id||''),i)).join('')+'</select></label>'+
- '<button class="btn secondary" type="button" id="nocrMapConfirm">'+esc(tr('assign'))+'</button></details>':'');
- const mapButton=$('#nocrMapConfirm',root);if(mapButton)mapButton.onclick=()=>{
+ '<button class="btn secondary" type="button" id="nocrMapConfirm">'+esc(tr('assign'))+'</button></details>':'')+
+ '<details class="nocr-add-missing" id="nocrAddMissing" '+(!r.hits.length?'open':'')+'><summary>'+esc(reviewText('addPlayer'))+'</summary>'+
+ '<p>'+esc(reviewText('addHint'))+'</p>'+
+ '<label>'+esc(reviewText('search'))+'<input type="search" id="nocrSearchRoster" placeholder="'+esc(reviewText('search'))+'"></label>'+
+ '<label>'+esc(tr('selectPlayer'))+'<select id="nocrNewPlayer"><option value="">–</option></select></label>'+
+ '<label>'+esc(tr('score'))+'<input type="text" inputmode="numeric" autocomplete="off" id="nocrNewScore" placeholder="'+esc(reviewText('scorePlaceholder'))+'"></label>'+
+ (r.kind==='perf'&&$('#nocrType',root).value==='kvk_prep'?'<label>'+esc(tr('rank'))+'<input type="number" min="1" max="200" id="nocrNewRank" placeholder="1–200"></label>':'')+
+ (r.frames.length?'<label>'+esc(reviewText('evidence'))+'<select id="nocrNewFrame">'+r.frames.map((f,i)=>selectOption(f.time.toFixed(1)+' s',i)).join('')+'</select></label><img id="nocrFramePreview" src="'+r.frames[0].image+'" alt="'+esc(tr('frame'))+'">':'')+
+ '<button type="button" class="btn secondary" id="nocrNewAdd">'+esc(reviewText('add'))+'</button>'+
+ '<div class="nocr-status" id="nocrNewStatus" role="status"></div></details>';
+ root.querySelectorAll('[data-score]').forEach(input=>input.addEventListener('blur',()=>{
+  const value=parsePoints(input.value);
+  if(value!==null)input.value=points(value);
+ }));
+ const mapButton=$('#nocrMapConfirm',root);
+ if(mapButton)mapButton.onclick=()=>{
   const index=Number($('#nocrUnknown',root).value),playerIndex=$('#nocrMapPlayer',root).value;
   if(playerIndex==='')return;
   const row=r.unmatched[index],p=r.members[Number(playerIndex)];if(!row||!p)return;
   const existing=r.hits.find(x=>String(x.player.player_game_id||x.player.player_id)===String(p.player_game_id||p.player_id));
-  if(!existing||row.score>existing.score){const h={...row,player:p,manual:true};if(existing)r.hits=r.hits.filter(x=>x!==existing);r.hits.push(h)}
-  r.unmatched.splice(index,1);r.hits.sort((x,y)=>y.score-x.score);showReview(r);
+  if(!existing||row.score>existing.score){
+   const h={...row,player:p,alliance:p.alliance_code,manual:true};
+   if(existing)r.hits=r.hits.filter(x=>x!==existing);
+   r.hits.push(h);
+  }
+  r.unmatched.splice(index,1);
+  r.hits.sort((x,y)=>y.score-x.score);refreshReview(r);
+ };
+ const sel=$('#nocrNewPlayer',root);
+ const filter=$('#nocrSearchRoster',root);
+ const list=()=>{const q=norm(filter.value);const options=r.members.map((p,i)=>({p,i})).filter(x=>!q||norm(x.p.player_name+' '+x.p.player_game_id+' '+x.p.alliance_code).includes(q)).slice(0,350);
+  sel.innerHTML='<option value="">–</option>'+options.map(x=>selectOption(x.p.player_name+' · '+(x.p.alliance_code||'')+' · '+(x.p.player_game_id||''),x.i)).join('');
+ };
+ list();filter.addEventListener('input',list);
+ const frame=$('#nocrNewFrame',root);
+ if(frame)frame.onchange=()=>{$('#nocrFramePreview',root).src=r.frames[Number(frame.value)]?.image||''};
+ $('#nocrNewScore',root).addEventListener('blur',e=>{const value=parsePoints(e.target.value);if(value!==null)e.target.value=points(value)});
+ $('#nocrNewAdd',root).onclick=()=>{
+  const idx=sel.value,out=$('#nocrNewStatus',root),score=parsePoints($('#nocrNewScore',root).value);
+  if(idx===''){out.textContent=reviewText('missingPlayer');return}
+  if(score===null){out.textContent=reviewText('invalidScore');return}
+  let rank=null;
+  if(r.kind==='perf'&&$('#nocrType',root).value==='kvk_prep'){
+   rank=Number($('#nocrNewRank',root).value);
+   if(!Number.isInteger(rank)||rank<1||rank>200){out.textContent=reviewText('missingRank');return}
+  }
+  const p=r.members[Number(idx)];
+  if(!p){out.textContent=reviewText('missingPlayer');return}
+  const old=r.hits.find(x=>String(x.player.player_game_id||x.player.player_id)===String(p.player_game_id||p.player_id));
+  if(old&&old.score>=score){out.textContent=reviewText('higher');return}
+  if(old)r.hits=r.hits.filter(x=>x!==old);
+  const proof=r.frames[Number(frame?.value||0)]||null;
+  r.hits.push({player:p,name:p.player_name,alliance:p.alliance_code,score,rank,time:proof?.time??0,image:proof?.image||null,manual:true});
+  r.hits.sort((a,b)=>b.score-a.score);refreshReview(r);
  };
  $('#nocrSave',root).disabled=!r.hits.length;
 }
