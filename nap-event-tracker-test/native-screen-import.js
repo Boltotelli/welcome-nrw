@@ -180,7 +180,7 @@ async function lawOccurrence(){
   const options=await rpc('get_screen_import_occurrences',{p_event_name:event});
   if(run!==r)return;
   const permitted=r.allowed.filter(x=>x.event_name===event);
-  const open=(options||[]).filter(o=>permitted.some(p=>Number(p.source_event_id)===Number(o.source_event_id)&&p.source_event_id!=null||p.begin_at&&o.begin_at&&p.begin_at===o.begin_at));
+  const open=(options||[]).filter(o=>permitted.some(p=>p.begin_at&&o.begin_at&&Date.parse(p.begin_at)===Date.parse(o.begin_at)));
   r.occurrences=open;
   occ.innerHTML=open.length?open.map(o=>selectOption(dayUTC(o.begin_at)+' · '+(dayUTC(o.end_at))+(o.phase_hint?' · '+o.phase_hint:''),o.event_schedule_id)).join(''):selectOption(tr('missingEvent'),'');
   setLawPhase();
