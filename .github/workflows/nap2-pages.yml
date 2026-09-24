@@ -69,3 +69,5 @@ jobs:
 # Deploy API fallback for expired avatar CDN links and V7 mockup reference 2026-09-24
 
 # Publish redirected API player portraits and compact V2 Home cards 2026-09-24
+
+# Publish V2-only checked NAP notifications and live Home priority panels 2026-09-24
