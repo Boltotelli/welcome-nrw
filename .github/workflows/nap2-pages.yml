@@ -71,3 +71,5 @@ jobs:
 # Publish redirected API player portraits and compact V2 Home cards 2026-09-24
 
 # Publish V2-only checked NAP notifications and live Home priority panels 2026-09-24
+
+# Publish consistent dynamic language handling across all V2 views 2026-09-24
