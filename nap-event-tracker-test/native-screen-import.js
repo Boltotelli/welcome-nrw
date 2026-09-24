@@ -225,7 +225,7 @@ async function performanceOptions(){
   const options=type==='kvk_prep'?d.kvk:d.mobilization;
   r.occurrences=(options||[]).map(o=>({...o,event_schedule_id:o.event_schedule_id||null}));
   occ.innerHTML=r.occurrences.length?r.occurrences.map(o=>selectOption(dayUTC(o.begin_at||o.prep_start)+' · '+(type==='kvk_prep'?'KvK Prep':'Alliance Mobilization'),o.event_schedule_id||o.cycle_id)).join(''):selectOption(tr('missingEvent'),'');
-  status(r.occurrences.length?'':tr('missingEvent'),!r.occurrences.length);
+  status(!r.occurrences.length?tr('missingEvent'):type==='kvk_prep'?tr('needRank'):'',!r.occurrences.length);
  }catch(e){occ.innerHTML=selectOption(tr('missingEvent'),'');status(e.message||String(e),true)}
 }
 function perfOcc(){return run?.occurrences?.find(o=>String(o.event_schedule_id||o.cycle_id)===$('#nocrOcc',run.root)?.value)}
@@ -269,7 +269,7 @@ async function analyze(){
    for(const row of rows){
     const p=matchPlayer(row,members);
     if(!p){const k=norm(row.name)+'|'+row.score;if(!unmatched.has(k)){if(!still)still=canvas.toDataURL('image/jpeg',.74);unmatched.set(k,{...row,time:sec,image:still})}continue}
-    if(r.kind==='perf'&&$('#nocrType',root).value==='kvk_prep'&&!(row.rank>=1&&row.rank<=200))continue;
+    if(r.kind==='perf'&&$('#nocrType',root).value==='kvk_prep'&&!(row.rank>=1&&row.rank<=200))row.rank=null;
     const key=p.player_game_id||p.player_id;
     const existing=best.get(key);
     if(!existing||row.score>existing.score){
