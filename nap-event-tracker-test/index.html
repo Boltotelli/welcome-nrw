@@ -379,6 +379,12 @@ tr:hover td{background:color-mix(in srgb,var(--panel-2) 65%,transparent)}
 .home-v2-recent-item>strong{font-size:12px}
 .home-v2-recent .card-head{gap:8px;flex-wrap:wrap}
 }
+
+/* V2 public-alliance activity filter; audit privacy stays enforced server-side. */
+.live-activity-alliance-label{display:flex;align-items:center;gap:8px;min-width:0;color:var(--muted);font-size:12px}
+.live-activity-alliance-label select{box-sizing:border-box;min-height:39px;min-width:130px;max-width:100%;padding:7px 28px 7px 10px;border:1px solid var(--line);border-radius:11px;background:var(--panel-2);color:var(--text);font:inherit}
+.live-audit-scope{margin:10px 0 14px;font-size:12px;line-height:1.5}
+@media(max-width:700px){.live-activity-alliance-label{width:100%}.live-activity-alliance-label select{flex:1;min-width:0}.toolbar .toolbar-right{min-width:0;max-width:100%}}
 </style>
 
 <style id="v4-home-notification-styles">
@@ -1602,8 +1608,8 @@ document.getElementById('settingsSaveDemo')?.addEventListener('click',()=>{
 });
 
 </script>
-<script src="./live-adapter.js?v=20260924-nap-alerts-priority-v2"></script>
+<script src="./live-adapter.js?v=20260924-alliance-audit-log"></script>
 <script src="./native-screen-import.js?v=20260924-date-login-counts"></script>
-<script src="./live-translations-v2.js?v=20260924-i18n-audit-v2"></script>
+<script src="./live-translations-v2.js?v=20260924-i18n-complete-and-alliance-log"></script>
 </body>
 </html>
