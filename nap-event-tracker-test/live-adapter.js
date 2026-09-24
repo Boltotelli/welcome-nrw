@@ -2,7 +2,7 @@
 if(window.NAP2_LIVE_ADAPTER)return;window.NAP2_LIVE_ADAPTER=true;
 const C={u:'https://bdzlgirowutasrsycjfj.supabase.co',k:'sb_publishable_8i1ismeQtj9WM-xVN_Vm0w_Tj7AvVtL',s:'nap_v4_supabase_session'};
 let crownAllowed2=false;
-const S={a:null,profile:null,p:[],v:[],x:[],e:[],o:[],t:[],bans:[],spend:[],reviews:[],settings:null,avatars:{},laws:[],lawCases:[],lawEvidence:[],performance:null,crown:null,activity:[],eventOptions:[],features:null,law9:null};
+const S={a:null,profile:null,p:[],v:[],x:[],e:[],o:[],t:[],bans:[],spend:[],reviews:[],shared:[],settings:null,avatars:{},laws:[],lawCases:[],lawEvidence:[],performance:null,crown:null,activity:[],eventOptions:[],features:null,law9:null};
 let ses=null;try{ses=JSON.parse(localStorage.getItem(C.s)||'null')}catch{}
 const L=()=>window.currentLang||document.querySelector('#languagePicker')?.value||'de';
 const T={de:{login:'Anmelden',alliance:'Allianz',password:'Passwort',hint:'Ein zentraler Login pro Allianz. Private Daten bleiben innerhalb der eigenen Allianz.',fail:'Login fehlgeschlagen.',logout:'Abmelden',live:'LIVE DATEN',open:'Öffnen',contact:'Kontaktiert',r1:'R1 umgesetzt',nap:'24h NAP OUT aktivieren',none:'Keine Einträge.',actions:'offen',over:'überfällig',left:'verbleibend'},en:{login:'Sign in',alliance:'Alliance',password:'Password',hint:'One central login per alliance. Private data stays within your alliance.',fail:'Login failed.',logout:'Sign out',live:'LIVE DATA',open:'Open',contact:'Contacted',r1:'R1 implemented',nap:'Activate 24h NAP OUT',none:'No entries.',actions:'open',over:'overdue',left:'remaining'},fr:{login:'Connexion',alliance:'Alliance',password:'Mot de passe',hint:'Un login central par alliance. Les données privées restent dans votre alliance.',fail:'Échec de connexion.',logout:'Déconnexion',live:'DONNÉES LIVE',open:'Ouvrir',contact:'Contacté',r1:'R1 appliqué',nap:'Activer NAP OUT 24 h',none:'Aucune entrée.',actions:'ouvert',over:'en retard',left:'restant'},es:{login:'Iniciar sesión',alliance:'Alianza',password:'Contraseña',hint:'Un login central por alianza. Los datos privados permanecen en tu alianza.',fail:'Error de inicio de sesión.',logout:'Cerrar sesión',live:'DATOS LIVE',open:'Abrir',contact:'Contactado',r1:'R1 aplicado',nap:'Activar NAP OUT 24 h',none:'No hay entradas.',actions:'abiertas',over:'vencido',left:'restante'}};
@@ -28,7 +28,7 @@ function active(v){return !v.expires_at||new Date(v.expires_at)>new Date()}
 function p(name){return S.p.find(x=>(x.name||x.player_name)===name)||{}}
 function vv(name){return S.v.filter(x=>x.player_name===name)}
 function ss(name){return S.x.filter(x=>x.player_name===name)}
-function level(name){const n=vv(name).filter(active).length,s=ss(name).find(x=>Number(x.level)===4?!x.started_at:!x.completed);return Math.min(4,Math.max(n,Number(s?.level||0)))}
+function level(name){const valid=new Set(vv(name).filter(v=>active(v)&&v.sanction_eligible!==false).map(v=>String(v.id)));return Math.min(4,Math.max(0,...ss(name).filter(s=>valid.has(String(s.violation_id))).map(s=>Number(s.level)||0)))}
 function act(name){return ss(name).filter(x=>{if(Number(x.level)===1){const v=S.v.find(v=>v.id===x.violation_id);return v&&!v.contacted}if(Number(x.level)===2)return !x.completed||(x.completed&&(!x.started_at||!x.end_at));if(Number(x.level)===4)return !x.started_at;return !x.completed}).sort((a,b)=>Number(b.level)-Number(a.level))[0]||null}
 function actions(){return [...new Set(S.v.filter(active).map(v=>v.player_name))].map(name=>{const l=level(name),s=act(name);if(l===1){const v=vv(name).find(v=>active(v)&&!v.contacted);return v?{name,l,v,s}:null}return s?{name,l,v:S.v.find(v=>v.id===s.violation_id),s}:null}).filter(Boolean)}
 function dl(a){const z=new Date((a.s||a.v)?.created_at||(a.v?.occurred_at)||0).getTime()+86400000-Date.now();return dur(Math.abs(z))+' '+t(z<0?'over':'left')}
@@ -67,7 +67,7 @@ async function syncCrownVisibility2(){
  if(!permitted&&document.getElementById('view-crown')?.classList.contains('active'))setView('home');
 }
 function decorate(){const ab=document.querySelector('.alliance-badge');if(ab)ab.innerHTML=allianceLogo2(S.a,'alliance-top-logo')+'<span>'+E(S.a)+'</span>';document.querySelectorAll('[data-current-alliance]').forEach(x=>x.textContent=S.a);const u=document.querySelector('.user-pill');if(u){u.innerHTML=allianceLogo2(S.a,'alliance-user-logo')+'<span>'+E(S.a)+'</span> <span class="n2live">'+E(t('live'))+'</span>';u.title=t('logout');u.onclick=()=>{if(confirm(t('logout')+'?')){save(null);location.reload()}}}}
-async function load(){const a=encodeURIComponent(S.a);const [p1,v,x,e,o,tr,bans,spend,settings,reviews]=await Promise.all([tab('players','select=*&alliance_code=eq.'+a+'&order=name.asc'),tab('violations','select=*&alliance_code=eq.'+a+'&order=occurred_at.desc'),tab('sanctions','select=*&alliance_code=eq.'+a+'&order=created_at.desc'),rpc('get_public_nap_exclusions',{}),rpc('get_nap_overdue_action_notifications_v2',{}),rpc('get_my_roster_transfer_candidates',{}),tab('nap_bans','select=*&active=eq.true&order=created_at.desc').catch(()=>[]),rpc('get_public_nap_spending_exclusions',{}).catch(()=>[]),tab('alliance_settings','select=*&alliance_code=eq.'+a+'&limit=1').catch(()=>[]),rpc('get_pending_post_contact_spending_reviews',{}).catch(()=>[])]);S.p=(p1||[]).filter(r=>r.alliance_code===S.a);S.v=(v||[]).filter(r=>r.alliance_code===S.a);S.x=(x||[]).filter(r=>r.alliance_code===S.a);S.e=e||[];S.o=o||[];S.t=(tr||[]).filter(r=>r.from_alliance===S.a||r.to_alliance===S.a);S.bans=bans||[];S.spend=spend||[];S.reviews=reviews||[];S.settings=settings?.[0]||null;window.NAP2_PLAYER_AVATARS=S.avatars;loadAvatars().catch(e=>console.warn('avatar load',e))}
+async function load(){const a=encodeURIComponent(S.a);const [p1,v,x,e,o,tr,bans,spend,settings,reviews,shared]=await Promise.all([tab('players','select=*&alliance_code=eq.'+a+'&order=name.asc'),tab('violations','select=*&alliance_code=eq.'+a+'&order=occurred_at.desc'),tab('sanctions','select=*&alliance_code=eq.'+a+'&order=created_at.desc'),rpc('get_public_nap_exclusions',{}),rpc('get_nap_overdue_action_notifications_v2',{}),rpc('get_my_roster_transfer_candidates',{}),tab('nap_bans','select=*&active=eq.true&order=created_at.desc').catch(()=>[]),rpc('get_public_nap_spending_exclusions',{}).catch(()=>[]),tab('alliance_settings','select=*&alliance_code=eq.'+a+'&limit=1').catch(()=>[]),rpc('get_pending_post_contact_spending_reviews',{}).catch(()=>[]),rpc('get_my_shared_spending_cases',{}).catch(()=>[])]);S.p=(p1||[]).filter(r=>r.alliance_code===S.a);S.v=(v||[]).filter(r=>r.alliance_code===S.a);S.x=(x||[]).filter(r=>r.alliance_code===S.a);S.e=e||[];S.o=o||[];S.t=(tr||[]).filter(r=>r.from_alliance===S.a||r.to_alliance===S.a);S.bans=bans||[];S.spend=spend||[];S.reviews=reviews||[];S.shared=shared||[];S.settings=settings?.[0]||null;window.NAP2_PLAYER_AVATARS=S.avatars;loadAvatars().catch(e=>console.warn('avatar load',e))}
 async function enter(expected){const P=await tab('profiles','select=alliance_code,can_manage_bans,is_admin&limit=1'),prof=P?.[0]||null,a=prof?.alliance_code;if(!a)throw Error('Account incomplete');if(expected&&expected!==a)throw Error('Wrong alliance');S.a=a;S.profile=prof;await load();await syncCrownVisibility2();n2login.hidden=true;document.body.classList.remove('n2lock');decorate();renderHome();renderPlayers();if(typeof applyTranslations==='function')applyTranslations()}
 async function boot(){css();login();document.body.classList.add('n2lock');if(!await token())return;try{await enter()}catch{save(null)}}
 setTimeout(boot,0);document.querySelector('#languagePicker')?.addEventListener('change',()=>setTimeout(()=>{if(S.a){decorate();renderHome();renderPlayers()}},0));
@@ -691,6 +691,74 @@ function profileActionCard2(s){
  return '<article class="card" data-profile-sanction="'+E(s.id)+'"><div class="card-head"><div><div class="card-title">Stufe '+E(s.level)+' · '+E(Number(s.level)===2?'R1':Number(s.level)===3?'24h NAP OUT':Number(s.level)===4?'Extended':'Kontakt')+'</div><div class="card-sub">Erstellt '+E(D(s.created_at))+'</div></div><span class="pill '+(r1Missing?'gold':done?'green':running?'red':'gold')+'">'+E(r1Missing?'Timer fehlt':label)+'</span></div><div class="card-body">'+(r1Missing?'<div class="notice warn" style="margin-bottom:10px">⚠ R1 bestätigt – individuelle Endzeit noch setzen.</div><div class="live-form-row"><label>Ende<input class="profile-r1-end" type="datetime-local" value="'+E(toLocalInput2(s.end_at))+'"></label><div style="display:flex;align-items:end"><button class="btn secondary profile-r1-save" data-id="'+E(s.id)+'">Timer setzen</button></div></div>':'')+'<div class="action-date-grid"><div><span>Start</span><b>'+E(D(start))+'</b></div><div><span>Ende</span><b>'+E(D(s.end_at))+'</b></div><div><span>Restzeit</span><b>'+(s.end_at?E(dur(new Date(s.end_at)-Date.now())):'–')+'</b></div><div><span>Status</span><b>'+E(r1Missing?'Timer fehlt':label)+'</b></div></div></div></article>';
 }
 function bindProfileR1Timers2(){document.querySelectorAll('.profile-r1-save').forEach(b=>b.onclick=()=>setR1Timer2(b.dataset.id,b.closest('[data-profile-sanction]')?.querySelector('.profile-r1-end')))}
+
+const SHARED_SPENDING_WORDS2={
+ de:{
+ title:'Shared Spending · gemeinsame Ausgaben',sub:'Mindestens zwei Events am selben Tag. Eine Verbindung wird nie automatisch angenommen.',select:'Diese Verstöße gemeinsam prüfen',pending:'Noch offen',shared:'Gemeinsame Ausgaben · 1 Sanktionsfall',separate:'Getrennte Ausgaben · getrennt zählen',reason:'Begründung / gemeinsam verwendete Ressourcen',hint:'Beide Events und Screenshots bleiben erhalten. Nur die zuständige Allianz entscheidet.',save:'Entscheidung speichern',confirm:'Die Sanktionsstufen werden neu berechnet. Eine vorhandene Maßnahme kann entfallen oder sich ändern; dies wird protokolliert. Wirklich als gemeinsame Ausgaben speichern?',success:'Shared-Spending-Entscheidung gespeichert.',needTwo:'Bitte mindestens zwei Verstöße aus unterschiedlichen Events desselben Tages wählen.',short:'Für gemeinsame Ausgaben bitte die Ressource kurz begründen (mindestens 8 Zeichen).',badge:'Shared Spending',source:'Mehrere Events · gemeinsame Ressourcen'
+ },
+ en:{
+ title:'Shared Spending · shared resources',sub:'At least two events on the same day. Linking is never automatic.',select:'Review these violations together',pending:'Pending decision',shared:'Shared resources · 1 sanction case',separate:'Separate spending · count separately',reason:'Reason / shared resources',hint:'Both events and screenshots remain. Only the responsible alliance decides.',save:'Save decision',confirm:'Sanction levels will be recalculated. An existing action may disappear or change; this will be logged. Confirm shared spending?',success:'Shared Spending decision saved.',needTwo:'Select at least two violations from different events on the same day.',short:'Briefly explain the shared resources (at least 8 characters).',badge:'Shared Spending',source:'Multiple events · shared resources'
+ },
+ fr:{
+ title:'Shared Spending · ressources communes',sub:'Au moins deux événements le même jour. Aucun lien automatique.',select:'Examiner ces infractions ensemble',pending:'Décision en attente',shared:'Ressources communes · 1 cas de sanction',separate:'Dépenses distinctes · compter séparément',reason:'Motif / ressources communes',hint:'Les deux événements et captures sont conservés. Seule l’alliance responsable décide.',save:'Enregistrer la décision',confirm:'Les niveaux de sanction seront recalculés. Une mesure existante peut disparaître ou changer ; cela sera journalisé. Confirmer les dépenses communes ?',success:'Décision Shared Spending enregistrée.',needTwo:'Sélectionnez au moins deux infractions de différents événements du même jour.',short:'Expliquez brièvement les ressources communes (au moins 8 caractères).',badge:'Shared Spending',source:'Plusieurs événements · ressources communes'
+ },
+ es:{
+ title:'Shared Spending · recursos compartidos',sub:'Al menos dos eventos el mismo día. Nunca se vinculan automáticamente.',select:'Revisar estas infracciones juntas',pending:'Decisión pendiente',shared:'Recursos compartidos · 1 caso de sanción',separate:'Gastos separados · contar por separado',reason:'Motivo / recursos compartidos',hint:'Se conservan ambos eventos y las capturas. Solo decide la alianza responsable.',save:'Guardar decisión',confirm:'Se recalcularán los niveles de sanción. Una medida existente puede desaparecer o cambiar; quedará registrada. ¿Confirmar gastos compartidos?',success:'Decisión Shared Spending guardada.',needTwo:'Selecciona al menos dos infracciones de eventos distintos del mismo día.',short:'Describe brevemente los recursos compartidos (mínimo 8 caracteres).',badge:'Shared Spending',source:'Varios eventos · recursos compartidos'
+ }
+};
+function sharedWords2(){return SHARED_SPENDING_WORDS2[L()]||SHARED_SPENDING_WORDS2.de}
+function sharedSpendingPanel2(violations){
+ const w=sharedWords2(),byDay=new Map();
+ for(const v of violations||[]){
+   if(v.kind!=='overspend')continue;
+   const day=String(v.violation_day||String(v.occurred_at||'').slice(0,10));
+   if(!day)continue;
+   if(!byDay.has(day))byDay.set(day,[]);
+   byDay.get(day).push(v);
+ }
+ const days=[...byDay].filter(([,a])=>a.length>=2&&new Set(a.map(v=>v.event_name)).size>=2);
+ if(!days.length)return '';
+ return '<section class="card live-shared-spending"><div class="card-head"><div><div class="card-title">'+E(w.title)+'</div><div class="card-sub">'+E(w.sub)+'</div></div></div><div class="card-body live-list">'+
+ days.map(([day,entries])=>{
+   const date=new Date(day+'T00:00:00Z').toLocaleDateString(loc());
+   const selected=entries.slice(0,5).map(v=>String(v.id));
+   const existing=(S.shared||[]).find(x=>
+     x.player_id===entries[0].player_id &&
+     Array.isArray(x.violation_ids)&&x.violation_ids.length===selected.length &&
+     selected.every(id=>x.violation_ids.some(y=>String(y)===id))
+   );
+   const status=existing?.status||'pending';
+   return '<form class="live-shared-form live-form" data-shared-day="'+E(day)+'" style="padding:11px;border:1px solid var(--line);border-radius:12px">'+
+    '<b>'+E(date)+' · '+E(w.select)+'</b>'+
+    entries.map((v,i)=>'<label class="live-shared-choice" style="display:flex;flex-direction:row;align-items:center;gap:9px"><input style="width:auto;min-height:0" type="checkbox" class="live-shared-violation" data-event="'+E(v.event_name||'')+'" value="'+E(v.id)+'" '+(i<5?'checked':'')+'><span>'+E(v.event_name||'–')+' · '+E(v.phase_name||'')+' · '+N(v.score)+'</span></label>').join('')+
+    '<select class="live-shared-status" aria-label="'+E(w.title)+'">'+
+      ['pending','shared','separate'].map(k=>'<option value="'+k+'" '+(status===k?'selected':'')+'>'+E(w[k])+'</option>').join('')+
+    '</select>'+
+    '<label>'+E(w.reason)+'<textarea class="live-shared-reason" maxlength="500" rows="2">'+E(existing?.reason||'')+'</textarea></label>'+
+    '<div class="live-note">'+E(w.hint)+'</div>'+
+    '<div class="hero-actions"><button class="btn small primary" type="submit">'+E(w.save)+'</button><span class="live-status live-shared-output"></span></div>'+
+    '</form>';
+ }).join('')+'</div></section>';
+}
+async function saveSharedSpending2(form,name){
+ const w=sharedWords2(),out=form.querySelector('.live-shared-output'),
+ ids=[...form.querySelectorAll('.live-shared-violation:checked')].map(c=>c.value),
+ events=[...form.querySelectorAll('.live-shared-violation:checked')].map(c=>c.dataset.event);
+ const status=form.querySelector('.live-shared-status').value;
+ const reason=form.querySelector('.live-shared-reason').value.trim();
+ if(ids.length<2||ids.length>5||new Set(events).size<2){
+   out.textContent=w.needTwo;return;
+ }
+ if(status==='shared'&&reason.length<8){out.textContent=w.short;return}
+ if(status==='shared'&&!window.confirm(w.confirm))return;
+ out.textContent='…';const btn=form.querySelector('button[type="submit"]');btn.disabled=true;
+ try{
+   await rpc('decide_shared_spending',{p_violation_ids:ids,p_status:status,p_reason:reason});
+   await load();renderHomeFull2();renderPlayers2();
+   await openProfile2(name);
+   document.querySelector('[data-live-profiletab="violations"]')?.click();
+ }catch(err){out.textContent=err.message||String(err);btn.disabled=false}
+}
 function profileWords2(){
  const d={
  de:{back:'← Spielerakten',head:'SPIELERPROFIL',overview:'Übersicht',violations:'Verstöße',actions:'Maßnahmen',performance:'Performance',comments:'Kommentare',history:'Historie',points:'Punkte',limit:'Grenze',contact:'Kontakt',open:'offen',fix:'✎ Korrigieren',attend:'Teilnahme',shot:'Screenshots zum Verstoß',noShot:'Kein Screenshot zu diesem Verstoß gespeichert.',failedShot:'Screenshot konnte nicht geladen werden.',note:'Kommentar / Notiz zum Verstoß',file:'Weitere Aktenkommentare zum Spieler',notLinked:'Diese Aktenkommentare sind nicht einem einzelnen Verstoß zugeordnet.',noFile:'Keine weiteren Aktenkommentare.',frame:'Videoposition',none:'Keine Verstöße.',import:'Aus einem früheren NAP-weiten ScreenRecording-Test importiert.'},
@@ -716,8 +784,9 @@ async function paintProfileTab2(name,tab){
  }
  if(tab==='violations'){
   const w=profileWords2();
-  body.innerHTML='<div class="live-list">'+(V.length?V.map(v=>'<article class="card" data-live-vio="'+E(v.id)+'"><div class="card-head"><div><div class="card-title">'+E(v.event_name||'–')+' · '+E(v.phase_name||'')+'</div><div class="card-sub">'+E(D(v.occurred_at))+(v.source_type?' · '+E(v.source_type):'')+'</div></div><div class="hero-actions"><span class="pill '+(v.kind==='swordland'?'blue':'red')+'">'+(v.kind==='overspend'&&v.target_value?(Number(v.score)/Number(v.target_value)).toFixed(2)+'×':E(w.attend))+'</span><button class="btn small secondary live-edit-violation" data-id="'+E(v.id)+'">'+E(w.fix)+'</button></div></div><div class="card-body"><div class="action-date-grid"><div><span>'+E(w.points)+'</span><b>'+N(v.score)+'</b></div><div><span>'+E(w.limit)+'</span><b>'+(v.target_value?N(Number(v.target_value)*3):'–')+'</b></div><div><span>'+E(w.contact)+'</span><b>'+(v.contacted?'✓':E(w.open))+'</b></div></div>'+(v.note?'<div class="live-note live-violation-comment"><b>'+E(w.note)+'</b><p>'+E(v.note==='Imported from NAP-wide ScreenRecording test for selected event occurrence'?w.import:v.note)+'</p></div>':'')+'<div class="live-violation-proof"><b>'+E(w.shot)+'</b><div class="live-evidence" data-vio="'+E(v.id)+'"><div class="live-empty-state">'+E(w.noShot)+'</div></div></div></div></article>').join(''):'<div class="live-empty-state">'+E(w.none)+'</div>')+'</div><section class="card live-player-comments"><div class="card-head"><div><div class="card-title">'+E(w.file)+'</div><div class="card-sub">'+E(w.notLinked)+'</div></div></div><div class="card-body live-list" id="liveViolationPlayerComments"><div class="live-empty-state">'+E(w.noFile)+'</div></div></section>';
+  body.innerHTML=sharedSpendingPanel2(V)+'<div class="live-list">'+(V.length?V.map(v=>'<article class="card" data-live-vio="'+E(v.id)+'"><div class="card-head"><div><div class="card-title">'+E(v.event_name||'–')+' · '+E(v.phase_name||'')+'</div><div class="card-sub">'+E(D(v.occurred_at))+(v.source_type?' · '+E(v.source_type):'')+'</div></div><div class="hero-actions"><span class="pill green" '+(v.shared_spending_group_id?'':'hidden')+'>'+E(sharedWords2().badge)+'</span><span class="pill '+(v.kind==='swordland'?'blue':'red')+'">'+(v.kind==='overspend'&&v.target_value?(Number(v.score)/Number(v.target_value)).toFixed(2)+'×':E(w.attend))+'</span><button class="btn small secondary live-edit-violation" data-id="'+E(v.id)+'">'+E(w.fix)+'</button></div></div><div class="card-body"><div class="action-date-grid"><div><span>'+E(w.points)+'</span><b>'+N(v.score)+'</b></div><div><span>'+E(w.limit)+'</span><b>'+(v.target_value?N(Number(v.target_value)*3):'–')+'</b></div><div><span>'+E(w.contact)+'</span><b>'+(v.contacted?'✓':E(w.open))+'</b></div></div>'+(v.note?'<div class="live-note live-violation-comment"><b>'+E(w.note)+'</b><p>'+E(v.note==='Imported from NAP-wide ScreenRecording test for selected event occurrence'?w.import:v.note)+'</p></div>':'')+'<div class="live-violation-proof"><b>'+E(w.shot)+'</b><div class="live-evidence" data-vio="'+E(v.id)+'"><div class="live-empty-state">'+E(w.noShot)+'</div></div></div></div></article>').join(''):'<div class="live-empty-state">'+E(w.none)+'</div>')+'</div><section class="card live-player-comments"><div class="card-head"><div><div class="card-title">'+E(w.file)+'</div><div class="card-sub">'+E(w.notLinked)+'</div></div></div><div class="card-body live-list" id="liveViolationPlayerComments"><div class="live-empty-state">'+E(w.noFile)+'</div></div></section>';
   body.querySelectorAll('.live-edit-violation').forEach(b=>b.onclick=()=>openViolationEditor2(b.dataset.id));
+  body.querySelectorAll('.live-shared-form').forEach(form=>form.onsubmit=e=>{e.preventDefault();saveSharedSpending2(form,name)});
   const destination=body.querySelector('#liveViolationPlayerComments');
   // These are player-wide file comments, not evidence that a specific violation caused them.
   try{
