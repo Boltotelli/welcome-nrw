@@ -241,7 +241,7 @@ async function analyze(){
  let url,video,worker;
  try{
   progress(0,1,0);
-  let members=await roster();
+  let members=[...(await roster())];
   if(r.kind==='perf'&&$('#nocrType',root).value==='alliance_mobilization'&&perfOcc()?.event_schedule_id){
    try{
     const extras=await rpc('get_performance_candidate_roster',{p_event_schedule_id:perfOcc().event_schedule_id});
