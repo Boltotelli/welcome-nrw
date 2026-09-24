@@ -112,7 +112,7 @@ async function avatarObject2(id){
  if(avatarPending2.has(id))return avatarPending2.get(id);
  const promise=(async()=>{
   const res=await fetch(C.u+'/functions/v1/nap-player-avatar-v2?player_id='+encodeURIComponent(id),{
-   method:'GET',headers:await h(),signal:AbortSignal.timeout(15000)
+   method:'GET',headers:await h(),signal:AbortSignal.timeout(38000)
   });
   if(!res.ok)throw Error('Avatar source '+res.status);
   const blob=await res.blob();
