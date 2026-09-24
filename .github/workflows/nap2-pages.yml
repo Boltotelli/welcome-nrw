@@ -49,3 +49,5 @@ jobs:
 # Refresh isolated V2: mobile header, notifications, profile tabs, Crown and KvK dates
 # Refresh isolated V2: inline evidence, profile comments, mobile alliance login and Crown access
 # Publish V2 evidence/login/Crown + adapter cache refresh 2026-09-24
+
+# Deploy isolated V2 native OCR, SG days, manual attendance and performance import 2026-09-24
