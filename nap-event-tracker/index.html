@@ -313,11 +313,18 @@ function renderDashboard(){
   const names=[...new Set(vs.map(v=>v.player_name))];
   content.innerHTML=`<div class="notice">${t("privateNotice",{alliance:esc(state.alliance)})}</div>
   <section class="kpi-grid"><div class="kpi"><strong>${vs.length}</strong><small>${t("activeViolations")}</small></div><div class="kpi"><strong>${openContact}</strong><small>${t("contactOpen")}</small></div><div class="kpi"><strong>${activeR1}</strong><small>${t("activeR1")}</small></div><div class="kpi"><strong>${activeNap}</strong><small>${t("napExclusions")}</small></div></section>
-  <section class="stack"><div class="section-title"><h3>${t("actionRequired")}</h3></div><div class="list">${names.length?names.map(playerActionCard).join(""):`<div class="card muted">${t("noAction")}</div>`}</div></section>
+  <section class="stack"><div class="section-title"><h3>${t("actionRequired")}</h3></div><div class="list">${names.map(playerActionCard).filter(Boolean).join("")||`<div class="card muted">${t("noAction")}</div>`}</div></section>
   <section class="stack"><div class="section-title"><h3>${t("recentViolations")}</h3></div><div class="list">${ownViolations().slice(0,12).map(violationCard).join("")||`<div class="card muted">${t("noViolations")}</div>`}</div></section>`;
   bindDynamic();bindSanctionControls();
 }
-function playerActionCard(name){const count=violationCount(name),level=Math.min(count,4),warn=warningForPlayer(name),sanction=ownSanctions().find(s=>s.player_name===name&&s.level===level&&!s.completed);return `<article class="item"><div class="item-head"><div><div class="item-title">${esc(name)}</div><div class="item-meta">${t("activeCount",{n:count})}</div></div><span class="pill ${level>=3?"red":level===2?"orange":"blue"}">${t("action")} ${level}</span></div>${warn?`<div class="notice warn" style="margin-top:10px">⚠ ${t("repeatedWarning",{days:state.warningWindowDays})}</div>`:""}<div class="row" style="margin-top:10px"><span class="subtle">${t("action")}:</span><strong>${levelLabel(level)}</strong></div>${sanction?sanctionMini(sanction):""}</article>`}
+function playerActionCard(name){
+  const active=ownViolations().filter(v=>v.player_name===name&&activeViolation(v));
+  const activeLevel=Math.min(active.length,4);
+  const settled=ownSanctions().filter(s=>s.player_name===name&&Number(s.level)===activeLevel).sort((a,b)=>new Date(b.created_at||0)-new Date(a.created_at||0))[0];
+  // A completed R1 action with a recorded time window needs no further action.
+  // Keep any pending contacts and R1 actions missing a timer visible.
+  if(activeLevel===2&&active.length&&active.every(v=>v.contacted)&&settled?.completed&&settled.started_at&&settled.end_at)return '';
+  const count=violationCount(name),level=Math.min(count,4),warn=warningForPlayer(name),sanction=ownSanctions().find(s=>s.player_name===name&&s.level===level&&!s.completed);return `<article class="item"><div class="item-head"><div><div class="item-title">${esc(name)}</div><div class="item-meta">${t("activeCount",{n:count})}</div></div><span class="pill ${level>=3?"red":level===2?"orange":"blue"}">${t("action")} ${level}</span></div>${warn?`<div class="notice warn" style="margin-top:10px">⚠ ${t("repeatedWarning",{days:state.warningWindowDays})}</div>`:""}<div class="row" style="margin-top:10px"><span class="subtle">${t("action")}:</span><strong>${levelLabel(level)}</strong></div>${sanction?sanctionMini(sanction):""}</article>`}
 function sanctionMini(s){
   if(s.level===1)return `<div class="subtle" style="margin-top:6px">${t("contacted")}: ${ownViolations().find(v=>v.id===s.violation_id)?.contacted?"✓":"–"}</div>`;
   if(s.level===2){
