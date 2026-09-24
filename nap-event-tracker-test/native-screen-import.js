@@ -334,8 +334,13 @@ function reviewStatus(h,r,entry){
  const state=r.kind==='perf'?'performance':entry?.status||'unresolved';
  const dict=reviewText(state);
  const label=Array.isArray(dict)?dict:[String(state),''];
+ // The preview supplies a prior-event highest score where available.
+ const previous=entry?.existing_score==null?null:Number(entry.existing_score);
+ const current=Number(h.score);
+ const showDiff=['update','already_recorded'].includes(state)&&Number.isFinite(previous)&&Number.isFinite(current)&&previous>=0;
+ const details=showDiff?'<div class="nocr-score-change"><span>'+esc(reviewText('was'))+': <b>'+points(previous)+'</b></span><span>'+esc(reviewText('now'))+': <b>'+points(current)+'</b></span></div>':'';
  const tone=['violation','update'].includes(state)?'danger':state==='exempt'?'exempt':state==='target_missing'||state==='unresolved'?'warning':'neutral';
- return '<div class="nocr-check-result '+tone+'"><strong>'+esc(label[0])+'</strong><small>'+esc(label[1])+'</small></div>';
+ return '<div class="nocr-check-result '+tone+'"><strong>'+esc(label[0])+'</strong><small>'+esc(label[1])+'</small>'+details+'</div>';
 }
 async function refreshReview(r){
  if(r.kind==='law'){
@@ -354,11 +359,19 @@ async function refreshReview(r){
 }
 function showReview(r){
  const root=r.root,preview=r.preview?.results||[],statuses=new Map(preview.map(x=>[String(x.player_game_id||x.player_id||''),x]));
- $('#nocrReview',root).hidden=false;$('#nocrCount',root).textContent=r.hits.length+' '+tr('found');
+ $('#nocrReview',root).hidden=false;
+ const counts=r.kind==='law'&&r.preview?[
+ [r.preview.violations,reviewText('newCount')],
+ [r.preview.updates,reviewText('updateCount')],
+ [r.preview.already_recorded,reviewText('alreadyCount')]
+ ].filter(x=>Number(x[0])>0).map(x=>points(x[0])+' '+x[1]):[];
+ $('#nocrCount',root).textContent=r.hits.length+' '+tr('found')+(counts.length?' · '+counts.join(' · '):'');
  $('#nocrResults',root).innerHTML=r.hits.map((h,i)=>{
   const st=statuses.get(String(h.player?.player_game_id||h.player?.player_id||'')),label=st?.status||'';
   const allowed=r.kind==='perf'||['violation','update'].includes(label);
-  return '<article class="nocr-hit"><label class="nocr-hit-check"><input type="checkbox" data-hit="'+i+'" '+(allowed?'checked':'')+'>'+
+  const key=String(h.player?.player_game_id||h.player?.player_id||'');
+  const checked=r.selection?.has(key)?r.selection.get(key):allowed;
+  return '<article class="nocr-hit"><label class="nocr-hit-check"><input type="checkbox" data-hit="'+i+'" '+(checked?'checked':'')+'>'+
    '<span><strong>'+esc(h.player.player_name)+'</strong><small>'+esc(h.player.alliance_code||'')+' · '+esc(h.player.player_game_id||'')+(h.manual?' · '+esc(reviewText('manual')):'')+'</small></span></label>'+
    '<input type="text" inputmode="numeric" autocomplete="off" data-score="'+i+'" value="'+esc(points(h.score))+'" aria-label="'+esc(tr('score'))+'">'+
    (r.kind==='perf'&&$('#nocrType',root).value==='kvk_prep'?'<input type="number" min="1" max="200" step="1" data-rank="'+i+'" value="'+esc(h.rank||'')+'" aria-label="'+esc(tr('rank'))+'">':'')+
@@ -378,9 +391,20 @@ function showReview(r){
  (r.frames.length?'<label>'+esc(reviewText('evidence'))+'<select id="nocrNewFrame">'+r.frames.map((f,i)=>selectOption(f.time.toFixed(1)+' s',i)).join('')+'</select></label><img id="nocrFramePreview" src="'+r.frames[0].image+'" alt="'+esc(tr('frame'))+'">':'')+
  '<button type="button" class="btn secondary" id="nocrNewAdd">'+esc(reviewText('add'))+'</button>'+
  '<div class="nocr-status" id="nocrNewStatus" role="status"></div></details>';
- root.querySelectorAll('[data-score]').forEach(input=>input.addEventListener('blur',()=>{
+ root.querySelectorAll('[data-hit]').forEach(checkbox=>checkbox.addEventListener('change',()=>{
+  const h=r.hits[Number(checkbox.dataset.hit)];
+  if(!h)return;
+  r.selection??=new Map();
+  r.selection.set(String(h.player?.player_game_id||h.player?.player_id||''),checkbox.checked);
+ }));
+ root.querySelectorAll('[data-score]').forEach(input=>input.addEventListener('blur',async()=>{
   const value=parsePoints(input.value);
-  if(value!==null)input.value=points(value);
+  if(value===null)return;
+  input.value=points(value);
+  const h=r.hits[Number(input.dataset.score)];
+  if(!h||h.score===value)return;
+  h.score=value;
+  if(r.kind==='law'){status(reviewText('preview'));await refreshReview(r)}
  }));
  const mapButton=$('#nocrMapConfirm',root);
  if(mapButton)mapButton.onclick=()=>{
@@ -458,7 +482,7 @@ async function save(){
    });
    const wanted=new Set(selected.map(h=>String(h.player.player_game_id||h.player.player_id)));
    const allowed=(checked.results||[]).filter(x=>wanted.has(String(x.player_game_id||x.player_id))&&['violation','update'].includes(x.status));
-   if(!allowed.length){out.textContent=tr('nohits');return}
+   if(!allowed.length){out.textContent=reviewText('noChanges');return}
    args.p_hits=selected.filter(h=>allowed.some(x=>String(x.player_game_id||x.player_id)===String(h.player.player_game_id||h.player.player_id))).map(hitPayload);
    response=await rpc('import_screen_recording_nap_occurrence_v2',args);
    const evidenceRows=(response.results||[]).filter(x=>['created','updated'].includes(x.status)&&x.violation_id);
@@ -490,7 +514,7 @@ async function save(){
 }
 function mount(root,kind,allowed=[]){
  if(run?.busy)return;
- run={root,kind,allowed,hits:[],unmatched:[],frames:[],occurrences:[],members:[],busy:false,preview:null,fileHash:null};
+ run={root,kind,allowed,hits:[],unmatched:[],frames:[],occurrences:[],members:[],selection:new Map(),busy:false,preview:null,fileHash:null};
  shell(root,kind);
  const r=run;$('#nocrAnalyze',root).onclick=analyze;$('#nocrSave',root).onclick=save;
  if(kind==='law'){
