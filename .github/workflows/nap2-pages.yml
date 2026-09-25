@@ -86,3 +86,4 @@ jobs:
 # Publish isolated V2 SG UTC 3x and 4x threshold display 2026-09-24
 # Publish V2 sanction timer/status consistency 2026-09-25
 # Publish V2 evidence retry/backfill 2026-09-25
+# Publish V2 server-synced notification read state 2026-09-25
