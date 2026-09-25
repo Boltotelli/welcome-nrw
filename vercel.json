@@ -1,1 +1,10 @@
-{"cleanUrls": false, "trailingSlash": false}
+{
+  "cleanUrls": false,
+  "trailingSlash": false,
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "git": {
+    "deploymentEnabled": {
+      "fix/nap2-navigation-mobile": false
+    }
+  }
+}
