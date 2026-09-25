@@ -389,10 +389,10 @@ function napStatsWords2(){return NAP_STATS_WORDS2[L()]||NAP_STATS_WORDS2.de}
 function spendWords2(){return SPEND_WORDS2[L()]||SPEND_WORDS2.de}
 function spendingStatus2(x){
  const w=spendWords2(),now=Date.now(),start=x?.starts_at?new Date(x.starts_at).getTime():null,end=x?.ends_at?new Date(x.ends_at).getTime():null;
- if(x?.ended_at)return {label:w.ended,cls:''};
- if(start&&now<start)return {label:w.planned,cls:'gold'};
- if(end&&now>=end)return {label:w.expired,cls:''};
- return {label:w.active,cls:'green'};
+ if(x?.ended_at)return {key:'ended',label:w.ended,cls:''};
+ if(start&&now<start)return {key:'planned',label:w.planned,cls:'gold'};
+ if(end&&now>=end)return {key:'expired',label:w.expired,cls:''};
+ return {key:'active',label:w.active,cls:'green'};
 }
 function napViolationStats2(){
  const rows=Array.isArray(S.napStats)?S.napStats:[],w=napStatsWords2();
@@ -445,7 +445,7 @@ function renderNapLive(){
  }
  const sg=S.sgWindow||null,sw=spendWords2();
  body.innerHTML='<div class="live-panel-grid"><section class="card"><div class="card-head"><div><div class="card-title">'+E(sw.title)+'</div><div class="card-sub">'+E(sw.sub)+'</div></div><span class="pill gold">'+activeSpend.length+'</span></div><div class="card-body live-list">'+
- (S.spend.length?S.spend.map(x=>{const st=spendingStatus2(x);return napRow2(x.player_name,(x.owner_alliance||'')+(x.player_game_id?' · ID '+x.player_game_id:'')+(x.reason?' · '+x.reason:'')+(x.ends_at?' · bis '+D(x.ends_at):''),(!x.ended_at&&x.owner_alliance===S.a&&st.label==='aktiv'?'<div class="hero-actions"><span class="pill '+st.cls+'">'+E(st.label)+'</span><button class="btn small secondary live-end-spend" data-id="'+E(x.id)+'">vorzeitig beenden</button></div>':'<span class="pill '+st.cls+'">'+E(st.label)+'</span>') )}).join(''):'<div class="live-empty-state">Keine Spending Exclusions vorhanden.</div>')+
+ (S.spend.length?S.spend.map(x=>{const st=spendingStatus2(x);return napRow2(x.player_name,(x.owner_alliance||'')+(x.player_game_id?' · ID '+x.player_game_id:'')+(x.reason?' · '+x.reason:'')+(x.ends_at?' · bis '+D(x.ends_at):''),(!x.ended_at&&x.owner_alliance===S.a&&st.key==='active'?'<div class="hero-actions"><span class="pill '+st.cls+'">'+E(st.label)+'</span><button class="btn small secondary live-end-spend" data-id="'+E(x.id)+'">'+E(sw.end)+'</button></div>':'<span class="pill '+st.cls+'">'+E(st.label)+'</span>') )}).join(''):'<div class="live-empty-state">Keine Spending Exclusions vorhanden.</div>')+
  '</div></section><section class="card"><div class="card-head"><div><div class="card-title">'+E(sw.add)+'</div><div class="card-sub">'+E(sw.addSub)+'</div></div></div><div class="card-body">'+
  (sg?'<div class="live-note" style="margin-bottom:12px"><b>'+E(sw.run)+'</b><br>'+E(D(sg.begin_at))+' → '+E(D(sg.end_at))+'<br>'+E(sw.rule)+'</div>':'<div class="live-empty-state">'+E(sw.none)+'</div>')+
  (sg?'<form id="liveSpendForm" class="live-form"><label>'+E(sw.player)+'<select id="liveSpendPlayer">'+S.p.map(p=>'<option value="'+E(p.id)+'">'+E(p.name||p.player_name)+' · '+E(p.game_id||'–')+'</option>').join('')+'</select></label><label>'+E(sw.reason)+'<textarea id="liveSpendReason" placeholder="'+E(sw.placeholder)+'"></textarea></label><button class="btn primary" type="submit">'+E(sw.save)+'</button><div id="liveSpendStatus" class="live-status"></div></form>':'')+
