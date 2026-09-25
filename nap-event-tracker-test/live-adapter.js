@@ -849,9 +849,13 @@ async function createSupportTicket2(e){
  finally{btn.disabled=false}
 }
 async function addSupportMessage2(e){
- e.preventDefault();const form=e.currentTarget,input=form.querySelector('textarea'),btn=form.querySelector('button'),out=form.querySelector('.live-status');
+ e.preventDefault();const form=e.currentTarget,input=form.querySelector('textarea'),files=form.querySelector('input[type="file"]')?.files,btn=form.querySelector('button'),out=form.querySelector('.live-status');
  const msg=input.value.trim();if(!msg)return;btn.disabled=true;out.textContent='…';
- try{await rpc('add_support_ticket_message',{p_ticket_id:form.dataset.ticketId,p_message:msg});input.value='';await renderSupportLive()}
+ try{
+  await rpc('add_support_ticket_message',{p_ticket_id:form.dataset.ticketId,p_message:msg});
+  if(files?.length)await uploadSupportFiles2(form.dataset.ticketId,files);
+  input.value='';form.querySelector('input[type="file"]')?.setAttribute('value','');await renderSupportLive()
+ }
  catch(err){out.textContent=err.message||String(err)}
  finally{btn.disabled=false}
 }
@@ -874,7 +878,7 @@ async function renderSupportLive(){
    return '<section class="card support-ticket"><div class="card-head"><div><div class="card-title">'+E(tk.subject)+'</div><div class="card-sub">'+E(supportCategory2(tk.category))+' · '+E(D(tk.created_at))+'</div></div><span class="pill '+(tk.status==='resolved'?'green':tk.status==='awaiting_user'?'gold':'blue')+'">'+E(supportStatus2(tk.status))+'</span></div><div class="card-body">'+
     '<div class="support-thread">'+msgs.map(m=>'<div class="support-msg '+(m.sender_type==='support'?'support':'alliance')+'"><b>'+E(m.sender_type==='support'?w.support:(S.a||w.alliance))+'</b><div>'+E(m.message).replace(/\n/g,'<br>')+'</div><small>'+E(D(m.created_at))+'</small></div>').join('')+'</div>'+
     (ev.length?'<div class="support-evidence-grid">'+ev.map(x=>'<a target="_blank" rel="noopener" title="'+E(x.file_name)+'"><img alt="'+E(w.image)+'" data-support-evidence-path="'+E(x.storage_path)+'"></a>').join('')+'</div>':'')+
-    '<form class="live-form live-support-reply" data-ticket-id="'+E(tk.id)+'" style="margin-top:12px"><label>'+E(w.reply)+'<textarea maxlength="4000" placeholder="'+E(w.replyPlaceholder)+'"></textarea></label><button class="btn small secondary" type="submit">'+E(w.replySend)+'</button><div class="live-status"></div></form>'+
+    '<form class="live-form live-support-reply" data-ticket-id="'+E(tk.id)+'" style="margin-top:12px"><label>'+E(w.reply)+'<textarea maxlength="4000" placeholder="'+E(w.replyPlaceholder)+'"></textarea></label><label>'+E(w.screens)+'<input type="file" accept="image/png,image/jpeg,image/webp" multiple><small>'+E(w.screenHint)+'</small></label><button class="btn small secondary" type="submit">'+E(w.replySend)+'</button><div class="live-status"></div></form>'+
    '</div></section>';
   }).join(''):'<div class="live-empty-state">'+E(w.none)+'</div>')+'</div>';
  document.getElementById('liveSupportCreate').onsubmit=createSupportTicket2;
