@@ -227,7 +227,7 @@ function v2ThemeIcon(){
 }
 function v2ToggleTheme(){
   const next=document.documentElement.dataset.v2Theme==='light'?'dark':'light';
-  document.documentElement.dataset.v2Theme=next;localStorage.setItem('nap-v2-theme',next);v2ThemeIcon();
+  document.documentElement.dataset.v2Theme=next;document.documentElement.dataset.theme=next;localStorage.setItem('nap-v2-theme',next);v2ThemeIcon();
 }
 
 function v2MakeNavButton(view,icon,label,extra='v2-desktop-extra'){
@@ -236,7 +236,7 @@ function v2MakeNavButton(view,icon,label,extra='v2-desktop-extra'){
   return b;
 }
 function v2DecorateShell(){
-  document.documentElement.dataset.v2Theme=localStorage.getItem('nap-v2-theme')||'dark';
+  const savedTheme=localStorage.getItem('nap-v2-theme')||'dark';document.documentElement.dataset.v2Theme=savedTheme;document.documentElement.dataset.theme=savedTheme;
   const top=document.querySelector('.topbar .row');
   if(top&&!document.getElementById('v2BellBtn')){
     const badge=document.createElement('span');badge.className='v2-test-badge';badge.textContent=v2t('test');top.prepend(badge);
