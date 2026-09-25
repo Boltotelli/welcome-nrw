@@ -110,6 +110,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 .support-agent-icon{width:22px;height:22px;display:block;fill:none;stroke:currentColor;stroke-width:1.85;stroke-linecap:round;stroke-linejoin:round}
 .nav-icon-support .support-agent-icon{width:21px;height:21px}
 .more-icon-support .support-agent-icon{width:22px;height:22px;margin:auto}
+.kvk-trophy-icon{width:21px;height:21px;display:block;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+.more-icon-kvk .kvk-trophy-icon{width:22px;height:22px;margin:auto}
 .support-top-btn:hover .support-agent-icon{transform:translateY(-.5px)}
 .support-agent-icon{transition:transform .14s ease}
 .badge-count{position:absolute;right:-3px;top:-4px;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:var(--red);color:white;display:grid;place-items:center;font-size:10px;font-weight:900;border:2px solid var(--bg)}
@@ -644,7 +646,14 @@ img[src*="./assets/alliance/"]{
       <button class="nav-btn" data-view="add"><span class="nav-icon">＋</span><span class="nav-label" data-i18n="add">Eintragen</span></button>
       <button class="nav-btn" data-view="players"><span class="nav-icon">♙</span><span class="nav-label" data-i18n="players">Spieler</span></button>
       <button class="nav-btn" data-view="nap"><span class="nav-icon">◈</span><span class="nav-label">NAP</span></button>
-      <button class="nav-btn" data-view="kvk"><span class="nav-icon">🏆</span><span class="nav-label">KvK</span></button>
+      <button class="nav-btn" data-view="kvk"><span class="nav-icon nav-icon-kvk"><svg class="kvk-trophy-icon" viewBox="0 0 24 24" aria-hidden="true">
+  <path d="M8 3h8v4.5c0 3.2-1.7 5.5-4 5.5s-4-2.3-4-5.5V3Z"/>
+  <path d="M8 5H4.5v1.8c0 2.2 1.4 3.8 3.6 4.1"/>
+  <path d="M16 5h3.5v1.8c0 2.2-1.4 3.8-3.6 4.1"/>
+  <path d="M12 13v4"/>
+  <path d="M9 17h6"/>
+  <path d="M8 21h8"/>
+</svg></span><span class="nav-label">KvK</span></button>
       <button class="nav-btn" data-view="laws"><span class="nav-icon">⚖</span><span class="nav-label">Laws</span></button>
       <div class="nav-section" data-i18n="analysis">Analyse</div>
       <button class="nav-btn" data-view="performance"><span class="nav-icon">▥</span><span class="nav-label">Performance</span></button>
@@ -1297,7 +1306,14 @@ img[src*="./assets/alliance/"]{
 </nav>
 <div class="more-sheet" id="moreSheet">
   <div class="more-grid">
-    <button class="more-item" data-view="kvk"><span class="more-icon">🏆</span><span class="more-label">KvK</span></button>
+    <button class="more-item" data-view="kvk"><span class="more-icon more-icon-kvk"><svg class="kvk-trophy-icon" viewBox="0 0 24 24" aria-hidden="true">
+  <path d="M8 3h8v4.5c0 3.2-1.7 5.5-4 5.5s-4-2.3-4-5.5V3Z"/>
+  <path d="M8 5H4.5v1.8c0 2.2 1.4 3.8 3.6 4.1"/>
+  <path d="M16 5h3.5v1.8c0 2.2-1.4 3.8-3.6 4.1"/>
+  <path d="M12 13v4"/>
+  <path d="M9 17h6"/>
+  <path d="M8 21h8"/>
+</svg></span><span class="more-label">KvK</span></button>
     <button class="more-item" data-view="laws"><span class="more-icon">⚖</span><span class="more-label">Laws</span></button>
     <button class="more-item" data-view="performance"><span class="more-icon">▥</span><span class="more-label">Performance</span></button>
     <button class="more-item" data-view="crown"><span class="more-icon">♛</span><span class="more-label">Crown</span></button>
@@ -1727,7 +1743,7 @@ document.getElementById('settingsSaveDemo')?.addEventListener('click',()=>{
 });
 
 </script>
-<script src="./live-adapter.js?v=20260925-support-icon-all-nav"></script>
+<script src="./live-adapter.js?v=20260925-kvk-mono-icon"></script>
 <script src="./native-screen-import.js?v=20260925-final-ux-pass"></script>
 <script src="./live-translations-v2.js?v=20260925-overdue-days-i18n"></script>
 </body>
