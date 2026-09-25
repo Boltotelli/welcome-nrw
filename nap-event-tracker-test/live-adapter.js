@@ -404,7 +404,7 @@ function renderNapLive(){
  }
  if(liveNapTab==='exclusions'){
    body.innerHTML='<div class="live-panel-grid"><section class="card"><div class="card-head"><div><div class="card-title">Aktive Exclusions</div></div><span class="pill red">'+S.e.length+'</span></div><div class="card-body live-list">'+
-   (S.e.length?S.e.map(x=>napRow2(x.player_name,(x.alliance_code||'')+' · Stufe '+x.level,(x.alliance_code===S.a&&x.id?'<div class="hero-actions"><span class="pill">'+(x.end_at?E(D(x.end_at)):'∞')+'</span><button class="btn small secondary live-end-exclusion" data-id="'+E(x.id)+'">Exclusion beenden</button></div>':'<span class="pill">'+(x.end_at?E(D(x.end_at)):'∞')+'</span>'))).join(''):'<div class="live-empty-state">Keine aktive Exclusion.</div>')+
+   (S.e.length?S.e.map(x=>napRow2(x.player_name,(x.alliance_code||'')+' · Stufe '+x.level,(Number(x.level)===4&&x.alliance_code===S.a&&x.id?'<div class="hero-actions"><span class="pill">'+(x.end_at?E(D(x.end_at)):'∞')+'</span><button class="btn small secondary live-end-exclusion" data-id="'+E(x.id)+'">'+E(extendedActionWords2().endNow)+'</button></div>':'<span class="pill">'+(x.end_at?E(D(x.end_at)):'∞')+'</span>'))).join(''):'<div class="live-empty-state">Keine aktive Exclusion.</div>')+
    '</div></section><section class="card"><div class="card-head"><div><div class="card-title">Manuelle Exclusion</div><div class="card-sub">Wie in 1.0: zusätzliche NAP-Exclusion anlegen.</div></div></div><div class="card-body"><form id="liveExclusionForm" class="live-form"><label>Spieler<input id="liveExPlayer" required></label><div class="live-form-row"><label>Stufe<select id="liveExLevel"><option value="3">3 · 24h</option><option value="4">4 · Extended</option></select></label><label>Ende<input id="liveExEnd" type="datetime-local"></label></div><button class="btn primary" type="submit">Exclusion speichern</button><div id="liveExStatus" class="live-status"></div></form></div></section></div>';
    document.getElementById('liveExclusionForm').onsubmit=saveManualExclusion2;document.querySelectorAll('.live-end-exclusion').forEach(b=>b.onclick=()=>endExclusion2(b.dataset.id));return;
  }
@@ -422,8 +422,13 @@ function renderNapLive(){
 async function saveSpending2(e){e.preventDefault();const out=document.getElementById('liveSpendStatus');out.textContent='Speichere …';try{await rpc('create_nap_spending_exclusion',{p_player_id:document.getElementById('liveSpendPlayer').value,p_starts_at:new Date(document.getElementById('liveSpendStart').value).toISOString(),p_ends_at:new Date(document.getElementById('liveSpendEnd').value).toISOString(),p_reason:document.getElementById('liveSpendReason').value.trim()||null});await load();renderNapLive()}catch(err){out.textContent=err.message||String(err)}}
 async function endSpending2(id){if(!confirm('Spending Exclusion beenden?'))return;try{await rpc('end_nap_spending_exclusion',{p_id:id});await load();renderNapLive()}catch(err){alert(err.message||String(err))}}
 async function endExclusion2(id){
- if(!confirm('Diese NAP Exclusion jetzt beenden?'))return;
- try{await upd('sanctions',id,{completed:true});await load();renderNapLive();renderNotifications2();renderHomeFull2()}catch(err){alert(err.message||String(err))}
+ const x=(S.e||[]).find(r=>String(r.id)===String(id)),w=extendedActionWords2();
+ if(!x||Number(x.level)!==4||x.alliance_code!==S.a)return;
+ if(!confirm(w.endConfirm))return;
+ try{
+  await upd('sanctions',id,{end_at:new Date().toISOString(),completed:true});
+  await load();renderNapLive();renderNotifications2();renderHomeFull2();
+ }catch(err){alert(err.message||String(err))}
 }
 async function saveManualExclusion2(e){
  e.preventDefault();const out=document.getElementById('liveExStatus');out.textContent='Speichere …';
@@ -905,10 +910,10 @@ function profileActionLabel2(s){
  return v?.contacted?t('contact'):profileActionDone2(s)?'erledigt':'offen';
 }
 const EXTENDED_ACTION_WORDS2={
- de:{notice:'Nur nach NAP-Abstimmung starten. Ohne Endzeit bleibt die Extended Exclusion aktiv, bis sie manuell beendet wird.',end:'Optionales Ende',start:'Extended Exclusion starten',confirm:'Extended NAP Exclusion jetzt starten?',badEnd:'Das optionale Ende muss in der Zukunft liegen.',started:'Extended Exclusion gestartet'},
- en:{notice:'Start only after a NAP vote. Without an end time, the Extended Exclusion remains active until it is ended manually.',end:'Optional end',start:'Start Extended Exclusion',confirm:'Start the Extended NAP Exclusion now?',badEnd:'The optional end time must be in the future.',started:'Extended Exclusion started'},
- fr:{notice:'Démarrer uniquement après un vote NAP. Sans date de fin, l’exclusion prolongée reste active jusqu’à sa clôture manuelle.',end:'Fin facultative',start:'Démarrer l’exclusion prolongée',confirm:'Démarrer maintenant l’exclusion NAP prolongée ?',badEnd:'La fin facultative doit être dans le futur.',started:'Exclusion prolongée démarrée'},
- es:{notice:'Iniciar solo después de una votación NAP. Sin fecha de fin, la exclusión ampliada seguirá activa hasta que se cierre manualmente.',end:'Fin opcional',start:'Iniciar exclusión ampliada',confirm:'¿Iniciar ahora la exclusión NAP ampliada?',badEnd:'La fecha de fin opcional debe estar en el futuro.',started:'Exclusión ampliada iniciada'}
+ de:{notice:'Nur nach NAP-Abstimmung starten. Ohne Endzeit bleibt die Extended Exclusion aktiv, bis sie manuell beendet wird.',end:'Optionales Ende',start:'Extended Exclusion starten',confirm:'Extended NAP Exclusion jetzt starten?',badEnd:'Das optionale Ende muss in der Zukunft liegen.',started:'Extended Exclusion gestartet',endNow:'Extended beenden',endConfirm:'Extended NAP Exclusion jetzt beenden?',ended:'Extended Exclusion beendet'},
+ en:{notice:'Start only after a NAP vote. Without an end time, the Extended Exclusion remains active until it is ended manually.',end:'Optional end',start:'Start Extended Exclusion',confirm:'Start the Extended NAP Exclusion now?',badEnd:'The optional end time must be in the future.',started:'Extended Exclusion started',endNow:'End Extended',endConfirm:'End the Extended NAP Exclusion now?',ended:'Extended Exclusion ended'},
+ fr:{notice:'Démarrer uniquement après un vote NAP. Sans date de fin, l’exclusion prolongée reste active jusqu’à sa clôture manuelle.',end:'Fin facultative',start:'Démarrer l’exclusion prolongée',confirm:'Démarrer maintenant l’exclusion NAP prolongée ?',badEnd:'La fin facultative doit être dans le futur.',started:'Exclusion prolongée démarrée',endNow:'Terminer l’exclusion prolongée',endConfirm:'Terminer maintenant l’exclusion NAP prolongée ?',ended:'Exclusion prolongée terminée'},
+ es:{notice:'Iniciar solo después de una votación NAP. Sin fecha de fin, la exclusión ampliada seguirá activa hasta que se cierre manualmente.',end:'Fin opcional',start:'Iniciar exclusión ampliada',confirm:'¿Iniciar ahora la exclusión NAP ampliada?',badEnd:'La fecha de fin opcional debe estar en el futuro.',started:'Exclusión ampliada iniciada',endNow:'Finalizar exclusión ampliada',endConfirm:'¿Finalizar ahora la exclusión NAP ampliada?',ended:'Exclusión ampliada finalizada'}
 };
 function extendedActionWords2(){return EXTENDED_ACTION_WORDS2[L()]||EXTENDED_ACTION_WORDS2.de}
 async function startExtendedExclusion2(id,input){
