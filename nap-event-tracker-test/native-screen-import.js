@@ -502,7 +502,7 @@ function showReview(r){
    '<span><strong>'+esc(h.player.player_name)+'</strong><small>'+esc(h.player.alliance_code||'')+' · '+esc(h.player.player_game_id||'')+(h.manual?' · '+esc(reviewText('manual')):'')+'</small></span></label>'+
    '<input type="text" inputmode="numeric" autocomplete="off" data-score="'+i+'" value="'+esc(points(h.score))+'" aria-label="'+esc(tr('score'))+'">'+
    (r.kind==='perf'&&$('#nocrType',root).value==='kvk_prep'?'<input type="number" min="1" max="200" step="1" data-rank="'+i+'" value="'+esc(h.rank||'')+'" aria-label="'+esc(tr('rank'))+'">':'')+
-   reviewStatus(h,r,st)+(needsEvidence?'<div class="nocr-status error">'+esc(reviewText('evidence'))+' required</div>':'')+
+   reviewStatus(h,r,st)+(needsEvidence?'<div class="nocr-status error">'+esc(tr('evidenceRequired'))+'</div>':'')+
    (r.kind==='law'&&st?.post_contact_confirmation_required?'<label class="nocr-post-contact-confirm"><input type="checkbox" data-post-contact-confirm="'+i+'" '+(h.postContactConfirmed?'checked':'')+'><span><strong>'+esc(postContactText('title'))+'</strong><small>'+esc(postContactText('hint'))+'</small></span></label>':'')+
    (h.image?'<details><summary>'+esc(tr('frame'))+'</summary><img src="'+h.image+'" alt="'+esc(tr('frame'))+'"></details>':'')+'</article>'
  }).join('')+
