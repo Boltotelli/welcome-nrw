@@ -631,6 +631,7 @@ img[src*="./assets/alliance/"]{
       <button class="nav-btn" data-view="crown"><span class="nav-icon">♛</span><span class="nav-label">Crown</span></button>
       <button class="nav-btn" data-view="activity"><span class="nav-icon">◷</span><span class="nav-label" data-i18n="activity">Aktivität</span></button>
       <button class="nav-btn" data-view="settings"><span class="nav-icon">⚙</span><span class="nav-label" data-i18n="settings">Einstellungen</span></button>
+      <button class="nav-btn" data-view="support"><span class="nav-icon">?</span><span class="nav-label">Support</span></button>
     </nav>
     <div class="sidebar-footer">
       <div class="concept">Standalone UI-Konzept<br>Keine Datenbankverbindung.</div>
@@ -1216,6 +1217,9 @@ img[src*="./assets/alliance/"]{
 
   <div class="toast" id="settingsToast" hidden>✓ <span data-i18n="settingsSaved">Einstellungen gespeichert.</span></div>
 </section>
+      <section class="view" id="view-support">
+        <div class="hero"><div><div class="kicker">SUPPORT</div><h1>Support</h1><p>Support wird geladen …</p></div></div>
+      </section>
     </main>
   </div>
 </div>
@@ -1256,6 +1260,7 @@ img[src*="./assets/alliance/"]{
     <button class="more-item" data-view="crown"><span class="more-icon">♛</span><span class="more-label">Crown</span></button>
     <button class="more-item" data-view="activity"><span class="more-icon">◷</span><span class="more-label" data-i18n="activity">Aktivität</span></button>
     <button class="more-item" data-view="settings"><span class="more-icon">⚙</span><span class="more-label" data-i18n="settings">Einstellungen</span></button>
+    <button class="more-item" data-view="support"><span class="more-icon">?</span><span class="more-label">Support</span></button>
     <button class="more-item" id="themeToggleMobile"><span class="more-icon" id="themeIconMobile"></span><span class="more-label" data-i18n="theme">Theme</span></button>
     <button class="more-item" id="bellMobile"><span class="more-icon">🔔</span><span class="more-label" data-i18n="notifications">Meldungen</span></button>
   </div>
@@ -1281,7 +1286,7 @@ Object.assign(UI.fr,{homeTitleV4:'Votre situation NAP en un coup d’œil.',home
 Object.assign(UI.es,{homeTitleV4:'Tu situación NAP de un vistazo.',homeSubV4:'Tus propias medidas, avisos NAP y cambios de alianza relevantes, claramente separados por responsabilidad.',myOpenActions:'Tus medidas abiertas',oneDeadlineNear:'1 plazo se acerca',napWideOverdue:'Vencido en NAP',visibleToAllNap:'visible para todas las alianzas NAP',relevantTransfers:'Cambios relevantes',onlyYourAlliance:'solo relacionados con tu alianza',napWideNotice:'Aviso NAP',napWideAlertCopyV4:'THM no ha aplicado una medida de Law 14 después de 24 horas. El aviso ahora es visible en todo el NAP.',privateAllianceWarning:'Solo tu alianza',ownDeadlineTitle:'Una de tus medidas se acerca al límite de 24 h',notSharedYet:'todavía no compartido en NAP',openPlayer:'Abrir jugador',myActionRequired:'Mis acciones pendientes',ownAllianceOnly:'Solo medidas de tu alianza conectada',threeOpen:'3 abiertas',level1Contact:'Nivel 1 · Contacto',seventeenHoursLeft:'17:08h hasta aviso NAP',awaitingActivation:'Aplicación aún no confirmada',recentOwnViolations:'Infracciones recientes propias',privateOwnAlliance:'Los detalles privados permanecen en tu alianza',awaitingActivationShort:'NAP OUT pendiente',napTransparencyV4:'Solo información NAP publicada por otras alianzas',activePublicExclusion:'Exclusión NAP activa',endsIn:'termina en 13:19h',transferVisibilityRule:'Solo cambios donde NRW sea origen o destino',violationRecorded:'Infracción registrada · Nivel 3',notificationScope:'Avisos NAP y solo notificaciones relevantes para tu alianza',myAlliance:'Mi alianza',markAllRead:'Marcar todo como leído',privacyNotificationHint:'Los detalles privados de infracciones de otras alianzas no se muestran aquí.',ownDeadlineNotification:'Medida propia cerca del límite de 24 h',ownDeadlineNotificationCopy:'– · Nivel 2 · R1 · 05:36h hasta aviso NAP',transferIncoming:'Cambio hacia NRW detectado',transferOutgoing:'Cambio desde NRW detectado',incoming:'Entrada',outgoing:'Salida',noNotifications:'No hay notificaciones en esta sección.',system:'Sistema',napOverdueNotification:'THM superó el plazo de 24 h',napOverdueCopy:'– · Nivel 2 · R1 · abierta desde hace 26 h',publicExclusionNotification:'Exclusión NAP activada',publicExclusionCopy:'Hakuna Matata · CWR · NAP OUT 24h',screenImportNotification:'ScreenRecording procesado',screenImportCopy:'Strongest Governor · 4 posibles infracciones detectadas',now:'ahora',ago12m:'hace 12 min',ago51m:'hace 51 min',ago1h:'hace 1 h',ago2h:'hace 2 h',transferRelevantHint:'Este cambio afecta a tu alianza y por eso es visible.',confirmTransfer:'Confirmar cambio',temporaryTransfer:'Temporal',markTemporary:'Marcar temporal',doNotConfirm:'No confirmar',savedDemo:'Guardado en el prototipo.'});
 
 let currentLang='de';
-const titles={home:'home',add:'add',players:'playerFiles',profile:'playerFiles',nap:'NAP Center',kvk:'KvK',laws:'Laws',performance:'Performance',crown:'Crown',activity:'activity',settings:'settings'};
+const titles={home:'home',add:'add',players:'playerFiles',profile:'playerFiles',nap:'NAP Center',kvk:'KvK',laws:'Laws',performance:'Performance',crown:'Crown',activity:'activity',settings:'settings',support:'Support'};
 
 Object.assign(UI.de,{
   quickContact:'Als kontaktiert markieren',
@@ -1669,7 +1674,7 @@ document.getElementById('settingsSaveDemo')?.addEventListener('click',()=>{
 });
 
 </script>
-<script src="./live-adapter.js?v=20260925-settings-sg-stats"></script>
+<script src="./live-adapter.js?v=20260925-support-v1"></script>
 <script src="./native-screen-import.js?v=20260925-final-ux-pass"></script>
 <script src="./live-translations-v2.js?v=20260925-overdue-days-i18n"></script>
 </body>
