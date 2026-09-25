@@ -761,10 +761,41 @@ async function saveViolationEdit2(e,old){
   document.getElementById('liveViolationEditModal')?.remove();await load();await openProfile2(editedPlayer||old.player_name);
  }catch(err){out.textContent=err.message||String(err)}
 }
+const DELETE_REASON_WORDS2={
+ de:{title:'Verstoß löschen',sub:'Die zugehörige Sanktionskette wird neu berechnet.',label:'Begründung',hint:'Mindestens 5 Zeichen. Die Begründung wird im Audit-Log gespeichert.',cancel:'Abbrechen',confirm:'Endgültig löschen',short:'Bitte eine Begründung mit mindestens 5 Zeichen eingeben.'},
+ en:{title:'Delete violation',sub:'The linked sanction chain will be recalculated.',label:'Reason',hint:'At least 5 characters. The reason is stored in the audit log.',cancel:'Cancel',confirm:'Delete permanently',short:'Enter a reason with at least 5 characters.'},
+ fr:{title:'Supprimer l’infraction',sub:'La chaîne de sanctions associée sera recalculée.',label:'Motif',hint:'Au moins 5 caractères. Le motif est enregistré dans le journal d’audit.',cancel:'Annuler',confirm:'Supprimer définitivement',short:'Saisissez un motif d’au moins 5 caractères.'},
+ es:{title:'Eliminar infracción',sub:'Se recalculará la cadena de sanciones asociada.',label:'Motivo',hint:'Mínimo 5 caracteres. El motivo se guarda en el registro de auditoría.',cancel:'Cancelar',confirm:'Eliminar definitivamente',short:'Introduce un motivo de al menos 5 caracteres.'}
+};
+function askDeleteReason2(v){
+ const w=DELETE_REASON_WORDS2[L()]||DELETE_REASON_WORDS2.de;
+ document.getElementById('liveDeleteReasonModal')?.remove();
+ return new Promise(resolve=>{
+  const modal=document.createElement('div');modal.id='liveDeleteReasonModal';modal.className='modal-backdrop';
+  modal.innerHTML='<div class="modal-card"><div class="modal-head"><div><b>'+E(w.title)+'</b><small>'+E(v.player_name||'–')+' · '+E(v.event_name||'')+'</small></div><button class="icon-btn live-delete-close" type="button">×</button></div>'+
+   '<div class="live-form"><div class="notice warn">'+E(w.sub)+'</div><label>'+E(w.label)+'<textarea class="live-delete-reason" maxlength="500" rows="4" placeholder="'+E(w.hint)+'"></textarea></label>'+
+   '<div class="hero-actions"><button class="btn secondary live-delete-cancel" type="button">'+E(w.cancel)+'</button><button class="btn danger live-delete-confirm" type="button">'+E(w.confirm)+'</button></div><div class="live-status live-delete-status"></div></div></div>';
+  document.body.appendChild(modal);
+  const close=val=>{modal.remove();resolve(val)};
+  modal.querySelector('.live-delete-close').onclick=()=>close(null);
+  modal.querySelector('.live-delete-cancel').onclick=()=>close(null);
+  modal.onclick=e=>{if(e.target===modal)close(null)};
+  modal.querySelector('.live-delete-confirm').onclick=()=>{
+   const reason=modal.querySelector('.live-delete-reason').value.trim();
+   if(reason.length<5){modal.querySelector('.live-delete-status').textContent=w.short;return}
+   close(reason);
+  };
+  modal.querySelector('.live-delete-reason').focus();
+ });
+}
 async function deleteViolation2(v){
- if(!confirm('Verstoß von '+v.player_name+' wirklich löschen? Die zugehörige Maßnahme wird neu berechnet.'))return;
+ const reason=await askDeleteReason2(v);if(!reason)return;
  const out=document.getElementById('liveVioEditStatus');if(out)out.textContent='Lösche …';
- try{await rpc('delete_violation_fast',{p_id:v.id});document.getElementById('liveViolationEditModal')?.remove();await load();renderHomeFull2();renderPlayers2();await openProfile2(v.player_name)}catch(err){if(out)out.textContent=err.message||String(err)}
+ try{
+  await rpc('delete_violation_fast',{p_id:v.id,p_reason:reason});
+  document.getElementById('liveViolationEditModal')?.remove();
+  await load();renderHomeFull2();renderPlayers2();await openProfile2(v.player_name);
+ }catch(err){if(out)out.textContent=err.message||String(err)}
 }
 function profileStage2(l){
  const text={
