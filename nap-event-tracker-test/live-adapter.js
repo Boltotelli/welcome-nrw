@@ -2,7 +2,7 @@
 if(window.NAP2_LIVE_ADAPTER)return;window.NAP2_LIVE_ADAPTER=true;
 const C={u:'https://bdzlgirowutasrsycjfj.supabase.co',k:'sb_publishable_8i1ismeQtj9WM-xVN_Vm0w_Tj7AvVtL',s:'nap_v4_supabase_session'};
 let crownAllowed2=false;
-const S={a:null,profile:null,p:[],v:[],x:[],e:[],o:[],t:[],bans:[],spend:[],reviews:[],shared:[],settings:null,avatars:{},laws:[],lawCases:[],lawEvidence:[],performance:null,crown:null,activity:[],eventOptions:[],features:null,law9:null,notificationReads:new Set(),syncStatus:null,level4Hosting:[],napStats:[],sgWindow:null};
+const S={a:null,profile:null,p:[],v:[],x:[],e:[],o:[],t:[],bans:[],spend:[],reviews:[],shared:[],settings:null,avatars:{},laws:[],lawCases:[],lawEvidence:[],performance:null,crown:null,activity:[],eventOptions:[],features:null,law9:null,notificationReads:new Set(),syncStatus:null,level4Hosting:[],napStats:[],sgWindow:null,supportTickets:[],supportMessages:[],supportEvidence:[]};
 let ses=null;try{ses=JSON.parse(localStorage.getItem(C.s)||'null')}catch{}
 const L=()=>window.currentLang||document.querySelector('#languagePicker')?.value||'de';
 const T={de:{login:'Anmelden',alliance:'Allianz',password:'Passwort',hint:'Ein zentraler Login pro Allianz. Private Daten bleiben innerhalb der eigenen Allianz.',fail:'Login fehlgeschlagen.',logout:'Abmelden',live:'LIVE DATEN',open:'Öffnen',contact:'Kontaktiert',r1:'R1 umgesetzt',nap:'24h NAP OUT aktivieren',none:'Keine Einträge.',actions:'offen',over:'überfällig',left:'verbleibend',tempTransfer:'Als temporär markieren',rejectTemp:'Ablehnen · temporär',tempTransferQ:'Diesen Wechsel als temporär markieren? Die Spielerakte bleibt in der Heimatallianz; der Hinweis wird 7 Tage ausgeblendet.',rejectTempQ:'Diesen Neuzugang als temporär ablehnen? Die Spielerakte bleibt bei der bisherigen Allianz. Der Hinweis wird 7 Tage ausgeblendet und erscheint erneut, falls der Spieler danach weiterhin bei deiner Allianz geführt wird.'},en:{login:'Sign in',alliance:'Alliance',password:'Password',hint:'One central login per alliance. Private data stays within your alliance.',fail:'Login failed.',logout:'Sign out',live:'LIVE DATA',open:'Open',contact:'Contacted',r1:'R1 implemented',nap:'Activate 24h NAP OUT',none:'No entries.',actions:'open',over:'overdue',left:'remaining',tempTransfer:'Mark as temporary',rejectTemp:'Reject · temporary',tempTransferQ:'Mark this transfer as temporary? The player file stays with the home alliance and the notice is hidden for 7 days.',rejectTempQ:'Reject this incoming player as temporary? The player file stays with the previous alliance. The notice is hidden for 7 days and will appear again if the player is still listed with your alliance afterwards.'},fr:{login:'Connexion',alliance:'Alliance',password:'Mot de passe',hint:'Un login central par alliance. Les données privées restent dans votre alliance.',fail:'Échec de connexion.',logout:'Déconnexion',live:'DONNÉES LIVE',open:'Ouvrir',contact:'Contacté',r1:'R1 appliqué',nap:'Activer NAP OUT 24 h',none:'Aucune entrée.',actions:'ouvert',over:'en retard',left:'restant',tempTransfer:'Marquer temporaire',rejectTemp:'Refuser · temporaire',tempTransferQ:'Marquer ce transfert comme temporaire ? Le dossier reste dans l’alliance d’origine et l’alerte est masquée pendant 7 jours.',rejectTempQ:'Refuser ce joueur entrant comme transfert temporaire ? Le dossier reste dans l’alliance précédente. L’alerte est masquée pendant 7 jours et réapparaît si le joueur est toujours dans votre alliance ensuite.'},es:{login:'Iniciar sesión',alliance:'Alianza',password:'Contraseña',hint:'Un login central por alianza. Los datos privados permanecen en tu alianza.',fail:'Error de inicio de sesión.',logout:'Cerrar sesión',live:'DATOS LIVE',open:'Abrir',contact:'Contactado',r1:'R1 aplicado',nap:'Activar NAP OUT 24 h',none:'No hay entradas.',actions:'abiertas',over:'vencido',left:'restante',tempTransfer:'Marcar temporal',rejectTemp:'Rechazar · temporal',tempTransferQ:'¿Marcar este cambio como temporal? El expediente permanece en la alianza de origen y el aviso se oculta durante 7 días.',rejectTempQ:'¿Rechazar este jugador entrante como temporal? El expediente permanece en la alianza anterior. El aviso se oculta durante 7 días y volverá a aparecer si el jugador sigue en tu alianza después.'}};
@@ -32,7 +32,7 @@ async function h(json=false){const a=await token();return {apikey:C.k,...(a?{Aut
 async function tab(n,s=''){return q(C.u+'/rest/v1/'+n+(s?'?'+s:''),{headers:await h()})}
 async function rpc(n,b={}){return q(C.u+'/rest/v1/rpc/'+n,{method:'POST',headers:await h(true),body:JSON.stringify(b)})}
 async function upd(n,id,b){return q(C.u+'/rest/v1/'+n+'?id=eq.'+encodeURIComponent(id),{method:'PATCH',headers:{...(await h(true)),Prefer:'return=minimal'},body:JSON.stringify(b)})}
-function css(){const s=document.createElement('style');s.textContent=`body.n2lock .app{filter:blur(5px);pointer-events:none}.n2login{position:fixed;inset:0;z-index:999;background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(16px);display:grid;place-items:center;padding:18px}.n2login[hidden]{display:none}.n2box{width:min(420px,100%);padding:24px;border:1px solid var(--line);border-radius:22px;background:var(--panel);box-shadow:var(--shadow)}.n2box h2{margin:5px 0}.n2box p{color:var(--muted);font-size:11px}.n2grid{display:grid;gap:10px;margin-top:16px}.n2grid label{display:grid;gap:5px;font-size:10px;color:var(--muted);font-weight:800}.n2grid input,.n2grid select{min-height:42px;border:1px solid var(--line);border-radius:11px;background:var(--panel-2);color:var(--text);padding:9px 11px}.n2err{min-height:16px;color:var(--red);font-size:10px}.n2live{font-size:8px;padding:4px 7px;border-radius:999px;background:var(--green);color:#08140d;font-weight:900}.n2empty{padding:18px;text-align:center;color:var(--muted);font-size:10px}.user-pill{cursor:pointer}@media(min-width:801px){.sidebar:hover{--sidebar:var(--sidebar-open)}.sidebar:hover~.shell{margin-left:var(--sidebar-open)}.sidebar:hover .brandtext,.sidebar:hover .nav-label{opacity:1;transform:none}.sidebar:hover .nav-section,.sidebar:hover .concept{opacity:.9}}.home-hero-tools{min-width:220px}.home-sync-status{margin-top:9px;padding:9px 12px;border:1px solid var(--line);border-radius:12px;background:var(--panel-2);display:grid;gap:4px;min-width:220px}.home-sync-status>span,.home-sync-status small{font-size:9px;color:var(--muted);font-weight:800}.home-sync-status b{font-size:11px}.home-sync-meta{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}.home-sync-meta b,.home-sync-meta small{white-space:nowrap}@media(max-width:640px){.home-hero-tools{width:100%;min-width:0}.home-hero-tools .hero-actions{margin-bottom:10px}.home-sync-status{min-width:0;width:100%;margin-top:0;padding:9px 11px;gap:5px}.home-sync-meta{justify-content:space-between;column-gap:12px;row-gap:4px}}`;document.head.appendChild(s)}
+function css(){const s=document.createElement('style');s.textContent=`body.n2lock .app{filter:blur(5px);pointer-events:none}.n2login{position:fixed;inset:0;z-index:999;background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(16px);display:grid;place-items:center;padding:18px}.n2login[hidden]{display:none}.n2box{width:min(420px,100%);padding:24px;border:1px solid var(--line);border-radius:22px;background:var(--panel);box-shadow:var(--shadow)}.n2box h2{margin:5px 0}.n2box p{color:var(--muted);font-size:11px}.n2grid{display:grid;gap:10px;margin-top:16px}.n2grid label{display:grid;gap:5px;font-size:10px;color:var(--muted);font-weight:800}.n2grid input,.n2grid select{min-height:42px;border:1px solid var(--line);border-radius:11px;background:var(--panel-2);color:var(--text);padding:9px 11px}.n2err{min-height:16px;color:var(--red);font-size:10px}.n2live{font-size:8px;padding:4px 7px;border-radius:999px;background:var(--green);color:#08140d;font-weight:900}.n2empty{padding:18px;text-align:center;color:var(--muted);font-size:10px}.user-pill{cursor:pointer}@media(min-width:801px){.sidebar:hover{--sidebar:var(--sidebar-open)}.sidebar:hover~.shell{margin-left:var(--sidebar-open)}.sidebar:hover .brandtext,.sidebar:hover .nav-label{opacity:1;transform:none}.sidebar:hover .nav-section,.sidebar:hover .concept{opacity:.9}}.home-hero-tools{min-width:220px}.home-sync-status{margin-top:9px;padding:9px 12px;border:1px solid var(--line);border-radius:12px;background:var(--panel-2);display:grid;gap:4px;min-width:220px}.home-sync-status>span,.home-sync-status small{font-size:9px;color:var(--muted);font-weight:800}.home-sync-status b{font-size:11px}.home-sync-meta{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}.home-sync-meta b,.home-sync-meta small{white-space:nowrap}@media(max-width:640px){.home-hero-tools{width:100%;min-width:0}.home-hero-tools .hero-actions{margin-bottom:10px}.home-sync-status{min-width:0;width:100%;margin-top:0;padding:9px 11px;gap:5px}.home-sync-meta{justify-content:space-between;column-gap:12px;row-gap:4px}}.support-thread{display:grid;gap:9px}.support-msg{max-width:min(760px,92%);padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:var(--panel-2);display:grid;gap:5px}.support-msg.alliance{justify-self:end;background:color-mix(in srgb,var(--blue) 8%,var(--panel-2));border-color:color-mix(in srgb,var(--blue) 28%,var(--line))}.support-msg.support{justify-self:start;background:color-mix(in srgb,var(--green) 8%,var(--panel-2));border-color:color-mix(in srgb,var(--green) 28%,var(--line))}.support-msg small{color:var(--muted);font-size:9px}.support-evidence-grid{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.support-evidence-grid a{display:block;width:88px;height:66px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--panel-3)}.support-evidence-grid img{width:100%;height:100%;object-fit:cover}.support-ticket{margin-bottom:14px}.support-safety-note{border-color:color-mix(in srgb,var(--blue) 30%,var(--line));background:color-mix(in srgb,var(--blue) 6%,var(--panel-2))}`;document.head.appendChild(s)}
 function login(){const d=document.createElement('div');d.id='n2login';d.className='n2login';d.innerHTML=`<div class="n2box"><div class="kicker">NAP Event Tracker 2.0 · TEST</div><h2>Kingdom 1044</h2><p>${E(t('hint'))}</p><form class="n2grid" id="n2form"><label>${E(t('alliance'))}<select id="n2a" class="n2alliance-select" tabindex="-1" aria-hidden="true"><option>NRW</option><option>THM</option><option>NWO</option><option>NwO</option><option>CWR</option><option>PxR</option></select></label><div class="n2alliance-grid" role="group" aria-label="${E(t('alliance'))}">${['NRW','THM','NWO','NwO','CWR','PxR'].map(a=>`<button type="button" class="n2alliance-choice ${a==='NRW'?'active':''}" data-login-alliance="${a}" aria-pressed="${a==='NRW'}">${a}</button>`).join('')}</div><label>${E(t('password'))}<input id="n2p" type="password" required></label><div id="n2e" class="n2err"></div><button class="btn primary">${E(t('login'))}</button></form></div>`;document.body.appendChild(d);d.querySelectorAll('[data-login-alliance]').forEach(b=>b.onclick=()=>{
  const code=b.dataset.loginAlliance;d.querySelector('#n2a').value=code;
  d.querySelectorAll('[data-login-alliance]').forEach(x=>{const selected=x.dataset.loginAlliance===code;x.classList.toggle('active',selected);x.setAttribute('aria-pressed',String(selected))});
@@ -395,10 +395,11 @@ function spendingStatus2(x){
  return {key:'active',label:w.active,cls:'green'};
 }
 function napViolationStats2(){
- const rows=Array.isArray(S.napStats)?S.napStats:[],w=napStatsWords2();
- if(!rows.length)return '';
+ const raw=Array.isArray(S.napStats)?S.napStats:[],w=napStatsWords2(),codes=['NRW','THM','NWO','NwO','CWR','PxR'];
+ if(!raw.length)return '';
+ const rows=codes.map(code=>raw.find(x=>String(x.alliance_code)===code)||{alliance_code:code,valid_violations:0,affected_players:0});
  return '<section class="card" style="margin-bottom:14px"><div class="card-head"><div><div class="card-title">'+E(w.title)+'</div><div class="card-sub">'+E(w.sub)+'</div></div><span class="pill">'+rows.reduce((n,x)=>n+Number(x.valid_violations||0),0)+'</span></div><div class="card-body"><div class="live-stat-grid">'+
- rows.map(x=>'<div class="live-stat"><b>'+N(x.valid_violations||0)+'</b><small>'+E(x.alliance_code)+' · '+N(x.affected_players||0)+' '+E(w.players)+'</small></div>').join('')+
+ rows.map(x=>'<div class="live-stat"><b>'+N(x.valid_violations||0)+'</b><small><span style="text-transform:none">'+E(x.alliance_code)+'</span> · '+N(x.affected_players||0)+' '+E(w.players)+'</small></div>').join('')+
  '</div></div></section>';
 }
 function renderNapLive(){
@@ -787,6 +788,99 @@ async function saveTargets2(e){e.preventDefault();const out=document.getElementB
 async function toggleEventOverride2(btn){try{await rpc('set_manual_event_entry_override',{p_event_name:btn.dataset.event,p_enabled:btn.dataset.enabled!=='1'});await load();renderSettingsLive()}catch(err){alert(err.message||String(err))}}
 async function toggleFeature2(which){const f=S.features||{kvk_top200_enabled:true,mobilization_enabled:true},next={kvk_top200_enabled:f.kvk_top200_enabled!==false,mobilization_enabled:f.mobilization_enabled!==false};if(which==='kvk')next.kvk_top200_enabled=!next.kvk_top200_enabled;else next.mobilization_enabled=!next.mobilization_enabled;try{S.features=await rpc('set_performance_feature_settings',{p_kvk_top200_enabled:next.kvk_top200_enabled,p_mobilization_enabled:next.mobilization_enabled});await renderSettingsLive()}catch(err){alert(err.message||String(err))}}
 
+
+
+/* === SUPPORT LIVE V2 === */
+const SUPPORT_WORDS2={
+ de:{kicker:'SUPPORT · LIVE',title:'Problem melden oder Frage stellen.',sub:'Beschreibe den Sachverhalt möglichst genau. Screenshots helfen bei der Prüfung.',safeTitle:'Prüfen statt automatisch ändern',safe:'Supportmeldungen ändern niemals automatisch Spieler, Verstöße, Sanktionen oder Einstellungen. Der Fall wird zuerst geprüft und das weitere Vorgehen abgestimmt.',newTicket:'Neue Support-Anfrage',category:'Kategorie',subject:'Betreff',message:'Beschreibung',screens:'Screenshots',screenHint:'Optional · PNG/JPEG/WebP · max. 3 Dateien pro Nachricht · 5 MB je Bild',send:'Anfrage senden',sending:'Wird gesendet …',sent:'✓ Support-Anfrage gespeichert',mine:'Deine Support-Fälle',none:'Noch keine Support-Anfragen.',reply:'Nachricht ergänzen',replyPlaceholder:'Weitere Informationen …',replySend:'Senden',support:'Support',alliance:'Allianz',new:'Neu',reviewing:'Wird geprüft',awaiting_user:'Rückfrage',resolved:'Gelöst',problem:'Problem / Fehler',data:'Datenfehler',ui:'Anzeige / Übersetzung',question:'Frage',other:'Sonstiges',image:'Screenshot'},
+ en:{kicker:'SUPPORT · LIVE',title:'Report a problem or ask a question.',sub:'Describe the issue as precisely as possible. Screenshots help with review.',safeTitle:'Review first, no automatic changes',safe:'Support reports never automatically change players, violations, sanctions or settings. The case is reviewed first and the next step is discussed.',newTicket:'New support request',category:'Category',subject:'Subject',message:'Description',screens:'Screenshots',screenHint:'Optional · PNG/JPEG/WebP · max. 3 files per message · 5 MB each',send:'Send request',sending:'Sending …',sent:'✓ Support request saved',mine:'Your support cases',none:'No support requests yet.',reply:'Add message',replyPlaceholder:'Additional information …',replySend:'Send',support:'Support',alliance:'Alliance',new:'New',reviewing:'Under review',awaiting_user:'Question pending',resolved:'Resolved',problem:'Problem / bug',data:'Data issue',ui:'Display / translation',question:'Question',other:'Other',image:'Screenshot'},
+ fr:{kicker:'SUPPORT · LIVE',title:'Signaler un problème ou poser une question.',sub:'Décrivez le cas le plus précisément possible. Les captures facilitent la vérification.',safeTitle:'Vérifier avant toute modification',safe:'Les demandes Support ne modifient jamais automatiquement joueurs, infractions, sanctions ou paramètres. Le cas est d’abord vérifié et la suite est discutée.',newTicket:'Nouvelle demande',category:'Catégorie',subject:'Objet',message:'Description',screens:'Captures',screenHint:'Facultatif · PNG/JPEG/WebP · max. 3 fichiers · 5 Mo par image',send:'Envoyer',sending:'Envoi …',sent:'✓ Demande enregistrée',mine:'Vos demandes Support',none:'Aucune demande Support.',reply:'Ajouter un message',replyPlaceholder:'Informations supplémentaires …',replySend:'Envoyer',support:'Support',alliance:'Alliance',new:'Nouveau',reviewing:'En cours de vérification',awaiting_user:'Question en attente',resolved:'Résolu',problem:'Problème / bug',data:'Erreur de données',ui:'Affichage / traduction',question:'Question',other:'Autre',image:'Capture'},
+ es:{kicker:'SUPPORT · LIVE',title:'Reportar un problema o hacer una pregunta.',sub:'Describe el caso con el mayor detalle posible. Las capturas ayudan a revisarlo.',safeTitle:'Revisar antes de cambiar',safe:'Las solicitudes de Support nunca modifican automáticamente jugadores, infracciones, sanciones o ajustes. Primero se revisa el caso y se acuerda el siguiente paso.',newTicket:'Nueva solicitud',category:'Categoría',subject:'Asunto',message:'Descripción',screens:'Capturas',screenHint:'Opcional · PNG/JPEG/WebP · máx. 3 archivos · 5 MB por imagen',send:'Enviar',sending:'Enviando …',sent:'✓ Solicitud guardada',mine:'Tus casos de Support',none:'Aún no hay solicitudes.',reply:'Añadir mensaje',replyPlaceholder:'Información adicional …',replySend:'Enviar',support:'Support',alliance:'Alianza',new:'Nuevo',reviewing:'En revisión',awaiting_user:'Pregunta pendiente',resolved:'Resuelto',problem:'Problema / bug',data:'Error de datos',ui:'Visualización / traducción',question:'Pregunta',other:'Otro',image:'Captura'}
+};
+function supportWords2(){return SUPPORT_WORDS2[L()]||SUPPORT_WORDS2.de}
+function supportStatus2(status){const w=supportWords2();return w[status]||status||w.new}
+function supportCategory2(cat){const w=supportWords2();return w[cat]||cat||w.other}
+async function loadSupport2(){
+ const [tickets,messages,evidence]=await Promise.all([
+  rpc('get_my_support_tickets',{}),
+  rpc('get_my_support_ticket_messages',{}),
+  rpc('get_my_support_ticket_evidence',{})
+ ]);
+ S.supportTickets=tickets||[];S.supportMessages=messages||[];S.supportEvidence=evidence||[];
+}
+function supportEvidenceFor2(ticketId){return (S.supportEvidence||[]).filter(x=>String(x.ticket_id)===String(ticketId))}
+function supportMessagesFor2(ticketId){return (S.supportMessages||[]).filter(x=>String(x.ticket_id)===String(ticketId))}
+async function hydrateSupportImages2(root){
+ const imgs=[...root.querySelectorAll('[data-support-evidence-path]')];
+ await Promise.all(imgs.map(async img=>{
+  try{
+   const url=await signStorage2('support-evidence',img.dataset.supportEvidencePath);
+   if(url){img.src=url;img.closest('a').href=url}
+  }catch(e){console.warn('support evidence',e)}
+ }));
+}
+async function uploadSupportFiles2(ticketId,fileList){
+ const files=[...fileList].slice(0,3);
+ for(const file of files){
+  if(!['image/png','image/jpeg','image/webp'].includes(file.type))throw Error('Only PNG, JPEG or WebP screenshots are allowed.');
+  if(file.size>5242880)throw Error('Screenshot must be 5 MB or smaller.');
+  const ext=file.type==='image/png'?'png':file.type==='image/webp'?'webp':'jpg';
+  const path=S.a+'/'+ticketId+'/'+crypto.randomUUID()+'.'+ext;
+  await uploadStorage2('support-evidence',path,file);
+  await rpc('add_support_ticket_evidence',{
+   p_ticket_id:ticketId,p_storage_path:path,p_file_name:file.name||('screenshot.'+ext),
+   p_mime_type:file.type,p_size_bytes:file.size
+  });
+ }
+}
+async function createSupportTicket2(e){
+ e.preventDefault();const w=supportWords2(),form=e.currentTarget,out=form.querySelector('.live-status'),btn=form.querySelector('button[type="submit"]');
+ out.textContent=w.sending;btn.disabled=true;
+ try{
+  const tid=await rpc('create_support_ticket',{
+   p_category:form.querySelector('[name="category"]').value,
+   p_subject:form.querySelector('[name="subject"]').value.trim(),
+   p_message:form.querySelector('[name="message"]').value.trim()
+  });
+  const files=form.querySelector('[name="screens"]').files;
+  if(files?.length)await uploadSupportFiles2(tid,files);
+  form.reset();out.textContent=w.sent;await renderSupportLive();
+ }catch(err){out.textContent=err.message||String(err)}
+ finally{btn.disabled=false}
+}
+async function addSupportMessage2(e){
+ e.preventDefault();const form=e.currentTarget,input=form.querySelector('textarea'),btn=form.querySelector('button'),out=form.querySelector('.live-status');
+ const msg=input.value.trim();if(!msg)return;btn.disabled=true;out.textContent='…';
+ try{await rpc('add_support_ticket_message',{p_ticket_id:form.dataset.ticketId,p_message:msg});input.value='';await renderSupportLive()}
+ catch(err){out.textContent=err.message||String(err)}
+ finally{btn.disabled=false}
+}
+async function renderSupportLive(){
+ const v=document.getElementById('view-support');if(!v)return;const w=supportWords2();
+ v.innerHTML='<div class="hero"><div><div class="kicker">'+E(w.kicker)+'</div><h1>'+E(w.title)+'</h1><p>'+E(w.sub)+'</p></div></div><div class="live-empty-state">…</div>';
+ try{await loadSupport2()}catch(err){v.innerHTML+='<div class="live-empty-state">'+E(err.message||String(err))+'</div>';return}
+ const tickets=S.supportTickets||[];
+ v.innerHTML='<div class="hero"><div><div class="kicker">'+E(w.kicker)+'</div><h1>'+E(w.title)+'</h1><p>'+E(w.sub)+'</p></div></div>'+
+ '<div class="live-note support-safety-note" style="margin-bottom:14px"><b>'+E(w.safeTitle)+'</b><br>'+E(w.safe)+'</div>'+
+ '<div class="live-panel-grid"><section class="card"><div class="card-head"><div><div class="card-title">'+E(w.newTicket)+'</div></div></div><div class="card-body"><form id="liveSupportCreate" class="live-form">'+
+ '<label>'+E(w.category)+'<select name="category"><option value="problem">'+E(w.problem)+'</option><option value="data">'+E(w.data)+'</option><option value="ui">'+E(w.ui)+'</option><option value="question">'+E(w.question)+'</option><option value="other">'+E(w.other)+'</option></select></label>'+
+ '<label>'+E(w.subject)+'<input name="subject" maxlength="120" required></label>'+
+ '<label>'+E(w.message)+'<textarea name="message" maxlength="4000" required></textarea></label>'+
+ '<label>'+E(w.screens)+'<input name="screens" type="file" accept="image/png,image/jpeg,image/webp" multiple><small>'+E(w.screenHint)+'</small></label>'+
+ '<button class="btn primary" type="submit">'+E(w.send)+'</button><div class="live-status"></div></form></div></section>'+
+ '<section class="card"><div class="card-head"><div><div class="card-title">'+E(w.mine)+'</div></div><span class="pill">'+tickets.length+'</span></div><div class="card-body"><div class="live-note">'+E(w.safe)+'</div></div></section></div>'+
+ '<div style="margin-top:14px">'+(tickets.length?tickets.map(tk=>{
+   const msgs=supportMessagesFor2(tk.id),ev=supportEvidenceFor2(tk.id);
+   return '<section class="card support-ticket"><div class="card-head"><div><div class="card-title">'+E(tk.subject)+'</div><div class="card-sub">'+E(supportCategory2(tk.category))+' · '+E(D(tk.created_at))+'</div></div><span class="pill '+(tk.status==='resolved'?'green':tk.status==='awaiting_user'?'gold':'blue')+'">'+E(supportStatus2(tk.status))+'</span></div><div class="card-body">'+
+    '<div class="support-thread">'+msgs.map(m=>'<div class="support-msg '+(m.sender_type==='support'?'support':'alliance')+'"><b>'+E(m.sender_type==='support'?w.support:(S.a||w.alliance))+'</b><div>'+E(m.message).replace(/\n/g,'<br>')+'</div><small>'+E(D(m.created_at))+'</small></div>').join('')+'</div>'+
+    (ev.length?'<div class="support-evidence-grid">'+ev.map(x=>'<a target="_blank" rel="noopener" title="'+E(x.file_name)+'"><img alt="'+E(w.image)+'" data-support-evidence-path="'+E(x.storage_path)+'"></a>').join('')+'</div>':'')+
+    '<form class="live-form live-support-reply" data-ticket-id="'+E(tk.id)+'" style="margin-top:12px"><label>'+E(w.reply)+'<textarea maxlength="4000" placeholder="'+E(w.replyPlaceholder)+'"></textarea></label><button class="btn small secondary" type="submit">'+E(w.replySend)+'</button><div class="live-status"></div></form>'+
+   '</div></section>';
+  }).join(''):'<div class="live-empty-state">'+E(w.none)+'</div>')+'</div>';
+ document.getElementById('liveSupportCreate').onsubmit=createSupportTicket2;
+ v.querySelectorAll('.live-support-reply').forEach(form=>form.onsubmit=addSupportMessage2);
+ hydrateSupportImages2(v).catch(e=>console.warn('support images',e));
+}
 
 /* === PLAYER FILES + NOTIFICATIONS + VIEW ROUTER LIVE V2 === */
 const LANG_OPTIONS2=[
@@ -1270,6 +1364,7 @@ setView=function(name){
  else if(name==='crown')renderCrownLive();
  else if(name==='activity')renderActivityLive();
  else if(name==='settings')renderSettingsLive();
+ else if(name==='support')renderSupportLive();
 };
 renderHome=renderHomeFull2;renderPlayers=renderPlayers2;openProfile=openProfile2;
 
