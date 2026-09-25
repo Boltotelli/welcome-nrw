@@ -7,6 +7,21 @@ let ses=null;try{ses=JSON.parse(localStorage.getItem(C.s)||'null')}catch{}
 const L=()=>window.currentLang||document.querySelector('#languagePicker')?.value||'de';
 const T={de:{login:'Anmelden',alliance:'Allianz',password:'Passwort',hint:'Ein zentraler Login pro Allianz. Private Daten bleiben innerhalb der eigenen Allianz.',fail:'Login fehlgeschlagen.',logout:'Abmelden',live:'LIVE DATEN',open:'Öffnen',contact:'Kontaktiert',r1:'R1 umgesetzt',nap:'24h NAP OUT aktivieren',none:'Keine Einträge.',actions:'offen',over:'überfällig',left:'verbleibend',tempTransfer:'Als temporär markieren',rejectTemp:'Ablehnen · temporär',tempTransferQ:'Diesen Wechsel als temporär markieren? Die Spielerakte bleibt in der Heimatallianz; der Hinweis wird 7 Tage ausgeblendet.',rejectTempQ:'Diesen Neuzugang als temporär ablehnen? Die Spielerakte bleibt bei der bisherigen Allianz. Der Hinweis wird 7 Tage ausgeblendet und erscheint erneut, falls der Spieler danach weiterhin bei deiner Allianz geführt wird.'},en:{login:'Sign in',alliance:'Alliance',password:'Password',hint:'One central login per alliance. Private data stays within your alliance.',fail:'Login failed.',logout:'Sign out',live:'LIVE DATA',open:'Open',contact:'Contacted',r1:'R1 implemented',nap:'Activate 24h NAP OUT',none:'No entries.',actions:'open',over:'overdue',left:'remaining',tempTransfer:'Mark as temporary',rejectTemp:'Reject · temporary',tempTransferQ:'Mark this transfer as temporary? The player file stays with the home alliance and the notice is hidden for 7 days.',rejectTempQ:'Reject this incoming player as temporary? The player file stays with the previous alliance. The notice is hidden for 7 days and will appear again if the player is still listed with your alliance afterwards.'},fr:{login:'Connexion',alliance:'Alliance',password:'Mot de passe',hint:'Un login central par alliance. Les données privées restent dans votre alliance.',fail:'Échec de connexion.',logout:'Déconnexion',live:'DONNÉES LIVE',open:'Ouvrir',contact:'Contacté',r1:'R1 appliqué',nap:'Activer NAP OUT 24 h',none:'Aucune entrée.',actions:'ouvert',over:'en retard',left:'restant',tempTransfer:'Marquer temporaire',rejectTemp:'Refuser · temporaire',tempTransferQ:'Marquer ce transfert comme temporaire ? Le dossier reste dans l’alliance d’origine et l’alerte est masquée pendant 7 jours.',rejectTempQ:'Refuser ce joueur entrant comme transfert temporaire ? Le dossier reste dans l’alliance précédente. L’alerte est masquée pendant 7 jours et réapparaît si le joueur est toujours dans votre alliance ensuite.'},es:{login:'Iniciar sesión',alliance:'Alianza',password:'Contraseña',hint:'Un login central por alianza. Los datos privados permanecen en tu alianza.',fail:'Error de inicio de sesión.',logout:'Cerrar sesión',live:'DATOS LIVE',open:'Abrir',contact:'Contactado',r1:'R1 aplicado',nap:'Activar NAP OUT 24 h',none:'No hay entradas.',actions:'abiertas',over:'vencido',left:'restante',tempTransfer:'Marcar temporal',rejectTemp:'Rechazar · temporal',tempTransferQ:'¿Marcar este cambio como temporal? El expediente permanece en la alianza de origen y el aviso se oculta durante 7 días.',rejectTempQ:'¿Rechazar este jugador entrante como temporal? El expediente permanece en la alianza anterior. El aviso se oculta durante 7 días y volverá a aparecer si el jugador sigue en tu alianza después.'}};
 const t=k=>(T[L()]||T.de)[k]||k, E=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const ACTION_WORDS2={
+ de:{connectionFail:'Verbindung fehlgeschlagen.',connectionRetry:'Die Daten konnten nicht geladen werden. Deine Sitzung bleibt erhalten.',retry:'Erneut versuchen',accountIncomplete:'Account ist nicht vollständig eingerichtet.',wrongAlliance:'Der Account gehört zu einer anderen Allianz.',endRequired:'Bitte eine Endzeit auswählen.',endFuture:'Bitte eine Endzeit in der Zukunft auswählen.',contactComment:'Optionaler Akten-Kommentar zum Kontakt:',activateNapOut:'24h NAP OUT aktivieren?',endSpending:'Spending Exclusion beenden?',deactivateBan:'NAP Ban deaktivieren?',confirmTransfer:'Diesen Allianzwechsel jetzt bestätigen? Die Spielerakte wird der neuen Allianz zugeordnet.',memberCountCheck:'Mitgliederzahl prüfen.',pointsMustExceed:'Punkte müssen über {mult}× Ziel liegen.',sgNotRunning:'Aktuell läuft kein Strongest Governor.',noPerformance:'Kein Performance-Durchlauf vorhanden.',scoreCheck:'Score prüfen.',kvkRankCheck:'KvK benötigt Serverrang 1–200.',lawImageRule:'Nur PNG/JPEG/WebP, max. 8 MB.',caseIdMissing:'Fall-ID fehlt.',saving:'Speichere …',saved:'✓ Gespeichert',deleting:'Lösche …',loadingMore:'Lade weitere Einträge …',importerMissing:'Importer nicht geladen. Bitte Seite aktualisieren.'},
+ en:{connectionFail:'Connection failed.',connectionRetry:'The data could not be loaded. Your session has been kept.',retry:'Try again',accountIncomplete:'The account is not fully configured.',wrongAlliance:'This account belongs to another alliance.',endRequired:'Please select an end time.',endFuture:'Please select an end time in the future.',contactComment:'Optional player-file comment for the contact:',activateNapOut:'Activate 24h NAP OUT?',endSpending:'End Spending Exclusion?',deactivateBan:'Deactivate NAP ban?',confirmTransfer:'Confirm this alliance transfer now? The player file will be assigned to the new alliance.',memberCountCheck:'Check the member count.',pointsMustExceed:'Points must be above {mult}× the target.',sgNotRunning:'No Strongest Governor is currently running.',noPerformance:'No performance occurrence is available.',scoreCheck:'Check the score.',kvkRankCheck:'KvK requires a server rank from 1–200.',lawImageRule:'PNG/JPEG/WebP only, max. 8 MB.',caseIdMissing:'Case ID is missing.',saving:'Saving …',saved:'✓ Saved',deleting:'Deleting …',loadingMore:'Loading more entries …',importerMissing:'Importer is not loaded. Please refresh the page.'},
+ fr:{connectionFail:'Échec de la connexion.',connectionRetry:'Les données n’ont pas pu être chargées. Votre session a été conservée.',retry:'Réessayer',accountIncomplete:'Le compte n’est pas entièrement configuré.',wrongAlliance:'Ce compte appartient à une autre alliance.',endRequired:'Veuillez sélectionner une heure de fin.',endFuture:'Veuillez sélectionner une heure de fin future.',contactComment:'Commentaire facultatif dans le dossier du joueur :',activateNapOut:'Activer NAP OUT 24 h ?',endSpending:'Terminer la Spending Exclusion ?',deactivateBan:'Désactiver le ban NAP ?',confirmTransfer:'Confirmer ce changement d’alliance ? Le dossier du joueur sera attribué à la nouvelle alliance.',memberCountCheck:'Vérifiez le nombre de membres.',pointsMustExceed:'Les points doivent dépasser {mult}× la cible.',sgNotRunning:'Aucun Strongest Governor n’est actuellement en cours.',noPerformance:'Aucune session Performance disponible.',scoreCheck:'Vérifiez le score.',kvkRankCheck:'Le KvK exige un rang serveur de 1 à 200.',lawImageRule:'PNG/JPEG/WebP uniquement, max. 8 Mo.',caseIdMissing:'Identifiant du cas manquant.',saving:'Enregistrement …',saved:'✓ Enregistré',deleting:'Suppression …',loadingMore:'Chargement d’autres entrées …',importerMissing:'L’importateur n’est pas chargé. Actualisez la page.'},
+ es:{connectionFail:'Error de conexión.',connectionRetry:'No se pudieron cargar los datos. Tu sesión se ha conservado.',retry:'Reintentar',accountIncomplete:'La cuenta no está configurada por completo.',wrongAlliance:'Esta cuenta pertenece a otra alianza.',endRequired:'Selecciona una hora de finalización.',endFuture:'Selecciona una hora de finalización futura.',contactComment:'Comentario opcional en el expediente del jugador:',activateNapOut:'¿Activar NAP OUT de 24 h?',endSpending:'¿Finalizar la Spending Exclusion?',deactivateBan:'¿Desactivar el ban NAP?',confirmTransfer:'¿Confirmar ahora este cambio de alianza? El expediente se asignará a la nueva alianza.',memberCountCheck:'Revisa el número de miembros.',pointsMustExceed:'Los puntos deben superar {mult}× el objetivo.',sgNotRunning:'No hay ningún Strongest Governor en curso.',noPerformance:'No hay una sesión de Performance disponible.',scoreCheck:'Revisa la puntuación.',kvkRankCheck:'KvK requiere un rango del servidor entre 1 y 200.',lawImageRule:'Solo PNG/JPEG/WebP, máx. 8 MB.',caseIdMissing:'Falta el ID del caso.',saving:'Guardando …',saved:'✓ Guardado',deleting:'Eliminando …',loadingMore:'Cargando más entradas …',importerMissing:'El importador no está cargado. Actualiza la página.'}
+};
+function actionWord2(k,vars={}){
+ let s=(ACTION_WORDS2[L()]||ACTION_WORDS2.de)[k]||k;
+ for(const [name,value] of Object.entries(vars))s=s.replaceAll('{'+name+'}',String(value));
+ return s;
+}
+function isSessionAuthError2(err){
+ const status=Number(err?.status||0),msg=String(err?.message||'').toLowerCase();
+ return status===401||(status===400&&/(refresh|token|jwt|session)/.test(msg));
+}
 const loc=()=>({de:'de-DE',en:'en-US',fr:'fr-FR',es:'es-ES'}[L()]||'de-DE');
 const N=n=>Number(n||0).toLocaleString(loc()), D=x=>x?new Date(x).toLocaleString(loc(),{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'–';
 function monthYear2(x){if(!x)return '';const d=new Date(x);return Number.isFinite(d.getTime())?d.toLocaleDateString(loc(),{month:'long',year:'numeric'}):''}
@@ -26,17 +41,48 @@ function durLong2(ms){
    [unit(hours,'h'),unit(minutes,'m')].join(' ');
 }
 function save(s){ses=s;try{s?localStorage.setItem(C.s,JSON.stringify(s)):localStorage.removeItem(C.s)}catch{}}
-async function q(url,opt={}){const r=await fetch(url,opt),z=await r.text();let d;try{d=z?JSON.parse(z):null}catch{d=z}if(!r.ok)throw Error(d?.message||d?.error_description||d?.error||z||('HTTP '+r.status));return d}
-async function token(){if(!ses)return null;if(ses.expires_at&&ses.expires_at<Math.floor(Date.now()/1000)+20&&ses.refresh_token){try{const d=await q(C.u+'/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:{apikey:C.k,'Content-Type':'application/json'},body:JSON.stringify({refresh_token:ses.refresh_token})});save({...d,expires_at:Math.floor(Date.now()/1000)+(d.expires_in||3600)})}catch{save(null)}}return ses?.access_token||null}
+async function q(url,opt={}){
+ let r;
+ try{r=await fetch(url,opt)}
+ catch(cause){const err=Error(actionWord2('connectionFail'));err.isNetwork=true;err.cause=cause;throw err}
+ const z=await r.text();let d;try{d=z?JSON.parse(z):null}catch{d=z}
+ if(!r.ok){const err=Error(d?.message||d?.error_description||d?.error||z||('HTTP '+r.status));err.status=r.status;err.payload=d;throw err}
+ return d;
+}
+async function token(){
+ if(!ses)return null;
+ if(ses.expires_at&&ses.expires_at<Math.floor(Date.now()/1000)+20&&ses.refresh_token){
+  try{
+   const d=await q(C.u+'/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:{apikey:C.k,'Content-Type':'application/json'},body:JSON.stringify({refresh_token:ses.refresh_token})});
+   save({...d,expires_at:Math.floor(Date.now()/1000)+(d.expires_in||3600)});
+  }catch(err){
+   if(isSessionAuthError2(err)){save(null);return null}
+   throw err;
+  }
+ }
+ return ses?.access_token||null;
+}
 async function h(json=false){const a=await token();return {apikey:C.k,...(a?{Authorization:'Bearer '+a}:{}),...(json?{'Content-Type':'application/json'}:{})}}
 async function tab(n,s=''){return q(C.u+'/rest/v1/'+n+(s?'?'+s:''),{headers:await h()})}
 async function rpc(n,b={}){return q(C.u+'/rest/v1/rpc/'+n,{method:'POST',headers:await h(true),body:JSON.stringify(b)})}
 async function upd(n,id,b){return q(C.u+'/rest/v1/'+n+'?id=eq.'+encodeURIComponent(id),{method:'PATCH',headers:{...(await h(true)),Prefer:'return=minimal'},body:JSON.stringify(b)})}
 function css(){const s=document.createElement('style');s.textContent=`body.n2lock .app{filter:blur(5px);pointer-events:none}.n2login{position:fixed;inset:0;z-index:999;background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(16px);display:grid;place-items:center;padding:18px}.n2login[hidden]{display:none}.n2box{width:min(420px,100%);padding:24px;border:1px solid var(--line);border-radius:22px;background:var(--panel);box-shadow:var(--shadow)}.n2box h2{margin:5px 0}.n2box p{color:var(--muted);font-size:11px}.n2grid{display:grid;gap:10px;margin-top:16px}.n2grid label{display:grid;gap:5px;font-size:10px;color:var(--muted);font-weight:800}.n2grid input,.n2grid select{min-height:42px;border:1px solid var(--line);border-radius:11px;background:var(--panel-2);color:var(--text);padding:9px 11px}.n2err{min-height:16px;color:var(--red);font-size:10px}.n2live{font-size:8px;padding:4px 7px;border-radius:999px;background:var(--green);color:#08140d;font-weight:900}.n2empty{padding:18px;text-align:center;color:var(--muted);font-size:10px}.user-pill{cursor:pointer}@media(min-width:801px){.sidebar:hover{--sidebar:var(--sidebar-open)}.sidebar:hover~.shell{margin-left:var(--sidebar-open)}.sidebar:hover .brandtext,.sidebar:hover .nav-label{opacity:1;transform:none}.sidebar:hover .nav-section,.sidebar:hover .concept{opacity:.9}}.home-hero-tools{min-width:220px}.home-sync-status{margin-top:9px;padding:9px 12px;border:1px solid var(--line);border-radius:12px;background:var(--panel-2);display:grid;gap:4px;min-width:220px}.home-sync-status>span,.home-sync-status small{font-size:9px;color:var(--muted);font-weight:800}.home-sync-status b{font-size:11px}.home-sync-meta{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}.home-sync-meta b,.home-sync-meta small{white-space:nowrap}@media(max-width:640px){.home-hero-tools{width:100%;min-width:0}.home-hero-tools .hero-actions{margin-bottom:10px}.home-sync-status{min-width:0;width:100%;margin-top:0;padding:9px 11px;gap:5px}.home-sync-meta{justify-content:space-between;column-gap:12px;row-gap:4px}}.support-thread{display:grid;gap:9px}.support-msg{max-width:min(760px,92%);padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:var(--panel-2);display:grid;gap:5px}.support-msg.alliance{justify-self:end;background:color-mix(in srgb,var(--blue) 8%,var(--panel-2));border-color:color-mix(in srgb,var(--blue) 28%,var(--line))}.support-msg.support{justify-self:start;background:color-mix(in srgb,var(--green) 8%,var(--panel-2));border-color:color-mix(in srgb,var(--green) 28%,var(--line))}.support-msg small{color:var(--muted);font-size:9px}.support-evidence-grid{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.support-evidence-grid a{display:block;width:88px;height:66px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--panel-3)}.support-evidence-grid img{width:100%;height:100%;object-fit:cover}.support-ticket{margin-bottom:14px}.support-safety-note{border-color:color-mix(in srgb,var(--blue) 30%,var(--line));background:color-mix(in srgb,var(--blue) 6%,var(--panel-2))}`;document.head.appendChild(s)}
-function login(){const d=document.createElement('div');d.id='n2login';d.className='n2login';d.innerHTML=`<div class="n2box"><div class="kicker">NAP Event Tracker 2.0 · TEST</div><h2>Kingdom 1044</h2><p>${E(t('hint'))}</p><form class="n2grid" id="n2form"><label>${E(t('alliance'))}<select id="n2a" class="n2alliance-select" tabindex="-1" aria-hidden="true"><option>NRW</option><option>THM</option><option>NWO</option><option>NwO</option><option>CWR</option><option>PxR</option></select></label><div class="n2alliance-grid" role="group" aria-label="${E(t('alliance'))}">${['NRW','THM','NWO','NwO','CWR','PxR'].map(a=>`<button type="button" class="n2alliance-choice ${a==='NRW'?'active':''}" data-login-alliance="${a}" aria-pressed="${a==='NRW'}">${a}</button>`).join('')}</div><label>${E(t('password'))}<input id="n2p" type="password" required></label><div id="n2e" class="n2err"></div><button class="btn primary">${E(t('login'))}</button></form></div>`;document.body.appendChild(d);d.querySelectorAll('[data-login-alliance]').forEach(b=>b.onclick=()=>{
+function login(){const d=document.createElement('div');d.id='n2login';d.className='n2login';d.innerHTML=`<div class="n2box"><div class="kicker">NAP Event Tracker 2.0 · TEST</div><h2>Kingdom 1044</h2><p>${E(t('hint'))}</p><form class="n2grid" id="n2form"><label>${E(t('alliance'))}<select id="n2a" class="n2alliance-select" tabindex="-1" aria-hidden="true"><option>NRW</option><option>THM</option><option>NWO</option><option>NwO</option><option>CWR</option><option>PxR</option></select></label><div class="n2alliance-grid" role="group" aria-label="${E(t('alliance'))}">${['NRW','THM','NWO','NwO','CWR','PxR'].map(a=>`<button type="button" class="n2alliance-choice ${a==='NRW'?'active':''}" data-login-alliance="${a}" aria-pressed="${a==='NRW'}">${a}</button>`).join('')}</div><label>${E(t('password'))}<input id="n2p" type="password" required></label><div id="n2e" class="n2err"></div><button class="btn primary" type="submit">${E(t('login'))}</button><button class="btn secondary" type="button" id="n2retry" hidden>${E(actionWord2('retry'))}</button></form></div>`;document.body.appendChild(d);d.querySelectorAll('[data-login-alliance]').forEach(b=>b.onclick=()=>{
  const code=b.dataset.loginAlliance;d.querySelector('#n2a').value=code;
  d.querySelectorAll('[data-login-alliance]').forEach(x=>{const selected=x.dataset.loginAlliance===code;x.classList.toggle('active',selected);x.setAttribute('aria-pressed',String(selected))});
-});document.querySelector('#n2form').onsubmit=async e=>{e.preventDefault();const a=n2a.value,p=n2p.value;try{const z=await q(C.u+'/auth/v1/token?grant_type=password',{method:'POST',headers:{apikey:C.k,'Content-Type':'application/json'},body:JSON.stringify({email:a.toLowerCase()+'@nap-tracker.invalid',password:p})});save({...z,expires_at:Math.floor(Date.now()/1000)+(z.expires_in||3600)});await enter(a)}catch(x){n2e.textContent=t('fail')+' '+x.message}}}
+});
+ const retry=d.querySelector('#n2retry');if(retry)retry.onclick=retrySavedSession2;
+ document.querySelector('#n2form').onsubmit=async e=>{
+  e.preventDefault();const a=n2a.value,p=n2p.value,errBox=d.querySelector('#n2e');if(retry)retry.hidden=true;
+  try{
+   const z=await q(C.u+'/auth/v1/token?grant_type=password',{method:'POST',headers:{apikey:C.k,'Content-Type':'application/json'},body:JSON.stringify({email:a.toLowerCase()+'@nap-tracker.invalid',password:p})});
+   save({...z,expires_at:Math.floor(Date.now()/1000)+(z.expires_in||3600)});await enter(a);
+  }catch(x){
+   if(isSessionAuthError2(x)||x?.code==='ACCOUNT_INCOMPLETE'||x?.code==='ACCOUNT_MISMATCH')save(null);
+   if(errBox)errBox.textContent=x?.isNetwork?actionWord2('connectionFail'):t('fail')+' '+(x?.message||'');
+  }
+ };
+}
 function active(v){return !v.expires_at||new Date(v.expires_at)>new Date()}
 function p(name){return S.p.find(x=>(x.name||x.player_name)===name)||{}}
 function vv(name){return S.v.filter(x=>x.player_name===name)}
@@ -120,21 +166,21 @@ function openProfile(name){const P=p(name),V=vv(name),X=ss(name),l=level(name),v
 function toLocalInput2(d){if(!d)return '';const x=new Date(d);if(Number.isNaN(x.getTime()))return '';const z=new Date(x.getTime()-x.getTimezoneOffset()*60000);return z.toISOString().slice(0,16)}
 async function setR1Timer2(id,input){
  const s=S.x.find(x=>String(x.id)===String(id));const val=typeof input==='string'?input:input?.value;
- if(!s||!val){alert('Bitte eine Endzeit auswählen.');return}
- const end=new Date(val);if(Number.isNaN(end.getTime())||end<=new Date()){alert('Bitte eine Endzeit in der Zukunft auswählen.');return}
+ if(!s||!val){alert(actionWord2('endRequired'));return}
+ const end=new Date(val);if(Number.isNaN(end.getTime())||end<=new Date()){alert(actionWord2('endFuture'));return}
  try{await upd('sanctions',id,{started_at:s.started_at||new Date().toISOString(),end_at:end.toISOString()});await load();renderHomeFull2();renderPlayers2();if(document.getElementById('view-profile')?.classList.contains('active'))await openProfile2(s.player_name)}catch(err){alert(err.message||String(err))}
 }
 async function doAct(k,id){
  if(k==='contact'){
    const violation=S.v.find(v=>String(v.id)===String(id));
    await upd('violations',id,{contacted:true,contacted_at:new Date().toISOString()});
-   const note=window.prompt('Optionaler Akten-Kommentar zum Kontakt:','');
+   const note=window.prompt(actionWord2('contactComment'),'');
    if(note&&note.trim()){
      const pid=violation?.player_id||p(violation?.player_name)?.id;
      if(pid){try{await rpc('add_player_file_comment',{p_player_id:pid,p_comment:note.trim()})}catch(err){console.warn('contact comment',err)}}
    }
  }else{
-   if(k==='nap'&&!confirm('24h NAP OUT aktivieren?'))return;
+   if(k==='nap'&&!confirm(actionWord2('activateNapOut')))return;
    await upd('sanctions',id,{completed:true});
  }
  await load();renderHome();renderPlayers()
@@ -149,9 +195,63 @@ async function syncCrownVisibility2(){
  if(!permitted&&document.getElementById('view-crown')?.classList.contains('active'))setView('home');
 }
 function decorate(){const ab=document.querySelector('.alliance-badge');if(ab)ab.innerHTML=allianceLogo2(S.a,'alliance-top-logo')+'<span>'+E(S.a)+'</span>';document.querySelectorAll('[data-current-alliance]').forEach(x=>x.textContent=S.a);const u=document.querySelector('.user-pill');if(u){u.innerHTML=allianceLogo2(S.a,'alliance-user-logo')+'<span>'+E(S.a)+'</span> <span class="n2live">'+E(t('live'))+'</span>';u.title=t('logout');u.onclick=()=>{if(confirm(t('logout')+'?')){save(null);location.reload()}}}}
-async function load(){const a=encodeURIComponent(S.a);const [p1,v,x,e,o,tr,bans,spend,settings,reviews,shared,notificationReads,syncStatus]=await Promise.all([tab('players','select=*&alliance_code=eq.'+a+'&order=name.asc'),tab('violations','select=*&alliance_code=eq.'+a+'&order=occurred_at.desc'),tab('sanctions','select=*&alliance_code=eq.'+a+'&order=created_at.desc'),rpc('get_public_nap_exclusions',{}),rpc('get_nap_overdue_action_notifications_v2',{}),rpc('get_my_roster_transfer_candidates',{}),tab('nap_bans','select=*&active=eq.true&order=created_at.desc').catch(()=>[]),rpc('get_public_nap_spending_exclusions',{}).catch(()=>[]),tab('alliance_settings','select=*&alliance_code=eq.'+a+'&limit=1').catch(()=>[]),rpc('get_pending_post_contact_spending_reviews',{}).catch(()=>[]),rpc('get_my_shared_spending_cases',{}).catch(()=>[]),tab('notification_read_state','select=notification_id&alliance_code=eq.'+a+'&order=read_at.desc').catch(()=>[]),rpc('get_roster_sync_status_v2',{}).catch(()=>null)]);S.p=(p1||[]).filter(r=>r.alliance_code===S.a);S.v=(v||[]).filter(r=>r.alliance_code===S.a);S.x=(x||[]).filter(r=>r.alliance_code===S.a);S.e=e||[];S.o=o||[];S.t=(tr||[]).filter(r=>r.from_alliance===S.a||r.to_alliance===S.a);S.bans=bans||[];S.spend=spend||[];S.reviews=reviews||[];S.shared=shared||[];S.notificationReads=new Set((notificationReads||[]).map(r=>String(r.notification_id)));S.syncStatus=syncStatus||null;S.settings=settings?.[0]||null;S.level4Hosting=await rpc('get_level4_hosting_alerts_v2',{}).catch(()=>[]);S.napStats=await rpc('get_nap_violation_stats_v2',{}).catch(()=>[]);S.sgWindow=await rpc('get_current_sg_window_v2',{}).catch(()=>null);window.NAP2_PLAYER_AVATARS=S.avatars;loadAvatars().catch(e=>console.warn('avatar load',e))}
-async function enter(expected){const P=await tab('profiles','select=alliance_code,can_manage_bans,is_admin&limit=1'),prof=P?.[0]||null,a=prof?.alliance_code;if(!a)throw Error('Account incomplete');if(expected&&expected!==a)throw Error('Wrong alliance');S.a=a;S.profile=prof;await load();await migrateLocalNotificationReads2();await syncCrownVisibility2();n2login.hidden=true;document.body.classList.remove('n2lock');decorate();renderHome();renderPlayers();if(typeof applyTranslations==='function')applyTranslations();}
-async function boot(){css();login();document.body.classList.add('n2lock');if(!await token())return;try{await enter()}catch{save(null)}}
+async function load(){
+ const a=encodeURIComponent(S.a);
+ const [p1,v,x,e,o,tr,bans,spend,settings,reviews,shared,notificationReads,syncStatus,level4Hosting,napStats,sgWindow,performance]=await Promise.all([
+  tab('players','select=*&alliance_code=eq.'+a+'&order=name.asc'),
+  tab('violations','select=*&alliance_code=eq.'+a+'&order=occurred_at.desc'),
+  tab('sanctions','select=*&alliance_code=eq.'+a+'&order=created_at.desc'),
+  rpc('get_public_nap_exclusions',{}),
+  rpc('get_nap_overdue_action_notifications_v2',{}),
+  rpc('get_my_roster_transfer_candidates',{}),
+  tab('nap_bans','select=*&active=eq.true&order=created_at.desc').catch(()=>[]),
+  rpc('get_public_nap_spending_exclusions',{}).catch(()=>[]),
+  tab('alliance_settings','select=*&alliance_code=eq.'+a+'&limit=1').catch(()=>[]),
+  rpc('get_pending_post_contact_spending_reviews',{}).catch(()=>[]),
+  rpc('get_my_shared_spending_cases',{}).catch(()=>[]),
+  tab('notification_read_state','select=notification_id&alliance_code=eq.'+a+'&order=read_at.desc').catch(()=>[]),
+  rpc('get_roster_sync_status_v2',{}).catch(()=>null),
+  rpc('get_level4_hosting_alerts_v2',{}).catch(()=>[]),
+  rpc('get_nap_violation_stats_v2',{}).catch(()=>[]),
+  rpc('get_current_sg_window_v2',{}).catch(()=>null),
+  rpc('get_performance_dashboard',{}).catch(()=>null)
+ ]);
+ S.p=(p1||[]).filter(r=>r.alliance_code===S.a);S.v=(v||[]).filter(r=>r.alliance_code===S.a);S.x=(x||[]).filter(r=>r.alliance_code===S.a);
+ S.e=e||[];S.o=o||[];S.t=(tr||[]).filter(r=>r.from_alliance===S.a||r.to_alliance===S.a);S.bans=bans||[];S.spend=spend||[];
+ S.reviews=reviews||[];S.shared=shared||[];S.notificationReads=new Set((notificationReads||[]).map(r=>String(r.notification_id)));
+ S.syncStatus=syncStatus||null;S.settings=settings?.[0]||null;S.level4Hosting=level4Hosting||[];S.napStats=napStats||[];S.sgWindow=sgWindow||null;S.performance=performance||null;
+ window.NAP2_PLAYER_AVATARS=S.avatars;loadAvatars().catch(e=>console.warn('avatar load',e));
+}
+async function enter(expected){
+ const P=await tab('profiles','select=alliance_code,can_manage_bans,is_admin&limit=1'),prof=P?.[0]||null,a=prof?.alliance_code;
+ if(!a){const err=Error(actionWord2('accountIncomplete'));err.code='ACCOUNT_INCOMPLETE';throw err}
+ if(expected&&expected!==a){const err=Error(actionWord2('wrongAlliance'));err.code='ACCOUNT_MISMATCH';throw err}
+ S.a=a;S.profile=prof;await load();await migrateLocalNotificationReads2();await syncCrownVisibility2();
+ n2login.hidden=true;document.body.classList.remove('n2lock');decorate();renderHome();renderPlayers();if(typeof applyTranslations==='function')applyTranslations();
+}
+function showLoginRetry2(err){
+ const box=document.getElementById('n2e'),button=document.getElementById('n2retry');
+ if(box)box.textContent=actionWord2('connectionRetry')+(err?.message&&err.message!==actionWord2('connectionFail')?' '+err.message:'');
+ if(button){button.textContent=actionWord2('retry');button.hidden=false}
+}
+async function retrySavedSession2(){
+ const button=document.getElementById('n2retry');if(button)button.disabled=true;
+ try{
+  if(!await token()){if(button)button.hidden=true;return}
+  await enter();
+ }catch(err){
+  if(isSessionAuthError2(err)||err?.code==='ACCOUNT_INCOMPLETE'||err?.code==='ACCOUNT_MISMATCH'){save(null);if(button)button.hidden=true;const box=document.getElementById('n2e');if(box)box.textContent=t('fail');return}
+  showLoginRetry2(err);
+ }finally{if(button)button.disabled=false}
+}
+async function boot(){
+ css();login();document.body.classList.add('n2lock');
+ try{if(!await token())return;await enter()}
+ catch(err){
+  if(isSessionAuthError2(err)||err?.code==='ACCOUNT_INCOMPLETE'||err?.code==='ACCOUNT_MISMATCH'){save(null);return}
+  showLoginRetry2(err);
+ }
+}
 setTimeout(boot,0);document.querySelector('#languagePicker')?.addEventListener('change',()=>setTimeout(()=>{if(S.a){decorate();renderHome();renderPlayers()}},0));
 
 /* === LIVE HELPERS V2 === */
@@ -354,12 +454,12 @@ function updateManualPreview2(sourceId){
  const a=document.getElementById('liveManualPreview'),b=document.getElementById('liveRuleCard');if(a)a.textContent=text;if(b)b.textContent=text;
 }
 async function saveManualViolation2(e){
- e.preventDefault();const out=document.getElementById('liveManualStatus');out.textContent='Speichere …';
+ e.preventDefault();const out=document.getElementById('liveManualStatus');out.textContent=actionWord2('saving');
  try{
    const player=document.getElementById('liveManualPlayer').value,event=document.getElementById('liveManualEvent').value,phase=document.getElementById('liveManualPhase').value,note=document.getElementById('liveManualNote').value.trim()||null,occurred=new Date(document.getElementById('liveManualOccurred').value).toISOString(),source=S.eventOptions.find(x=>x.event_name===event)?.source_event_id,target=targetFor2(event,phase),score=Number(String(document.getElementById('liveManualScore').value||'').replace(/\D/g,'')),kind=(event==='Swordland Showdown'||event==='Tri-Alliance Clash')?'swordland':'overspend',mult=phaseMultiplier2(event,phase,document.getElementById('liveManualOccurred').value);
-   if(kind==='overspend'&&(!Number.isFinite(score)||score<=Number(target||0)*mult))throw Error('Punkte müssen über '+mult+'× Ziel liegen.');
+   if(kind==='overspend'&&(!Number.isFinite(score)||score<=Number(target||0)*mult))throw Error(actionWord2('pointsMustExceed',{mult}));
    await rpc('record_violation_fast',{p_player_name:player,p_event_name:event,p_phase_name:phase,p_kind:kind,p_score:kind==='swordland'?0:score,p_target_value:target,p_occurred_at:occurred,p_expiry_days:Number(S.settings?.violation_expiry_days||30),p_note:note});
-   out.textContent='✓ Gespeichert';await load();renderHome();renderPlayers();document.getElementById('liveManualScore').value='';
+   out.textContent=actionWord2('saved');await load();renderHome();renderPlayers();document.getElementById('liveManualScore').value='';
  }catch(err){out.textContent=err.message||String(err)}
 }
 async function loadScreenImporter2(){
@@ -452,8 +552,8 @@ function renderNapLive(){
  (sg?'<form id="liveSpendForm" class="live-form"><label>'+E(sw.player)+'<select id="liveSpendPlayer">'+S.p.map(p=>'<option value="'+E(p.id)+'">'+E(p.name||p.player_name)+' · '+E(p.game_id||'–')+'</option>').join('')+'</select></label><label>'+E(sw.reason)+'<textarea id="liveSpendReason" placeholder="'+E(sw.placeholder)+'"></textarea></label><button class="btn primary" type="submit">'+E(sw.save)+'</button><div id="liveSpendStatus" class="live-status"></div></form>':'')+
  '</div></section></div>';document.querySelectorAll('.live-end-spend').forEach(b=>b.onclick=()=>endSpending2(b.dataset.id));document.getElementById('liveSpendForm')?.addEventListener('submit',saveSpending2);
 }
-async function saveSpending2(e){e.preventDefault();const out=document.getElementById('liveSpendStatus');out.textContent='Speichere …';try{if(!S.sgWindow?.end_at)throw Error('Aktuell läuft kein Strongest Governor.');await rpc('create_nap_spending_exclusion',{p_player_id:document.getElementById('liveSpendPlayer').value,p_starts_at:new Date().toISOString(),p_ends_at:S.sgWindow.end_at,p_reason:document.getElementById('liveSpendReason').value.trim()||'Strongest Governor'});await load();renderNapLive()}catch(err){out.textContent=err.message||String(err)}}
-async function endSpending2(id){if(!confirm('Spending Exclusion beenden?'))return;try{await rpc('end_nap_spending_exclusion',{p_id:id});await load();renderNapLive()}catch(err){alert(err.message||String(err))}}
+async function saveSpending2(e){e.preventDefault();const out=document.getElementById('liveSpendStatus');out.textContent=actionWord2('saving');try{if(!S.sgWindow?.end_at)throw Error(actionWord2('sgNotRunning'));await rpc('create_nap_spending_exclusion',{p_player_id:document.getElementById('liveSpendPlayer').value,p_starts_at:new Date().toISOString(),p_ends_at:S.sgWindow.end_at,p_reason:document.getElementById('liveSpendReason').value.trim()||'Strongest Governor'});await load();renderNapLive()}catch(err){out.textContent=err.message||String(err)}}
+async function endSpending2(id){if(!confirm(actionWord2('endSpending')))return;try{await rpc('end_nap_spending_exclusion',{p_id:id});await load();renderNapLive()}catch(err){alert(err.message||String(err))}}
 async function endExclusion2(id){
  const x=(S.e||[]).find(r=>String(r.id)===String(id)),w=extendedActionWords2();
  if(!x||Number(x.level)!==4||x.alliance_code!==S.a)return;
@@ -464,14 +564,14 @@ async function endExclusion2(id){
  }catch(err){alert(err.message||String(err))}
 }
 async function saveManualExclusion2(e){
- e.preventDefault();const out=document.getElementById('liveExStatus');out.textContent='Speichere …';
- try{const name=document.getElementById('liveExPlayer').value.trim(),level=Number(document.getElementById('liveExLevel').value),end=document.getElementById('liveExEnd').value;await rpc('create_manual_nap_exclusion',{p_player_name:name,p_level:level,p_started_at:new Date().toISOString(),p_end_at:end?new Date(end).toISOString():null});await load();out.textContent='✓ Gespeichert';renderNapLive()}catch(err){out.textContent=err.message||String(err)}
+ e.preventDefault();const out=document.getElementById('liveExStatus');out.textContent=actionWord2('saving');
+ try{const name=document.getElementById('liveExPlayer').value.trim(),level=Number(document.getElementById('liveExLevel').value),end=document.getElementById('liveExEnd').value;await rpc('create_manual_nap_exclusion',{p_player_name:name,p_level:level,p_started_at:new Date().toISOString(),p_end_at:end?new Date(end).toISOString():null});await load();out.textContent=actionWord2('saved');renderNapLive()}catch(err){out.textContent=err.message||String(err)}
 }
 async function saveBan2(e){
- e.preventDefault();const out=document.getElementById('liveBanStatus');out.textContent='Speichere …';
+ e.preventDefault();const out=document.getElementById('liveBanStatus');out.textContent=actionWord2('saving');
  try{await ins('nap_bans',{player_name:document.getElementById('liveBanPlayer').value.trim(),player_game_id:document.getElementById('liveBanId').value.trim()||null,former_alliance:document.getElementById('liveBanAlliance').value.trim()||null,reason:document.getElementById('liveBanReason').value.trim(),active:true});await load();renderNapLive()}catch(err){out.textContent=err.message||String(err)}
 }
-async function endBan2(id){if(!confirm('NAP Ban deaktivieren?'))return;await upd('nap_bans',id,{active:false,updated_at:new Date().toISOString()});await load();renderNapLive()}
+async function endBan2(id){if(!confirm(actionWord2('deactivateBan')))return;await upd('nap_bans',id,{active:false,updated_at:new Date().toISOString()});await load();renderNapLive()}
 
 
 /* === PERFORMANCE + KVK LIVE V2 === */
@@ -497,13 +597,13 @@ async function renderPerformanceLive(){
 }
 async function openPerformanceScreenImport2(){
  const out=document.getElementById('livePerformanceExtra');
- if(!window.NAP_NATIVE_IMPORTER){if(out)out.textContent='Importer nicht geladen. Bitte Seite aktualisieren.';return}
+ if(!window.NAP_NATIVE_IMPORTER){if(out)out.textContent=actionWord2('importerMissing');return}
  window.NAP_NATIVE_IMPORTER.openPerformance();
 }
 async function loadFullPerformance2(type){
  const out=document.getElementById('livePerformanceExtra');if(!out)return;out.innerHTML='<div class="live-empty-state">Ranking wird geladen …</div>';
  try{
-   const ev=type==='kvk'?S.performance?.kvk?.event:S.performance?.mobilization?.event;if(!ev?.id)throw Error('Kein Performance-Durchlauf vorhanden.');
+   const ev=type==='kvk'?S.performance?.kvk?.event:S.performance?.mobilization?.event;if(!ev?.id)throw Error(actionWord2('noPerformance'));
    const d=await rpc(type==='kvk'?'get_kvk_full_ranking':'get_mobilization_full_ranking',{p_performance_event_id:ev.id}),rows=Array.isArray(d)?d:(d?.rows||[]);
    out.innerHTML='<section class="card"><div class="card-head"><div><div class="card-title">'+(type==='kvk'?'KvK Prep · Top 200':'Alliance Mobilization')+'</div><div class="card-sub">'+E(performanceDate2(ev)||'Ohne Zeitangabe')+(ev.period_start?' · '+E(D(ev.period_start)):'')+'</div></div><span class="pill">'+rows.length+'</span></div><div class="card-body live-list">'+
    (rows.length?rows.map((r,i)=>'<div class="live-row"><div><b>#'+E(r.server_rank||r.alliance_rank||i+1)+' · '+E(r.name||'–')+'</b><small>'+E(r.source_type||'')+'</small></div><strong>'+N(r.score)+'</strong></div>').join(''):'<div class="live-empty-state">Keine Daten.</div>')+'</div></section>';
@@ -523,8 +623,8 @@ async function openManualPerformance2(){
  }catch(err){out.innerHTML='<div class="live-empty-state">'+E(err.message||String(err))+'</div>'}
 }
 async function saveManualPerformance2(e){
- e.preventDefault();const out=document.getElementById('livePerfStatus'),type=document.getElementById('livePerfType').value,isK=type==='kvk_prep',score=Number(String(document.getElementById('livePerfScore').value||'').replace(/\D/g,'')),rank=Number(String(document.getElementById('livePerfRank').value||'').replace(/\D/g,''));out.textContent='Speichere …';
- try{if(!Number.isFinite(score)||score<0)throw Error('Score prüfen.');if(isK&&(rank<1||rank>200))throw Error('KvK benötigt Serverrang 1–200.');await rpc('add_manual_player_performance',{p_performance_type:type,p_player_id:document.getElementById('livePerfPlayer').value,p_event_schedule_id:isK?null:Number(document.getElementById('livePerfOcc').value),p_cycle_id:isK?document.getElementById('livePerfOcc').value:null,p_score:score,p_server_rank:isK?rank:null,p_note:document.getElementById('livePerfNote').value.trim()||null});out.textContent='✓ Gespeichert';await renderPerformanceLive()}catch(err){out.textContent=err.message||String(err)}
+ e.preventDefault();const out=document.getElementById('livePerfStatus'),type=document.getElementById('livePerfType').value,isK=type==='kvk_prep',score=Number(String(document.getElementById('livePerfScore').value||'').replace(/\D/g,'')),rank=Number(String(document.getElementById('livePerfRank').value||'').replace(/\D/g,''));out.textContent=actionWord2('saving');
+ try{if(!Number.isFinite(score)||score<0)throw Error(actionWord2('scoreCheck'));if(isK&&(rank<1||rank>200))throw Error(actionWord2('kvkRankCheck'));await rpc('add_manual_player_performance',{p_performance_type:type,p_player_id:document.getElementById('livePerfPlayer').value,p_event_schedule_id:isK?null:Number(document.getElementById('livePerfOcc').value),p_cycle_id:isK?document.getElementById('livePerfOcc').value:null,p_score:score,p_server_rank:isK?rank:null,p_note:document.getElementById('livePerfNote').value.trim()||null});out.textContent=actionWord2('saved');await renderPerformanceLive()}catch(err){out.textContent=err.message||String(err)}
 }
 async function renderKvkLive(){
  const v=document.getElementById('view-kvk');if(!v)return;v.innerHTML='<div class="hero"><div><div class="kicker">KVK · LIVE</div><h1>KvK & Law 9</h1><p>Snapshot, Prep-Scores, normalisiertes Ranking und Top-200-Performance.</p></div></div><div class="live-empty-state">KvK-Daten werden geladen …</div>';
@@ -550,7 +650,7 @@ async function renderKvkLive(){
 }
 async function saveMemberPlan2(e){
  e.preventDefault();const form=e.currentTarget,count=Number(String(form.querySelector('input').value||'').replace(/\D/g,''));
- if(!Number.isInteger(count)||count<0||count>200){alert('Mitgliederzahl prüfen.');return}
+ if(!Number.isInteger(count)||count<0||count>200){alert(actionWord2('memberCountCheck'));return}
  try{await rpc('set_law9_member_override',{p_cycle_id:S.law9.cycle.id,p_alliance_code:form.dataset.code,p_member_count:count});await renderKvkLive()}catch(err){alert(err.message||String(err))}
 }
 async function savePrepScore2(e){
@@ -620,11 +720,11 @@ function openLawReport2(key){
  const d=new Date(Date.now()-new Date().getTimezoneOffset()*60000);document.getElementById('liveLawOccurred').value=d.toISOString().slice(0,16);document.getElementById('liveLawClose').onclick=()=>modal.remove();modal.onclick=e=>{if(e.target===modal)modal.remove()};document.getElementById('liveLawForm').onsubmit=e=>saveLawReport2(e,l);
 }
 async function saveLawReport2(e,l){
- e.preventDefault();const out=document.getElementById('liveLawStatus'),files=[...document.getElementById('liveLawFiles').files];out.textContent='Speichere …';
+ e.preventDefault();const out=document.getElementById('liveLawStatus'),files=[...document.getElementById('liveLawFiles').files];out.textContent=actionWord2('saving');
  try{
-  for(const f of files)if(!['image/png','image/jpeg','image/webp'].includes(f.type)||f.size>8388608)throw Error('Nur PNG/JPG/WebP, max. 8 MB.');
+  for(const f of files)if(!['image/png','image/jpeg','image/webp'].includes(f.type)||f.size>8388608)throw Error(actionWord2('lawImageRule'));
   const d=await rpc('record_nap_law_violation_v2',{p_law_key:l.law_key,p_subject_label:document.getElementById('liveLawSubject').value.trim(),p_subject_game_id:document.getElementById('liveLawSubjectId').value.trim()||null,p_affected_party:document.getElementById('liveLawAffected').value.trim()||null,p_affected_game_id:document.getElementById('liveLawAffectedId').value.trim()||null,p_occurred_at:new Date(document.getElementById('liveLawOccurred').value).toISOString(),p_description:document.getElementById('liveLawDesc').value.trim(),p_evidence_note:document.getElementById('liveLawNote').value.trim()||null,p_sanction_type:null,p_sanction_start:null,p_sanction_end:null});
-  const vid=d?.id;if(!vid)throw Error('Fall-ID fehlt.');const uid=ses?.user?.id||'user';
+  const vid=d?.id;if(!vid)throw Error(actionWord2('caseIdMissing'));const uid=ses?.user?.id||'user';
   for(const file of files){const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,'_'),path=uid+'/'+vid+'/'+Date.now()+'-'+safe;await uploadStorage2('nap-law-evidence',path,file);await ins('nap_law_evidence',{violation_id:vid,storage_path:path,file_name:file.name,mime_type:file.type,size_bytes:file.size})}
   document.getElementById('liveLawModal')?.remove();liveLawTab='cases';await renderLawsLive();
  }catch(err){out.textContent=err.message||String(err)}
@@ -741,7 +841,7 @@ async function loadMoreActivity2(){
  if(activityLoading2||!activityMore2)return;
  activityLoading2=true;
  const btn=document.getElementById('liveActivityMore');
- if(btn){btn.disabled=true;btn.textContent='Lade weitere Einträge …'}
+ if(btn){btn.disabled=true;btn.textContent=actionWord2('loadingMore')}
  try{
   const d=await rpc('get_activity_log_v2',activityRpcArgs2(activityOffset2));
   const page=Array.isArray(d?.rows)?d.rows:[];
@@ -783,8 +883,8 @@ async function renderSettingsLive(){
  document.getElementById('liveSettingsForm').onsubmit=saveGeneralSettings2;document.getElementById('liveTargetsForm').onsubmit=saveTargets2;v.querySelectorAll('.live-event-override').forEach(b=>b.onclick=()=>toggleEventOverride2(b));document.getElementById('liveFeatKvk').onclick=()=>toggleFeature2('kvk');document.getElementById('liveFeatMob').onclick=()=>toggleFeature2('mob');
 }
 async function upsertSettings2(body){return q(C.u+'/rest/v1/alliance_settings?alliance_code=eq.'+encodeURIComponent(S.a),{method:'PATCH',headers:{...(await h(true)),Prefer:'return=representation'},body:JSON.stringify({...body,updated_at:new Date().toISOString()})})}
-async function saveGeneralSettings2(e){e.preventDefault();const out=document.getElementById('liveSettingsStatus');out.textContent='Speichere …';try{const rows=await upsertSettings2({warning_window_days:Number(document.getElementById('liveWarnDays').value)||7,violation_expiry_days:Number(document.getElementById('liveExpiryDays').value)||30});S.settings={...S.settings,...rows?.[0]};out.textContent='✓ Gespeichert'}catch(err){out.textContent=err.message||String(err)}}
-async function saveTargets2(e){e.preventDefault();const out=document.getElementById('liveTargetsStatus'),targets={...(S.settings?.event_targets||{})};document.querySelectorAll('.live-target-input').forEach(i=>targets[i.dataset.key]=i.value?Number(i.value):null);out.textContent='Speichere …';try{const rows=await upsertSettings2({event_targets:targets});S.settings={...S.settings,...rows?.[0]};out.textContent='✓ Gespeichert'}catch(err){out.textContent=err.message||String(err)}}
+async function saveGeneralSettings2(e){e.preventDefault();const out=document.getElementById('liveSettingsStatus');out.textContent=actionWord2('saving');try{const rows=await upsertSettings2({warning_window_days:Number(document.getElementById('liveWarnDays').value)||7,violation_expiry_days:Number(document.getElementById('liveExpiryDays').value)||30});S.settings={...S.settings,...rows?.[0]};out.textContent=actionWord2('saved')}catch(err){out.textContent=err.message||String(err)}}
+async function saveTargets2(e){e.preventDefault();const out=document.getElementById('liveTargetsStatus'),targets={...(S.settings?.event_targets||{})};document.querySelectorAll('.live-target-input').forEach(i=>targets[i.dataset.key]=i.value?Number(i.value):null);out.textContent=actionWord2('saving');try{const rows=await upsertSettings2({event_targets:targets});S.settings={...S.settings,...rows?.[0]};out.textContent=actionWord2('saved')}catch(err){out.textContent=err.message||String(err)}}
 async function toggleEventOverride2(btn){try{await rpc('set_manual_event_entry_override',{p_event_name:btn.dataset.event,p_enabled:btn.dataset.enabled!=='1'});await load();renderSettingsLive()}catch(err){alert(err.message||String(err))}}
 async function toggleFeature2(which){const f=S.features||{kvk_top200_enabled:true,mobilization_enabled:true},next={kvk_top200_enabled:f.kvk_top200_enabled!==false,mobilization_enabled:f.mobilization_enabled!==false};if(which==='kvk')next.kvk_top200_enabled=!next.kvk_top200_enabled;else next.mobilization_enabled=!next.mobilization_enabled;try{S.features=await rpc('set_performance_feature_settings',{p_kvk_top200_enabled:next.kvk_top200_enabled,p_mobilization_enabled:next.mobilization_enabled});await renderSettingsLive()}catch(err){alert(err.message||String(err))}}
 
@@ -792,12 +892,14 @@ async function toggleFeature2(which){const f=S.features||{kvk_top200_enabled:tru
 
 /* === SUPPORT LIVE V2 === */
 const SUPPORT_WORDS2={
- de:{kicker:'SUPPORT · LIVE',title:'Problem melden oder Frage stellen.',sub:'Beschreibe den Sachverhalt möglichst genau. Screenshots helfen bei der Prüfung.',safeTitle:'Prüfen statt automatisch ändern',safe:'Supportmeldungen ändern niemals automatisch Spieler, Verstöße, Sanktionen oder Einstellungen. Der Fall wird zuerst geprüft und das weitere Vorgehen abgestimmt.',newTicket:'Neue Support-Anfrage',category:'Kategorie',subject:'Betreff',message:'Beschreibung',screens:'Screenshots',screenHint:'Optional · PNG/JPEG/WebP · max. 3 Dateien pro Nachricht · 5 MB je Bild',send:'Anfrage senden',sending:'Wird gesendet …',sent:'✓ Support-Anfrage gespeichert',mine:'Deine Support-Fälle',none:'Noch keine Support-Anfragen.',reply:'Nachricht ergänzen',replyPlaceholder:'Weitere Informationen …',replySend:'Senden',support:'Support',alliance:'Allianz',new:'Neu',reviewing:'Wird geprüft',awaiting_user:'Rückfrage',resolved:'Gelöst',problem:'Problem / Fehler',data:'Datenfehler',ui:'Anzeige / Übersetzung',question:'Frage',other:'Sonstiges',image:'Screenshot'},
- en:{kicker:'SUPPORT · LIVE',title:'Report a problem or ask a question.',sub:'Describe the issue as precisely as possible. Screenshots help with review.',safeTitle:'Review first, no automatic changes',safe:'Support reports never automatically change players, violations, sanctions or settings. The case is reviewed first and the next step is discussed.',newTicket:'New support request',category:'Category',subject:'Subject',message:'Description',screens:'Screenshots',screenHint:'Optional · PNG/JPEG/WebP · max. 3 files per message · 5 MB each',send:'Send request',sending:'Sending …',sent:'✓ Support request saved',mine:'Your support cases',none:'No support requests yet.',reply:'Add message',replyPlaceholder:'Additional information …',replySend:'Send',support:'Support',alliance:'Alliance',new:'New',reviewing:'Under review',awaiting_user:'Question pending',resolved:'Resolved',problem:'Problem / bug',data:'Data issue',ui:'Display / translation',question:'Question',other:'Other',image:'Screenshot'},
- fr:{kicker:'SUPPORT · LIVE',title:'Signaler un problème ou poser une question.',sub:'Décrivez le cas le plus précisément possible. Les captures facilitent la vérification.',safeTitle:'Vérifier avant toute modification',safe:'Les demandes Support ne modifient jamais automatiquement joueurs, infractions, sanctions ou paramètres. Le cas est d’abord vérifié et la suite est discutée.',newTicket:'Nouvelle demande',category:'Catégorie',subject:'Objet',message:'Description',screens:'Captures',screenHint:'Facultatif · PNG/JPEG/WebP · max. 3 fichiers · 5 Mo par image',send:'Envoyer',sending:'Envoi …',sent:'✓ Demande enregistrée',mine:'Vos demandes Support',none:'Aucune demande Support.',reply:'Ajouter un message',replyPlaceholder:'Informations supplémentaires …',replySend:'Envoyer',support:'Support',alliance:'Alliance',new:'Nouveau',reviewing:'En cours de vérification',awaiting_user:'Question en attente',resolved:'Résolu',problem:'Problème / bug',data:'Erreur de données',ui:'Affichage / traduction',question:'Question',other:'Autre',image:'Capture'},
- es:{kicker:'SUPPORT · LIVE',title:'Reportar un problema o hacer una pregunta.',sub:'Describe el caso con el mayor detalle posible. Las capturas ayudan a revisarlo.',safeTitle:'Revisar antes de cambiar',safe:'Las solicitudes de Support nunca modifican automáticamente jugadores, infracciones, sanciones o ajustes. Primero se revisa el caso y se acuerda el siguiente paso.',newTicket:'Nueva solicitud',category:'Categoría',subject:'Asunto',message:'Descripción',screens:'Capturas',screenHint:'Opcional · PNG/JPEG/WebP · máx. 3 archivos · 5 MB por imagen',send:'Enviar',sending:'Enviando …',sent:'✓ Solicitud guardada',mine:'Tus casos de Support',none:'Aún no hay solicitudes.',reply:'Añadir mensaje',replyPlaceholder:'Información adicional …',replySend:'Enviar',support:'Support',alliance:'Alianza',new:'Nuevo',reviewing:'En revisión',awaiting_user:'Pregunta pendiente',resolved:'Resuelto',problem:'Problema / bug',data:'Error de datos',ui:'Visualización / traducción',question:'Pregunta',other:'Otro',image:'Captura'}
+ de:{kicker:'SUPPORT · LIVE',title:'Problem melden oder Frage stellen.',sub:'Beschreibe den Sachverhalt möglichst genau. Screenshots helfen bei der Prüfung.',safeTitle:'Prüfen statt automatisch ändern',safe:'Supportmeldungen ändern niemals automatisch Spieler, Verstöße, Sanktionen oder Einstellungen. Der Fall wird zuerst geprüft und das weitere Vorgehen abgestimmt.',newTicket:'Neue Support-Anfrage',category:'Kategorie',subject:'Betreff',message:'Beschreibung',screens:'Screenshots',screenHint:'Optional · PNG/JPEG/WebP · max. 3 Dateien pro Nachricht · 5 MB je Bild',send:'Anfrage senden',sending:'Wird gesendet …',sent:'✓ Support-Anfrage gespeichert',mine:'Deine Support-Fälle',none:'Noch keine Support-Anfragen.',reply:'Nachricht ergänzen',replyPlaceholder:'Weitere Informationen …',replySend:'Senden',support:'Support',alliance:'Allianz',new:'Neu',reviewing:'Wird geprüft',awaiting_user:'Rückfrage',resolved:'Gelöst',problem:'Problem / Fehler',data:'Datenfehler',ui:'Anzeige / Übersetzung',question:'Frage',other:'Sonstiges',image:'Screenshot',fileType:'Nur PNG, JPEG oder WebP sind erlaubt.',fileSize:'Ein Screenshot darf höchstens 5 MB groß sein.',sentPartial:'✓ Support-Anfrage gespeichert. {count} Screenshot(s) konnten nicht gespeichert werden.',replySaved:'✓ Nachricht gespeichert',replyPartial:'✓ Nachricht gespeichert. {count} Screenshot(s) konnten nicht gespeichert werden.'},
+ en:{kicker:'SUPPORT · LIVE',title:'Report a problem or ask a question.',sub:'Describe the issue as precisely as possible. Screenshots help with review.',safeTitle:'Review first, no automatic changes',safe:'Support reports never automatically change players, violations, sanctions or settings. The case is reviewed first and the next step is discussed.',newTicket:'New support request',category:'Category',subject:'Subject',message:'Description',screens:'Screenshots',screenHint:'Optional · PNG/JPEG/WebP · max. 3 files per message · 5 MB each',send:'Send request',sending:'Sending …',sent:'✓ Support request saved',mine:'Your support cases',none:'No support requests yet.',reply:'Add message',replyPlaceholder:'Additional information …',replySend:'Send',support:'Support',alliance:'Alliance',new:'New',reviewing:'Under review',awaiting_user:'Question pending',resolved:'Resolved',problem:'Problem / bug',data:'Data issue',ui:'Display / translation',question:'Question',other:'Other',image:'Screenshot',fileType:'Only PNG, JPEG or WebP screenshots are allowed.',fileSize:'A screenshot must be 5 MB or smaller.',sentPartial:'✓ Support request saved. {count} screenshot(s) could not be saved.',replySaved:'✓ Message saved',replyPartial:'✓ Message saved. {count} screenshot(s) could not be saved.'},
+ fr:{kicker:'SUPPORT · LIVE',title:'Signaler un problème ou poser une question.',sub:'Décrivez le cas le plus précisément possible. Les captures facilitent la vérification.',safeTitle:'Vérifier avant toute modification',safe:'Les demandes Support ne modifient jamais automatiquement joueurs, infractions, sanctions ou paramètres. Le cas est d’abord vérifié et la suite est discutée.',newTicket:'Nouvelle demande',category:'Catégorie',subject:'Objet',message:'Description',screens:'Captures',screenHint:'Facultatif · PNG/JPEG/WebP · max. 3 fichiers · 5 Mo par image',send:'Envoyer',sending:'Envoi …',sent:'✓ Demande enregistrée',mine:'Vos demandes Support',none:'Aucune demande Support.',reply:'Ajouter un message',replyPlaceholder:'Informations supplémentaires …',replySend:'Envoyer',support:'Support',alliance:'Alliance',new:'Nouveau',reviewing:'En cours de vérification',awaiting_user:'Question en attente',resolved:'Résolu',problem:'Problème / bug',data:'Erreur de données',ui:'Affichage / traduction',question:'Question',other:'Autre',image:'Capture',fileType:'Seuls PNG, JPEG ou WebP sont autorisés.',fileSize:'Une capture ne doit pas dépasser 5 Mo.',sentPartial:'✓ Demande enregistrée. {count} capture(s) n’ont pas pu être enregistrées.',replySaved:'✓ Message enregistré',replyPartial:'✓ Message enregistré. {count} capture(s) n’ont pas pu être enregistrées.'},
+ es:{kicker:'SUPPORT · LIVE',title:'Reportar un problema o hacer una pregunta.',sub:'Describe el caso con el mayor detalle posible. Las capturas ayudan a revisarlo.',safeTitle:'Revisar antes de cambiar',safe:'Las solicitudes de Support nunca modifican automáticamente jugadores, infracciones, sanciones o ajustes. Primero se revisa el caso y se acuerda el siguiente paso.',newTicket:'Nueva solicitud',category:'Categoría',subject:'Asunto',message:'Descripción',screens:'Capturas',screenHint:'Opcional · PNG/JPEG/WebP · máx. 3 archivos · 5 MB por imagen',send:'Enviar',sending:'Enviando …',sent:'✓ Solicitud guardada',mine:'Tus casos de Support',none:'Aún no hay solicitudes.',reply:'Añadir mensaje',replyPlaceholder:'Información adicional …',replySend:'Enviar',support:'Support',alliance:'Alianza',new:'Nuevo',reviewing:'En revisión',awaiting_user:'Pregunta pendiente',resolved:'Resuelto',problem:'Problema / bug',data:'Error de datos',ui:'Visualización / traducción',question:'Pregunta',other:'Otro',image:'Captura',fileType:'Solo se permiten PNG, JPEG o WebP.',fileSize:'Cada captura debe tener 5 MB o menos.',sentPartial:'✓ Solicitud guardada. No se pudieron guardar {count} captura(s).',replySaved:'✓ Mensaje guardado',replyPartial:'✓ Mensaje guardado. No se pudieron guardar {count} captura(s).'}
 };
+let supportFlash2=null;
 function supportWords2(){return SUPPORT_WORDS2[L()]||SUPPORT_WORDS2.de}
+function supportFormat2(text,vars={}){let s=String(text||'');for(const [k,v] of Object.entries(vars))s=s.replaceAll('{'+k+'}',String(v));return s}
 function supportStatus2(status){const w=supportWords2();return w[status]||status||w.new}
 function supportCategory2(cat){const w=supportWords2();return w[cat]||cat||w.other}
 async function loadSupport2(){
@@ -819,52 +921,58 @@ async function hydrateSupportImages2(root){
   }catch(e){console.warn('support evidence',e)}
  }));
 }
-async function uploadSupportFiles2(ticketId,fileList){
- const files=[...fileList].slice(0,3);
+function validateSupportFiles2(fileList){
+ const w=supportWords2(),files=[...fileList].slice(0,3);
  for(const file of files){
-  if(!['image/png','image/jpeg','image/webp'].includes(file.type))throw Error('Only PNG, JPEG or WebP screenshots are allowed.');
-  if(file.size>5242880)throw Error('Screenshot must be 5 MB or smaller.');
-  const ext=file.type==='image/png'?'png':file.type==='image/webp'?'webp':'jpg';
-  const path=S.a+'/'+ticketId+'/'+crypto.randomUUID()+'.'+ext;
-  await uploadStorage2('support-evidence',path,file);
-  await rpc('add_support_ticket_evidence',{
-   p_ticket_id:ticketId,p_storage_path:path,p_file_name:file.name||('screenshot.'+ext),
-   p_mime_type:file.type,p_size_bytes:file.size
-  });
+  if(!['image/png','image/jpeg','image/webp'].includes(file.type))throw Error(w.fileType);
+  if(file.size>5242880)throw Error(w.fileSize);
  }
+ return files;
+}
+async function uploadSupportFiles2(ticketId,fileList){
+ const files=validateSupportFiles2(fileList),failed=[];
+ for(const file of files){
+  try{
+   const ext=file.type==='image/png'?'png':file.type==='image/webp'?'webp':'jpg';
+   const path=S.a+'/'+ticketId+'/'+crypto.randomUUID()+'.'+ext;
+   await uploadStorage2('support-evidence',path,file);
+   await rpc('add_support_ticket_evidence',{p_ticket_id:ticketId,p_storage_path:path,p_file_name:file.name||('screenshot.'+ext),p_mime_type:file.type,p_size_bytes:file.size});
+  }catch(err){failed.push({file,error:err})}
+ }
+ return failed;
 }
 async function createSupportTicket2(e){
  e.preventDefault();const w=supportWords2(),form=e.currentTarget,out=form.querySelector('.live-status'),btn=form.querySelector('button[type="submit"]');
+ let files;try{files=validateSupportFiles2(form.querySelector('[name="screens"]').files)}catch(err){out.textContent=err.message||String(err);return}
  out.textContent=w.sending;btn.disabled=true;
  try{
-  const tid=await rpc('create_support_ticket',{
-   p_category:form.querySelector('[name="category"]').value,
-   p_subject:form.querySelector('[name="subject"]').value.trim(),
-   p_message:form.querySelector('[name="message"]').value.trim()
-  });
-  const files=form.querySelector('[name="screens"]').files;
-  if(files?.length)await uploadSupportFiles2(tid,files);
-  form.reset();out.textContent=w.sent;await renderSupportLive();
+  const tid=await rpc('create_support_ticket',{p_category:form.querySelector('[name="category"]').value,p_subject:form.querySelector('[name="subject"]').value.trim(),p_message:form.querySelector('[name="message"]').value.trim()});
+  const failed=files.length?await uploadSupportFiles2(tid,files):[];
+  form.reset();supportFlash2=failed.length?supportFormat2(w.sentPartial,{count:failed.length}):w.sent;
+  await renderSupportLive();
  }catch(err){out.textContent=err.message||String(err)}
  finally{btn.disabled=false}
 }
 async function addSupportMessage2(e){
- e.preventDefault();const form=e.currentTarget,input=form.querySelector('textarea'),files=form.querySelector('input[type="file"]')?.files,btn=form.querySelector('button'),out=form.querySelector('.live-status');
- const msg=input.value.trim();if(!msg)return;btn.disabled=true;out.textContent='…';
+ e.preventDefault();const w=supportWords2(),form=e.currentTarget,input=form.querySelector('textarea'),btn=form.querySelector('button'),out=form.querySelector('.live-status');
+ const msg=input.value.trim();if(!msg)return;
+ let files;try{files=validateSupportFiles2(form.querySelector('input[type="file"]')?.files||[])}catch(err){out.textContent=err.message||String(err);return}
+ btn.disabled=true;out.textContent=w.sending;
  try{
   await rpc('add_support_ticket_message',{p_ticket_id:form.dataset.ticketId,p_message:msg});
-  if(files?.length)await uploadSupportFiles2(form.dataset.ticketId,files);
-  input.value='';const fi=form.querySelector('input[type="file"]');if(fi)fi.value='';await renderSupportLive()
- }
- catch(err){out.textContent=err.message||String(err)}
+  const failed=files.length?await uploadSupportFiles2(form.dataset.ticketId,files):[];
+  input.value='';const fi=form.querySelector('input[type="file"]');if(fi)fi.value='';
+  supportFlash2=failed.length?supportFormat2(w.replyPartial,{count:failed.length}):w.replySaved;
+  await renderSupportLive();
+ }catch(err){out.textContent=err.message||String(err)}
  finally{btn.disabled=false}
 }
 async function renderSupportLive(){
  const v=document.getElementById('view-support');if(!v)return;const w=supportWords2();
  v.innerHTML='<div class="hero"><div><div class="kicker">'+E(w.kicker)+'</div><h1>'+E(w.title)+'</h1><p>'+E(w.sub)+'</p></div></div><div class="live-empty-state">…</div>';
  try{await loadSupport2()}catch(err){v.innerHTML+='<div class="live-empty-state">'+E(err.message||String(err))+'</div>';return}
- const tickets=S.supportTickets||[];
- v.innerHTML='<div class="hero"><div><div class="kicker">'+E(w.kicker)+'</div><h1>'+E(w.title)+'</h1><p>'+E(w.sub)+'</p></div></div>'+
+ const tickets=S.supportTickets||[],flash=supportFlash2;supportFlash2=null;
+ v.innerHTML='<div class="hero"><div><div class="kicker">'+E(w.kicker)+'</div><h1>'+E(w.title)+'</h1><p>'+E(w.sub)+'</p></div></div>'+(flash?'<div class="live-note" style="margin-bottom:14px">'+E(flash)+'</div>':'')+
  '<div class="live-note support-safety-note" style="margin-bottom:14px"><b>'+E(w.safeTitle)+'</b><br>'+E(w.safe)+'</div>'+
  '<div class="live-panel-grid"><section class="card"><div class="card-head"><div><div class="card-title">'+E(w.newTicket)+'</div></div></div><div class="card-body"><form id="liveSupportCreate" class="live-form">'+
  '<label>'+E(w.category)+'<select name="category"><option value="problem">'+E(w.problem)+'</option><option value="data">'+E(w.data)+'</option><option value="ui">'+E(w.ui)+'</option><option value="question">'+E(w.question)+'</option><option value="other">'+E(w.other)+'</option></select></label>'+
@@ -915,10 +1023,10 @@ function languageEditor2(P){
  return '<details class="live-language-editor"><summary>🌐 Sprachen bearbeiten</summary><div class="live-language-grid">'+LANG_OPTIONS2.map(x=>'<label class="live-language-option"><input type="checkbox" value="'+E(x[0])+'" '+(selected.has(x[0])?'checked':'')+'><span>'+E(x[1])+'</span></label>').join('')+'</div><div class="hero-actions" style="margin-top:10px"><button type="button" class="btn secondary" id="liveSaveLanguages">Sprachen speichern</button><span id="liveLanguageStatus" class="live-status"></span></div></details>';
 }
 async function saveLanguages2(P){
- const out=document.getElementById('liveLanguageStatus'),langs=[...document.querySelectorAll('.live-language-option input:checked')].map(x=>x.value);if(out)out.textContent='Speichere …';
+ const out=document.getElementById('liveLanguageStatus'),langs=[...document.querySelectorAll('.live-language-option input:checked')].map(x=>x.value);if(out)out.textContent=actionWord2('saving');
  try{
    const rows=await upd('players',P.id,{languages:langs}),updated=rows?.[0]||{...P,languages:langs},idx=S.p.findIndex(x=>x.id===P.id);if(idx>=0)S.p[idx]=updated;
-   if(out)out.textContent='✓ Gespeichert';
+   if(out)out.textContent=actionWord2('saved');
    const line=document.querySelector('.profile-alliance-line');if(line)line.innerHTML='Player ID '+E(updated.game_id||'–')+' · '+allianceBadge2(S.a)+' · '+E(langs.map(languageName2).join(' / ')||'–');
  }catch(err){if(out)out.textContent=err.message||String(err)}
 }
@@ -976,7 +1084,7 @@ function updateViolationEditPreview2(original){
 async function saveViolationEdit2(e,old){
  e.preventDefault();const out=document.getElementById('liveVioEditStatus'),event=document.getElementById('liveVioEvent').value,phase=document.getElementById('liveVioPhase').value,special=event==='Swordland Showdown'||event==='Tri-Alliance Clash',target=special?null:Number(String(document.getElementById('liveVioTarget').value||'').replace(/\D/g,'')),score=special?0:Number(String(document.getElementById('liveVioScore').value||'').replace(/\D/g,'')),source=S.eventOptions?.find(x=>x.event_name===event)?.source_event_id,mult=phaseMultiplier2(event,phase,document.getElementById('liveVioOccurred').value);
  if(!special&&(!target||!(score>target*mult))){out.textContent='Der korrigierte Wert ist kein Verstoß mehr. Nutze „Verstoß löschen“. ';return}
- out.textContent='Speichere …';
+ out.textContent=actionWord2('saving');
  try{
   const editedPlayer=document.getElementById('liveVioPlayer').value.trim();await rpc('update_violation_fast',{p_id:old.id,p_player_name:editedPlayer,p_event_name:event,p_phase_name:phase,p_kind:special?'swordland':'overspend',p_score:special?null:score,p_target_value:target,p_occurred_at:new Date(document.getElementById('liveVioOccurred').value).toISOString(),p_expiry_days:Number(S.settings?.violation_expiry_days||30),p_note:document.getElementById('liveVioNote').value.trim()||null});
   document.getElementById('liveViolationEditModal')?.remove();await load();await openProfile2(editedPlayer||old.player_name);
@@ -1011,7 +1119,7 @@ function askDeleteReason2(v){
 }
 async function deleteViolation2(v){
  const reason=await askDeleteReason2(v);if(!reason)return;
- const out=document.getElementById('liveVioEditStatus');if(out)out.textContent='Lösche …';
+ const out=document.getElementById('liveVioEditStatus');if(out)out.textContent=actionWord2('deleting');
  try{
   await rpc('delete_violation_fast',{p_id:v.id,p_reason:reason});
   document.getElementById('liveViolationEditModal')?.remove();
@@ -1163,7 +1271,7 @@ async function paintProfileTab2(name,tab){
  if(tab==='overview'){
   const lawCases=V.filter(isLaw14Case2),internalCases=V.filter(isInternalCase2),cw=playerCaseWords2();
   body.innerHTML='<div class="live-panel-grid"><section class="card"><div class="card-head"><div><div class="card-title">Übersicht</div></div></div><div class="card-body"><div class="live-stat-grid"><div class="live-stat"><b>'+lawCases.length+'</b><small>'+E(cw.lawCases)+'</small></div><div class="live-stat"><b>'+lawCases.filter(active).length+'</b><small>'+E(cw.lawActive)+'</small></div><div class="live-stat"><b>'+internalCases.length+'</b><small>'+E(cw.internalCases)+'</small></div><div class="live-stat"><b>'+l+'</b><small>'+E(cw.stage)+'</small></div><div class="live-stat"><b>'+E((P.languages||[]).map(languageName2).join(' / ')||'–')+'</b><small>Sprachen</small></div></div>'+languageEditor2(P)+'<form id="livePlayerIdForm" class="live-form"><label>Player ID<input id="livePlayerId" value="'+E(P.game_id||'')+'" inputmode="numeric"></label><button class="btn secondary">Player ID speichern</button><div id="livePlayerIdStatus" class="live-status"></div></form></div></section><section>'+ (latest?profileActionCard2(latest):'<div class="live-empty-state">Keine Maßnahme vorhanden.</div>') +'</section></div>';
-  document.getElementById('liveSaveLanguages')?.addEventListener('click',()=>saveLanguages2(P));bindProfileR1Timers2();document.getElementById('livePlayerIdForm').onsubmit=async e=>{e.preventDefault();const out=document.getElementById('livePlayerIdStatus');try{const d=await rpc('set_player_game_id',{p_player_name:name,p_game_id:document.getElementById('livePlayerId').value.replace(/\D/g,'')});if(d){const i=S.p.findIndex(x=>x.id===P.id);if(i>=0)S.p[i]=d}out.textContent='✓ Gespeichert';await loadAvatars();renderPlayers2()}catch(err){out.textContent=err.message||String(err)}};return;
+  document.getElementById('liveSaveLanguages')?.addEventListener('click',()=>saveLanguages2(P));bindProfileR1Timers2();document.getElementById('livePlayerIdForm').onsubmit=async e=>{e.preventDefault();const out=document.getElementById('livePlayerIdStatus');try{const d=await rpc('set_player_game_id',{p_player_name:name,p_game_id:document.getElementById('livePlayerId').value.replace(/\D/g,'')});if(d){const i=S.p.findIndex(x=>x.id===P.id);if(i>=0)S.p[i]=d}out.textContent=actionWord2('saved');await loadAvatars();renderPlayers2()}catch(err){out.textContent=err.message||String(err)}};return;
  }
  if(tab==='violations'){
   const w=profileWords2();
@@ -1241,7 +1349,7 @@ function transferRow2(x){
  return '<div class="live-row live-transfer-row"><div><b>'+E(x.player_name||'–')+'</b><div class="live-transfer-route">'+allianceBadge2(x.from_alliance||'POOL')+'<span>→</span>'+allianceBadge2(x.to_alliance||'POOL')+'<small>'+E(D(x.detected_since))+'</small></div>'+(buttons?'<div class="hero-actions" style="margin-top:7px">'+buttons+'</div>':'')+'</div><span class="pill '+(ownTarget?'green':'blue')+'">'+E(ownTarget?'Eingang':'Ausgang')+'</span></div>';
 }
 async function confirmTransfer2(id){
- if(!confirm('Diesen Allianzwechsel jetzt bestätigen? Die Spielerakte wird der neuen Allianz zugeordnet.'))return;
+ if(!confirm(actionWord2('confirmTransfer')))return;
  try{await rpc('confirm_roster_transfer_candidate',{p_candidate_id:id});await load();renderHomeFull2();renderNotifications2()}catch(err){alert(err.message||String(err))}
 }
 async function markTransferTemporary2(id,rejectIncoming=false){
@@ -1352,7 +1460,7 @@ function renderHomeFull2(){
  v.querySelectorAll('[data-home-nap-alert]').forEach(b=>b.onclick=()=>{liveNapTab='alerts';setView('nap')});v.querySelectorAll('[data-home-level4-alert]').forEach(b=>b.onclick=()=>{liveNapTab='alerts';setView('nap')});v.querySelectorAll('.home-v2-actions-toggle').forEach(b=>b.onclick=()=>{const body=b.closest('.home-v2-action-panel')?.querySelector('.home-v2-actions-body');if(!body)return;const expanded=b.getAttribute('aria-expanded')!=='false';b.setAttribute('aria-expanded',String(!expanded));body.hidden=expanded;b.textContent=expanded?'Ausklappen':'Einklappen'});v.querySelectorAll('.n2act').forEach(b=>b.onclick=()=>doAct(b.dataset.k,b.dataset.id));v.querySelectorAll('.live-r1-timer').forEach(b=>b.onclick=()=>setR1Timer2(b.dataset.id,b.closest('.r1-home-timer')?.querySelector('.r1-home-end')));v.querySelectorAll('.n2open').forEach(b=>b.onclick=()=>openProfile2(b.dataset.p));v.querySelectorAll('.home-v2-expand').forEach(b=>b.onclick=()=>{const card=b.closest('.home-v2-recent'),expanded=card.classList.toggle('expanded');b.setAttribute('aria-expanded',String(expanded));b.textContent=expanded?'Weniger anzeigen':'Alle '+recent.length+' anzeigen'});v.querySelectorAll('.live-transfer-confirm').forEach(b=>b.onclick=()=>confirmTransfer2(b.dataset.id));v.querySelectorAll('.live-transfer-temp').forEach(b=>b.onclick=()=>markTransferTemporary2(b.dataset.id,b.dataset.reject==='1'));v.querySelectorAll('.live-post-contact-confirm').forEach(b=>b.onclick=()=>resolvePostContactReview2(b.dataset.reviewId,true));v.querySelectorAll('.live-post-contact-dismiss').forEach(b=>b.onclick=()=>resolvePostContactReview2(b.dataset.reviewId,false));renderHomePerformance2();renderNotifications2();
 }
 async function renderHomePerformance2(){
- const box=document.getElementById('liveHomePerformance');if(!box)return;try{const d=await rpc('get_performance_dashboard',{}),m=d?.mobilization,k=d?.kvk;box.innerHTML='<div class="card-head"><div><div class="card-title">Performance</div><div class="card-sub">kompakter Überblick</div></div><button class="mini-link" data-go="performance">Öffnen</button></div><div class="card-body live-list">'+(m?'<div class="live-row"><div><b>Alliance Mobilization</b><small>'+E(m.event?.label||'')+'</small></div><strong>'+N(m.total_score||0)+'</strong></div>':'')+(k?'<div class="live-row"><div><b>KvK Top 200</b><small>'+E(k.event?.label||'')+'</small></div><strong>'+N(k.known_top200_score||0)+'</strong></div>':'')+'</div>'}catch{box.innerHTML='<div class="card-body"><div class="live-empty-state">Keine Performance-Daten.</div></div>'}}
+ const box=document.getElementById('liveHomePerformance');if(!box)return;try{const d=S.performance||await rpc('get_performance_dashboard',{});if(!S.performance)S.performance=d||null;const m=d?.mobilization,k=d?.kvk;box.innerHTML='<div class="card-head"><div><div class="card-title">Performance</div><div class="card-sub">kompakter Überblick</div></div><button class="mini-link" data-go="performance">Öffnen</button></div><div class="card-body live-list">'+(m?'<div class="live-row"><div><b>Alliance Mobilization</b><small>'+E(m.event?.label||'')+'</small></div><strong>'+N(m.total_score||0)+'</strong></div>':'')+(k?'<div class="live-row"><div><b>KvK Top 200</b><small>'+E(k.event?.label||'')+'</small></div><strong>'+N(k.known_top200_score||0)+'</strong></div>':'')+'</div>'}catch{box.innerHTML='<div class="card-body"><div class="live-empty-state">Keine Performance-Daten.</div></div>'}}
 const setViewBase2=setView;
 let lastMotionView2=document.querySelector('.view.active')?.id?.replace('view-','')||'home',motionTimer2=null;
 function animateViewChange2(name){
