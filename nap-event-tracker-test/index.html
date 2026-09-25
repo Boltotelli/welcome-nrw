@@ -1545,7 +1545,13 @@ function applyPlayerFilters(){
  document.querySelector('#playerFilterSummary .pill').firstChild.nodeValue=n+' ';
  if(!n){
   const empty=document.createElement('div');empty.id='playerFilterEmpty';empty.className='live-empty-state';
-  empty.textContent=q?'Keine Spieler für diese Suche / Filter.':'Keine Spieler für die aktiven Filter.';
+  const msg={
+   de:q?'Keine Spieler für diese Suche / Filter.':'Keine Spieler für die aktiven Filter.',
+   en:q?'No players match this search / filter.':'No players match the active filters.',
+   fr:q?'Aucun joueur ne correspond à cette recherche / ces filtres.':'Aucun joueur ne correspond aux filtres actifs.',
+   es:q?'Ningún jugador coincide con esta búsqueda / filtro.':'Ningún jugador coincide con los filtros activos.'
+  };
+  empty.textContent=msg[currentLang]||msg.de;
   grid.appendChild(empty);
  }
 }
