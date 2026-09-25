@@ -420,6 +420,9 @@ body{background:var(--v2-bg)!important}
 .p2-stage-node.done span{background:var(--v2-green);border-color:var(--v2-green);color:#07120c}
 .p2-stage-node.current span{background:var(--v2-gold);border-color:var(--v2-gold);color:#171006;box-shadow:0 0 0 5px color-mix(in srgb,var(--v2-gold) 12%,transparent)}
 .p2-stage-node.current small{color:var(--v2-text)}
+.p2-stage-node small em{display:block;margin-top:2px;font-style:normal;font-size:7px;font-weight:900;color:var(--v2-muted)}
+.p2-stage-node.current.current-complete span{background:var(--v2-green);border-color:var(--v2-gold);color:#07120c;box-shadow:0 0 0 5px color-mix(in srgb,var(--v2-gold) 12%,transparent)}
+.p2-stage-node.current.current-complete small em{color:var(--v2-green-text,var(--v2-green))}
 .p2-profile-tabs{display:flex;gap:5px;overflow-x:auto;padding:4px;border:1px solid var(--v2-line);border-radius:13px;background:var(--v2-panel);width:max-content;max-width:100%;margin-bottom:12px}
 .p2-profile-tabs button{border:0;background:transparent;color:var(--v2-muted);padding:8px 11px;border-radius:9px;font-size:9px;font-weight:850;white-space:nowrap}
 .p2-profile-tabs button.active{background:var(--v2-panel3);color:var(--v2-text);box-shadow:inset 0 0 0 1px var(--v2-line)}
