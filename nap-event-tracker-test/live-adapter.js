@@ -616,8 +616,44 @@ async function renderCrownLive(){
 }
 let activityType2='all',activityAlliance2='all',activityOffset2=0,activityMore2=false,activityLoading2=false,activityAlliances2=[];
 function activityCategory2(a){const s=String(a?.action||'').toLowerCase();if(s.includes('screen')||s.includes('import')||s.includes('upload'))return'uploads';if(s.includes('player')||s.includes('roster')||s.includes('alliance_updated'))return'players';if(s.includes('event')||s.includes('settings'))return'events';if(s.includes('delete'))return'deleted';if(s.includes('violation')||s.includes('sanction')||s.includes('exclusion')||s.includes('ban'))return'violations';return'all'}
+const ACTIVITY_EXTRA_TITLES2={
+ de:{
+  sanction_review_correction:'Sanktionsprüfung korrigiert',sanction_manual_timer_restore:'Sanktions-Timer wiederhergestellt',
+  screen_import_occurrence_created_test:'ScreenRecording Test erfasst',screen_import_phase_corrected:'ScreenRecording Phase korrigiert',
+  screen_import_case_corrected:'ScreenImport-Fall korrigiert',screen_import_false_positive_removed:'ScreenImport-Fehlerkennung entfernt',
+  performance_import_video_corrected:'Performance-Video korrigiert',nap_spending_exemption_created:'Spending Exclusion eingetragen',
+  law9_baseline_manual_correction:'KvK Baseline korrigiert',roster_transfer_marked_temporary:'Allianzwechsel als temporär markiert',
+  crown_manual_override:'Crown manuell korrigiert',frontend_live_loader_updated:'Frontend aktualisiert',alliance_created:'Allianz angelegt'
+ },
+ en:{
+  sanction_review_correction:'Sanction review corrected',sanction_manual_timer_restore:'Sanction timer restored',
+  screen_import_occurrence_created_test:'ScreenRecording test recorded',screen_import_phase_corrected:'ScreenRecording phase corrected',
+  screen_import_case_corrected:'ScreenImport case corrected',screen_import_false_positive_removed:'ScreenImport false detection removed',
+  performance_import_video_corrected:'Performance video corrected',nap_spending_exemption_created:'Spending Exclusion added',
+  law9_baseline_manual_correction:'KvK baseline corrected',roster_transfer_marked_temporary:'Alliance move marked temporary',
+  crown_manual_override:'Crown corrected manually',frontend_live_loader_updated:'Frontend updated',alliance_created:'Alliance created'
+ },
+ fr:{
+  sanction_review_correction:'Révision de sanction corrigée',sanction_manual_timer_restore:'Minuteur de sanction restauré',
+  screen_import_occurrence_created_test:'Test ScreenRecording enregistré',screen_import_phase_corrected:'Phase ScreenRecording corrigée',
+  screen_import_case_corrected:'Cas ScreenImport corrigé',screen_import_false_positive_removed:'Fausse détection ScreenImport supprimée',
+  performance_import_video_corrected:'Vidéo de performance corrigée',nap_spending_exemption_created:'Spending Exclusion ajoutée',
+  law9_baseline_manual_correction:'Baseline KvK corrigée',roster_transfer_marked_temporary:'Changement d’alliance marqué temporaire',
+  crown_manual_override:'Crown corrigée manuellement',frontend_live_loader_updated:'Frontend mis à jour',alliance_created:'Alliance créée'
+ },
+ es:{
+  sanction_review_correction:'Revisión de sanción corregida',sanction_manual_timer_restore:'Temporizador de sanción restaurado',
+  screen_import_occurrence_created_test:'Prueba ScreenRecording registrada',screen_import_phase_corrected:'Fase ScreenRecording corregida',
+  screen_import_case_corrected:'Caso ScreenImport corregido',screen_import_false_positive_removed:'Detección errónea ScreenImport eliminada',
+  performance_import_video_corrected:'Vídeo de rendimiento corregido',nap_spending_exemption_created:'Spending Exclusion añadida',
+  law9_baseline_manual_correction:'Baseline KvK corregida',roster_transfer_marked_temporary:'Cambio de alianza marcado temporal',
+  crown_manual_override:'Crown corregida manualmente',frontend_live_loader_updated:'Frontend actualizado',alliance_created:'Alianza creada'
+ }
+};
 function activityTitle2(a){
- const act=String(a?.action||''),map={
+ const act=String(a?.action||''),extra=(ACTIVITY_EXTRA_TITLES2[L()]||ACTIVITY_EXTRA_TITLES2.de)[act];
+ if(extra)return extra;
+ const map={
   violation_created:'Verstoß eingetragen',violation_created_vnext:'Verstoß eingetragen',violation_updated:'Verstoß aktualisiert',
   violation_details_updated:'Verstoß aktualisiert',violation_contact_updated:'Kontaktstatus geändert',violation_deleted:'Eintrag gelöscht',
   player_id_updated:'Spieler-ID aktualisiert',player_alliance_updated:'Allianzwechsel',player_status_updated:'Spielerstatus geändert',
