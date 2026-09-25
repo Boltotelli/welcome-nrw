@@ -94,11 +94,13 @@ function sanctionStatus2(s,v=null){
    return {key:'expired',label:w.expired,short:w.expired,cls:'green'};
  }
  if(lvl===4){
-   if(s.started_at&&(!s.end_at||(Number.isFinite(end)&&end>now)))
+   // Level 4 is vote/start driven. "completed" alone must never make an
+   // unstarted extended exclusion look finished.
+   if(!s.started_at)return {key:'open',label:w.open,short:w.open,cls:'gold'};
+   if(!s.end_at||(Number.isFinite(end)&&end>now))
      return {key:'active',label:w.active,short:s.end_at?dur(end-now):w.active,cls:'red'};
-   if(s.end_at&&Number.isFinite(end)&&end<=now)return {key:'expired',label:w.expired,short:w.expired,cls:'green'};
-   if(s.completed)return {key:'done',label:w.done,short:w.done,cls:'green'};
-   return {key:'open',label:w.open,short:w.open,cls:'gold'};
+   if(Number.isFinite(end)&&end<=now)return {key:'expired',label:w.expired,short:w.expired,cls:'green'};
+   return {key:'active',label:w.active,short:w.active,cls:'red'};
  }
  return {key:'open',label:w.open,short:w.open,cls:'gold'};
 }
