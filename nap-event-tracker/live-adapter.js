@@ -100,16 +100,26 @@ function sanctionState2(name){
  }).sort((a,b)=>Number(b.level||0)-Number(a.level||0)||
    new Date(b.created_at||0)-new Date(a.created_at||0));
  const current=Math.min(4,Math.max(0,...sanctions.map(s=>Number(s.level)||0)));
- const action=sanctions.find(s=>{
-   const v=eligible.get(String(s.violation_id));
-   if(Number(s.level)===1)return !v.contacted&&!s.completed;
-   if(Number(s.level)===2)return !s.completed||!s.started_at||!s.end_at;
-   if(Number(s.level)===4)return !s.started_at;
-   return !s.completed;
- })||null;
  const currentSanction=sanctions.find(s=>Number(s.level||0)===current)||null;
- return {level:current,action,violation:action?eligible.get(String(action.violation_id)):null,
-   currentSanction,currentViolation:currentSanction?eligible.get(String(currentSanction.violation_id)):null};
+ const currentViolation=currentSanction?eligible.get(String(currentSanction.violation_id)):null;
+ // Only the highest currently valid stage can require an action.
+ // Older unfinished lower stages are superseded once a stricter stage exists.
+ let action=null;
+ if(currentSanction&&currentViolation){
+   const lvl=Number(currentSanction.level||0);
+   const needsAction=lvl===1
+     ? !currentViolation.contacted&&!currentSanction.completed
+     : lvl===2
+       ? (!currentSanction.completed||!currentSanction.started_at||!currentSanction.end_at)
+       : lvl===3
+         ? !currentSanction.completed
+         : lvl===4
+           ? !currentSanction.started_at
+           : false;
+   if(needsAction)action=currentSanction;
+ }
+ return {level:current,action,violation:action?currentViolation:null,
+   currentSanction,currentViolation};
 }
 function level(name){return sanctionState2(name).level}
 function act(name){return sanctionState2(name).action}
@@ -188,11 +198,22 @@ async function doAct(k,id){
 async function syncCrownVisibility2(){
  let permitted=false;
  try{
-  if(S.a){const d=await rpc('get_crown_dashboard',{});S.crown=d;permitted=!!(d?.has_access&&d?.king?.alliance_code===S.a)}
+  if(S.a){
+   const d=await rpc('get_crown_dashboard',{});
+   S.crown=d;
+   // Backend is the authority for Crown access. Avoid a second frontend
+   // alliance-code comparison that can incorrectly hide an authorized Crown login.
+   permitted=d?.has_access===true;
+  }
  }catch(err){console.warn('Crown access',err)}
  crownAllowed2=permitted;
- document.querySelectorAll('[data-view="crown"],[data-go="crown"]').forEach(el=>{el.hidden=!permitted;el.style.display=permitted?'':'none'});
+ document.documentElement.dataset.crownAccess=permitted?'1':'0';
+ document.querySelectorAll('[data-view="crown"],[data-go="crown"]').forEach(el=>{
+  el.hidden=!permitted;
+  el.style.display=permitted?'':'none';
+ });
  if(!permitted&&document.getElementById('view-crown')?.classList.contains('active'))setView('home');
+ return permitted;
 }
 function decorate(){const ab=document.querySelector('.alliance-badge');if(ab)ab.innerHTML=allianceLogo2(S.a,'alliance-top-logo')+'<span>'+E(S.a)+'</span>';document.querySelectorAll('[data-current-alliance]').forEach(x=>x.textContent=S.a);const u=document.querySelector('.user-pill');if(u){u.innerHTML=allianceLogo2(S.a,'alliance-user-logo')+'<span>'+E(S.a)+'</span> <span class="n2live">'+E(t('live'))+'</span>';u.title=t('logout');u.onclick=()=>{if(confirm(t('logout')+'?')){save(null);location.reload()}}}}
 async function load(){
@@ -227,8 +248,9 @@ async function enter(expected){
  const P=await tab('profiles','select=alliance_code,can_manage_bans,is_admin&limit=1'),prof=P?.[0]||null,a=prof?.alliance_code;
  if(!a){const err=Error(actionWord2('accountIncomplete'));err.code='ACCOUNT_INCOMPLETE';throw err}
  if(expected&&expected!==a){const err=Error(actionWord2('wrongAlliance'));err.code='ACCOUNT_MISMATCH';throw err}
- S.a=a;S.profile=prof;await load();await migrateLocalNotificationReads2();await syncCrownVisibility2();
- n2login.hidden=true;document.body.classList.remove('n2lock');decorate();renderSupportUnreadBadge2();startSupportUnreadPolling2();renderHome();renderPlayers();if(typeof applyTranslations==='function')applyTranslations();
+ S.a=a;S.profile=prof;await load();await migrateLocalNotificationReads2();
+ n2login.hidden=true;document.body.classList.remove('n2lock');decorate();await syncCrownVisibility2();renderSupportUnreadBadge2();startSupportUnreadPolling2();renderHome();renderPlayers();if(typeof applyTranslations==='function')applyTranslations();
+ requestAnimationFrame(()=>syncCrownVisibility2().catch(err=>console.warn('Crown refresh',err)));
 }
 function showLoginRetry2(err){
  const box=document.getElementById('n2e'),button=document.getElementById('n2retry');
@@ -1218,15 +1240,23 @@ async function deleteViolation2(v){
   await load();renderHomeFull2();renderPlayers2();await openProfile2(v.player_name);
  }catch(err){if(out)out.textContent=err.message||String(err)}
 }
-function profileStage2(l){
+function profileStage2(name,l){
  const text={
- de:{labs:['Kontakt','R1','24h NAP OUT','Erweitert'],current:'aktuell'},
- en:{labs:['Contact','R1','24h NAP OUT','Extended'],current:'current'},
- fr:{labs:['Contact','R1','Exclusion 24 h','Prolongée'],current:'actuel'},
- es:{labs:['Contacto','R1','Exclusión 24 h','Ampliada'],current:'actual'}
- }[L()]||{labs:['Kontakt','R1','24h NAP OUT','Erweitert'],current:'aktuell'};
- const labs=text.labs;
- return '<div class="stage-progress stage-progress-loading"><div class="stage-progress-bar"><div class="stage-progress-fill" style="width:'+([0,12,38,66,100][l]||0)+'%"></div><div class="stage-marks">'+labs.map((_,i)=>'<span class="stage-mark '+(i+1<l?'done':i+1===l?'current':'')+'">'+(i+1)+'</span>').join('')+'</div></div><div class="stage-progress-labels">'+labs.map((x,i)=>'<span><b>'+E(x)+'</b><span>'+(i+1<l?'✓':i+1===l?E(text.current):'')+'</span></span>').join('')+'</div></div>';
+ de:{labs:['Kontakt','R1','24h NAP OUT','Erweitert'],current:'aktuell',done:'erledigt'},
+ en:{labs:['Contact','R1','24h NAP OUT','Extended'],current:'current',done:'completed'},
+ fr:{labs:['Contact','R1','Exclusion 24 h','Prolongée'],current:'actuel',done:'terminé'},
+ es:{labs:['Contacto','R1','Exclusión 24 h','Ampliada'],current:'actual',done:'finalizado'}
+ }[L()]||{labs:['Kontakt','R1','24h NAP OUT','Erweitert'],current:'aktuell',done:'erledigt'};
+ const labs=text.labs,state=sanctionState2(name),current=state.currentSanction,
+   currentStatus=current?sanctionStatus2(current,state.currentViolation):null,
+   currentDone=!!(currentStatus&&['done','expired'].includes(currentStatus.key));
+ return '<div class="stage-progress stage-progress-loading"><div class="stage-progress-bar"><div class="stage-progress-fill" style="width:'+([0,12,38,66,100][l]||0)+'%"></div><div class="stage-marks">'+labs.map((_,i)=>{
+   const n=i+1,isCurrent=n===l,done=n<l||(isCurrent&&currentDone);
+   return '<span class="stage-mark '+(done?'done ':'')+(isCurrent?'current ':'')+(isCurrent&&currentDone?'current-complete':'')+'">'+n+'</span>';
+ }).join('')+'</div></div><div class="stage-progress-labels">'+labs.map((x,i)=>{
+   const n=i+1,isCurrent=n===l,status=n<l?'✓':isCurrent?(currentDone?'✓ '+text.done+' · '+text.current:text.current):'';
+   return '<span><b>'+E(x)+'</b><span>'+E(status)+'</span></span>';
+ }).join('')+'</div></div>';
 }
 function profileActionDone2(s){
  if(Number(s.level)===1){
@@ -1354,12 +1384,12 @@ async function openProfile2(name){
  const w=profileWords2();
  view.innerHTML='<button class="btn small" data-go="players">'+E(w.back)+'</button>'+
  '<div class="profile-head" style="margin-top:12px"><div class="profile-main">'+avatarHtml(P,'profile-avatar')+'<div><div class="kicker">'+E(w.head)+'</div><div class="profile-name">'+E(name)+'</div><div class="muted small">Player ID '+E(P.game_id||'–')+' · <span class="pill">'+E(S.a)+'</span> · '+E((P.languages||[]).map(languageName2).join(' / ')||'–')+'</div></div></div></div>'+
- profileStage2(l)+
+ profileStage2(name,l)+
  '<div class="profile-tabs"><button class="profile-tab active" data-live-profiletab="overview">'+E(w.overview)+'</button><button class="profile-tab" data-live-profiletab="violations">'+E(w.violations)+'</button><button class="profile-tab" data-live-profiletab="actions">'+E(w.actions)+'</button><button class="profile-tab" data-live-profiletab="performance">'+E(w.performance)+'</button><button class="profile-tab" data-live-profiletab="comments">'+E(w.comments)+'</button><button class="profile-tab" data-live-profiletab="history">'+E(w.history)+'</button></div><div id="liveProfileBody"></div>';
  setViewBase2('profile');view.querySelectorAll('[data-live-profiletab]').forEach(b=>b.onclick=()=>{view.querySelectorAll('[data-live-profiletab]').forEach(x=>x.classList.toggle('active',x===b));paintProfileTab2(name,b.dataset.liveProfiletab)});await paintProfileTab2(name,'overview');
 }
 async function paintProfileTab2(name,tab){
- const body=document.getElementById('liveProfileBody');if(!body)return;const P=p(name),V=vv(name),X=ss(name),l=level(name),latest=X[0];
+ const body=document.getElementById('liveProfileBody');if(!body)return;const P=p(name),V=vv(name),X=ss(name),state=sanctionState2(name),l=state.level,latest=state.currentSanction||null;
  if(tab==='overview'){
   const lawCases=V.filter(isLaw14Case2),internalCases=V.filter(isInternalCase2),cw=playerCaseWords2();
   body.innerHTML='<div class="live-panel-grid"><section class="card"><div class="card-head"><div><div class="card-title">Übersicht</div></div></div><div class="card-body"><div class="live-stat-grid"><div class="live-stat"><b>'+lawCases.length+'</b><small>'+E(cw.lawCases)+'</small></div><div class="live-stat"><b>'+lawCases.filter(active).length+'</b><small>'+E(cw.lawActive)+'</small></div><div class="live-stat"><b>'+internalCases.length+'</b><small>'+E(cw.internalCases)+'</small></div><div class="live-stat"><b>'+l+'</b><small>'+E(cw.stage)+'</small></div><div class="live-stat"><b>'+E((P.languages||[]).map(languageName2).join(' / ')||'–')+'</b><small>Sprachen</small></div></div>'+languageEditor2(P)+'<form id="livePlayerIdForm" class="live-form"><label>Player ID<input id="livePlayerId" value="'+E(P.game_id||'')+'" inputmode="numeric"></label><button class="btn secondary">Player ID speichern</button><div id="livePlayerIdStatus" class="live-status"></div></form></div></section><section>'+ (latest?profileActionCard2(latest):'<div class="live-empty-state">Keine Maßnahme vorhanden.</div>') +'</section></div>';
