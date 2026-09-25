@@ -100,16 +100,26 @@ function sanctionState2(name){
  }).sort((a,b)=>Number(b.level||0)-Number(a.level||0)||
    new Date(b.created_at||0)-new Date(a.created_at||0));
  const current=Math.min(4,Math.max(0,...sanctions.map(s=>Number(s.level)||0)));
- const action=sanctions.find(s=>{
-   const v=eligible.get(String(s.violation_id));
-   if(Number(s.level)===1)return !v.contacted&&!s.completed;
-   if(Number(s.level)===2)return !s.completed||!s.started_at||!s.end_at;
-   if(Number(s.level)===4)return !s.started_at;
-   return !s.completed;
- })||null;
  const currentSanction=sanctions.find(s=>Number(s.level||0)===current)||null;
- return {level:current,action,violation:action?eligible.get(String(action.violation_id)):null,
-   currentSanction,currentViolation:currentSanction?eligible.get(String(currentSanction.violation_id)):null};
+ const currentViolation=currentSanction?eligible.get(String(currentSanction.violation_id)):null;
+ // Only the highest currently valid stage can require an action.
+ // Older unfinished lower stages are superseded once a stricter stage exists.
+ let action=null;
+ if(currentSanction&&currentViolation){
+   const lvl=Number(currentSanction.level||0);
+   const needsAction=lvl===1
+     ? !currentViolation.contacted&&!currentSanction.completed
+     : lvl===2
+       ? (!currentSanction.completed||!currentSanction.started_at||!currentSanction.end_at)
+       : lvl===3
+         ? !currentSanction.completed
+         : lvl===4
+           ? !currentSanction.started_at
+           : false;
+   if(needsAction)action=currentSanction;
+ }
+ return {level:current,action,violation:action?currentViolation:null,
+   currentSanction,currentViolation};
 }
 function level(name){return sanctionState2(name).level}
 function act(name){return sanctionState2(name).action}
