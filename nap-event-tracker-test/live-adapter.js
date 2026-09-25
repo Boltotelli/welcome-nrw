@@ -48,10 +48,47 @@ function sanctionState2(name){
    if(Number(s.level)===4)return !s.started_at;
    return !s.completed;
  })||null;
- return {level:current,action,violation:action?eligible.get(String(action.violation_id)):null};
+ const currentSanction=sanctions.find(s=>Number(s.level||0)===current)||null;
+ return {level:current,action,violation:action?eligible.get(String(action.violation_id)):null,
+   currentSanction,currentViolation:currentSanction?eligible.get(String(currentSanction.violation_id)):null};
 }
 function level(name){return sanctionState2(name).level}
 function act(name){return sanctionState2(name).action}
+const SANCTION_STATUS_WORDS2={
+ de:{open:'offen',active:'aktiv',expired:'abgelaufen',done:'erledigt',timerMissing:'Timer fehlt'},
+ en:{open:'open',active:'active',expired:'expired',done:'done',timerMissing:'Timer missing'},
+ fr:{open:'ouvert',active:'actif',expired:'expiré',done:'terminé',timerMissing:'Minuteur manquant'},
+ es:{open:'abierto',active:'activo',expired:'finalizado',done:'hecho',timerMissing:'Falta temporizador'}
+};
+function sanctionStatus2(s,v=null){
+ const w=SANCTION_STATUS_WORDS2[L()]||SANCTION_STATUS_WORDS2.de;
+ if(!s)return {key:'none',label:'OK',short:'OK',cls:'green'};
+ const lvl=Number(s.level||0),now=Date.now(),end=s.end_at?new Date(s.end_at).getTime():null;
+ if(lvl===1){
+   const done=!!(v?.contacted||s.completed);
+   return {key:done?'done':'open',label:done?w.done:w.open,short:done?'✓':w.open,cls:done?'green':'gold'};
+ }
+ if(lvl===2){
+   if(!s.completed)return {key:'open',label:w.open,short:w.open,cls:'gold'};
+   if(!s.started_at||!s.end_at)return {key:'timer_missing',label:w.timerMissing,short:w.timerMissing,cls:'gold'};
+   if(Number.isFinite(end)&&end>Date.now())return {key:'active',label:w.active,short:dur(end-now),cls:'red'};
+   return {key:'expired',label:w.expired,short:w.expired,cls:'green'};
+ }
+ if(lvl===3){
+   if(!s.completed)return {key:'open',label:w.open,short:w.open,cls:'gold'};
+   if(!s.started_at||!s.end_at)return {key:'timer_missing',label:w.timerMissing,short:w.timerMissing,cls:'gold'};
+   if(Number.isFinite(end)&&end>now)return {key:'active',label:w.active,short:dur(end-now),cls:'red'};
+   return {key:'expired',label:w.expired,short:w.expired,cls:'green'};
+ }
+ if(lvl===4){
+   if(s.started_at&&(!s.end_at||(Number.isFinite(end)&&end>now)))
+     return {key:'active',label:w.active,short:s.end_at?dur(end-now):w.active,cls:'red'};
+   if(s.end_at&&Number.isFinite(end)&&end<=now)return {key:'expired',label:w.expired,short:w.expired,cls:'green'};
+   if(s.completed)return {key:'done',label:w.done,short:w.done,cls:'green'};
+   return {key:'open',label:w.open,short:w.open,cls:'gold'};
+ }
+ return {key:'open',label:w.open,short:w.open,cls:'gold'};
+}
 function actions(){
  return [...new Set(S.v.filter(v=>
    v.kind==='overspend'&&v.sanction_eligible!==false&&active(v)
@@ -643,8 +680,9 @@ async function saveLanguages2(P){
 function renderPlayers2(){
  const g=document.getElementById('playerGrid');if(!g)return;
  g.innerHTML=S.p.map(P=>{
-  const name=P.name||P.player_name||'',V=vv(name),l=level(name),att=V.some(v=>v.kind==='swordland'||/swordland|trialliance|triforce/i.test(String(v.event_name||''))),last=V[0],A=act(name);
-  let val=l===1?(V.some(v=>active(v)&&!v.contacted)?'offen':'✓'):l===2?(A?dl({s:A}):'–'):l===3?(A?.end_at?dur(new Date(A.end_at)-Date.now()):'offen'):l===4?'Extended':'OK';
+  const name=P.name||P.player_name||'',V=vv(name),state=sanctionState2(name),l=state.level,
+   att=V.some(v=>v.kind==='swordland'||/swordland|trialliance|triforce/i.test(String(v.event_name||''))),last=V[0],
+   status=sanctionStatus2(state.currentSanction,state.currentViolation),val=status.short;
   return '<div class="player-card" data-p="'+E(name)+'" data-has-entry="'+(V.length||ss(name).length?'1':'0')+'" data-attendance="'+(att?'1':'0')+'" data-search="'+E((name+' '+(P.game_id||'')).toLowerCase())+'">'+
    '<div class="player-card-top"><div class="player-meta">'+avatarHtml(P,'player-avatar')+'<div><div class="player-name">'+E(name)+'</div><div class="player-id">'+E(P.game_id||'–')+'</div></div></div>'+allianceBadge2(S.a)+'</div>'+
    '<div class="metric-row"><div class="metric"><b>'+V.length+'</b><span>Verstöße</span></div><div class="metric"><b>'+l+'</b><span>Stufe</span></div><div class="metric"><b>'+E(val)+'</b><span>Status</span></div></div>'+
@@ -725,12 +763,12 @@ function profileActionLabel2(s){
  return v?.contacted?t('contact'):profileActionDone2(s)?'erledigt':'offen';
 }
 function profileActionCard2(s){
- const done=profileActionDone2(s),label=profileActionLabel2(s);
- const v=Number(s.level)===1?S.v.find(v=>String(v.id)===String(s.violation_id)):null;
- const start=v?.contacted_at||s.started_at;
- const running=s.started_at&&!done&&(!s.end_at||new Date(s.end_at)>new Date());
- const r1Missing=Number(s.level)===2&&s.completed&&(!s.started_at||!s.end_at);
- return '<article class="card" data-profile-sanction="'+E(s.id)+'"><div class="card-head"><div><div class="card-title">Stufe '+E(s.level)+' · '+E(Number(s.level)===2?'R1':Number(s.level)===3?'24h NAP OUT':Number(s.level)===4?'Extended':'Kontakt')+'</div><div class="card-sub">Erstellt '+E(D(s.created_at))+'</div></div><span class="pill '+(r1Missing?'gold':done?'green':running?'red':'gold')+'">'+E(r1Missing?'Timer fehlt':label)+'</span></div><div class="card-body">'+(r1Missing?'<div class="notice warn" style="margin-bottom:10px">⚠ R1 bestätigt – individuelle Endzeit noch setzen.</div><div class="live-form-row"><label>Ende<input class="profile-r1-end" type="datetime-local" value="'+E(toLocalInput2(s.end_at))+'"></label><div style="display:flex;align-items:end"><button class="btn secondary profile-r1-save" data-id="'+E(s.id)+'">Timer setzen</button></div></div>':'')+'<div class="action-date-grid"><div><span>Start</span><b>'+E(D(start))+'</b></div><div><span>Ende</span><b>'+E(D(s.end_at))+'</b></div><div><span>Restzeit</span><b>'+(s.end_at?E(dur(new Date(s.end_at)-Date.now())):'–')+'</b></div><div><span>Status</span><b>'+E(r1Missing?'Timer fehlt':label)+'</b></div></div></div></article>';
+ const v=S.v.find(v=>String(v.id)===String(s.violation_id))||null;
+ const status=sanctionStatus2(s,v),start=Number(s.level)===1?v?.contacted_at||s.started_at:s.started_at;
+ const r1Missing=status.key==='timer_missing'&&Number(s.level)===2;
+ const remaining=status.key==='active'&&s.end_at?dur(new Date(s.end_at)-Date.now()):
+   status.key==='expired'?(SANCTION_STATUS_WORDS2[L()]||SANCTION_STATUS_WORDS2.de).expired:'–';
+ return '<article class="card" data-profile-sanction="'+E(s.id)+'"><div class="card-head"><div><div class="card-title">Stufe '+E(s.level)+' · '+E(Number(s.level)===2?'R1':Number(s.level)===3?'24h NAP OUT':Number(s.level)===4?'Extended':'Kontakt')+'</div><div class="card-sub">Erstellt '+E(D(s.created_at))+'</div></div><span class="pill '+E(status.cls)+'">'+E(status.label)+'</span></div><div class="card-body">'+(r1Missing?'<div class="notice warn" style="margin-bottom:10px">⚠ R1 bestätigt – individuelle Endzeit noch setzen.</div><div class="live-form-row"><label>Ende<input class="profile-r1-end" type="datetime-local" value="'+E(toLocalInput2(s.end_at))+'"></label><div style="display:flex;align-items:end"><button class="btn secondary profile-r1-save" data-id="'+E(s.id)+'">Timer setzen</button></div></div>':'')+'<div class="action-date-grid"><div><span>Start</span><b>'+E(D(start))+'</b></div><div><span>Ende</span><b>'+E(D(s.end_at))+'</b></div><div><span>Restzeit</span><b>'+E(remaining)+'</b></div><div><span>Status</span><b>'+E(status.label)+'</b></div></div></div></article>';
 }
 function bindProfileR1Timers2(){document.querySelectorAll('.profile-r1-save').forEach(b=>b.onclick=()=>setR1Timer2(b.dataset.id,b.closest('[data-profile-sanction]')?.querySelector('.profile-r1-end')))}
 
