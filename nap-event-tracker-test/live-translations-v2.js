@@ -30,21 +30,21 @@ function translate(raw,l){
   else if((m=value.match(/^Eigene Maßnahme: (.+)$/)))out=word.myAction+' '+m[1];
   else if((m=value.match(/^nur (.+) betreffend$/)))out=word.from+' '+m[1];
   else if((m=value.match(/^(?:Stufe|Level|Niveau|Nivel)\s+(\d+)(?:\s*·\s*(.*))?$/))){
-   const suffix=m[2]||'',over=suffix.match(/^seit\s+(\d+h\s+\d+m)$/);
-   const deadline=suffix.match(/^(\d+h\s+\d+m)\s+über 24h-Frist\s+\(laut Tracker\)$/);
+   const suffix=m[2]||'',over=suffix.match(/^seit\s+(.+)$/);
+   const deadline=suffix.match(/^(.+?)\s+über 24h-Frist\s+\(laut Tracker\)$/);
    const status=over
     ?(l==='en'?'overdue by ':l==='fr'?'en retard de ':'vencido por ')+over[1]
     :deadline?deadline[1]+' '+map['über 24h-Frist (laut Tracker)']
     :(map[reverse.get(suffix)||suffix]||suffix);
    out=word.level+' '+m[1]+(suffix?' · '+status:'');
   }
-  else if((m=value.match(/^(\d+h\s+\d+m)\s+(überfällig|verbleibend)$/)))out=m[1]+' '+(m[2]==='überfällig'?word.overdue:word.remaining);
-  else if((m=value.match(/^(\d+h\s+\d+m) über 24h-Frist \(laut Tracker\)$/)))out=m[1]+' '+map['über 24h-Frist (laut Tracker)'];
-  else if((m=value.match(/^(.+?) · (\d+h\s+\d+m) über 24h-Frist\. Nur die betroffene Allianz kann die Umsetzung im Spiel bestätigen\.$/)))
+  else if((m=value.match(/^(.+?)\s+(überfällig|verbleibend)$/)))out=m[1]+' '+(m[2]==='überfällig'?word.overdue:word.remaining);
+  else if((m=value.match(/^(.+?) über 24h-Frist \(laut Tracker\)$/)))out=m[1]+' '+map['über 24h-Frist (laut Tracker)'];
+  else if((m=value.match(/^(.+?) · (.+?) über 24h-Frist\. Nur die betroffene Allianz kann die Umsetzung im Spiel bestätigen\.$/)))
    out=m[1]+' · '+m[2]+' '+map['über der 24h-Frist. Nur die betroffene Allianz kann die Umsetzung im Spiel bestätigen.'];
-  else if((m=value.match(/^(.+) · (noch|überfällig) (\d+h\s+\d+m) bis zum bzw\. über dem NAP-Hinweis$/)))
+  else if((m=value.match(/^(.+) · (noch|überfällig) (.+?) bis zum bzw\. über dem NAP-Hinweis$/)))
    out=m[1]+' · '+m[3]+' '+(m[2]==='noch'?word.before:word.after);
-  else if((m=value.match(/^(.+?) · (\d+h\s+\d+m) über 24h-Frist \(laut Tracker\)$/)))
+  else if((m=value.match(/^(.+?) · (.+?) über 24h-Frist \(laut Tracker\)$/)))
    out=m[1]+' · '+m[2]+' '+map['über 24h-Frist (laut Tracker)'];
  }
  if(out===undefined&&l!=='de'){
