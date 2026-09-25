@@ -85,7 +85,7 @@ async function rpc(name,body={}){
  return result;
 }
 function canPassThroughForEvidence(status,hasImage){
- return status==='violation'||status==='update'||(status==='already_recorded'&&!!hasImage);
+ return !!hasImage&&['violation','update','already_recorded'].includes(status);
 }
 async function uploadEvidencePayload(item){
  const res=await fetch(API+'/functions/v1/screen-evidence-upload',{
@@ -430,15 +430,16 @@ function showReview(r){
   const lookup=statuses.get(String(h.player?.player_game_id||h.player?.player_id||''));
   if(r.kind==='law'&&lookup?.status==='exempt')return '';
   const st=statuses.get(String(h.player?.player_game_id||h.player?.player_id||'')),label=st?.status||'';
-  const allowed=r.kind==='perf'||['violation','update'].includes(label);
+  const needsEvidence=r.kind==='law'&&['violation','update'].includes(label)&&!h.image;
+  const allowed=r.kind==='perf'||(['violation','update'].includes(label)&&!!h.image);
   const key=String(h.player?.player_game_id||h.player?.player_id||'');
   const checked=r.selection?.has(key)?r.selection.get(key):allowed;
   const tone=r.kind==='perf'?'performance':label==='violation'?'new':label==='update'?'update':label==='already_recorded'?'already':'other';
-  return '<article class="nocr-hit nocr-hit--'+tone+'"><label class="nocr-hit-check"><input type="checkbox" data-hit="'+i+'" '+(checked?'checked':'')+'>'+
+  return '<article class="nocr-hit nocr-hit--'+tone+'"><label class="nocr-hit-check"><input type="checkbox" data-hit="'+i+'" '+(checked?'checked':'')+' '+(needsEvidence?'disabled':'')+'>'+
    '<span><strong>'+esc(h.player.player_name)+'</strong><small>'+esc(h.player.alliance_code||'')+' · '+esc(h.player.player_game_id||'')+(h.manual?' · '+esc(reviewText('manual')):'')+'</small></span></label>'+
    '<input type="text" inputmode="numeric" autocomplete="off" data-score="'+i+'" value="'+esc(points(h.score))+'" aria-label="'+esc(tr('score'))+'">'+
    (r.kind==='perf'&&$('#nocrType',root).value==='kvk_prep'?'<input type="number" min="1" max="200" step="1" data-rank="'+i+'" value="'+esc(h.rank||'')+'" aria-label="'+esc(tr('rank'))+'">':'')+
-   reviewStatus(h,r,st)+
+   reviewStatus(h,r,st)+(needsEvidence?'<div class="nocr-status error">'+esc(reviewText('evidence'))+' required</div>':'')+
    (r.kind==='law'&&st?.post_contact_confirmation_required?'<label class="nocr-post-contact-confirm"><input type="checkbox" data-post-contact-confirm="'+i+'" '+(h.postContactConfirmed?'checked':'')+'><span><strong>'+esc(postContactText('title'))+'</strong><small>'+esc(postContactText('hint'))+'</small></span></label>':'')+
    (h.image?'<details><summary>'+esc(tr('frame'))+'</summary><img src="'+h.image+'" alt="'+esc(tr('frame'))+'"></details>':'')+'</article>'
  }).join('')+
@@ -539,6 +540,7 @@ function showReview(r){
   if(old&&old.score>=score){out.textContent=reviewText('higher');return}
   if(old)r.hits=r.hits.filter(x=>x!==old);
   const proof=r.frames[Number(frame?.value||0)]||null;
+  if(r.kind==='law'&&!proof?.image){out.textContent=reviewText('evidence')+' required';return}
   r.hits.push({player:p,name:p.player_name,alliance:p.alliance_code,score,rank,time:proof?.time??0,image:proof?.image||null,manual:true});
   r.hits.sort((a,b)=>b.score-a.score);r.addOpen=true;refreshReview(r);
  };
@@ -560,6 +562,7 @@ async function save(){
   return true;
  });
  if(scoreError||rankError){$('#nocrSaveStatus',root).textContent=reviewText(scoreError?'invalidScore':'missingRank');return}
+ if(r.kind==='law'&&selected.some(h=>!h.image)){$('#nocrSaveStatus',root).textContent=reviewText('evidence')+' required';return}
  if(!selected.length){$('#nocrSaveStatus',root).textContent=tr('nohits');return}
  r.busy=true;$('#nocrSave',root).disabled=true;
  const out=$('#nocrSaveStatus',root);out.textContent=tr('saving');
