@@ -368,11 +368,14 @@ function renderNapLive(){
  v.querySelectorAll('[data-live-naptab]').forEach(b=>b.onclick=()=>{liveNapTab=b.dataset.liveNaptab;renderNapLive()});
  const body=document.getElementById('liveNapBody');
  if(liveNapTab==='overview'){
+   const hw=level4HomeWords2(),hosts=S.level4Hosting||[];
    body.innerHTML='<div class="live-stat-grid">'+
+    '<div class="live-stat"><b>'+hosts.length+'</b><small>'+E(hw.section)+'</small></div>'+
     '<div class="live-stat"><b>'+S.o.length+'</b><small>24h überfällig</small></div>'+
     '<div class="live-stat"><b>'+S.e.length+'</b><small>aktive NAP OUT</small></div>'+
     '<div class="live-stat"><b>'+S.bans.length+'</b><small>aktive Bans</small></div>'+
     '<div class="live-stat"><b>'+activeSpend.length+'</b><small>Spending Exclusions</small></div></div>'+
+    (hosts.length?'<section class="card" style="margin-bottom:14px"><div class="card-head"><div><div class="card-title">'+E(hw.section)+'</div><div class="card-sub">'+E(hw.sectionSub)+'</div></div><span class="pill red">'+hosts.length+'</span></div><div class="card-body live-list">'+hosts.map(h=>napRow2(h.player_name,h.current_alliance+' · '+hw.eyebrow,'<span class="pill red">Stufe 4</span>')).join('')+'</div></section>':'')+
     '<div class="live-panel-grid"><section class="card"><div class="card-head"><div><div class="card-title">NAP-Benachrichtigungen</div><div class="card-sub">Maßnahmen anderer NAP-Allianzen, die nach 24h nicht umgesetzt wurden.</div></div></div><div class="card-body live-list">'+
     (S.o.length?S.o.slice(0,8).map(x=>napRow2((x.alliance_code||'')+' · '+(x.player_name||'–'),'Stufe '+x.level+' · seit '+durLong2(Number(x.overdue_seconds||0)*1000),'<span class="pill red">überfällig</span>')).join(''):'<div class="live-empty-state">Keine überfälligen NAP-Maßnahmen.</div>')+
     '</div></section><section class="card"><div class="card-head"><div><div class="card-title">Aktive NAP OUTs</div><div class="card-sub">NAP-weit sichtbare Ausschlüsse.</div></div></div><div class="card-body live-list">'+
@@ -381,7 +384,9 @@ function renderNapLive(){
    return;
  }
  if(liveNapTab==='alerts'){
-   body.innerHTML='<section class="card"><div class="card-head"><div><div class="card-title">Überfällige Maßnahmen</div><div class="card-sub">Nur notwendige NAP-Informationen, keine privaten Verstoßdetails.</div></div><span class="pill red">'+S.o.length+'</span></div><div class="card-body live-list">'+
+   const hw=level4HomeWords2(),hosts=S.level4Hosting||[];
+   body.innerHTML=(hosts.length?'<section class="card" style="margin-bottom:14px"><div class="card-head"><div><div class="card-title">'+E(hw.section)+'</div><div class="card-sub">'+E(hw.sectionSub)+'</div></div><span class="pill red">'+hosts.length+'</span></div><div class="card-body live-list">'+hosts.map(h=>napRow2(h.player_name,h.current_alliance+' · '+hw.eyebrow,'<span class="pill red">Stufe 4</span>')).join('')+'</div></section>':'')+
+   '<section class="card"><div class="card-head"><div><div class="card-title">Überfällige Maßnahmen</div><div class="card-sub">Nur notwendige NAP-Informationen, keine privaten Verstoßdetails.</div></div><span class="pill red">'+S.o.length+'</span></div><div class="card-body live-list">'+
    (S.o.length?S.o.map(x=>napRow2((x.alliance_code||'')+' · '+(x.player_name||'–'),'Stufe '+x.level+' · erstellt '+D(x.action_created_at),'<span class="pill red">'+E(durLong2(Number(x.overdue_seconds||0)*1000))+'</span>')).join(''):'<div class="live-empty-state">Keine überfälligen Maßnahmen.</div>')+'</div></section>';return;
  }
  if(liveNapTab==='exclusions'){
@@ -967,7 +972,7 @@ function liveNotifications2(){
   cat:'nap',
   title:(h.player_name||'–')+' · '+(h.current_alliance||'–'),
   copy:(hw?.eyebrow||'Extended NAP Exclusion')+' · '+(hw?.notice||'Level 4'),
-  go:'home'
+  go:'nap'
  });
  for(const r of S.reviews||[])rows.push({key:'post-contact-review|'+String(r.review_id),cat:'alliance',title:(r.player_name||'–')+' · '+postContactReviewText2('required'),copy:(r.event_name||'Event')+' · '+(r.phase_name||'')+' · '+N(r.score)+' '+postContactReviewText2('notice'),go:'home'});
  for(const x of S.o||[])rows.push({key:'nap|'+String(x.sanction_id||x.alliance_code+'|'+x.player_name+'|'+x.level),cat:'nap',title:(x.alliance_code||'')+' · '+(x.player_name||'–'),copy:'Stufe '+x.level+' · '+durLong2(Number(x.overdue_seconds||0)*1000)+' über 24h-Frist (laut Tracker)',go:'nap'});
@@ -1053,21 +1058,21 @@ function homeV2RecentButton2(x,i){
  '<strong>'+N(x.score)+'</strong></button>';
 }
 const LEVEL4_HOME_WORDS2={
- de:{eyebrow:'Extended NAP Exclusion',title:'ist noch/erneut in einer Allianz',text1:'führt den Spieler aktuell im Roster. Bei Stufe 4 muss der Spieler aus der Allianz entfernt bzw. darf nicht aufgenommen werden.',cases:'Fälle',open:'NAP öffnen',notice:'Stufe 4 · Spieler muss entfernt werden bzw. darf nicht aufgenommen werden.'},
- en:{eyebrow:'Extended NAP Exclusion',title:'is still/back in an alliance',text1:'currently has this player on its roster. At Level 4, the player must be removed and must not be accepted into an alliance.',cases:'cases',open:'Open NAP',notice:'Level 4 · player must be removed and must not be accepted into an alliance.'},
- fr:{eyebrow:'Exclusion NAP prolongée',title:'est toujours/de nouveau dans une alliance',text1:'a actuellement ce joueur dans son effectif. Au niveau 4, le joueur doit être retiré et ne doit pas être accepté dans une alliance.',cases:'cas',open:'Ouvrir NAP',notice:'Niveau 4 · le joueur doit être retiré et ne doit pas être accepté dans une alliance.'},
- es:{eyebrow:'Exclusión NAP ampliada',title:'sigue/está de nuevo en una alianza',text1:'tiene actualmente a este jugador en su roster. En nivel 4, el jugador debe ser expulsado y no debe ser aceptado en una alianza.',cases:'casos',open:'Abrir NAP',notice:'Nivel 4 · el jugador debe ser expulsado y no debe ser aceptado en una alianza.'}
+ de:{eyebrow:'Extended NAP Exclusion',single:'Spieler mit Stufe 4 ist noch/erneut in einer NAP-Allianz',multi:'Spieler mit Stufe 4 sind noch/erneut in NAP-Allianzen',section:'Stufe 4 im Roster',sectionSub:'Diese Spieler dürfen während der Extended NAP Exclusion nicht in einer NAP-Allianz geführt oder aufgenommen werden.',cases:'Fälle',open:'Alle Fälle ansehen',notice:'Stufe 4 · Spieler muss entfernt werden bzw. darf nicht aufgenommen werden.'},
+ en:{eyebrow:'Extended NAP Exclusion',single:'Level 4 player is still/back in a NAP alliance',multi:'Level 4 players are still/back in NAP alliances',section:'Level 4 on roster',sectionSub:'These players must not remain in or be accepted by a NAP alliance during an Extended NAP Exclusion.',cases:'cases',open:'View all cases',notice:'Level 4 · player must be removed and must not be accepted into an alliance.'},
+ fr:{eyebrow:'Exclusion NAP prolongée',single:'Un joueur niveau 4 est toujours/de nouveau dans une alliance NAP',multi:'Des joueurs niveau 4 sont toujours/de nouveau dans des alliances NAP',section:'Niveau 4 dans l’effectif',sectionSub:'Pendant une exclusion NAP prolongée, ces joueurs ne doivent pas rester dans une alliance NAP ni y être acceptés.',cases:'cas',open:'Voir tous les cas',notice:'Niveau 4 · le joueur doit être retiré et ne doit pas être accepté dans une alliance.'},
+ es:{eyebrow:'Exclusión NAP ampliada',single:'Un jugador de nivel 4 sigue/está de nuevo en una alianza NAP',multi:'Jugadores de nivel 4 siguen/están de nuevo en alianzas NAP',section:'Nivel 4 en el roster',sectionSub:'Durante una exclusión NAP ampliada, estos jugadores no deben permanecer ni ser aceptados en una alianza NAP.',cases:'casos',open:'Ver todos los casos',notice:'Nivel 4 · el jugador debe ser expulsado y no debe ser aceptado en una alianza.'}
 };
 function level4HomeWords2(){return LEVEL4_HOME_WORDS2[L()]||LEVEL4_HOME_WORDS2.de}
 function homeV2PriorityPanels2(A){
- const notice=S.o?.[0],own=A?.[0],host=S.level4Hosting?.[0];let html='';
- if(host){
+ const notice=S.o?.[0],own=A?.[0],hosts=S.level4Hosting||[];let html='';
+ if(hosts.length){
   const hw=level4HomeWords2();
   html+='<article class="priority-alert critical"><div class="priority-icon">4</div><div class="priority-main">'+
-   '<div class="priority-eyebrow">'+E(hw.eyebrow)+'</div><b>'+E(host.player_name||'–')+' '+E(hw.title)+'</b>'+
-   '<p>'+E(host.current_alliance||'–')+' '+E(hw.text1)+'</p>'+
-   '<div class="alert-meta"><span class="pill red">Stufe 4</span><span class="pill">'+E(host.current_alliance||'–')+'</span>'+(S.level4Hosting.length>1?'<span class="pill">'+E(S.level4Hosting.length)+' '+E(hw.cases)+'</span>':'')+'</div>'+
-   '</div><button type="button" class="btn small secondary" data-home-nap-alert>'+E(hw.open)+'</button></article>';
+   '<div class="priority-eyebrow">'+E(hw.eyebrow)+'</div><b>'+E(hosts.length===1?hw.single:(hosts.length+' '+hw.multi))+'</b>'+
+   '<p>'+E(hw.sectionSub)+'</p>'+
+   '<div class="live-list" style="margin-top:8px">'+hosts.map(h=>'<div class="live-row" style="padding:7px 0"><div><b>'+E(h.player_name||'–')+'</b><small>'+E(h.current_alliance||'–')+'</small></div><span class="pill red">Stufe 4</span></div>').join('')+'</div>'+
+   '</div><button type="button" class="btn small secondary" data-home-level4-alert>'+E(hw.open)+'</button></article>';
  }
  if(notice){
   html+='<article class="priority-alert critical"><div class="priority-icon">!</div><div class="priority-main">'+
@@ -1096,7 +1101,7 @@ function renderHomeFull2(){
  '<section class="card home-v2-recent"><div class="card-head"><div><div class="card-title">Letzte eigene Verfehlungen</div><div class="card-sub">Spieler und Punkte · private Details bleiben bei '+E(S.a)+'</div></div>'+(recent.length>4?'<button class="btn small secondary home-v2-expand" type="button" aria-expanded="false">Alle '+recent.length+' anzeigen</button>':'')+'</div><div class="card-body live-list">'+(recent.length?recent.map(homeV2RecentButton2).join(''):'<div class="live-empty-state">Keine Verfehlungen.</div>')+'</div></section></div>'+
  '<div class="stack"><section class="card"><div class="card-head"><div><div class="card-title">🔔 NAP-Benachrichtigungen</div><div class="card-sub">24h-Frist überschritten · laut Tracker</div></div><span class="pill red">'+S.o.length+'</span></div><div class="card-body live-list">'+(S.o.length?S.o.slice(0,6).map(x=>'<div class="live-row"><div><b>'+E(x.alliance_code)+' · '+E(x.player_name||'–')+'</b><small>Stufe '+E(x.level)+'</small></div><span class="pill red">'+E(durLong2(Number(x.overdue_seconds||0)*1000))+'</span></div>').join(''):'<div class="live-empty-state">Keine überfälligen Maßnahmen.</div>')+'</div></section>'+
  '<section class="card"><div class="card-head"><div><div class="card-title">Allianzwechsel</div><div class="card-sub">nur Quelle oder Ziel '+E(S.a)+'</div></div><span class="pill">'+S.t.length+'</span></div><div class="card-body live-list">'+(S.t.length?S.t.map(transferRow2).join(''):'<div class="live-empty-state">Keine relevanten Wechsel.</div>')+'</div></section><section class="card" id="liveHomePerformance"><div class="card-body"><div class="live-empty-state">Performance wird geladen …</div></div></section></div></div>';
- v.querySelectorAll('[data-home-nap-alert]').forEach(b=>b.onclick=()=>setView('nap'));v.querySelectorAll('.n2act').forEach(b=>b.onclick=()=>doAct(b.dataset.k,b.dataset.id));v.querySelectorAll('.live-r1-timer').forEach(b=>b.onclick=()=>setR1Timer2(b.dataset.id,b.closest('.r1-home-timer')?.querySelector('.r1-home-end')));v.querySelectorAll('.n2open').forEach(b=>b.onclick=()=>openProfile2(b.dataset.p));v.querySelectorAll('.home-v2-expand').forEach(b=>b.onclick=()=>{const card=b.closest('.home-v2-recent'),expanded=card.classList.toggle('expanded');b.setAttribute('aria-expanded',String(expanded));b.textContent=expanded?'Weniger anzeigen':'Alle '+recent.length+' anzeigen'});v.querySelectorAll('.live-transfer-confirm').forEach(b=>b.onclick=()=>confirmTransfer2(b.dataset.id));v.querySelectorAll('.live-transfer-temp').forEach(b=>b.onclick=()=>markTransferTemporary2(b.dataset.id));v.querySelectorAll('.live-post-contact-confirm').forEach(b=>b.onclick=()=>resolvePostContactReview2(b.dataset.reviewId,true));v.querySelectorAll('.live-post-contact-dismiss').forEach(b=>b.onclick=()=>resolvePostContactReview2(b.dataset.reviewId,false));renderHomePerformance2();renderNotifications2();
+ v.querySelectorAll('[data-home-nap-alert]').forEach(b=>b.onclick=()=>{liveNapTab='alerts';setView('nap')});v.querySelectorAll('[data-home-level4-alert]').forEach(b=>b.onclick=()=>{liveNapTab='alerts';setView('nap')});v.querySelectorAll('.n2act').forEach(b=>b.onclick=()=>doAct(b.dataset.k,b.dataset.id));v.querySelectorAll('.live-r1-timer').forEach(b=>b.onclick=()=>setR1Timer2(b.dataset.id,b.closest('.r1-home-timer')?.querySelector('.r1-home-end')));v.querySelectorAll('.n2open').forEach(b=>b.onclick=()=>openProfile2(b.dataset.p));v.querySelectorAll('.home-v2-expand').forEach(b=>b.onclick=()=>{const card=b.closest('.home-v2-recent'),expanded=card.classList.toggle('expanded');b.setAttribute('aria-expanded',String(expanded));b.textContent=expanded?'Weniger anzeigen':'Alle '+recent.length+' anzeigen'});v.querySelectorAll('.live-transfer-confirm').forEach(b=>b.onclick=()=>confirmTransfer2(b.dataset.id));v.querySelectorAll('.live-transfer-temp').forEach(b=>b.onclick=()=>markTransferTemporary2(b.dataset.id));v.querySelectorAll('.live-post-contact-confirm').forEach(b=>b.onclick=()=>resolvePostContactReview2(b.dataset.reviewId,true));v.querySelectorAll('.live-post-contact-dismiss').forEach(b=>b.onclick=()=>resolvePostContactReview2(b.dataset.reviewId,false));renderHomePerformance2();renderNotifications2();
 }
 async function renderHomePerformance2(){
  const box=document.getElementById('liveHomePerformance');if(!box)return;try{const d=await rpc('get_performance_dashboard',{}),m=d?.mobilization,k=d?.kvk;box.innerHTML='<div class="card-head"><div><div class="card-title">Performance</div><div class="card-sub">kompakter Überblick</div></div><button class="mini-link" data-go="performance">Öffnen</button></div><div class="card-body live-list">'+(m?'<div class="live-row"><div><b>Alliance Mobilization</b><small>'+E(m.event?.label||'')+'</small></div><strong>'+N(m.total_score||0)+'</strong></div>':'')+(k?'<div class="live-row"><div><b>KvK Top 200</b><small>'+E(k.event?.label||'')+'</small></div><strong>'+N(k.known_top200_score||0)+'</strong></div>':'')+'</div>'}catch{box.innerHTML='<div class="card-body"><div class="live-empty-state">Keine Performance-Daten.</div></div>'}}
@@ -1145,7 +1150,7 @@ renderNotifications2=function(){
  if(badge){badge.textContent=unread;badge.style.display=unread?'grid':'none'}
  if(filters){filters.innerHTML='<button class="notification-filter '+(liveNotificationFilter==='all'?'active':'')+'" data-live-nf="all">Alle</button><button class="notification-filter '+(liveNotificationFilter==='nap'?'active':'')+'" data-live-nf="nap">NAP</button><button class="notification-filter '+(liveNotificationFilter==='alliance'?'active':'')+'" data-live-nf="alliance">Meine Allianz</button>';filters.querySelectorAll('[data-live-nf]').forEach(b=>b.onclick=()=>{liveNotificationFilter=b.dataset.liveNf;renderNotifications2()})}
  list.innerHTML=rows.length?rows.map(x=>{const id=notificationId2(x),isRead=read.has(id);return '<button class="notification-item '+(isRead?'':'unread')+'" data-live-notify="'+E(x.go)+'" data-live-nid="'+E(id)+'"><span class="notification-dot"></span><span><b>'+E(x.title)+'</b><small>'+E(x.copy)+'</small></span></button>'}).join(''):'<div class="live-empty-state">Keine Meldungen.</div>';
- list.querySelectorAll('[data-live-notify]').forEach(b=>b.onclick=async()=>{try{await markNotificationReads2([b.dataset.liveNid])}catch(err){console.warn('notification read state',err)}setView(b.dataset.liveNotify);document.getElementById('notificationPanel')?.classList.remove('show');document.getElementById('overlay')?.classList.remove('show');renderNotifications2()});
+ list.querySelectorAll('[data-live-notify]').forEach(b=>b.onclick=async()=>{try{await markNotificationReads2([b.dataset.liveNid])}catch(err){console.warn('notification read state',err)}if(b.dataset.liveNid?.startsWith('level4-host|'))liveNapTab='alerts';setView(b.dataset.liveNotify);document.getElementById('notificationPanel')?.classList.remove('show');document.getElementById('overlay')?.classList.remove('show');renderNotifications2()});
  if(mark){const clone=mark.cloneNode(true);mark.replaceWith(clone);clone.onclick=async()=>{try{await markNotificationReads2(all.map(notificationId2))}catch(err){console.warn('notification mark all',err)}renderNotifications2()}}
 };
 renderNotifications=()=>renderNotifications2();
