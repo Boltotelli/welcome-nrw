@@ -265,6 +265,7 @@ function v2DecorateShell(){
       '<button data-more-view="crown">♛<small>'+v2esc(v2t('crown'))+'</small></button>'+
       '<button data-more-view="activity">◷<small>'+v2esc(v2t('activity'))+'</small></button>'+
       '<button data-more-view="settings">⚙<small>'+v2esc(v2t('settings'))+'</small></button>'+
+      '<button data-more-view="support">◌<small>Support</small></button>'+
       '<button id="v2MoreTheme"><span class="v2-theme-icon"></span><small>'+v2esc(v2t('theme'))+'</small></button>'+
       '<button id="v2MoreBell">🔔<small>'+v2esc(v2t('notifications'))+'</small></button>'+
     '</div>';document.body.appendChild(s);
