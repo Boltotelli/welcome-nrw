@@ -301,6 +301,14 @@ function isInternalCase2(v){
 function isLaw14Case2(v){
  return !!v&&v.kind==='overspend'&&v.sanction_eligible!==false&&!isInternalCase2(v);
 }
+const PLAYER_CASE_WORDS2={
+ de:{law:'Law 14',internal:'Intern',lawCases:'Law 14 Fälle',lawActive:'Law 14 aktiv',internalCases:'interne Fälle',stage:'Stufe',status:'Status'},
+ en:{law:'Law 14',internal:'Internal',lawCases:'Law 14 cases',lawActive:'Law 14 active',internalCases:'internal cases',stage:'Level',status:'Status'},
+ fr:{law:'Loi 14',internal:'Interne',lawCases:'Cas loi 14',lawActive:'Loi 14 actifs',internalCases:'cas internes',stage:'Niveau',status:'Statut'},
+ es:{law:'Law 14',internal:'Interno',lawCases:'Casos Law 14',lawActive:'Law 14 activos',internalCases:'casos internos',stage:'Nivel',status:'Estado'}
+};
+function playerCaseWords2(){return PLAYER_CASE_WORDS2[L()]||PLAYER_CASE_WORDS2.de}
+
 function targetFor2(event,phase){const cfg=S.settings?.event_targets||{},p=(PHASES2[event]||[]).find(x=>x[0]===phase);return cfg[phase]??p?.[2]??null}
 function neutralizeMocks(){
  const concept=document.querySelector('.concept');if(concept)concept.textContent='NAP Event Tracker 2.0 · TEST';
@@ -714,14 +722,15 @@ async function saveLanguages2(P){
 }
 function renderPlayers2(){
  const g=document.getElementById('playerGrid');if(!g)return;
+ const w=playerCaseWords2();
  g.innerHTML=S.p.map(P=>{
   const name=P.name||P.player_name||'',V=vv(name),law=V.filter(isLaw14Case2),internal=V.filter(isInternalCase2),
    state=sanctionState2(name),l=state.level,last=V[0],
    status=sanctionStatus2(state.currentSanction,state.currentViolation),val=status.short;
   return '<div class="player-card" data-p="'+E(name)+'" data-has-entry="'+(V.length||ss(name).length?'1':'0')+'" data-attendance="'+(internal.length?'1':'0')+'" data-search="'+E((name+' '+(P.game_id||'')).toLowerCase())+'">'+
    '<div class="player-card-top"><div class="player-meta">'+avatarHtml(P,'player-avatar')+'<div><div class="player-name">'+E(name)+'</div><div class="player-id">'+E(P.game_id||'–')+'</div></div></div>'+allianceBadge2(S.a)+'</div>'+
-   '<div class="metric-row"><div class="metric"><b>'+law.length+'</b><span>Law 14</span></div><div class="metric"><b>'+l+'</b><span>Stufe</span></div><div class="metric"><b>'+E(val)+'</b><span>Status</span></div></div>'+
-   '<div class="player-card-foot">'+(internal.length?'<span class="pill blue">Intern · '+internal.length+'</span>':'<span></span>')+'<span class="muted tiny">'+(last?E(D(last.occurred_at)):'–')+'</span></div></div>';
+   '<div class="metric-row"><div class="metric"><b>'+law.length+'</b><span>'+E(w.law)+'</span></div><div class="metric"><b>'+l+'</b><span>'+E(w.stage)+'</span></div><div class="metric"><b>'+E(val)+'</b><span>'+E(w.status)+'</span></div></div>'+
+   '<div class="player-card-foot">'+(internal.length?'<span class="pill blue">'+E(w.internal)+' · '+internal.length+'</span>':'<span></span>')+'<span class="muted tiny">'+(last?E(D(last.occurred_at)):'–')+'</span></div></div>';
  }).join('')||'<div class="live-empty-state">Keine Spieler.</div>';
  g.querySelectorAll('[data-p]').forEach(c=>c.onclick=()=>openProfile2(c.dataset.p));if(typeof applyPlayerFilters==='function')applyPlayerFilters();renderWelcomeLanguageQueue2();
 }
@@ -928,8 +937,8 @@ async function openProfile2(name){
 async function paintProfileTab2(name,tab){
  const body=document.getElementById('liveProfileBody');if(!body)return;const P=p(name),V=vv(name),X=ss(name),l=level(name),latest=X[0];
  if(tab==='overview'){
-  const lawCases=V.filter(isLaw14Case2),internalCases=V.filter(isInternalCase2);
-  body.innerHTML='<div class="live-panel-grid"><section class="card"><div class="card-head"><div><div class="card-title">Übersicht</div></div></div><div class="card-body"><div class="live-stat-grid"><div class="live-stat"><b>'+lawCases.length+'</b><small>Law 14 Fälle</small></div><div class="live-stat"><b>'+lawCases.filter(active).length+'</b><small>Law 14 aktiv</small></div><div class="live-stat"><b>'+internalCases.length+'</b><small>interne Fälle</small></div><div class="live-stat"><b>'+l+'</b><small>aktuelle Stufe</small></div><div class="live-stat"><b>'+E((P.languages||[]).map(languageName2).join(' / ')||'–')+'</b><small>Sprachen</small></div></div>'+languageEditor2(P)+'<form id="livePlayerIdForm" class="live-form"><label>Player ID<input id="livePlayerId" value="'+E(P.game_id||'')+'" inputmode="numeric"></label><button class="btn secondary">Player ID speichern</button><div id="livePlayerIdStatus" class="live-status"></div></form></div></section><section>'+ (latest?profileActionCard2(latest):'<div class="live-empty-state">Keine Maßnahme vorhanden.</div>') +'</section></div>';
+  const lawCases=V.filter(isLaw14Case2),internalCases=V.filter(isInternalCase2),cw=playerCaseWords2();
+  body.innerHTML='<div class="live-panel-grid"><section class="card"><div class="card-head"><div><div class="card-title">Übersicht</div></div></div><div class="card-body"><div class="live-stat-grid"><div class="live-stat"><b>'+lawCases.length+'</b><small>'+E(cw.lawCases)+'</small></div><div class="live-stat"><b>'+lawCases.filter(active).length+'</b><small>'+E(cw.lawActive)+'</small></div><div class="live-stat"><b>'+internalCases.length+'</b><small>'+E(cw.internalCases)+'</small></div><div class="live-stat"><b>'+l+'</b><small>'+E(cw.stage)+'</small></div><div class="live-stat"><b>'+E((P.languages||[]).map(languageName2).join(' / ')||'–')+'</b><small>Sprachen</small></div></div>'+languageEditor2(P)+'<form id="livePlayerIdForm" class="live-form"><label>Player ID<input id="livePlayerId" value="'+E(P.game_id||'')+'" inputmode="numeric"></label><button class="btn secondary">Player ID speichern</button><div id="livePlayerIdStatus" class="live-status"></div></form></div></section><section>'+ (latest?profileActionCard2(latest):'<div class="live-empty-state">Keine Maßnahme vorhanden.</div>') +'</section></div>';
   document.getElementById('liveSaveLanguages')?.addEventListener('click',()=>saveLanguages2(P));bindProfileR1Timers2();document.getElementById('livePlayerIdForm').onsubmit=async e=>{e.preventDefault();const out=document.getElementById('livePlayerIdStatus');try{const d=await rpc('set_player_game_id',{p_player_name:name,p_game_id:document.getElementById('livePlayerId').value.replace(/\D/g,'')});if(d){const i=S.p.findIndex(x=>x.id===P.id);if(i>=0)S.p[i]=d}out.textContent='✓ Gespeichert';await loadAvatars();renderPlayers2()}catch(err){out.textContent=err.message||String(err)}};return;
  }
  if(tab==='violations'){
@@ -1057,11 +1066,11 @@ function homeSyncBadge2(){
  return '<div class="home-sync-status"><span>'+E(w.title)+'</span><b>'+E(s?exactDateTime2(s):w.never)+'</b>'+(s?'<small>'+E(relativeSyncAge2(s))+'</small>':'')+'</div>';
 }
 function homeV2RecentButton2(x,i){
- const P=p(x.player_name),name=x.player_name||'–',internal=isInternalCase2(x);
+ const P=p(x.player_name),name=x.player_name||'–',internal=isInternalCase2(x),cw=playerCaseWords2();
  return '<button type="button" class="live-row n2open home-v2-recent-item" data-p="'+E(name)+'">'+
  '<span class="home-v2-recent-person">'+avatarHtml({...P,name},'player-avatar')+
  '<span class="home-v2-recent-copy"><b>'+E(name)+'</b><small>'+E(x.event_name||'')+' · '+E(x.phase_name||'')+' · '+E(D(x.occurred_at))+'</small></span></span>'+
- (internal?'<span class="pill blue">Intern</span>':'<strong>'+N(x.score)+'</strong>')+'</button>';
+ (internal?'<span class="pill blue">'+E(cw.internal)+'</span>':'<strong>'+N(x.score)+'</strong>')+'</button>';
 }
 const LEVEL4_HOME_WORDS2={
  de:{eyebrow:'Extended NAP Exclusion',single:'Spieler mit Stufe 4 ist noch/erneut in einer NAP-Allianz',multi:'Spieler mit Stufe 4 sind noch/erneut in NAP-Allianzen',section:'Stufe 4 im Roster',sectionSub:'Diese Spieler dürfen während der Extended NAP Exclusion nicht in einer NAP-Allianz geführt oder aufgenommen werden.',cases:'Fälle',open:'Alle Fälle ansehen',notice:'Stufe 4 · Spieler muss entfernt werden bzw. darf nicht aufgenommen werden.'},
