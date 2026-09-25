@@ -1240,15 +1240,23 @@ async function deleteViolation2(v){
   await load();renderHomeFull2();renderPlayers2();await openProfile2(v.player_name);
  }catch(err){if(out)out.textContent=err.message||String(err)}
 }
-function profileStage2(l){
+function profileStage2(name,l){
  const text={
- de:{labs:['Kontakt','R1','24h NAP OUT','Erweitert'],current:'aktuell'},
- en:{labs:['Contact','R1','24h NAP OUT','Extended'],current:'current'},
- fr:{labs:['Contact','R1','Exclusion 24 h','Prolongée'],current:'actuel'},
- es:{labs:['Contacto','R1','Exclusión 24 h','Ampliada'],current:'actual'}
- }[L()]||{labs:['Kontakt','R1','24h NAP OUT','Erweitert'],current:'aktuell'};
- const labs=text.labs;
- return '<div class="stage-progress stage-progress-loading"><div class="stage-progress-bar"><div class="stage-progress-fill" style="width:'+([0,12,38,66,100][l]||0)+'%"></div><div class="stage-marks">'+labs.map((_,i)=>'<span class="stage-mark '+(i+1<l?'done':i+1===l?'current':'')+'">'+(i+1)+'</span>').join('')+'</div></div><div class="stage-progress-labels">'+labs.map((x,i)=>'<span><b>'+E(x)+'</b><span>'+(i+1<l?'✓':i+1===l?E(text.current):'')+'</span></span>').join('')+'</div></div>';
+ de:{labs:['Kontakt','R1','24h NAP OUT','Erweitert'],current:'aktuell',done:'erledigt'},
+ en:{labs:['Contact','R1','24h NAP OUT','Extended'],current:'current',done:'completed'},
+ fr:{labs:['Contact','R1','Exclusion 24 h','Prolongée'],current:'actuel',done:'terminé'},
+ es:{labs:['Contacto','R1','Exclusión 24 h','Ampliada'],current:'actual',done:'finalizado'}
+ }[L()]||{labs:['Kontakt','R1','24h NAP OUT','Erweitert'],current:'aktuell',done:'erledigt'};
+ const labs=text.labs,state=sanctionState2(name),current=state.currentSanction,
+   currentStatus=current?sanctionStatus2(current,state.currentViolation):null,
+   currentDone=!!(currentStatus&&['done','expired'].includes(currentStatus.key));
+ return '<div class="stage-progress stage-progress-loading"><div class="stage-progress-bar"><div class="stage-progress-fill" style="width:'+([0,12,38,66,100][l]||0)+'%"></div><div class="stage-marks">'+labs.map((_,i)=>{
+   const n=i+1,isCurrent=n===l,done=n<l||(isCurrent&&currentDone);
+   return '<span class="stage-mark '+(done?'done ':'')+(isCurrent?'current ':'')+(isCurrent&&currentDone?'current-complete':'')+'">'+n+'</span>';
+ }).join('')+'</div></div><div class="stage-progress-labels">'+labs.map((x,i)=>{
+   const n=i+1,isCurrent=n===l,status=n<l?'✓':isCurrent?(currentDone?'✓ '+text.done+' · '+text.current:text.current):'';
+   return '<span><b>'+E(x)+'</b><span>'+E(status)+'</span></span>';
+ }).join('')+'</div></div>';
 }
 function profileActionDone2(s){
  if(Number(s.level)===1){
@@ -1376,12 +1384,12 @@ async function openProfile2(name){
  const w=profileWords2();
  view.innerHTML='<button class="btn small" data-go="players">'+E(w.back)+'</button>'+
  '<div class="profile-head" style="margin-top:12px"><div class="profile-main">'+avatarHtml(P,'profile-avatar')+'<div><div class="kicker">'+E(w.head)+'</div><div class="profile-name">'+E(name)+'</div><div class="muted small">Player ID '+E(P.game_id||'–')+' · <span class="pill">'+E(S.a)+'</span> · '+E((P.languages||[]).map(languageName2).join(' / ')||'–')+'</div></div></div></div>'+
- profileStage2(l)+
+ profileStage2(name,l)+
  '<div class="profile-tabs"><button class="profile-tab active" data-live-profiletab="overview">'+E(w.overview)+'</button><button class="profile-tab" data-live-profiletab="violations">'+E(w.violations)+'</button><button class="profile-tab" data-live-profiletab="actions">'+E(w.actions)+'</button><button class="profile-tab" data-live-profiletab="performance">'+E(w.performance)+'</button><button class="profile-tab" data-live-profiletab="comments">'+E(w.comments)+'</button><button class="profile-tab" data-live-profiletab="history">'+E(w.history)+'</button></div><div id="liveProfileBody"></div>';
  setViewBase2('profile');view.querySelectorAll('[data-live-profiletab]').forEach(b=>b.onclick=()=>{view.querySelectorAll('[data-live-profiletab]').forEach(x=>x.classList.toggle('active',x===b));paintProfileTab2(name,b.dataset.liveProfiletab)});await paintProfileTab2(name,'overview');
 }
 async function paintProfileTab2(name,tab){
- const body=document.getElementById('liveProfileBody');if(!body)return;const P=p(name),V=vv(name),X=ss(name),l=level(name),latest=X[0];
+ const body=document.getElementById('liveProfileBody');if(!body)return;const P=p(name),V=vv(name),X=ss(name),state=sanctionState2(name),l=state.level,latest=state.currentSanction||null;
  if(tab==='overview'){
   const lawCases=V.filter(isLaw14Case2),internalCases=V.filter(isInternalCase2),cw=playerCaseWords2();
   body.innerHTML='<div class="live-panel-grid"><section class="card"><div class="card-head"><div><div class="card-title">Übersicht</div></div></div><div class="card-body"><div class="live-stat-grid"><div class="live-stat"><b>'+lawCases.length+'</b><small>'+E(cw.lawCases)+'</small></div><div class="live-stat"><b>'+lawCases.filter(active).length+'</b><small>'+E(cw.lawActive)+'</small></div><div class="live-stat"><b>'+internalCases.length+'</b><small>'+E(cw.internalCases)+'</small></div><div class="live-stat"><b>'+l+'</b><small>'+E(cw.stage)+'</small></div><div class="live-stat"><b>'+E((P.languages||[]).map(languageName2).join(' / ')||'–')+'</b><small>Sprachen</small></div></div>'+languageEditor2(P)+'<form id="livePlayerIdForm" class="live-form"><label>Player ID<input id="livePlayerId" value="'+E(P.game_id||'')+'" inputmode="numeric"></label><button class="btn secondary">Player ID speichern</button><div id="livePlayerIdStatus" class="live-status"></div></form></div></section><section>'+ (latest?profileActionCard2(latest):'<div class="live-empty-state">Keine Maßnahme vorhanden.</div>') +'</section></div>';
