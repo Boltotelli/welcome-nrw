@@ -227,16 +227,17 @@ function v2ThemeIcon(){
 }
 function v2ToggleTheme(){
   const next=document.documentElement.dataset.v2Theme==='light'?'dark':'light';
-  document.documentElement.dataset.v2Theme=next;localStorage.setItem('nap-v2-theme',next);v2ThemeIcon();
+  document.documentElement.dataset.v2Theme=next;document.documentElement.dataset.theme=next;localStorage.setItem('nap-v2-theme',next);v2ThemeIcon();
 }
 
+const V2_KVK_ICON='<svg class="kvk-trophy-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h8v4.5c0 3.2-1.7 5.5-4 5.5s-4-2.3-4-5.5V3Z"/><path d="M8 5H4.5v1.8c0 2.2 1.4 3.8 3.6 4.1"/><path d="M16 5h3.5v1.8c0 2.2-1.4 3.8-3.6 4.1"/><path d="M12 13v4"/><path d="M9 17h6"/><path d="M8 21h8"/></svg>';
 function v2MakeNavButton(view,icon,label,extra='v2-desktop-extra'){
   const b=document.createElement('button');b.type='button';b.className='nav-btn '+extra;b.dataset.view=view;b.innerHTML='<span>'+icon+'</span><small>'+v2esc(label)+'</small>';
   b.addEventListener('click',()=>{if(view==='v2more'){v2ToggleMore();return}setView(view)});
   return b;
 }
 function v2DecorateShell(){
-  document.documentElement.dataset.v2Theme=localStorage.getItem('nap-v2-theme')||'dark';
+  const savedTheme=localStorage.getItem('nap-v2-theme')||'dark';document.documentElement.dataset.v2Theme=savedTheme;document.documentElement.dataset.theme=savedTheme;
   const top=document.querySelector('.topbar .row');
   if(top&&!document.getElementById('v2BellBtn')){
     const badge=document.createElement('span');badge.className='v2-test-badge';badge.textContent=v2t('test');top.prepend(badge);
@@ -249,7 +250,7 @@ function v2DecorateShell(){
   const nav=document.querySelector('.bottom-nav');
   if(nav&&!nav.querySelector('[data-v2-nav="1"]')){
     const laws=nav.querySelector('[data-view="laws"]');
-    const kvk=v2MakeNavButton('kvkV2','🏆',v2t('kvk'));kvk.dataset.v2Nav='1';
+    const kvk=v2MakeNavButton('kvkV2',V2_KVK_ICON,v2t('kvk'));kvk.dataset.v2Nav='1';
     const perf=v2MakeNavButton('performanceV2','▥',v2t('performance'));perf.dataset.v2Nav='1';
     const crown=v2MakeNavButton('crown','♛',v2t('crown'));crown.dataset.v2Nav='1';
     const activity=v2MakeNavButton('activity','◷',v2t('activity'));activity.dataset.v2Nav='1';
@@ -259,12 +260,13 @@ function v2DecorateShell(){
   if(!document.getElementById('v2MoreSheet')){
     const s=document.createElement('div');s.id='v2MoreSheet';s.className='v2-more-sheet';s.hidden=true;
     s.innerHTML='<div class="v2-more-grid">'+
-      '<button data-more-view="kvkV2">🏆<small>'+v2esc(v2t('kvk'))+'</small></button>'+
+      '<button data-more-view="kvkV2">'+V2_KVK_ICON+'<small>'+v2esc(v2t('kvk'))+'</small></button>'+
       '<button data-more-view="laws">⚖<small>'+v2esc(v2t('laws'))+'</small></button>'+
       '<button data-more-view="performanceV2">▥<small>'+v2esc(v2t('performance'))+'</small></button>'+
       '<button data-more-view="crown">♛<small>'+v2esc(v2t('crown'))+'</small></button>'+
       '<button data-more-view="activity">◷<small>'+v2esc(v2t('activity'))+'</small></button>'+
       '<button data-more-view="settings">⚙<small>'+v2esc(v2t('settings'))+'</small></button>'+
+      '<button data-more-view="support"><svg class="support-agent-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.4 11.2V9.7C4.4 5.6 7.7 2.3 11.8 2.3s7.4 3.3 7.4 7.4v1.5"/><path d="M4.5 10.2c-1.2.2-2.1 1.2-2.1 2.5v2.2c0 1.5 1.2 2.7 2.7 2.7h1.1v-7.4H4.5Z"/><path d="M19.1 10.2c1.4 0 2.5 1.1 2.5 2.5v2.2c0 1.5-1.2 2.7-2.7 2.7h-1.2"/><path d="M6.2 10.2v4.4c0 4 2.5 6.8 5.8 6.8"/><path d="M17.8 10.2v5.2c0 3.3-2.2 5-5.4 5"/><path d="M12.4 20.4h2.5"/><path d="M7.7 7.4c1.4-.4 2.6-1.4 3.2-2.7 1.8 1.7 4.1 2.5 6.8 2.5"/><circle cx="9.5" cy="12.2" r=".65" fill="currentColor" stroke="none"/><circle cx="14.5" cy="12.2" r=".65" fill="currentColor" stroke="none"/></svg><small>Support</small></button>'+
       '<button id="v2MoreTheme"><span class="v2-theme-icon"></span><small>'+v2esc(v2t('theme'))+'</small></button>'+
       '<button id="v2MoreBell">🔔<small>'+v2esc(v2t('notifications'))+'</small></button>'+
     '</div>';document.body.appendChild(s);
