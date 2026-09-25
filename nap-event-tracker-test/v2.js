@@ -230,6 +230,7 @@ function v2ToggleTheme(){
   document.documentElement.dataset.v2Theme=next;document.documentElement.dataset.theme=next;localStorage.setItem('nap-v2-theme',next);v2ThemeIcon();
 }
 
+const V2_KVK_ICON='<svg class="kvk-trophy-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h8v4.5c0 3.2-1.7 5.5-4 5.5s-4-2.3-4-5.5V3Z"/><path d="M8 5H4.5v1.8c0 2.2 1.4 3.8 3.6 4.1"/><path d="M16 5h3.5v1.8c0 2.2-1.4 3.8-3.6 4.1"/><path d="M12 13v4"/><path d="M9 17h6"/><path d="M8 21h8"/></svg>';
 function v2MakeNavButton(view,icon,label,extra='v2-desktop-extra'){
   const b=document.createElement('button');b.type='button';b.className='nav-btn '+extra;b.dataset.view=view;b.innerHTML='<span>'+icon+'</span><small>'+v2esc(label)+'</small>';
   b.addEventListener('click',()=>{if(view==='v2more'){v2ToggleMore();return}setView(view)});
@@ -249,7 +250,7 @@ function v2DecorateShell(){
   const nav=document.querySelector('.bottom-nav');
   if(nav&&!nav.querySelector('[data-v2-nav="1"]')){
     const laws=nav.querySelector('[data-view="laws"]');
-    const kvk=v2MakeNavButton('kvkV2','🏆',v2t('kvk'));kvk.dataset.v2Nav='1';
+    const kvk=v2MakeNavButton('kvkV2',V2_KVK_ICON,v2t('kvk'));kvk.dataset.v2Nav='1';
     const perf=v2MakeNavButton('performanceV2','▥',v2t('performance'));perf.dataset.v2Nav='1';
     const crown=v2MakeNavButton('crown','♛',v2t('crown'));crown.dataset.v2Nav='1';
     const activity=v2MakeNavButton('activity','◷',v2t('activity'));activity.dataset.v2Nav='1';
@@ -259,7 +260,7 @@ function v2DecorateShell(){
   if(!document.getElementById('v2MoreSheet')){
     const s=document.createElement('div');s.id='v2MoreSheet';s.className='v2-more-sheet';s.hidden=true;
     s.innerHTML='<div class="v2-more-grid">'+
-      '<button data-more-view="kvkV2">🏆<small>'+v2esc(v2t('kvk'))+'</small></button>'+
+      '<button data-more-view="kvkV2">'+V2_KVK_ICON+'<small>'+v2esc(v2t('kvk'))+'</small></button>'+
       '<button data-more-view="laws">⚖<small>'+v2esc(v2t('laws'))+'</small></button>'+
       '<button data-more-view="performanceV2">▥<small>'+v2esc(v2t('performance'))+'</small></button>'+
       '<button data-more-view="crown">♛<small>'+v2esc(v2t('crown'))+'</small></button>'+
