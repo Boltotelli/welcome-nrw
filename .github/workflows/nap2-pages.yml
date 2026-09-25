@@ -124,3 +124,4 @@ jobs:
 # Publish iOS bottom-navigation viewport stabilization 2026-09-25
 # Publish current-stage profile measure and completion indicator 2026-09-25
 # Publish active player profile current-sanction fix 2026-09-25
+# Publish current-sanction profile fix with cache-hardening 2026-09-25
