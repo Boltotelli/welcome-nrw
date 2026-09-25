@@ -8,7 +8,7 @@
 }
 html[data-v2-theme="light"]{
   --v2-bg:#f4f7fb;--v2-panel:#ffffff;--v2-panel2:#f8fafc;--v2-panel3:#edf2f7;
-  --v2-line:#dce4ed;--v2-text:#17202d;--v2-muted:#6e7b8c;--v2-shadow:0 18px 45px rgba(26,42,66,.10);
+  --v2-line:#dce4ed;--v2-text:#17202d;--v2-muted:#6e7b8c;--v2-red:#b42318;--v2-shadow:0 18px 45px rgba(26,42,66,.10);
 }
 html[data-v2-theme="light"] body,
 html[data-v2-theme="light"] .app-shell{background:var(--v2-bg)!important;color:var(--v2-text)!important}
