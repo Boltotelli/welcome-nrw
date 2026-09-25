@@ -119,7 +119,7 @@ async function retryPendingEvidence(){
   }else{
    out.textContent='✓ '+tr('evidenceSaved');
    button.hidden=true;
-   window.postMessage({type:'nap-screen-import-saved'},location.origin);
+   window.postMessage({type:'nap-screen-import-saved'},location.origin);await loadRecentCorrections2();
   }
  }finally{r.busy=false;button.disabled=false}
 }
@@ -233,6 +233,13 @@ async function metadata(video,file){
   return url;
  }catch(e){URL.revokeObjectURL(url);throw e}
 }
+const CORRECTION_WORDS={
+ de:{title:'Letzte ScreenImport-Fälle korrigieren',sub:'Nur Fälle, die zuletzt von deiner Allianz importiert wurden. Fremde Spielerakten bleiben verborgen.',loading:'Korrekturen werden geladen …',empty:'Keine kürzlich importierten Fälle.',correct:'Korrigieren',score:'Punkte',alliance:'Allianz',player:'Spieler',save:'Korrektur speichern',cancel:'Abbrechen',evidence:'Evidence',needsEvidence:'Keine Korrektur ohne Screenshot-Evidence.',saved:'Korrektur gespeichert'},
+ en:{title:'Correct recent ScreenImport cases',sub:'Only cases last imported by your alliance. Other alliances’ player files remain hidden.',loading:'Loading corrections …',empty:'No recent imported cases.',correct:'Correct',score:'Score',alliance:'Alliance',player:'Player',save:'Save correction',cancel:'Cancel',evidence:'Evidence',needsEvidence:'Correction requires screenshot evidence.',saved:'Correction saved'},
+ fr:{title:'Corriger les imports ScreenRecording récents',sub:'Uniquement les cas importés en dernier par votre alliance. Les dossiers des autres alliances restent masqués.',loading:'Chargement des corrections …',empty:'Aucun import récent.',correct:'Corriger',score:'Score',alliance:'Alliance',player:'Joueur',save:'Enregistrer',cancel:'Annuler',evidence:'Preuve',needsEvidence:'Une capture est requise pour corriger.',saved:'Correction enregistrée'},
+ es:{title:'Corregir ScreenImports recientes',sub:'Solo casos importados por última vez por tu alianza. Los archivos de otras alianzas permanecen ocultos.',loading:'Cargando correcciones …',empty:'No hay importaciones recientes.',correct:'Corregir',score:'Puntuación',alliance:'Alianza',player:'Jugador',save:'Guardar corrección',cancel:'Cancelar',evidence:'Evidencia',needsEvidence:'Se requiere captura para corregir.',saved:'Corrección guardada'}
+};
+function correctionWords(){return CORRECTION_WORDS[lng()]||CORRECTION_WORDS.de}
 function shell(root,kind){
  const perf=kind==='perf';root.innerHTML=
  '<div class="nocr-layout"><section class="nocr-panel"><div class="nocr-fields">'+
@@ -243,8 +250,60 @@ function shell(root,kind){
  '</div><label class="nocr-file"><span class="nocr-file-icon">▣</span><strong>'+esc(tr('file'))+'</strong><small id="nocrFilename">MP4 / MOV</small><input id="nocrFile" type="file" accept="video/mp4,video/quicktime,video/*"></label>'+
  '<p class="nocr-note">'+esc(tr('video'))+'</p><button type="button" class="btn primary nocr-analyze" id="nocrAnalyze">'+esc(tr('analyze'))+'</button><div class="nocr-status" id="nocrStatus" role="status" aria-live="polite"></div></section>'+
  '<section class="nocr-panel nocr-progress" id="nocrProgress" hidden><h3>'+esc(tr('prep'))+'</h3><p id="nocrProgressText"></p><div class="nocr-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="nocrBar"></span></div><div class="nocr-progress-foot"><b id="nocrPercent">0%</b><span id="nocrFound">0 '+esc(tr('found'))+'</span></div><div class="nocr-stages"><div data-step="0">✓ '+esc(tr('prep'))+'</div><div data-step="1">◎ '+esc(tr('recognize'))+'</div><div data-step="2">○ '+esc(tr('check'))+'</div></div></section></div>'+
- '<section class="nocr-panel nocr-review" id="nocrReview" hidden><div class="nocr-review-title"><h3>'+esc(tr('review'))+'</h3><strong id="nocrCount"></strong></div><div id="nocrResults"></div><div class="nocr-save-row"><button type="button" class="btn primary" id="nocrSave">'+esc(tr('save'))+'</button><button type="button" class="btn secondary" id="nocrEvidenceRetry" hidden>'+esc(tr('retryEvidence'))+'</button><div class="nocr-status" id="nocrSaveStatus" role="status"></div></div></section>';
+ '<section class="nocr-panel nocr-review" id="nocrReview" hidden><div class="nocr-review-title"><h3>'+esc(tr('review'))+'</h3><strong id="nocrCount"></strong></div><div id="nocrResults"></div><div class="nocr-save-row"><button type="button" class="btn primary" id="nocrSave">'+esc(tr('save'))+'</button><button type="button" class="btn secondary" id="nocrEvidenceRetry" hidden>'+esc(tr('retryEvidence'))+'</button><div class="nocr-status" id="nocrSaveStatus" role="status"></div></div></section>'+
+ (perf?'':'<section class="nocr-panel" id="nocrCorrections"><div class="nocr-review-title"><div><h3>'+esc(correctionWords().title)+'</h3><small>'+esc(correctionWords().sub)+'</small></div></div><div id="nocrCorrectionRows" class="nocr-status">'+esc(correctionWords().loading)+'</div></section>');
  root.querySelector('#nocrFile').addEventListener('change',e=>{$('#nocrFilename',root).textContent=e.target.files?.[0]?.name||'MP4 / MOV'});
+}
+async function loadRecentCorrections2(){
+ const r=run,root=r?.root;if(!r||r.kind!=='law'||!root?.isConnected)return;
+ const box=$('#nocrCorrectionRows',root);if(!box)return;
+ const w=correctionWords();
+ try{
+  const rows=await rpc('get_my_recent_screen_import_cases_v2',{p_limit:30});
+  if(r!==run)return;
+  r.corrections=Array.isArray(rows)?rows:[];
+  box.classList.remove('error');
+  box.innerHTML=r.corrections.length?r.corrections.map(x=>
+   '<div class="nocr-correction-row" data-correction-row="'+esc(x.case_id)+'" style="padding:10px 0;border-bottom:1px solid var(--line)">'+
+    '<div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><div><strong>'+esc(x.assigned_alliance||'–')+' · '+esc(x.player_name||'–')+'</strong><small style="display:block">'+esc(x.event_name||'–')+' · '+esc(x.phase_name||'')+' · '+points(x.score)+'</small></div>'+
+    '<div style="display:flex;gap:8px;align-items:center"><span class="pill '+(x.evidence_available?'green':'gold')+'">'+esc(w.evidence)+' '+(x.evidence_available?'✓':'–')+'</span>'+
+    '<button type="button" class="btn small secondary nocr-correct-open" data-case="'+esc(x.case_id)+'" '+(x.evidence_available?'':'disabled')+'>'+esc(w.correct)+'</button></div></div>'+
+    '<div class="nocr-correction-editor" data-editor="'+esc(x.case_id)+'" hidden></div>'+
+   '</div>'
+  ).join(''):'<div class="nocr-status">'+esc(w.empty)+'</div>';
+  box.querySelectorAll('.nocr-correct-open').forEach(b=>b.onclick=()=>openCorrectionEditor2(b.dataset.case));
+ }catch(e){box.classList.add('error');box.textContent=e.message||String(e)}
+}
+async function openCorrectionEditor2(caseId){
+ const r=run,root=r?.root,row=(r?.corrections||[]).find(x=>String(x.case_id)===String(caseId));
+ if(!r||!row||!root?.isConnected)return;
+ const editor=$('[data-editor="'+CSS.escape(String(caseId))+'"]',root);if(!editor)return;
+ if(!row.evidence_available){editor.hidden=false;editor.textContent=correctionWords().needsEvidence;return}
+ const members=r.members?.length?r.members:await roster();r.members=members;
+ const alliances=orderedAlliances(members),w=correctionWords();
+ editor.hidden=false;
+ editor.innerHTML='<div class="nocr-fields" style="margin-top:10px"><label>'+esc(w.score)+'<input class="nocr-corr-score" type="text" inputmode="numeric" value="'+esc(points(row.score))+'"></label>'+
+  '<label>'+esc(w.alliance)+'<select class="nocr-corr-alliance">'+alliances.map(a=>selectOption(a,a)).join('')+'</select></label>'+
+  '<label>'+esc(w.player)+'<select class="nocr-corr-player"></select></label></div>'+
+  '<div class="nocr-save-row"><button type="button" class="btn primary nocr-corr-save">'+esc(w.save)+'</button><button type="button" class="btn secondary nocr-corr-cancel">'+esc(w.cancel)+'</button><div class="nocr-status nocr-corr-status"></div></div>';
+ const alliance=$('.nocr-corr-alliance',editor),player=$('.nocr-corr-player',editor),score=$('.nocr-corr-score',editor);
+ const fillPlayers=()=>{
+  const code=alliance.value;
+  player.innerHTML=alphabeticalRoster(members).filter(({p})=>p.alliance_code===code)
+   .map(({p})=>selectOption(p.player_name+' · '+(p.player_game_id||''),p.player_id)).join('');
+ };
+ alliance.value=row.assigned_alliance||alliances[0]||'';fillPlayers();if(row.player_id)player.value=row.player_id;
+ alliance.onchange=fillPlayers;
+ $('.nocr-corr-cancel',editor).onclick=()=>{editor.hidden=true};
+ $('.nocr-corr-save',editor).onclick=async()=>{
+  const out=$('.nocr-corr-status',editor),value=parsePoints(score.value);
+  if(value===null||!player.value){out.textContent=reviewText(value===null?'invalidScore':'missingPlayer');return}
+  out.textContent=tr('saving');
+  try{
+   await rpc('correct_my_screen_import_case_v2',{p_case_id:row.case_id,p_target_player_id:player.value,p_score:value});
+   out.textContent='✓ '+w.saved;rosterPromise=null;await loadRecentCorrections2();
+  }catch(e){out.textContent=e.message||String(e)}
+ };
 }
 function progress(step,value,count){
  const el=run?.root;if(!el)return;
@@ -629,7 +688,7 @@ async function save(){
   ];
   out.textContent='✓ '+reviewText('saveSummary')+': '+parts.join(' · ')+
    (response?.duplicate_video?' · '+reviewText('existingVideo'):'')+evidenceWarning;
-  window.postMessage({type:'nap-screen-import-saved'},location.origin);
+  window.postMessage({type:'nap-screen-import-saved'},location.origin);await loadRecentCorrections2();
  }catch(e){out.textContent=(e.message||String(e));console.error('native OCR save',e)}
  finally{r.busy=false;if(root.isConnected)$('#nocrSave',root).disabled=false}
 }
@@ -639,6 +698,7 @@ function mount(root,kind,allowed=[]){
  shell(root,kind);
  const r=run;$('#nocrAnalyze',root).onclick=analyze;$('#nocrSave',root).onclick=save;$('#nocrEvidenceRetry',root).onclick=retryPendingEvidence;
  if(kind==='law'){
+  loadRecentCorrections2();
   const event=$('#liveScreenEvent')?.value||allowed[0]?.event_name;
   $('#nocrEvent',root).innerHTML=EVENTS.filter(n=>allowed.some(o=>o.event_name===n)).map(x=>selectOption(x,x)).join('');
   if(event&&EVENTS.includes(event))$('#nocrEvent',root).value=event;
