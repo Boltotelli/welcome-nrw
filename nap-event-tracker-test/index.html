@@ -108,8 +108,12 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 .icon-btn:hover{background:var(--panel-2)}
 .support-top-btn{color:var(--text)}
 .support-agent-icon{width:22px;height:22px;display:block;fill:none;stroke:currentColor;stroke-width:1.85;stroke-linecap:round;stroke-linejoin:round}
+.nav-icon-support,.more-icon-support{position:relative}
 .nav-icon-support .support-agent-icon{width:21px;height:21px}
 .more-icon-support .support-agent-icon{width:22px;height:22px;margin:auto}
+.support-unread-badge{display:none}
+.nav-icon-support .support-unread-badge{right:-8px;top:-8px}
+.more-icon-support .support-unread-badge{right:-7px;top:-7px}
 .kvk-trophy-icon{width:21px;height:21px;display:block;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
 .more-icon-kvk .kvk-trophy-icon{width:22px;height:22px;margin:auto}
 .support-top-btn:hover .support-agent-icon{transform:translateY(-.5px)}
@@ -670,7 +674,7 @@ img[src*="./assets/alliance/"]{
             <path d="M7.7 7.4c1.4-.4 2.6-1.4 3.2-2.7 1.8 1.7 4.1 2.5 6.8 2.5"/>
             <circle cx="9.5" cy="12.2" r=".65" fill="currentColor" stroke="none"/>
             <circle cx="14.5" cy="12.2" r=".65" fill="currentColor" stroke="none"/>
-          </svg></span><span class="nav-label">Support</span></button>
+          </svg><span class="badge-count support-unread-badge" data-support-unread-badge hidden></span></span><span class="nav-label">Support</span></button>
     </nav>
     <div class="sidebar-footer">
       <div class="concept">Standalone UI-Konzept<br>Keine Datenbankverbindung.</div>
@@ -700,6 +704,7 @@ img[src*="./assets/alliance/"]{
             <circle cx="9.5" cy="12.2" r=".65" fill="currentColor" stroke="none"/>
             <circle cx="14.5" cy="12.2" r=".65" fill="currentColor" stroke="none"/>
           </svg>
+          <span class="badge-count support-unread-badge" data-support-unread-badge hidden></span>
         </button>
         <button class="icon-btn" id="bellBtn" title="Benachrichtigungen">🔔<span class="badge-count">3</span></button>
         <div class="user-pill"><span class="avatar">B</span> Boltotelli</div>
@@ -1329,7 +1334,7 @@ img[src*="./assets/alliance/"]{
             <path d="M7.7 7.4c1.4-.4 2.6-1.4 3.2-2.7 1.8 1.7 4.1 2.5 6.8 2.5"/>
             <circle cx="9.5" cy="12.2" r=".65" fill="currentColor" stroke="none"/>
             <circle cx="14.5" cy="12.2" r=".65" fill="currentColor" stroke="none"/>
-          </svg></span><span class="more-label">Support</span></button>
+          </svg><span class="badge-count support-unread-badge" data-support-unread-badge hidden></span></span><span class="more-label">Support</span></button>
     <button class="more-item" id="themeToggleMobile"><span class="more-icon" id="themeIconMobile"></span><span class="more-label" data-i18n="theme">Theme</span></button>
     <button class="more-item" id="bellMobile"><span class="more-icon">🔔</span><span class="more-label" data-i18n="notifications">Meldungen</span></button>
   </div>
