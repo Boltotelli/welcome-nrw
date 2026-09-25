@@ -1354,10 +1354,28 @@ function renderHomeFull2(){
 async function renderHomePerformance2(){
  const box=document.getElementById('liveHomePerformance');if(!box)return;try{const d=await rpc('get_performance_dashboard',{}),m=d?.mobilization,k=d?.kvk;box.innerHTML='<div class="card-head"><div><div class="card-title">Performance</div><div class="card-sub">kompakter Überblick</div></div><button class="mini-link" data-go="performance">Öffnen</button></div><div class="card-body live-list">'+(m?'<div class="live-row"><div><b>Alliance Mobilization</b><small>'+E(m.event?.label||'')+'</small></div><strong>'+N(m.total_score||0)+'</strong></div>':'')+(k?'<div class="live-row"><div><b>KvK Top 200</b><small>'+E(k.event?.label||'')+'</small></div><strong>'+N(k.known_top200_score||0)+'</strong></div>':'')+'</div>'}catch{box.innerHTML='<div class="card-body"><div class="live-empty-state">Keine Performance-Daten.</div></div>'}}
 const setViewBase2=setView;
+let lastMotionView2=document.querySelector('.view.active')?.id?.replace('view-','')||'home',motionTimer2=null;
+function animateViewChange2(name){
+ const v=document.getElementById('view-'+name);
+ if(!v||window.matchMedia?.('(prefers-reduced-motion: reduce)').matches){lastMotionView2=name;return}
+ v.classList.remove('motion-enter');
+ v.querySelectorAll('.motion-surface').forEach(el=>{el.classList.remove('motion-surface');el.style.removeProperty('--motion-i')});
+ const surfaces=[...v.querySelectorAll('.hero,.priority-alert,.card,.live-stat,.player-card,.transfer-card,.v2-card,.p2-player-card')].slice(0,9);
+ surfaces.forEach((el,i)=>{el.classList.add('motion-surface');el.style.setProperty('--motion-i',String(i))});
+ void v.offsetWidth;
+ v.classList.add('motion-enter');
+ clearTimeout(motionTimer2);
+ motionTimer2=setTimeout(()=>{
+  v.classList.remove('motion-enter');
+  v.querySelectorAll('.motion-surface').forEach(el=>{el.classList.remove('motion-surface');el.style.removeProperty('--motion-i')});
+ },430);
+ lastMotionView2=name;
+}
 setView=function(name){
  if(name==='crown'&&!crownAllowed2)return;
+ const changed=name!==lastMotionView2;
  setViewBase2(name);
- if(!S.a)return;
+ if(!S.a){if(changed)requestAnimationFrame(()=>animateViewChange2(name));return}
  if(name==='home')renderHomeFull2();
  else if(name==='add')renderAddLive();
  else if(name==='players')renderPlayers2();
@@ -1369,6 +1387,7 @@ setView=function(name){
  else if(name==='activity')renderActivityLive();
  else if(name==='settings')renderSettingsLive();
  else if(name==='support')renderSupportLive();
+ if(changed)requestAnimationFrame(()=>animateViewChange2(name));
 };
 renderHome=renderHomeFull2;renderPlayers=renderPlayers2;openProfile=openProfile2;
 
