@@ -367,14 +367,14 @@ function napRow2(title,sub,right,cls){
 }
 function renderNapLive(){
  const v=document.getElementById('view-nap');if(!v)return;
- const now=Date.now(),activeSpend=(S.spend||[]).filter(x=>!x.ended_at&&(!x.ends_at||new Date(x.ends_at).getTime()>now));
- const tabs=[['overview','Übersicht'],['alerts','24h Meldungen'],['exclusions','Exclusions'],['bans','NAP Bans'],['spending','Spending Exclusions']];
- v.innerHTML='<div class="hero"><div><div class="kicker">NAP CENTER · LIVE</div><h1>NAP-weite Transparenz, private Details getrennt.</h1><p>Exclusions, Bans, Spending Exclusions und überfällige Maßnahmen an einem Ort.</p></div></div>'+
- '<div class="live-tabs">'+tabs.map(x=>'<button class="live-tab '+(liveNapTab===x[0]?'active':'')+'" data-live-naptab="'+x[0]+'">'+x[1]+'</button>').join('')+'</div><div id="liveNapBody"></div>';
+ const now=Date.now(),activeSpend=(S.spend||[]).filter(x=>!x.ended_at&&(!x.ends_at||new Date(x.ends_at).getTime()>now)),
+  hosts=S.level4Hosting||[],hw=level4HomeWords2();
+ const tabs=[['overview','Übersicht',0],['alerts','Hinweise',hosts.length+S.o.length],['exclusions','Exclusions',S.e.length],['bans','NAP Bans',S.bans.length],['spending','Spending Exclusions',activeSpend.length]];
+ v.innerHTML='<div class="hero"><div><div class="kicker">NAP CENTER · LIVE</div><h1>NAP-weite Transparenz, private Details getrennt.</h1><p>Exclusions, Bans, Spending Exclusions und NAP-Hinweise an einem Ort.</p></div></div>'+
+ '<div class="live-tabs">'+tabs.map(x=>'<button class="live-tab '+(liveNapTab===x[0]?'active':'')+'" data-live-naptab="'+x[0]+'">'+x[1]+(x[2]?'<span class="tab-count">'+x[2]+'</span>':'')+'</button>').join('')+'</div><div id="liveNapBody"></div>';
  v.querySelectorAll('[data-live-naptab]').forEach(b=>b.onclick=()=>{liveNapTab=b.dataset.liveNaptab;renderNapLive()});
  const body=document.getElementById('liveNapBody');
  if(liveNapTab==='overview'){
-   const hw=level4HomeWords2(),hosts=S.level4Hosting||[];
    body.innerHTML='<div class="live-stat-grid">'+
     '<div class="live-stat"><b>'+hosts.length+'</b><small>'+E(hw.section)+'</small></div>'+
     '<div class="live-stat"><b>'+S.o.length+'</b><small>24h überfällig</small></div>'+
@@ -390,7 +390,6 @@ function renderNapLive(){
    return;
  }
  if(liveNapTab==='alerts'){
-   const hw=level4HomeWords2(),hosts=S.level4Hosting||[];
    body.innerHTML=(hosts.length?'<section class="card" style="margin-bottom:14px"><div class="card-head"><div><div class="card-title">'+E(hw.section)+'</div><div class="card-sub">'+E(hw.sectionSub)+'</div></div><span class="pill red">'+hosts.length+'</span></div><div class="card-body live-list">'+hosts.map(h=>napRow2(h.player_name,h.current_alliance+' · '+hw.eyebrow,'<span class="pill red">Stufe 4</span>')).join('')+'</div></section>':'')+
    '<section class="card"><div class="card-head"><div><div class="card-title">Überfällige Maßnahmen</div><div class="card-sub">Nur notwendige NAP-Informationen, keine privaten Verstoßdetails.</div></div><span class="pill red">'+S.o.length+'</span></div><div class="card-body live-list">'+
    (S.o.length?S.o.map(x=>napRow2((x.alliance_code||'')+' · '+(x.player_name||'–'),'Stufe '+x.level+' · erstellt '+D(x.action_created_at),'<span class="pill red">'+E(durLong2(Number(x.overdue_seconds||0)*1000))+'</span>')).join(''):'<div class="live-empty-state">Keine überfälligen Maßnahmen.</div>')+'</div></section>';return;
@@ -663,7 +662,7 @@ async function renderSettingsLive(){
  const s=S.settings||{},over=s.manual_event_entry_overrides||{},events=['Strongest Governor','Alliance Brawl','Officer Project','Armament Competition','Swordland Showdown','Tri-Alliance Clash'];
  v.innerHTML='<div class="hero"><div><div class="kicker">EINSTELLUNGEN · LIVE</div><h1>Konfiguration getrennt von den Laws.</h1><p>Zielwerte, Gültigkeit, Event-Verfügbarkeit und Performance.</p></div></div>'+
  '<div class="live-tabs"><button class="live-tab active" data-settab="general">Allgemein</button><button class="live-tab" data-settab="events">Event-Verfügbarkeit</button><button class="live-tab" data-settab="targets">Zielwerte</button><button class="live-tab" data-settab="performance">Performance</button></div>'+
- '<div id="liveSettingsGeneral"><div class="live-panel-grid"><section class="card"><div class="card-head"><div><div class="card-title">Verstoß-Fenster</div></div></div><div class="card-body"><form id="liveSettingsForm" class="live-form"><div class="live-form-row"><label>Warnfenster · Tage<input id="liveWarnDays" type="number" min="1" value="'+E(s.warning_window_days||7)+'"></label><label>Verfehlung gültig · Tage<input id="liveExpiryDays" type="number" min="1" value="'+E(s.violation_expiry_days||30)+'"></label></div><div class="live-note">Eine reine Änderung dieser Dauer wird ohne zusätzlichen Activity-Log-Eintrag gespeichert.</div><button class="btn primary">Speichern</button><div id="liveSettingsStatus" class="live-status"></div></form></div></section><section class="card"><div class="card-head"><div><div class="card-title">Allianz</div></div></div><div class="card-body"><div class="live-stat"><b>'+E(S.a)+'</b><small>eingeloggte Allianz</small></div></div></section></div></div>'+
+ '<div id="liveSettingsGeneral"><div class="live-panel-grid"><section class="card"><div class="card-head"><div><div class="card-title">Verstoß-Fenster</div></div></div><div class="card-body"><form id="liveSettingsForm" class="live-form"><div class="live-form-row"><label>Warnfenster · Tage<input id="liveWarnDays" type="number" min="1" value="'+E(s.warning_window_days||7)+'"></label><label>Verfehlung gültig · Tage<input id="liveExpiryDays" type="number" min="1" value="'+E(s.violation_expiry_days||30)+'"></label></div><div class="live-note">Die Gültigkeitsdauer bestimmt, wie lange Law-14-Fälle zur aktuellen Stufe zählen. Nach Ablauf wird die Stufe automatisch neu berechnet. Eine reine Änderung dieser Dauer erzeugt keinen zusätzlichen Activity-Log-Eintrag.</div><button class="btn primary">Speichern</button><div id="liveSettingsStatus" class="live-status"></div></form></div></section><section class="card"><div class="card-head"><div><div class="card-title">Allianz</div></div></div><div class="card-body"><div class="live-stat"><b>'+E(S.a)+'</b><small>eingeloggte Allianz</small></div></div></section></div></div>'+
  '<div id="liveSettingsEvents" hidden><section class="card"><div class="card-head"><div><div class="card-title">Event-Verfügbarkeit</div><div class="card-sub">Automatische Fenster plus manuelle Freigabe.</div></div></div><div class="card-body live-list">'+events.map(ev=>{const auto=opts.some(x=>x.event_name===ev),always=ev==='Swordland Showdown'||ev==='Tri-Alliance Clash',manual=over[ev]===true;return '<div class="live-row"><div><b>'+E(ev)+'</b><small>'+(always?'immer offen':auto?'automatisch offen':manual?'manuell offen':'geschlossen')+'</small></div>'+(always?'<span class="pill blue">immer</span>':'<button class="btn small secondary live-event-override" data-event="'+E(ev)+'" data-enabled="'+(manual?'1':'0')+'">'+(manual?'Freigabe entfernen':'manuell aktivieren')+'</button>')+'</div>'}).join('')+'</div></section></div>'+
  '<div id="liveSettingsTargets" hidden><section class="card"><div class="card-head"><div><div class="card-title">Law-14 Zielwerte</div><div class="card-sub">Aktuelle persönliche Zielwerte je Event/Phase.</div></div></div><div class="card-body"><form id="liveTargetsForm" class="live-form"><div class="live-list">'+settingTargetRows2()+'</div><button class="btn primary">Zielwerte speichern</button><div id="liveTargetsStatus" class="live-status"></div></form></div></section></div>'+
  '<div id="liveSettingsPerformance" hidden><div class="live-panel-grid"><section class="card"><div class="card-head"><div><div class="card-title">KvK Top 200</div></div></div><div class="card-body"><button id="liveFeatKvk" class="btn secondary">'+(features?.kvk_top200_enabled!==false?'✓ sichtbar':'ausgeblendet')+'</button></div></section><section class="card"><div class="card-head"><div><div class="card-title">Alliance Mobilization</div></div></div><div class="card-body"><button id="liveFeatMob" class="btn secondary">'+(features?.mobilization_enabled!==false?'✓ sichtbar':'ausgeblendet')+'</button></div></section></div></div>';
@@ -993,7 +992,7 @@ function transferRow2(x){
  const ownSource=x.from_alliance===S.a,ownTarget=x.to_alliance===S.a,watching=x.status==='watching',ready=x.status==='ready';
  let buttons='';
  if(ownSource){
-   if(watching||ready)buttons+='<button class="btn small secondary live-transfer-temp" data-id="'+E(x.candidate_id)+'">↩ Nicht bestätigen</button>';
+   if(watching||ready)buttons+='<button class="btn small secondary live-transfer-temp" data-id="'+E(x.candidate_id)+'">↩ Als temporär markieren</button>';
    if(watching)buttons+='<button class="btn small primary live-transfer-confirm" data-id="'+E(x.candidate_id)+'">✓ Jetzt bestätigen</button>';
    else if(ready)buttons+='<button class="btn small primary live-transfer-confirm" data-id="'+E(x.candidate_id)+'">✓ Wechsel bestätigen</button>';
  }
@@ -1004,7 +1003,7 @@ async function confirmTransfer2(id){
  try{await rpc('confirm_roster_transfer_candidate',{p_candidate_id:id});await load();renderHomeFull2();renderNotifications2()}catch(err){alert(err.message||String(err))}
 }
 async function markTransferTemporary2(id){
- if(!confirm('Temporären Wechsel wirklich nicht bestätigen? Die Spielerakte bleibt in der Heimatallianz; der Hinweis wird 7 Tage ausgeblendet.'))return;
+ if(!confirm('Diesen Wechsel als temporär markieren? Die Spielerakte bleibt in der Heimatallianz; der Hinweis wird 7 Tage ausgeblendet.'))return;
  try{await rpc('mark_roster_transfer_temporary',{p_candidate_id:id});await load();renderHomeFull2();renderNotifications2()}catch(err){alert(err.message||String(err))}
 }
 function postContactReviewCard2(r){
@@ -1172,7 +1171,7 @@ const LIVE_TRANSLATE={
   'Verstoß erfassen':'Record violation','ScreenRecording und manuelle Eingabe sind getrennt, nutzen aber dieselben aktuellen Eventfreigaben und Regeln.':'ScreenRecording and manual entry are separated but use the same current event availability and rules.',
   'Manuell':'Manual','Manuell eintragen':'Manual entry','Spieler':'Player','Punkte':'Points','Zeitpunkt':'Time','Notiz':'Note','Verstoß speichern':'Save violation',
   'Regelprüfung':'Rule check','Grenze aus den Allianz-Einstellungen.':'Limit from alliance settings.','Importer laden':'Load importer','Importer wird geladen …':'Loading importer …','Importer bereit':'Importer ready',
-  'NAP-weite Transparenz, private Details getrennt.':'NAP-wide transparency with private details kept separate.','Übersicht':'Overview','24h Meldungen':'24h notices','Maßnahmen anderer NAP-Allianzen, die nach 24h nicht umgesetzt wurden.':'Actions from other NAP alliances not implemented after 24h.',
+  'NAP-weite Transparenz, private Details getrennt.':'NAP-wide transparency with private details kept separate.','Hinweise':'Notices','NAP-Hinweise':'NAP notices','Als temporär markieren':'Mark as temporary','Übersicht':'Overview','24h Meldungen':'24h notices','Maßnahmen anderer NAP-Allianzen, die nach 24h nicht umgesetzt wurden.':'Actions from other NAP alliances not implemented after 24h.',
   'Aktive Exclusions':'Active exclusions','Manuelle Exclusion':'Manual exclusion','Exclusion speichern':'Save exclusion','NAP Bans':'NAP bans','Ban hinzufügen':'Add ban','Grund':'Reason','NAP Ban speichern':'Save NAP ban',
   'NAP Spending Exclusions':'NAP Spending Exclusions','Spending Exclusion hinzufügen':'Add Spending Exclusion','Nur Spieler deiner Allianz.':'Only players from your alliance.','Start':'Start','Ende':'End','Spending Exclusion speichern':'Save Spending Exclusion','beenden':'End',
   'Performance ohne Dashboard-Überladung.':'Performance without dashboard clutter.','Manuell ergänzen / korrigieren':'Add / correct manually','erfasste Spieler':'recorded players','Gesamtscore':'total score','Vollständiges Ranking':'Full ranking','Durchlauf':'Occurrence','Serverrang 1–200':'Server rank 1–200',
