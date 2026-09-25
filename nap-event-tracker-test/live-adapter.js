@@ -373,18 +373,32 @@ let liveNapTab='overview';
 function napRow2(title,sub,right,cls){
  return '<div class="live-row"><div><b>'+E(title)+'</b><small>'+E(sub||'')+'</small></div><div>'+ (right||'') +'</div></div>';
 }
+const NAP_STATS_WORDS2={
+ de:{title:'Gültige Law-14-Verstöße',sub:'NAP-weit aggregiert · keine fremden Spieler- oder Falldetails',players:'Spieler'},
+ en:{title:'Valid Law 14 violations',sub:'NAP-wide aggregate · no foreign player or case details',players:'players'},
+ fr:{title:'Infractions Law 14 valides',sub:'Agrégé pour le NAP · aucun détail de dossier ou joueur étranger',players:'joueurs'},
+ es:{title:'Infracciones Law 14 válidas',sub:'Agregado NAP · sin detalles de jugadores o casos ajenos',players:'jugadores'}
+};
+const SPEND_WORDS2={
+ de:{ended:'beendet',planned:'geplant',expired:'abgelaufen',active:'aktiv',title:'SG Spending Exclusions',sub:'Gelten ausschließlich für Strongest Governor im aktuellen SG-Durchlauf.',add:'SG Spending Exclusion hinzufügen',addSub:'Nur Spieler deiner Allianz · Ende automatisch mit dem laufenden SG.',run:'Aktueller SG-Durchlauf',rule:''+E(sw.rule)+'',none:''+E(sw.none)+'',player:'Spieler',reason:'Grund',placeholder:'Optional · z. B. SG nomination',save:'Für aktuellen SG freistellen',end:'vorzeitig beenden'},
+ en:{ended:'ended',planned:'planned',expired:'expired',active:'active',title:'SG Spending Exclusions',sub:'Apply only to Strongest Governor in the current SG occurrence.',add:'Add SG Spending Exclusion',addSub:'Own-alliance players only · ends automatically with the current SG.',run:'Current SG occurrence',rule:'The exemption applies only to Strongest Governor; other Law 14 events remain active.',none:'No Strongest Governor is currently running. No SG Spending Exclusion can be created.',player:'Player',reason:'Reason',placeholder:'Optional · e.g. SG nomination',save:'Exempt for current SG',end:'end early'},
+ fr:{ended:'terminé',planned:'prévu',expired:'expiré',active:'actif',title:'Exclusions de dépenses SG',sub:'Valables uniquement pour Strongest Governor pendant le SG actuel.',add:'Ajouter une exclusion SG',addSub:'Uniquement vos joueurs · fin automatique avec le SG actuel.',run:'SG actuel',rule:'L’exemption ne vaut que pour Strongest Governor ; les autres événements Law 14 restent actifs.',none:'Aucun Strongest Governor en cours. Impossible de créer une exclusion SG.',player:'Joueur',reason:'Motif',placeholder:'Facultatif · ex. SG nomination',save:'Exempter pour le SG actuel',end:'terminer plus tôt'},
+ es:{ended:'finalizada',planned:'programada',expired:'caducada',active:'activa',title:'Exclusiones de gasto SG',sub:'Solo se aplican a Strongest Governor en el SG actual.',add:'Añadir exclusión SG',addSub:'Solo jugadores propios · termina automáticamente con el SG actual.',run:'SG actual',rule:'La exención solo se aplica a Strongest Governor; los demás eventos Law 14 siguen activos.',none:'No hay Strongest Governor activo. No se puede crear una exclusión SG.',player:'Jugador',reason:'Motivo',placeholder:'Opcional · p. ej. SG nomination',save:'Eximir para el SG actual',end:'terminar antes'}
+};
+function napStatsWords2(){return NAP_STATS_WORDS2[L()]||NAP_STATS_WORDS2.de}
+function spendWords2(){return SPEND_WORDS2[L()]||SPEND_WORDS2.de}
 function spendingStatus2(x){
- const now=Date.now(),start=x?.starts_at?new Date(x.starts_at).getTime():null,end=x?.ends_at?new Date(x.ends_at).getTime():null;
- if(x?.ended_at)return {label:'beendet',cls:''};
- if(start&&now<start)return {label:'geplant',cls:'gold'};
- if(end&&now>=end)return {label:'abgelaufen',cls:''};
- return {label:'aktiv',cls:'green'};
+ const w=spendWords2(),now=Date.now(),start=x?.starts_at?new Date(x.starts_at).getTime():null,end=x?.ends_at?new Date(x.ends_at).getTime():null;
+ if(x?.ended_at)return {label:w.ended,cls:''};
+ if(start&&now<start)return {label:w.planned,cls:'gold'};
+ if(end&&now>=end)return {label:w.expired,cls:''};
+ return {label:w.active,cls:'green'};
 }
 function napViolationStats2(){
- const rows=Array.isArray(S.napStats)?S.napStats:[];
+ const rows=Array.isArray(S.napStats)?S.napStats:[],w=napStatsWords2();
  if(!rows.length)return '';
- return '<section class="card" style="margin-bottom:14px"><div class="card-head"><div><div class="card-title">Gültige Law-14-Verstöße</div><div class="card-sub">NAP-weit aggregiert · keine fremden Spieler- oder Falldetails</div></div><span class="pill">'+rows.reduce((n,x)=>n+Number(x.valid_violations||0),0)+'</span></div><div class="card-body"><div class="live-stat-grid">'+
- rows.map(x=>'<div class="live-stat"><b>'+N(x.valid_violations||0)+'</b><small>'+E(x.alliance_code)+' · '+N(x.affected_players||0)+' Spieler</small></div>').join('')+
+ return '<section class="card" style="margin-bottom:14px"><div class="card-head"><div><div class="card-title">'+E(w.title)+'</div><div class="card-sub">'+E(w.sub)+'</div></div><span class="pill">'+rows.reduce((n,x)=>n+Number(x.valid_violations||0),0)+'</span></div><div class="card-body"><div class="live-stat-grid">'+
+ rows.map(x=>'<div class="live-stat"><b>'+N(x.valid_violations||0)+'</b><small>'+E(x.alliance_code)+' · '+N(x.affected_players||0)+' '+E(w.players)+'</small></div>').join('')+
  '</div></div></section>';
 }
 function renderNapLive(){
@@ -429,12 +443,12 @@ function renderNapLive(){
    '</div></section>'+(can?'<section class="card"><div class="card-head"><div><div class="card-title">Ban hinzufügen</div></div></div><div class="card-body"><form id="liveBanForm" class="live-form"><label>Spieler<input id="liveBanPlayer" required></label><label>Player ID<input id="liveBanId"></label><label>Frühere Allianz<input id="liveBanAlliance"></label><label>Grund<textarea id="liveBanReason" required></textarea></label><button class="btn primary" type="submit">NAP Ban speichern</button><div id="liveBanStatus" class="live-status"></div></form></div></section>':'')+'</div>';
    document.querySelectorAll('.live-end-ban').forEach(b=>b.onclick=()=>endBan2(b.dataset.id));document.getElementById('liveBanForm')?.addEventListener('submit',saveBan2);return;
  }
- const sg=S.sgWindow||null;
- body.innerHTML='<div class="live-panel-grid"><section class="card"><div class="card-head"><div><div class="card-title">SG Spending Exclusions</div><div class="card-sub">Gelten ausschließlich für Strongest Governor im aktuellen SG-Durchlauf.</div></div><span class="pill gold">'+activeSpend.length+'</span></div><div class="card-body live-list">'+
+ const sg=S.sgWindow||null,sw=spendWords2();
+ body.innerHTML='<div class="live-panel-grid"><section class="card"><div class="card-head"><div><div class="card-title">'+E(sw.title)+'</div><div class="card-sub">'+E(sw.sub)+'</div></div><span class="pill gold">'+activeSpend.length+'</span></div><div class="card-body live-list">'+
  (S.spend.length?S.spend.map(x=>{const st=spendingStatus2(x);return napRow2(x.player_name,(x.owner_alliance||'')+(x.player_game_id?' · ID '+x.player_game_id:'')+(x.reason?' · '+x.reason:'')+(x.ends_at?' · bis '+D(x.ends_at):''),(!x.ended_at&&x.owner_alliance===S.a&&st.label==='aktiv'?'<div class="hero-actions"><span class="pill '+st.cls+'">'+E(st.label)+'</span><button class="btn small secondary live-end-spend" data-id="'+E(x.id)+'">vorzeitig beenden</button></div>':'<span class="pill '+st.cls+'">'+E(st.label)+'</span>') )}).join(''):'<div class="live-empty-state">Keine Spending Exclusions vorhanden.</div>')+
- '</div></section><section class="card"><div class="card-head"><div><div class="card-title">SG Spending Exclusion hinzufügen</div><div class="card-sub">Nur Spieler deiner Allianz · Ende automatisch mit dem laufenden SG.</div></div></div><div class="card-body">'+
- (sg?'<div class="live-note" style="margin-bottom:12px"><b>Aktueller SG-Durchlauf</b><br>'+E(D(sg.begin_at))+' → '+E(D(sg.end_at))+'<br>Die Ausnahme gilt nur für Strongest Governor; andere Law-14-Events bleiben normal aktiv.</div>':'<div class="live-empty-state">Aktuell läuft kein Strongest Governor. Es kann keine SG Spending Exclusion angelegt werden.</div>')+
- (sg?'<form id="liveSpendForm" class="live-form"><label>Spieler<select id="liveSpendPlayer">'+S.p.map(p=>'<option value="'+E(p.id)+'">'+E(p.name||p.player_name)+' · '+E(p.game_id||'–')+'</option>').join('')+'</select></label><label>Grund<textarea id="liveSpendReason" placeholder="Optional · z. B. SG nomination"></textarea></label><button class="btn primary" type="submit">Für aktuellen SG freistellen</button><div id="liveSpendStatus" class="live-status"></div></form>':'')+
+ '</div></section><section class="card"><div class="card-head"><div><div class="card-title">'+E(sw.add)+'</div><div class="card-sub">'+E(sw.addSub)+'</div></div></div><div class="card-body">'+
+ (sg?'<div class="live-note" style="margin-bottom:12px"><b>'+E(sw.run)+'</b><br>'+E(D(sg.begin_at))+' → '+E(D(sg.end_at))+'<br>Die Ausnahme gilt nur für Strongest Governor; andere Law-14-Events bleiben normal aktiv.</div>':'<div class="live-empty-state">Aktuell läuft kein Strongest Governor. Es kann keine SG Spending Exclusion angelegt werden.</div>')+
+ (sg?'<form id="liveSpendForm" class="live-form"><label>'+E(sw.player)+'<select id="liveSpendPlayer">'+S.p.map(p=>'<option value="'+E(p.id)+'">'+E(p.name||p.player_name)+' · '+E(p.game_id||'–')+'</option>').join('')+'</select></label><label>'+E(sw.reason)+'<textarea id="liveSpendReason" placeholder="'+E(sw.placeholder)+'"></textarea></label><button class="btn primary" type="submit">'+E(sw.save)+'</button><div id="liveSpendStatus" class="live-status"></div></form>':'')+
  '</div></section></div>';document.querySelectorAll('.live-end-spend').forEach(b=>b.onclick=()=>endSpending2(b.dataset.id));document.getElementById('liveSpendForm')?.addEventListener('submit',saveSpending2);
 }
 async function saveSpending2(e){e.preventDefault();const out=document.getElementById('liveSpendStatus');out.textContent='Speichere …';try{if(!S.sgWindow?.end_at)throw Error('Aktuell läuft kein Strongest Governor.');await rpc('create_nap_spending_exclusion',{p_player_id:document.getElementById('liveSpendPlayer').value,p_starts_at:new Date().toISOString(),p_ends_at:S.sgWindow.end_at,p_reason:document.getElementById('liveSpendReason').value.trim()||'Strongest Governor'});await load();renderNapLive()}catch(err){out.textContent=err.message||String(err)}}
