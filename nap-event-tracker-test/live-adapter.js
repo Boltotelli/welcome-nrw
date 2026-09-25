@@ -2,7 +2,7 @@
 if(window.NAP2_LIVE_ADAPTER)return;window.NAP2_LIVE_ADAPTER=true;
 const C={u:'https://bdzlgirowutasrsycjfj.supabase.co',k:'sb_publishable_8i1ismeQtj9WM-xVN_Vm0w_Tj7AvVtL',s:'nap_v4_supabase_session'};
 let crownAllowed2=false;
-const S={a:null,profile:null,p:[],v:[],x:[],e:[],o:[],t:[],bans:[],spend:[],reviews:[],shared:[],settings:null,avatars:{},laws:[],lawCases:[],lawEvidence:[],performance:null,crown:null,activity:[],eventOptions:[],features:null,law9:null};
+const S={a:null,profile:null,p:[],v:[],x:[],e:[],o:[],t:[],bans:[],spend:[],reviews:[],shared:[],settings:null,avatars:{},laws:[],lawCases:[],lawEvidence:[],performance:null,crown:null,activity:[],eventOptions:[],features:null,law9:null,notificationReads:new Set()};
 let ses=null;try{ses=JSON.parse(localStorage.getItem(C.s)||'null')}catch{}
 const L=()=>window.currentLang||document.querySelector('#languagePicker')?.value||'de';
 const T={de:{login:'Anmelden',alliance:'Allianz',password:'Passwort',hint:'Ein zentraler Login pro Allianz. Private Daten bleiben innerhalb der eigenen Allianz.',fail:'Login fehlgeschlagen.',logout:'Abmelden',live:'LIVE DATEN',open:'Öffnen',contact:'Kontaktiert',r1:'R1 umgesetzt',nap:'24h NAP OUT aktivieren',none:'Keine Einträge.',actions:'offen',over:'überfällig',left:'verbleibend'},en:{login:'Sign in',alliance:'Alliance',password:'Password',hint:'One central login per alliance. Private data stays within your alliance.',fail:'Login failed.',logout:'Sign out',live:'LIVE DATA',open:'Open',contact:'Contacted',r1:'R1 implemented',nap:'Activate 24h NAP OUT',none:'No entries.',actions:'open',over:'overdue',left:'remaining'},fr:{login:'Connexion',alliance:'Alliance',password:'Mot de passe',hint:'Un login central par alliance. Les données privées restent dans votre alliance.',fail:'Échec de connexion.',logout:'Déconnexion',live:'DONNÉES LIVE',open:'Ouvrir',contact:'Contacté',r1:'R1 appliqué',nap:'Activer NAP OUT 24 h',none:'Aucune entrée.',actions:'ouvert',over:'en retard',left:'restant'},es:{login:'Iniciar sesión',alliance:'Alianza',password:'Contraseña',hint:'Un login central por alianza. Los datos privados permanecen en tu alianza.',fail:'Error de inicio de sesión.',logout:'Cerrar sesión',live:'DATOS LIVE',open:'Abrir',contact:'Contactado',r1:'R1 aplicado',nap:'Activar NAP OUT 24 h',none:'No hay entradas.',actions:'abiertas',over:'vencido',left:'restante'}};
@@ -134,8 +134,8 @@ async function syncCrownVisibility2(){
  if(!permitted&&document.getElementById('view-crown')?.classList.contains('active'))setView('home');
 }
 function decorate(){const ab=document.querySelector('.alliance-badge');if(ab)ab.innerHTML=allianceLogo2(S.a,'alliance-top-logo')+'<span>'+E(S.a)+'</span>';document.querySelectorAll('[data-current-alliance]').forEach(x=>x.textContent=S.a);const u=document.querySelector('.user-pill');if(u){u.innerHTML=allianceLogo2(S.a,'alliance-user-logo')+'<span>'+E(S.a)+'</span> <span class="n2live">'+E(t('live'))+'</span>';u.title=t('logout');u.onclick=()=>{if(confirm(t('logout')+'?')){save(null);location.reload()}}}}
-async function load(){const a=encodeURIComponent(S.a);const [p1,v,x,e,o,tr,bans,spend,settings,reviews,shared]=await Promise.all([tab('players','select=*&alliance_code=eq.'+a+'&order=name.asc'),tab('violations','select=*&alliance_code=eq.'+a+'&order=occurred_at.desc'),tab('sanctions','select=*&alliance_code=eq.'+a+'&order=created_at.desc'),rpc('get_public_nap_exclusions',{}),rpc('get_nap_overdue_action_notifications_v2',{}),rpc('get_my_roster_transfer_candidates',{}),tab('nap_bans','select=*&active=eq.true&order=created_at.desc').catch(()=>[]),rpc('get_public_nap_spending_exclusions',{}).catch(()=>[]),tab('alliance_settings','select=*&alliance_code=eq.'+a+'&limit=1').catch(()=>[]),rpc('get_pending_post_contact_spending_reviews',{}).catch(()=>[]),rpc('get_my_shared_spending_cases',{}).catch(()=>[])]);S.p=(p1||[]).filter(r=>r.alliance_code===S.a);S.v=(v||[]).filter(r=>r.alliance_code===S.a);S.x=(x||[]).filter(r=>r.alliance_code===S.a);S.e=e||[];S.o=o||[];S.t=(tr||[]).filter(r=>r.from_alliance===S.a||r.to_alliance===S.a);S.bans=bans||[];S.spend=spend||[];S.reviews=reviews||[];S.shared=shared||[];S.settings=settings?.[0]||null;window.NAP2_PLAYER_AVATARS=S.avatars;loadAvatars().catch(e=>console.warn('avatar load',e))}
-async function enter(expected){const P=await tab('profiles','select=alliance_code,can_manage_bans,is_admin&limit=1'),prof=P?.[0]||null,a=prof?.alliance_code;if(!a)throw Error('Account incomplete');if(expected&&expected!==a)throw Error('Wrong alliance');S.a=a;S.profile=prof;await load();await syncCrownVisibility2();n2login.hidden=true;document.body.classList.remove('n2lock');decorate();renderHome();renderPlayers();if(typeof applyTranslations==='function')applyTranslations();}
+async function load(){const a=encodeURIComponent(S.a);const [p1,v,x,e,o,tr,bans,spend,settings,reviews,shared,notificationReads]=await Promise.all([tab('players','select=*&alliance_code=eq.'+a+'&order=name.asc'),tab('violations','select=*&alliance_code=eq.'+a+'&order=occurred_at.desc'),tab('sanctions','select=*&alliance_code=eq.'+a+'&order=created_at.desc'),rpc('get_public_nap_exclusions',{}),rpc('get_nap_overdue_action_notifications_v2',{}),rpc('get_my_roster_transfer_candidates',{}),tab('nap_bans','select=*&active=eq.true&order=created_at.desc').catch(()=>[]),rpc('get_public_nap_spending_exclusions',{}).catch(()=>[]),tab('alliance_settings','select=*&alliance_code=eq.'+a+'&limit=1').catch(()=>[]),rpc('get_pending_post_contact_spending_reviews',{}).catch(()=>[]),rpc('get_my_shared_spending_cases',{}).catch(()=>[]),tab('notification_read_state','select=notification_id&alliance_code=eq.'+a+'&order=read_at.desc').catch(()=>[])]);S.p=(p1||[]).filter(r=>r.alliance_code===S.a);S.v=(v||[]).filter(r=>r.alliance_code===S.a);S.x=(x||[]).filter(r=>r.alliance_code===S.a);S.e=e||[];S.o=o||[];S.t=(tr||[]).filter(r=>r.from_alliance===S.a||r.to_alliance===S.a);S.bans=bans||[];S.spend=spend||[];S.reviews=reviews||[];S.shared=shared||[];S.notificationReads=new Set((notificationReads||[]).map(r=>String(r.notification_id)));S.settings=settings?.[0]||null;window.NAP2_PLAYER_AVATARS=S.avatars;loadAvatars().catch(e=>console.warn('avatar load',e))}
+async function enter(expected){const P=await tab('profiles','select=alliance_code,can_manage_bans,is_admin&limit=1'),prof=P?.[0]||null,a=prof?.alliance_code;if(!a)throw Error('Account incomplete');if(expected&&expected!==a)throw Error('Wrong alliance');S.a=a;S.profile=prof;await load();await migrateLocalNotificationReads2();await syncCrownVisibility2();n2login.hidden=true;document.body.classList.remove('n2lock');decorate();renderHome();renderPlayers();if(typeof applyTranslations==='function')applyTranslations();}
 async function boot(){css();login();document.body.classList.add('n2lock');if(!await token())return;try{await enter()}catch{save(null)}}
 setTimeout(boot,0);document.querySelector('#languagePicker')?.addEventListener('change',()=>setTimeout(()=>{if(S.a){decorate();renderHome();renderPlayers()}},0));
 
@@ -1019,8 +1019,23 @@ renderHome=renderHomeFull2;renderPlayers=renderPlayers2;openProfile=openProfile2
 
 /* === FINAL BOOT + LIVE NOTIFICATION STATE V2 === */
 let liveNotificationFilter='all';
-function notificationReadSet2(){try{return new Set(JSON.parse(localStorage.getItem('nap2_read_'+S.a)||'[]'))}catch{return new Set()}}
+function notificationReadSet2(){return new Set(S.notificationReads||[])}
 function notificationId2(x){return x.key||[x.cat,x.title,x.go].join('|')}
+async function markNotificationReads2(ids){
+ const clean=[...new Set((ids||[]).map(String).filter(id=>id&&id.length<=300))];
+ if(!S.a||!clean.length)return;
+ const url=C.u+'/rest/v1/notification_read_state?on_conflict=alliance_code,notification_id';
+ await q(url,{method:'POST',headers:{...(await h(true)),Prefer:'resolution=merge-duplicates,return=minimal'},
+  body:JSON.stringify(clean.map(notification_id=>({alliance_code:S.a,notification_id,read_at:new Date().toISOString()})))});
+ for(const id of clean)S.notificationReads.add(id);
+}
+async function migrateLocalNotificationReads2(){
+ const key='nap2_read_'+S.a;let old=[];
+ try{old=JSON.parse(localStorage.getItem(key)||'[]')}catch{}
+ if(!Array.isArray(old)||!old.length)return;
+ try{await markNotificationReads2(old);localStorage.removeItem(key)}
+ catch(err){console.warn('notification read-state migration',err)}
+}
 const baseRenderNotifications2=renderNotifications2;
 renderNotifications2=function(){
  const list=document.getElementById('notificationList'),badge=document.querySelector('#bellBtn .badge-count'),filters=document.getElementById('notificationFilters'),mark=document.getElementById('markAllRead');if(!list)return;
@@ -1028,8 +1043,8 @@ renderNotifications2=function(){
  if(badge){badge.textContent=unread;badge.style.display=unread?'grid':'none'}
  if(filters){filters.innerHTML='<button class="notification-filter '+(liveNotificationFilter==='all'?'active':'')+'" data-live-nf="all">Alle</button><button class="notification-filter '+(liveNotificationFilter==='nap'?'active':'')+'" data-live-nf="nap">NAP</button><button class="notification-filter '+(liveNotificationFilter==='alliance'?'active':'')+'" data-live-nf="alliance">Meine Allianz</button>';filters.querySelectorAll('[data-live-nf]').forEach(b=>b.onclick=()=>{liveNotificationFilter=b.dataset.liveNf;renderNotifications2()})}
  list.innerHTML=rows.length?rows.map(x=>{const id=notificationId2(x),isRead=read.has(id);return '<button class="notification-item '+(isRead?'':'unread')+'" data-live-notify="'+E(x.go)+'" data-live-nid="'+E(id)+'"><span class="notification-dot"></span><span><b>'+E(x.title)+'</b><small>'+E(x.copy)+'</small></span></button>'}).join(''):'<div class="live-empty-state">Keine Meldungen.</div>';
- list.querySelectorAll('[data-live-notify]').forEach(b=>b.onclick=()=>{const r=notificationReadSet2();r.add(b.dataset.liveNid);localStorage.setItem('nap2_read_'+S.a,JSON.stringify([...r]));setView(b.dataset.liveNotify);document.getElementById('notificationPanel')?.classList.remove('show');document.getElementById('overlay')?.classList.remove('show');renderNotifications2()});
- if(mark){const clone=mark.cloneNode(true);mark.replaceWith(clone);clone.onclick=()=>{const r=notificationReadSet2();for(const x of all)r.add(notificationId2(x));localStorage.setItem('nap2_read_'+S.a,JSON.stringify([...r]));renderNotifications2()}}
+ list.querySelectorAll('[data-live-notify]').forEach(b=>b.onclick=async()=>{try{await markNotificationReads2([b.dataset.liveNid])}catch(err){console.warn('notification read state',err)}setView(b.dataset.liveNotify);document.getElementById('notificationPanel')?.classList.remove('show');document.getElementById('overlay')?.classList.remove('show');renderNotifications2()});
+ if(mark){const clone=mark.cloneNode(true);mark.replaceWith(clone);clone.onclick=async()=>{try{await markNotificationReads2(all.map(notificationId2))}catch(err){console.warn('notification mark all',err)}renderNotifications2()}}
 };
 renderNotifications=()=>renderNotifications2();
 updateBellCount=()=>renderNotifications2();
