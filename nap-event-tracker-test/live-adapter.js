@@ -197,7 +197,7 @@ async function syncCrownVisibility2(){
 function decorate(){const ab=document.querySelector('.alliance-badge');if(ab)ab.innerHTML=allianceLogo2(S.a,'alliance-top-logo')+'<span>'+E(S.a)+'</span>';document.querySelectorAll('[data-current-alliance]').forEach(x=>x.textContent=S.a);const u=document.querySelector('.user-pill');if(u){u.innerHTML=allianceLogo2(S.a,'alliance-user-logo')+'<span>'+E(S.a)+'</span> <span class="n2live">'+E(t('live'))+'</span>';u.title=t('logout');u.onclick=()=>{if(confirm(t('logout')+'?')){save(null);location.reload()}}}}
 async function load(){
  const a=encodeURIComponent(S.a);
- const [p1,v,x,e,o,tr,bans,spend,settings,reviews,shared,notificationReads,syncStatus,level4Hosting,napStats,sgWindow,performance]=await Promise.all([
+ const [p1,v,x,e,o,tr,bans,spend,settings,reviews,shared,notificationReads,syncStatus,level4Hosting,napStats,sgWindow,performance,supportUnread]=await Promise.all([
   tab('players','select=*&alliance_code=eq.'+a+'&order=name.asc'),
   tab('violations','select=*&alliance_code=eq.'+a+'&order=occurred_at.desc'),
   tab('sanctions','select=*&alliance_code=eq.'+a+'&order=created_at.desc'),
@@ -214,12 +214,13 @@ async function load(){
   rpc('get_level4_hosting_alerts_v2',{}).catch(()=>[]),
   rpc('get_nap_violation_stats_v2',{}).catch(()=>[]),
   rpc('get_current_sg_window_v2',{}).catch(()=>null),
-  rpc('get_performance_dashboard',{}).catch(()=>null)
+  rpc('get_performance_dashboard',{}).catch(()=>null),
+  rpc('get_support_unread_count',{}).catch(()=>0)
  ]);
  S.p=(p1||[]).filter(r=>r.alliance_code===S.a);S.v=(v||[]).filter(r=>r.alliance_code===S.a);S.x=(x||[]).filter(r=>r.alliance_code===S.a);
  S.e=e||[];S.o=o||[];S.t=(tr||[]).filter(r=>r.from_alliance===S.a||r.to_alliance===S.a);S.bans=bans||[];S.spend=spend||[];
  S.reviews=reviews||[];S.shared=shared||[];S.notificationReads=new Set((notificationReads||[]).map(r=>String(r.notification_id)));
- S.syncStatus=syncStatus||null;S.settings=settings?.[0]||null;S.level4Hosting=level4Hosting||[];S.napStats=napStats||[];S.sgWindow=sgWindow||null;S.performance=performance||null;
+ S.syncStatus=syncStatus||null;S.settings=settings?.[0]||null;S.level4Hosting=level4Hosting||[];S.napStats=napStats||[];S.sgWindow=sgWindow||null;S.performance=performance||null;S.supportUnread=Math.max(0,Number(supportUnread||0));
  window.NAP2_PLAYER_AVATARS=S.avatars;loadAvatars().catch(e=>console.warn('avatar load',e));
 }
 async function enter(expected){
@@ -227,7 +228,7 @@ async function enter(expected){
  if(!a){const err=Error(actionWord2('accountIncomplete'));err.code='ACCOUNT_INCOMPLETE';throw err}
  if(expected&&expected!==a){const err=Error(actionWord2('wrongAlliance'));err.code='ACCOUNT_MISMATCH';throw err}
  S.a=a;S.profile=prof;await load();await migrateLocalNotificationReads2();await syncCrownVisibility2();
- n2login.hidden=true;document.body.classList.remove('n2lock');decorate();renderHome();renderPlayers();if(typeof applyTranslations==='function')applyTranslations();
+ n2login.hidden=true;document.body.classList.remove('n2lock');decorate();renderSupportUnreadBadge2();startSupportUnreadPolling2();renderHome();renderPlayers();if(typeof applyTranslations==='function')applyTranslations();
 }
 function showLoginRetry2(err){
  const box=document.getElementById('n2e'),button=document.getElementById('n2retry');
@@ -900,6 +901,73 @@ const SUPPORT_WORDS2={
 let supportFlash2=null;
 function supportWords2(){return SUPPORT_WORDS2[L()]||SUPPORT_WORDS2.de}
 function supportFormat2(text,vars={}){let s=String(text||'');for(const [k,v] of Object.entries(vars))s=s.replaceAll('{'+k+'}',String(v));return s}
+let supportUnreadPoll2=null,supportUnreadRefreshing2=null,supportReadObserver2=null,supportReadFlushTimer2=null,supportVisibilityHook2=false;
+let supportReadQueue2=new Map();
+function renderSupportUnreadBadge2(){
+ const n=Math.max(0,Number(S.supportUnread||0));
+ document.querySelectorAll('[data-support-unread-badge]').forEach(b=>{
+  b.textContent=n>99?'99+':String(n);
+  b.hidden=n===0;
+  b.style.display=n?'grid':'none';
+  b.setAttribute('aria-label',n?String(n)+' unread support messages':'');
+ });
+}
+async function refreshSupportUnread2(){
+ if(!S.a)return 0;
+ if(supportUnreadRefreshing2)return supportUnreadRefreshing2;
+ supportUnreadRefreshing2=(async()=>{
+  const n=await rpc('get_support_unread_count',{});
+  S.supportUnread=Math.max(0,Number(n||0));
+  renderSupportUnreadBadge2();
+  return S.supportUnread;
+ })().finally(()=>{supportUnreadRefreshing2=null});
+ return supportUnreadRefreshing2;
+}
+function startSupportUnreadPolling2(){
+ renderSupportUnreadBadge2();
+ if(supportUnreadPoll2)clearInterval(supportUnreadPoll2);
+ supportUnreadPoll2=setInterval(()=>{if(S.a&&!document.hidden)refreshSupportUnread2().catch(e=>console.warn('support unread',e))},15000);
+ if(!supportVisibilityHook2){
+  supportVisibilityHook2=true;
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&S.a)refreshSupportUnread2().catch(e=>console.warn('support unread',e))});
+  window.addEventListener('focus',()=>{if(S.a)refreshSupportUnread2().catch(e=>console.warn('support unread',e))});
+ }
+}
+async function flushSupportReadQueue2(){
+ const queue=supportReadQueue2;supportReadQueue2=new Map();supportReadFlushTimer2=null;
+ if(!queue.size||!S.a)return;
+ try{
+  await Promise.all([...queue.entries()].map(([ticketId,ids])=>
+   rpc('mark_support_messages_read',{p_ticket_id:ticketId,p_message_ids:[...ids]})
+  ));
+  await refreshSupportUnread2();
+ }catch(err){console.warn('support read state',err)}
+}
+function queueSupportMessageRead2(el){
+ const ticketId=el?.dataset?.supportTicketId,messageId=el?.dataset?.supportMessageId;
+ if(!ticketId||!messageId)return;
+ if(!supportReadQueue2.has(ticketId))supportReadQueue2.set(ticketId,new Set());
+ supportReadQueue2.get(ticketId).add(messageId);
+ if(!supportReadFlushTimer2)supportReadFlushTimer2=setTimeout(flushSupportReadQueue2,120);
+}
+function observeVisibleSupportMessages2(root){
+ supportReadObserver2?.disconnect();
+ const nodes=[...root.querySelectorAll('[data-support-message-id][data-support-ticket-id]')];
+ if(!nodes.length)return;
+ if(!('IntersectionObserver' in window)){
+  nodes.forEach(queueSupportMessageRead2);
+  return;
+ }
+ supportReadObserver2=new IntersectionObserver(entries=>{
+  for(const entry of entries){
+   if(entry.isIntersecting&&entry.intersectionRatio>=0.35){
+    supportReadObserver2.unobserve(entry.target);
+    queueSupportMessageRead2(entry.target);
+   }
+  }
+ },{threshold:[0.35]});
+ nodes.forEach(n=>supportReadObserver2.observe(n));
+}
 function supportStatus2(status){const w=supportWords2();return w[status]||status||w.new}
 function supportCategory2(cat){const w=supportWords2();return w[cat]||cat||w.other}
 async function loadSupport2(){
@@ -984,13 +1052,14 @@ async function renderSupportLive(){
  '<div style="margin-top:14px">'+(tickets.length?tickets.map(tk=>{
    const msgs=supportMessagesFor2(tk.id),ev=supportEvidenceFor2(tk.id);
    return '<section class="card support-ticket"><div class="card-head"><div><div class="card-title">'+E(tk.subject)+'</div><div class="card-sub">'+E(supportCategory2(tk.category))+' · '+E(D(tk.created_at))+'</div></div><span class="pill '+(tk.status==='resolved'?'green':tk.status==='awaiting_user'?'gold':'blue')+'">'+E(supportStatus2(tk.status))+'</span></div><div class="card-body">'+
-    '<div class="support-thread">'+msgs.map(m=>'<div class="support-msg '+(m.sender_type==='support'?'support':'alliance')+'"><b>'+E(m.sender_type==='support'?w.support:(S.a||w.alliance))+'</b><div>'+E(m.message).replace(/\n/g,'<br>')+'</div><small>'+E(D(m.created_at))+'</small></div>').join('')+'</div>'+
+    '<div class="support-thread">'+msgs.map(m=>{const readAttrs=m.sender_type==='support'?' data-support-message-id="'+E(m.id)+'" data-support-ticket-id="'+E(tk.id)+'"':'';return '<div class="support-msg '+(m.sender_type==='support'?'support':'alliance')+'"'+readAttrs+'><b>'+E(m.sender_type==='support'?w.support:(S.a||w.alliance))+'</b><div>'+E(m.message).replace(/\n/g,'<br>')+'</div><small>'+E(D(m.created_at))+'</small></div>'}).join('')+'</div>'+
     (ev.length?'<div class="support-evidence-grid">'+ev.map(x=>'<a target="_blank" rel="noopener" title="'+E(x.file_name)+'"><img alt="'+E(w.image)+'" data-support-evidence-path="'+E(x.storage_path)+'"></a>').join('')+'</div>':'')+
     '<form class="live-form live-support-reply" data-ticket-id="'+E(tk.id)+'" style="margin-top:12px"><label>'+E(w.reply)+'<textarea maxlength="4000" placeholder="'+E(w.replyPlaceholder)+'"></textarea></label><label>'+E(w.screens)+'<input type="file" accept="image/png,image/jpeg,image/webp" multiple><small>'+E(w.screenHint)+'</small></label><button class="btn small secondary" type="submit">'+E(w.replySend)+'</button><div class="live-status"></div></form>'+
    '</div></section>';
   }).join(''):'<div class="live-empty-state">'+E(w.none)+'</div>')+'</div>';
  document.getElementById('liveSupportCreate').onsubmit=createSupportTicket2;
  v.querySelectorAll('.live-support-reply').forEach(form=>form.onsubmit=addSupportMessage2);
+ observeVisibleSupportMessages2(v);
  hydrateSupportImages2(v).catch(e=>console.warn('support images',e));
 }
 
