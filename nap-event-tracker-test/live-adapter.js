@@ -1026,7 +1026,7 @@ function profileStage2(l){
  es:{labs:['Contacto','R1','Exclusión 24 h','Ampliada'],current:'actual'}
  }[L()]||{labs:['Kontakt','R1','24h NAP OUT','Erweitert'],current:'aktuell'};
  const labs=text.labs;
- return '<div class="stage-progress"><div class="stage-progress-bar"><div class="stage-progress-fill" style="width:'+([0,12,38,66,100][l]||0)+'%"></div><div class="stage-marks">'+labs.map((_,i)=>'<span class="stage-mark '+(i+1<l?'done':i+1===l?'current':'')+'">'+(i+1)+'</span>').join('')+'</div></div><div class="stage-progress-labels">'+labs.map((x,i)=>'<span><b>'+E(x)+'</b><span>'+(i+1<l?'✓':i+1===l?E(text.current):'')+'</span></span>').join('')+'</div></div>';
+ return '<div class="stage-progress stage-progress-loading"><div class="stage-progress-bar"><div class="stage-progress-fill" style="width:'+([0,12,38,66,100][l]||0)+'%"></div><div class="stage-marks">'+labs.map((_,i)=>'<span class="stage-mark '+(i+1<l?'done':i+1===l?'current':'')+'">'+(i+1)+'</span>').join('')+'</div></div><div class="stage-progress-labels">'+labs.map((x,i)=>'<span><b>'+E(x)+'</b><span>'+(i+1<l?'✓':i+1===l?E(text.current):'')+'</span></span>').join('')+'</div></div>';
 }
 function profileActionDone2(s){
  if(Number(s.level)===1){
