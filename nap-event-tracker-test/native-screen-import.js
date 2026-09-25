@@ -251,7 +251,7 @@ function shell(root,kind){
  '<p class="nocr-note">'+esc(tr('video'))+'</p><button type="button" class="btn primary nocr-analyze" id="nocrAnalyze">'+esc(tr('analyze'))+'</button><div class="nocr-status" id="nocrStatus" role="status" aria-live="polite"></div></section>'+
  '<section class="nocr-panel nocr-progress" id="nocrProgress" hidden><h3>'+esc(tr('prep'))+'</h3><p id="nocrProgressText"></p><div class="nocr-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="nocrBar"></span></div><div class="nocr-progress-foot"><b id="nocrPercent">0%</b><span id="nocrFound">0 '+esc(tr('found'))+'</span></div><div class="nocr-stages"><div data-step="0">✓ '+esc(tr('prep'))+'</div><div data-step="1">◎ '+esc(tr('recognize'))+'</div><div data-step="2">○ '+esc(tr('check'))+'</div></div></section></div>'+
  '<section class="nocr-panel nocr-review" id="nocrReview" hidden><div class="nocr-review-title"><h3>'+esc(tr('review'))+'</h3><strong id="nocrCount"></strong></div><div id="nocrResults"></div><div class="nocr-save-row"><button type="button" class="btn primary" id="nocrSave">'+esc(tr('save'))+'</button><button type="button" class="btn secondary" id="nocrEvidenceRetry" hidden>'+esc(tr('retryEvidence'))+'</button><div class="nocr-status" id="nocrSaveStatus" role="status"></div></div></section>'+
- (perf?'':'<section class="nocr-panel" id="nocrCorrections"><div class="nocr-review-title"><div><h3>'+esc(correctionWords().title)+'</h3><small>'+esc(correctionWords().sub)+'</small></div></div><div id="nocrCorrectionRows" class="nocr-status">'+esc(correctionWords().loading)+'</div></section>');
+ (perf?'':'<details class="nocr-panel" id="nocrCorrections"><summary style="display:flex;justify-content:space-between;align-items:center;gap:12px;cursor:pointer"><div><strong>'+esc(correctionWords().title)+'</strong><small style="display:block;margin-top:3px">'+esc(correctionWords().sub)+'</small></div><span class="pill" id="nocrCorrectionCount">…</span></summary><div id="nocrCorrectionRows" class="nocr-status" style="margin-top:12px">'+esc(correctionWords().loading)+'</div></details>');
  root.querySelector('#nocrFile').addEventListener('change',e=>{$('#nocrFilename',root).textContent=e.target.files?.[0]?.name||'MP4 / MOV'});
 }
 async function loadRecentCorrections2(){
@@ -262,6 +262,7 @@ async function loadRecentCorrections2(){
   const rows=await rpc('get_my_recent_screen_import_cases_v2',{p_limit:30});
   if(r!==run)return;
   r.corrections=Array.isArray(rows)?rows:[];
+  const count=$('#nocrCorrectionCount',root);if(count)count.textContent=String(r.corrections.length);
   box.classList.remove('error');
   box.innerHTML=r.corrections.length?r.corrections.map(x=>
    '<div class="nocr-correction-row" data-correction-row="'+esc(x.case_id)+'" style="padding:10px 0;border-bottom:1px solid var(--line)">'+
