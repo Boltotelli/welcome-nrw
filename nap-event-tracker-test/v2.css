@@ -144,7 +144,11 @@ body{background:var(--v2-bg)!important}
   .v2-grid{grid-template-columns:1fr}
 }
 @media(max-width:700px){
-  .topbar{padding:9px 12px!important;min-height:60px}
+  .topbar{
+    padding:env(safe-area-inset-top) max(12px,env(safe-area-inset-right)) 0 max(12px,env(safe-area-inset-left))!important;
+    min-height:calc(60px + env(safe-area-inset-top));
+    box-sizing:border-box
+  }
   #content{padding:14px 12px 92px!important}
   .bottom-nav{
     top:auto!important;right:0!important;width:auto!important;height:66px!important;flex-direction:row!important;justify-content:space-around!important;
