@@ -102,3 +102,4 @@ jobs:
 # Publish V2 mobile API sync spacing and light-mode red contrast 2026-09-25
 # Publish V2 unified light-theme contrast fix 2026-09-25
 # Publish full V2 light-mode semantic contrast fix 2026-09-25
+# Publish incoming transfer reject/temporary action and cache refresh 2026-09-25
