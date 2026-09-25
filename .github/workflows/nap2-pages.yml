@@ -87,3 +87,4 @@ jobs:
 # Publish V2 sanction timer/status consistency 2026-09-25
 # Publish V2 evidence retry/backfill 2026-09-25
 # Publish V2 server-synced notification read state 2026-09-25
+# Publish V2 i18n stability and Home API sync status 2026-09-25
