@@ -2,7 +2,7 @@
 if(window.NAP2_LIVE_ADAPTER)return;window.NAP2_LIVE_ADAPTER=true;
 const C={u:'https://bdzlgirowutasrsycjfj.supabase.co',k:'sb_publishable_8i1ismeQtj9WM-xVN_Vm0w_Tj7AvVtL',s:'nap_v4_supabase_session'};
 let crownAllowed2=false;
-const S={a:null,profile:null,p:[],v:[],x:[],e:[],o:[],t:[],bans:[],spend:[],reviews:[],shared:[],settings:null,avatars:{},laws:[],lawCases:[],lawEvidence:[],performance:null,crown:null,activity:[],eventOptions:[],features:null,law9:null,notificationReads:new Set(),syncStatus:null};
+const S={a:null,profile:null,p:[],v:[],x:[],e:[],o:[],t:[],bans:[],spend:[],reviews:[],shared:[],settings:null,avatars:{},laws:[],lawCases:[],lawEvidence:[],performance:null,crown:null,activity:[],eventOptions:[],features:null,law9:null,notificationReads:new Set(),syncStatus:null,level4Hosting:[],foreignViolations:[]};
 let ses=null;try{ses=JSON.parse(localStorage.getItem(C.s)||'null')}catch{}
 const L=()=>window.currentLang||document.querySelector('#languagePicker')?.value||'de';
 const T={de:{login:'Anmelden',alliance:'Allianz',password:'Passwort',hint:'Ein zentraler Login pro Allianz. Private Daten bleiben innerhalb der eigenen Allianz.',fail:'Login fehlgeschlagen.',logout:'Abmelden',live:'LIVE DATEN',open:'Öffnen',contact:'Kontaktiert',r1:'R1 umgesetzt',nap:'24h NAP OUT aktivieren',none:'Keine Einträge.',actions:'offen',over:'überfällig',left:'verbleibend'},en:{login:'Sign in',alliance:'Alliance',password:'Password',hint:'One central login per alliance. Private data stays within your alliance.',fail:'Login failed.',logout:'Sign out',live:'LIVE DATA',open:'Open',contact:'Contacted',r1:'R1 implemented',nap:'Activate 24h NAP OUT',none:'No entries.',actions:'open',over:'overdue',left:'remaining'},fr:{login:'Connexion',alliance:'Alliance',password:'Mot de passe',hint:'Un login central par alliance. Les données privées restent dans votre alliance.',fail:'Échec de connexion.',logout:'Déconnexion',live:'DONNÉES LIVE',open:'Ouvrir',contact:'Contacté',r1:'R1 appliqué',nap:'Activer NAP OUT 24 h',none:'Aucune entrée.',actions:'ouvert',over:'en retard',left:'restant'},es:{login:'Iniciar sesión',alliance:'Alianza',password:'Contraseña',hint:'Un login central por alianza. Los datos privados permanecen en tu alianza.',fail:'Error de inicio de sesión.',logout:'Cerrar sesión',live:'DATOS LIVE',open:'Abrir',contact:'Contactado',r1:'R1 aplicado',nap:'Activar NAP OUT 24 h',none:'No hay entradas.',actions:'abiertas',over:'vencido',left:'restante'}};
@@ -149,7 +149,7 @@ async function syncCrownVisibility2(){
  if(!permitted&&document.getElementById('view-crown')?.classList.contains('active'))setView('home');
 }
 function decorate(){const ab=document.querySelector('.alliance-badge');if(ab)ab.innerHTML=allianceLogo2(S.a,'alliance-top-logo')+'<span>'+E(S.a)+'</span>';document.querySelectorAll('[data-current-alliance]').forEach(x=>x.textContent=S.a);const u=document.querySelector('.user-pill');if(u){u.innerHTML=allianceLogo2(S.a,'alliance-user-logo')+'<span>'+E(S.a)+'</span> <span class="n2live">'+E(t('live'))+'</span>';u.title=t('logout');u.onclick=()=>{if(confirm(t('logout')+'?')){save(null);location.reload()}}}}
-async function load(){const a=encodeURIComponent(S.a);const [p1,v,x,e,o,tr,bans,spend,settings,reviews,shared,notificationReads,syncStatus]=await Promise.all([tab('players','select=*&alliance_code=eq.'+a+'&order=name.asc'),tab('violations','select=*&alliance_code=eq.'+a+'&order=occurred_at.desc'),tab('sanctions','select=*&alliance_code=eq.'+a+'&order=created_at.desc'),rpc('get_public_nap_exclusions',{}),rpc('get_nap_overdue_action_notifications_v2',{}),rpc('get_my_roster_transfer_candidates',{}),tab('nap_bans','select=*&active=eq.true&order=created_at.desc').catch(()=>[]),rpc('get_public_nap_spending_exclusions',{}).catch(()=>[]),tab('alliance_settings','select=*&alliance_code=eq.'+a+'&limit=1').catch(()=>[]),rpc('get_pending_post_contact_spending_reviews',{}).catch(()=>[]),rpc('get_my_shared_spending_cases',{}).catch(()=>[]),tab('notification_read_state','select=notification_id&alliance_code=eq.'+a+'&order=read_at.desc').catch(()=>[]),rpc('get_roster_sync_status_v2',{}).catch(()=>null)]);S.p=(p1||[]).filter(r=>r.alliance_code===S.a);S.v=(v||[]).filter(r=>r.alliance_code===S.a);S.x=(x||[]).filter(r=>r.alliance_code===S.a);S.e=e||[];S.o=o||[];S.t=(tr||[]).filter(r=>r.from_alliance===S.a||r.to_alliance===S.a);S.bans=bans||[];S.spend=spend||[];S.reviews=reviews||[];S.shared=shared||[];S.notificationReads=new Set((notificationReads||[]).map(r=>String(r.notification_id)));S.syncStatus=syncStatus||null;S.settings=settings?.[0]||null;window.NAP2_PLAYER_AVATARS=S.avatars;loadAvatars().catch(e=>console.warn('avatar load',e))}
+async function load(){const a=encodeURIComponent(S.a);const [p1,v,x,e,o,tr,bans,spend,settings,reviews,shared,notificationReads,syncStatus]=await Promise.all([tab('players','select=*&alliance_code=eq.'+a+'&order=name.asc'),tab('violations','select=*&alliance_code=eq.'+a+'&order=occurred_at.desc'),tab('sanctions','select=*&alliance_code=eq.'+a+'&order=created_at.desc'),rpc('get_public_nap_exclusions',{}),rpc('get_nap_overdue_action_notifications_v2',{}),rpc('get_my_roster_transfer_candidates',{}),tab('nap_bans','select=*&active=eq.true&order=created_at.desc').catch(()=>[]),rpc('get_public_nap_spending_exclusions',{}).catch(()=>[]),tab('alliance_settings','select=*&alliance_code=eq.'+a+'&limit=1').catch(()=>[]),rpc('get_pending_post_contact_spending_reviews',{}).catch(()=>[]),rpc('get_my_shared_spending_cases',{}).catch(()=>[]),tab('notification_read_state','select=notification_id&alliance_code=eq.'+a+'&order=read_at.desc').catch(()=>[]),rpc('get_roster_sync_status_v2',{}).catch(()=>null)]);S.p=(p1||[]).filter(r=>r.alliance_code===S.a);S.v=(v||[]).filter(r=>r.alliance_code===S.a);S.x=(x||[]).filter(r=>r.alliance_code===S.a);S.e=e||[];S.o=o||[];S.t=(tr||[]).filter(r=>r.from_alliance===S.a||r.to_alliance===S.a);S.bans=bans||[];S.spend=spend||[];S.reviews=reviews||[];S.shared=shared||[];S.notificationReads=new Set((notificationReads||[]).map(r=>String(r.notification_id)));S.syncStatus=syncStatus||null;S.settings=settings?.[0]||null;const [hosting,foreign]=await Promise.all([rpc('get_level4_hosting_alerts_v2',{}).catch(()=>[]),rpc('get_tracked_foreign_violations_v2',{p_limit:250,p_offset:0}).catch(()=>[])]);S.level4Hosting=hosting||[];S.foreignViolations=foreign||[];window.NAP2_PLAYER_AVATARS=S.avatars;loadAvatars().catch(e=>console.warn('avatar load',e))}
 async function enter(expected){const P=await tab('profiles','select=alliance_code,can_manage_bans,is_admin&limit=1'),prof=P?.[0]||null,a=prof?.alliance_code;if(!a)throw Error('Account incomplete');if(expected&&expected!==a)throw Error('Wrong alliance');S.a=a;S.profile=prof;await load();await migrateLocalNotificationReads2();await syncCrownVisibility2();n2login.hidden=true;document.body.classList.remove('n2lock');decorate();renderHome();renderPlayers();if(typeof applyTranslations==='function')applyTranslations();}
 async function boot(){css();login();document.body.classList.add('n2lock');if(!await token())return;try{await enter()}catch{save(null)}}
 setTimeout(boot,0);document.querySelector('#languagePicker')?.addEventListener('change',()=>setTimeout(()=>{if(S.a){decorate();renderHome();renderPlayers()}},0));
@@ -702,6 +702,30 @@ async function saveLanguages2(P){
    const line=document.querySelector('.profile-alliance-line');if(line)line.innerHTML='Player ID '+E(updated.game_id||'–')+' · '+allianceBadge2(S.a)+' · '+E(langs.map(languageName2).join(' / ')||'–');
  }catch(err){if(out)out.textContent=err.message||String(err)}
 }
+const FOREIGN_TRACK_WORDS2={
+ de:{title:'Serverweit getrackte Verstöße',sub:'Read-only Fremdverstöße aus ScreenRecording. Private Akten, Kontakte und Sanktionen bleiben bei der jeweiligen Allianz.',evidence:'Screenshot',missing:'fehlt',correct:'Punkte korrigieren',prompt:'Korrigierten Punktestand eingeben',saved:'Punktestand aktualisiert'},
+ en:{title:'Server-wide tracked violations',sub:'Read-only violations from other alliances captured by ScreenRecording. Private files, contacts and sanctions stay with the owning alliance.',evidence:'Screenshot',missing:'missing',correct:'Correct score',prompt:'Enter corrected score',saved:'Score updated'},
+ fr:{title:'Infractions suivies sur le serveur',sub:'Infractions en lecture seule des autres alliances issues du ScreenRecording. Les dossiers privés, contacts et sanctions restent auprès de leur alliance.',evidence:'Capture',missing:'manquante',correct:'Corriger le score',prompt:'Saisir le score corrigé',saved:'Score mis à jour'},
+ es:{title:'Infracciones rastreadas del servidor',sub:'Infracciones de otras alianzas en modo lectura capturadas por ScreenRecording. Los archivos privados, contactos y sanciones permanecen con su alianza.',evidence:'Captura',missing:'falta',correct:'Corregir puntuación',prompt:'Introduce la puntuación corregida',saved:'Puntuación actualizada'}
+};
+function foreignTrackWords2(){return FOREIGN_TRACK_WORDS2[L()]||FOREIGN_TRACK_WORDS2.de}
+function renderForeignTrackedViolations2(){
+ const view=document.getElementById('view-players'),grid=document.getElementById('playerGrid');if(!view||!grid)return;
+ view.querySelector('#foreignTrackedViolations2')?.remove();
+ const rows=S.foreignViolations||[];if(!rows.length)return;
+ const w=foreignTrackWords2(),section=document.createElement('section');section.id='foreignTrackedViolations2';section.className='card';section.style.marginTop='16px';
+ section.innerHTML='<div class="card-head"><div><div class="card-title">'+E(w.title)+'</div><div class="card-sub">'+E(w.sub)+'</div></div><span class="pill">'+rows.length+'</span></div><div class="card-body live-list">'+rows.map(v=>
+  '<div class="live-row"><div><b>'+E(v.violation_alliance||'–')+' · '+E(v.player_name||'–')+'</b><small>'+E(v.event_name||'–')+' · '+E(v.phase_name||'')+' · '+E(D(v.occurred_at))+' · '+N(v.score)+' / '+N(v.target_value)+'</small></div><div class="hero-actions"><span class="pill '+(v.evidence_available?'green':'gold')+'">'+E(w.evidence)+' '+(v.evidence_available?'✓':E(w.missing))+'</span>'+(v.can_correct_score&&v.evidence_available?'<button class="btn small secondary foreign-score-correct" data-id="'+E(v.violation_id)+'">'+E(w.correct)+'</button>':'')+'</div></div>'
+ ).join('')+'</div>';
+ grid.insertAdjacentElement('afterend',section);
+ section.querySelectorAll('.foreign-score-correct').forEach(b=>b.onclick=()=>correctForeignTrackedScore2(b.dataset.id));
+}
+async function correctForeignTrackedScore2(id){
+ const row=(S.foreignViolations||[]).find(x=>String(x.violation_id)===String(id));if(!row)return;
+ const w=foreignTrackWords2(),raw=prompt(w.prompt,String(row.score??''));if(raw==null)return;
+ const score=Number(String(raw).replace(/[^0-9]/g,''));if(!Number.isFinite(score)||score<=0)return;
+ try{await rpc('correct_foreign_screen_violation_score_v2',{p_violation_id:id,p_score:score});const foreign=await rpc('get_tracked_foreign_violations_v2',{p_limit:250,p_offset:0});S.foreignViolations=foreign||[];renderForeignTrackedViolations2()}catch(err){alert(err.message||String(err))}
+}
 function renderPlayers2(){
  const g=document.getElementById('playerGrid');if(!g)return;
  g.innerHTML=S.p.map(P=>{
@@ -713,7 +737,7 @@ function renderPlayers2(){
    '<div class="metric-row"><div class="metric"><b>'+V.length+'</b><span>Verstöße</span></div><div class="metric"><b>'+l+'</b><span>Stufe</span></div><div class="metric"><b>'+E(val)+'</b><span>Status</span></div></div>'+
    '<div class="player-card-foot">'+(att?'<span class="pill gold">Swordland / TriAlliance</span>':'<span></span>')+'<span class="muted tiny">'+(last?E(D(last.occurred_at)):'–')+'</span></div></div>';
  }).join('')||'<div class="live-empty-state">Keine Spieler.</div>';
- g.querySelectorAll('[data-p]').forEach(c=>c.onclick=()=>openProfile2(c.dataset.p));if(typeof applyPlayerFilters==='function')applyPlayerFilters();renderWelcomeLanguageQueue2();
+ g.querySelectorAll('[data-p]').forEach(c=>c.onclick=()=>openProfile2(c.dataset.p));if(typeof applyPlayerFilters==='function')applyPlayerFilters();renderWelcomeLanguageQueue2();renderForeignTrackedViolations2();
 }
 function violationRule2(v){
  const phases=PHASES2[v.event_name]||[];
@@ -1015,7 +1039,14 @@ function homeV2RecentButton2(x,i){
  '<strong>'+N(x.score)+'</strong></button>';
 }
 function homeV2PriorityPanels2(A){
- const notice=S.o?.[0],own=A?.[0];let html='';
+ const notice=S.o?.[0],own=A?.[0],host=S.level4Hosting?.[0];let html='';
+ if(host){
+  html+='<article class="priority-alert critical"><div class="priority-icon">4</div><div class="priority-main">'+
+   '<div class="priority-eyebrow">Extended NAP Exclusion</div><b>'+E(host.player_name||'–')+' ist noch/erneut in einer Allianz</b>'+
+   '<p>'+E(host.current_alliance||'–')+' führt den Spieler aktuell im Roster. Bei Stufe 4 muss der Spieler aus der Allianz entfernt bzw. darf nicht aufgenommen werden.</p>'+
+   '<div class="alert-meta"><span class="pill red">Stufe 4</span><span class="pill">'+E(host.current_alliance||'–')+'</span>'+(S.level4Hosting.length>1?'<span class="pill">'+E(S.level4Hosting.length)+' Fälle</span>':'')+'</div>'+
+   '</div><button type="button" class="btn small secondary" data-home-nap-alert>NAP öffnen</button></article>';
+ }
  if(notice){
   html+='<article class="priority-alert critical"><div class="priority-icon">!</div><div class="priority-main">'+
    '<div class="priority-eyebrow">NAP-weite Meldung · laut Tracker</div><b>'+S.o.length+' Maßnahmen über der 24h-Frist</b>'+
