@@ -188,11 +188,22 @@ async function doAct(k,id){
 async function syncCrownVisibility2(){
  let permitted=false;
  try{
-  if(S.a){const d=await rpc('get_crown_dashboard',{});S.crown=d;permitted=!!(d?.has_access&&d?.king?.alliance_code===S.a)}
+  if(S.a){
+   const d=await rpc('get_crown_dashboard',{});
+   S.crown=d;
+   // Backend is the authority for Crown access. Avoid a second frontend
+   // alliance-code comparison that can incorrectly hide an authorized Crown login.
+   permitted=d?.has_access===true;
+  }
  }catch(err){console.warn('Crown access',err)}
  crownAllowed2=permitted;
- document.querySelectorAll('[data-view="crown"],[data-go="crown"]').forEach(el=>{el.hidden=!permitted;el.style.display=permitted?'':'none'});
+ document.documentElement.dataset.crownAccess=permitted?'1':'0';
+ document.querySelectorAll('[data-view="crown"],[data-go="crown"]').forEach(el=>{
+  el.hidden=!permitted;
+  el.style.display=permitted?'':'none';
+ });
  if(!permitted&&document.getElementById('view-crown')?.classList.contains('active'))setView('home');
+ return permitted;
 }
 function decorate(){const ab=document.querySelector('.alliance-badge');if(ab)ab.innerHTML=allianceLogo2(S.a,'alliance-top-logo')+'<span>'+E(S.a)+'</span>';document.querySelectorAll('[data-current-alliance]').forEach(x=>x.textContent=S.a);const u=document.querySelector('.user-pill');if(u){u.innerHTML=allianceLogo2(S.a,'alliance-user-logo')+'<span>'+E(S.a)+'</span> <span class="n2live">'+E(t('live'))+'</span>';u.title=t('logout');u.onclick=()=>{if(confirm(t('logout')+'?')){save(null);location.reload()}}}}
 async function load(){
@@ -227,8 +238,9 @@ async function enter(expected){
  const P=await tab('profiles','select=alliance_code,can_manage_bans,is_admin&limit=1'),prof=P?.[0]||null,a=prof?.alliance_code;
  if(!a){const err=Error(actionWord2('accountIncomplete'));err.code='ACCOUNT_INCOMPLETE';throw err}
  if(expected&&expected!==a){const err=Error(actionWord2('wrongAlliance'));err.code='ACCOUNT_MISMATCH';throw err}
- S.a=a;S.profile=prof;await load();await migrateLocalNotificationReads2();await syncCrownVisibility2();
- n2login.hidden=true;document.body.classList.remove('n2lock');decorate();renderSupportUnreadBadge2();startSupportUnreadPolling2();renderHome();renderPlayers();if(typeof applyTranslations==='function')applyTranslations();
+ S.a=a;S.profile=prof;await load();await migrateLocalNotificationReads2();
+ n2login.hidden=true;document.body.classList.remove('n2lock');decorate();await syncCrownVisibility2();renderSupportUnreadBadge2();startSupportUnreadPolling2();renderHome();renderPlayers();if(typeof applyTranslations==='function')applyTranslations();
+ requestAnimationFrame(()=>syncCrownVisibility2().catch(err=>console.warn('Crown refresh',err)));
 }
 function showLoginRetry2(err){
  const box=document.getElementById('n2e'),button=document.getElementById('n2retry');
