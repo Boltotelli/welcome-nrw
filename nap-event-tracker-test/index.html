@@ -1518,8 +1518,37 @@ screenEvent.addEventListener('change',syncScreenEvent);syncScreenEvent();
 document.getElementById('uploadZone').addEventListener('click',()=>document.getElementById('demoVideoInput').click());
 
 function toggleChip(btn){btn.classList.toggle('active');btn.querySelector('.check').textContent=btn.classList.contains('active')?'✓':'';applyPlayerFilters()}
-document.getElementById('filterEntries').addEventListener('click',e=>toggleChip(e.currentTarget));document.getElementById('filterAttendance').addEventListener('click',e=>toggleChip(e.currentTarget));document.getElementById('playerSearch').addEventListener('input',applyPlayerFilters);
-function applyPlayerFilters(){const q=document.getElementById('playerSearch').value.trim().toLowerCase();const entries=document.getElementById('filterEntries').classList.contains('active');const attendance=document.getElementById('filterAttendance').classList.contains('active');let n=0;document.querySelectorAll('#playerGrid .player-card').forEach(c=>{const show=(!q||c.dataset.search.includes(q))&&(!entries||c.dataset.hasEntry==='1')&&(!attendance||c.dataset.attendance==='1');c.classList.toggle('filtered-out',!show);if(show)n++});document.querySelector('#playerFilterSummary .pill').firstChild.nodeValue=n+' '}
+document.getElementById('filterEntries').addEventListener('click',e=>toggleChip(e.currentTarget));
+document.getElementById('filterAttendance').addEventListener('click',e=>toggleChip(e.currentTarget));
+document.getElementById('playerSearch').addEventListener('input',()=>{
+ const q=document.getElementById('playerSearch').value.trim();
+ const entries=document.getElementById('filterEntries');
+ // A direct name/ID search should find every player in the user's own alliance,
+ // even when the default "only with entries" filter was active.
+ if(q&&entries.classList.contains('active')){
+  entries.classList.remove('active');
+  entries.querySelector('.check').textContent='';
+ }
+ applyPlayerFilters();
+});
+function applyPlayerFilters(){
+ const q=document.getElementById('playerSearch').value.trim().toLowerCase(),
+  entries=document.getElementById('filterEntries').classList.contains('active'),
+  attendance=document.getElementById('filterAttendance').classList.contains('active'),
+  grid=document.getElementById('playerGrid');
+ let n=0;
+ grid.querySelector('#playerFilterEmpty')?.remove();
+ grid.querySelectorAll('.player-card').forEach(c=>{
+  const show=(!q||c.dataset.search.includes(q))&&(!entries||c.dataset.hasEntry==='1')&&(!attendance||c.dataset.attendance==='1');
+  c.classList.toggle('filtered-out',!show);if(show)n++
+ });
+ document.querySelector('#playerFilterSummary .pill').firstChild.nodeValue=n+' ';
+ if(!n){
+  const empty=document.createElement('div');empty.id='playerFilterEmpty';empty.className='live-empty-state';
+  empty.textContent=q?'Keine Spieler für diese Suche / Filter.':'Keine Spieler für die aktiven Filter.';
+  grid.appendChild(empty);
+ }
+}
 applyPlayerFilters();
 
 function setProfileTab(tab){document.querySelectorAll('[data-profile-tab]').forEach(b=>b.classList.toggle('active',b.dataset.profileTab===tab));document.querySelectorAll('[data-profile-panel]').forEach(p=>p.classList.toggle('active',p.dataset.profilePanel===tab))}
