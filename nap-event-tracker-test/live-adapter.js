@@ -854,7 +854,7 @@ async function addSupportMessage2(e){
  try{
   await rpc('add_support_ticket_message',{p_ticket_id:form.dataset.ticketId,p_message:msg});
   if(files?.length)await uploadSupportFiles2(form.dataset.ticketId,files);
-  input.value='';form.querySelector('input[type="file"]')?.setAttribute('value','');await renderSupportLive()
+  input.value='';const fi=form.querySelector('input[type="file"]');if(fi)fi.value='';await renderSupportLive()
  }
  catch(err){out.textContent=err.message||String(err)}
  finally{btn.disabled=false}
