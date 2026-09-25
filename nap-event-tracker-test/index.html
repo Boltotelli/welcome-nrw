@@ -108,6 +108,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 .icon-btn:hover{background:var(--panel-2)}
 .support-top-btn{color:var(--text)}
 .support-agent-icon{width:22px;height:22px;display:block;fill:none;stroke:currentColor;stroke-width:1.85;stroke-linecap:round;stroke-linejoin:round}
+.nav-icon-support .support-agent-icon{width:21px;height:21px}
+.more-icon-support .support-agent-icon{width:22px;height:22px;margin:auto}
 .support-top-btn:hover .support-agent-icon{transform:translateY(-.5px)}
 .support-agent-icon{transition:transform .14s ease}
 .badge-count{position:absolute;right:-3px;top:-4px;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:var(--red);color:white;display:grid;place-items:center;font-size:10px;font-weight:900;border:2px solid var(--bg)}
@@ -649,7 +651,17 @@ img[src*="./assets/alliance/"]{
       <button class="nav-btn" data-view="crown"><span class="nav-icon">♛</span><span class="nav-label">Crown</span></button>
       <button class="nav-btn" data-view="activity"><span class="nav-icon">◷</span><span class="nav-label" data-i18n="activity">Aktivität</span></button>
       <button class="nav-btn" data-view="settings"><span class="nav-icon">⚙</span><span class="nav-label" data-i18n="settings">Einstellungen</span></button>
-      <button class="nav-btn" data-view="support"><span class="nav-icon">◌</span><span class="nav-label">Support</span></button>
+      <button class="nav-btn" data-view="support"><span class="nav-icon nav-icon-support"><svg class="support-agent-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4.4 11.2V9.7C4.4 5.6 7.7 2.3 11.8 2.3s7.4 3.3 7.4 7.4v1.5"/>
+            <path d="M4.5 10.2c-1.2.2-2.1 1.2-2.1 2.5v2.2c0 1.5 1.2 2.7 2.7 2.7h1.1v-7.4H4.5Z"/>
+            <path d="M19.1 10.2c1.4 0 2.5 1.1 2.5 2.5v2.2c0 1.5-1.2 2.7-2.7 2.7h-1.2"/>
+            <path d="M6.2 10.2v4.4c0 4 2.5 6.8 5.8 6.8"/>
+            <path d="M17.8 10.2v5.2c0 3.3-2.2 5-5.4 5"/>
+            <path d="M12.4 20.4h2.5"/>
+            <path d="M7.7 7.4c1.4-.4 2.6-1.4 3.2-2.7 1.8 1.7 4.1 2.5 6.8 2.5"/>
+            <circle cx="9.5" cy="12.2" r=".65" fill="currentColor" stroke="none"/>
+            <circle cx="14.5" cy="12.2" r=".65" fill="currentColor" stroke="none"/>
+          </svg></span><span class="nav-label">Support</span></button>
     </nav>
     <div class="sidebar-footer">
       <div class="concept">Standalone UI-Konzept<br>Keine Datenbankverbindung.</div>
@@ -1291,7 +1303,17 @@ img[src*="./assets/alliance/"]{
     <button class="more-item" data-view="crown"><span class="more-icon">♛</span><span class="more-label">Crown</span></button>
     <button class="more-item" data-view="activity"><span class="more-icon">◷</span><span class="more-label" data-i18n="activity">Aktivität</span></button>
     <button class="more-item" data-view="settings"><span class="more-icon">⚙</span><span class="more-label" data-i18n="settings">Einstellungen</span></button>
-    <button class="more-item" data-view="support"><span class="more-icon">◌</span><span class="more-label">Support</span></button>
+    <button class="more-item" data-view="support"><span class="more-icon more-icon-support"><svg class="support-agent-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4.4 11.2V9.7C4.4 5.6 7.7 2.3 11.8 2.3s7.4 3.3 7.4 7.4v1.5"/>
+            <path d="M4.5 10.2c-1.2.2-2.1 1.2-2.1 2.5v2.2c0 1.5 1.2 2.7 2.7 2.7h1.1v-7.4H4.5Z"/>
+            <path d="M19.1 10.2c1.4 0 2.5 1.1 2.5 2.5v2.2c0 1.5-1.2 2.7-2.7 2.7h-1.2"/>
+            <path d="M6.2 10.2v4.4c0 4 2.5 6.8 5.8 6.8"/>
+            <path d="M17.8 10.2v5.2c0 3.3-2.2 5-5.4 5"/>
+            <path d="M12.4 20.4h2.5"/>
+            <path d="M7.7 7.4c1.4-.4 2.6-1.4 3.2-2.7 1.8 1.7 4.1 2.5 6.8 2.5"/>
+            <circle cx="9.5" cy="12.2" r=".65" fill="currentColor" stroke="none"/>
+            <circle cx="14.5" cy="12.2" r=".65" fill="currentColor" stroke="none"/>
+          </svg></span><span class="more-label">Support</span></button>
     <button class="more-item" id="themeToggleMobile"><span class="more-icon" id="themeIconMobile"></span><span class="more-label" data-i18n="theme">Theme</span></button>
     <button class="more-item" id="bellMobile"><span class="more-icon">🔔</span><span class="more-label" data-i18n="notifications">Meldungen</span></button>
   </div>
@@ -1705,7 +1727,7 @@ document.getElementById('settingsSaveDemo')?.addEventListener('click',()=>{
 });
 
 </script>
-<script src="./live-adapter.js?v=20260925-support-both-nav"></script>
+<script src="./live-adapter.js?v=20260925-support-icon-all-nav"></script>
 <script src="./native-screen-import.js?v=20260925-final-ux-pass"></script>
 <script src="./live-translations-v2.js?v=20260925-overdue-days-i18n"></script>
 </body>
