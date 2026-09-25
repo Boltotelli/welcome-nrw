@@ -265,7 +265,7 @@ function v2DecorateShell(){
       '<button data-more-view="crown">♛<small>'+v2esc(v2t('crown'))+'</small></button>'+
       '<button data-more-view="activity">◷<small>'+v2esc(v2t('activity'))+'</small></button>'+
       '<button data-more-view="settings">⚙<small>'+v2esc(v2t('settings'))+'</small></button>'+
-      '<button data-more-view="support"><span class="v2-support-agent-icon">◔</span><small>Support</small></button>'+
+      '<button data-more-view="support"><svg class="support-agent-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.4 11.2V9.7C4.4 5.6 7.7 2.3 11.8 2.3s7.4 3.3 7.4 7.4v1.5"/><path d="M4.5 10.2c-1.2.2-2.1 1.2-2.1 2.5v2.2c0 1.5 1.2 2.7 2.7 2.7h1.1v-7.4H4.5Z"/><path d="M19.1 10.2c1.4 0 2.5 1.1 2.5 2.5v2.2c0 1.5-1.2 2.7-2.7 2.7h-1.2"/><path d="M6.2 10.2v4.4c0 4 2.5 6.8 5.8 6.8"/><path d="M17.8 10.2v5.2c0 3.3-2.2 5-5.4 5"/><path d="M12.4 20.4h2.5"/><path d="M7.7 7.4c1.4-.4 2.6-1.4 3.2-2.7 1.8 1.7 4.1 2.5 6.8 2.5"/><circle cx="9.5" cy="12.2" r=".65" fill="currentColor" stroke="none"/><circle cx="14.5" cy="12.2" r=".65" fill="currentColor" stroke="none"/></svg><small>Support</small></button>'+
       '<button id="v2MoreTheme"><span class="v2-theme-icon"></span><small>'+v2esc(v2t('theme'))+'</small></button>'+
       '<button id="v2MoreBell">🔔<small>'+v2esc(v2t('notifications'))+'</small></button>'+
     '</div>';document.body.appendChild(s);
