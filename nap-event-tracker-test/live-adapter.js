@@ -616,8 +616,39 @@ async function renderCrownLive(){
 }
 let activityType2='all',activityAlliance2='all',activityOffset2=0,activityMore2=false,activityLoading2=false,activityAlliances2=[];
 function activityCategory2(a){const s=String(a?.action||'').toLowerCase();if(s.includes('screen')||s.includes('import')||s.includes('upload'))return'uploads';if(s.includes('player')||s.includes('roster')||s.includes('alliance_updated'))return'players';if(s.includes('event')||s.includes('settings'))return'events';if(s.includes('delete'))return'deleted';if(s.includes('violation')||s.includes('sanction')||s.includes('exclusion')||s.includes('ban'))return'violations';return'all'}
-function activityTitle2(a){const act=String(a?.action||''),map={violation_created:'Verstoß eingetragen',violation_created_vnext:'Verstoß eingetragen',violation_updated:'Verstoß aktualisiert',violation_details_updated:'Verstoß aktualisiert',violation_contact_updated:'Kontaktstatus geändert',violation_deleted:'Eintrag gelöscht',player_id_updated:'Spieler-ID aktualisiert',player_alliance_updated:'Allianzwechsel',player_status_updated:'Spielerstatus geändert',player_name_updated:'Spielername geändert',player_file_comment_added:'Aktenkommentar hinzugefügt',sanction_updated:'Maßnahme aktualisiert',alliance_settings_updated:'Einstellungen aktualisiert',screen_recording_import:'ScreenRecording Import',screen_import_occurrence_created:'ScreenRecording erfasst',screen_import_occurrence_updated:'ScreenRecording aktualisiert',performance_screen_import:'Performance ScreenRecording',manual_nap_exclusion_created_v3:'NAP Exclusion eingetragen',performance_manual_snapshot_added:'Performance manuell korrigiert',performance_feature_settings_updated:'Performance-Anzeige geändert',law9_prep_score_saved:'KvK Prep Score gespeichert'};return map[act]||act.replaceAll('_',' ')}
-function activityMeta2(a){const d=a?.details||{},p={...(d.public||{}),...(d.private||{}),...d},bits=[];if(p.player_name)bits.push(p.player_name);if(p.event_name)bits.push(p.event_name);if(p.phase_name)bits.push(p.phase_name);if(p.from_alliance&&p.to_alliance)bits.push(p.from_alliance+' → '+p.to_alliance);if(p.score!=null)bits.push(N(p.score));return bits.join(' · ')}
+function activityTitle2(a){
+ const act=String(a?.action||''),map={
+  violation_created:'Verstoß eingetragen',violation_created_vnext:'Verstoß eingetragen',violation_updated:'Verstoß aktualisiert',
+  violation_details_updated:'Verstoß aktualisiert',violation_contact_updated:'Kontaktstatus geändert',violation_deleted:'Eintrag gelöscht',
+  player_id_updated:'Spieler-ID aktualisiert',player_alliance_updated:'Allianzwechsel',player_status_updated:'Spielerstatus geändert',
+  player_name_updated:'Spielername geändert',player_file_comment_added:'Aktenkommentar hinzugefügt',sanction_updated:'Maßnahme aktualisiert',
+  sanction_review_correction:'Sanktionsprüfung korrigiert',sanction_manual_timer_restore:'Sanktions-Timer wiederhergestellt',
+  alliance_settings_updated:'Einstellungen aktualisiert',screen_recording_import:'ScreenRecording Import',
+  screen_import_occurrence_created:'ScreenRecording erfasst',screen_import_occurrence_updated:'ScreenRecording aktualisiert',
+  screen_import_occurrence_created_test:'ScreenRecording Test erfasst',screen_import_phase_corrected:'ScreenRecording Phase korrigiert',
+  screen_import_case_corrected:'ScreenImport-Fall korrigiert',screen_import_false_positive_removed:'ScreenImport-Fehlerkennung entfernt',
+  performance_screen_import:'Performance ScreenRecording',performance_import_video_corrected:'Performance-Video korrigiert',
+  manual_nap_exclusion_created_v3:'NAP Exclusion eingetragen',nap_spending_exemption_created:'Spending Exclusion eingetragen',
+  performance_manual_snapshot_added:'Performance manuell korrigiert',performance_feature_settings_updated:'Performance-Anzeige geändert',
+  law9_prep_score_saved:'KvK Prep Score gespeichert',law9_baseline_manual_correction:'KvK Baseline korrigiert',
+  roster_transfer_marked_temporary:'Allianzwechsel als temporär markiert',crown_manual_override:'Crown manuell korrigiert',
+  frontend_live_loader_updated:'Frontend aktualisiert',alliance_created:'Allianz angelegt'
+ };
+ return map[act]||act.replaceAll('_',' ');
+}
+function activityMeta2(a){
+ const d=a?.details||{},p={...(d.public||{}),...(d.private||{}),...d},bits=[];
+ if(p.player_name)bits.push(p.player_name);
+ if(p.event_name)bits.push(p.event_name);
+ if(p.phase_name)bits.push(p.phase_name);
+ if(p.from_alliance&&p.to_alliance)bits.push(p.from_alliance+' → '+p.to_alliance);
+ if(p.score!=null)bits.push(N(p.score));
+ if(a?.reason){
+  const label={de:'Grund',en:'Reason',fr:'Motif',es:'Motivo'}[L()]||'Grund';
+  bits.push(label+': '+a.reason);
+ }
+ return bits.join(' · ');
+}
 function activityRpcArgs2(offset=0){
  return {p_limit:250,p_offset:offset,p_alliance:activityAlliance2==='all'?null:activityAlliance2,p_category:activityType2};
 }
