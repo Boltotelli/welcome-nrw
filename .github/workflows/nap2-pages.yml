@@ -106,3 +106,6 @@ jobs:
 # Publish V2 settings PATCH and live expiry resequencing 2026-09-25
 # Publish SG-only Spending Exclusions with event-bound expiry 2026-09-25
 # Publish NAP-wide aggregate violation statistics 2026-09-25
+# Publish canonical NWO/NwO/PxR NAP statistic labels 2026-09-25
+# Publish privacy-safe Support tickets with screenshots and chat 2026-09-25
+# Support remains triage-only: no automatic app/data changes 2026-09-25
