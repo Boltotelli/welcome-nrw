@@ -961,7 +961,14 @@ const POST_CONTACT_REVIEW_TEXT2={
 };
 function postContactReviewText2(k){return (POST_CONTACT_REVIEW_TEXT2[L()]||POST_CONTACT_REVIEW_TEXT2.de)[k]||k}
 function liveNotifications2(){
- const rows=[];
+ const rows=[],hw=typeof level4HomeWords2==='function'?level4HomeWords2():null;
+ for(const h of S.level4Hosting||[])rows.push({
+  key:'level4-host|'+String(h.sanction_id||h.player_id)+'|'+String(h.current_alliance||''),
+  cat:'nap',
+  title:(h.player_name||'–')+' · '+(h.current_alliance||'–'),
+  copy:(hw?.eyebrow||'Extended NAP Exclusion')+' · '+(hw?.notice||'Level 4'),
+  go:'home'
+ });
  for(const r of S.reviews||[])rows.push({key:'post-contact-review|'+String(r.review_id),cat:'alliance',title:(r.player_name||'–')+' · '+postContactReviewText2('required'),copy:(r.event_name||'Event')+' · '+(r.phase_name||'')+' · '+N(r.score)+' '+postContactReviewText2('notice'),go:'home'});
  for(const x of S.o||[])rows.push({key:'nap|'+String(x.sanction_id||x.alliance_code+'|'+x.player_name+'|'+x.level),cat:'nap',title:(x.alliance_code||'')+' · '+(x.player_name||'–'),copy:'Stufe '+x.level+' · '+durLong2(Number(x.overdue_seconds||0)*1000)+' über 24h-Frist (laut Tracker)',go:'nap'});
  for(const a of actions()){const z=new Date((a.s||a.v)?.created_at||(a.v?.occurred_at)||0).getTime()+86400000-Date.now();if(z>0&&z<=21600000)rows.push({key:'action|'+String(a.s?.id||a.v?.id||a.name),cat:'alliance',title:a.name,copy:'Stufe '+a.l+' · '+dur(z)+' verbleibend',go:'home'})}
@@ -1046,10 +1053,10 @@ function homeV2RecentButton2(x,i){
  '<strong>'+N(x.score)+'</strong></button>';
 }
 const LEVEL4_HOME_WORDS2={
- de:{eyebrow:'Extended NAP Exclusion',title:'ist noch/erneut in einer Allianz',text1:'führt den Spieler aktuell im Roster. Bei Stufe 4 muss der Spieler aus der Allianz entfernt bzw. darf nicht aufgenommen werden.',cases:'Fälle',open:'NAP öffnen'},
- en:{eyebrow:'Extended NAP Exclusion',title:'is still/back in an alliance',text1:'currently has this player on its roster. At Level 4, the player must be removed and must not be accepted into an alliance.',cases:'cases',open:'Open NAP'},
- fr:{eyebrow:'Exclusion NAP prolongée',title:'est toujours/de nouveau dans une alliance',text1:'a actuellement ce joueur dans son effectif. Au niveau 4, le joueur doit être retiré et ne doit pas être accepté dans une alliance.',cases:'cas',open:'Ouvrir NAP'},
- es:{eyebrow:'Exclusión NAP ampliada',title:'sigue/está de nuevo en una alianza',text1:'tiene actualmente a este jugador en su roster. En nivel 4, el jugador debe ser expulsado y no debe ser aceptado en una alianza.',cases:'casos',open:'Abrir NAP'}
+ de:{eyebrow:'Extended NAP Exclusion',title:'ist noch/erneut in einer Allianz',text1:'führt den Spieler aktuell im Roster. Bei Stufe 4 muss der Spieler aus der Allianz entfernt bzw. darf nicht aufgenommen werden.',cases:'Fälle',open:'NAP öffnen',notice:'Stufe 4 · Spieler muss entfernt werden bzw. darf nicht aufgenommen werden.'},
+ en:{eyebrow:'Extended NAP Exclusion',title:'is still/back in an alliance',text1:'currently has this player on its roster. At Level 4, the player must be removed and must not be accepted into an alliance.',cases:'cases',open:'Open NAP',notice:'Level 4 · player must be removed and must not be accepted into an alliance.'},
+ fr:{eyebrow:'Exclusion NAP prolongée',title:'est toujours/de nouveau dans une alliance',text1:'a actuellement ce joueur dans son effectif. Au niveau 4, le joueur doit être retiré et ne doit pas être accepté dans une alliance.',cases:'cas',open:'Ouvrir NAP',notice:'Niveau 4 · le joueur doit être retiré et ne doit pas être accepté dans une alliance.'},
+ es:{eyebrow:'Exclusión NAP ampliada',title:'sigue/está de nuevo en una alianza',text1:'tiene actualmente a este jugador en su roster. En nivel 4, el jugador debe ser expulsado y no debe ser aceptado en una alianza.',cases:'casos',open:'Abrir NAP',notice:'Nivel 4 · el jugador debe ser expulsado y no debe ser aceptado en una alianza.'}
 };
 function level4HomeWords2(){return LEVEL4_HOME_WORDS2[L()]||LEVEL4_HOME_WORDS2.de}
 function homeV2PriorityPanels2(A){
