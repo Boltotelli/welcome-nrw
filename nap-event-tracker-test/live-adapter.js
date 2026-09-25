@@ -1038,14 +1038,22 @@ function homeV2RecentButton2(x,i){
  '<span class="home-v2-recent-copy"><b>'+E(name)+'</b><small>'+E(x.event_name||'')+' · '+E(x.phase_name||'')+' · '+E(D(x.occurred_at))+'</small></span></span>'+
  '<strong>'+N(x.score)+'</strong></button>';
 }
+const LEVEL4_HOME_WORDS2={
+ de:{eyebrow:'Extended NAP Exclusion',title:'ist noch/erneut in einer Allianz',text1:'führt den Spieler aktuell im Roster. Bei Stufe 4 muss der Spieler aus der Allianz entfernt bzw. darf nicht aufgenommen werden.',cases:'Fälle',open:'NAP öffnen'},
+ en:{eyebrow:'Extended NAP Exclusion',title:'is still/back in an alliance',text1:'currently has this player on its roster. At Level 4, the player must be removed and must not be accepted into an alliance.',cases:'cases',open:'Open NAP'},
+ fr:{eyebrow:'Exclusion NAP prolongée',title:'est toujours/de nouveau dans une alliance',text1:'a actuellement ce joueur dans son effectif. Au niveau 4, le joueur doit être retiré et ne doit pas être accepté dans une alliance.',cases:'cas',open:'Ouvrir NAP'},
+ es:{eyebrow:'Exclusión NAP ampliada',title:'sigue/está de nuevo en una alianza',text1:'tiene actualmente a este jugador en su roster. En nivel 4, el jugador debe ser expulsado y no debe ser aceptado en una alianza.',cases:'casos',open:'Abrir NAP'}
+};
+function level4HomeWords2(){return LEVEL4_HOME_WORDS2[L()]||LEVEL4_HOME_WORDS2.de}
 function homeV2PriorityPanels2(A){
  const notice=S.o?.[0],own=A?.[0],host=S.level4Hosting?.[0];let html='';
  if(host){
+  const hw=level4HomeWords2();
   html+='<article class="priority-alert critical"><div class="priority-icon">4</div><div class="priority-main">'+
-   '<div class="priority-eyebrow">Extended NAP Exclusion</div><b>'+E(host.player_name||'–')+' ist noch/erneut in einer Allianz</b>'+
-   '<p>'+E(host.current_alliance||'–')+' führt den Spieler aktuell im Roster. Bei Stufe 4 muss der Spieler aus der Allianz entfernt bzw. darf nicht aufgenommen werden.</p>'+
-   '<div class="alert-meta"><span class="pill red">Stufe 4</span><span class="pill">'+E(host.current_alliance||'–')+'</span>'+(S.level4Hosting.length>1?'<span class="pill">'+E(S.level4Hosting.length)+' Fälle</span>':'')+'</div>'+
-   '</div><button type="button" class="btn small secondary" data-home-nap-alert>NAP öffnen</button></article>';
+   '<div class="priority-eyebrow">'+E(hw.eyebrow)+'</div><b>'+E(host.player_name||'–')+' '+E(hw.title)+'</b>'+
+   '<p>'+E(host.current_alliance||'–')+' '+E(hw.text1)+'</p>'+
+   '<div class="alert-meta"><span class="pill red">Stufe 4</span><span class="pill">'+E(host.current_alliance||'–')+'</span>'+(S.level4Hosting.length>1?'<span class="pill">'+E(S.level4Hosting.length)+' '+E(hw.cases)+'</span>':'')+'</div>'+
+   '</div><button type="button" class="btn small secondary" data-home-nap-alert>'+E(hw.open)+'</button></article>';
  }
  if(notice){
   html+='<article class="priority-alert critical"><div class="priority-icon">!</div><div class="priority-main">'+
