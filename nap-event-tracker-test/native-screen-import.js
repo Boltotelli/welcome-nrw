@@ -171,6 +171,12 @@ function dayUTC(stamp,delta=0){
 }
 function dayNum(d){return Date.parse(String(d)+'T00:00:00Z')}
 function validDay(runDay,occ){return !!runDay&&!!occ&&dayNum(runDay)<Date.parse(occ.end_at)&&dayNum(runDay)+86400000>Date.parse(occ.begin_at)&&dayNum(runDay)<=dayNum(new Date().toISOString().slice(0,10))}
+function validRecordingDay(runDay,occ){
+ if(!runDay||!occ)return false;
+ const d=dayNum(runDay),start=dayNum(dayUTC(occ.begin_at)),endPlusOne=dayNum(dayUTC(new Date(Date.parse(occ.end_at)+86400000)));
+ const today=dayNum(dayUTC(new Date()));
+ return d>=start&&d<=endPlusOne&&d<=today;
+}
 async function sha256(file){
  const n=Math.min(file.size,1048576),a=new Uint8Array(await file.slice(0,n).arrayBuffer());
  const b=new Uint8Array(await file.slice(Math.max(n,file.size-n)).arrayBuffer());
@@ -269,9 +275,9 @@ function frameCanvas(video){
  return canvas;
 }
 function rankingCanvas(frame){
- // Kingshot keeps the current player's own rank in a sticky row at the bottom.
- // Stop above that row so it can never widen rank coverage (e.g. rank 160).
- const x=Math.round(frame.width*.035),y=Math.round(frame.height*.265),w=Math.round(frame.width*.93),h=Math.round(frame.height*.615);
+ // Keep the complete top of the visible ranking (ranks 1–3 live high in the view),
+ // but still stop above Kingshot's sticky own-player row at the bottom.
+ const x=Math.round(frame.width*.035),y=Math.round(frame.height*.215),w=Math.round(frame.width*.93),h=Math.round(frame.height*.665);
  const scale=Math.min(1.35,1350/Math.max(1,w)),out=document.createElement('canvas');
  out.width=Math.max(1,Math.round(w*scale));out.height=Math.max(1,Math.round(h*scale));
  const cx=out.getContext('2d',{willReadFrequently:true});cx.imageSmoothingEnabled=true;cx.imageSmoothingQuality='high';
@@ -363,12 +369,15 @@ function consensusHit(list){
  return {...exemplar.row,player:exemplar.player,time:exemplar.time,image:exemplar.image,rank,observations:list.length,consensus:chosen.length};
 }
 function baseFrameTimes(dur){
- const start=Math.min(.30,Math.max(.04,dur*.04)),end=Math.max(start,Math.max(.04,dur-.10));
- // Mobile-first: a sparse first pass covers the scroll; rank continuity decides
- // whether a small targeted rescue pass is necessary.
- const count=Math.max(6,Math.min(10,Math.ceil(dur/2.25)+1));
- if(count===1)return [(start+end)/2];
- return Array.from({length:count},(_,i)=>start+(end-start)*(i/(count-1)));
+ const end=Math.max(.06,dur-.10),times=[];
+ const add=t=>{const v=Math.max(.04,Math.min(end,t));if(!times.some(x=>Math.abs(x-v)<.10))times.push(v)};
+ // The first ranks can disappear quickly once scrolling begins. Sample the opening
+ // slightly denser, then stay sparse for the rest of the video.
+ [0.08,0.38,0.78,1.25].forEach(add);
+ const remaining=Math.max(4,Math.min(7,Math.ceil(dur/3)));
+ for(let i=1;i<=remaining;i++)add(1.25+(end-1.25)*(i/(remaining+1)));
+ add(end);
+ return times.sort((a,b)=>a-b).slice(0,12);
 }
 async function seek(video,time){
  if(Math.abs(video.currentTime-time)<.03&&video.readyState>=2)return;
@@ -446,7 +455,8 @@ async function lawOccurrence(){
 function selectedOcc(){return run?.occurrences?.find(o=>String(o.event_schedule_id)===$('#nocrOcc',run.root)?.value)}
 function setLawPhase(){
  const r=run;if(!r||r.kind!=='law')return;
- const root=r.root,event=$('#nocrEvent',root).value,occ=selectedOcc(),phase=$('#nocrPhase',root);
+ const root=r.root,event=$('#nocrEvent',root).value,occ=selectedOcc(),phase=$('#nocrPhase',root),input=$('#nocrDay',root);
+ const previousPhase=phase.value,previousDate=input?.value||'';
  const list=(PHASES[event]||[]).filter(p=>{
   if(occ?.phase_hint&&p[0]!==occ.phase_hint)return false;
   if((event==='Strongest Governor'||event==='Alliance Brawl')&&occ){
@@ -454,22 +464,23 @@ function setLawPhase(){
   }
   return true;
  });
- const previous=phase.value;
  phase.innerHTML=list.map(p=>{
   const n=Number(p[0].slice(2)),day=(event==='Strongest Governor'||event==='Alliance Brawl')&&occ?dayUTC(occ.begin_at,n-1):'';
   return selectOption(p[1]+(day?' · '+day:''),p[0]);
  }).join('');
- if(list.some(p=>p[0]===previous))phase.value=previous;
+ if(list.some(p=>p[0]===previousPhase))phase.value=previousPhase;
  else if(list.length)phase.value=list[list.length-1][0];
- if(event==='Strongest Governor'||event==='Alliance Brawl'){
-  const first=phase.value,offset=Number(first.slice(2))-1;
-  const suggested=occ?dayUTC(occ.begin_at,offset):dayUTC(new Date());
-  $('#nocrDay',root).value=suggested;
- }else{
-  const now=dayUTC(new Date()),start=occ?dayUTC(occ.begin_at):now,end=occ?dayUTC(new Date(Math.min(Date.now(),Date.parse(occ.end_at)-1000))):now;
-  $('#nocrDay',root).value=dayNum(now)>=dayNum(start)&&dayNum(now)<=dayNum(end)?now:end;
- }
- const input=$('#nocrDay',root);input.min=occ?dayUTC(occ.begin_at):'';input.max=occ?dayUTC(new Date(Math.min(Date.now(),Date.parse(occ.end_at)-1000))):dayUTC(new Date());
+
+ const today=dayUTC(new Date());
+ input.min=occ?dayUTC(occ.begin_at):'';
+ // Recording/upload day is independent from the selected event phase.
+ // Allow the event window plus the following day, never a future day.
+ const occEndPlusOne=occ?dayUTC(new Date(Date.parse(occ.end_at)+86400000)):today;
+ input.max=dayNum(occEndPlusOne)<dayNum(today)?occEndPlusOne:today;
+ const candidate=previousDate&&validRecordingDay(previousDate,occ)?previousDate:
+   validRecordingDay(today,occ)?today:
+   (occ?dayUTC(new Date(Math.min(Date.now(),Date.parse(occ.end_at)+86399000))):today);
+ input.value=candidate;
  input.readOnly=false;
  input.disabled=!occ;
  input.title=reviewText('dayReadOnly');
@@ -492,7 +503,7 @@ async function analyze(){
  if(!file){status(tr('choose'),true);return}
  if(r.kind==='law'){
   const occ=selectedOcc(),day=$('#nocrDay',root).value;
-  if(!occ||!$('#nocrPhase',root).value||!validDay(day,occ)){status(tr('invalid'),true);return}
+  if(!occ||!$('#nocrPhase',root).value||!validRecordingDay(day,occ)){status(tr('invalid'),true);return}
  }else if(!perfOcc()){status(tr('missingEvent'),true);return}
  r.busy=true;btn.disabled=true;$('#nocrSave',root).disabled=true;$('#nocrReview',root).hidden=true;status('');
  let url,video,worker;
@@ -509,7 +520,7 @@ async function analyze(){
   r.members=members;r.fileHash=await sha256(file);worker=await ensureWorker();
   video=document.createElement('video');url=await metadata(video,file);if(r!==run)return;
   const dur=video.duration;progress(1,5,0);
-  const times=baseFrameTimes(dur),observations=new Map(),unmatched=new Map(),rankMap=new Map();r.frames=[];
+  const times=baseFrameTimes(dur),observations=new Map(),unmatched=new Map(),rankMap=new Map();r.frames=[];let topRankingSeen=false;
   const processRows=(rows,sec,full)=>{
    let still=null;
    for(const row of rows){
@@ -529,12 +540,18 @@ async function analyze(){
   for(let i=0;i<times.length;i++){
    if(run!==r)break;const sec=times[i];await seek(video,sec);const full=frameCanvas(video),roi=rankingCanvas(full);
    if(r.frames.length<12&&i%Math.max(1,Math.floor(times.length/12))===0)r.frames.push({time:sec,image:full.toDataURL('image/jpeg',.72)});
-   const text=(await worker.recognize(roi)).data?.text||'';processRows(repairSequentialRanks(extractRows(text)),sec,full);
+   const text=(await worker.recognize(roi)).data?.text||'',parsed=repairSequentialRanks(extractRows(text));
+   if(sec<=1.35&&parsed.some(row=>Number.isInteger(row.rank)&&row.rank>=1&&row.rank<=9))topRankingSeen=true;
+   processRows(parsed,sec,full);
    progress(1,5+65*((i+1)/times.length),observations.size);
    await new Promise(resolve=>setTimeout(resolve,0));
   }
   if(run!==r)return;
-  let coverage=rankCoverage(rankMap),rescue=rescueTimes(coverage,rankMap,dur,times);
+  let coverage=rankCoverage(rankMap);
+  if(topRankingSeen&&coverage.min&&coverage.min>1){
+   coverage={...coverage,min:1,missing:[...Array(coverage.min-1)].map((_,i)=>i+1).concat(coverage.missing)};
+  }
+  let rescue=rescueTimes(coverage,rankMap,dur,times);
   if(coverage.missing.length&&rescue.length){
    progress(1,72,observations.size,'rescue');
    const missingSet=new Set(coverage.missing);
@@ -546,6 +563,9 @@ async function analyze(){
     await new Promise(resolve=>setTimeout(resolve,0));
    }
    coverage=rankCoverage(rankMap);
+   if(topRankingSeen&&coverage.min&&coverage.min>1){
+    coverage={...coverage,min:1,missing:[...Array(coverage.min-1)].map((_,i)=>i+1).concat(coverage.missing)};
+   }
   }
   if(run!==r)return;
   r.coverage=coverage;
