@@ -188,20 +188,29 @@ function sourceRank(line){
  if(!m)return null;
  const n=Number(m[1]);return Number.isInteger(n)&&n>=1&&n<=999?n:null;
 }
+function scoreTail(line){
+ const s=String(line||'');
+ // Only normalize OCR lookalikes inside the final numeric token. Never convert
+ // letters in the player name (e.g. the "ll" in "Hell") into score digits.
+ const m=s.match(/(?:^|\s)([0-9OoIl|]{1,3}(?:[.,\s][0-9OoIl|]{3}){1,4}|[0-9OoIl|]{4,12})\s*$/);
+ if(!m)return null;
+ const raw=m[1],normalized=ocrDigits(raw),score=Number(normalized.replace(/[.,\s]/g,''));
+ if(!Number.isSafeInteger(score)||score<1000)return null;
+ const tokenStart=s.lastIndexOf(raw);
+ return {raw,score,start:tokenStart};
+}
 function extractRows(text){
  const out=[],lines=String(text||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
  for(let i=0;i<lines.length;i++){
-  let line=lines[i],numeric=ocrDigits(line);
-  let m=numeric.match(/(\d{1,3}(?:[.,\s]\d{3}){1,4}|\d{4,12})\s*$/);
-  if(!m&&i+1<lines.length){
-   const next=ocrDigits(lines[i+1]);
-   if(/^(?:\d{1,3}(?:[.,\s]\d{3})+|\d{4,12})$/.test(next)){
-    line+=' '+lines[++i];numeric=ocrDigits(line);m=numeric.match(/(\d{1,3}(?:[.,\s]\d{3}){1,4}|\d{4,12})\s*$/);
+  let line=lines[i],tail=scoreTail(line);
+  if(!tail&&i+1<lines.length){
+   const next=scoreTail(lines[i+1]);
+   if(next&&next.start===0){
+    line+=' '+lines[++i];tail=scoreTail(line);
    }
   }
-  if(!m)continue;
-  const score=Number(m[1].replace(/[.,\s]/g,''));if(!Number.isSafeInteger(score)||score<1000)continue;
-  const scoreStart=m.index;
+  if(!tail)continue;
+  const score=tail.score,scoreStart=tail.start;
   const left=line.slice(0,scoreStart).replace(/^\s*#?\s*[0-9OoIl|]{1,3}\s*[.)\-:]?\s*/,'').trim();
   if(!left||left.length<2||/^(total|score|points|punkte|rang|rank|ranking|mission|server)\b/i.test(left))continue;
   const tag=left.match(/[\[(]\s*([a-z0-9]{2,6})\s*[\])]/i);
