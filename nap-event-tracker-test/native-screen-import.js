@@ -209,6 +209,25 @@ function extractRows(text){
  }
  return out;
 }
+function repairSequentialRanks(rows){
+ if(!Array.isArray(rows)||rows.length<2)return rows||[];
+ const offsets=new Map();
+ rows.forEach((row,i)=>{
+  const r=Number(row.rank);if(!Number.isInteger(r)||r<1||r>999)return;
+  const off=r-i;offsets.set(off,(offsets.get(off)||0)+1);
+ });
+ const ranked=[...offsets.entries()].sort((a,b)=>b[1]-a[1]);
+ if(!ranked.length)return rows;
+ const [offset,votes]=ranked[0];
+ // Two agreeing anchors are enough; with only one anchor infer only short blocks.
+ if(votes<2&&rows.length>4)return rows;
+ const first=offset,last=offset+rows.length-1;if(first<1||last>999)return rows;
+ return rows.map((row,i)=>{
+  const inferred=offset+i,current=Number(row.rank);
+  const reliable=Number.isInteger(current)&&current===inferred;
+  return {...row,rank:inferred,rankInferred:!reliable,rawRank:row.rank};
+ });
+}
 function similarity(a,b){
  const x=norm(a),y=norm(b);if(!x||!y)return 0;if(x===y)return 1;
  if(x.length<3||y.length<3)return 0;
@@ -474,7 +493,7 @@ async function analyze(){
   for(let i=0;i<times.length;i++){
    if(run!==r)break;const sec=times[i];await seek(video,sec);const full=frameCanvas(video),roi=rankingCanvas(full);
    if(r.frames.length<12&&i%Math.max(1,Math.floor(times.length/12))===0)r.frames.push({time:sec,image:full.toDataURL('image/jpeg',.72)});
-   const text=(await worker.recognize(roi)).data?.text||'';processRows(extractRows(text),sec,full);
+   const text=(await worker.recognize(roi)).data?.text||'';processRows(repairSequentialRanks(extractRows(text)),sec,full);
    progress(1,6+65*((i+1)/times.length),observations.size);await new Promise(resolve=>setTimeout(resolve,0));
   }
   if(run!==r)return;
@@ -484,9 +503,9 @@ async function analyze(){
    const missingSet=new Set(coverage.missing);
    for(let i=0;i<rescue.length;i++){
     if(run!==r)break;const sec=rescue[i];await seek(video,sec);const full=frameCanvas(video),roi=rankingCanvas(full);
-    let rows=extractRows((await worker.recognize(roi)).data?.text||'');
+    let rows=repairSequentialRanks(extractRows((await worker.recognize(roi)).data?.text||''));
     if(!rows.some(x=>missingSet.has(x.rank))){
-     const enhanced=enhancedCanvas(roi),extra=extractRows((await worker.recognize(enhanced)).data?.text||'');
+     const enhanced=enhancedCanvas(roi),extra=repairSequentialRanks(extractRows((await worker.recognize(enhanced)).data?.text||''));
      const seen=new Set(rows.map(x=>(x.rank||'')+'|'+norm(x.name)+'|'+x.score));
      rows=rows.concat(extra.filter(x=>!seen.has((x.rank||'')+'|'+norm(x.name)+'|'+x.score)));
     }
@@ -498,7 +517,8 @@ async function analyze(){
   if(run!==r)return;
   r.coverage=coverage;
   r.hits=[...observations.values()].map(consensusHit).filter(Boolean).sort((a,b)=>(a.rank&&b.rank?a.rank-b.rank:b.score-a.score));
-  r.unmatched=[...unmatched.values()].sort((a,b)=>(a.rank||999)-(b.rank||999)).slice(0,40);
+  const matchedRanks=new Set(r.hits.map(h=>h.rank).filter(Boolean));
+  r.unmatched=[...unmatched.values()].filter(u=>!matchedRanks.has(u.rank)&&!r.hits.some(h=>u.score===h.score&&similarity(u.name,h.player?.player_name||'')>=.62)).sort((a,b)=>(a.rank||999)-(b.rank||999)).slice(0,40);
   progress(2,96,r.hits.length);
   if(r.kind==='law'){
    const occ=selectedOcc();
