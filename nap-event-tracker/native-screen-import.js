@@ -43,22 +43,27 @@ function postContactText(key){const d=POST_CONTACT_WORDS[lang()]||POST_CONTACT_W
 const reviewText=(key)=>((REVIEW_WORDS[lng()]||REVIEW_WORDS.de)[key]||key);
 const points=n=>Number(n).toLocaleString('de-DE');
 const NAP_ORDER=['NWO','THM','CWR','NRW','PxR','NwO'];
+const UNAFFILIATED_CODE='__UNAFFILIATED__';
 let alliancePower=new Map();
 const alphabeticalRoster=members=>members.map((p,i)=>({p,i})).sort((a,b)=>String(a.p.player_name||'').localeCompare(String(b.p.player_name||''),'de',{sensitivity:'base',numeric:true})||String(a.p.player_game_id||'').localeCompare(String(b.p.player_game_id||''),'de',{numeric:true}));
+const allianceValueForPlayer=p=>p?.alliance_code==null?UNAFFILIATED_CODE:String(p.alliance_code);
+const allianceLabelForValue=a=>a===UNAFFILIATED_CODE?ocr2('unaffiliated'):a;
 function orderedAlliances(members){
  const names=[...new Set(members.map(p=>p.alliance_code).filter(Boolean))];
- return names.sort((a,b)=>{
+ const nap=NAP_ORDER.filter(a=>names.includes(a));
+ const external=names.filter(a=>!NAP_ORDER.includes(a)).sort((a,b)=>{
   const pa=Number(alliancePower.get(a)||0),pb=Number(alliancePower.get(b)||0);
   if(pa>0&&pb>0&&pa!==pb)return pb-pa;
   if(pa>0)return -1;if(pb>0)return 1;
-  const ai=NAP_ORDER.indexOf(a),bi=NAP_ORDER.indexOf(b);
-  if(ai>=0&&bi>=0)return ai-bi;
-  if(ai>=0)return -1;if(bi>=0)return 1;
   return a.localeCompare(b,'de',{sensitivity:'base',numeric:true});
  });
+ return [...nap,...(members.some(p=>p.alliance_code==null)?[UNAFFILIATED_CODE]:[]),...external];
 }
 function allianceOptions(members){
- return orderedAlliances(members).map(a=>selectOption(a+(alliancePower.get(a)?' · '+reviewText('alliancePower')+' '+points(alliancePower.get(a)):'') ,a)).join('');
+ return orderedAlliances(members).map(a=>selectOption(
+  allianceLabelForValue(a)+(a!==UNAFFILIATED_CODE&&alliancePower.get(a)?' · '+reviewText('alliancePower')+' '+points(alliancePower.get(a)):''),
+  a
+ )).join('');
 }
 const parsePoints=raw=>{const x=String(raw??'').trim();if(!/^(?:\d+|\d{1,3}(?:\.\d{3})+)$/.test(x))return null;const n=Number(x.replace(/\./g,''));return Number.isSafeInteger(n)&&n>=0?n:null};
 const $=(s,root=document)=>root.querySelector(s);
@@ -66,8 +71,40 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const norm=s=>String(s||'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase().replace(/[^\p{L}\p{N}]/gu,'');
 const lng=()=>$('#languagePicker')?.value||'de';
 const tr=k=>(WORDS[lng()]||WORDS.de)[k]||k;
+const OCR2_WORDS={
+ de:{coverage:'Rangabdeckung',complete:'Rangfolge vollständig',missing:'Nicht sicher erkannt',rescue:'Einige Stellen werden noch einmal geprüft',manual:'Bitte fehlende Ränge vor dem Speichern manuell prüfen',version:'Erkennung V2',scan:'Video wird geprüft',collect:'Spieler werden erfasst',finish:'Ergebnis wird geprüft',rankSlots:'Rankingplätze gelesen',matched:'Spieler zugeordnet',unassigned:'nicht zugeordnet',reviewable:'prüfbare Ergebnisse',exemptCount:'ausgenommen',poolCandidate:'Als allianzlosen Spieler anlegen',poolHint:'Kein Allianz-Tag erkannt. Namen prüfen und als allianzlosen Tracking-Spieler anlegen. Es wird keine Sanktion erzeugt.',poolCreated:'Allianzloser Spieler wurde dem Tracking-Pool hinzugefügt.',poolConflict:'Ein Spieler mit diesem Namen existiert bereits in einer Allianz. Bitte manuell zuordnen.',tracking:'Allianzloses Tracking',trackingHint:'Historisch gespeichert · keine Law-14-Sanktion, solange keine Allianz zugeordnet ist.',unaffiliated:'Allianzlos',trackingSaved:'allianzloser Tracking-Eintrag gespeichert'},
+ en:{coverage:'Rank coverage',complete:'Rank sequence complete',missing:'Not confidently detected',rescue:'A few areas are being checked again',manual:'Please review missing ranks manually before saving',version:'Recognition V2',scan:'Checking video',collect:'Reading players',finish:'Checking results',rankSlots:'ranking positions read',matched:'players matched',unassigned:'unmatched',reviewable:'reviewable results',exemptCount:'exempt',poolCandidate:'Add as alliance-less player',poolHint:'No alliance tag detected. Verify the name and add this player to alliance-less tracking. No sanction will be created.',poolCreated:'Alliance-less player added to the tracking pool.',poolConflict:'A player with this name already exists in an alliance. Assign manually instead.',tracking:'Alliance-less tracking',trackingHint:'Stored as history · no Law 14 sanction while no alliance is assigned.',unaffiliated:'Alliance-less',trackingSaved:'alliance-less tracking entry saved'},
+ fr:{coverage:'Couverture des rangs',complete:'Séquence des rangs complète',missing:'Non détecté avec certitude',rescue:'Certaines zones sont vérifiées à nouveau',manual:'Vérifiez manuellement les rangs manquants avant d’enregistrer',version:'Reconnaissance V2',scan:'Vérification de la vidéo',collect:'Lecture des joueurs',finish:'Vérification du résultat',rankSlots:'places du classement lues',matched:'joueurs associés',unassigned:'non associés',reviewable:'résultats à vérifier',exemptCount:'exemptés',poolCandidate:'Ajouter comme joueur sans alliance',poolHint:'Aucun tag d’alliance détecté. Vérifiez le nom et ajoutez le joueur au suivi sans alliance. Aucune sanction ne sera créée.',poolCreated:'Joueur sans alliance ajouté au suivi.',poolConflict:'Un joueur portant ce nom existe déjà dans une alliance. Attribuez-le manuellement.',tracking:'Suivi sans alliance',trackingHint:'Historique enregistré · aucune sanction Law 14 tant qu’aucune alliance n’est attribuée.',unaffiliated:'Sans alliance',trackingSaved:'entrée de suivi sans alliance enregistrée'},
+ es:{coverage:'Cobertura de rangos',complete:'Secuencia de rangos completa',missing:'No detectado con seguridad',rescue:'Se están revisando de nuevo algunas zonas',manual:'Revisa manualmente los rangos que faltan antes de guardar',version:'Reconocimiento V2',scan:'Revisando vídeo',collect:'Leyendo jugadores',finish:'Revisando resultado',rankSlots:'puestos leídos',matched:'jugadores asociados',unassigned:'sin asociar',reviewable:'resultados revisables',exemptCount:'exentos',poolCandidate:'Añadir como jugador sin alianza',poolHint:'No se detectó etiqueta de alianza. Revisa el nombre y añádelo al seguimiento sin alianza. No se creará ninguna sanción.',poolCreated:'Jugador sin alianza añadido al seguimiento.',poolConflict:'Ya existe un jugador con este nombre en una alianza. Asígnalo manualmente.',tracking:'Seguimiento sin alianza',trackingHint:'Guardado como historial · sin sanción Law 14 mientras no tenga alianza.',unaffiliated:'Sin alianza',trackingSaved:'entrada de seguimiento sin alianza guardada'}
+};
+const ocr2=k=>(OCR2_WORDS[lng()]||OCR2_WORDS.de)[k]||k;
 const fmt=x=>Number(x||0).toLocaleString(lng()==='de'?'de-DE':lng()==='fr'?'fr-FR':lng()==='es'?'es-ES':'en-US');
-let run=null,workerPromise=null,rosterPromise=null;
+const isTrackingHit=h=>!!h?.trackingOnly||h?.player?.alliance_code==null;
+let run=null,workerPromise=null,rosterPromise=null,wakeLockSentinel=null;
+async function acquireOcrWakeLock(){
+ if(!run?.ocrActive||document.visibilityState!=='visible'||!('wakeLock' in navigator))return false;
+ if(wakeLockSentinel&&!wakeLockSentinel.released)return true;
+ try{
+  const sentinel=await navigator.wakeLock.request('screen');
+  wakeLockSentinel=sentinel;
+  sentinel.addEventListener('release',()=>{
+   if(wakeLockSentinel===sentinel)wakeLockSentinel=null;
+  },{once:true});
+  return true;
+ }catch(err){
+  console.warn('Screen Wake Lock unavailable during OCR',err);
+  return false;
+ }
+}
+async function releaseOcrWakeLock(){
+ const sentinel=wakeLockSentinel;
+ wakeLockSentinel=null;
+ if(!sentinel||sentinel.released)return;
+ try{await sentinel.release()}catch(err){console.warn('Wake Lock release',err)}
+}
+document.addEventListener('visibilitychange',()=>{
+ if(document.visibilityState==='visible'&&run?.ocrActive)acquireOcrWakeLock();
+});
 function getSession(){try{return JSON.parse(localStorage.getItem(SESSION_KEY)||'null')}catch{return null}}
 async function headers(json=true){
  let s=getSession();if(!s?.access_token)throw Error('Your V2 session expired. Please sign in again.');
@@ -88,7 +125,8 @@ function canPassThroughForEvidence(status,hasImage){
  return !!hasImage&&['violation','update','already_recorded'].includes(status);
 }
 async function uploadEvidencePayload(item){
- const res=await fetch(API+'/functions/v1/screen-evidence-upload',{
+ const endpoint=item?.p_observation_id?'screen-tracking-evidence-upload':'screen-evidence-upload';
+ const res=await fetch(API+'/functions/v1/'+endpoint,{
   method:'POST',headers:await headers(),body:JSON.stringify(item)
  });
  if(!res.ok){const err=await res.text();throw Error('Evidence '+res.status+': '+err.slice(0,180))}
@@ -123,11 +161,15 @@ async function retryPendingEvidence(){
   }
  }finally{r.busy=false;button.disabled=false}
 }
-async function roster(){
+async function roster(force=false){
+ if(force)rosterPromise=null;
  if(rosterPromise)return rosterPromise;
- rosterPromise=(async()=>{
+ const pending=(async()=>{
   const [rows,own,alliances]=await Promise.all([
-   rpc('get_nap_screen_import_directory_test'),
+   rpc('get_nap_screen_import_directory_v3').catch(async e=>{
+    console.warn('Full screen-import directory unavailable, using legacy directory',e);
+    return await rpc('get_nap_screen_import_directory_test');
+   }),
    rpc('get_own_player_identity_directory'),
    (async()=>{try{
     const res=await fetch(API+'/rest/v1/alliance_registry?select=alliance_code,power&enabled=eq.true&limit=1000',{headers:await headers(false)});
@@ -138,8 +180,10 @@ async function roster(){
   alliancePower=new Map((alliances||[]).filter(x=>x.alliance_code&&Number(x.power)>0).map(x=>[x.alliance_code,Number(x.power)]));
   const aliases=new Map((own||[]).map(x=>[String(x.player_game_id),x.aliases||[]]));
   return (rows||[]).map(x=>({...x,aliases:aliases.get(String(x.player_game_id))||[],player_id:x.player_id||null}));
- })().catch(e=>{rosterPromise=null;throw e});
- return rosterPromise;
+ })();
+ rosterPromise=pending;
+ try{return await pending}
+ finally{if(rosterPromise===pending)rosterPromise=null}
 }
 async function ensureWorker(){
  if(workerPromise)return workerPromise;
@@ -150,7 +194,11 @@ async function ensureWorker(){
     el.onload=resolve;el.onerror=()=>reject(Error('OCR library could not be loaded'));document.head.appendChild(el);
    });
   }
-  return window.Tesseract.createWorker('eng',1);
+  // Mobile fast path: English handles ranks, alliance tags, Latin names and scores.
+  // Unknown/Korean names remain visible through rank coverage and can be rescued manually.
+  const worker=await window.Tesseract.createWorker('eng',1);
+  try{await worker.setParameters({preserve_interword_spaces:'1',tessedit_pageseg_mode:'6'})}catch(err){console.warn('OCR parameters',err)}
+  return worker;
  })().catch(e=>{workerPromise=null;throw e});
  return workerPromise;
 }
@@ -160,6 +208,12 @@ function dayUTC(stamp,delta=0){
 }
 function dayNum(d){return Date.parse(String(d)+'T00:00:00Z')}
 function validDay(runDay,occ){return !!runDay&&!!occ&&dayNum(runDay)<Date.parse(occ.end_at)&&dayNum(runDay)+86400000>Date.parse(occ.begin_at)&&dayNum(runDay)<=dayNum(new Date().toISOString().slice(0,10))}
+function validRecordingDay(runDay,occ){
+ if(!runDay||!occ)return false;
+ const d=dayNum(runDay),start=dayNum(dayUTC(occ.begin_at)),endPlusOne=dayNum(dayUTC(new Date(Date.parse(occ.end_at)+86400000)));
+ const today=dayNum(dayUTC(new Date()));
+ return d>=start&&d<=endPlusOne&&d<=today;
+}
 async function sha256(file){
  const n=Math.min(file.size,1048576),a=new Uint8Array(await file.slice(0,n).arrayBuffer());
  const b=new Uint8Array(await file.slice(Math.max(n,file.size-n)).arrayBuffer());
@@ -168,24 +222,185 @@ async function sha256(file){
  const hash=await crypto.subtle.digest('SHA-256',bytes);
  return Array.from(new Uint8Array(hash),x=>x.toString(16).padStart(2,'0')).join('');
 }
+function ocrDigits(raw){
+ return String(raw||'').replace(/[Oo]/g,'0').replace(/[Il|]/g,'1');
+}
 function sourceRank(line){
- const m=String(line||'').match(/^\s*#?\s*(\d{1,3})\s*[.)\-:]?\s+(?=\S)/);
- return m?Number(m[1]):null;
+ const lead=ocrDigits(String(line||'').trimStart());
+ const m=lead.match(/^#?\s*(\d{1,3})\s*[.)\-:]?\s+(?=\S)/);
+ if(!m)return null;
+ const n=Number(m[1]);return Number.isInteger(n)&&n>=1&&n<=999?n:null;
+}
+function scoreTail(line){
+ const s=String(line||'');
+ // Only normalize OCR lookalikes inside the final numeric token. Never convert
+ // letters in the player name (e.g. the "ll" in "Hell") into score digits.
+ const m=s.match(/(?:^|\s)([0-9OoIl|]{1,3}(?:[.,\s][0-9OoIl|]{3}){1,4}|[0-9OoIl|]{4,12})\s*$/);
+ if(!m)return null;
+ const raw=m[1],normalized=ocrDigits(raw),score=Number(normalized.replace(/[.,\s]/g,''));
+ if(!Number.isSafeInteger(score)||score<1000)return null;
+ const tokenStart=s.lastIndexOf(raw);
+ return {raw,score,start:tokenStart};
 }
 function extractRows(text){
  const out=[],lines=String(text||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
  for(let i=0;i<lines.length;i++){
-  let line=lines[i];
-  let m=line.match(/(\d{1,3}(?:[.,\s]\d{3}){1,4}|\d{4,12})\s*$/);
-  if(!m&&i+1<lines.length&&/^(?:\d{1,3}(?:[.,\s]\d{3})+|\d{4,12})$/.test(lines[i+1])){
-   line+=' '+lines[++i];m=line.match(/(\d{1,3}(?:[.,\s]\d{3}){1,4}|\d{4,12})\s*$/);
+  let line=lines[i],tail=scoreTail(line);
+  if(!tail&&i+1<lines.length){
+   const next=scoreTail(lines[i+1]);
+   if(next&&next.start===0){
+    line+=' '+lines[++i];tail=scoreTail(line);
+   }
   }
-  if(!m)continue;
-  const score=Number(m[1].replace(/[.,\s]/g,''));if(!Number.isSafeInteger(score)||score<1000)continue;
-  const left=line.slice(0,m.index).replace(/^\s*#?\s*\d{1,3}\s*[.)\-:]?\s*/,'').trim();
+  if(!tail)continue;
+  const score=tail.score,scoreStart=tail.start;
+  const left=line.slice(0,scoreStart).replace(/^\s*#?\s*[0-9OoIl|]{1,3}\s*[.)\-:]?\s*/,'').trim();
   if(!left||left.length<2||/^(total|score|points|punkte|rang|rank|ranking|mission|server)\b/i.test(left))continue;
   const tag=left.match(/[\[(]\s*([a-z0-9]{2,6})\s*[\])]/i);
-  out.push({name:left.replace(/[\[(]\s*[a-z0-9]{2,6}\s*[\])]/gi,' ').trim(),alliance:tag?.[1]||'',score,rank:sourceRank(line),raw:line});
+  let name=left.replace(/[\[(]\s*[a-z0-9]{2,6}\s*[\])]/gi,' ').trim();
+  if(tag&&Number.isInteger(tag.index)){
+   const after=left.slice(tag.index+tag[0].length).trim();
+   if(norm(after).length>=2)name=after;
+  }
+  name=name.replace(/^[^\p{L}\p{N}~_-]+/gu,'').trim();
+  out.push({name,alliance:tag?.[1]||'',score,rank:sourceRank(line),raw:line});
+ }
+ return out;
+}
+function ocrLinesFromBlocks(blocks){
+ const out=[];
+ for(const block of blocks||[])for(const paragraph of block?.paragraphs||[])for(const line of paragraph?.lines||[]){
+  if(line?.text&&line?.bbox)out.push({text:String(line.text).trim(),bbox:line.bbox});
+ }
+ return out;
+}
+function attachLayout(rows,blocks){
+ const lines=ocrLinesFromBlocks(blocks);
+ if(!lines.length)return rows;
+ return (rows||[]).map(row=>{
+  const candidates=lines.map(line=>{
+   const tail=scoreTail(line.text),nameText=line.text.replace(/\s*[0-9OoIl|]{1,3}(?:[.,\s][0-9OoIl|]{3}){1,4}\s*$/,'');
+   const score=(tail&&tail.score===row.score?1:0)+(similarity(nameText,row.name)*.45);
+   return {line,score};
+  }).sort((a,b)=>b.score-a.score);
+  return candidates[0]?.score>=.32?{...row,bbox:candidates[0].line.bbox}:{...row};
+ });
+}
+function parseOcrData(data){
+ return attachLayout(repairSequentialRanks(extractRows(data?.text||'')),data?.blocks||[]);
+}
+function qualityNameCanvas(roi,bbox){
+ if(!bbox||![bbox.x0,bbox.y0,bbox.x1,bbox.y1].every(Number.isFinite))return null;
+ const x0=Math.max(0,Math.round(roi.width*.285)),x1=Math.min(roi.width,Math.round(roi.width*.735));
+ const y0=Math.max(0,Math.floor(bbox.y0-26)),y1=Math.min(roi.height,Math.ceil(bbox.y1+26));
+ if(x1<=x0||y1<=y0)return null;
+ const w=x1-x0,h=y1-y0,scale=Math.min(2.3,1750/Math.max(1,w)),out=document.createElement('canvas');
+ out.width=Math.max(1,Math.round(w*scale));out.height=Math.max(1,Math.round(h*scale));
+ const cx=out.getContext('2d',{willReadFrequently:true});cx.imageSmoothingEnabled=true;cx.imageSmoothingQuality='high';
+ cx.drawImage(roi,x0,y0,w,h,0,0,out.width,out.height);return out;
+}
+function qualityScoreCanvas(roi,bbox){
+ if(!bbox||![bbox.y0,bbox.y1].every(Number.isFinite))return null;
+ const x0=Math.max(0,Math.round(roi.width*.72)),x1=Math.min(roi.width,Math.round(roi.width*.995));
+ const y0=Math.max(0,Math.floor(bbox.y0-26)),y1=Math.min(roi.height,Math.ceil(bbox.y1+26));
+ if(x1<=x0||y1<=y0)return null;
+ const w=x1-x0,h=y1-y0,scale=Math.min(2.35,1200/Math.max(1,w)),out=document.createElement('canvas');
+ out.width=Math.max(1,Math.round(w*scale));out.height=Math.max(1,Math.round(h*scale));
+ const cx=out.getContext('2d',{willReadFrequently:true});cx.imageSmoothingEnabled=true;cx.imageSmoothingQuality='high';
+ cx.drawImage(roi,x0,y0,w,h,0,0,out.width,out.height);return out;
+}
+function parseNameOnly(text,fallbackAlliance=''){
+ const lines=String(text||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+ if(!lines.length)return null;
+ let best=lines.sort((a,b)=>(b.match(/[\p{L}\p{N}]/gu)||[]).length-(a.match(/[\p{L}\p{N}]/gu)||[]).length)[0]||'';
+ best=best.replace(/^\s*#?\s*[0-9OoIl|]{1,3}\s*[.)\-:]?\s*/,'').replace(/\s*[0-9OoIl|]{1,3}(?:[.,\s][0-9OoIl|]{3}){1,4}\s*$/,'').trim();
+ const tag=best.match(/[\[(]\s*([a-z0-9]{2,6})\s*[\])]/i);
+ let name=best.replace(/[\[(]\s*[a-z0-9]{2,6}\s*[\])]/gi,' ').trim();
+ if(tag&&Number.isInteger(tag.index)){
+  const after=best.slice(tag.index+tag[0].length).trim();
+  if(norm(after).length>=2)name=after;
+ }
+ name=name.replace(/^[^\p{L}\p{N}~_-]+|[^\p{L}\p{N}~_-]+$/gu,'').trim();
+ if(norm(name).length<2)return null;
+ return {name,alliance:tag?.[1]||fallbackAlliance||'',raw:best};
+}
+function parseScoreOnly(text){
+ const lines=String(text||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+ for(const line of lines){
+  const cleaned=ocrDigits(line).replace(/[^0-9.,\s]/g,' ').trim();
+  const m=cleaned.match(/(\d{1,3}(?:[.,\s]\d{3}){1,4}|\d{4,12})/);
+  if(!m)continue;
+  const n=Number(m[1].replace(/[.,\s]/g,''));
+  if(Number.isSafeInteger(n)&&n>=1000)return n;
+ }
+ return null;
+}
+function qualityNameRow(text,group,scoreOverride=null){
+ const parsed=parseNameOnly(text,group.alliance||'');
+ if(!parsed)return null;
+ return {...group,...parsed,score:Number.isSafeInteger(scoreOverride)?scoreOverride:group.score,rank:group.rank,quality:true};
+}
+function splitPodiumCards(podium){
+ const out=[];
+ for(let i=0;i<3;i++){
+  const band0=podium.height*(i/3),band1=podium.height*((i+1)/3),trim=podium.height*.006;
+  const y0=Math.round(band0+trim),y1=Math.round(band1-trim);
+  const card=document.createElement('canvas');card.width=podium.width;card.height=Math.max(1,y1-y0);
+  card.getContext('2d',{willReadFrequently:true}).drawImage(podium,0,y0,podium.width,y1-y0,0,0,card.width,card.height);
+  out.push(card);
+ }
+ return out;
+}
+function podiumNameCanvas(card){
+ const x0=Math.round(card.width*.285),x1=Math.round(card.width*.73),y0=Math.round(card.height*.08),y1=Math.round(card.height*.92);
+ const out=document.createElement('canvas'),w=x1-x0,h=y1-y0,scale=Math.min(2.25,1700/Math.max(1,w));
+ out.width=Math.max(1,Math.round(w*scale));out.height=Math.max(1,Math.round(h*scale));
+ out.getContext('2d',{willReadFrequently:true}).drawImage(card,x0,y0,w,h,0,0,out.width,out.height);return out;
+}
+function podiumScoreCanvas(card){
+ const x0=Math.round(card.width*.72),x1=Math.round(card.width*.995),y0=Math.round(card.height*.08),y1=Math.round(card.height*.92);
+ const out=document.createElement('canvas'),w=x1-x0,h=y1-y0,scale=Math.min(2.3,1150/Math.max(1,w));
+ out.width=Math.max(1,Math.round(w*scale));out.height=Math.max(1,Math.round(h*scale));
+ out.getContext('2d',{willReadFrequently:true}).drawImage(card,x0,y0,w,h,0,0,out.width,out.height);return out;
+}
+function ranksFromText(text){
+ const out=[];
+ for(const line of String(text||'').split(/\r?\n/)){
+  const rank=sourceRank(line);
+  if(Number.isInteger(rank)&&rank>=1&&rank<=999)out.push(rank);
+ }
+ return [...new Set(out)];
+}
+function extractPodiumRows(text){
+ const rows=extractRows(text).slice(0,3);
+ if(rows.length===3){
+  return rows.map((row,i)=>({...row,rank:i+1,podium:true,rankInferred:true,rawRank:row.rank}));
+ }
+ // Partial fallback: keep only ranks that OCR itself clearly identified as 1–3.
+ return rows.filter(row=>Number.isInteger(row.rank)&&row.rank>=1&&row.rank<=3).map(row=>({...row,podium:true}));
+}
+function repairSequentialRanks(rows){
+ if(!Array.isArray(rows)||rows.length<2)return rows||[];
+ const out=rows.map(r=>({...r}));
+ const valid=r=>Number.isInteger(Number(r))&&Number(r)>=1&&Number(r)<=999;
+ for(let i=0;i<out.length;i++){
+  const current=valid(out[i].rank)?Number(out[i].rank):null;
+  let pi=i-1;while(pi>=0&&!valid(out[pi].rank))pi--;
+  let ni=i+1;while(ni<out.length&&!valid(out[ni].rank))ni++;
+  let inferred=null;
+  if(pi>=0&&ni<out.length){
+   const pr=Number(out[pi].rank),nr=Number(out[ni].rank);
+   if(nr-pr===ni-pi)inferred=pr+(i-pi);
+  }else if(pi>=1&&valid(out[pi-1].rank)){
+   const a=Number(out[pi-1].rank),b=Number(out[pi].rank);
+   if(b===a+1)inferred=b+(i-pi);
+  }else if(ni+1<out.length&&valid(out[ni+1].rank)){
+   const a=Number(out[ni].rank),b=Number(out[ni+1].rank);
+   if(b===a+1)inferred=a-(ni-i);
+  }
+  if(inferred!=null&&inferred>=1&&inferred<=999&&current!==inferred){
+   out[i]={...out[i],rank:inferred,rankInferred:true,rawRank:out[i].rank};
+  }
  }
  return out;
 }
@@ -197,29 +412,282 @@ function similarity(a,b){
  for(let i=1;i<=x.length;i++){const next=[i];for(let j=1;j<=y.length;j++)next[j]=Math.min(next[j-1]+1,prev[j]+1,prev[j-1]+(x[i-1]===y[j-1]?0:1));prev=next}
  return Math.max(0,1-prev[y.length]/Math.max(x.length,y.length));
 }
+function playerNameSimilarity(row,p){
+ const raw=norm(row?.name),code=norm(p?.alliance_code||''),variants=[raw];
+ if(code&&raw.startsWith(code)&&raw.length>code.length)variants.push(raw.slice(code.length));
+ const names=[p.player_name,...(p.aliases||[])].filter(Boolean);
+ let best=0;
+ for(const n of names){
+  const nn=norm(n);if(!nn)continue;
+  for(const v of variants){
+   best=Math.max(best,similarity(v,nn));
+   // OCR often glues the alliance code/noise to very short names (PxRJAK1 -> Ak1).
+   if(nn.length<=4&&v.endsWith(nn)&&code&&v.startsWith(code))best=Math.max(best,.995);
+   else if(nn.length>=5&&v.endsWith(nn))best=Math.max(best,.97);
+  }
+ }
+ return best;
+}
+function rankedPlayerCandidates(row,members){
+ return members.map(p=>({p,s:playerNameSimilarity(row,p)})).filter(x=>x.s>=.72).sort((a,b)=>b.s-a.s);
+}
+function oneDigitSuffixMatch(a,b){
+ const x=norm(a),y=norm(b),mx=x.match(/^(.*?)(\d+)$/),my=y.match(/^(.*?)(\d+)$/);
+ if(!mx||!my||mx[1]!==my[1]||mx[1].length<2||mx[2].length!==my[2].length)return false;
+ let diff=0;
+ for(let i=0;i<mx[2].length;i++)if(mx[2][i]!==my[2][i]&&++diff>1)return false;
+ return diff===1;
+}
+function uniquePoolNumericSuffixMatch(row,members){
+ const hits=members.filter(p=>
+  [p.player_name,...(p.aliases||[])].some(n=>oneDigitSuffixMatch(row.name,n))
+ );
+ return hits.length===1&&hits[0].alliance_code==null?hits[0]:null;
+}
 function matchPlayer(row,members){
- if(!norm(row.name))return null;
- const tagged=members.filter(p=>!row.alliance||String(p.alliance_code).toLowerCase()===row.alliance.toLowerCase());
- const list=tagged.map(p=>{
-  const names=[p.player_name,...(p.aliases||[])];return {p,s:Math.max(...names.map(n=>similarity(row.name,n)))};
- }).filter(x=>x.s>=.78).sort((a,b)=>b.s-a.s);
- const best=list[0],second=list[1];
- if(!best||best.s<(row.alliance?.92:.96)||second&&best.s-second.s<.07&&best.s<.995)return null;
- if(norm(row.name).length<=4&&best.s<.995)return null;
- return {...best.p,confidence:best.s};
+ const rowNorm=norm(row.name);if(!rowNorm)return null;
+ const exact=members.filter(p=>[p.player_name,...(p.aliases||[])].some(n=>norm(n)===rowNorm));
+ if(exact.length===1)return {...exact[0],confidence:1,allianceMismatch:!!row.alliance&&String(exact[0].alliance_code||'').toLowerCase()!==String(row.alliance).toLowerCase(),exactName:true};
+ const numericPool=uniquePoolNumericSuffixMatch(row,members);
+ if(numericPool)return {...numericPool,confidence:.985,allianceMismatch:!!row.alliance,numericSuffixCorrected:true};
+ const quality=!!row.quality,alliance=String(row.alliance||'').toLowerCase();
+ const same=alliance?members.filter(p=>String(p.alliance_code||'').toLowerCase()===alliance):members;
+ let list=rankedPlayerCandidates(row,same),best=list[0],second=list[1];
+ const threshold=quality?(row.alliance?.84:.90):(row.alliance?.92:.96),margin=quality?.06:.07;
+ const accept=(b,s,t=threshold)=>{
+  if(!b||b.s<t)return false;
+  if(s&&b.s-s.s<margin&&b.s<(quality?.97:.995))return false;
+  if(norm(row.name).length<=4&&b.s<(quality?.94:.995))return false;
+  return true;
+ };
+ if(accept(best,second))return {...best.p,confidence:best.s,allianceMismatch:false};
+ // Transfer/stale-roster fallback: allow only a unique near-exact name/alias match
+ // across all alliances. The detected alliance from the recording remains on row.alliance.
+ if(alliance){
+  list=rankedPlayerCandidates(row,members);best=list[0];second=list[1];
+  const exactish=best&&(best.s>=.985)&&(!second||best.s-second.s>=.08||best.s>=.999);
+  if(exactish)return {...best.p,confidence:best.s,allianceMismatch:String(best.p.alliance_code||'').toLowerCase()!==alliance};
+ }
+ return null;
+}
+function memberKey(p){return String(p?.player_game_id||p?.player_id||'')}
+function bestMemberForVariant(row,members){
+ const same=row.alliance?members.filter(p=>String(p.alliance_code||'').toLowerCase()===String(row.alliance).toLowerCase()):members;
+ let list=rankedPlayerCandidates(row,same);
+ if((!list[0]||list[0].s<.78)&&row.alliance)list=rankedPlayerCandidates(row,members);
+ return {best:list[0]||null,second:list[1]||null};
+}
+function groupUnmatchedRows(rows,matchedRanks=new Set()){
+ const byRank=new Map(),loose=[];
+ for(const row of rows||[]){
+  if(Number.isInteger(row.rank)&&row.rank>=1&&row.rank<=999){
+   if(matchedRanks.has(row.rank))continue;
+   if(!byRank.has(row.rank))byRank.set(row.rank,[]);
+   byRank.get(row.rank).push(row);
+  }else loose.push(row);
+ }
+ const grouped=[...byRank.entries()].map(([rank,variants])=>{
+  const scoreGroups=new Map();
+  for(const v of variants){
+   const k=String(v.score);
+   if(!scoreGroups.has(k))scoreGroups.set(k,[]);
+   for(let n=0;n<Math.max(1,Number(v._seen)||1);n++)scoreGroups.get(k).push(v);
+  }
+  const scoreSets=[...scoreGroups.values()].sort((a,b)=>b.length-a.length);
+  let chosen=scoreSets[0]||variants;
+  if(scoreSets.length>1&&scoreSets[0].length===scoreSets[1].length){
+   const nums=variants.map(v=>Number(v.score)).filter(Number.isFinite).sort((a,b)=>a-b);
+   const med=nums[Math.floor(nums.length/2)];
+   chosen=[...variants].sort((a,b)=>Math.abs(Number(a.score)-med)-Math.abs(Number(b.score)-med)).slice(0,1);
+  }
+  const allianceCounts=new Map();
+  for(const v of variants)if(v.alliance){
+   const k=String(v.alliance);allianceCounts.set(k,(allianceCounts.get(k)||0)+1);
+  }
+  const alliance=[...allianceCounts.entries()].sort((a,b)=>b[1]-a[1])[0]?.[0]||chosen[0]?.alliance||'';
+  const rep=[...chosen].sort((a,b)=>String(b.name||'').length-String(a.name||'').length)[0]||variants[0];
+  const names=[...new Set(variants.map(v=>String(v.name||'').trim()).filter(Boolean))].slice(0,4);
+  const variantCount=variants.reduce((n,v)=>n+Math.max(1,Number(v._seen)||1),0);
+  return {...rep,rank,alliance,variants,variantCount,
+   raw:'Rang '+rank+' · '+(names.join(' / ')||rep.raw||'')+' · '+fmt(rep.score)+(variants.length>1?' · '+variants.length+' OCR':'' )};
+ });
+ grouped.loose=loose;
+ return grouped.sort((a,b)=>a.rank-b.rank);
+}
+function consensusMatchGroup(group,members,usedPlayers=new Set()){
+ const variants=group?.variants||[group];
+ if(variants.length<2)return null;
+ const votes=new Map(),scores=new Map();
+ for(const row of variants){
+  const {best,second}=bestMemberForVariant(row,members);
+  if(!best||best.s<.78)return null;
+  // Each individual sighting must have at least a small lead.
+  if(second&&best.s-second.s<.025&&best.s<.94)continue;
+  const key=memberKey(best.p);if(!key||usedPlayers.has(key))continue;
+  const weight=Math.max(1,Number(row._seen)||1);
+  votes.set(key,(votes.get(key)||0)+weight);
+  if(!scores.has(key))scores.set(key,[]);
+  for(let n=0;n<weight;n++)scores.get(key).push(best.s);
+ }
+ const ranked=[...votes.entries()].sort((a,b)=>b[1]-a[1]||
+   (Math.max(...(scores.get(b[0])||[0]))-Math.max(...(scores.get(a[0])||[0]))));
+ if(!ranked.length)return null;
+ const [key,voteCount]=ranked[0],runner=ranked[1]?.[1]||0;
+ const sims=(scores.get(key)||[]).sort((a,b)=>b-a);
+ const avg=sims.reduce((a,b)=>a+b,0)/Math.max(1,sims.length);
+ // Require repeat agreement. Short/noisy names need stronger confidence.
+ if(voteCount<2||voteCount<=runner||avg<.84||sims[0]<.88)return null;
+ const player=members.find(p=>memberKey(p)===key);if(!player)return null;
+ const same=variants.filter(v=>{
+  const {best}=bestMemberForVariant(v,members);return best&&memberKey(best.p)===key;
+ });
+ const scoreGroups=new Map();
+ for(const v of same){
+  const k=String(v.score);if(!scoreGroups.has(k))scoreGroups.set(k,[]);
+  for(let n=0;n<Math.max(1,Number(v._seen)||1);n++)scoreGroups.get(k).push(v);
+ }
+ const winning=[...scoreGroups.values()].sort((a,b)=>b.length-a.length)[0]||same;
+ const exemplar=[...winning].sort((a,b)=>similarity(b.name,player.player_name)-similarity(a.name,player.player_name))[0]||same[0];
+ return {...exemplar,player:{...player,confidence:avg},alliance:player.alliance_code||group.alliance,
+   rank:group.rank,observations:variants.length,consensus:winning.length,autoConsensus:true,trackingOnly:player.alliance_code==null};
 }
 function frameCanvas(video){
- const canvas=document.createElement('canvas'),scale=Math.min(2.1,1900/Math.max(1,video.videoWidth));
+ const canvas=document.createElement('canvas'),scale=Math.min(1.35,1400/Math.max(1,video.videoWidth));
  canvas.width=Math.max(1,Math.round(video.videoWidth*scale));canvas.height=Math.max(1,Math.round(video.videoHeight*scale));
  const cx=canvas.getContext('2d',{willReadFrequently:true});cx.drawImage(video,0,0,canvas.width,canvas.height);
  return canvas;
 }
+function podiumCanvas(frame){
+ // Gold / Silver / Bronze occupy a compact block around 25–44% of the screen.
+ // The previous crop started inside rank 1 and mixed neighbouring podium cards.
+ const x=Math.round(frame.width*.03),y=Math.round(frame.height*.247),w=Math.round(frame.width*.94),h=Math.round(frame.height*.202);
+ const scale=Math.min(1.25,1280/Math.max(1,w)),out=document.createElement('canvas');
+ out.width=Math.max(1,Math.round(w*scale));out.height=Math.max(1,Math.round(h*scale));
+ const cx=out.getContext('2d',{willReadFrequently:true});cx.imageSmoothingEnabled=true;cx.imageSmoothingQuality='high';
+ cx.drawImage(frame,x,y,w,h,0,0,out.width,out.height);return out;
+}
+function rankingCanvas(frame){
+ // Keep the complete top of the visible ranking (ranks 1–3 live high in the view),
+ // but still stop above Kingshot's sticky own-player row at the bottom.
+ const x=Math.round(frame.width*.035),y=Math.round(frame.height*.205),w=Math.round(frame.width*.93),h=Math.round(frame.height*.670);
+ const scale=Math.min(1.35,1350/Math.max(1,w)),out=document.createElement('canvas');
+ out.width=Math.max(1,Math.round(w*scale));out.height=Math.max(1,Math.round(h*scale));
+ const cx=out.getContext('2d',{willReadFrequently:true});cx.imageSmoothingEnabled=true;cx.imageSmoothingQuality='high';
+ cx.drawImage(frame,x,y,w,h,0,0,out.width,out.height);return out;
+}
+function enhancedCanvas(src){
+ const out=document.createElement('canvas');out.width=src.width;out.height=src.height;
+ const cx=out.getContext('2d',{willReadFrequently:true});cx.drawImage(src,0,0);
+ const img=cx.getImageData(0,0,out.width,out.height),d=img.data;
+ for(let i=0;i<d.length;i+=4){
+  const g=.2126*d[i]+.7152*d[i+1]+.0722*d[i+2],v=Math.max(0,Math.min(255,(g-128)*1.42+128));
+  d[i]=d[i+1]=d[i+2]=v;
+ }
+ cx.putImageData(img,0,0);return out;
+}
+function sharpnessScore(src){
+ const tiny=document.createElement('canvas'),w=160,h=Math.max(60,Math.round(src.height*(w/src.width)));
+ tiny.width=w;tiny.height=h;const cx=tiny.getContext('2d',{willReadFrequently:true});cx.drawImage(src,0,0,w,h);
+ const d=cx.getImageData(0,0,w,h).data;let sum=0,n=0;
+ const lum=i=>.2126*d[i]+.7152*d[i+1]+.0722*d[i+2];
+ for(let y=1;y<h-1;y+=2)for(let x=1;x<w-1;x+=2){
+  const i=(y*w+x)*4,gx=Math.abs(lum(i+4)-lum(i-4)),gy=Math.abs(lum(i+w*4)-lum(i-w*4));sum+=gx+gy;n++;
+ }
+ return n?sum/n:0;
+}
+function recordRank(rank,time,map){
+ if(!Number.isInteger(rank)||rank<1||rank>999)return;
+ if(!map.has(rank))map.set(rank,[]);map.get(rank).push(time);
+}
+function rankCoverage(map){
+ const ranks=[...map.keys()].filter(r=>Number.isInteger(r)&&r>=1&&r<=999).sort((a,b)=>a-b);
+ if(!ranks.length)return {min:null,max:null,seen:[],missing:[]};
+ if(ranks.length===1)return {min:ranks[0],max:ranks[0],seen:ranks,missing:[]};
+ // Build dense rank clusters. A lone bad OCR rank (for example 160/240)
+ // must not turn a 1–31 recording into hundreds of "missing" ranks.
+ const clusters=[];let cur=[ranks[0]];
+ for(let i=1;i<ranks.length;i++){
+  if(ranks[i]-ranks[i-1]<=10)cur.push(ranks[i]);
+  else{clusters.push(cur);cur=[ranks[i]]}
+ }
+ clusters.push(cur);
+ const support=cluster=>cluster.reduce((n,r)=>n+(map.get(r)?.length||0),0);
+ clusters.sort((a,b)=>b.length-a.length||support(b)-support(a));
+ const use=clusters[0],min=use[0],max=use[use.length-1],set=new Set(use),missing=[];
+ for(let r=min;r<=max;r++)if(!set.has(r))missing.push(r);
+ return {min,max,seen:use,missing};
+}
+function medianTime(arr){if(!arr?.length)return null;const a=[...arr].sort((x,y)=>x-y);return a[Math.floor(a.length/2)]}
+function rescueTimes(coverage,rankMap,dur,used){
+ const missing=[...(coverage?.missing||[])].sort((a,b)=>a-b);
+ if(!missing.length)return [];
+ const groups=[];let g=[missing[0]];
+ for(let i=1;i<missing.length;i++){
+  if(missing[i]===missing[i-1]+1)g.push(missing[i]);else{groups.push(g);g=[missing[i]]}
+ }
+ groups.push(g);
+ const seen=[...rankMap.keys()].sort((a,b)=>a-b),out=[];
+ const add=t=>{
+  const v=Math.max(.03,Math.min(Math.max(.03,dur-.03),Math.round(t*100)/100));
+  if(!used.some(x=>Math.abs(x-v)<.10)&&!out.some(x=>Math.abs(x-v)<.10))out.push(v);
+ };
+ for(const group of groups.slice(0,4)){
+  const first=group[0],last=group[group.length-1];
+  const lo=[...seen].reverse().find(r=>r<first),hi=seen.find(r=>r>last);
+  const lt=lo!=null?medianTime(rankMap.get(lo)):null,ht=hi!=null?medianTime(rankMap.get(hi)):null;
+  if(lt!=null&&ht!=null){
+   const a=Math.min(lt,ht),b=Math.max(lt,ht),n=Math.min(3,Math.max(1,group.length));
+   for(let i=1;i<=n;i++)add(a+(b-a)*(i/(n+1)));
+  }else{
+   const t=lt??ht;if(t==null)continue;
+   add(t-.30);add(t+.30);
+  }
+ }
+ return out.sort((a,b)=>a-b).slice(0,12);
+}
+function consensusHit(list){
+ if(!list?.length)return null;
+ const scores=new Map();
+ for(const o of list){const k=String(o.row.score);if(!scores.has(k))scores.set(k,[]);scores.get(k).push(o)}
+ const groups=[...scores.values()].sort((a,b)=>b.length-a.length||Math.max(...b.map(x=>x.player.confidence||0))-Math.max(...a.map(x=>x.player.confidence||0)));
+ let chosen=groups[0];
+ if(groups.length>1&&groups[0].length===groups[1].length){
+  const nums=list.map(x=>x.row.score).sort((a,b)=>a-b),med=nums[Math.floor(nums.length/2)];
+  chosen=[...list].sort((a,b)=>Math.abs(a.row.score-med)-Math.abs(b.row.score-med)||(b.player.confidence||0)-(a.player.confidence||0)).slice(0,1);
+ }
+ const exemplar=[...chosen].sort((a,b)=>(b.player.confidence||0)-(a.player.confidence||0))[0];
+ const ranks=new Map();for(const o of list)if(o.row.rank){ranks.set(o.row.rank,(ranks.get(o.row.rank)||0)+1)}
+ const rank=[...ranks.entries()].sort((a,b)=>b[1]-a[1])[0]?.[0]||exemplar.row.rank||null;
+ return {...exemplar.row,player:exemplar.player,time:exemplar.time,image:exemplar.image,rank,observations:list.length,consensus:chosen.length,trackingOnly:exemplar.player?.alliance_code==null};
+}
+function baseFrameTimes(dur){
+ const end=Math.max(.06,dur-.10),times=[];
+ const add=t=>{const v=Math.max(.04,Math.min(end,t));if(!times.some(x=>Math.abs(x-v)<.10))times.push(v)};
+ // Keep a few early samples for normal rows 4–7; podium ranks 1–3 have
+ // their own dedicated OCR pass on the first frame.
+ [0.08,0.52,1.10].forEach(add);
+ const remaining=Math.max(4,Math.min(7,Math.ceil(dur/3)));
+ for(let i=1;i<=remaining;i++)add(1.10+(end-1.10)*(i/(remaining+1)));
+ add(end);
+ return times.sort((a,b)=>a-b).slice(0,11);
+}
 async function seek(video,time){
  if(Math.abs(video.currentTime-time)<.03&&video.readyState>=2)return;
  await new Promise((resolve,reject)=>{
-  const clean=()=>{video.removeEventListener('seeked',ok);video.removeEventListener('error',bad)};
-  const ok=()=>{clean();resolve()};const bad=()=>{clean();reject(Error('Video frame could not be opened'))};
-  video.addEventListener('seeked',ok,{once:true});video.addEventListener('error',bad,{once:true});video.currentTime=time;
+  let settled=false;
+  const finish=(err)=>{
+   if(settled)return;settled=true;clearTimeout(timer);
+   video.removeEventListener('seeked',ok);video.removeEventListener('error',bad);
+   err?reject(err):resolve();
+  };
+  const ok=()=>finish();const bad=()=>finish(Error('Video frame could not be opened'));
+  const timer=setTimeout(()=>{
+   // Some mobile browsers occasionally omit seeked even though the frame is ready.
+   if(video.readyState>=2&&Math.abs(video.currentTime-time)<.12)finish();
+   else finish(Error('Video frame timed out'));
+  },4500);
+  video.addEventListener('seeked',ok,{once:true});video.addEventListener('error',bad,{once:true});
+  try{video.currentTime=time}catch(err){finish(err)}
  });
 }
 async function metadata(video,file){
@@ -235,25 +703,25 @@ async function metadata(video,file){
 }
 function shell(root,kind){
  const perf=kind==='perf';root.innerHTML=
- '<div class="nocr-layout"><section class="nocr-panel"><div class="nocr-fields">'+
+ '<div class="nocr-layout"><section class="nocr-panel"><div class="nocr-engine-badge">'+esc(ocr2('version'))+'</div><div class="nocr-fields">'+
  (perf?'<label>'+esc(tr('type'))+'<select id="nocrType"><option value="alliance_mobilization">Alliance Mobilization</option><option value="kvk_prep">KvK Prep · Top 200</option></select></label>':'')+
  (perf?'':'<label>'+esc(tr('event'))+'<select id="nocrEvent" disabled></select></label>')+
  '<label>'+esc(tr('occ'))+'<select id="nocrOcc"></select></label>'+
  (perf?'':'<label>'+esc(tr('day'))+'<select id="nocrPhase"></select></label><label>'+esc(tr('date'))+'<input id="nocrDay" type="date"></label>')+
  '</div><label class="nocr-file"><span class="nocr-file-icon">▣</span><strong>'+esc(tr('file'))+'</strong><small id="nocrFilename">MP4 / MOV</small><input id="nocrFile" type="file" accept="video/mp4,video/quicktime,video/*"></label>'+
  '<p class="nocr-note">'+esc(tr('video'))+'</p><button type="button" class="btn primary nocr-analyze" id="nocrAnalyze">'+esc(tr('analyze'))+'</button><div class="nocr-status" id="nocrStatus" role="status" aria-live="polite"></div></section>'+
- '<section class="nocr-panel nocr-progress" id="nocrProgress" hidden><h3>'+esc(tr('prep'))+'</h3><p id="nocrProgressText"></p><div class="nocr-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="nocrBar"></span></div><div class="nocr-progress-foot"><b id="nocrPercent">0%</b><span id="nocrFound">0 '+esc(tr('found'))+'</span></div><div class="nocr-stages"><div data-step="0">✓ '+esc(tr('prep'))+'</div><div data-step="1">◎ '+esc(tr('recognize'))+'</div><div data-step="2">○ '+esc(tr('check'))+'</div></div></section></div>'+
+ '<section class="nocr-panel nocr-progress" id="nocrProgress" hidden><h3>'+esc(tr('prep'))+'</h3><p id="nocrProgressText"></p><div class="nocr-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="nocrBar"></span></div><div class="nocr-progress-foot"><b id="nocrPercent">0%</b><span id="nocrFound">0 '+esc(tr('found'))+'</span></div><div class="nocr-stages"><div data-step="0">✓ '+esc(ocr2('scan'))+'</div><div data-step="1">◎ '+esc(ocr2('collect'))+'</div><div data-step="2">○ '+esc(ocr2('finish'))+'</div></div></section></div>'+
  '<section class="nocr-panel nocr-review" id="nocrReview" hidden><div class="nocr-review-title"><h3>'+esc(tr('review'))+'</h3><strong id="nocrCount"></strong></div><div id="nocrResults"></div><div class="nocr-save-row"><button type="button" class="btn primary" id="nocrSave">'+esc(tr('save'))+'</button><button type="button" class="btn secondary" id="nocrEvidenceRetry" hidden>'+esc(tr('retryEvidence'))+'</button><div class="nocr-status" id="nocrSaveStatus" role="status"></div></div></section>';
  root.querySelector('#nocrFile').addEventListener('change',e=>{$('#nocrFilename',root).textContent=e.target.files?.[0]?.name||'MP4 / MOV'});
 }
-function progress(step,value,count){
+function progress(step,value,count,mode=''){
  const el=run?.root;if(!el)return;
  const panel=$('#nocrProgress',el);panel.hidden=false;
  const pct=Math.max(0,Math.min(100,Math.round(value)));$('#nocrBar',el).style.width=pct+'%';
  $('#nocrPercent',el).textContent=pct+'%';$('.nocr-bar',el).setAttribute('aria-valuenow',String(pct));
- const title=tr(step===0?'prep':step===1?'recognize':'check');
+ const title=step===0?ocr2('scan'):step===1?(mode==='rescue'?ocr2('rescue'):ocr2('collect')):ocr2('finish');
  $('h3',panel).textContent=title;$('#nocrProgressText',el).textContent=title+' …';
- $('#nocrFound',el).textContent=count+' '+tr('found');
+ $('#nocrFound',el).textContent=count+' '+ocr2('matched');
  for(const item of panel.querySelectorAll('[data-step]'))item.classList.toggle('active',Number(item.dataset.step)===step);
 }
 function status(txt,isError=false){
@@ -279,7 +747,8 @@ async function lawOccurrence(){
 function selectedOcc(){return run?.occurrences?.find(o=>String(o.event_schedule_id)===$('#nocrOcc',run.root)?.value)}
 function setLawPhase(){
  const r=run;if(!r||r.kind!=='law')return;
- const root=r.root,event=$('#nocrEvent',root).value,occ=selectedOcc(),phase=$('#nocrPhase',root);
+ const root=r.root,event=$('#nocrEvent',root).value,occ=selectedOcc(),phase=$('#nocrPhase',root),input=$('#nocrDay',root);
+ const previousPhase=phase.value,previousDate=input?.value||'';
  const list=(PHASES[event]||[]).filter(p=>{
   if(occ?.phase_hint&&p[0]!==occ.phase_hint)return false;
   if((event==='Strongest Governor'||event==='Alliance Brawl')&&occ){
@@ -287,22 +756,23 @@ function setLawPhase(){
   }
   return true;
  });
- const previous=phase.value;
  phase.innerHTML=list.map(p=>{
   const n=Number(p[0].slice(2)),day=(event==='Strongest Governor'||event==='Alliance Brawl')&&occ?dayUTC(occ.begin_at,n-1):'';
   return selectOption(p[1]+(day?' · '+day:''),p[0]);
  }).join('');
- if(list.some(p=>p[0]===previous))phase.value=previous;
+ if(list.some(p=>p[0]===previousPhase))phase.value=previousPhase;
  else if(list.length)phase.value=list[list.length-1][0];
- if(event==='Strongest Governor'||event==='Alliance Brawl'){
-  const first=phase.value,offset=Number(first.slice(2))-1;
-  const suggested=occ?dayUTC(occ.begin_at,offset):dayUTC(new Date());
-  $('#nocrDay',root).value=suggested;
- }else{
-  const now=dayUTC(new Date()),start=occ?dayUTC(occ.begin_at):now,end=occ?dayUTC(new Date(Math.min(Date.now(),Date.parse(occ.end_at)-1000))):now;
-  $('#nocrDay',root).value=dayNum(now)>=dayNum(start)&&dayNum(now)<=dayNum(end)?now:end;
- }
- const input=$('#nocrDay',root);input.min=occ?dayUTC(occ.begin_at):'';input.max=occ?dayUTC(new Date(Math.min(Date.now(),Date.parse(occ.end_at)-1000))):dayUTC(new Date());
+
+ const today=dayUTC(new Date());
+ input.min=occ?dayUTC(occ.begin_at):'';
+ // Recording/upload day is independent from the selected event phase.
+ // Allow the event window plus the following day, never a future day.
+ const occEndPlusOne=occ?dayUTC(new Date(Date.parse(occ.end_at)+86400000)):today;
+ input.max=dayNum(occEndPlusOne)<dayNum(today)?occEndPlusOne:today;
+ const candidate=previousDate&&validRecordingDay(previousDate,occ)?previousDate:
+   validRecordingDay(today,occ)?today:
+   (occ?dayUTC(new Date(Math.min(Date.now(),Date.parse(occ.end_at)+86399000))):today);
+ input.value=candidate;
  input.readOnly=false;
  input.disabled=!occ;
  input.title=reviewText('dayReadOnly');
@@ -325,13 +795,14 @@ async function analyze(){
  if(!file){status(tr('choose'),true);return}
  if(r.kind==='law'){
   const occ=selectedOcc(),day=$('#nocrDay',root).value;
-  if(!occ||!$('#nocrPhase',root).value||!validDay(day,occ)){status(tr('invalid'),true);return}
+  if(!occ||!$('#nocrPhase',root).value||!validRecordingDay(day,occ)){status(tr('invalid'),true);return}
  }else if(!perfOcc()){status(tr('missingEvent'),true);return}
- r.busy=true;btn.disabled=true;$('#nocrSave',root).disabled=true;$('#nocrReview',root).hidden=true;status('');
+ r.busy=true;r.ocrActive=true;btn.disabled=true;$('#nocrSave',root).disabled=true;$('#nocrReview',root).hidden=true;status('');
+ await acquireOcrWakeLock();
  let url,video,worker;
  try{
-  progress(0,1,0);
-  let members=[...(await roster())];
+  progress(0,2,0);
+  let members=[...(await roster(true))];
   if(r.kind==='perf'&&$('#nocrType',root).value==='alliance_mobilization'&&perfOcc()?.event_schedule_id){
    try{
     const extras=await rpc('get_performance_candidate_roster',{p_event_schedule_id:perfOcc().event_schedule_id});
@@ -339,57 +810,154 @@ async function analyze(){
     for(const p of extras||[]){const id=String(p.player_game_id||p.player_id);if(!ids.has(id)){members.push(p);ids.add(id)}}
    }catch(e){console.warn('Performance transfer roster unavailable',e)}
   }
-  r.members=members;
-  r.fileHash=await sha256(file);
-  worker=await ensureWorker();
-  video=document.createElement('video');url=await metadata(video,file);
-  if(r!==run)return;
-  progress(1,6,0);
-  const dur=video.duration;
-  const count=Math.min(46,Math.max(1,Math.floor(dur/.85)));
-  const times=Array.from({length:count},(_,i)=>Math.min(Math.max(0,dur-.08),.25+i*Math.max(.85,(dur-.5)/Math.max(1,count))));
-  const best=new Map(),unmatched=new Map();r.frames=[];
-  for(let i=0;i<times.length;i++){
-   if(run!==r)break;
-   const sec=times[i];await seek(video,sec);
-   const canvas=frameCanvas(video);
-   if(r.frames.length<12&&i%Math.max(1,Math.floor(times.length/12))===0)r.frames.push({time:sec,image:canvas.toDataURL('image/jpeg',.72)});
-   const text=(await worker.recognize(canvas)).data?.text||'';
-   const rows=extractRows(text);
+  const poolCount=members.filter(p=>p.alliance_code==null).length;
+  if(!poolCount)console.warn('ScreenImporter roster contains no alliance-less players');
+  r.members=members;r.fileHash=await sha256(file);worker=await ensureWorker();
+  video=document.createElement('video');url=await metadata(video,file);if(r!==run)return;
+  const dur=video.duration;progress(1,5,0);
+  const times=baseFrameTimes(dur),observations=new Map(),unmatched=new Map(),rankMap=new Map();r.frames=[];
+  const processRows=(rows,sec,full)=>{
    let still=null;
    for(const row of rows){
+    recordRank(row.rank,sec,rankMap);
     const p=matchPlayer(row,members);
-    if(!p){const k=norm(row.name)+'|'+row.score;if(!unmatched.has(k)){if(!still)still=canvas.toDataURL('image/jpeg',.74);unmatched.set(k,{...row,time:sec,image:still})}continue}
-    if(r.kind==='perf'&&$('#nocrType',root).value==='kvk_prep'&&!(row.rank>=1&&row.rank<=200))row.rank=null;
-    const key=p.player_game_id||p.player_id;
-    const existing=best.get(key);
-    if(!existing||row.score>existing.score){
-     if(!still)still=canvas.toDataURL('image/jpeg',.74);
-     best.set(key,{...row,player:p,time:sec,image:still});
+    if(!p){
+     const k=(row.rank||'')+'|'+norm(row.name)+'|'+row.score;
+     if(!unmatched.has(k)){
+      if(!still)still=full.toDataURL('image/jpeg',.76);
+      unmatched.set(k,{...row,time:sec,image:still,_seen:1});
+     }else unmatched.get(k)._seen=(unmatched.get(k)._seen||1)+1;
+     continue;
     }
+    if(r.kind==='perf'&&$('#nocrType',root).value==='kvk_prep'&&!(row.rank>=1&&row.rank<=200))row.rank=null;
+    const key=String(p.player_game_id||p.player_id);if(!observations.has(key))observations.set(key,[]);
+    if(!still)still=full.toDataURL('image/jpeg',.76);
+    observations.get(key).push({row:{...row},player:p,time:sec,image:still});
    }
-   progress(1,6+86*((i+1)/times.length),best.size);
+  };
+  for(let i=0;i<times.length;i++){
+   if(run!==r)break;const sec=times[i];await seek(video,sec);const full=frameCanvas(video),roi=rankingCanvas(full);
+   if(r.frames.length<12&&i%Math.max(1,Math.floor(times.length/12))===0)r.frames.push({time:sec,image:full.toDataURL('image/jpeg',.72)});
+   const ocr=(await worker.recognize(roi,{}, {text:true,blocks:true})).data||{};
+   for(const rank of ranksFromText(ocr.text||''))recordRank(rank,sec,rankMap);
+   const parsed=parseOcrData(ocr);
+   processRows(parsed,sec,full);
+   if(i===0){
+    const podium=podiumCanvas(full),cards=splitPodiumCards(podium),podiumRows=[];
+    try{await worker.setParameters({preserve_interword_spaces:'1',tessedit_pageseg_mode:'7',tessedit_char_whitelist:''})}catch{}
+    for(let pi=0;pi<cards.length;pi++){
+     const nameText=(await worker.recognize(podiumNameCanvas(cards[pi]))).data?.text||'';
+     const parsedName=parseNameOnly(nameText,'');
+     try{await worker.setParameters({preserve_interword_spaces:'1',tessedit_pageseg_mode:'7',tessedit_char_whitelist:'0123456789.,'})}catch{}
+     const scoreText=(await worker.recognize(podiumScoreCanvas(cards[pi]))).data?.text||'',score=parseScoreOnly(scoreText);
+     try{await worker.setParameters({preserve_interword_spaces:'1',tessedit_pageseg_mode:'7',tessedit_char_whitelist:''})}catch{}
+     if(parsedName&&Number.isSafeInteger(score))podiumRows.push({...parsedName,score,rank:pi+1,podium:true,quality:true,raw:'Podium '+(pi+1)+' · '+parsedName.raw+' · '+score});
+    }
+    processRows(podiumRows,sec,full);
+    try{await worker.setParameters({preserve_interword_spaces:'1',tessedit_pageseg_mode:'6',tessedit_char_whitelist:''})}catch{}
+   }
+   progress(1,5+65*((i+1)/times.length),observations.size);
    await new Promise(resolve=>setTimeout(resolve,0));
   }
   if(run!==r)return;
-  r.hits=[...best.values()].sort((a,b)=>b.score-a.score);
-  r.unmatched=[...unmatched.values()].slice(0,30);
+  let coverage=rankCoverage(rankMap),rescue=rescueTimes(coverage,rankMap,dur,times);
+  if(coverage.missing.length&&rescue.length){
+   progress(1,72,observations.size,'rescue');
+   const missingSet=new Set(coverage.missing);
+   for(let i=0;i<rescue.length;i++){
+    if(run!==r)break;const sec=rescue[i];await seek(video,sec);const full=frameCanvas(video),roi=rankingCanvas(full);
+    const rescueData=(await worker.recognize(roi)).data||{};
+    for(const rank of ranksFromText(rescueData.text||''))recordRank(rank,sec,rankMap);
+    const rows=repairSequentialRanks(extractRows(rescueData.text||''));
+    processRows(rows,sec,full);
+    progress(1,72+22*((i+1)/rescue.length),observations.size,'rescue');
+    await new Promise(resolve=>setTimeout(resolve,0));
+   }
+   coverage=rankCoverage(rankMap);
+  }
+  if(run!==r)return;
+  coverage=rankCoverage(rankMap);
+  r.coverage=coverage;
+  r.hits=[...observations.values()].map(consensusHit).filter(Boolean).sort((a,b)=>(a.rank&&b.rank?a.rank-b.rank:b.score-a.score));
+  let matchedRanks=new Set(r.hits.map(h=>h.rank).filter(Boolean));
+  const rawUnmatched=[...unmatched.values()].filter(u=>!matchedRanks.has(u.rank)&&!r.hits.some(h=>u.score===h.score&&similarity(u.name,h.player?.player_name||'')>=.62));
+  let groupedUnmatched=groupUnmatchedRows(rawUnmatched,matchedRanks);
+  r.looseUnmatched=groupedUnmatched.loose||[];
+
+  // Quality pass: only re-read the name area of still-open rows at higher resolution.
+  // This spends extra time where it matters instead of re-OCRing the whole video.
+  const qualityTargets=groupedUnmatched.filter(g=>Number.isInteger(g.rank)&&g.variants?.some(v=>v.bbox&&Number.isFinite(v.time))).slice(0,10);
+  if(qualityTargets.length){
+   progress(2,94,observations.size);
+   try{await worker.setParameters({preserve_interword_spaces:'1',tessedit_pageseg_mode:'7'})}catch{}
+   for(let qi=0;qi<qualityTargets.length;qi++){
+    if(run!==r)break;
+    const group=qualityTargets[qi];
+    const source=[...group.variants].filter(v=>v.bbox&&Number.isFinite(v.time)).sort((a,b)=>(b._seen||1)-(a._seen||1))[0];
+    if(!source)continue;
+    await seek(video,source.time);
+    const full=frameCanvas(video),roi=rankingCanvas(full),nameCrop=qualityNameCanvas(roi,source.bbox),scoreCrop=qualityScoreCanvas(roi,source.bbox);
+    if(nameCrop){
+     try{await worker.setParameters({preserve_interword_spaces:'1',tessedit_pageseg_mode:'7',tessedit_char_whitelist:''})}catch{}
+     const nameText=(await worker.recognize(nameCrop)).data?.text||'';
+     let score=null;
+     if(scoreCrop){
+      try{await worker.setParameters({preserve_interword_spaces:'1',tessedit_pageseg_mode:'7',tessedit_char_whitelist:'0123456789.,'})}catch{}
+      score=parseScoreOnly((await worker.recognize(scoreCrop)).data?.text||'');
+     }
+     const row=qualityNameRow(nameText,group,score);
+     if(row)processRows([row],source.time,full);
+    }
+    progress(2,94+2*((qi+1)/qualityTargets.length),observations.size);
+    await new Promise(resolve=>setTimeout(resolve,0));
+   }
+   try{await worker.setParameters({preserve_interword_spaces:'1',tessedit_pageseg_mode:'6',tessedit_char_whitelist:''})}catch{}
+   // Rebuild candidate groups after the dedicated row OCR.
+   r.hits=[...observations.values()].map(consensusHit).filter(Boolean).sort((a,b)=>(a.rank&&b.rank?a.rank-b.rank:b.score-a.score));
+   matchedRanks=new Set(r.hits.map(h=>h.rank).filter(Boolean));
+   const refreshedRaw=[...unmatched.values()].filter(u=>!matchedRanks.has(u.rank)&&!r.hits.some(h=>u.score===h.score&&similarity(u.name,h.player?.player_name||'')>=.62));
+   groupedUnmatched=groupUnmatchedRows(refreshedRaw,matchedRanks);
+   r.looseUnmatched=groupedUnmatched.loose||[];
+  }
+  const usedPlayers=new Set(r.hits.map(h=>memberKey(h.player)).filter(Boolean)),rescued=[];
+  for(const group of groupedUnmatched){
+   const hit=consensusMatchGroup(group,members,usedPlayers);
+   if(!hit)continue;
+   rescued.push(hit);usedPlayers.add(memberKey(hit.player));
+   if(hit.rank)matchedRanks.add(hit.rank);
+  }
+  if(rescued.length)r.hits=r.hits.concat(rescued).sort((a,b)=>(a.rank&&b.rank?a.rank-b.rank:b.score-a.score));
+  r.unmatched=groupedUnmatched.filter(g=>Number.isInteger(g.rank)&&!matchedRanks.has(g.rank)).slice(0,40);
   progress(2,96,r.hits.length);
   if(r.kind==='law'){
-   const occ=selectedOcc();
-   r.preview=await rpc('preview_screen_recording_nap_occurrence_v2',{
+   const occ=selectedOcc(),regularHits=r.hits.filter(h=>!isTrackingHit(h));
+   r.preview=regularHits.length?await rpc('preview_screen_recording_nap_occurrence_v2',{
     p_event_schedule_id:occ.event_schedule_id,p_event_name:$('#nocrEvent',root).value,
     p_phase_name:$('#nocrPhase',root).value,p_recording_day:$('#nocrDay',root).value,
-    p_recording_captured_at:null,p_hits:r.hits.map(hitPayload)
-   });
+    p_recording_captured_at:null,p_hits:regularHits.map(hitPayload)
+   }):{results:[],violations:0,updates:0,already_recorded:0};
   }
-  progress(2,100,r.hits.length);
-  showReview(r);status(r.hits.length?tr('ready'):reviewText('nothing'),false);
+  progress(2,100,r.hits.length);showReview(r);
+  const cov=r.coverage,coveredRanks=cov?.seen?.length||0;
+  const unassignedRanks=r.unmatched?.length||0;
+  const assignment=' · '+r.hits.length+' '+ocr2('matched')+(unassignedRanks?' · '+unassignedRanks+' '+ocr2('unassigned'):'');
+  if(cov?.min&&cov?.max&&cov.missing.length)status(coveredRanks+' '+ocr2('rankSlots')+' · '+ocr2('coverage')+' '+cov.min+'–'+cov.max+' · '+ocr2('missing')+': '+cov.missing.join(', ')+assignment+' · '+ocr2('manual'),true);
+  else if(cov?.min&&cov?.max)status(coveredRanks+' '+ocr2('rankSlots')+' · '+ocr2('coverage')+' '+cov.min+'–'+cov.max+' · '+ocr2('complete')+assignment,false);
+  else status(r.hits.length?tr('ready'):reviewText('nothing'),false);
  }catch(e){console.error('native screen OCR',e);status(tr('error')+': '+(e.message||e),true)}
- finally{if(url)URL.revokeObjectURL(url);if(video){video.removeAttribute('src');video.load()}r.busy=false;if(root.isConnected){btn.disabled=false;$('#nocrSave',root).disabled=!r.hits?.length}}
+ finally{
+  r.ocrActive=false;
+  await releaseOcrWakeLock();
+  if(url)URL.revokeObjectURL(url);
+  if(video){video.removeAttribute('src');video.load()}
+  r.busy=false;
+  if(root.isConnected){btn.disabled=false;$('#nocrSave',root).disabled=!r.hits?.length}
+ }
 }
 function hitPayload(h){return {player_id:h.player?.player_id||null,player_game_id:h.player?.player_game_id||null,player_name:h.player?.player_name||h.name,detected_alliance:h.alliance||h.player?.alliance_code||null,score:h.score,server_rank:h.rank||null,confirmed_post_contact_spending:!!h.postContactConfirmed}}
 function reviewStatus(h,r,entry){
+ if(r.kind==='law'&&isTrackingHit(h))
+  return '<div class="nocr-check-result neutral"><strong>'+esc(ocr2('tracking'))+'</strong><small>'+esc(ocr2('trackingHint'))+'</small></div>';
  const state=r.kind==='perf'?'performance':entry?.status||'unresolved';
  const dict=reviewText(state);
  const label=Array.isArray(dict)?dict:[String(state),''];
@@ -405,13 +973,13 @@ async function refreshReview(r){
  if(r.kind==='law'){
   const o=selectedOcc();
   if(!o)return;
-  const payload=r.hits.map(hitPayload);
+  const payload=r.hits.filter(h=>!isTrackingHit(h)).map(hitPayload);
   try{
-   r.preview=await rpc('preview_screen_recording_nap_occurrence_v2',{
+   r.preview=payload.length?await rpc('preview_screen_recording_nap_occurrence_v2',{
     p_event_schedule_id:o.event_schedule_id,p_event_name:$('#nocrEvent',r.root).value,
     p_phase_name:$('#nocrPhase',r.root).value,p_recording_day:$('#nocrDay',r.root).value,
     p_recording_captured_at:null,p_hits:payload
-   });
+   }):{results:[],violations:0,updates:0,already_recorded:0};
   }catch(e){r.preview=null;status((e.message||String(e)),true)}
  }
  if(r===run&&r.root.isConnected)showReview(r);
@@ -424,23 +992,35 @@ function showReview(r){
  [r.preview.updates,reviewText('updateCount')],
  [r.preview.already_recorded,reviewText('alreadyCount')]
  ].filter(x=>Number(x[0])>0).map(x=>points(x[0])+' '+x[1]):[];
+ const exemptCount=r.kind==='law'?preview.filter(x=>x.status==='exempt').length:0;
  const visibleCount=r.hits.filter(h=>r.kind!=='law'||statuses.get(String(h.player?.player_game_id||h.player?.player_id||''))?.status!=='exempt').length;
- $('#nocrCount',root).textContent=visibleCount+' '+tr('found')+(counts.length?' · '+counts.join(' · '):'');
+ const cov=r.coverage,coveredRanks=cov?.seen?.length||0;
+ const unassignedRanks=r.unmatched?.length||0;
+ const parts=[
+  visibleCount+' '+ocr2('reviewable'),
+  r.hits.length+' '+ocr2('matched'),
+  coveredRanks+' '+ocr2('rankSlots'),
+  ...(unassignedRanks?[unassignedRanks+' '+ocr2('unassigned')]:[]),
+  ...(exemptCount?[exemptCount+' '+ocr2('exemptCount')]:[]),
+  ...counts
+ ];
+ const covText=cov?.min&&cov?.max?' · '+ocr2('coverage')+' '+cov.min+'–'+cov.max+(cov.missing.length?' · ⚠ '+ocr2('missing')+': '+cov.missing.join(', '):' · ✓'):'';
+ $('#nocrCount',root).textContent=parts.join(' · ')+covText;
  $('#nocrResults',root).innerHTML=r.hits.map((h,i)=>{
   const lookup=statuses.get(String(h.player?.player_game_id||h.player?.player_id||''));
   if(r.kind==='law'&&lookup?.status==='exempt')return '';
-  const st=statuses.get(String(h.player?.player_game_id||h.player?.player_id||'')),label=st?.status||'';
-  const needsEvidence=r.kind==='law'&&['violation','update'].includes(label)&&!h.image;
-  const allowed=r.kind==='perf'||(['violation','update'].includes(label)&&!!h.image);
+  const st=statuses.get(String(h.player?.player_game_id||h.player?.player_id||'')),label=st?.status||'',tracking=r.kind==='law'&&isTrackingHit(h);
+  const needsEvidence=r.kind==='law'&&((tracking&&!h.image)||(['violation','update'].includes(label)&&!h.image));
+  const allowed=r.kind==='perf'||(tracking?!!h.image:(['violation','update'].includes(label)&&!!h.image));
   const key=String(h.player?.player_game_id||h.player?.player_id||'');
   const checked=r.selection?.has(key)?r.selection.get(key):allowed;
   const tone=r.kind==='perf'?'performance':label==='violation'?'new':label==='update'?'update':label==='already_recorded'?'already':'other';
   return '<article class="nocr-hit nocr-hit--'+tone+'"><label class="nocr-hit-check"><input type="checkbox" data-hit="'+i+'" '+(checked?'checked':'')+' '+(needsEvidence?'disabled':'')+'>'+
-   '<span><strong>'+esc(h.player.player_name)+'</strong><small>'+esc(h.player.alliance_code||'')+' · '+esc(h.player.player_game_id||'')+(h.manual?' · '+esc(reviewText('manual')):'')+'</small></span></label>'+
+   '<span><strong>'+esc(h.player.player_name)+'</strong><small>'+esc(isTrackingHit(h)?ocr2('unaffiliated'):(h.alliance||h.player.alliance_code||''))+' · '+esc(h.player.player_game_id||'')+(h.rank?' · '+esc(tr('rank'))+' '+esc(h.rank):'')+(h.observations>1?' · '+esc(h.consensus)+'/'+esc(h.observations):'')+(h.manual?' · '+esc(reviewText('manual')):'')+'</small></span></label>'+
    '<input type="text" inputmode="numeric" autocomplete="off" data-score="'+i+'" value="'+esc(points(h.score))+'" aria-label="'+esc(tr('score'))+'">'+
    (r.kind==='perf'&&$('#nocrType',root).value==='kvk_prep'?'<input type="number" min="1" max="200" step="1" data-rank="'+i+'" value="'+esc(h.rank||'')+'" aria-label="'+esc(tr('rank'))+'">':'')+
    reviewStatus(h,r,st)+(needsEvidence?'<div class="nocr-status error">'+esc(tr('evidenceRequired'))+'</div>':'')+
-   (r.kind==='law'&&st?.post_contact_confirmation_required?'<label class="nocr-post-contact-confirm"><input type="checkbox" data-post-contact-confirm="'+i+'" '+(h.postContactConfirmed?'checked':'')+'><span><strong>'+esc(postContactText('title'))+'</strong><small>'+esc(postContactText('hint'))+'</small></span></label>':'')+
+   (r.kind==='law'&&!tracking&&st?.post_contact_confirmation_required?'<label class="nocr-post-contact-confirm"><input type="checkbox" data-post-contact-confirm="'+i+'" '+(h.postContactConfirmed?'checked':'')+'><span><strong>'+esc(postContactText('title'))+'</strong><small>'+esc(postContactText('hint'))+'</small></span></label>':'')+
    (h.image?'<details><summary>'+esc(tr('frame'))+'</summary><img src="'+h.image+'" alt="'+esc(tr('frame'))+'"></details>':'')+'</article>'
  }).join('')+
  (r.kind==='law'&&preview.some(x=>x.status==='exempt')?'<details class="nocr-exempt-compact"><summary><span class="nocr-exempt-icon" aria-hidden="true">✓</span><strong>'+preview.filter(x=>x.status==='exempt').length+' '+esc(reviewText('exemptCollapsed'))+'</strong><span>'+esc(reviewText('exemptShort'))+'</span></summary><p>'+esc(reviewText('exemptNote'))+'</p><div class="nocr-exempt-names">'+preview.filter(x=>x.status==='exempt').map(x=>'<span>'+esc(x.player_name||'')+'</span>').join('')+'</div></details>':'')+
@@ -448,7 +1028,9 @@ function showReview(r){
  '<label>'+esc(tr('unmatched'))+'<select id="nocrUnknown">'+r.unmatched.map((x,i)=>selectOption(x.raw,i)).join('')+'</select></label>'+
  '<label>'+esc(reviewText('chooseAlliance'))+'<select id="nocrMapAlliance"><option value="">– '+esc(reviewText('chooseAlliance'))+' –</option>'+allianceOptions(r.members)+'</select></label>'+ 
  '<label>'+esc(tr('selectPlayer'))+'<select id="nocrMapPlayer"><option value="">–</option></select></label>'+
- '<button class="btn secondary" type="button" id="nocrMapConfirm">'+esc(tr('assign'))+'</button></details>':'')+
+ '<button class="btn secondary" type="button" id="nocrMapConfirm">'+esc(tr('assign'))+'</button>'+
+ '<div id="nocrPoolCandidate" hidden><p>'+esc(ocr2('poolHint'))+'</p><label>'+esc(tr('name'))+'<input type="text" id="nocrPoolName" maxlength="64"></label>'+
+ '<button class="btn secondary" type="button" id="nocrPoolConfirm">'+esc(ocr2('poolCandidate'))+'</button><div class="nocr-status" id="nocrPoolStatus" role="status"></div></div></details>':'')+
  '<details class="nocr-add-missing" id="nocrAddMissing" '+(r.addOpen||!r.hits.length?'open':'')+'><summary>'+esc(reviewText('addPlayer'))+'</summary>'+
  '<p>'+esc(reviewText('addHint'))+'</p>'+
  '<label>'+esc(reviewText('chooseAlliance'))+'<select id="nocrNewAlliance"><option value="">– '+esc(reviewText('chooseAlliance'))+' –</option>'+allianceOptions(r.members)+'</select></label>'+ 
@@ -484,17 +1066,26 @@ function showReview(r){
   const populate=()=>{
    const code=mapAlliance.value;
    mapPlayer.innerHTML='<option value="">–</option>'+alphabeticalRoster(r.members)
-    .filter(({p})=>code&&p.alliance_code===code)
+    .filter(({p})=>code&&(code===UNAFFILIATED_CODE?p.alliance_code==null:p.alliance_code===code))
     .map(({p,i})=>selectOption(p.player_name+' · '+(p.player_game_id||''),i)).join('');
   };
   mapAlliance.onchange=populate;
-  const detected=r.unmatched[0]?.alliance;
-  if(detected&&orderedAlliances(r.members).some(a=>a.toLowerCase()===String(detected).toLowerCase()))
-   mapAlliance.value=orderedAlliances(r.members).find(a=>a.toLowerCase()===String(detected).toLowerCase());
+  const chooseAllianceForRow=row=>{
+   const candidate=String(row?.alliance||'').trim();
+   if(candidate){
+    const code=orderedAlliances(r.members).find(a=>a!==UNAFFILIATED_CODE&&a.toLowerCase()===candidate.toLowerCase());
+    if(code)return code;
+   }
+   const rn=norm(row?.name);
+   const poolExact=r.members.filter(p=>p.alliance_code==null&&[p.player_name,...(p.aliases||[])].some(n=>norm(n)===rn));
+   return poolExact.length===1?UNAFFILIATED_CODE:'';
+  };
+  const firstChoice=chooseAllianceForRow(r.unmatched[0]);
+  if(firstChoice)mapAlliance.value=firstChoice;
   populate();
   $('#nocrUnknown',root)?.addEventListener('change',()=>{
-   const candidate=r.unmatched[Number($('#nocrUnknown',root).value)]?.alliance;
-   const code=orderedAlliances(r.members).find(a=>a.toLowerCase()===String(candidate||'').toLowerCase());
+   const row=r.unmatched[Number($('#nocrUnknown',root).value)];
+   const code=chooseAllianceForRow(row);
    if(code){mapAlliance.value=code;populate()}
   });
  }
@@ -505,19 +1096,59 @@ function showReview(r){
   const row=r.unmatched[index],p=r.members[Number(playerIndex)];if(!row||!p)return;
   const existing=r.hits.find(x=>String(x.player.player_game_id||x.player.player_id)===String(p.player_game_id||p.player_id));
   if(!existing||row.score>existing.score){
-   const h={...row,player:p,alliance:p.alliance_code,manual:true};
+   const h={...row,player:p,alliance:p.alliance_code??null,manual:true,trackingOnly:p.alliance_code==null,observations:row.variantCount||row.observations||1,consensus:1};
    if(existing)r.hits=r.hits.filter(x=>x!==existing);
    r.hits.push(h);
   }
   r.unmatched.splice(index,1);
   r.hits.sort((x,y)=>y.score-x.score);refreshReview(r);
  };
+ const poolBox=$('#nocrPoolCandidate',root),poolName=$('#nocrPoolName',root),poolStatus=$('#nocrPoolStatus',root);
+ const syncPoolCandidate=()=>{
+  if(!poolBox)return;
+  const idx=Number($('#nocrUnknown',root)?.value||0),row=r.unmatched[idx];
+  const rn=norm(row?.name),poolExact=row?r.members.filter(p=>p.alliance_code==null&&[p.player_name,...(p.aliases||[])].some(n=>norm(n)===rn)):[];
+  const eligible=!!row&&r.kind==='law'&&!String(row.alliance||'').trim()&&poolExact.length===0;
+  poolBox.hidden=!eligible;
+  if(eligible&&poolName&&document.activeElement!==poolName)poolName.value=row.name||'';
+ };
+ syncPoolCandidate();
+ $('#nocrUnknown',root)?.addEventListener('change',syncPoolCandidate);
+ const poolButton=$('#nocrPoolConfirm',root);
+ if(poolButton)poolButton.onclick=async()=>{
+  const index=Number($('#nocrUnknown',root)?.value||0),row=r.unmatched[index];
+  if(!row||String(row.alliance||'').trim())return;
+  const name=String(poolName?.value||row.name||'').trim();
+  if(!name){poolStatus.textContent=reviewText('missingPlayer');return}
+  poolButton.disabled=true;poolStatus.textContent=tr('saving');
+  try{
+   const result=await rpc('confirm_unaffiliated_screen_candidate',{p_player_name:name});
+   if(result?.status==='existing_alliance_conflict'){
+    poolStatus.textContent=ocr2('poolConflict');return;
+   }
+   if(!result?.player_id)throw Error('Player could not be created');
+   const p={player_id:result.player_id,player_game_id:result.player_game_id||null,player_name:result.player_name||name,alliance_code:null,aliases:[]};
+   if(!r.members.some(x=>String(x.player_id||'')===String(p.player_id)))r.members.push(p);
+   const h={...row,player:p,name:p.player_name,alliance:null,manual:true,trackingOnly:true,
+    observations:row.variantCount||row.observations||1,consensus:1};
+   r.hits.push(h);r.unmatched.splice(index,1);
+   r.hits.sort((x,y)=>(x.rank&&y.rank?x.rank-y.rank:y.score-x.score));
+   poolStatus.textContent=ocr2('poolCreated');
+   await refreshReview(r);
+  }catch(e){poolStatus.textContent=e.message||String(e)}
+  finally{poolButton.disabled=false}
+ };
  const sel=$('#nocrNewPlayer',root),alliance=$('#nocrNewAlliance',root);
  const filter=$('#nocrSearchRoster',root);
  const list=()=>{
   const q=norm(filter.value),code=alliance.value;
-  const options=alphabeticalRoster(r.members).filter(({p})=>code&&p.alliance_code===code&&(!q||norm(p.player_name+' '+p.player_game_id).includes(q)));
-  sel.innerHTML='<option value="">–</option>'+options.map(({p,i})=>selectOption(p.player_name+' · '+(p.player_game_id||''),i)).join('');
+  const options=alphabeticalRoster(r.members).filter(({p})=>
+   code&&(code===UNAFFILIATED_CODE?p.alliance_code==null:p.alliance_code===code)&&
+   (!q||norm(p.player_name+' '+(p.player_game_id||'')).includes(q))
+  );
+  sel.innerHTML='<option value="">–</option>'+options.map(({p,i})=>selectOption(
+   p.player_name+(p.player_game_id?' · '+p.player_game_id:' · '+ocr2('unaffiliated')),i
+  )).join('');
  };
  list();filter.addEventListener('input',list);alliance.addEventListener('change',list);
  const missingDetails=$('#nocrAddMissing',root);
@@ -541,7 +1172,7 @@ function showReview(r){
   if(old)r.hits=r.hits.filter(x=>x!==old);
   const proof=r.frames[Number(frame?.value||0)]||null;
   if(r.kind==='law'&&!proof?.image){out.textContent=tr('evidenceRequired');return}
-  r.hits.push({player:p,name:p.player_name,alliance:p.alliance_code,score,rank,time:proof?.time??0,image:proof?.image||null,manual:true});
+  r.hits.push({player:p,name:p.player_name,alliance:p.alliance_code??null,score,rank,time:proof?.time??0,image:proof?.image||null,manual:true,trackingOnly:p.alliance_code==null});
   r.hits.sort((a,b)=>b.score-a.score);r.addOpen=true;refreshReview(r);
  };
  $('#nocrSave',root).disabled=!r.hits.length;
@@ -550,13 +1181,12 @@ async function save(){
  const r=run,root=r.root;if(r.busy)return;
  let scoreError=false,rankError=false;
  const selected=r.hits.filter((h,i)=>{
-  const c=$('[data-hit="'+i+'"]',root);
-  if(!c?.checked)return false;
+  const box=$('[data-hit="'+i+'"]',root);
+  if(!box?.checked)return false;
   const score=parsePoints($('[data-score="'+i+'"]',root)?.value);
   if(score===null){scoreError=true;return false}h.score=score;
   if(r.kind==='perf'&&$('#nocrType',root).value==='kvk_prep'){
-   const field=$('[data-rank="'+i+'"]',root);
-   const rank=field?.value?.trim()?Number(field.value):NaN;
+   const field=$('[data-rank="'+i+'"]',root),rank=field?.value?.trim()?Number(field.value):NaN;
    if(!Number.isInteger(rank)||rank<1||rank>200){rankError=true;return false}h.rank=rank;
   }
   return true;
@@ -567,48 +1197,65 @@ async function save(){
  r.busy=true;$('#nocrSave',root).disabled=true;
  const out=$('#nocrSaveStatus',root);out.textContent=tr('saving');
  try{
-  let response,evidenceWarning='';
+  let response={created:0,updated:0,unchanged:0,unresolved:0,results:[]},evidenceWarning='',trackingSaved=0;
   if(r.kind==='law'){
-   const occ=selectedOcc();
-   const args={p_event_schedule_id:occ.event_schedule_id,p_event_name:$('#nocrEvent',root).value,
-    p_phase_name:$('#nocrPhase',root).value,p_recording_day:$('#nocrDay',root).value,
-    p_recording_captured_at:null,p_video_hash:r.fileHash,p_hits:selected.map(hitPayload)};
-   // Mandatory fresh preview after editable scores, before any database write.
-   const checked=await rpc('preview_screen_recording_nap_occurrence_v2',{
-    p_event_schedule_id:args.p_event_schedule_id,p_event_name:args.p_event_name,p_phase_name:args.p_phase_name,
-    p_recording_day:args.p_recording_day,p_recording_captured_at:null,p_hits:args.p_hits
-   });
-   const previewByPlayer=new Map((checked.results||[]).map(x=>[String(x.player_game_id||x.player_id),x]));
-   const importable=selected.filter(h=>{
-    const row=previewByPlayer.get(String(h.player.player_game_id||h.player.player_id));
-    return !!row&&canPassThroughForEvidence(row.status,!!h.image);
-   });
-   if(!importable.length){out.textContent=reviewText('noChanges');return}
-   // "already_recorded" is intentionally allowed through when we have a still:
-   // the RPC keeps the violation unchanged but refreshes the import-case link,
-   // so evidence registration can safely target the existing violation.
-   args.p_hits=importable.map(hitPayload);
-   response=await rpc('import_screen_recording_nap_occurrence_v2',args);
-   const evidenceRows=(response.results||[]).filter(x=>['created','updated','unchanged'].includes(x.status)&&x.violation_id);
-   if(evidenceRows.length){
-    out.textContent=tr('upload');
-    const items=evidenceRows.map(row=>{
-     const h=importable.find(x=>x.player.player_name===row.player_name&&x.player.alliance_code===row.assigned_alliance);
-     return h?.image?{p_violation_id:row.violation_id,p_source_video_hash:r.fileHash,
-       p_frame_time_seconds:h.time,p_data_url:h.image}:null;
-    }).filter(Boolean);
-    if(items.length){
-     const failed=await uploadEvidenceBatch(items,3);
-     r.pendingEvidence=failed;
-     const retry=$('#nocrEvidenceRetry',root);
-     if(failed.length){
-      evidenceWarning=' · '+tr('evidenceFailed')+' ('+failed.length+')';
-      retry.hidden=false;
-     }else{
-      retry.hidden=true;
+   const occ=selectedOcc(),trackingSelected=selected.filter(isTrackingHit),regularSelected=selected.filter(h=>!isTrackingHit(h));
+   let regularImportable=[];
+   if(regularSelected.length){
+    const baseArgs={p_event_schedule_id:occ.event_schedule_id,p_event_name:$('#nocrEvent',root).value,
+     p_phase_name:$('#nocrPhase',root).value,p_recording_day:$('#nocrDay',root).value,
+     p_recording_captured_at:null,p_video_hash:r.fileHash};
+    const checked=await rpc('preview_screen_recording_nap_occurrence_v2',{
+     p_event_schedule_id:baseArgs.p_event_schedule_id,p_event_name:baseArgs.p_event_name,p_phase_name:baseArgs.p_phase_name,
+     p_recording_day:baseArgs.p_recording_day,p_recording_captured_at:null,p_hits:regularSelected.map(hitPayload)
+    });
+    const previewByPlayer=new Map((checked.results||[]).map(x=>[String(x.player_game_id||x.player_id),x]));
+    regularImportable=regularSelected.filter(h=>{
+     const row=previewByPlayer.get(String(h.player.player_game_id||h.player.player_id));
+     return !!row&&canPassThroughForEvidence(row.status,!!h.image);
+    });
+    if(regularImportable.length){
+     response=await rpc('import_screen_recording_nap_occurrence_v2',{...baseArgs,p_hits:regularImportable.map(hitPayload)});
+     const evidenceRows=(response.results||[]).filter(x=>['created','updated','unchanged'].includes(x.status)&&x.violation_id);
+     if(evidenceRows.length){
+      out.textContent=tr('upload');
+      const items=evidenceRows.map(row=>{
+       const h=regularImportable.find(x=>x.player.player_name===row.player_name&&x.player.alliance_code===row.assigned_alliance);
+       return h?.image?{p_violation_id:row.violation_id,p_source_video_hash:r.fileHash,p_frame_time_seconds:h.time,p_data_url:h.image}:null;
+      }).filter(Boolean);
+      if(items.length){
+       const failed=await uploadEvidenceBatch(items,3);
+       r.pendingEvidence=(r.pendingEvidence||[]).concat(failed);
+       if(failed.length)evidenceWarning=' · '+tr('evidenceFailed')+' ('+failed.length+')';
+      }
      }
     }
    }
+
+   if(trackingSelected.length){
+    out.textContent=tr('upload');
+    const trackingEvidence=[];
+    for(const h of trackingSelected){
+     const obs=await rpc('record_unaffiliated_screen_observation',{
+      p_player_id:h.player.player_id,p_event_schedule_id:occ.event_schedule_id,
+      p_event_name:$('#nocrEvent',root).value,p_phase_name:$('#nocrPhase',root).value,
+      p_recording_day:$('#nocrDay',root).value,p_score:h.score,p_server_rank:h.rank||null,p_video_hash:r.fileHash
+     });
+     if(obs?.observation_id){
+      trackingSaved++;
+      if(h.image)trackingEvidence.push({p_observation_id:obs.observation_id,p_source_video_hash:r.fileHash,
+       p_frame_time_seconds:h.time,p_data_url:h.image});
+     }
+    }
+    if(trackingEvidence.length){
+     const failed=await uploadEvidenceBatch(trackingEvidence,3);
+     r.pendingEvidence=(r.pendingEvidence||[]).concat(failed);
+     if(failed.length)evidenceWarning=' · '+tr('evidenceFailed')+' ('+(r.pendingEvidence?.length||failed.length)+')';
+    }
+   }
+
+   if(!regularImportable.length&&!trackingSaved){out.textContent=reviewText('noChanges');return}
+   const retry=$('#nocrEvidenceRetry',root);if(retry)retry.hidden=!(r.pendingEvidence?.length);
   }else{
    const type=$('#nocrType',root).value,occ=perfOcc();
    const method=type==='kvk_prep'?'import_player_kvk_performance_batch':'import_player_performance_batch';
@@ -616,18 +1263,20 @@ async function save(){
     {p_performance_type:'alliance_mobilization',p_event_schedule_id:occ.event_schedule_id,p_video_hash:r.fileHash,p_hits:selected.map(hitPayload)};
    response=await rpc(method,args);
   }
+
   const created=Number(response?.created||0),updated=Number(response?.updated||0),
    unchanged=Number(response?.unchanged||0),unresolved=Number(response?.unresolved||0);
   const piece=(count,one,many)=>points(count)+' '+reviewText(count===1?one:many);
   const parts=r.kind==='law'?[
-   piece(created,'newViolationOne','newViolationMany'),
-   piece(updated,'scoreUpdateOne','scoreUpdateMany'),
-   ...(unchanged?[piece(unchanged,'alreadyOne','alreadyMany')]:[])
+   ...(created?[piece(created,'newViolationOne','newViolationMany')]:[]),
+   ...(updated?[piece(updated,'scoreUpdateOne','scoreUpdateMany')]:[]),
+   ...(unchanged?[piece(unchanged,'alreadyOne','alreadyMany')]:[]),
+   ...(trackingSaved?[points(trackingSaved)+' '+ocr2('trackingSaved')]:[])
   ]:[
    piece(created,'importedPerformanceOne','importedPerformanceMany'),
    ...(unresolved?[piece(unresolved,'notMatchedOne','notMatchedMany')]:[])
   ];
-  out.textContent='✓ '+reviewText('saveSummary')+': '+parts.join(' · ')+
+  out.textContent='✓ '+reviewText('saveSummary')+': '+(parts.length?parts.join(' · '):reviewText('noDataChanged'))+
    (response?.duplicate_video?' · '+reviewText('existingVideo'):'')+evidenceWarning;
   window.postMessage({type:'nap-screen-import-saved'},location.origin);
  }catch(e){out.textContent=(e.message||String(e));console.error('native OCR save',e)}
@@ -635,7 +1284,7 @@ async function save(){
 }
 function mount(root,kind,allowed=[]){
  if(run?.busy)return;
- run={root,kind,allowed,hits:[],unmatched:[],frames:[],occurrences:[],members:[],selection:new Map(),addOpen:false,busy:false,preview:null,fileHash:null,pendingEvidence:[]};
+ run={root,kind,allowed,hits:[],unmatched:[],frames:[],occurrences:[],members:[],selection:new Map(),addOpen:false,busy:false,ocrActive:false,preview:null,fileHash:null,pendingEvidence:[]};
  shell(root,kind);
  const r=run;$('#nocrAnalyze',root).onclick=analyze;$('#nocrSave',root).onclick=save;$('#nocrEvidenceRetry',root).onclick=retryPendingEvidence;
  if(kind==='law'){
@@ -644,20 +1293,11 @@ function mount(root,kind,allowed=[]){
   if(event&&EVENTS.includes(event))$('#nocrEvent',root).value=event;
   $('#nocrEvent',root).onchange=lawOccurrence;$('#nocrOcc',root).onchange=setLawPhase;
   $('#nocrPhase',root).onchange=async()=>{
-  const occ=selectedOcc(),phase=$('#nocrPhase',root).value,event=$('#nocrEvent',root).value;
-  if(occ&&(event==='Strongest Governor'||event==='Alliance Brawl'))
-   $('#nocrDay',root).value=dayUTC(occ.begin_at,Number(phase.slice(2))-1);
   if(r.hits.length)await refreshReview(r);
  };
  $('#nocrDay',root).addEventListener('change',async()=>{
-  const occ=selectedOcc(),day=$('#nocrDay',root).value,event=$('#nocrEvent',root).value,phase=$('#nocrPhase',root);
-  if(!occ||!validDay(day,occ)){status(tr('wrongDay'),true);return}
-  if(event==='Strongest Governor'||event==='Alliance Brawl'){
-   const offset=Math.round((dayNum(day)-dayNum(dayUTC(occ.begin_at)))/86400000)+1;
-   const next=(event==='Strongest Governor'?'sg':'b')+offset;
-   if(!Array.from(phase.options).some(option=>option.value===next)){status(tr('wrongDay'),true);return}
-   phase.value=next;
-  }
+  const occ=selectedOcc(),day=$('#nocrDay',root).value;
+  if(!occ||!validRecordingDay(day,occ)){status(tr('wrongDay'),true);return}
   status(reviewText('dayUpdated'));
   if(r.hits.length)await refreshReview(r);
  });
