@@ -224,6 +224,14 @@ function extractRows(text){
  }
  return out;
 }
+function extractPodiumRows(text){
+ const rows=extractRows(text).slice(0,3);
+ if(rows.length===3){
+  return rows.map((row,i)=>({...row,rank:i+1,podium:true,rankInferred:true,rawRank:row.rank}));
+ }
+ // Partial fallback: keep only ranks that OCR itself clearly identified as 1–3.
+ return rows.filter(row=>Number.isInteger(row.rank)&&row.rank>=1&&row.rank<=3).map(row=>({...row,podium:true}));
+}
 function repairSequentialRanks(rows){
  if(!Array.isArray(rows)||rows.length<2)return rows||[];
  const out=rows.map(r=>({...r}));
@@ -273,6 +281,15 @@ function frameCanvas(video){
  canvas.width=Math.max(1,Math.round(video.videoWidth*scale));canvas.height=Math.max(1,Math.round(video.videoHeight*scale));
  const cx=canvas.getContext('2d',{willReadFrequently:true});cx.drawImage(video,0,0,canvas.width,canvas.height);
  return canvas;
+}
+function podiumCanvas(frame){
+ // Gold / Silver / Bronze use a different card design than rank 4+.
+ // Crop them as one compact block; their vertical order defines ranks 1, 2, 3.
+ const x=Math.round(frame.width*.03),y=Math.round(frame.height*.315),w=Math.round(frame.width*.94),h=Math.round(frame.height*.285);
+ const scale=Math.min(1.15,1180/Math.max(1,w)),out=document.createElement('canvas');
+ out.width=Math.max(1,Math.round(w*scale));out.height=Math.max(1,Math.round(h*scale));
+ const cx=out.getContext('2d',{willReadFrequently:true});cx.imageSmoothingEnabled=true;cx.imageSmoothingQuality='high';
+ cx.drawImage(frame,x,y,w,h,0,0,out.width,out.height);return out;
 }
 function rankingCanvas(frame){
  // Keep the complete top of the visible ranking (ranks 1–3 live high in the view),
@@ -371,13 +388,13 @@ function consensusHit(list){
 function baseFrameTimes(dur){
  const end=Math.max(.06,dur-.10),times=[];
  const add=t=>{const v=Math.max(.04,Math.min(end,t));if(!times.some(x=>Math.abs(x-v)<.10))times.push(v)};
- // The first ranks can disappear quickly once scrolling begins. Sample the opening
- // slightly denser, then stay sparse for the rest of the video.
- [0.08,0.38,0.78,1.25].forEach(add);
+ // Keep a few early samples for normal rows 4–7; podium ranks 1–3 have
+ // their own dedicated OCR pass on the first frame.
+ [0.08,0.52,1.10].forEach(add);
  const remaining=Math.max(4,Math.min(7,Math.ceil(dur/3)));
- for(let i=1;i<=remaining;i++)add(1.25+(end-1.25)*(i/(remaining+1)));
+ for(let i=1;i<=remaining;i++)add(1.10+(end-1.10)*(i/(remaining+1)));
  add(end);
- return times.sort((a,b)=>a-b).slice(0,12);
+ return times.sort((a,b)=>a-b).slice(0,11);
 }
 async function seek(video,time){
  if(Math.abs(video.currentTime-time)<.03&&video.readyState>=2)return;
@@ -542,6 +559,11 @@ async function analyze(){
    if(r.frames.length<12&&i%Math.max(1,Math.floor(times.length/12))===0)r.frames.push({time:sec,image:full.toDataURL('image/jpeg',.72)});
    const text=(await worker.recognize(roi)).data?.text||'',parsed=repairSequentialRanks(extractRows(text));
    processRows(parsed,sec,full);
+   if(i===0){
+    const podium=podiumCanvas(full),podiumText=(await worker.recognize(podium)).data?.text||'';
+    const podiumRows=extractPodiumRows(podiumText);
+    processRows(podiumRows,sec,full);
+   }
    progress(1,5+65*((i+1)/times.length),observations.size);
    await new Promise(resolve=>setTimeout(resolve,0));
   }
