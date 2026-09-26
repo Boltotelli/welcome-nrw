@@ -679,61 +679,79 @@ function videoErrorMessage(video){
         code===4?'unsupported video codec/format':
         'video frame could not be opened';
 }
-async function recoverVideo(video){
- try{video.pause()}catch{}
+async function waitForDecodedVideo(video,timeout=7000){
+ if(video.readyState>=2&&video.videoWidth>0&&video.videoHeight>0)return true;
  await new Promise((resolve,reject)=>{
   let settled=false;
   const finish=(err)=>{
    if(settled)return;settled=true;clearTimeout(timer);
-   video.removeEventListener('loadeddata',ok);
-   video.removeEventListener('canplay',ok);
+   video.removeEventListener('loadeddata',ready);
+   video.removeEventListener('canplay',ready);
    video.removeEventListener('error',bad);
    err?reject(err):resolve();
   };
-  const ok=()=>video.readyState>=2&&video.videoWidth?finish():null;
+  const ready=()=>video.readyState>=2&&video.videoWidth>0&&video.videoHeight>0?finish():null;
   const bad=()=>finish(Error(videoErrorMessage(video)));
-  const timer=setTimeout(()=>video.readyState>=2&&video.videoWidth?finish():finish(Error('Video decoder recovery timed out')),6500);
-  video.addEventListener('loadeddata',ok);
-  video.addEventListener('canplay',ok);
+  const timer=setTimeout(()=>ready()||finish(Error('Video decoder did not become ready')),timeout);
+  video.addEventListener('loadeddata',ready);
+  video.addEventListener('canplay',ready);
   video.addEventListener('error',bad,{once:true});
-  try{video.load();if(video.readyState>=2&&video.videoWidth)finish()}catch(err){finish(err)}
+  ready();
  });
+ return true;
 }
-async function seekOnce(video,time){
- if(Math.abs(video.currentTime-time)<.04&&video.readyState>=2)return true;
+async function waitForPresentedFrame(video,target,timeout=2400){
+ if(typeof video.requestVideoFrameCallback!=='function'){
+  await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+  if(video.readyState<2)throw Error('Video frame not decoded');
+  return true;
+ }
  await new Promise((resolve,reject)=>{
-  let settled=false,errorSeen=false;
+  let settled=false,handle=0;
   const finish=(err)=>{
-   if(settled)return;settled=true;clearTimeout(timer);clearTimeout(errorTimer);
-   video.removeEventListener('seeked',ok);
-   video.removeEventListener('loadeddata',check);
-   video.removeEventListener('canplay',check);
-   video.removeEventListener('timeupdate',check);
-   video.removeEventListener('error',bad);
+   if(settled)return;settled=true;clearTimeout(timer);
+   try{if(handle&&video.cancelVideoFrameCallback)video.cancelVideoFrameCallback(handle)}catch{}
    err?reject(err):resolve();
-  };
-  const check=()=>{
-   if(video.readyState>=2&&Math.abs(video.currentTime-time)<.20)finish();
-  };
-  const ok=()=>requestAnimationFrame(check);
-  const bad=()=>{
-   errorSeen=true;
-   // Desktop Chromium can emit a transient media error around a difficult keyframe.
-   // Give the decoder a brief chance to expose the requested frame before failing.
-   clearTimeout(errorTimer);
-   errorTimer=setTimeout(()=>check()||finish(Error(videoErrorMessage(video))),180);
   };
   const timer=setTimeout(()=>{
-   if(video.readyState>=2&&Math.abs(video.currentTime-time)<.20)finish();
-   else finish(Error(errorSeen?videoErrorMessage(video):'Video frame timed out'));
-  },5200);
-  let errorTimer=0;
-  video.addEventListener('seeked',ok);
-  video.addEventListener('loadeddata',check);
-  video.addEventListener('canplay',check);
-  video.addEventListener('timeupdate',check);
-  video.addEventListener('error',bad);
-  try{video.currentTime=time}catch(err){finish(err)}
+   if(video.readyState>=2&&Math.abs(video.currentTime-target)<.25)finish();
+   else finish(Error('Video frame presentation timed out'));
+  },timeout);
+  handle=video.requestVideoFrameCallback(()=>finish());
+ });
+ return true;
+}
+async function seekOnce(video,time){
+ await waitForDecodedVideo(video,4500);
+ if(Math.abs(video.currentTime-time)<.04&&video.readyState>=2){
+  await waitForPresentedFrame(video,time,1600).catch(()=>{});
+  return true;
+ }
+ await new Promise((resolve,reject)=>{
+  let settled=false;
+  const finish=(err)=>{
+   if(settled)return;settled=true;clearTimeout(timer);
+   video.removeEventListener('seeked',ok);
+   video.removeEventListener('error',bad);
+   err?reject(err):resolve();
+  };
+  const ok=()=>finish();
+  const bad=()=>finish(Error(videoErrorMessage(video)));
+  const timer=setTimeout(()=>{
+   if(video.readyState>=2&&Math.abs(video.currentTime-time)<.25)finish();
+   else finish(Error('Video frame timed out'));
+  },5000);
+  video.addEventListener('seeked',ok,{once:true});
+  video.addEventListener('error',bad,{once:true});
+  try{
+   if(typeof video.fastSeek==='function'&&Math.abs(video.currentTime-time)>.75)video.fastSeek(time);
+   else video.currentTime=time;
+  }catch(err){finish(err)}
+ });
+ await waitForDecodedVideo(video,2500);
+ await waitForPresentedFrame(video,time,2200).catch(err=>{
+  // A seek can be usable even when Chromium omits the presentation callback.
+  if(video.readyState<2||Math.abs(video.currentTime-time)>.30)throw err;
  });
  return true;
 }
@@ -741,29 +759,39 @@ async function seek(video,time){
  const duration=Number(video.duration)||0;
  const edge=Math.max(0,duration-.06);
  const base=Math.max(0,Math.min(Number(time)||0,edge));
- const offsets=[0,.08,-.08,.18,-.18,.35];
+ const offsets=[0,.06,-.06,.14,-.14,.28,-.28];
  let lastError=null;
  for(let attempt=0;attempt<offsets.length;attempt++){
   const target=Math.max(0,Math.min(base+offsets[attempt],edge));
-  if(attempt>0){
-   try{await recoverVideo(video)}catch(err){lastError=err}
-  }
   try{await seekOnce(video,target);return target}
   catch(err){
    lastError=err;
    console.warn('OCR video seek retry',attempt+1,'target',target,err);
+   // Do not call video.load() here: resetting Chromium's decoder between
+   // retries can turn a transient seek problem into repeated MEDIA_ERR_SRC_NOT_SUPPORTED.
+   await new Promise(resolve=>setTimeout(resolve,120+attempt*70));
   }
  }
  throw lastError||Error('Video frame could not be decoded');
 }
 async function metadata(video,file){
- const url=URL.createObjectURL(file);video.src=url;video.preload='auto';video.muted=true;video.playsInline=true;
+ const url=URL.createObjectURL(file);
+ video.preload='auto';video.muted=true;video.playsInline=true;video.src=url;
  try{
   await new Promise((resolve,reject)=>{
    if(video.readyState>=1)return resolve();
-   video.onloadedmetadata=resolve;video.onerror=()=>reject(Error('Unsupported video format'));video.load();
+   const ok=()=>resolve();
+   const bad=()=>reject(Error(videoErrorMessage(video)));
+   video.addEventListener('loadedmetadata',ok,{once:true});
+   video.addEventListener('error',bad,{once:true});
+   video.load();
   });
   if(!Number.isFinite(video.duration)||video.duration<=0||!video.videoWidth)throw Error('Video metadata unavailable');
+  // Desktop Chromium often exposes metadata before the first frame is actually
+  // decoded. OCR must not start seeking until HAVE_CURRENT_DATA or better.
+  await waitForDecodedVideo(video,8000);
+  if(Math.abs(video.currentTime)>0.01)video.currentTime=0;
+  await waitForPresentedFrame(video,0,2500).catch(()=>{});
   return url;
  }catch(e){URL.revokeObjectURL(url);throw e}
 }
