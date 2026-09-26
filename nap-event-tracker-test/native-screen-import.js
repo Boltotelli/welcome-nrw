@@ -43,22 +43,27 @@ function postContactText(key){const d=POST_CONTACT_WORDS[lang()]||POST_CONTACT_W
 const reviewText=(key)=>((REVIEW_WORDS[lng()]||REVIEW_WORDS.de)[key]||key);
 const points=n=>Number(n).toLocaleString('de-DE');
 const NAP_ORDER=['NWO','THM','CWR','NRW','PxR','NwO'];
+const UNAFFILIATED_CODE='__UNAFFILIATED__';
 let alliancePower=new Map();
 const alphabeticalRoster=members=>members.map((p,i)=>({p,i})).sort((a,b)=>String(a.p.player_name||'').localeCompare(String(b.p.player_name||''),'de',{sensitivity:'base',numeric:true})||String(a.p.player_game_id||'').localeCompare(String(b.p.player_game_id||''),'de',{numeric:true}));
+const allianceValueForPlayer=p=>p?.alliance_code==null?UNAFFILIATED_CODE:String(p.alliance_code);
+const allianceLabelForValue=a=>a===UNAFFILIATED_CODE?ocr2('unaffiliated'):a;
 function orderedAlliances(members){
  const names=[...new Set(members.map(p=>p.alliance_code).filter(Boolean))];
- return names.sort((a,b)=>{
+ const nap=NAP_ORDER.filter(a=>names.includes(a));
+ const external=names.filter(a=>!NAP_ORDER.includes(a)).sort((a,b)=>{
   const pa=Number(alliancePower.get(a)||0),pb=Number(alliancePower.get(b)||0);
   if(pa>0&&pb>0&&pa!==pb)return pb-pa;
   if(pa>0)return -1;if(pb>0)return 1;
-  const ai=NAP_ORDER.indexOf(a),bi=NAP_ORDER.indexOf(b);
-  if(ai>=0&&bi>=0)return ai-bi;
-  if(ai>=0)return -1;if(bi>=0)return 1;
   return a.localeCompare(b,'de',{sensitivity:'base',numeric:true});
  });
+ return [...nap,...(members.some(p=>p.alliance_code==null)?[UNAFFILIATED_CODE]:[]),...external];
 }
 function allianceOptions(members){
- return orderedAlliances(members).map(a=>selectOption(a+(alliancePower.get(a)?' · '+reviewText('alliancePower')+' '+points(alliancePower.get(a)):'') ,a)).join('');
+ return orderedAlliances(members).map(a=>selectOption(
+  allianceLabelForValue(a)+(a!==UNAFFILIATED_CODE&&alliancePower.get(a)?' · '+reviewText('alliancePower')+' '+points(alliancePower.get(a)):''),
+  a
+ )).join('');
 }
 const parsePoints=raw=>{const x=String(raw??'').trim();if(!/^(?:\d+|\d{1,3}(?:\.\d{3})+)$/.test(x))return null;const n=Number(x.replace(/\./g,''));return Number.isSafeInteger(n)&&n>=0?n:null};
 const $=(s,root=document)=>root.querySelector(s);
@@ -132,9 +137,10 @@ async function retryPendingEvidence(){
   }
  }finally{r.busy=false;button.disabled=false}
 }
-async function roster(){
+async function roster(force=false){
+ if(force)rosterPromise=null;
  if(rosterPromise)return rosterPromise;
- rosterPromise=(async()=>{
+ const pending=(async()=>{
   const [rows,own,alliances]=await Promise.all([
    rpc('get_nap_screen_import_directory_test'),
    rpc('get_own_player_identity_directory'),
@@ -147,8 +153,10 @@ async function roster(){
   alliancePower=new Map((alliances||[]).filter(x=>x.alliance_code&&Number(x.power)>0).map(x=>[x.alliance_code,Number(x.power)]));
   const aliases=new Map((own||[]).map(x=>[String(x.player_game_id),x.aliases||[]]));
   return (rows||[]).map(x=>({...x,aliases:aliases.get(String(x.player_game_id))||[],player_id:x.player_id||null}));
- })().catch(e=>{rosterPromise=null;throw e});
- return rosterPromise;
+ })();
+ rosterPromise=pending;
+ try{return await pending}
+ finally{if(rosterPromise===pending)rosterPromise=null}
 }
 async function ensureWorker(){
  if(workerPromise)return workerPromise;
@@ -397,7 +405,9 @@ function rankedPlayerCandidates(row,members){
  return members.map(p=>({p,s:playerNameSimilarity(row,p)})).filter(x=>x.s>=.72).sort((a,b)=>b.s-a.s);
 }
 function matchPlayer(row,members){
- if(!norm(row.name))return null;
+ const rowNorm=norm(row.name);if(!rowNorm)return null;
+ const exact=members.filter(p=>[p.player_name,...(p.aliases||[])].some(n=>norm(n)===rowNorm));
+ if(exact.length===1)return {...exact[0],confidence:1,allianceMismatch:!!row.alliance&&String(exact[0].alliance_code||'').toLowerCase()!==String(row.alliance).toLowerCase(),exactName:true};
  const quality=!!row.quality,alliance=String(row.alliance||'').toLowerCase();
  const same=alliance?members.filter(p=>String(p.alliance_code||'').toLowerCase()===alliance):members;
  let list=rankedPlayerCandidates(row,same),best=list[0],second=list[1];
@@ -749,7 +759,7 @@ async function analyze(){
  let url,video,worker;
  try{
   progress(0,2,0);
-  let members=[...(await roster())];
+  let members=[...(await roster(true))];
   if(r.kind==='perf'&&$('#nocrType',root).value==='alliance_mobilization'&&perfOcc()?.event_schedule_id){
    try{
     const extras=await rpc('get_performance_candidate_roster',{p_event_schedule_id:perfOcc().event_schedule_id});
@@ -1004,17 +1014,26 @@ function showReview(r){
   const populate=()=>{
    const code=mapAlliance.value;
    mapPlayer.innerHTML='<option value="">–</option>'+alphabeticalRoster(r.members)
-    .filter(({p})=>code&&p.alliance_code===code)
+    .filter(({p})=>code&&(code===UNAFFILIATED_CODE?p.alliance_code==null:p.alliance_code===code))
     .map(({p,i})=>selectOption(p.player_name+' · '+(p.player_game_id||''),i)).join('');
   };
   mapAlliance.onchange=populate;
-  const detected=r.unmatched[0]?.alliance;
-  if(detected&&orderedAlliances(r.members).some(a=>a.toLowerCase()===String(detected).toLowerCase()))
-   mapAlliance.value=orderedAlliances(r.members).find(a=>a.toLowerCase()===String(detected).toLowerCase());
+  const chooseAllianceForRow=row=>{
+   const candidate=String(row?.alliance||'').trim();
+   if(candidate){
+    const code=orderedAlliances(r.members).find(a=>a!==UNAFFILIATED_CODE&&a.toLowerCase()===candidate.toLowerCase());
+    if(code)return code;
+   }
+   const rn=norm(row?.name);
+   const poolExact=r.members.filter(p=>p.alliance_code==null&&[p.player_name,...(p.aliases||[])].some(n=>norm(n)===rn));
+   return poolExact.length===1?UNAFFILIATED_CODE:'';
+  };
+  const firstChoice=chooseAllianceForRow(r.unmatched[0]);
+  if(firstChoice)mapAlliance.value=firstChoice;
   populate();
   $('#nocrUnknown',root)?.addEventListener('change',()=>{
-   const candidate=r.unmatched[Number($('#nocrUnknown',root).value)]?.alliance;
-   const code=orderedAlliances(r.members).find(a=>a.toLowerCase()===String(candidate||'').toLowerCase());
+   const row=r.unmatched[Number($('#nocrUnknown',root).value)];
+   const code=chooseAllianceForRow(row);
    if(code){mapAlliance.value=code;populate()}
   });
  }
@@ -1025,7 +1044,7 @@ function showReview(r){
   const row=r.unmatched[index],p=r.members[Number(playerIndex)];if(!row||!p)return;
   const existing=r.hits.find(x=>String(x.player.player_game_id||x.player.player_id)===String(p.player_game_id||p.player_id));
   if(!existing||row.score>existing.score){
-   const h={...row,player:p,alliance:p.alliance_code,manual:true,observations:row.variantCount||row.observations||1,consensus:1};
+   const h={...row,player:p,alliance:p.alliance_code??null,manual:true,trackingOnly:p.alliance_code==null,observations:row.variantCount||row.observations||1,consensus:1};
    if(existing)r.hits=r.hits.filter(x=>x!==existing);
    r.hits.push(h);
   }
