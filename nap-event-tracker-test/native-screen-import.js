@@ -157,9 +157,9 @@ async function ensureWorker(){
     el.onload=resolve;el.onerror=()=>reject(Error('OCR library could not be loaded'));document.head.appendChild(el);
    });
   }
-  let worker;
-  try{worker=await window.Tesseract.createWorker(['eng','kor'],1)}
-  catch(err){console.warn('Korean OCR language unavailable, using English only',err);worker=await window.Tesseract.createWorker('eng',1)}
+  // Mobile fast path: English handles ranks, alliance tags, Latin names and scores.
+  // Unknown/Korean names remain visible through rank coverage and can be rescued manually.
+  const worker=await window.Tesseract.createWorker('eng',1);
   try{await worker.setParameters({preserve_interword_spaces:'1',tessedit_pageseg_mode:'6'})}catch(err){console.warn('OCR parameters',err)}
   return worker;
  })().catch(e=>{workerPromise=null;throw e});
@@ -263,7 +263,7 @@ function matchPlayer(row,members){
  return {...best.p,confidence:best.s};
 }
 function frameCanvas(video){
- const canvas=document.createElement('canvas'),scale=Math.min(2.1,1900/Math.max(1,video.videoWidth));
+ const canvas=document.createElement('canvas'),scale=Math.min(1.35,1400/Math.max(1,video.videoWidth));
  canvas.width=Math.max(1,Math.round(video.videoWidth*scale));canvas.height=Math.max(1,Math.round(video.videoHeight*scale));
  const cx=canvas.getContext('2d',{willReadFrequently:true});cx.drawImage(video,0,0,canvas.width,canvas.height);
  return canvas;
@@ -272,7 +272,7 @@ function rankingCanvas(frame){
  // Kingshot keeps the current player's own rank in a sticky row at the bottom.
  // Stop above that row so it can never widen rank coverage (e.g. rank 160).
  const x=Math.round(frame.width*.035),y=Math.round(frame.height*.265),w=Math.round(frame.width*.93),h=Math.round(frame.height*.615);
- const scale=Math.min(2.45,1850/Math.max(1,w)),out=document.createElement('canvas');
+ const scale=Math.min(1.35,1350/Math.max(1,w)),out=document.createElement('canvas');
  out.width=Math.max(1,Math.round(w*scale));out.height=Math.max(1,Math.round(h*scale));
  const cx=out.getContext('2d',{willReadFrequently:true});cx.imageSmoothingEnabled=true;cx.imageSmoothingQuality='high';
  cx.drawImage(frame,x,y,w,h,0,0,out.width,out.height);return out;
@@ -321,19 +321,31 @@ function rankCoverage(map){
 }
 function medianTime(arr){if(!arr?.length)return null;const a=[...arr].sort((x,y)=>x-y);return a[Math.floor(a.length/2)]}
 function rescueTimes(coverage,rankMap,dur,used){
- const out=new Set(),seen=[...rankMap.keys()].sort((a,b)=>a-b);
- for(const m of coverage.missing.slice(0,36)){
-  const lo=[...seen].reverse().find(r=>r<m),hi=seen.find(r=>r>m);
+ const missing=[...(coverage?.missing||[])].sort((a,b)=>a-b);
+ if(!missing.length)return [];
+ const groups=[];let g=[missing[0]];
+ for(let i=1;i<missing.length;i++){
+  if(missing[i]===missing[i-1]+1)g.push(missing[i]);else{groups.push(g);g=[missing[i]]}
+ }
+ groups.push(g);
+ const seen=[...rankMap.keys()].sort((a,b)=>a-b),out=[];
+ const add=t=>{
+  const v=Math.max(.03,Math.min(Math.max(.03,dur-.03),Math.round(t*100)/100));
+  if(!used.some(x=>Math.abs(x-v)<.10)&&!out.some(x=>Math.abs(x-v)<.10))out.push(v);
+ };
+ for(const group of groups.slice(0,4)){
+  const first=group[0],last=group[group.length-1];
+  const lo=[...seen].reverse().find(r=>r<first),hi=seen.find(r=>r>last);
   const lt=lo!=null?medianTime(rankMap.get(lo)):null,ht=hi!=null?medianTime(rankMap.get(hi)):null;
-  let a,b;
-  if(lt!=null&&ht!=null){a=Math.min(lt,ht)-.45;b=Math.max(lt,ht)+.45}
-  else{const t=lt??ht;if(t==null)continue;a=t-.9;b=t+.9}
-  a=Math.max(.03,a);b=Math.min(Math.max(.03,dur-.03),b);
-  for(let t=a;t<=b+.001;t+=.22){
-   const v=Math.round(t*100)/100;if(!used.some(x=>Math.abs(x-v)<.08))out.add(v);
+  if(lt!=null&&ht!=null){
+   const a=Math.min(lt,ht),b=Math.max(lt,ht),n=Math.min(3,Math.max(1,group.length));
+   for(let i=1;i<=n;i++)add(a+(b-a)*(i/(n+1)));
+  }else{
+   const t=lt??ht;if(t==null)continue;
+   add(t-.30);add(t+.30);
   }
  }
- return [...out].sort((a,b)=>a-b).slice(0,42);
+ return out.sort((a,b)=>a-b).slice(0,12);
 }
 function consensusHit(list){
  if(!list?.length)return null;
@@ -351,12 +363,12 @@ function consensusHit(list){
  return {...exemplar.row,player:exemplar.player,time:exemplar.time,image:exemplar.image,rank,observations:list.length,consensus:chosen.length};
 }
 function baseFrameTimes(dur){
- const safeEnd=Math.max(.04,dur-.06);
- // Fast first pass; rank continuity triggers a focused follow-up if needed.
- const step=Math.max(.72,dur/28),times=[];
- for(let t=.20;t<safeEnd;t+=step)times.push(Math.min(safeEnd,t));
- if(!times.length)times.push(Math.min(safeEnd,Math.max(.02,dur/2)));
- return times.slice(0,30);
+ const start=Math.min(.30,Math.max(.04,dur*.04)),end=Math.max(start,Math.max(.04,dur-.10));
+ // Mobile-first: a sparse first pass covers the scroll; rank continuity decides
+ // whether a small targeted rescue pass is necessary.
+ const count=Math.max(6,Math.min(10,Math.ceil(dur/2.25)+1));
+ if(count===1)return [(start+end)/2];
+ return Array.from({length:count},(_,i)=>start+(end-start)*(i/(count-1)));
 }
 async function seek(video,time){
  if(Math.abs(video.currentTime-time)<.03&&video.readyState>=2)return;
@@ -518,7 +530,7 @@ async function analyze(){
    if(run!==r)break;const sec=times[i];await seek(video,sec);const full=frameCanvas(video),roi=rankingCanvas(full);
    if(r.frames.length<12&&i%Math.max(1,Math.floor(times.length/12))===0)r.frames.push({time:sec,image:full.toDataURL('image/jpeg',.72)});
    const text=(await worker.recognize(roi)).data?.text||'';processRows(repairSequentialRanks(extractRows(text)),sec,full);
-   progress(1,5+66*((i+1)/times.length),observations.size);
+   progress(1,5+65*((i+1)/times.length),observations.size);
    await new Promise(resolve=>setTimeout(resolve,0));
   }
   if(run!==r)return;
@@ -528,12 +540,7 @@ async function analyze(){
    const missingSet=new Set(coverage.missing);
    for(let i=0;i<rescue.length;i++){
     if(run!==r)break;const sec=rescue[i];await seek(video,sec);const full=frameCanvas(video),roi=rankingCanvas(full);
-    let rows=repairSequentialRanks(extractRows((await worker.recognize(roi)).data?.text||''));
-    if(!rows.some(x=>missingSet.has(x.rank))){
-     const enhanced=enhancedCanvas(roi),extra=repairSequentialRanks(extractRows((await worker.recognize(enhanced)).data?.text||''));
-     const seen=new Set(rows.map(x=>(x.rank||'')+'|'+norm(x.name)+'|'+x.score));
-     rows=rows.concat(extra.filter(x=>!seen.has((x.rank||'')+'|'+norm(x.name)+'|'+x.score)));
-    }
+    const rows=repairSequentialRanks(extractRows((await worker.recognize(roi)).data?.text||''));
     processRows(rows,sec,full);
     progress(1,72+22*((i+1)/rescue.length),observations.size,'rescue');
     await new Promise(resolve=>setTimeout(resolve,0));
