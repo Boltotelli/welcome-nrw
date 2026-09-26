@@ -47,3 +47,4 @@ jobs:
       - name: Deploy V2
         id: deployment
         uses: actions/deploy-pages@v4
+# Publish OCR V2 rank-aware rescue test 2026-09-26
