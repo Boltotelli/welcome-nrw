@@ -224,6 +224,48 @@ function extractRows(text){
  }
  return out;
 }
+function ocrLinesFromBlocks(blocks){
+ const out=[];
+ for(const block of blocks||[])for(const paragraph of block?.paragraphs||[])for(const line of paragraph?.lines||[]){
+  if(line?.text&&line?.bbox)out.push({text:String(line.text).trim(),bbox:line.bbox});
+ }
+ return out;
+}
+function attachLayout(rows,blocks){
+ const lines=ocrLinesFromBlocks(blocks);
+ if(!lines.length)return rows;
+ return (rows||[]).map(row=>{
+  const candidates=lines.map(line=>{
+   const tail=scoreTail(line.text),nameText=line.text.replace(/\s*[0-9OoIl|]{1,3}(?:[.,\s][0-9OoIl|]{3}){1,4}\s*$/,'');
+   const score=(tail&&tail.score===row.score?1:0)+(similarity(nameText,row.name)*.45);
+   return {line,score};
+  }).sort((a,b)=>b.score-a.score);
+  return candidates[0]?.score>=.32?{...row,bbox:candidates[0].line.bbox}:{...row};
+ });
+}
+function parseOcrData(data){
+ return attachLayout(repairSequentialRanks(extractRows(data?.text||'')),data?.blocks||[]);
+}
+function qualityNameCanvas(roi,bbox){
+ if(!bbox||![bbox.x0,bbox.y0,bbox.x1,bbox.y1].every(Number.isFinite))return null;
+ const x0=Math.max(0,Math.round(roi.width*.10)),x1=Math.min(roi.width,Math.round(roi.width*.73));
+ const y0=Math.max(0,Math.floor(bbox.y0-22)),y1=Math.min(roi.height,Math.ceil(bbox.y1+22));
+ if(x1<=x0||y1<=y0)return null;
+ const w=x1-x0,h=y1-y0,scale=Math.min(2.25,1800/Math.max(1,w)),out=document.createElement('canvas');
+ out.width=Math.max(1,Math.round(w*scale));out.height=Math.max(1,Math.round(h*scale));
+ const cx=out.getContext('2d',{willReadFrequently:true});cx.imageSmoothingEnabled=true;cx.imageSmoothingQuality='high';
+ cx.drawImage(roi,x0,y0,w,h,0,0,out.width,out.height);return out;
+}
+function qualityNameRow(text,group){
+ const lines=String(text||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+ if(!lines.length)return null;
+ let best=lines.sort((a,b)=>(b.match(/[\p{L}\p{N}]/gu)||[]).length-(a.match(/[\p{L}\p{N}]/gu)||[]).length)[0]||'';
+ best=best.replace(/^\s*#?\s*[0-9OoIl|]{1,3}\s*[.)\-:]?\s*/,'').replace(/\s*[0-9OoIl|]{1,3}(?:[.,\s][0-9OoIl|]{3}){1,4}\s*$/,'').trim();
+ const tag=best.match(/[\[(]\s*([a-z0-9]{2,6})\s*[\])]/i);
+ const name=best.replace(/[\[(]\s*[a-z0-9]{2,6}\s*[\])]/gi,' ').replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}~_-]+$/gu,'').trim();
+ if(norm(name).length<2)return null;
+ return {...group,name,alliance:tag?.[1]||group.alliance||'',score:group.score,rank:group.rank,raw:best,quality:true};
+}
 function extractPodiumRows(text){
  const rows=extractRows(text).slice(0,3);
  if(rows.length===3){
@@ -267,13 +309,15 @@ function similarity(a,b){
 }
 function matchPlayer(row,members){
  if(!norm(row.name))return null;
- const tagged=members.filter(p=>!row.alliance||String(p.alliance_code).toLowerCase()===row.alliance.toLowerCase());
+ const tagged=members.filter(p=>!row.alliance||String(p.alliance_code).toLowerCase()===String(row.alliance).toLowerCase());
  const list=tagged.map(p=>{
   const names=[p.player_name,...(p.aliases||[])];return {p,s:Math.max(...names.map(n=>similarity(row.name,n)))};
- }).filter(x=>x.s>=.78).sort((a,b)=>b.s-a.s);
- const best=list[0],second=list[1];
- if(!best||best.s<(row.alliance?.92:.96)||second&&best.s-second.s<.07&&best.s<.995)return null;
- if(norm(row.name).length<=4&&best.s<.995)return null;
+ }).filter(x=>x.s>=.72).sort((a,b)=>b.s-a.s);
+ const best=list[0],second=list[1],quality=!!row.quality;
+ const threshold=quality?(row.alliance?.84:.90):(row.alliance?.92:.96);
+ const margin=quality?.06:.07;
+ if(!best||best.s<threshold||second&&best.s-second.s<margin&&best.s<(quality?.97:.995))return null;
+ if(norm(row.name).length<=4&&best.s<(quality?.94:.995))return null;
  return {...best.p,confidence:best.s};
 }
 function memberKey(p){return String(p?.player_game_id||p?.player_id||'')}
@@ -647,7 +691,7 @@ async function analyze(){
   for(let i=0;i<times.length;i++){
    if(run!==r)break;const sec=times[i];await seek(video,sec);const full=frameCanvas(video),roi=rankingCanvas(full);
    if(r.frames.length<12&&i%Math.max(1,Math.floor(times.length/12))===0)r.frames.push({time:sec,image:full.toDataURL('image/jpeg',.72)});
-   const text=(await worker.recognize(roi)).data?.text||'',parsed=repairSequentialRanks(extractRows(text));
+   const ocr=(await worker.recognize(roi,{}, {text:true,blocks:true})).data||{},parsed=parseOcrData(ocr);
    processRows(parsed,sec,full);
    if(i===0){
     const podium=podiumCanvas(full),podiumText=(await worker.recognize(podium)).data?.text||'';
@@ -677,6 +721,34 @@ async function analyze(){
   let matchedRanks=new Set(r.hits.map(h=>h.rank).filter(Boolean));
   const rawUnmatched=[...unmatched.values()].filter(u=>!matchedRanks.has(u.rank)&&!r.hits.some(h=>u.score===h.score&&similarity(u.name,h.player?.player_name||'')>=.62));
   let groupedUnmatched=groupUnmatchedRows(rawUnmatched,matchedRanks);
+
+  // Quality pass: only re-read the name area of still-open rows at higher resolution.
+  // This spends extra time where it matters instead of re-OCRing the whole video.
+  const qualityTargets=groupedUnmatched.filter(g=>Number.isInteger(g.rank)&&g.variants?.some(v=>v.bbox&&Number.isFinite(v.time))).slice(0,10);
+  if(qualityTargets.length){
+   progress(2,94,observations.size);
+   try{await worker.setParameters({preserve_interword_spaces:'1',tessedit_pageseg_mode:'7'})}catch{}
+   for(let qi=0;qi<qualityTargets.length;qi++){
+    if(run!==r)break;
+    const group=qualityTargets[qi];
+    const source=[...group.variants].filter(v=>v.bbox&&Number.isFinite(v.time)).sort((a,b)=>(b._seen||1)-(a._seen||1))[0];
+    if(!source)continue;
+    await seek(video,source.time);
+    const full=frameCanvas(video),roi=rankingCanvas(full),crop=qualityNameCanvas(roi,source.bbox);
+    if(crop){
+     const txt=(await worker.recognize(crop)).data?.text||'',row=qualityNameRow(txt,group);
+     if(row)processRows([row],source.time,full);
+    }
+    progress(2,94+2*((qi+1)/qualityTargets.length),observations.size);
+    await new Promise(resolve=>setTimeout(resolve,0));
+   }
+   try{await worker.setParameters({preserve_interword_spaces:'1',tessedit_pageseg_mode:'6'})}catch{}
+   // Rebuild candidate groups after the dedicated row OCR.
+   r.hits=[...observations.values()].map(consensusHit).filter(Boolean).sort((a,b)=>(a.rank&&b.rank?a.rank-b.rank:b.score-a.score));
+   matchedRanks=new Set(r.hits.map(h=>h.rank).filter(Boolean));
+   const refreshedRaw=[...unmatched.values()].filter(u=>!matchedRanks.has(u.rank)&&!r.hits.some(h=>u.score===h.score&&similarity(u.name,h.player?.player_name||'')>=.62));
+   groupedUnmatched=groupUnmatchedRows(refreshedRaw,matchedRanks);
+  }
   const usedPlayers=new Set(r.hits.map(h=>memberKey(h.player)).filter(Boolean)),rescued=[];
   for(const group of groupedUnmatched){
    const hit=consensusMatchGroup(group,members,usedPlayers);
