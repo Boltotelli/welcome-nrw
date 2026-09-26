@@ -302,7 +302,7 @@ function groupUnmatchedRows(rows,matchedRanks=new Set()){
   for(const v of variants){
    const k=String(v.score);
    if(!scoreGroups.has(k))scoreGroups.set(k,[]);
-   scoreGroups.get(k).push(v);
+   for(let n=0;n<Math.max(1,Number(v._seen)||1);n++)scoreGroups.get(k).push(v);
   }
   const scoreSets=[...scoreGroups.values()].sort((a,b)=>b.length-a.length);
   let chosen=scoreSets[0]||variants;
@@ -318,7 +318,8 @@ function groupUnmatchedRows(rows,matchedRanks=new Set()){
   const alliance=[...allianceCounts.entries()].sort((a,b)=>b[1]-a[1])[0]?.[0]||chosen[0]?.alliance||'';
   const rep=[...chosen].sort((a,b)=>String(b.name||'').length-String(a.name||'').length)[0]||variants[0];
   const names=[...new Set(variants.map(v=>String(v.name||'').trim()).filter(Boolean))].slice(0,4);
-  return {...rep,rank,alliance,variants,variantCount:variants.length,
+  const variantCount=variants.reduce((n,v)=>n+Math.max(1,Number(v._seen)||1),0);
+  return {...rep,rank,alliance,variants,variantCount,
    raw:'Rang '+rank+' · '+(names.join(' / ')||rep.raw||'')+' · '+fmt(rep.score)+(variants.length>1?' · '+variants.length+' OCR':'' )};
  });
  // Rows without a trustworthy rank cannot be merged safely.
@@ -335,9 +336,10 @@ function consensusMatchGroup(group,members,usedPlayers=new Set()){
   // Each individual sighting must have at least a small lead.
   if(second&&best.s-second.s<.025&&best.s<.94)continue;
   const key=memberKey(best.p);if(!key||usedPlayers.has(key))continue;
-  votes.set(key,(votes.get(key)||0)+1);
+  const weight=Math.max(1,Number(row._seen)||1);
+  votes.set(key,(votes.get(key)||0)+weight);
   if(!scores.has(key))scores.set(key,[]);
-  scores.get(key).push(best.s);
+  for(let n=0;n<weight;n++)scores.get(key).push(best.s);
  }
  const ranked=[...votes.entries()].sort((a,b)=>b[1]-a[1]||
    (Math.max(...(scores.get(b[0])||[0]))-Math.max(...(scores.get(a[0])||[0]))));
@@ -353,7 +355,8 @@ function consensusMatchGroup(group,members,usedPlayers=new Set()){
  });
  const scoreGroups=new Map();
  for(const v of same){
-  const k=String(v.score);if(!scoreGroups.has(k))scoreGroups.set(k,[]);scoreGroups.get(k).push(v);
+  const k=String(v.score);if(!scoreGroups.has(k))scoreGroups.set(k,[]);
+  for(let n=0;n<Math.max(1,Number(v._seen)||1);n++)scoreGroups.get(k).push(v);
  }
  const winning=[...scoreGroups.values()].sort((a,b)=>b.length-a.length)[0]||same;
  const exemplar=[...winning].sort((a,b)=>similarity(b.name,player.player_name)-similarity(a.name,player.player_name))[0]||same[0];
@@ -629,7 +632,10 @@ async function analyze(){
     const p=matchPlayer(row,members);
     if(!p){
      const k=(row.rank||'')+'|'+norm(row.name)+'|'+row.score;
-     if(!unmatched.has(k)){if(!still)still=full.toDataURL('image/jpeg',.76);unmatched.set(k,{...row,time:sec,image:still})}
+     if(!unmatched.has(k)){
+      if(!still)still=full.toDataURL('image/jpeg',.76);
+      unmatched.set(k,{...row,time:sec,image:still,_seen:1});
+     }else unmatched.get(k)._seen=(unmatched.get(k)._seen||1)+1;
      continue;
     }
     if(r.kind==='perf'&&$('#nocrType',root).value==='kvk_prep'&&!(row.rank>=1&&row.rank<=200))row.rank=null;
