@@ -1336,10 +1336,10 @@ async function startExtendedExclusion2(id,input){
  }catch(err){alert(err.message||String(err))}
 }
 const R1_WATCH_WORDS2={
- de:{title:'R1 API-Watch · Testmodus',waiting:'Warte auf den nächsten 10-Minuten-Check.',rank:'Letzter API-Rang',once:'R1 einmal erkannt · zweite frische Bestätigung ausstehend.',confirmed:'R1 durch zwei frische Snapshots bestätigt · noch keine automatische Sanktion.',left:'Nach bestätigtem R1 wurde wieder ein höherer Rang erkannt.',invalid:'Letzter API-Check war nicht verwertbar · keine automatische Änderung.',shadow:'Shadow-Modus: Die Sanktion wird durch diesen Test nicht verändert.'},
- en:{title:'R1 API Watch · test mode',waiting:'Waiting for the next 10-minute check.',rank:'Last API rank',once:'R1 detected once · waiting for a second fresh confirmation.',confirmed:'R1 confirmed by two fresh snapshots · no automatic sanction change yet.',left:'A higher rank was detected after confirmed R1.',invalid:'The last API check was not usable · no automatic change.',shadow:'Shadow mode: this test does not change the sanction.'},
- fr:{title:'Surveillance API R1 · mode test',waiting:'En attente du prochain contrôle de 10 minutes.',rank:'Dernier rang API',once:'R1 détecté une fois · deuxième confirmation récente en attente.',confirmed:'R1 confirmé par deux instantanés récents · aucune sanction automatique pour le moment.',left:'Un rang supérieur a été détecté après la confirmation R1.',invalid:'Le dernier contrôle API est inutilisable · aucune modification automatique.',shadow:'Mode shadow : ce test ne modifie pas la sanction.'},
- es:{title:'Vigilancia API R1 · modo prueba',waiting:'Esperando el próximo control de 10 minutos.',rank:'Último rango API',once:'R1 detectado una vez · esperando una segunda confirmación reciente.',confirmed:'R1 confirmado por dos snapshots recientes · todavía sin cambios automáticos en la sanción.',left:'Se detectó un rango superior después de confirmar R1.',invalid:'El último control de API no fue válido · sin cambios automáticos.',shadow:'Modo shadow: esta prueba no modifica la sanción.'}
+ de:{title:'R1 API-Watch · Testmodus',waiting:'Warte auf den nächsten 10-Minuten-Check.',rank:'Letzter API-Rang',once:'R1 einmal erkannt · zweite frische Bestätigung ausstehend.',confirmed:'R1 durch zwei frische Snapshots bestätigt.',left:'Nach bestätigtem R1 wurde wieder ein höherer Rang erkannt.',invalid:'Letzter API-Check war nicht verwertbar · keine automatische Änderung.',shadow:'Shadow-Modus: Die Sanktion wird durch diesen Test noch nicht verändert.',start:'Effektiver R1-Start',end:'Berechnetes 24h-Ende'},
+ en:{title:'R1 API Watch · test mode',waiting:'Waiting for the next 10-minute check.',rank:'Last API rank',once:'R1 detected once · waiting for a second fresh confirmation.',confirmed:'R1 confirmed by two fresh snapshots.',left:'A higher rank was detected after confirmed R1.',invalid:'The last API check was not usable · no automatic change.',shadow:'Shadow mode: this test does not change the sanction yet.',start:'Effective R1 start',end:'Calculated 24h end'},
+ fr:{title:'Surveillance API R1 · mode test',waiting:'En attente du prochain contrôle de 10 minutes.',rank:'Dernier rang API',once:'R1 détecté une fois · deuxième confirmation récente en attente.',confirmed:'R1 confirmé par deux instantanés récents.',left:'Un rang supérieur a été détecté après la confirmation R1.',invalid:'Le dernier contrôle API est inutilisable · aucune modification automatique.',shadow:'Mode shadow : ce test ne modifie pas encore la sanction.',start:'Début R1 effectif',end:'Fin calculée après 24 h'},
+ es:{title:'Vigilancia API R1 · modo prueba',waiting:'Esperando el próximo control de 10 minutos.',rank:'Último rango API',once:'R1 detectado una vez · esperando una segunda confirmación reciente.',confirmed:'R1 confirmado por dos snapshots recientes.',left:'Se detectó un rango superior después de confirmar R1.',invalid:'El último control de API no fue válido · sin cambios automáticos.',shadow:'Modo shadow: esta prueba todavía no cambia la sanción.',start:'Inicio R1 efectivo',end:'Fin calculado de 24 h'}
 };
 function r1WatchWords2(){return R1_WATCH_WORDS2[L()]||R1_WATCH_WORDS2.de}
 function r1WatchHtml2(s){
@@ -1361,7 +1361,9 @@ async function loadR1WatchStatus2(el){
   else if(Number(d.last_rank)===1&&d.first_r1_observed_at)text=w.once;
   else if(d.last_label)text=w.rank+': '+d.last_label;
   else text=w.waiting;
-  if(d.last_observed_at)text+=' · '+exactDateTime2(d.last_observed_at);
+  if(d.effective_start_at)text+=' · '+w.start+': '+exactDateTime2(d.effective_start_at);
+  if(d.projected_end_at)text+=' · '+w.end+': '+exactDateTime2(d.projected_end_at);
+  if(d.last_observed_at)text+=' · Check: '+exactDateTime2(d.last_observed_at);
   status.textContent=text;
  }catch(err){if(status)status.textContent=w.invalid}
 }
