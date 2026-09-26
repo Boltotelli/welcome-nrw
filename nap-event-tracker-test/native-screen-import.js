@@ -306,7 +306,8 @@ function qualityNameRow(text,group,scoreOverride=null){
 function splitPodiumCards(podium){
  const out=[];
  for(let i=0;i<3;i++){
-  const y0=Math.round(podium.height*(i/3)),y1=Math.round(podium.height*((i+1)/3));
+  const band0=podium.height*(i/3),band1=podium.height*((i+1)/3),trim=podium.height*.006;
+  const y0=Math.round(band0+trim),y1=Math.round(band1-trim);
   const card=document.createElement('canvas');card.width=podium.width;card.height=Math.max(1,y1-y0);
   card.getContext('2d',{willReadFrequently:true}).drawImage(podium,0,y0,podium.width,y1-y0,0,0,card.width,card.height);
   out.push(card);
@@ -374,30 +375,53 @@ function similarity(a,b){
  for(let i=1;i<=x.length;i++){const next=[i];for(let j=1;j<=y.length;j++)next[j]=Math.min(next[j-1]+1,prev[j]+1,prev[j-1]+(x[i-1]===y[j-1]?0:1));prev=next}
  return Math.max(0,1-prev[y.length]/Math.max(x.length,y.length));
 }
+function playerNameSimilarity(row,p){
+ const raw=norm(row?.name),code=norm(p?.alliance_code||''),variants=[raw];
+ if(code&&raw.startsWith(code)&&raw.length>code.length)variants.push(raw.slice(code.length));
+ const names=[p.player_name,...(p.aliases||[])].filter(Boolean);
+ let best=0;
+ for(const n of names){
+  const nn=norm(n);if(!nn)continue;
+  for(const v of variants){
+   best=Math.max(best,similarity(v,nn));
+   // OCR often glues the alliance code/noise to very short names (PxRJAK1 -> Ak1).
+   if(nn.length<=4&&v.endsWith(nn)&&code&&v.startsWith(code))best=Math.max(best,.995);
+   else if(nn.length>=5&&v.endsWith(nn))best=Math.max(best,.97);
+  }
+ }
+ return best;
+}
+function rankedPlayerCandidates(row,members){
+ return members.map(p=>({p,s:playerNameSimilarity(row,p)})).filter(x=>x.s>=.72).sort((a,b)=>b.s-a.s);
+}
 function matchPlayer(row,members){
  if(!norm(row.name))return null;
- const tagged=members.filter(p=>!row.alliance||String(p.alliance_code).toLowerCase()===String(row.alliance).toLowerCase());
- const list=tagged.map(p=>{
-  const names=[p.player_name,...(p.aliases||[])];return {p,s:Math.max(...names.map(n=>similarity(row.name,n)))};
- }).filter(x=>x.s>=.72).sort((a,b)=>b.s-a.s);
- const best=list[0],second=list[1],quality=!!row.quality;
- const threshold=quality?(row.alliance?.84:.90):(row.alliance?.92:.96);
- const margin=quality?.06:.07;
- if(!best||best.s<threshold||second&&best.s-second.s<margin&&best.s<(quality?.97:.995))return null;
- if(norm(row.name).length<=4&&best.s<(quality?.94:.995))return null;
- return {...best.p,confidence:best.s};
+ const quality=!!row.quality,alliance=String(row.alliance||'').toLowerCase();
+ const same=alliance?members.filter(p=>String(p.alliance_code||'').toLowerCase()===alliance):members;
+ let list=rankedPlayerCandidates(row,same),best=list[0],second=list[1];
+ const threshold=quality?(row.alliance?.84:.90):(row.alliance?.92:.96),margin=quality?.06:.07;
+ const accept=(b,s,t=threshold)=>{
+  if(!b||b.s<t)return false;
+  if(s&&b.s-s.s<margin&&b.s<(quality?.97:.995))return false;
+  if(norm(row.name).length<=4&&b.s<(quality?.94:.995))return false;
+  return true;
+ };
+ if(accept(best,second))return {...best.p,confidence:best.s,allianceMismatch:false};
+ // Transfer/stale-roster fallback: allow only a unique near-exact name/alias match
+ // across all alliances. The detected alliance from the recording remains on row.alliance.
+ if(alliance){
+  list=rankedPlayerCandidates(row,members);best=list[0];second=list[1];
+  const exactish=best&&(best.s>=.985)&&(!second||best.s-second.s>=.08||best.s>=.999);
+  if(exactish)return {...best.p,confidence:best.s,allianceMismatch:String(best.p.alliance_code||'').toLowerCase()!==alliance};
+ }
+ return null;
 }
 function memberKey(p){return String(p?.player_game_id||p?.player_id||'')}
 function bestMemberForVariant(row,members){
- const pool=members.filter(p=>!row.alliance||String(p.alliance_code||'').toLowerCase()===String(row.alliance).toLowerCase());
- let best=null,second=null;
- for(const p of pool){
-  const names=[p.player_name,...(p.aliases||[])];
-  const s=Math.max(0,...names.map(n=>similarity(row.name,n)));
-  const item={p,s};
-  if(!best||s>best.s){second=best;best=item}else if(!second||s>second.s)second=item;
- }
- return {best,second};
+ const same=row.alliance?members.filter(p=>String(p.alliance_code||'').toLowerCase()===String(row.alliance).toLowerCase()):members;
+ let list=rankedPlayerCandidates(row,same);
+ if((!list[0]||list[0].s<.78)&&row.alliance)list=rankedPlayerCandidates(row,members);
+ return {best:list[0]||null,second:list[1]||null};
 }
 function groupUnmatchedRows(rows,matchedRanks=new Set()){
  const byRank=new Map(),loose=[];
@@ -480,10 +504,10 @@ function frameCanvas(video){
  return canvas;
 }
 function podiumCanvas(frame){
- // Gold / Silver / Bronze use a different card design than rank 4+.
- // Crop them as one compact block; their vertical order defines ranks 1, 2, 3.
- const x=Math.round(frame.width*.03),y=Math.round(frame.height*.315),w=Math.round(frame.width*.94),h=Math.round(frame.height*.285);
- const scale=Math.min(1.15,1180/Math.max(1,w)),out=document.createElement('canvas');
+ // Gold / Silver / Bronze occupy a compact block around 25–44% of the screen.
+ // The previous crop started inside rank 1 and mixed neighbouring podium cards.
+ const x=Math.round(frame.width*.03),y=Math.round(frame.height*.247),w=Math.round(frame.width*.94),h=Math.round(frame.height*.202);
+ const scale=Math.min(1.25,1280/Math.max(1,w)),out=document.createElement('canvas');
  out.width=Math.max(1,Math.round(w*scale));out.height=Math.max(1,Math.round(h*scale));
  const cx=out.getContext('2d',{willReadFrequently:true});cx.imageSmoothingEnabled=true;cx.imageSmoothingQuality='high';
  cx.drawImage(frame,x,y,w,h,0,0,out.width,out.height);return out;
@@ -926,7 +950,7 @@ function showReview(r){
   const checked=r.selection?.has(key)?r.selection.get(key):allowed;
   const tone=r.kind==='perf'?'performance':label==='violation'?'new':label==='update'?'update':label==='already_recorded'?'already':'other';
   return '<article class="nocr-hit nocr-hit--'+tone+'"><label class="nocr-hit-check"><input type="checkbox" data-hit="'+i+'" '+(checked?'checked':'')+' '+(needsEvidence?'disabled':'')+'>'+
-   '<span><strong>'+esc(h.player.player_name)+'</strong><small>'+esc(h.player.alliance_code||'')+' · '+esc(h.player.player_game_id||'')+(h.rank?' · '+esc(tr('rank'))+' '+esc(h.rank):'')+(h.observations>1?' · '+esc(h.consensus)+'/'+esc(h.observations):'')+(h.manual?' · '+esc(reviewText('manual')):'')+'</small></span></label>'+
+   '<span><strong>'+esc(h.player.player_name)+'</strong><small>'+esc(h.alliance||h.player.alliance_code||'')+' · '+esc(h.player.player_game_id||'')+(h.rank?' · '+esc(tr('rank'))+' '+esc(h.rank):'')+(h.observations>1?' · '+esc(h.consensus)+'/'+esc(h.observations):'')+(h.manual?' · '+esc(reviewText('manual')):'')+'</small></span></label>'+
    '<input type="text" inputmode="numeric" autocomplete="off" data-score="'+i+'" value="'+esc(points(h.score))+'" aria-label="'+esc(tr('score'))+'">'+
    (r.kind==='perf'&&$('#nocrType',root).value==='kvk_prep'?'<input type="number" min="1" max="200" step="1" data-rank="'+i+'" value="'+esc(h.rank||'')+'" aria-label="'+esc(tr('rank'))+'">':'')+
    reviewStatus(h,r,st)+(needsEvidence?'<div class="nocr-status error">'+esc(tr('evidenceRequired'))+'</div>':'')+
