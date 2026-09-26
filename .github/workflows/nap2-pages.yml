@@ -15,14 +15,14 @@ permissions:
   id-token: write
 
 concurrency:
-  group: nap2-pages
+  group: nap2-pages-test
   cancel-in-progress: true
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     environment:
-      name: github-pages
+      name: github-pages-test
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout isolated V2 branch
