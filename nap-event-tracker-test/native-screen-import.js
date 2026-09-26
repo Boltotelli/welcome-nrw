@@ -341,25 +341,32 @@ function consensusHit(list){
  const rank=[...ranks.entries()].sort((a,b)=>b[1]-a[1])[0]?.[0]||exemplar.row.rank||null;
  return {...exemplar.row,player:exemplar.player,time:exemplar.time,image:exemplar.image,rank,observations:list.length,consensus:chosen.length};
 }
-async function chooseSharpTimes(video,dur){
- const bucket=.78,count=Math.max(1,Math.ceil(dur/bucket)),times=[];
- for(let b=0;b<count;b++){
-  const a=b*bucket,z=Math.min(dur-.04,(b+1)*bucket),candidates=[a+.12,(a+z)/2,z-.08].filter(t=>t>=.02&&t<dur);
-  let best=null;
-  for(const t of candidates){
-   await seek(video,t);const full=frameCanvas(video),roi=rankingCanvas(full),q=sharpnessScore(roi);
-   if(!best||q>best.q)best={t,q};
-  }
-  if(best)times.push(Math.min(dur-.04,Math.max(.02,best.t)));
- }
- return times.slice(0,55);
+function baseFrameTimes(dur){
+ const safeEnd=Math.max(.04,dur-.06);
+ // Dense enough for scrolling rankings, but avoid the 3x seek pre-scan that
+ // caused long 3% stalls on mobile. Rank Rescue fills any remaining gaps.
+ const step=Math.max(.58,dur/38),times=[];
+ for(let t=.18;t<safeEnd;t+=step)times.push(Math.min(safeEnd,t));
+ if(!times.length)times.push(Math.min(safeEnd,Math.max(.02,dur/2)));
+ return times.slice(0,42);
 }
 async function seek(video,time){
  if(Math.abs(video.currentTime-time)<.03&&video.readyState>=2)return;
  await new Promise((resolve,reject)=>{
-  const clean=()=>{video.removeEventListener('seeked',ok);video.removeEventListener('error',bad)};
-  const ok=()=>{clean();resolve()};const bad=()=>{clean();reject(Error('Video frame could not be opened'))};
-  video.addEventListener('seeked',ok,{once:true});video.addEventListener('error',bad,{once:true});video.currentTime=time;
+  let settled=false;
+  const finish=(err)=>{
+   if(settled)return;settled=true;clearTimeout(timer);
+   video.removeEventListener('seeked',ok);video.removeEventListener('error',bad);
+   err?reject(err):resolve();
+  };
+  const ok=()=>finish();const bad=()=>finish(Error('Video frame could not be opened'));
+  const timer=setTimeout(()=>{
+   // Some mobile browsers occasionally omit seeked even though the frame is ready.
+   if(video.readyState>=2&&Math.abs(video.currentTime-time)<.12)finish();
+   else finish(Error('Video frame timed out'));
+  },4500);
+  video.addEventListener('seeked',ok,{once:true});video.addEventListener('error',bad,{once:true});
+  try{video.currentTime=time}catch(err){finish(err)}
  });
 }
 async function metadata(video,file){
@@ -375,7 +382,7 @@ async function metadata(video,file){
 }
 function shell(root,kind){
  const perf=kind==='perf';root.innerHTML=
- '<div class="nocr-layout"><section class="nocr-panel"><div class="nocr-fields">'+
+ '<div class="nocr-layout"><section class="nocr-panel"><div class="nocr-engine-badge">OCR V2 · Rank Rescue</div><div class="nocr-fields">'+
  (perf?'<label>'+esc(tr('type'))+'<select id="nocrType"><option value="alliance_mobilization">Alliance Mobilization</option><option value="kvk_prep">KvK Prep · Top 200</option></select></label>':'')+
  (perf?'':'<label>'+esc(tr('event'))+'<select id="nocrEvent" disabled></select></label>')+
  '<label>'+esc(tr('occ'))+'<select id="nocrOcc"></select></label>'+
@@ -481,8 +488,9 @@ async function analyze(){
   }
   r.members=members;r.fileHash=await sha256(file);worker=await ensureWorker();
   video=document.createElement('video');url=await metadata(video,file);if(r!==run)return;
-  const dur=video.duration;progress(1,3,0);
-  const times=await chooseSharpTimes(video,dur),observations=new Map(),unmatched=new Map(),rankMap=new Map();r.frames=[];
+  const dur=video.duration;progress(1,4,0);
+  const times=baseFrameTimes(dur),observations=new Map(),unmatched=new Map(),rankMap=new Map();r.frames=[];
+  const progressText=$('#nocrProgressText',root);if(progressText)progressText.textContent=tr('recognize')+' · 0/'+times.length;
   const processRows=(rows,sec,full)=>{
    let still=null;
    for(const row of rows){
@@ -503,7 +511,9 @@ async function analyze(){
    if(run!==r)break;const sec=times[i];await seek(video,sec);const full=frameCanvas(video),roi=rankingCanvas(full);
    if(r.frames.length<12&&i%Math.max(1,Math.floor(times.length/12))===0)r.frames.push({time:sec,image:full.toDataURL('image/jpeg',.72)});
    const text=(await worker.recognize(roi)).data?.text||'';processRows(repairSequentialRanks(extractRows(text)),sec,full);
-   progress(1,6+65*((i+1)/times.length),observations.size);await new Promise(resolve=>setTimeout(resolve,0));
+   progress(1,5+66*((i+1)/times.length),observations.size);
+   const pt=$('#nocrProgressText',root);if(pt)pt.textContent=tr('recognize')+' · '+(i+1)+'/'+times.length;
+   await new Promise(resolve=>setTimeout(resolve,0));
   }
   if(run!==r)return;
   let coverage=rankCoverage(rankMap),rescue=rescueTimes(coverage,rankMap,dur,times);
@@ -519,7 +529,9 @@ async function analyze(){
      rows=rows.concat(extra.filter(x=>!seen.has((x.rank||'')+'|'+norm(x.name)+'|'+x.score)));
     }
     processRows(rows,sec,full);
-    progress(1,72+22*((i+1)/rescue.length),observations.size);await new Promise(resolve=>setTimeout(resolve,0));
+    progress(1,72+22*((i+1)/rescue.length),observations.size);
+    const rpt=$('#nocrProgressText',root);if(rpt)rpt.textContent=ocr2('rescue')+' · '+(i+1)+'/'+rescue.length;
+    await new Promise(resolve=>setTimeout(resolve,0));
    }
    coverage=rankCoverage(rankMap);
   }
