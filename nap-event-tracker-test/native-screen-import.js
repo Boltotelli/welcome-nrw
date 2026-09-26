@@ -142,7 +142,10 @@ async function roster(force=false){
  if(rosterPromise)return rosterPromise;
  const pending=(async()=>{
   const [rows,own,alliances]=await Promise.all([
-   rpc('get_nap_screen_import_directory_test'),
+   rpc('get_nap_screen_import_directory_v3').catch(async e=>{
+    console.warn('Full screen-import directory unavailable, using legacy directory',e);
+    return await rpc('get_nap_screen_import_directory_test');
+   }),
    rpc('get_own_player_identity_directory'),
    (async()=>{try{
     const res=await fetch(API+'/rest/v1/alliance_registry?select=alliance_code,power&enabled=eq.true&limit=1000',{headers:await headers(false)});
@@ -782,6 +785,8 @@ async function analyze(){
     for(const p of extras||[]){const id=String(p.player_game_id||p.player_id);if(!ids.has(id)){members.push(p);ids.add(id)}}
    }catch(e){console.warn('Performance transfer roster unavailable',e)}
   }
+  const poolCount=members.filter(p=>p.alliance_code==null).length;
+  if(!poolCount)console.warn('ScreenImporter roster contains no alliance-less players');
   r.members=members;r.fileHash=await sha256(file);worker=await ensureWorker();
   video=document.createElement('video');url=await metadata(video,file);if(r!==run)return;
   const dur=video.duration;progress(1,5,0);
