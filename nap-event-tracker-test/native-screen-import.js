@@ -404,10 +404,25 @@ function playerNameSimilarity(row,p){
 function rankedPlayerCandidates(row,members){
  return members.map(p=>({p,s:playerNameSimilarity(row,p)})).filter(x=>x.s>=.72).sort((a,b)=>b.s-a.s);
 }
+function oneDigitSuffixMatch(a,b){
+ const x=norm(a),y=norm(b),mx=x.match(/^(.*?)(\d+)$/),my=y.match(/^(.*?)(\d+)$/);
+ if(!mx||!my||mx[1]!==my[1]||mx[1].length<2||mx[2].length!==my[2].length)return false;
+ let diff=0;
+ for(let i=0;i<mx[2].length;i++)if(mx[2][i]!==my[2][i]&&++diff>1)return false;
+ return diff===1;
+}
+function uniquePoolNumericSuffixMatch(row,members){
+ const hits=members.filter(p=>
+  [p.player_name,...(p.aliases||[])].some(n=>oneDigitSuffixMatch(row.name,n))
+ );
+ return hits.length===1&&hits[0].alliance_code==null?hits[0]:null;
+}
 function matchPlayer(row,members){
  const rowNorm=norm(row.name);if(!rowNorm)return null;
  const exact=members.filter(p=>[p.player_name,...(p.aliases||[])].some(n=>norm(n)===rowNorm));
  if(exact.length===1)return {...exact[0],confidence:1,allianceMismatch:!!row.alliance&&String(exact[0].alliance_code||'').toLowerCase()!==String(row.alliance).toLowerCase(),exactName:true};
+ const numericPool=uniquePoolNumericSuffixMatch(row,members);
+ if(numericPool)return {...numericPool,confidence:.985,allianceMismatch:!!row.alliance,numericSuffixCorrected:true};
  const quality=!!row.quality,alliance=String(row.alliance||'').toLowerCase();
  const same=alliance?members.filter(p=>String(p.alliance_code||'').toLowerCase()===alliance):members;
  let list=rankedPlayerCandidates(row,same),best=list[0],second=list[1];
