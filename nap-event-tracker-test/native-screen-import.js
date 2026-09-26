@@ -80,7 +80,31 @@ const OCR2_WORDS={
 const ocr2=k=>(OCR2_WORDS[lng()]||OCR2_WORDS.de)[k]||k;
 const fmt=x=>Number(x||0).toLocaleString(lng()==='de'?'de-DE':lng()==='fr'?'fr-FR':lng()==='es'?'es-ES':'en-US');
 const isTrackingHit=h=>!!h?.trackingOnly||h?.player?.alliance_code==null;
-let run=null,workerPromise=null,rosterPromise=null;
+let run=null,workerPromise=null,rosterPromise=null,wakeLockSentinel=null;
+async function acquireOcrWakeLock(){
+ if(!run?.ocrActive||document.visibilityState!=='visible'||!('wakeLock' in navigator))return false;
+ if(wakeLockSentinel&&!wakeLockSentinel.released)return true;
+ try{
+  const sentinel=await navigator.wakeLock.request('screen');
+  wakeLockSentinel=sentinel;
+  sentinel.addEventListener('release',()=>{
+   if(wakeLockSentinel===sentinel)wakeLockSentinel=null;
+  },{once:true});
+  return true;
+ }catch(err){
+  console.warn('Screen Wake Lock unavailable during OCR',err);
+  return false;
+ }
+}
+async function releaseOcrWakeLock(){
+ const sentinel=wakeLockSentinel;
+ wakeLockSentinel=null;
+ if(!sentinel||sentinel.released)return;
+ try{await sentinel.release()}catch(err){console.warn('Wake Lock release',err)}
+}
+document.addEventListener('visibilitychange',()=>{
+ if(document.visibilityState==='visible'&&run?.ocrActive)acquireOcrWakeLock();
+});
 function getSession(){try{return JSON.parse(localStorage.getItem(SESSION_KEY)||'null')}catch{return null}}
 async function headers(json=true){
  let s=getSession();if(!s?.access_token)throw Error('Your V2 session expired. Please sign in again.');
@@ -773,7 +797,8 @@ async function analyze(){
   const occ=selectedOcc(),day=$('#nocrDay',root).value;
   if(!occ||!$('#nocrPhase',root).value||!validRecordingDay(day,occ)){status(tr('invalid'),true);return}
  }else if(!perfOcc()){status(tr('missingEvent'),true);return}
- r.busy=true;btn.disabled=true;$('#nocrSave',root).disabled=true;$('#nocrReview',root).hidden=true;status('');
+ r.busy=true;r.ocrActive=true;btn.disabled=true;$('#nocrSave',root).disabled=true;$('#nocrReview',root).hidden=true;status('');
+ await acquireOcrWakeLock();
  let url,video,worker;
  try{
   progress(0,2,0);
@@ -920,7 +945,14 @@ async function analyze(){
   else if(cov?.min&&cov?.max)status(coveredRanks+' '+ocr2('rankSlots')+' · '+ocr2('coverage')+' '+cov.min+'–'+cov.max+' · '+ocr2('complete')+assignment,false);
   else status(r.hits.length?tr('ready'):reviewText('nothing'),false);
  }catch(e){console.error('native screen OCR',e);status(tr('error')+': '+(e.message||e),true)}
- finally{if(url)URL.revokeObjectURL(url);if(video){video.removeAttribute('src');video.load()}r.busy=false;if(root.isConnected){btn.disabled=false;$('#nocrSave',root).disabled=!r.hits?.length}}
+ finally{
+  r.ocrActive=false;
+  await releaseOcrWakeLock();
+  if(url)URL.revokeObjectURL(url);
+  if(video){video.removeAttribute('src');video.load()}
+  r.busy=false;
+  if(root.isConnected){btn.disabled=false;$('#nocrSave',root).disabled=!r.hits?.length}
+ }
 }
 function hitPayload(h){return {player_id:h.player?.player_id||null,player_game_id:h.player?.player_game_id||null,player_name:h.player?.player_name||h.name,detected_alliance:h.alliance||h.player?.alliance_code||null,score:h.score,server_rank:h.rank||null,confirmed_post_contact_spending:!!h.postContactConfirmed}}
 function reviewStatus(h,r,entry){
@@ -1252,7 +1284,7 @@ async function save(){
 }
 function mount(root,kind,allowed=[]){
  if(run?.busy)return;
- run={root,kind,allowed,hits:[],unmatched:[],frames:[],occurrences:[],members:[],selection:new Map(),addOpen:false,busy:false,preview:null,fileHash:null,pendingEvidence:[]};
+ run={root,kind,allowed,hits:[],unmatched:[],frames:[],occurrences:[],members:[],selection:new Map(),addOpen:false,busy:false,ocrActive:false,preview:null,fileHash:null,pendingEvidence:[]};
  shell(root,kind);
  const r=run;$('#nocrAnalyze',root).onclick=analyze;$('#nocrSave',root).onclick=save;$('#nocrEvidenceRetry',root).onclick=retryPendingEvidence;
  if(kind==='law'){
