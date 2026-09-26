@@ -1,6 +1,7 @@
 /* Native V2 OCR: no embedded V1 page, no secondary login. */
 .nocr-layout{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;margin-top:12px}
 .nocr-panel{min-width:0;border:1px solid var(--line);border-radius:17px;background:var(--panel);padding:18px}
+.nocr-engine-badge{display:inline-flex;align-items:center;gap:6px;margin-bottom:12px;padding:5px 9px;border:1px solid color-mix(in srgb,#d9b75a 45%,var(--line));border-radius:999px;background:color-mix(in srgb,#d9b75a 10%,var(--panel));color:#d9b75a;font-size:10px;font-weight:800;letter-spacing:.03em;text-transform:uppercase}
 .nocr-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 .nocr-fields label{display:grid;gap:7px;font-size:12px;font-weight:750;color:var(--muted)}
 .nocr-fields select,.nocr-fields input{width:100%;min-width:0;min-height:46px;font:inherit;color:var(--text);background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:9px 11px}
