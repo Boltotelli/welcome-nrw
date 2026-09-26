@@ -276,6 +276,90 @@ function matchPlayer(row,members){
  if(norm(row.name).length<=4&&best.s<.995)return null;
  return {...best.p,confidence:best.s};
 }
+function memberKey(p){return String(p?.player_game_id||p?.player_id||'')}
+function bestMemberForVariant(row,members){
+ const pool=members.filter(p=>!row.alliance||String(p.alliance_code||'').toLowerCase()===String(row.alliance).toLowerCase());
+ let best=null,second=null;
+ for(const p of pool){
+  const names=[p.player_name,...(p.aliases||[])];
+  const s=Math.max(0,...names.map(n=>similarity(row.name,n)));
+  const item={p,s};
+  if(!best||s>best.s){second=best;best=item}else if(!second||s>second.s)second=item;
+ }
+ return {best,second};
+}
+function groupUnmatchedRows(rows,matchedRanks=new Set()){
+ const byRank=new Map(),loose=[];
+ for(const row of rows||[]){
+  if(Number.isInteger(row.rank)&&row.rank>=1&&row.rank<=999){
+   if(matchedRanks.has(row.rank))continue;
+   if(!byRank.has(row.rank))byRank.set(row.rank,[]);
+   byRank.get(row.rank).push(row);
+  }else loose.push(row);
+ }
+ const grouped=[...byRank.entries()].map(([rank,variants])=>{
+  const scoreGroups=new Map();
+  for(const v of variants){
+   const k=String(v.score);
+   if(!scoreGroups.has(k))scoreGroups.set(k,[]);
+   scoreGroups.get(k).push(v);
+  }
+  const scoreSets=[...scoreGroups.values()].sort((a,b)=>b.length-a.length);
+  let chosen=scoreSets[0]||variants;
+  if(scoreSets.length>1&&scoreSets[0].length===scoreSets[1].length){
+   const nums=variants.map(v=>Number(v.score)).filter(Number.isFinite).sort((a,b)=>a-b);
+   const med=nums[Math.floor(nums.length/2)];
+   chosen=[...variants].sort((a,b)=>Math.abs(Number(a.score)-med)-Math.abs(Number(b.score)-med)).slice(0,1);
+  }
+  const allianceCounts=new Map();
+  for(const v of variants)if(v.alliance){
+   const k=String(v.alliance);allianceCounts.set(k,(allianceCounts.get(k)||0)+1);
+  }
+  const alliance=[...allianceCounts.entries()].sort((a,b)=>b[1]-a[1])[0]?.[0]||chosen[0]?.alliance||'';
+  const rep=[...chosen].sort((a,b)=>String(b.name||'').length-String(a.name||'').length)[0]||variants[0];
+  const names=[...new Set(variants.map(v=>String(v.name||'').trim()).filter(Boolean))].slice(0,4);
+  return {...rep,rank,alliance,variants,variantCount:variants.length,
+   raw:'Rang '+rank+' · '+(names.join(' / ')||rep.raw||'')+' · '+fmt(rep.score)+(variants.length>1?' · '+variants.length+' OCR':'' )};
+ });
+ // Rows without a trustworthy rank cannot be merged safely.
+ for(const row of loose)grouped.push({...row,variants:[row],variantCount:1});
+ return grouped.sort((a,b)=>(a.rank||999)-(b.rank||999));
+}
+function consensusMatchGroup(group,members,usedPlayers=new Set()){
+ const variants=group?.variants||[group];
+ if(variants.length<2)return null;
+ const votes=new Map(),scores=new Map();
+ for(const row of variants){
+  const {best,second}=bestMemberForVariant(row,members);
+  if(!best||best.s<.78)return null;
+  // Each individual sighting must have at least a small lead.
+  if(second&&best.s-second.s<.025&&best.s<.94)continue;
+  const key=memberKey(best.p);if(!key||usedPlayers.has(key))continue;
+  votes.set(key,(votes.get(key)||0)+1);
+  if(!scores.has(key))scores.set(key,[]);
+  scores.get(key).push(best.s);
+ }
+ const ranked=[...votes.entries()].sort((a,b)=>b[1]-a[1]||
+   (Math.max(...(scores.get(b[0])||[0]))-Math.max(...(scores.get(a[0])||[0]))));
+ if(!ranked.length)return null;
+ const [key,voteCount]=ranked[0],runner=ranked[1]?.[1]||0;
+ const sims=(scores.get(key)||[]).sort((a,b)=>b-a);
+ const avg=sims.reduce((a,b)=>a+b,0)/Math.max(1,sims.length);
+ // Require repeat agreement. Short/noisy names need stronger confidence.
+ if(voteCount<2||voteCount<=runner||avg<.84||sims[0]<.88)return null;
+ const player=members.find(p=>memberKey(p)===key);if(!player)return null;
+ const same=variants.filter(v=>{
+  const {best}=bestMemberForVariant(v,members);return best&&memberKey(best.p)===key;
+ });
+ const scoreGroups=new Map();
+ for(const v of same){
+  const k=String(v.score);if(!scoreGroups.has(k))scoreGroups.set(k,[]);scoreGroups.get(k).push(v);
+ }
+ const winning=[...scoreGroups.values()].sort((a,b)=>b.length-a.length)[0]||same;
+ const exemplar=[...winning].sort((a,b)=>similarity(b.name,player.player_name)-similarity(a.name,player.player_name))[0]||same[0];
+ return {...exemplar,player:{...player,confidence:avg},alliance:player.alliance_code||group.alliance,
+   rank:group.rank,observations:variants.length,consensus:winning.length,autoConsensus:true};
+}
 function frameCanvas(video){
  const canvas=document.createElement('canvas'),scale=Math.min(1.35,1400/Math.max(1,video.videoWidth));
  canvas.width=Math.max(1,Math.round(video.videoWidth*scale));canvas.height=Math.max(1,Math.round(video.videoHeight*scale));
@@ -294,7 +378,7 @@ function podiumCanvas(frame){
 function rankingCanvas(frame){
  // Keep the complete top of the visible ranking (ranks 1–3 live high in the view),
  // but still stop above Kingshot's sticky own-player row at the bottom.
- const x=Math.round(frame.width*.035),y=Math.round(frame.height*.205),w=Math.round(frame.width*.93),h=Math.round(frame.height*.655);
+ const x=Math.round(frame.width*.035),y=Math.round(frame.height*.205),w=Math.round(frame.width*.93),h=Math.round(frame.height*.670);
  const scale=Math.min(1.35,1350/Math.max(1,w)),out=document.createElement('canvas');
  out.width=Math.max(1,Math.round(w*scale));out.height=Math.max(1,Math.round(h*scale));
  const cx=out.getContext('2d',{willReadFrequently:true});cx.imageSmoothingEnabled=true;cx.imageSmoothingQuality='high';
@@ -584,8 +668,18 @@ async function analyze(){
   if(run!==r)return;
   r.coverage=coverage;
   r.hits=[...observations.values()].map(consensusHit).filter(Boolean).sort((a,b)=>(a.rank&&b.rank?a.rank-b.rank:b.score-a.score));
-  const matchedRanks=new Set(r.hits.map(h=>h.rank).filter(Boolean));
-  r.unmatched=[...unmatched.values()].filter(u=>!matchedRanks.has(u.rank)&&!r.hits.some(h=>u.score===h.score&&similarity(u.name,h.player?.player_name||'')>=.62)).sort((a,b)=>(a.rank||999)-(b.rank||999)).slice(0,40);
+  let matchedRanks=new Set(r.hits.map(h=>h.rank).filter(Boolean));
+  const rawUnmatched=[...unmatched.values()].filter(u=>!matchedRanks.has(u.rank)&&!r.hits.some(h=>u.score===h.score&&similarity(u.name,h.player?.player_name||'')>=.62));
+  let groupedUnmatched=groupUnmatchedRows(rawUnmatched,matchedRanks);
+  const usedPlayers=new Set(r.hits.map(h=>memberKey(h.player)).filter(Boolean)),rescued=[];
+  for(const group of groupedUnmatched){
+   const hit=consensusMatchGroup(group,members,usedPlayers);
+   if(!hit)continue;
+   rescued.push(hit);usedPlayers.add(memberKey(hit.player));
+   if(hit.rank)matchedRanks.add(hit.rank);
+  }
+  if(rescued.length)r.hits=r.hits.concat(rescued).sort((a,b)=>(a.rank&&b.rank?a.rank-b.rank:b.score-a.score));
+  r.unmatched=groupedUnmatched.filter(g=>!matchedRanks.has(g.rank)).slice(0,40);
   progress(2,96,r.hits.length);
   if(r.kind==='law'){
    const occ=selectedOcc();
@@ -736,7 +830,7 @@ function showReview(r){
   const row=r.unmatched[index],p=r.members[Number(playerIndex)];if(!row||!p)return;
   const existing=r.hits.find(x=>String(x.player.player_game_id||x.player.player_id)===String(p.player_game_id||p.player_id));
   if(!existing||row.score>existing.score){
-   const h={...row,player:p,alliance:p.alliance_code,manual:true};
+   const h={...row,player:p,alliance:p.alliance_code,manual:true,observations:row.variantCount||row.observations||1,consensus:1};
    if(existing)r.hits=r.hits.filter(x=>x!==existing);
    r.hits.push(h);
   }
