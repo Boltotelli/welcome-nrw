@@ -277,7 +277,7 @@ function frameCanvas(video){
 function rankingCanvas(frame){
  // Keep the complete top of the visible ranking (ranks 1–3 live high in the view),
  // but still stop above Kingshot's sticky own-player row at the bottom.
- const x=Math.round(frame.width*.035),y=Math.round(frame.height*.215),w=Math.round(frame.width*.93),h=Math.round(frame.height*.665);
+ const x=Math.round(frame.width*.035),y=Math.round(frame.height*.205),w=Math.round(frame.width*.93),h=Math.round(frame.height*.655);
  const scale=Math.min(1.35,1350/Math.max(1,w)),out=document.createElement('canvas');
  out.width=Math.max(1,Math.round(w*scale));out.height=Math.max(1,Math.round(h*scale));
  const cx=out.getContext('2d',{willReadFrequently:true});cx.imageSmoothingEnabled=true;cx.imageSmoothingQuality='high';
@@ -520,7 +520,7 @@ async function analyze(){
   r.members=members;r.fileHash=await sha256(file);worker=await ensureWorker();
   video=document.createElement('video');url=await metadata(video,file);if(r!==run)return;
   const dur=video.duration;progress(1,5,0);
-  const times=baseFrameTimes(dur),observations=new Map(),unmatched=new Map(),rankMap=new Map();r.frames=[];let topRankingSeen=false;
+  const times=baseFrameTimes(dur),observations=new Map(),unmatched=new Map(),rankMap=new Map();r.frames=[];
   const processRows=(rows,sec,full)=>{
    let still=null;
    for(const row of rows){
@@ -541,17 +541,12 @@ async function analyze(){
    if(run!==r)break;const sec=times[i];await seek(video,sec);const full=frameCanvas(video),roi=rankingCanvas(full);
    if(r.frames.length<12&&i%Math.max(1,Math.floor(times.length/12))===0)r.frames.push({time:sec,image:full.toDataURL('image/jpeg',.72)});
    const text=(await worker.recognize(roi)).data?.text||'',parsed=repairSequentialRanks(extractRows(text));
-   if(sec<=1.35&&parsed.some(row=>Number.isInteger(row.rank)&&row.rank>=1&&row.rank<=9))topRankingSeen=true;
    processRows(parsed,sec,full);
    progress(1,5+65*((i+1)/times.length),observations.size);
    await new Promise(resolve=>setTimeout(resolve,0));
   }
   if(run!==r)return;
-  let coverage=rankCoverage(rankMap);
-  if(topRankingSeen&&coverage.min&&coverage.min>1){
-   coverage={...coverage,min:1,missing:[...Array(coverage.min-1)].map((_,i)=>i+1).concat(coverage.missing)};
-  }
-  let rescue=rescueTimes(coverage,rankMap,dur,times);
+  let coverage=rankCoverage(rankMap),rescue=rescueTimes(coverage,rankMap,dur,times);
   if(coverage.missing.length&&rescue.length){
    progress(1,72,observations.size,'rescue');
    const missingSet=new Set(coverage.missing);
@@ -563,9 +558,6 @@ async function analyze(){
     await new Promise(resolve=>setTimeout(resolve,0));
    }
    coverage=rankCoverage(rankMap);
-   if(topRankingSeen&&coverage.min&&coverage.min>1){
-    coverage={...coverage,min:1,missing:[...Array(coverage.min-1)].map((_,i)=>i+1).concat(coverage.missing)};
-   }
   }
   if(run!==r)return;
   r.coverage=coverage;
