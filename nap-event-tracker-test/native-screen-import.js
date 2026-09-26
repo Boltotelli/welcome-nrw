@@ -67,10 +67,10 @@ const norm=s=>String(s||'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toL
 const lng=()=>$('#languagePicker')?.value||'de';
 const tr=k=>(WORDS[lng()]||WORDS.de)[k]||k;
 const OCR2_WORDS={
- de:{coverage:'Rangabdeckung',complete:'Rangfolge vollständig',missing:'Nicht sicher erkannt',rescue:'Einige Stellen werden noch einmal geprüft',manual:'Bitte fehlende Ränge vor dem Speichern manuell prüfen',version:'Erkennung V2',scan:'Video wird geprüft',collect:'Spieler werden erfasst',finish:'Ergebnis wird geprüft'},
- en:{coverage:'Rank coverage',complete:'Rank sequence complete',missing:'Not confidently detected',rescue:'A few areas are being checked again',manual:'Please review missing ranks manually before saving',version:'Recognition V2',scan:'Checking video',collect:'Reading players',finish:'Checking results'},
- fr:{coverage:'Couverture des rangs',complete:'Séquence des rangs complète',missing:'Non détecté avec certitude',rescue:'Certaines zones sont vérifiées à nouveau',manual:'Vérifiez manuellement les rangs manquants avant d’enregistrer',version:'Reconnaissance V2',scan:'Vérification de la vidéo',collect:'Lecture des joueurs',finish:'Vérification du résultat'},
- es:{coverage:'Cobertura de rangos',complete:'Secuencia de rangos completa',missing:'No detectado con seguridad',rescue:'Se están revisando de nuevo algunas zonas',manual:'Revisa manualmente los rangos que faltan antes de guardar',version:'Reconocimiento V2',scan:'Revisando vídeo',collect:'Leyendo jugadores',finish:'Revisando resultado'}
+ de:{coverage:'Rangabdeckung',complete:'Rangfolge vollständig',missing:'Nicht sicher erkannt',rescue:'Einige Stellen werden noch einmal geprüft',manual:'Bitte fehlende Ränge vor dem Speichern manuell prüfen',version:'Erkennung V2',scan:'Video wird geprüft',collect:'Spieler werden erfasst',finish:'Ergebnis wird geprüft',rankSlots:'Rankingplätze gelesen',matched:'Spieler zugeordnet',unassigned:'nicht zugeordnet',reviewable:'prüfbare Ergebnisse',exemptCount:'ausgenommen'},
+ en:{coverage:'Rank coverage',complete:'Rank sequence complete',missing:'Not confidently detected',rescue:'A few areas are being checked again',manual:'Please review missing ranks manually before saving',version:'Recognition V2',scan:'Checking video',collect:'Reading players',finish:'Checking results',rankSlots:'ranking positions read',matched:'players matched',unassigned:'unmatched',reviewable:'reviewable results',exemptCount:'exempt'},
+ fr:{coverage:'Couverture des rangs',complete:'Séquence des rangs complète',missing:'Non détecté avec certitude',rescue:'Certaines zones sont vérifiées à nouveau',manual:'Vérifiez manuellement les rangs manquants avant d’enregistrer',version:'Reconnaissance V2',scan:'Vérification de la vidéo',collect:'Lecture des joueurs',finish:'Vérification du résultat',rankSlots:'places du classement lues',matched:'joueurs associés',unassigned:'non associés',reviewable:'résultats à vérifier',exemptCount:'exemptés'},
+ es:{coverage:'Cobertura de rangos',complete:'Secuencia de rangos completa',missing:'No detectado con seguridad',rescue:'Se están revisando de nuevo algunas zonas',manual:'Revisa manualmente los rangos que faltan antes de guardar',version:'Reconocimiento V2',scan:'Revisando vídeo',collect:'Leyendo jugadores',finish:'Revisando resultado',rankSlots:'puestos leídos',matched:'jugadores asociados',unassigned:'sin asociar',reviewable:'resultados revisables',exemptCount:'exentos'}
 };
 const ocr2=k=>(OCR2_WORDS[lng()]||OCR2_WORDS.de)[k]||k;
 const fmt=x=>Number(x||0).toLocaleString(lng()==='de'?'de-DE':lng()==='fr'?'fr-FR':lng()==='es'?'es-ES':'en-US');
@@ -446,7 +446,7 @@ function progress(step,value,count,mode=''){
  $('#nocrPercent',el).textContent=pct+'%';$('.nocr-bar',el).setAttribute('aria-valuenow',String(pct));
  const title=step===0?ocr2('scan'):step===1?(mode==='rescue'?ocr2('rescue'):ocr2('collect')):ocr2('finish');
  $('h3',panel).textContent=title;$('#nocrProgressText',el).textContent=title+' …';
- $('#nocrFound',el).textContent=count+' '+tr('found');
+ $('#nocrFound',el).textContent=count+' '+ocr2('matched');
  for(const item of panel.querySelectorAll('[data-step]'))item.classList.toggle('active',Number(item.dataset.step)===step);
 }
 function status(txt,isError=false){
@@ -596,9 +596,12 @@ async function analyze(){
    });
   }
   progress(2,100,r.hits.length);showReview(r);
-  const cov=r.coverage;
-  if(cov?.min&&cov?.max&&cov.missing.length)status(ocr2('coverage')+' '+cov.min+'–'+cov.max+' · '+ocr2('missing')+': '+cov.missing.join(', ')+' · '+ocr2('manual'),true);
-  else if(cov?.min&&cov?.max)status(ocr2('coverage')+' '+cov.min+'–'+cov.max+' · '+ocr2('complete'),false);
+  const cov=r.coverage,coveredRanks=cov?.seen?.length||0;
+  const statusMatchedRanks=new Set(r.hits.map(h=>Number(h.rank)).filter(n=>Number.isInteger(n)&&(!cov?.min||(n>=cov.min&&n<=cov.max))));
+  const unassignedRanks=Math.max(0,coveredRanks-statusMatchedRanks.size);
+  const assignment=' · '+r.hits.length+' '+ocr2('matched')+(unassignedRanks?' · '+unassignedRanks+' '+ocr2('unassigned'):'');
+  if(cov?.min&&cov?.max&&cov.missing.length)status(coveredRanks+' '+ocr2('rankSlots')+' · '+ocr2('coverage')+' '+cov.min+'–'+cov.max+' · '+ocr2('missing')+': '+cov.missing.join(', ')+assignment+' · '+ocr2('manual'),true);
+  else if(cov?.min&&cov?.max)status(coveredRanks+' '+ocr2('rankSlots')+' · '+ocr2('coverage')+' '+cov.min+'–'+cov.max+' · '+ocr2('complete')+assignment,false);
   else status(r.hits.length?tr('ready'):reviewText('nothing'),false);
  }catch(e){console.error('native screen OCR',e);status(tr('error')+': '+(e.message||e),true)}
  finally{if(url)URL.revokeObjectURL(url);if(video){video.removeAttribute('src');video.load()}r.busy=false;if(root.isConnected){btn.disabled=false;$('#nocrSave',root).disabled=!r.hits?.length}}
@@ -639,9 +642,21 @@ function showReview(r){
  [r.preview.updates,reviewText('updateCount')],
  [r.preview.already_recorded,reviewText('alreadyCount')]
  ].filter(x=>Number(x[0])>0).map(x=>points(x[0])+' '+x[1]):[];
+ const exemptCount=r.kind==='law'?preview.filter(x=>x.status==='exempt').length:0;
  const visibleCount=r.hits.filter(h=>r.kind!=='law'||statuses.get(String(h.player?.player_game_id||h.player?.player_id||''))?.status!=='exempt').length;
- const cov=r.coverage,covText=cov?.min&&cov?.max?' · '+ocr2('coverage')+' '+cov.min+'–'+cov.max+(cov.missing.length?' · ⚠ '+ocr2('missing')+': '+cov.missing.join(', '):' · ✓'):'';
- $('#nocrCount',root).textContent=visibleCount+' '+tr('found')+(counts.length?' · '+counts.join(' · '):'')+covText;
+ const cov=r.coverage,coveredRanks=cov?.seen?.length||0;
+ const reviewMatchedRanks=new Set(r.hits.map(h=>Number(h.rank)).filter(n=>Number.isInteger(n)&&(!cov?.min||(n>=cov.min&&n<=cov.max))));
+ const unassignedRanks=Math.max(0,coveredRanks-reviewMatchedRanks.size);
+ const parts=[
+  visibleCount+' '+ocr2('reviewable'),
+  r.hits.length+' '+ocr2('matched'),
+  coveredRanks+' '+ocr2('rankSlots'),
+  ...(unassignedRanks?[unassignedRanks+' '+ocr2('unassigned')]:[]),
+  ...(exemptCount?[exemptCount+' '+ocr2('exemptCount')]:[]),
+  ...counts
+ ];
+ const covText=cov?.min&&cov?.max?' · '+ocr2('coverage')+' '+cov.min+'–'+cov.max+(cov.missing.length?' · ⚠ '+ocr2('missing')+': '+cov.missing.join(', '):' · ✓'):'';
+ $('#nocrCount',root).textContent=parts.join(' · ')+covText;
  $('#nocrResults',root).innerHTML=r.hits.map((h,i)=>{
   const lookup=statuses.get(String(h.player?.player_game_id||h.player?.player_id||''));
   if(r.kind==='law'&&lookup?.status==='exempt')return '';
