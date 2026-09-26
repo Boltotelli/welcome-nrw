@@ -254,15 +254,25 @@ function parseOcrData(data){
 }
 function qualityNameCanvas(roi,bbox){
  if(!bbox||![bbox.x0,bbox.y0,bbox.x1,bbox.y1].every(Number.isFinite))return null;
- const x0=Math.max(0,Math.round(roi.width*.10)),x1=Math.min(roi.width,Math.round(roi.width*.73));
- const y0=Math.max(0,Math.floor(bbox.y0-22)),y1=Math.min(roi.height,Math.ceil(bbox.y1+22));
+ const x0=Math.max(0,Math.round(roi.width*.285)),x1=Math.min(roi.width,Math.round(roi.width*.735));
+ const y0=Math.max(0,Math.floor(bbox.y0-26)),y1=Math.min(roi.height,Math.ceil(bbox.y1+26));
  if(x1<=x0||y1<=y0)return null;
- const w=x1-x0,h=y1-y0,scale=Math.min(2.25,1800/Math.max(1,w)),out=document.createElement('canvas');
+ const w=x1-x0,h=y1-y0,scale=Math.min(2.3,1750/Math.max(1,w)),out=document.createElement('canvas');
  out.width=Math.max(1,Math.round(w*scale));out.height=Math.max(1,Math.round(h*scale));
  const cx=out.getContext('2d',{willReadFrequently:true});cx.imageSmoothingEnabled=true;cx.imageSmoothingQuality='high';
  cx.drawImage(roi,x0,y0,w,h,0,0,out.width,out.height);return out;
 }
-function qualityNameRow(text,group){
+function qualityScoreCanvas(roi,bbox){
+ if(!bbox||![bbox.y0,bbox.y1].every(Number.isFinite))return null;
+ const x0=Math.max(0,Math.round(roi.width*.72)),x1=Math.min(roi.width,Math.round(roi.width*.995));
+ const y0=Math.max(0,Math.floor(bbox.y0-26)),y1=Math.min(roi.height,Math.ceil(bbox.y1+26));
+ if(x1<=x0||y1<=y0)return null;
+ const w=x1-x0,h=y1-y0,scale=Math.min(2.35,1200/Math.max(1,w)),out=document.createElement('canvas');
+ out.width=Math.max(1,Math.round(w*scale));out.height=Math.max(1,Math.round(h*scale));
+ const cx=out.getContext('2d',{willReadFrequently:true});cx.imageSmoothingEnabled=true;cx.imageSmoothingQuality='high';
+ cx.drawImage(roi,x0,y0,w,h,0,0,out.width,out.height);return out;
+}
+function parseNameOnly(text,fallbackAlliance=''){
  const lines=String(text||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
  if(!lines.length)return null;
  let best=lines.sort((a,b)=>(b.match(/[\p{L}\p{N}]/gu)||[]).length-(a.match(/[\p{L}\p{N}]/gu)||[]).length)[0]||'';
@@ -275,7 +285,45 @@ function qualityNameRow(text,group){
  }
  name=name.replace(/^[^\p{L}\p{N}~_-]+|[^\p{L}\p{N}~_-]+$/gu,'').trim();
  if(norm(name).length<2)return null;
- return {...group,name,alliance:tag?.[1]||group.alliance||'',score:group.score,rank:group.rank,raw:best,quality:true};
+ return {name,alliance:tag?.[1]||fallbackAlliance||'',raw:best};
+}
+function parseScoreOnly(text){
+ const lines=String(text||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+ for(const line of lines){
+  const cleaned=ocrDigits(line).replace(/[^0-9.,\s]/g,' ').trim();
+  const m=cleaned.match(/(\d{1,3}(?:[.,\s]\d{3}){1,4}|\d{4,12})/);
+  if(!m)continue;
+  const n=Number(m[1].replace(/[.,\s]/g,''));
+  if(Number.isSafeInteger(n)&&n>=1000)return n;
+ }
+ return null;
+}
+function qualityNameRow(text,group,scoreOverride=null){
+ const parsed=parseNameOnly(text,group.alliance||'');
+ if(!parsed)return null;
+ return {...group,...parsed,score:Number.isSafeInteger(scoreOverride)?scoreOverride:group.score,rank:group.rank,quality:true};
+}
+function splitPodiumCards(podium){
+ const out=[];
+ for(let i=0;i<3;i++){
+  const y0=Math.round(podium.height*(i/3)),y1=Math.round(podium.height*((i+1)/3));
+  const card=document.createElement('canvas');card.width=podium.width;card.height=Math.max(1,y1-y0);
+  card.getContext('2d',{willReadFrequently:true}).drawImage(podium,0,y0,podium.width,y1-y0,0,0,card.width,card.height);
+  out.push(card);
+ }
+ return out;
+}
+function podiumNameCanvas(card){
+ const x0=Math.round(card.width*.285),x1=Math.round(card.width*.73),y0=Math.round(card.height*.08),y1=Math.round(card.height*.92);
+ const out=document.createElement('canvas'),w=x1-x0,h=y1-y0,scale=Math.min(2.25,1700/Math.max(1,w));
+ out.width=Math.max(1,Math.round(w*scale));out.height=Math.max(1,Math.round(h*scale));
+ out.getContext('2d',{willReadFrequently:true}).drawImage(card,x0,y0,w,h,0,0,out.width,out.height);return out;
+}
+function podiumScoreCanvas(card){
+ const x0=Math.round(card.width*.72),x1=Math.round(card.width*.995),y0=Math.round(card.height*.08),y1=Math.round(card.height*.92);
+ const out=document.createElement('canvas'),w=x1-x0,h=y1-y0,scale=Math.min(2.3,1150/Math.max(1,w));
+ out.width=Math.max(1,Math.round(w*scale));out.height=Math.max(1,Math.round(h*scale));
+ out.getContext('2d',{willReadFrequently:true}).drawImage(card,x0,y0,w,h,0,0,out.width,out.height);return out;
 }
 function ranksFromText(text){
  const out=[];
@@ -714,9 +762,18 @@ async function analyze(){
    const parsed=parseOcrData(ocr);
    processRows(parsed,sec,full);
    if(i===0){
-    const podium=podiumCanvas(full),podiumText=(await worker.recognize(podium)).data?.text||'';
-    const podiumRows=extractPodiumRows(podiumText);
+    const podium=podiumCanvas(full),cards=splitPodiumCards(podium),podiumRows=[];
+    try{await worker.setParameters({preserve_interword_spaces:'1',tessedit_pageseg_mode:'7',tessedit_char_whitelist:''})}catch{}
+    for(let pi=0;pi<cards.length;pi++){
+     const nameText=(await worker.recognize(podiumNameCanvas(cards[pi]))).data?.text||'';
+     const parsedName=parseNameOnly(nameText,'');
+     try{await worker.setParameters({preserve_interword_spaces:'1',tessedit_pageseg_mode:'7',tessedit_char_whitelist:'0123456789.,'})}catch{}
+     const scoreText=(await worker.recognize(podiumScoreCanvas(cards[pi]))).data?.text||'',score=parseScoreOnly(scoreText);
+     try{await worker.setParameters({preserve_interword_spaces:'1',tessedit_pageseg_mode:'7',tessedit_char_whitelist:''})}catch{}
+     if(parsedName&&Number.isSafeInteger(score))podiumRows.push({...parsedName,score,rank:pi+1,podium:true,quality:true,raw:'Podium '+(pi+1)+' · '+parsedName.raw+' · '+score});
+    }
     processRows(podiumRows,sec,full);
+    try{await worker.setParameters({preserve_interword_spaces:'1',tessedit_pageseg_mode:'6',tessedit_char_whitelist:''})}catch{}
    }
    progress(1,5+65*((i+1)/times.length),observations.size);
    await new Promise(resolve=>setTimeout(resolve,0));
@@ -758,15 +815,22 @@ async function analyze(){
     const source=[...group.variants].filter(v=>v.bbox&&Number.isFinite(v.time)).sort((a,b)=>(b._seen||1)-(a._seen||1))[0];
     if(!source)continue;
     await seek(video,source.time);
-    const full=frameCanvas(video),roi=rankingCanvas(full),crop=qualityNameCanvas(roi,source.bbox);
-    if(crop){
-     const txt=(await worker.recognize(crop)).data?.text||'',row=qualityNameRow(txt,group);
+    const full=frameCanvas(video),roi=rankingCanvas(full),nameCrop=qualityNameCanvas(roi,source.bbox),scoreCrop=qualityScoreCanvas(roi,source.bbox);
+    if(nameCrop){
+     try{await worker.setParameters({preserve_interword_spaces:'1',tessedit_pageseg_mode:'7',tessedit_char_whitelist:''})}catch{}
+     const nameText=(await worker.recognize(nameCrop)).data?.text||'';
+     let score=null;
+     if(scoreCrop){
+      try{await worker.setParameters({preserve_interword_spaces:'1',tessedit_pageseg_mode:'7',tessedit_char_whitelist:'0123456789.,'})}catch{}
+      score=parseScoreOnly((await worker.recognize(scoreCrop)).data?.text||'');
+     }
+     const row=qualityNameRow(nameText,group,score);
      if(row)processRows([row],source.time,full);
     }
     progress(2,94+2*((qi+1)/qualityTargets.length),observations.size);
     await new Promise(resolve=>setTimeout(resolve,0));
    }
-   try{await worker.setParameters({preserve_interword_spaces:'1',tessedit_pageseg_mode:'6'})}catch{}
+   try{await worker.setParameters({preserve_interword_spaces:'1',tessedit_pageseg_mode:'6',tessedit_char_whitelist:''})}catch{}
    // Rebuild candidate groups after the dedicated row OCR.
    r.hits=[...observations.values()].map(consensusHit).filter(Boolean).sort((a,b)=>(a.rank&&b.rank?a.rank-b.rank:b.score-a.score));
    matchedRanks=new Set(r.hits.map(h=>h.rank).filter(Boolean));
