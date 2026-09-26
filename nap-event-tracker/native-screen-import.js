@@ -671,24 +671,90 @@ function baseFrameTimes(dur){
  add(end);
  return times.sort((a,b)=>a-b).slice(0,11);
 }
-async function seek(video,time){
- if(Math.abs(video.currentTime-time)<.03&&video.readyState>=2)return;
+function videoErrorMessage(video){
+ const code=Number(video?.error?.code||0);
+ return code===1?'video load aborted':
+        code===2?'video network/read error':
+        code===3?'video decode error':
+        code===4?'unsupported video codec/format':
+        'video frame could not be opened';
+}
+async function recoverVideo(video){
+ try{video.pause()}catch{}
  await new Promise((resolve,reject)=>{
   let settled=false;
   const finish=(err)=>{
    if(settled)return;settled=true;clearTimeout(timer);
-   video.removeEventListener('seeked',ok);video.removeEventListener('error',bad);
+   video.removeEventListener('loadeddata',ok);
+   video.removeEventListener('canplay',ok);
+   video.removeEventListener('error',bad);
    err?reject(err):resolve();
   };
-  const ok=()=>finish();const bad=()=>finish(Error('Video frame could not be opened'));
+  const ok=()=>video.readyState>=2&&video.videoWidth?finish():null;
+  const bad=()=>finish(Error(videoErrorMessage(video)));
+  const timer=setTimeout(()=>video.readyState>=2&&video.videoWidth?finish():finish(Error('Video decoder recovery timed out')),6500);
+  video.addEventListener('loadeddata',ok);
+  video.addEventListener('canplay',ok);
+  video.addEventListener('error',bad,{once:true});
+  try{video.load();if(video.readyState>=2&&video.videoWidth)finish()}catch(err){finish(err)}
+ });
+}
+async function seekOnce(video,time){
+ if(Math.abs(video.currentTime-time)<.04&&video.readyState>=2)return true;
+ await new Promise((resolve,reject)=>{
+  let settled=false,errorSeen=false;
+  const finish=(err)=>{
+   if(settled)return;settled=true;clearTimeout(timer);clearTimeout(errorTimer);
+   video.removeEventListener('seeked',ok);
+   video.removeEventListener('loadeddata',check);
+   video.removeEventListener('canplay',check);
+   video.removeEventListener('timeupdate',check);
+   video.removeEventListener('error',bad);
+   err?reject(err):resolve();
+  };
+  const check=()=>{
+   if(video.readyState>=2&&Math.abs(video.currentTime-time)<.20)finish();
+  };
+  const ok=()=>requestAnimationFrame(check);
+  const bad=()=>{
+   errorSeen=true;
+   // Desktop Chromium can emit a transient media error around a difficult keyframe.
+   // Give the decoder a brief chance to expose the requested frame before failing.
+   clearTimeout(errorTimer);
+   errorTimer=setTimeout(()=>check()||finish(Error(videoErrorMessage(video))),180);
+  };
   const timer=setTimeout(()=>{
-   // Some mobile browsers occasionally omit seeked even though the frame is ready.
-   if(video.readyState>=2&&Math.abs(video.currentTime-time)<.12)finish();
-   else finish(Error('Video frame timed out'));
-  },4500);
-  video.addEventListener('seeked',ok,{once:true});video.addEventListener('error',bad,{once:true});
+   if(video.readyState>=2&&Math.abs(video.currentTime-time)<.20)finish();
+   else finish(Error(errorSeen?videoErrorMessage(video):'Video frame timed out'));
+  },5200);
+  let errorTimer=0;
+  video.addEventListener('seeked',ok);
+  video.addEventListener('loadeddata',check);
+  video.addEventListener('canplay',check);
+  video.addEventListener('timeupdate',check);
+  video.addEventListener('error',bad);
   try{video.currentTime=time}catch(err){finish(err)}
  });
+ return true;
+}
+async function seek(video,time){
+ const duration=Number(video.duration)||0;
+ const edge=Math.max(0,duration-.06);
+ const base=Math.max(0,Math.min(Number(time)||0,edge));
+ const offsets=[0,.08,-.08,.18,-.18,.35];
+ let lastError=null;
+ for(let attempt=0;attempt<offsets.length;attempt++){
+  const target=Math.max(0,Math.min(base+offsets[attempt],edge));
+  if(attempt>0){
+   try{await recoverVideo(video)}catch(err){lastError=err}
+  }
+  try{await seekOnce(video,target);return target}
+  catch(err){
+   lastError=err;
+   console.warn('OCR video seek retry',attempt+1,'target',target,err);
+  }
+ }
+ throw lastError||Error('Video frame could not be decoded');
 }
 async function metadata(video,file){
  const url=URL.createObjectURL(file);video.src=url;video.preload='auto';video.muted=true;video.playsInline=true;
@@ -835,8 +901,22 @@ async function analyze(){
     observations.get(key).push({row:{...row},player:p,time:sec,image:still});
    }
   };
+  let decodedFrames=0,skippedFrames=0;
   for(let i=0;i<times.length;i++){
-   if(run!==r)break;const sec=times[i];await seek(video,sec);const full=frameCanvas(video),roi=rankingCanvas(full);
+   if(run!==r)break;const sec=times[i];
+   try{await seek(video,sec)}
+   catch(err){
+    skippedFrames++;console.warn('Skipping unreadable OCR frame',sec,err);
+    progress(1,5+65*((i+1)/times.length),observations.size);
+    continue;
+   }
+   let full,roi;
+   try{full=frameCanvas(video);roi=rankingCanvas(full);decodedFrames++}
+   catch(err){
+    skippedFrames++;console.warn('Skipping undecodable OCR canvas frame',sec,err);
+    progress(1,5+65*((i+1)/times.length),observations.size);
+    continue;
+   }
    if(r.frames.length<12&&i%Math.max(1,Math.floor(times.length/12))===0)r.frames.push({time:sec,image:full.toDataURL('image/jpeg',.72)});
    const ocr=(await worker.recognize(roi,{}, {text:true,blocks:true})).data||{};
    for(const rank of ranksFromText(ocr.text||''))recordRank(rank,sec,rankMap);
@@ -860,12 +940,17 @@ async function analyze(){
    await new Promise(resolve=>setTimeout(resolve,0));
   }
   if(run!==r)return;
+  if(decodedFrames===0)throw Error('No video frame could be decoded. Please export the recording as H.264 MP4 and try again.');
+  if(skippedFrames)console.warn('OCR continued after skipped video frames',skippedFrames);
   let coverage=rankCoverage(rankMap),rescue=rescueTimes(coverage,rankMap,dur,times);
   if(coverage.missing.length&&rescue.length){
    progress(1,72,observations.size,'rescue');
    const missingSet=new Set(coverage.missing);
    for(let i=0;i<rescue.length;i++){
-    if(run!==r)break;const sec=rescue[i];await seek(video,sec);const full=frameCanvas(video),roi=rankingCanvas(full);
+    if(run!==r)break;const sec=rescue[i];
+    let full,roi;
+    try{await seek(video,sec);full=frameCanvas(video);roi=rankingCanvas(full)}
+    catch(err){console.warn('Skipping unreadable rescue frame',sec,err);continue}
     const rescueData=(await worker.recognize(roi)).data||{};
     for(const rank of ranksFromText(rescueData.text||''))recordRank(rank,sec,rankMap);
     const rows=repairSequentialRanks(extractRows(rescueData.text||''));
@@ -895,8 +980,10 @@ async function analyze(){
     const group=qualityTargets[qi];
     const source=[...group.variants].filter(v=>v.bbox&&Number.isFinite(v.time)).sort((a,b)=>(b._seen||1)-(a._seen||1))[0];
     if(!source)continue;
-    await seek(video,source.time);
-    const full=frameCanvas(video),roi=rankingCanvas(full),nameCrop=qualityNameCanvas(roi,source.bbox),scoreCrop=qualityScoreCanvas(roi,source.bbox);
+    let full,roi;
+    try{await seek(video,source.time);full=frameCanvas(video);roi=rankingCanvas(full)}
+    catch(err){console.warn('Skipping unreadable quality frame',source.time,err);continue}
+    const nameCrop=qualityNameCanvas(roi,source.bbox),scoreCrop=qualityScoreCanvas(roi,source.bbox);
     if(nameCrop){
      try{await worker.setParameters({preserve_interword_spaces:'1',tessedit_pageseg_mode:'7',tessedit_char_whitelist:''})}catch{}
      const nameText=(await worker.recognize(nameCrop)).data?.text||'';
