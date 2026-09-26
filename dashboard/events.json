@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "kingdom": 1044,
   "timezone": "UTC",
-  "updatedAt": "2026-09-23T12:07:31Z",
+  "updatedAt": "2026-09-26T00:16:13Z",
   "events": [
     {
       "id": "golden-glaives-prep-2026-09-20",
@@ -768,6 +768,250 @@
         ]
       },
       "sourceUrl": "https://centurygames.helpshift.com/hc/en/140-kingshot/section/1399-fishing-tournament/"
+    },
+    {
+      "id": "strongest-governor-2026-09-27",
+      "start": "2026-09-27",
+      "end": "2026-10-03",
+      "icon": "👑",
+      "iconUrl": "https://kingshotdata.com/uploads/2025/06/strongest-governor-event-icon.webp",
+      "manual": false,
+      "confidence": "predicted",
+      "name": {
+        "de": "Stärkster Gouverneur",
+        "en": "Strongest Governor",
+        "fr": "Gouverneur le plus puissant"
+      },
+      "tips": {
+        "de": [
+          "Der Termin folgt dem öffentlichen 4‑Wochen-Rhythmus und bleibt bis zur Ingame-Bestätigung voraussichtlich.",
+          "Prüfe vor jeder Ausgabe die aktive Phase im Spiel; nur die dort angezeigten Aktionen bringen Punkte.",
+          "KvK-Ressourcen nicht nur für Ranglistenpunkte verbrauchen. Die jeweils geltende NRW-/NAP-Grenze ist ein striktes Maximum, keine Empfehlung."
+        ],
+        "en": [
+          "The date follows the public four-week rotation and remains predicted until confirmed in game.",
+          "Check the active stage in game before spending; only the actions shown there score points.",
+          "Do not spend KvK resources only for leaderboard points. The applicable NRW/NAP limit is a strict maximum, not a recommendation."
+        ],
+        "fr": [
+          "La date suit le cycle public de quatre semaines et reste prévisionnelle jusqu’à confirmation en jeu.",
+          "Vérifie la phase active en jeu avant toute dépense ; seules les actions affichées rapportent des points.",
+          "Ne dépense pas de ressources KvK uniquement pour le classement. La limite NRW/NAP applicable est un maximum strict, pas une recommandation."
+        ]
+      },
+      "dailyPlans": {
+        "2026-09-27": {
+          "points": {
+            "de": "Tag 1 · Stadtbau: Amulettwert, Truegold, Truegold-Staub, gehärtetes Truegold und Speedups",
+            "en": "Day 1 · City Construction: Charm score, Truegold, Truegold Dust, Tempered Truegold and speedups",
+            "fr": "Jour 1 · Construction : score de charme, Truegold, poussière de Truegold, Truegold trempé et accélérateurs"
+          },
+          "steps": {
+            "de": [
+              "Prüfe nach dem Reset zuerst, ob Tag 1 ingame aktiv ist.",
+              "Punkte: +70 je Amulettwert, 2.000 je Truegold, 1.000 je Truegold-Staub, 30.000 je gehärtetes Truegold und 30 je Speedup-Minute.",
+              "Nutze nur ohnehin geplante Upgrades und stoppe spätestens an der geltenden strikten NRW-/NAP-Grenze."
+            ],
+            "en": [
+              "After reset, first verify that Day 1 is active in game.",
+              "Points: 70 per Charm score, 2,000 per Truegold, 1,000 per Truegold Dust, 30,000 per Tempered Truegold and 30 per speedup minute.",
+              "Only complete upgrades you already planned and stop no later than the applicable strict NRW/NAP limit."
+            ],
+            "fr": [
+              "Après le reset, vérifie d’abord que le jour 1 est actif en jeu.",
+              "Points : 70 par point de charme, 2 000 par Truegold, 1 000 par poussière de Truegold, 30 000 par Truegold trempé et 30 par minute d’accélération.",
+              "Effectue uniquement les améliorations déjà prévues et arrête-toi au plus tard à la limite stricte NRW/NAP applicable."
+            ]
+          }
+        },
+        "2026-09-28": {
+          "points": {
+            "de": "Tag 2 · Heldenentwicklung: Roulette, Heldensplitter, Heldenausrüstung, Meistermaterialien, Truegold und Speedups",
+            "en": "Day 2 · Hero Development: Roulette, Hero Shards, Hero Gear, Master materials, Truegold and speedups",
+            "fr": "Jour 2 · Développement des héros : Roulette, fragments, équipement, matériaux de Maître, Truegold et accélérateurs"
+          },
+          "steps": {
+            "de": [
+              "Prüfe die aktive Phase, bevor du Roulette-Drehungen oder Materialien einsetzt.",
+              "Punkte: Roulette 8.000; seltene/epische/mythische Splitter 350/1.220/3.040; Schmiedehammer 4.000; Widget 8.000; Mithril 40.000; Meisteremblem 6.000; Manuskript 60.",
+              "Zusätzlich zählen Truegold, Truegold-Staub, gehärtetes Truegold und passende Speedups. Nutze nichts nur für Ranglistenpunkte."
+            ],
+            "en": [
+              "Verify the active stage before using Roulette spins or materials.",
+              "Points: Roulette 8,000; Rare/Epic/Mythic Shards 350/1,220/3,040; Forgehammer 4,000; Widget 8,000; Mithril 40,000; Master Emblem 6,000; Manuscript 60.",
+              "Truegold, Truegold Dust, Tempered Truegold and eligible speedups also score. Do not use them only for leaderboard points."
+            ],
+            "fr": [
+              "Vérifie la phase active avant d’utiliser des tours de Roulette ou des matériaux.",
+              "Points : Roulette 8 000 ; fragments rares/épiques/mythiques 350/1 220/3 040 ; marteau 4 000 ; widget 8 000 ; Mithril 40 000 ; emblème 6 000 ; manuscrit 60.",
+              "Le Truegold, sa poussière, le Truegold trempé et les accélérateurs admissibles comptent aussi. Ne les utilise pas uniquement pour le classement."
+            ]
+          },
+          "note": {
+            "de": "Einmalige NRW-Ausnahme für dieses SG: Tag 2 darf höchstens 4× das Minimalziel erreichen. Das ist eine strikte Grenze, keine Empfehlung.",
+            "en": "One-time NRW exception for this SG: Day 2 may reach at most 4× the minimum target. This is a strict limit, not a recommendation.",
+            "fr": "Exception NRW unique pour ce SG : le jour 2 peut atteindre au maximum 4× l’objectif minimal. C’est une limite stricte, pas une recommandation."
+          }
+        },
+        "2026-09-29": {
+          "points": {
+            "de": "Tag 3 · Grundfertigkeiten: Pets, Meistermaterialien, Amulette, Roulette und Heldensplitter",
+            "en": "Day 3 · Basic Skill Up: Pets, Master materials, Charms, Roulette and Hero Shards",
+            "fr": "Jour 3 · Compétences de base : familiers, matériaux de Maître, charmes, Roulette et fragments"
+          },
+          "steps": {
+            "de": [
+              "Prüfe nach dem Reset die aktive Phase und verwende vorher keine dafür vorgesehenen Materialien.",
+              "Punkte: Pet-Fortschritt 50 je Punkt; fortgeschrittene/gewöhnliche Zähmungsmarke 15.000/1.150; Meisteremblem 6.000; Manuskript 60; Amulettwert 70 je Punkt; Roulette 8.000.",
+              "Heldensplitter bringen 350/1.220/3.040 Punkte für selten/episch/mythisch. Stoppe an der geltenden Grenze."
+            ],
+            "en": [
+              "After reset, verify the active stage and do not use the relevant materials beforehand.",
+              "Points: Pet Advancement 50 per point; Advanced/Common Taming Mark 15,000/1,150; Master Emblem 6,000; Manuscript 60; Charm score 70 per point; Roulette 8,000.",
+              "Rare/Epic/Mythic Hero Shards give 350/1,220/3,040 points. Stop at the applicable limit."
+            ],
+            "fr": [
+              "Après le reset, vérifie la phase active et n’utilise pas les matériaux concernés avant.",
+              "Points : progression de familier 50 par point ; marque avancée/ordinaire 15 000/1 150 ; emblème 6 000 ; manuscrit 60 ; charme 70 par point ; Roulette 8 000.",
+              "Les fragments rares/épiques/mythiques rapportent 350/1 220/3 040 points. Arrête-toi à la limite applicable."
+            ]
+          },
+          "note": {
+            "de": "Einmalige NRW-Ausnahme für dieses SG: Tag 3 darf höchstens 4× das Minimalziel erreichen. Das ist eine strikte Grenze, keine Empfehlung.",
+            "en": "One-time NRW exception for this SG: Day 3 may reach at most 4× the minimum target. This is a strict limit, not a recommendation.",
+            "fr": "Exception NRW unique pour ce SG : le jour 3 peut atteindre au maximum 4× l’objectif minimal. C’est une limite stricte, pas une recommandation."
+          }
+        },
+        "2026-09-30": {
+          "points": {
+            "de": "Tag 4 · Kampftraining: Truppen, Amulette und Heldenausrüstung",
+            "en": "Day 4 · Combat Training: Troops, Charms and Hero Gear",
+            "fr": "Jour 4 · Entraînement au combat : troupes, charmes et équipement de héros"
+          },
+          "steps": {
+            "de": [
+              "Reserviere bei geplanter Ausbildung rechtzeitig den Ministerposten „Edler Berater“ und kombiniere ihn erst kurz vor Abschluss mit dem Trainingsbonus.",
+              "Punkte je Truppe Level 1–11: 1/2/3/5/7/11/16/23/30/39/49.",
+              "Zusätzlich zählen Amulettwert 70 je Punkt, Schmiedehammer 4.000, Widget 8.000 und Mithril 40.000. Keine KvK-Vorräte nur für SG verbrauchen."
+            ],
+            "en": [
+              "If training is planned, reserve the Noble Advisor minister position in time and combine it with the training boost only shortly before completion.",
+              "Points per troop level 1–11: 1/2/3/5/7/11/16/23/30/39/49.",
+              "Charm score gives 70 per point, Forgehammer 4,000, Widget 8,000 and Mithril 40,000. Do not spend KvK reserves only for SG."
+            ],
+            "fr": [
+              "Si un entraînement est prévu, réserve à temps le poste de Noble Advisor et combine-le avec le bonus d’entraînement juste avant la fin.",
+              "Points par troupe de niveau 1–11 : 1/2/3/5/7/11/16/23/30/39/49.",
+              "Le charme rapporte 70 par point, le marteau 4 000, le widget 8 000 et le Mithril 40 000. Ne dépense pas les réserves KvK uniquement pour le SG."
+            ]
+          }
+        },
+        "2026-10-01": {
+          "points": {
+            "de": "Tag 5 · Grundfertigkeiten: Heldenausrüstung, Truegold und Speedups",
+            "en": "Day 5 · Basic Skill Up: Hero Gear, Truegold and speedups",
+            "fr": "Jour 5 · Compétences de base : équipement de héros, Truegold et accélérateurs"
+          },
+          "steps": {
+            "de": [
+              "Punkte: Schmiedehammer 4.000, Widget 8.000, Mithril 40.000, Truegold 2.000, Truegold-Staub 1.000, gehärtetes Truegold 30.000 und Speedups 30 je Minute.",
+              "Das bekannte Minimalziel beträgt 296.000 Punkte; prüfe den aktuellen Zielwert dennoch ingame bzw. in der NRW-Ansage.",
+              "Erreiche das Minimalziel nur, wenn sich die Belohnung für dich lohnt. Die reguläre 3×-Grenze bleibt ein striktes Maximum."
+            ],
+            "en": [
+              "Points: Forgehammer 4,000, Widget 8,000, Mithril 40,000, Truegold 2,000, Truegold Dust 1,000, Tempered Truegold 30,000 and speedups 30 per minute.",
+              "The known minimum target is 296,000 points; still verify the current target in game or in the NRW announcement.",
+              "Reach the minimum only if the reward is worthwhile for you. The regular 3× limit remains a strict maximum."
+            ],
+            "fr": [
+              "Points : marteau 4 000, widget 8 000, Mithril 40 000, Truegold 2 000, poussière 1 000, Truegold trempé 30 000 et accélérateurs 30 par minute.",
+              "L’objectif minimal connu est de 296 000 points ; vérifie tout de même la valeur actuelle en jeu ou dans l’annonce NRW.",
+              "Atteins le minimum uniquement si la récompense en vaut la peine. La limite normale de 3× reste un maximum strict."
+            ]
+          }
+        },
+        "2026-10-02": {
+          "points": {
+            "de": "Tag 6 · Kampftraining: Gouverneursausrüstung und Truppen",
+            "en": "Day 6 · Combat Training: Governor Gear and Troops",
+            "fr": "Jour 6 · Entraînement au combat : équipement du gouverneur et troupes"
+          },
+          "prepare": {
+            "title": {
+              "de": "Sammler und Bison für Tag 7 vorbereiten",
+              "en": "Prepare gatherers and Bison for Day 7",
+              "fr": "Préparer les collecteurs et le Bison pour le jour 7"
+            },
+            "status": {
+              "de": "VOR RESET",
+              "en": "BEFORE RESET",
+              "fr": "AVANT RESET"
+            },
+            "steps": {
+              "de": [
+                "Schicke vor dem Reset lange Sammelmärsche los, sodass sie erst an Tag 7 zurückkehren.",
+                "Aktiviere Bison, sobald die Truppen aktiv sammeln; dadurch läuft der Cooldown bereits vor dem Reset.",
+                "Rufe die Sammler nicht vor dem Reset zurück."
+              ],
+              "en": [
+                "Before reset, send long gathering marches so they return on Day 7.",
+                "Activate Bison once the troops are actively gathering; its cooldown then starts before reset.",
+                "Do not recall the gatherers before reset."
+              ],
+              "fr": [
+                "Avant le reset, envoie de longues marches afin qu’elles reviennent au jour 7.",
+                "Active le Bison lorsque les troupes collectent ; son temps de recharge commence avant le reset.",
+                "Ne rappelle pas les collecteurs avant le reset."
+              ]
+            }
+          },
+          "steps": {
+            "de": [
+              "Punkte je Truppe Level 1–11: 1/2/3/5/7/11/16/23/30/39/49; Gouverneursausrüstung bringt 36 Punkte je erhöhtem Maximalwert.",
+              "Nutze bei geplanter Ausbildung Edler Berater und Trainingsbonus passend zum Abschlusszeitpunkt.",
+              "Truppen und Ausrüstung nur im ohnehin geplanten Umfang verbessern; KvK-Vorräte sparen."
+            ],
+            "en": [
+              "Points per troop level 1–11: 1/2/3/5/7/11/16/23/30/39/49; Governor Gear gives 36 points per maximum score increase.",
+              "For planned training, time Noble Advisor and the training boost with completion.",
+              "Only improve troops and gear as already planned; save KvK reserves."
+            ],
+            "fr": [
+              "Points par troupe de niveau 1–11 : 1/2/3/5/7/11/16/23/30/39/49 ; l’équipement du gouverneur rapporte 36 points par hausse du score maximal.",
+              "Pour un entraînement prévu, synchronise Noble Advisor et le bonus avec la fin.",
+              "Améliore les troupes et l’équipement uniquement comme prévu ; conserve les réserves KvK."
+            ]
+          }
+        },
+        "2026-10-03": {
+          "points": {
+            "de": "Tag 7 · Heldenentwicklung und Sammeln: Pets, Ausrüstung, Truegold, Splitter, Speedups und Ressourcen",
+            "en": "Day 7 · Hero Development and Gathering: Pets, gear, Truegold, Shards, speedups and resources",
+            "fr": "Jour 7 · Héros et collecte : familiers, équipement, Truegold, fragments, accélérateurs et ressources"
+          },
+          "steps": {
+            "de": [
+              "Lass die vor dem Reset gestarteten Sammler erst nach dem Reset zurückkehren.",
+              "Schicke danach einen neuen Sammelmarsch: Die vorbereitete Bison-Fähigkeit löst sofort aus. Nach dem tatsächlichen Cooldown kannst du Bison ein weiteres Mal nutzen.",
+              "Sammeln bringt 3 Punkte je 2.500 Brot/Holz, 500 Stein oder 100 Eisen.",
+              "Zusätzlich zählen Pet-Fortschritt, Zähmungsmarken, Gouverneursausrüstung, Truegold, Speedups und Heldensplitter. Das bekannte Minimalziel beträgt 345.000 Punkte; prüfe die aktuelle NRW-Ansage und überschreite nicht die strikte 3×-Grenze."
+            ],
+            "en": [
+              "Let the gatherers sent before reset return only after reset.",
+              "Then send a new gathering march: the prepared Bison ability triggers instantly. After its actual cooldown, Bison can be used once more.",
+              "Gathering gives 3 points per 2,500 Bread/Wood, 500 Stone or 100 Iron.",
+              "Pet progress, Taming Marks, Governor Gear, Truegold, speedups and Hero Shards also score. The known minimum is 345,000 points; verify the current NRW announcement and do not exceed the strict 3× limit."
+            ],
+            "fr": [
+              "Laisse les collecteurs envoyés avant le reset revenir seulement après celui-ci.",
+              "Envoie ensuite une nouvelle marche : la compétence préparée du Bison se déclenche immédiatement. Après son véritable temps de recharge, utilise-le encore une fois.",
+              "La collecte rapporte 3 points pour 2 500 Pain/Bois, 500 Pierre ou 100 Fer.",
+              "La progression des familiers, les marques, l’équipement du gouverneur, le Truegold, les accélérateurs et les fragments comptent aussi. Le minimum connu est de 345 000 points ; vérifie l’annonce NRW et ne dépasse pas la limite stricte de 3×."
+            ]
+          }
+        }
+      },
+      "sourceUrl": "https://v2.kingshot.net/calendar"
     },
     {
       "id": "new-master-2026-09-14",
