@@ -1055,7 +1055,8 @@ function showReview(r){
  const syncPoolCandidate=()=>{
   if(!poolBox)return;
   const idx=Number($('#nocrUnknown',root)?.value||0),row=r.unmatched[idx];
-  const eligible=!!row&&r.kind==='law'&&!String(row.alliance||'').trim();
+  const rn=norm(row?.name),poolExact=row?r.members.filter(p=>p.alliance_code==null&&[p.player_name,...(p.aliases||[])].some(n=>norm(n)===rn)):[];
+  const eligible=!!row&&r.kind==='law'&&!String(row.alliance||'').trim()&&poolExact.length===0;
   poolBox.hidden=!eligible;
   if(eligible&&poolName&&document.activeElement!==poolName)poolName.value=row.name||'';
  };
@@ -1089,8 +1090,13 @@ function showReview(r){
  const filter=$('#nocrSearchRoster',root);
  const list=()=>{
   const q=norm(filter.value),code=alliance.value;
-  const options=alphabeticalRoster(r.members).filter(({p})=>code&&p.alliance_code===code&&(!q||norm(p.player_name+' '+p.player_game_id).includes(q)));
-  sel.innerHTML='<option value="">–</option>'+options.map(({p,i})=>selectOption(p.player_name+' · '+(p.player_game_id||''),i)).join('');
+  const options=alphabeticalRoster(r.members).filter(({p})=>
+   code&&(code===UNAFFILIATED_CODE?p.alliance_code==null:p.alliance_code===code)&&
+   (!q||norm(p.player_name+' '+(p.player_game_id||'')).includes(q))
+  );
+  sel.innerHTML='<option value="">–</option>'+options.map(({p,i})=>selectOption(
+   p.player_name+(p.player_game_id?' · '+p.player_game_id:' · '+ocr2('unaffiliated')),i
+  )).join('');
  };
  list();filter.addEventListener('input',list);alliance.addEventListener('change',list);
  const missingDetails=$('#nocrAddMissing',root);
@@ -1114,7 +1120,7 @@ function showReview(r){
   if(old)r.hits=r.hits.filter(x=>x!==old);
   const proof=r.frames[Number(frame?.value||0)]||null;
   if(r.kind==='law'&&!proof?.image){out.textContent=tr('evidenceRequired');return}
-  r.hits.push({player:p,name:p.player_name,alliance:p.alliance_code,score,rank,time:proof?.time??0,image:proof?.image||null,manual:true});
+  r.hits.push({player:p,name:p.player_name,alliance:p.alliance_code??null,score,rank,time:proof?.time??0,image:proof?.image||null,manual:true,trackingOnly:p.alliance_code==null});
   r.hits.sort((a,b)=>b.score-a.score);r.addOpen=true;refreshReview(r);
  };
  $('#nocrSave',root).disabled=!r.hits.length;
