@@ -218,8 +218,9 @@ async function syncCrownVisibility2(){
 function decorate(){const ab=document.querySelector('.alliance-badge');if(ab)ab.innerHTML=allianceLogo2(S.a,'alliance-top-logo')+'<span>'+E(S.a)+'</span>';document.querySelectorAll('[data-current-alliance]').forEach(x=>x.textContent=S.a);const u=document.querySelector('.user-pill');if(u){u.innerHTML=allianceLogo2(S.a,'alliance-user-logo')+'<span>'+E(S.a)+'</span> <span class="n2live">'+E(t('live'))+'</span>';u.title=t('logout');u.onclick=()=>{if(confirm(t('logout')+'?')){save(null);location.reload()}}}}
 async function load(){
  const a=encodeURIComponent(S.a);
- const [p1,v,x,e,o,tr,bans,spend,settings,reviews,shared,notificationReads,syncStatus,level4Hosting,napStats,sgWindow,performance,supportUnread]=await Promise.all([
+ const [p1,poolPlayers,v,x,e,o,tr,bans,spend,settings,reviews,shared,notificationReads,syncStatus,level4Hosting,napStats,sgWindow,performance,supportUnread]=await Promise.all([
   tab('players','select=*&alliance_code=eq.'+a+'&order=name.asc'),
+  rpc('get_my_unaffiliated_tracked_players',{}).catch(()=>[]),
   tab('violations','select=*&alliance_code=eq.'+a+'&order=occurred_at.desc'),
   tab('sanctions','select=*&alliance_code=eq.'+a+'&order=created_at.desc'),
   rpc('get_public_nap_exclusions',{}),
@@ -238,7 +239,11 @@ async function load(){
   rpc('get_performance_dashboard',{}).catch(()=>null),
   rpc('get_support_unread_count',{}).catch(()=>0)
  ]);
- S.p=(p1||[]).filter(r=>r.alliance_code===S.a);S.v=(v||[]).filter(r=>r.alliance_code===S.a);S.x=(x||[]).filter(r=>r.alliance_code===S.a);
+ S.p=[
+  ...(p1||[]).filter(r=>r.alliance_code===S.a),
+  ...(poolPlayers||[]).filter(r=>r&&r.alliance_code==null).map(r=>({...r,_unaffiliated:true}))
+ ].sort((a,b)=>String(a.name||a.player_name||'').localeCompare(String(b.name||b.player_name||''),undefined,{sensitivity:'base',numeric:true}));
+ S.v=(v||[]).filter(r=>r.alliance_code===S.a);S.x=(x||[]).filter(r=>r.alliance_code===S.a);
  S.e=e||[];S.o=o||[];S.t=(tr||[]).filter(r=>r.from_alliance===S.a||r.to_alliance===S.a);S.bans=bans||[];S.spend=spend||[];
  S.reviews=reviews||[];S.shared=shared||[];S.notificationReads=new Set((notificationReads||[]).map(r=>String(r.notification_id)));
  S.syncStatus=syncStatus||null;S.settings=settings?.[0]||null;S.level4Hosting=level4Hosting||[];S.napStats=napStats||[];S.sgWindow=sgWindow||null;S.performance=performance||null;S.supportUnread=Math.max(0,Number(supportUnread||0));
@@ -1162,19 +1167,31 @@ async function saveLanguages2(P){
    const line=document.querySelector('.profile-alliance-line');if(line)line.innerHTML='Player ID '+E(updated.game_id||'–')+' · '+allianceBadge2(S.a)+' · '+E(langs.map(languageName2).join(' / ')||'–');
  }catch(err){if(out)out.textContent=err.message||String(err)}
 }
+const UNAFFILIATED_WORDS2={
+ de:{alliance:'Allianzlos',tracking:'Tracking'},
+ en:{alliance:'Alliance-less',tracking:'Tracking'},
+ fr:{alliance:'Sans alliance',tracking:'Suivi'},
+ es:{alliance:'Sin alianza',tracking:'Seguimiento'}
+};
+function unaffiliatedWord2(key){return (UNAFFILIATED_WORDS2[L()]||UNAFFILIATED_WORDS2.de)[key]||key}
 function renderPlayers2(){
  const g=document.getElementById('playerGrid');if(!g)return;
  const w=playerCaseWords2();
  g.innerHTML=S.p.map(P=>{
   const name=P.name||P.player_name||'',V=vv(name),law=V.filter(isLaw14Case2),internal=V.filter(isInternalCase2),
-   state=sanctionState2(name),l=state.level,last=V[0],
-   status=sanctionStatus2(state.currentSanction,state.currentViolation),val=status.short;
-  return '<div class="player-card" data-p="'+E(name)+'" data-has-entry="'+(V.length||ss(name).length?'1':'0')+'" data-attendance="'+(internal.length?'1':'0')+'" data-search="'+E((name+' '+(P.game_id||'')).toLowerCase())+'">'+
-   '<div class="player-card-top"><div class="player-meta">'+avatarHtml(P,'player-avatar')+'<div><div class="player-name">'+E(name)+'</div><div class="player-id">'+E(P.game_id||'–')+'</div></div></div>'+allianceBadge2(S.a)+'</div>'+
+   pool=P.alliance_code==null||P._unaffiliated===true,trackingCount=Number(P.tracking_count||0),
+   state=sanctionState2(name),l=pool?0:state.level,last=V[0],
+   status=pool?null:sanctionStatus2(state.currentSanction,state.currentViolation),
+   val=pool?(trackingCount?unaffiliatedWord2('tracking'):'–'):status.short,
+   lastAt=last?.occurred_at||P.tracking_last_at||null,
+   hasEntry=!!(V.length||ss(name).length||trackingCount),
+   allianceLabel=pool?unaffiliatedWord2('alliance'):(P.alliance_code||S.a);
+  return '<div class="player-card" data-p="'+E(name)+'" data-has-entry="'+(hasEntry?'1':'0')+'" data-attendance="'+(internal.length?'1':'0')+'" data-search="'+E((name+' '+(P.game_id||'')+' '+allianceLabel).toLowerCase())+'">'+
+   '<div class="player-card-top"><div class="player-meta">'+avatarHtml(P,'player-avatar')+'<div><div class="player-name">'+E(name)+'</div><div class="player-id">'+E(P.game_id||'–')+'</div></div></div><span class="pill '+(pool?'blue':'')+'">'+E(allianceLabel)+'</span></div>'+
    '<div class="metric-row"><div class="metric"><b>'+law.length+'</b><span>'+E(w.law)+'</span></div><div class="metric"><b>'+l+'</b><span>'+E(w.stage)+'</span></div><div class="metric"><b>'+E(val)+'</b><span>'+E(w.status)+'</span></div></div>'+
-   '<div class="player-card-foot">'+(internal.length?'<span class="pill blue">'+E(w.internal)+' · '+internal.length+'</span>':'<span></span>')+'<span class="muted tiny">'+(last?E(D(last.occurred_at)):'–')+'</span></div></div>';
+   '<div class="player-card-foot">'+(pool?'<span class="pill blue">'+E(unaffiliatedWord2('tracking'))+(trackingCount?' · '+trackingCount:'')+'</span>':(internal.length?'<span class="pill blue">'+E(w.internal)+' · '+internal.length+'</span>':'<span></span>'))+'<span class="muted tiny">'+(lastAt?E(D(lastAt)):'–')+'</span></div></div>';
  }).join('')||'<div class="live-empty-state">Keine Spieler.</div>';
- g.querySelectorAll('[data-p]').forEach(c=>c.onclick=()=>openProfile2(c.dataset.p));if(typeof applyPlayerFilters==='function')applyPlayerFilters();renderWelcomeLanguageQueue2();
+ g.querySelectorAll('[data-p]').forEach(card=>card.onclick=()=>openProfile2(card.dataset.p));if(typeof applyPlayerFilters==='function')applyPlayerFilters();renderWelcomeLanguageQueue2();
 }
 function violationRule2(v){
  const phases=PHASES2[v.event_name]||[];
@@ -1407,7 +1424,7 @@ async function openProfile2(name){
  const P=p(name),V=vv(name),X=ss(name),l=level(name),view=document.getElementById('view-profile');if(!view)return;
  const w=profileWords2();
  view.innerHTML='<button class="btn small" data-go="players">'+E(w.back)+'</button>'+
- '<div class="profile-head" style="margin-top:12px"><div class="profile-main">'+avatarHtml(P,'profile-avatar')+'<div><div class="kicker">'+E(w.head)+'</div><div class="profile-name">'+E(name)+'</div><div class="muted small">Player ID '+E(P.game_id||'–')+' · <span class="pill">'+E(S.a)+'</span> · '+E((P.languages||[]).map(languageName2).join(' / ')||'–')+'</div></div></div></div>'+
+ '<div class="profile-head" style="margin-top:12px"><div class="profile-main">'+avatarHtml(P,'profile-avatar')+'<div><div class="kicker">'+E(w.head)+'</div><div class="profile-name">'+E(name)+'</div><div class="muted small">Player ID '+E(P.game_id||'–')+' · <span class="pill">'+E(P.alliance_code==null?unaffiliatedWord2('alliance'):(P.alliance_code||S.a))+'</span> · '+E((P.languages||[]).map(languageName2).join(' / ')||'–')+'</div></div></div></div>'+
  profileStage2(name,l)+
  '<div class="profile-tabs"><button class="profile-tab active" data-live-profiletab="overview">'+E(w.overview)+'</button><button class="profile-tab" data-live-profiletab="violations">'+E(w.violations)+'</button><button class="profile-tab" data-live-profiletab="actions">'+E(w.actions)+'</button><button class="profile-tab" data-live-profiletab="performance">'+E(w.performance)+'</button><button class="profile-tab" data-live-profiletab="comments">'+E(w.comments)+'</button><button class="profile-tab" data-live-profiletab="history">'+E(w.history)+'</button></div><div id="liveProfileBody"></div>';
  setViewBase2('profile');view.querySelectorAll('[data-live-profiletab]').forEach(b=>b.onclick=()=>{view.querySelectorAll('[data-live-profiletab]').forEach(x=>x.classList.toggle('active',x===b));paintProfileTab2(name,b.dataset.liveProfiletab)});await paintProfileTab2(name,'overview');
