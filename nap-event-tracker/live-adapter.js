@@ -1241,19 +1241,24 @@ async function saveViolationEdit2(e,old){
  }catch(err){out.textContent=err.message||String(err)}
 }
 const DELETE_REASON_WORDS2={
- de:{title:'Verstoß löschen',sub:'Die zugehörige Sanktionskette wird neu berechnet.',label:'Begründung',hint:'Mindestens 5 Zeichen. Die Begründung wird im Audit-Log gespeichert.',cancel:'Abbrechen',confirm:'Endgültig löschen',short:'Bitte eine Begründung mit mindestens 5 Zeichen eingeben.'},
- en:{title:'Delete violation',sub:'The linked sanction chain will be recalculated.',label:'Reason',hint:'At least 5 characters. The reason is stored in the audit log.',cancel:'Cancel',confirm:'Delete permanently',short:'Enter a reason with at least 5 characters.'},
- fr:{title:'Supprimer l’infraction',sub:'La chaîne de sanctions associée sera recalculée.',label:'Motif',hint:'Au moins 5 caractères. Le motif est enregistré dans le journal d’audit.',cancel:'Annuler',confirm:'Supprimer définitivement',short:'Saisissez un motif d’au moins 5 caractères.'},
- es:{title:'Eliminar infracción',sub:'Se recalculará la cadena de sanciones asociada.',label:'Motivo',hint:'Mínimo 5 caracteres. El motivo se guarda en el registro de auditoría.',cancel:'Cancelar',confirm:'Eliminar definitivamente',short:'Introduce un motivo de al menos 5 caracteres.'}
+ de:{title:'Verstoß löschen',sub:'Die zugehörige Sanktionskette wird neu berechnet.',label:'Begründung',hint:'Mindestens 5 Zeichen. Die Begründung wird im Audit-Log gespeichert.',by:'Gelöscht von',choose:'R4/R5 auswählen',byHint:'Nur aktuell per API erkannte R4/R5 deiner Allianz werden angezeigt.',unavailable:'Keine frische R4/R5-Liste verfügbar. Bitte später erneut versuchen.',needOfficer:'Bitte die verantwortliche R4/R5-Person auswählen.',cancel:'Abbrechen',confirm:'Endgültig löschen',short:'Bitte eine Begründung mit mindestens 5 Zeichen eingeben.'},
+ en:{title:'Delete violation',sub:'The linked sanction chain will be recalculated.',label:'Reason',hint:'At least 5 characters. The reason is stored in the audit log.',by:'Deleted by',choose:'Select R4/R5',byHint:'Only current R4/R5 members of your alliance detected by the API are shown.',unavailable:'No fresh R4/R5 list is available. Please try again later.',needOfficer:'Select the responsible R4/R5 member.',cancel:'Cancel',confirm:'Delete permanently',short:'Enter a reason with at least 5 characters.'},
+ fr:{title:'Supprimer l’infraction',sub:'La chaîne de sanctions associée sera recalculée.',label:'Motif',hint:'Au moins 5 caractères. Le motif est enregistré dans le journal d’audit.',by:'Supprimé par',choose:'Sélectionner R4/R5',byHint:'Seuls les R4/R5 actuels de votre alliance détectés par l’API sont affichés.',unavailable:'Aucune liste R4/R5 récente disponible. Réessayez plus tard.',needOfficer:'Sélectionnez le membre R4/R5 responsable.',cancel:'Annuler',confirm:'Supprimer définitivement',short:'Saisissez un motif d’au moins 5 caractères.'},
+ es:{title:'Eliminar infracción',sub:'Se recalculará la cadena de sanciones asociada.',label:'Motivo',hint:'Mínimo 5 caracteres. El motivo se guarda en el registro de auditoría.',by:'Eliminado por',choose:'Seleccionar R4/R5',byHint:'Solo se muestran los R4/R5 actuales de tu alianza detectados por la API.',unavailable:'No hay una lista R4/R5 reciente disponible. Inténtalo más tarde.',needOfficer:'Selecciona al miembro R4/R5 responsable.',cancel:'Cancelar',confirm:'Eliminar definitivamente',short:'Introduce un motivo de al menos 5 caracteres.'}
 };
-function askDeleteReason2(v){
+async function askDeleteReason2(v){
  const w=DELETE_REASON_WORDS2[L()]||DELETE_REASON_WORDS2.de;
  document.getElementById('liveDeleteReasonModal')?.remove();
+ let officers=[],loadError=null;
+ try{officers=await rpc('get_my_deletion_officers',{})||[]}catch(err){loadError=err}
  return new Promise(resolve=>{
   const modal=document.createElement('div');modal.id='liveDeleteReasonModal';modal.className='modal-backdrop';
+  const options=officers.map(o=>'<option value="'+E(o.player_id)+'">'+E(o.player_name||'–')+' · '+E(o.alliance_rank_label||('R'+o.alliance_rank))+'</option>').join('');
   modal.innerHTML='<div class="modal-card"><div class="modal-head"><div><b>'+E(w.title)+'</b><small>'+E(v.player_name||'–')+' · '+E(v.event_name||'')+'</small></div><button class="icon-btn live-delete-close" type="button">×</button></div>'+
-   '<div class="live-form"><div class="notice warn">'+E(w.sub)+'</div><label>'+E(w.label)+'<textarea class="live-delete-reason" maxlength="500" rows="4" placeholder="'+E(w.hint)+'"></textarea></label>'+
-   '<div class="hero-actions"><button class="btn secondary live-delete-cancel" type="button">'+E(w.cancel)+'</button><button class="btn danger live-delete-confirm" type="button">'+E(w.confirm)+'</button></div><div class="live-status live-delete-status"></div></div></div>';
+   '<div class="live-form"><div class="notice warn">'+E(w.sub)+'</div><label>'+E(w.by)+'<select class="live-delete-officer"><option value="">'+E(w.choose)+'</option>'+options+'</select></label><div class="live-note">'+E(w.byHint)+'</div>'+
+   ((!officers.length||loadError)?'<div class="notice warn">'+E(w.unavailable)+'</div>':'')+
+   '<label>'+E(w.label)+'<textarea class="live-delete-reason" maxlength="500" rows="4" placeholder="'+E(w.hint)+'"></textarea></label>'+
+   '<div class="hero-actions"><button class="btn secondary live-delete-cancel" type="button">'+E(w.cancel)+'</button><button class="btn danger live-delete-confirm" type="button" '+(!officers.length?'disabled':'')+'>'+E(w.confirm)+'</button></div><div class="live-status live-delete-status"></div></div></div>';
   document.body.appendChild(modal);
   const close=val=>{modal.remove();resolve(val)};
   modal.querySelector('.live-delete-close').onclick=()=>close(null);
@@ -1261,18 +1266,20 @@ function askDeleteReason2(v){
   modal.onclick=e=>{if(e.target===modal)close(null)};
   modal.querySelector('.live-delete-confirm').onclick=()=>{
    const reason=modal.querySelector('.live-delete-reason').value.trim();
+   const officerId=modal.querySelector('.live-delete-officer').value;
+   if(!officerId){modal.querySelector('.live-delete-status').textContent=w.needOfficer;return}
    if(reason.length<5){modal.querySelector('.live-delete-status').textContent=w.short;return}
-   close(reason);
+   close({reason,officerId});
   };
-  modal.querySelector('.live-delete-reason').focus();
+  modal.querySelector('.live-delete-officer')?.focus();
  });
 }
 async function deleteViolation2(v){
  if(!canDeleteViolation2(v))return;
- const reason=await askDeleteReason2(v);if(!reason)return;
+ const details=await askDeleteReason2(v);if(!details)return;
  const out=document.getElementById('liveVioEditStatus');if(out)out.textContent=actionWord2('deleting');
  try{
-  await rpc('delete_violation_fast',{p_id:v.id,p_reason:reason});
+  await rpc('delete_violation_fast_attributed',{p_id:v.id,p_reason:details.reason,p_deleted_by_player_id:details.officerId});
   document.getElementById('liveViolationEditModal')?.remove();
   await load();renderHomeFull2();renderPlayers2();await openProfile2(v.player_name);
  }catch(err){if(out)out.textContent=err.message||String(err)}
@@ -1328,6 +1335,38 @@ async function startExtendedExclusion2(id,input){
   if(document.getElementById('view-profile')?.classList.contains('active'))await openProfile2(s.player_name);
  }catch(err){alert(err.message||String(err))}
 }
+const R1_WATCH_WORDS2={
+ de:{title:'R1 API-Watch · Testmodus',waiting:'Warte auf den nächsten 10-Minuten-Check.',rank:'Letzter API-Rang',once:'R1 einmal erkannt · zweite frische Bestätigung ausstehend.',confirmed:'R1 durch zwei frische Snapshots bestätigt.',left:'Nach bestätigtem R1 wurde wieder ein höherer Rang erkannt.',invalid:'Letzter API-Check war nicht verwertbar · keine automatische Änderung.',shadow:'Shadow-Modus: Die Sanktion wird durch diesen Test noch nicht verändert.',start:'Effektiver R1-Start',end:'Berechnetes 24h-Ende'},
+ en:{title:'R1 API Watch · test mode',waiting:'Waiting for the next 10-minute check.',rank:'Last API rank',once:'R1 detected once · waiting for a second fresh confirmation.',confirmed:'R1 confirmed by two fresh snapshots.',left:'A higher rank was detected after confirmed R1.',invalid:'The last API check was not usable · no automatic change.',shadow:'Shadow mode: this test does not change the sanction yet.',start:'Effective R1 start',end:'Calculated 24h end'},
+ fr:{title:'Surveillance API R1 · mode test',waiting:'En attente du prochain contrôle de 10 minutes.',rank:'Dernier rang API',once:'R1 détecté une fois · deuxième confirmation récente en attente.',confirmed:'R1 confirmé par deux instantanés récents.',left:'Un rang supérieur a été détecté après la confirmation R1.',invalid:'Le dernier contrôle API est inutilisable · aucune modification automatique.',shadow:'Mode shadow : ce test ne modifie pas encore la sanction.',start:'Début R1 effectif',end:'Fin calculée après 24 h'},
+ es:{title:'Vigilancia API R1 · modo prueba',waiting:'Esperando el próximo control de 10 minutos.',rank:'Último rango API',once:'R1 detectado una vez · esperando una segunda confirmación reciente.',confirmed:'R1 confirmado por dos snapshots recientes.',left:'Se detectó un rango superior después de confirmar R1.',invalid:'El último control de API no fue válido · sin cambios automáticos.',shadow:'Modo shadow: esta prueba todavía no cambia la sanción.',start:'Inicio R1 efectivo',end:'Fin calculado de 24 h'}
+};
+function r1WatchWords2(){return R1_WATCH_WORDS2[L()]||R1_WATCH_WORDS2.de}
+function r1WatchHtml2(s){
+ if(Number(s.level)!==2||s.completed)return '';
+ const w=r1WatchWords2();
+ return '<div class="live-note live-r1-watch" data-r1-watch="'+E(s.id)+'" style="margin-bottom:10px"><b>'+E(w.title)+'</b><div class="live-r1-watch-status">'+E(w.waiting)+'</div><small>'+E(w.shadow)+'</small></div>';
+}
+async function loadR1WatchStatus2(el){
+ if(!el?.isConnected)return;
+ const w=r1WatchWords2(),id=el.dataset.r1Watch,status=el.querySelector('.live-r1-watch-status');
+ try{
+  const d=await rpc('get_my_r1_watch_status',{p_sanction_id:id});
+  if(!status)return;
+  if(!d){status.textContent=w.waiting;return}
+  let text='';
+  if(d.last_valid===false)text=w.invalid;
+  else if(d.confirmed_at&&d.left_r1_at)text=w.left;
+  else if(d.confirmed_at)text=w.confirmed;
+  else if(Number(d.last_rank)===1&&d.first_r1_observed_at)text=w.once;
+  else if(d.last_label)text=w.rank+': '+d.last_label;
+  else text=w.waiting;
+  if(d.effective_start_at)text+=' · '+w.start+': '+exactDateTime2(d.effective_start_at);
+  if(d.projected_end_at)text+=' · '+w.end+': '+exactDateTime2(d.projected_end_at);
+  if(d.last_observed_at)text+=' · Check: '+exactDateTime2(d.last_observed_at);
+  status.textContent=text;
+ }catch(err){if(status)status.textContent=w.invalid}
+}
 function profileActionCard2(s){
  const v=S.v.find(v=>String(v.id)===String(s.violation_id))||null;
  const status=sanctionStatus2(s,v),start=Number(s.level)===1?v?.contacted_at||s.started_at:s.started_at;
@@ -1335,11 +1374,12 @@ function profileActionCard2(s){
   l4Open=Number(s.level)===4&&!s.started_at,w4=extendedActionWords2();
  const remaining=status.key==='active'&&s.end_at?dur(new Date(s.end_at)-Date.now()):
    status.key==='expired'?(SANCTION_STATUS_WORDS2[L()]||SANCTION_STATUS_WORDS2.de).expired:'–';
- return '<article class="card" data-profile-sanction="'+E(s.id)+'"><div class="card-head"><div><div class="card-title">Stufe '+E(s.level)+' · '+E(Number(s.level)===2?'R1':Number(s.level)===3?'24h NAP OUT':Number(s.level)===4?'Extended':'Kontakt')+'</div><div class="card-sub">Erstellt '+E(D(s.created_at))+'</div></div><span class="pill '+E(status.cls)+'">'+E(status.label)+'</span></div><div class="card-body">'+(r1Missing?'<div class="notice warn" style="margin-bottom:10px">⚠ R1 bestätigt – individuelle Endzeit noch setzen.</div><div class="live-form-row"><label>Ende<input class="profile-r1-end" type="datetime-local" value="'+E(toLocalInput2(s.end_at))+'"></label><div style="display:flex;align-items:end"><button class="btn secondary profile-r1-save" data-id="'+E(s.id)+'">Timer setzen</button></div></div>':'')+(l4Open?'<div class="notice warn" style="margin-bottom:10px">⚠ '+E(w4.notice)+'</div><div class="live-form-row"><label>'+E(w4.end)+'<input class="profile-l4-end" type="datetime-local"></label><div style="display:flex;align-items:end"><button class="btn primary profile-l4-start" data-id="'+E(s.id)+'">'+E(w4.start)+'</button></div></div>':'')+'<div class="action-date-grid"><div><span>Start</span><b>'+E(D(start))+'</b></div><div><span>Ende</span><b>'+E(D(s.end_at))+'</b></div><div><span>Restzeit</span><b>'+E(remaining)+'</b></div><div><span>Status</span><b>'+E(status.label)+'</b></div></div></div></article>';
+ return '<article class="card" data-profile-sanction="'+E(s.id)+'"><div class="card-head"><div><div class="card-title">Stufe '+E(s.level)+' · '+E(Number(s.level)===2?'R1':Number(s.level)===3?'24h NAP OUT':Number(s.level)===4?'Extended':'Kontakt')+'</div><div class="card-sub">Erstellt '+E(D(s.created_at))+'</div></div><span class="pill '+E(status.cls)+'">'+E(status.label)+'</span></div><div class="card-body">'+r1WatchHtml2(s)+(r1Missing?'<div class="notice warn" style="margin-bottom:10px">⚠ R1 bestätigt – individuelle Endzeit noch setzen.</div><div class="live-form-row"><label>Ende<input class="profile-r1-end" type="datetime-local" value="'+E(toLocalInput2(s.end_at))+'"></label><div style="display:flex;align-items:end"><button class="btn secondary profile-r1-save" data-id="'+E(s.id)+'">Timer setzen</button></div></div>':'')+(l4Open?'<div class="notice warn" style="margin-bottom:10px">⚠ '+E(w4.notice)+'</div><div class="live-form-row"><label>'+E(w4.end)+'<input class="profile-l4-end" type="datetime-local"></label><div style="display:flex;align-items:end"><button class="btn primary profile-l4-start" data-id="'+E(s.id)+'">'+E(w4.start)+'</button></div></div>':'')+'<div class="action-date-grid"><div><span>Start</span><b>'+E(D(start))+'</b></div><div><span>Ende</span><b>'+E(D(s.end_at))+'</b></div><div><span>Restzeit</span><b>'+E(remaining)+'</b></div><div><span>Status</span><b>'+E(status.label)+'</b></div></div></div></article>';
 }
 function bindProfileR1Timers2(){
  document.querySelectorAll('.profile-r1-save').forEach(b=>b.onclick=()=>setR1Timer2(b.dataset.id,b.closest('[data-profile-sanction]')?.querySelector('.profile-r1-end')));
  document.querySelectorAll('.profile-l4-start').forEach(b=>b.onclick=()=>startExtendedExclusion2(b.dataset.id,b.closest('[data-profile-sanction]')?.querySelector('.profile-l4-end')));
+ document.querySelectorAll('[data-r1-watch]').forEach(el=>loadR1WatchStatus2(el));
 }
 
 const SHARED_SPENDING_WORDS2={
@@ -1424,7 +1464,7 @@ async function openProfile2(name){
  const P=p(name),V=vv(name),X=ss(name),l=level(name),view=document.getElementById('view-profile');if(!view)return;
  const w=profileWords2();
  view.innerHTML='<button class="btn small" data-go="players">'+E(w.back)+'</button>'+
- '<div class="profile-head" style="margin-top:12px"><div class="profile-main">'+avatarHtml(P,'profile-avatar')+'<div><div class="kicker">'+E(w.head)+'</div><div class="profile-name">'+E(name)+'</div><div class="muted small">Player ID '+E(P.game_id||'–')+' · <span class="pill">'+E(P.alliance_code==null?unaffiliatedWord2('alliance'):(P.alliance_code||S.a))+'</span> · '+E((P.languages||[]).map(languageName2).join(' / ')||'–')+'</div></div></div></div>'+
+ '<div class="profile-head" style="margin-top:12px"><div class="profile-main">'+avatarHtml(P,'profile-avatar')+'<div><div class="kicker">'+E(w.head)+'</div><div class="profile-name">'+E(name)+'</div><div class="muted small">Player ID '+E(P.game_id||'–')+' · <span class="pill">'+E(P.alliance_code==null?unaffiliatedWord2('alliance'):(P.alliance_code||S.a))+'</span>'+(P.alliance_rank_label?' · <span class="pill blue">'+E(P.alliance_rank_label)+'</span>':'')+' · '+E((P.languages||[]).map(languageName2).join(' / ')||'–')+'</div></div></div></div>'+
  profileStage2(name,l)+
  '<div class="profile-tabs"><button class="profile-tab active" data-live-profiletab="overview">'+E(w.overview)+'</button><button class="profile-tab" data-live-profiletab="violations">'+E(w.violations)+'</button><button class="profile-tab" data-live-profiletab="actions">'+E(w.actions)+'</button><button class="profile-tab" data-live-profiletab="performance">'+E(w.performance)+'</button><button class="profile-tab" data-live-profiletab="comments">'+E(w.comments)+'</button><button class="profile-tab" data-live-profiletab="history">'+E(w.history)+'</button></div><div id="liveProfileBody"></div>';
  setViewBase2('profile');view.querySelectorAll('[data-live-profiletab]').forEach(b=>b.onclick=()=>{view.querySelectorAll('[data-live-profiletab]').forEach(x=>x.classList.toggle('active',x===b));paintProfileTab2(name,b.dataset.liveProfiletab)});await paintProfileTab2(name,'overview');
