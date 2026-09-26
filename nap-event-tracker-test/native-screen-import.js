@@ -220,22 +220,28 @@ function extractRows(text){
 }
 function repairSequentialRanks(rows){
  if(!Array.isArray(rows)||rows.length<2)return rows||[];
- const offsets=new Map();
- rows.forEach((row,i)=>{
-  const r=Number(row.rank);if(!Number.isInteger(r)||r<1||r>999)return;
-  const off=r-i;offsets.set(off,(offsets.get(off)||0)+1);
- });
- const ranked=[...offsets.entries()].sort((a,b)=>b[1]-a[1]);
- if(!ranked.length)return rows;
- const [offset,votes]=ranked[0];
- // Two agreeing anchors are enough; with only one anchor infer only short blocks.
- if(votes<2&&rows.length>4)return rows;
- const first=offset,last=offset+rows.length-1;if(first<1||last>999)return rows;
- return rows.map((row,i)=>{
-  const inferred=offset+i,current=Number(row.rank);
-  const reliable=Number.isInteger(current)&&current===inferred;
-  return {...row,rank:inferred,rankInferred:!reliable,rawRank:row.rank};
- });
+ const out=rows.map(r=>({...r}));
+ const valid=r=>Number.isInteger(Number(r))&&Number(r)>=1&&Number(r)<=999;
+ for(let i=0;i<out.length;i++){
+  const current=valid(out[i].rank)?Number(out[i].rank):null;
+  let pi=i-1;while(pi>=0&&!valid(out[pi].rank))pi--;
+  let ni=i+1;while(ni<out.length&&!valid(out[ni].rank))ni++;
+  let inferred=null;
+  if(pi>=0&&ni<out.length){
+   const pr=Number(out[pi].rank),nr=Number(out[ni].rank);
+   if(nr-pr===ni-pi)inferred=pr+(i-pi);
+  }else if(pi>=1&&valid(out[pi-1].rank)){
+   const a=Number(out[pi-1].rank),b=Number(out[pi].rank);
+   if(b===a+1)inferred=b+(i-pi);
+  }else if(ni+1<out.length&&valid(out[ni+1].rank)){
+   const a=Number(out[ni].rank),b=Number(out[ni+1].rank);
+   if(b===a+1)inferred=a-(ni-i);
+  }
+  if(inferred!=null&&inferred>=1&&inferred<=999&&current!==inferred){
+   out[i]={...out[i],rank:inferred,rankInferred:true,rawRank:out[i].rank};
+  }
+ }
+ return out;
 }
 function similarity(a,b){
  const x=norm(a),y=norm(b);if(!x||!y)return 0;if(x===y)return 1;
@@ -263,7 +269,9 @@ function frameCanvas(video){
  return canvas;
 }
 function rankingCanvas(frame){
- const x=Math.round(frame.width*.035),y=Math.round(frame.height*.245),w=Math.round(frame.width*.93),h=Math.round(frame.height*.665);
+ // Kingshot keeps the current player's own rank in a sticky row at the bottom.
+ // Stop above that row so it can never widen rank coverage (e.g. rank 160).
+ const x=Math.round(frame.width*.035),y=Math.round(frame.height*.265),w=Math.round(frame.width*.93),h=Math.round(frame.height*.615);
  const scale=Math.min(2.45,1850/Math.max(1,w)),out=document.createElement('canvas');
  out.width=Math.max(1,Math.round(w*scale));out.height=Math.max(1,Math.round(h*scale));
  const cx=out.getContext('2d',{willReadFrequently:true});cx.imageSmoothingEnabled=true;cx.imageSmoothingQuality='high';
@@ -294,21 +302,22 @@ function recordRank(rank,time,map){
  if(!map.has(rank))map.set(rank,[]);map.get(rank).push(time);
 }
 function rankCoverage(map){
- const ranks=[...map.keys()].filter(r=>r>=1&&r<=999).sort((a,b)=>a-b);
- if(ranks.length<2)return {min:ranks[0]||null,max:ranks[0]||null,seen:ranks,missing:[]};
- const trusted=ranks.filter((r,i)=>((map.get(r)||[]).length>1)||ranks.some((x,j)=>j!==i&&Math.abs(x-r)<=3));
- const use=trusted.length>=2?trusted:ranks;
- let min=use[0],max=use[use.length-1];
- if(max-min>250){
-  let best=[min,min],start=0;
-  for(let i=0;i<use.length;i++){
-   while(use[i]-use[start]>250)start++;
-   if(i-start>best[1]-best[0])best=[start,i];
-  }
-  min=use[best[0]];max=use[best[1]];
+ const ranks=[...map.keys()].filter(r=>Number.isInteger(r)&&r>=1&&r<=999).sort((a,b)=>a-b);
+ if(!ranks.length)return {min:null,max:null,seen:[],missing:[]};
+ if(ranks.length===1)return {min:ranks[0],max:ranks[0],seen:ranks,missing:[]};
+ // Build dense rank clusters. A lone bad OCR rank (for example 160/240)
+ // must not turn a 1–31 recording into hundreds of "missing" ranks.
+ const clusters=[];let cur=[ranks[0]];
+ for(let i=1;i<ranks.length;i++){
+  if(ranks[i]-ranks[i-1]<=10)cur.push(ranks[i]);
+  else{clusters.push(cur);cur=[ranks[i]]}
  }
- const set=new Set(ranks),missing=[];for(let r=min;r<=max;r++)if(!set.has(r))missing.push(r);
- return {min,max,seen:ranks.filter(r=>r>=min&&r<=max),missing};
+ clusters.push(cur);
+ const support=cluster=>cluster.reduce((n,r)=>n+(map.get(r)?.length||0),0);
+ clusters.sort((a,b)=>b.length-a.length||support(b)-support(a));
+ const use=clusters[0],min=use[0],max=use[use.length-1],set=new Set(use),missing=[];
+ for(let r=min;r<=max;r++)if(!set.has(r))missing.push(r);
+ return {min,max,seen:use,missing};
 }
 function medianTime(arr){if(!arr?.length)return null;const a=[...arr].sort((x,y)=>x-y);return a[Math.floor(a.length/2)]}
 function rescueTimes(coverage,rankMap,dur,used){
