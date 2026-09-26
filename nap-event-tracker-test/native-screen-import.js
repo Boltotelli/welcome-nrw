@@ -67,10 +67,10 @@ const norm=s=>String(s||'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toL
 const lng=()=>$('#languagePicker')?.value||'de';
 const tr=k=>(WORDS[lng()]||WORDS.de)[k]||k;
 const OCR2_WORDS={
- de:{coverage:'Rangabdeckung',complete:'Rangfolge vollständig',missing:'Nicht sicher erkannt',rescue:'Fehlende Ränge werden gezielt nachgescannt',manual:'Bitte fehlende Ränge vor dem Speichern manuell prüfen'},
- en:{coverage:'Rank coverage',complete:'Rank sequence complete',missing:'Not confidently detected',rescue:'Missing ranks are being rescanned',manual:'Please review missing ranks manually before saving'},
- fr:{coverage:'Couverture des rangs',complete:'Séquence des rangs complète',missing:'Non détecté avec certitude',rescue:'Nouvelle analyse ciblée des rangs manquants',manual:'Vérifiez manuellement les rangs manquants avant d’enregistrer'},
- es:{coverage:'Cobertura de rangos',complete:'Secuencia de rangos completa',missing:'No detectado con seguridad',rescue:'Se vuelven a analizar los rangos que faltan',manual:'Revisa manualmente los rangos que faltan antes de guardar'}
+ de:{coverage:'Rangabdeckung',complete:'Rangfolge vollständig',missing:'Nicht sicher erkannt',rescue:'Einige Stellen werden noch einmal geprüft',manual:'Bitte fehlende Ränge vor dem Speichern manuell prüfen',version:'Erkennung V2',scan:'Video wird geprüft',collect:'Spieler werden erfasst',finish:'Ergebnis wird geprüft'},
+ en:{coverage:'Rank coverage',complete:'Rank sequence complete',missing:'Not confidently detected',rescue:'A few areas are being checked again',manual:'Please review missing ranks manually before saving',version:'Recognition V2',scan:'Checking video',collect:'Reading players',finish:'Checking results'},
+ fr:{coverage:'Couverture des rangs',complete:'Séquence des rangs complète',missing:'Non détecté avec certitude',rescue:'Certaines zones sont vérifiées à nouveau',manual:'Vérifiez manuellement les rangs manquants avant d’enregistrer',version:'Reconnaissance V2',scan:'Vérification de la vidéo',collect:'Lecture des joueurs',finish:'Vérification du résultat'},
+ es:{coverage:'Cobertura de rangos',complete:'Secuencia de rangos completa',missing:'No detectado con seguridad',rescue:'Se están revisando de nuevo algunas zonas',manual:'Revisa manualmente los rangos que faltan antes de guardar',version:'Reconocimiento V2',scan:'Revisando vídeo',collect:'Leyendo jugadores',finish:'Revisando resultado'}
 };
 const ocr2=k=>(OCR2_WORDS[lng()]||OCR2_WORDS.de)[k]||k;
 const fmt=x=>Number(x||0).toLocaleString(lng()==='de'?'de-DE':lng()==='fr'?'fr-FR':lng()==='es'?'es-ES':'en-US');
@@ -320,11 +320,11 @@ function rescueTimes(coverage,rankMap,dur,used){
   if(lt!=null&&ht!=null){a=Math.min(lt,ht)-.45;b=Math.max(lt,ht)+.45}
   else{const t=lt??ht;if(t==null)continue;a=t-.9;b=t+.9}
   a=Math.max(.03,a);b=Math.min(Math.max(.03,dur-.03),b);
-  for(let t=a;t<=b+.001;t+=.18){
-   const v=Math.round(t*100)/100;if(!used.some(x=>Math.abs(x-v)<.075))out.add(v);
+  for(let t=a;t<=b+.001;t+=.22){
+   const v=Math.round(t*100)/100;if(!used.some(x=>Math.abs(x-v)<.08))out.add(v);
   }
  }
- return [...out].sort((a,b)=>a-b).slice(0,80);
+ return [...out].sort((a,b)=>a-b).slice(0,42);
 }
 function consensusHit(list){
  if(!list?.length)return null;
@@ -343,12 +343,11 @@ function consensusHit(list){
 }
 function baseFrameTimes(dur){
  const safeEnd=Math.max(.04,dur-.06);
- // Dense enough for scrolling rankings, but avoid the 3x seek pre-scan that
- // caused long 3% stalls on mobile. Rank Rescue fills any remaining gaps.
- const step=Math.max(.58,dur/38),times=[];
- for(let t=.18;t<safeEnd;t+=step)times.push(Math.min(safeEnd,t));
+ // Fast first pass; rank continuity triggers a focused follow-up if needed.
+ const step=Math.max(.72,dur/28),times=[];
+ for(let t=.20;t<safeEnd;t+=step)times.push(Math.min(safeEnd,t));
  if(!times.length)times.push(Math.min(safeEnd,Math.max(.02,dur/2)));
- return times.slice(0,42);
+ return times.slice(0,30);
 }
 async function seek(video,time){
  if(Math.abs(video.currentTime-time)<.03&&video.readyState>=2)return;
@@ -382,23 +381,23 @@ async function metadata(video,file){
 }
 function shell(root,kind){
  const perf=kind==='perf';root.innerHTML=
- '<div class="nocr-layout"><section class="nocr-panel"><div class="nocr-engine-badge">OCR V2 · Rank Rescue</div><div class="nocr-fields">'+
+ '<div class="nocr-layout"><section class="nocr-panel"><div class="nocr-engine-badge">'+esc(ocr2('version'))+'</div><div class="nocr-fields">'+
  (perf?'<label>'+esc(tr('type'))+'<select id="nocrType"><option value="alliance_mobilization">Alliance Mobilization</option><option value="kvk_prep">KvK Prep · Top 200</option></select></label>':'')+
  (perf?'':'<label>'+esc(tr('event'))+'<select id="nocrEvent" disabled></select></label>')+
  '<label>'+esc(tr('occ'))+'<select id="nocrOcc"></select></label>'+
  (perf?'':'<label>'+esc(tr('day'))+'<select id="nocrPhase"></select></label><label>'+esc(tr('date'))+'<input id="nocrDay" type="date"></label>')+
  '</div><label class="nocr-file"><span class="nocr-file-icon">▣</span><strong>'+esc(tr('file'))+'</strong><small id="nocrFilename">MP4 / MOV</small><input id="nocrFile" type="file" accept="video/mp4,video/quicktime,video/*"></label>'+
  '<p class="nocr-note">'+esc(tr('video'))+'</p><button type="button" class="btn primary nocr-analyze" id="nocrAnalyze">'+esc(tr('analyze'))+'</button><div class="nocr-status" id="nocrStatus" role="status" aria-live="polite"></div></section>'+
- '<section class="nocr-panel nocr-progress" id="nocrProgress" hidden><h3>'+esc(tr('prep'))+'</h3><p id="nocrProgressText"></p><div class="nocr-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="nocrBar"></span></div><div class="nocr-progress-foot"><b id="nocrPercent">0%</b><span id="nocrFound">0 '+esc(tr('found'))+'</span></div><div class="nocr-stages"><div data-step="0">✓ '+esc(tr('prep'))+'</div><div data-step="1">◎ '+esc(tr('recognize'))+'</div><div data-step="2">○ '+esc(tr('check'))+'</div></div></section></div>'+
+ '<section class="nocr-panel nocr-progress" id="nocrProgress" hidden><h3>'+esc(tr('prep'))+'</h3><p id="nocrProgressText"></p><div class="nocr-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="nocrBar"></span></div><div class="nocr-progress-foot"><b id="nocrPercent">0%</b><span id="nocrFound">0 '+esc(tr('found'))+'</span></div><div class="nocr-stages"><div data-step="0">✓ '+esc(ocr2('scan'))+'</div><div data-step="1">◎ '+esc(ocr2('collect'))+'</div><div data-step="2">○ '+esc(ocr2('finish'))+'</div></div></section></div>'+
  '<section class="nocr-panel nocr-review" id="nocrReview" hidden><div class="nocr-review-title"><h3>'+esc(tr('review'))+'</h3><strong id="nocrCount"></strong></div><div id="nocrResults"></div><div class="nocr-save-row"><button type="button" class="btn primary" id="nocrSave">'+esc(tr('save'))+'</button><button type="button" class="btn secondary" id="nocrEvidenceRetry" hidden>'+esc(tr('retryEvidence'))+'</button><div class="nocr-status" id="nocrSaveStatus" role="status"></div></div></section>';
  root.querySelector('#nocrFile').addEventListener('change',e=>{$('#nocrFilename',root).textContent=e.target.files?.[0]?.name||'MP4 / MOV'});
 }
-function progress(step,value,count){
+function progress(step,value,count,mode=''){
  const el=run?.root;if(!el)return;
  const panel=$('#nocrProgress',el);panel.hidden=false;
  const pct=Math.max(0,Math.min(100,Math.round(value)));$('#nocrBar',el).style.width=pct+'%';
  $('#nocrPercent',el).textContent=pct+'%';$('.nocr-bar',el).setAttribute('aria-valuenow',String(pct));
- const title=tr(step===0?'prep':step===1?'recognize':'check');
+ const title=step===0?ocr2('scan'):step===1?(mode==='rescue'?ocr2('rescue'):ocr2('collect')):ocr2('finish');
  $('h3',panel).textContent=title;$('#nocrProgressText',el).textContent=title+' …';
  $('#nocrFound',el).textContent=count+' '+tr('found');
  for(const item of panel.querySelectorAll('[data-step]'))item.classList.toggle('active',Number(item.dataset.step)===step);
@@ -477,7 +476,7 @@ async function analyze(){
  r.busy=true;btn.disabled=true;$('#nocrSave',root).disabled=true;$('#nocrReview',root).hidden=true;status('');
  let url,video,worker;
  try{
-  progress(0,1,0);
+  progress(0,2,0);
   let members=[...(await roster())];
   if(r.kind==='perf'&&$('#nocrType',root).value==='alliance_mobilization'&&perfOcc()?.event_schedule_id){
    try{
@@ -488,9 +487,8 @@ async function analyze(){
   }
   r.members=members;r.fileHash=await sha256(file);worker=await ensureWorker();
   video=document.createElement('video');url=await metadata(video,file);if(r!==run)return;
-  const dur=video.duration;progress(1,4,0);
+  const dur=video.duration;progress(1,5,0);
   const times=baseFrameTimes(dur),observations=new Map(),unmatched=new Map(),rankMap=new Map();r.frames=[];
-  const progressText=$('#nocrProgressText',root);if(progressText)progressText.textContent=tr('recognize')+' · 0/'+times.length;
   const processRows=(rows,sec,full)=>{
    let still=null;
    for(const row of rows){
@@ -512,13 +510,12 @@ async function analyze(){
    if(r.frames.length<12&&i%Math.max(1,Math.floor(times.length/12))===0)r.frames.push({time:sec,image:full.toDataURL('image/jpeg',.72)});
    const text=(await worker.recognize(roi)).data?.text||'';processRows(repairSequentialRanks(extractRows(text)),sec,full);
    progress(1,5+66*((i+1)/times.length),observations.size);
-   const pt=$('#nocrProgressText',root);if(pt)pt.textContent=tr('recognize')+' · '+(i+1)+'/'+times.length;
    await new Promise(resolve=>setTimeout(resolve,0));
   }
   if(run!==r)return;
   let coverage=rankCoverage(rankMap),rescue=rescueTimes(coverage,rankMap,dur,times);
   if(coverage.missing.length&&rescue.length){
-   status(ocr2('rescue')+': '+coverage.missing.join(', '));
+   progress(1,72,observations.size,'rescue');
    const missingSet=new Set(coverage.missing);
    for(let i=0;i<rescue.length;i++){
     if(run!==r)break;const sec=rescue[i];await seek(video,sec);const full=frameCanvas(video),roi=rankingCanvas(full);
@@ -529,8 +526,7 @@ async function analyze(){
      rows=rows.concat(extra.filter(x=>!seen.has((x.rank||'')+'|'+norm(x.name)+'|'+x.score)));
     }
     processRows(rows,sec,full);
-    progress(1,72+22*((i+1)/rescue.length),observations.size);
-    const rpt=$('#nocrProgressText',root);if(rpt)rpt.textContent=ocr2('rescue')+' · '+(i+1)+'/'+rescue.length;
+    progress(1,72+22*((i+1)/rescue.length),observations.size,'rescue');
     await new Promise(resolve=>setTimeout(resolve,0));
    }
    coverage=rankCoverage(rankMap);
