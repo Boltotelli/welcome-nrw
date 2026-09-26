@@ -67,13 +67,14 @@ const norm=s=>String(s||'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toL
 const lng=()=>$('#languagePicker')?.value||'de';
 const tr=k=>(WORDS[lng()]||WORDS.de)[k]||k;
 const OCR2_WORDS={
- de:{coverage:'Rangabdeckung',complete:'Rangfolge vollständig',missing:'Nicht sicher erkannt',rescue:'Einige Stellen werden noch einmal geprüft',manual:'Bitte fehlende Ränge vor dem Speichern manuell prüfen',version:'Erkennung V2',scan:'Video wird geprüft',collect:'Spieler werden erfasst',finish:'Ergebnis wird geprüft',rankSlots:'Rankingplätze gelesen',matched:'Spieler zugeordnet',unassigned:'nicht zugeordnet',reviewable:'prüfbare Ergebnisse',exemptCount:'ausgenommen'},
- en:{coverage:'Rank coverage',complete:'Rank sequence complete',missing:'Not confidently detected',rescue:'A few areas are being checked again',manual:'Please review missing ranks manually before saving',version:'Recognition V2',scan:'Checking video',collect:'Reading players',finish:'Checking results',rankSlots:'ranking positions read',matched:'players matched',unassigned:'unmatched',reviewable:'reviewable results',exemptCount:'exempt'},
- fr:{coverage:'Couverture des rangs',complete:'Séquence des rangs complète',missing:'Non détecté avec certitude',rescue:'Certaines zones sont vérifiées à nouveau',manual:'Vérifiez manuellement les rangs manquants avant d’enregistrer',version:'Reconnaissance V2',scan:'Vérification de la vidéo',collect:'Lecture des joueurs',finish:'Vérification du résultat',rankSlots:'places du classement lues',matched:'joueurs associés',unassigned:'non associés',reviewable:'résultats à vérifier',exemptCount:'exemptés'},
- es:{coverage:'Cobertura de rangos',complete:'Secuencia de rangos completa',missing:'No detectado con seguridad',rescue:'Se están revisando de nuevo algunas zonas',manual:'Revisa manualmente los rangos que faltan antes de guardar',version:'Reconocimiento V2',scan:'Revisando vídeo',collect:'Leyendo jugadores',finish:'Revisando resultado',rankSlots:'puestos leídos',matched:'jugadores asociados',unassigned:'sin asociar',reviewable:'resultados revisables',exemptCount:'exentos'}
+ de:{coverage:'Rangabdeckung',complete:'Rangfolge vollständig',missing:'Nicht sicher erkannt',rescue:'Einige Stellen werden noch einmal geprüft',manual:'Bitte fehlende Ränge vor dem Speichern manuell prüfen',version:'Erkennung V2',scan:'Video wird geprüft',collect:'Spieler werden erfasst',finish:'Ergebnis wird geprüft',rankSlots:'Rankingplätze gelesen',matched:'Spieler zugeordnet',unassigned:'nicht zugeordnet',reviewable:'prüfbare Ergebnisse',exemptCount:'ausgenommen',poolCandidate:'Als allianzlosen Spieler anlegen',poolHint:'Kein Allianz-Tag erkannt. Namen prüfen und als allianzlosen Tracking-Spieler anlegen. Es wird keine Sanktion erzeugt.',poolCreated:'Allianzloser Spieler wurde dem Tracking-Pool hinzugefügt.',poolConflict:'Ein Spieler mit diesem Namen existiert bereits in einer Allianz. Bitte manuell zuordnen.',tracking:'Allianzloses Tracking',trackingHint:'Historisch gespeichert · keine Law-14-Sanktion, solange keine Allianz zugeordnet ist.',unaffiliated:'Allianzlos',trackingSaved:'allianzloser Tracking-Eintrag gespeichert'},
+ en:{coverage:'Rank coverage',complete:'Rank sequence complete',missing:'Not confidently detected',rescue:'A few areas are being checked again',manual:'Please review missing ranks manually before saving',version:'Recognition V2',scan:'Checking video',collect:'Reading players',finish:'Checking results',rankSlots:'ranking positions read',matched:'players matched',unassigned:'unmatched',reviewable:'reviewable results',exemptCount:'exempt',poolCandidate:'Add as alliance-less player',poolHint:'No alliance tag detected. Verify the name and add this player to alliance-less tracking. No sanction will be created.',poolCreated:'Alliance-less player added to the tracking pool.',poolConflict:'A player with this name already exists in an alliance. Assign manually instead.',tracking:'Alliance-less tracking',trackingHint:'Stored as history · no Law 14 sanction while no alliance is assigned.',unaffiliated:'Alliance-less',trackingSaved:'alliance-less tracking entry saved'},
+ fr:{coverage:'Couverture des rangs',complete:'Séquence des rangs complète',missing:'Non détecté avec certitude',rescue:'Certaines zones sont vérifiées à nouveau',manual:'Vérifiez manuellement les rangs manquants avant d’enregistrer',version:'Reconnaissance V2',scan:'Vérification de la vidéo',collect:'Lecture des joueurs',finish:'Vérification du résultat',rankSlots:'places du classement lues',matched:'joueurs associés',unassigned:'non associés',reviewable:'résultats à vérifier',exemptCount:'exemptés',poolCandidate:'Ajouter comme joueur sans alliance',poolHint:'Aucun tag d’alliance détecté. Vérifiez le nom et ajoutez le joueur au suivi sans alliance. Aucune sanction ne sera créée.',poolCreated:'Joueur sans alliance ajouté au suivi.',poolConflict:'Un joueur portant ce nom existe déjà dans une alliance. Attribuez-le manuellement.',tracking:'Suivi sans alliance',trackingHint:'Historique enregistré · aucune sanction Law 14 tant qu’aucune alliance n’est attribuée.',unaffiliated:'Sans alliance',trackingSaved:'entrée de suivi sans alliance enregistrée'},
+ es:{coverage:'Cobertura de rangos',complete:'Secuencia de rangos completa',missing:'No detectado con seguridad',rescue:'Se están revisando de nuevo algunas zonas',manual:'Revisa manualmente los rangos que faltan antes de guardar',version:'Reconocimiento V2',scan:'Revisando vídeo',collect:'Leyendo jugadores',finish:'Revisando resultado',rankSlots:'puestos leídos',matched:'jugadores asociados',unassigned:'sin asociar',reviewable:'resultados revisables',exemptCount:'exentos',poolCandidate:'Añadir como jugador sin alianza',poolHint:'No se detectó etiqueta de alianza. Revisa el nombre y añádelo al seguimiento sin alianza. No se creará ninguna sanción.',poolCreated:'Jugador sin alianza añadido al seguimiento.',poolConflict:'Ya existe un jugador con este nombre en una alianza. Asígnalo manualmente.',tracking:'Seguimiento sin alianza',trackingHint:'Guardado como historial · sin sanción Law 14 mientras no tenga alianza.',unaffiliated:'Sin alianza',trackingSaved:'entrada de seguimiento sin alianza guardada'}
 };
 const ocr2=k=>(OCR2_WORDS[lng()]||OCR2_WORDS.de)[k]||k;
 const fmt=x=>Number(x||0).toLocaleString(lng()==='de'?'de-DE':lng()==='fr'?'fr-FR':lng()==='es'?'es-ES':'en-US');
+const isTrackingHit=h=>!!h?.trackingOnly||h?.player?.alliance_code==null;
 let run=null,workerPromise=null,rosterPromise=null;
 function getSession(){try{return JSON.parse(localStorage.getItem(SESSION_KEY)||'null')}catch{return null}}
 async function headers(json=true){
@@ -95,7 +96,8 @@ function canPassThroughForEvidence(status,hasImage){
  return !!hasImage&&['violation','update','already_recorded'].includes(status);
 }
 async function uploadEvidencePayload(item){
- const res=await fetch(API+'/functions/v1/screen-evidence-upload',{
+ const endpoint=item?.p_observation_id?'screen-tracking-evidence-upload':'screen-evidence-upload';
+ const res=await fetch(API+'/functions/v1/'+endpoint,{
   method:'POST',headers:await headers(),body:JSON.stringify(item)
  });
  if(!res.ok){const err=await res.text();throw Error('Evidence '+res.status+': '+err.slice(0,180))}
@@ -495,7 +497,7 @@ function consensusMatchGroup(group,members,usedPlayers=new Set()){
  const winning=[...scoreGroups.values()].sort((a,b)=>b.length-a.length)[0]||same;
  const exemplar=[...winning].sort((a,b)=>similarity(b.name,player.player_name)-similarity(a.name,player.player_name))[0]||same[0];
  return {...exemplar,player:{...player,confidence:avg},alliance:player.alliance_code||group.alliance,
-   rank:group.rank,observations:variants.length,consensus:winning.length,autoConsensus:true};
+   rank:group.rank,observations:variants.length,consensus:winning.length,autoConsensus:true,trackingOnly:player.alliance_code==null};
 }
 function frameCanvas(video){
  const canvas=document.createElement('canvas'),scale=Math.min(1.35,1400/Math.max(1,video.videoWidth));
@@ -604,7 +606,7 @@ function consensusHit(list){
  const exemplar=[...chosen].sort((a,b)=>(b.player.confidence||0)-(a.player.confidence||0))[0];
  const ranks=new Map();for(const o of list)if(o.row.rank){ranks.set(o.row.rank,(ranks.get(o.row.rank)||0)+1)}
  const rank=[...ranks.entries()].sort((a,b)=>b[1]-a[1])[0]?.[0]||exemplar.row.rank||null;
- return {...exemplar.row,player:exemplar.player,time:exemplar.time,image:exemplar.image,rank,observations:list.length,consensus:chosen.length};
+ return {...exemplar.row,player:exemplar.player,time:exemplar.time,image:exemplar.image,rank,observations:list.length,consensus:chosen.length,trackingOnly:exemplar.player?.alliance_code==null};
 }
 function baseFrameTimes(dur){
  const end=Math.max(.06,dur-.10),times=[];
@@ -873,12 +875,12 @@ async function analyze(){
   r.unmatched=groupedUnmatched.filter(g=>Number.isInteger(g.rank)&&!matchedRanks.has(g.rank)).slice(0,40);
   progress(2,96,r.hits.length);
   if(r.kind==='law'){
-   const occ=selectedOcc();
-   r.preview=await rpc('preview_screen_recording_nap_occurrence_v2',{
+   const occ=selectedOcc(),regularHits=r.hits.filter(h=>!isTrackingHit(h));
+   r.preview=regularHits.length?await rpc('preview_screen_recording_nap_occurrence_v2',{
     p_event_schedule_id:occ.event_schedule_id,p_event_name:$('#nocrEvent',root).value,
     p_phase_name:$('#nocrPhase',root).value,p_recording_day:$('#nocrDay',root).value,
-    p_recording_captured_at:null,p_hits:r.hits.map(hitPayload)
-   });
+    p_recording_captured_at:null,p_hits:regularHits.map(hitPayload)
+   }):{results:[],violations:0,updates:0,already_recorded:0};
   }
   progress(2,100,r.hits.length);showReview(r);
   const cov=r.coverage,coveredRanks=cov?.seen?.length||0;
@@ -892,6 +894,8 @@ async function analyze(){
 }
 function hitPayload(h){return {player_id:h.player?.player_id||null,player_game_id:h.player?.player_game_id||null,player_name:h.player?.player_name||h.name,detected_alliance:h.alliance||h.player?.alliance_code||null,score:h.score,server_rank:h.rank||null,confirmed_post_contact_spending:!!h.postContactConfirmed}}
 function reviewStatus(h,r,entry){
+ if(r.kind==='law'&&isTrackingHit(h))
+  return '<div class="nocr-check-result neutral"><strong>'+esc(ocr2('tracking'))+'</strong><small>'+esc(ocr2('trackingHint'))+'</small></div>';
  const state=r.kind==='perf'?'performance':entry?.status||'unresolved';
  const dict=reviewText(state);
  const label=Array.isArray(dict)?dict:[String(state),''];
@@ -907,13 +911,13 @@ async function refreshReview(r){
  if(r.kind==='law'){
   const o=selectedOcc();
   if(!o)return;
-  const payload=r.hits.map(hitPayload);
+  const payload=r.hits.filter(h=>!isTrackingHit(h)).map(hitPayload);
   try{
-   r.preview=await rpc('preview_screen_recording_nap_occurrence_v2',{
+   r.preview=payload.length?await rpc('preview_screen_recording_nap_occurrence_v2',{
     p_event_schedule_id:o.event_schedule_id,p_event_name:$('#nocrEvent',r.root).value,
     p_phase_name:$('#nocrPhase',r.root).value,p_recording_day:$('#nocrDay',r.root).value,
     p_recording_captured_at:null,p_hits:payload
-   });
+   }):{results:[],violations:0,updates:0,already_recorded:0};
   }catch(e){r.preview=null;status((e.message||String(e)),true)}
  }
  if(r===run&&r.root.isConnected)showReview(r);
@@ -943,18 +947,18 @@ function showReview(r){
  $('#nocrResults',root).innerHTML=r.hits.map((h,i)=>{
   const lookup=statuses.get(String(h.player?.player_game_id||h.player?.player_id||''));
   if(r.kind==='law'&&lookup?.status==='exempt')return '';
-  const st=statuses.get(String(h.player?.player_game_id||h.player?.player_id||'')),label=st?.status||'';
-  const needsEvidence=r.kind==='law'&&['violation','update'].includes(label)&&!h.image;
-  const allowed=r.kind==='perf'||(['violation','update'].includes(label)&&!!h.image);
+  const st=statuses.get(String(h.player?.player_game_id||h.player?.player_id||'')),label=st?.status||'',tracking=r.kind==='law'&&isTrackingHit(h);
+  const needsEvidence=r.kind==='law'&&((tracking&&!h.image)||(['violation','update'].includes(label)&&!h.image));
+  const allowed=r.kind==='perf'||(tracking?!!h.image:(['violation','update'].includes(label)&&!!h.image));
   const key=String(h.player?.player_game_id||h.player?.player_id||'');
   const checked=r.selection?.has(key)?r.selection.get(key):allowed;
   const tone=r.kind==='perf'?'performance':label==='violation'?'new':label==='update'?'update':label==='already_recorded'?'already':'other';
   return '<article class="nocr-hit nocr-hit--'+tone+'"><label class="nocr-hit-check"><input type="checkbox" data-hit="'+i+'" '+(checked?'checked':'')+' '+(needsEvidence?'disabled':'')+'>'+
-   '<span><strong>'+esc(h.player.player_name)+'</strong><small>'+esc(h.alliance||h.player.alliance_code||'')+' · '+esc(h.player.player_game_id||'')+(h.rank?' · '+esc(tr('rank'))+' '+esc(h.rank):'')+(h.observations>1?' · '+esc(h.consensus)+'/'+esc(h.observations):'')+(h.manual?' · '+esc(reviewText('manual')):'')+'</small></span></label>'+
+   '<span><strong>'+esc(h.player.player_name)+'</strong><small>'+esc(isTrackingHit(h)?ocr2('unaffiliated'):(h.alliance||h.player.alliance_code||''))+' · '+esc(h.player.player_game_id||'')+(h.rank?' · '+esc(tr('rank'))+' '+esc(h.rank):'')+(h.observations>1?' · '+esc(h.consensus)+'/'+esc(h.observations):'')+(h.manual?' · '+esc(reviewText('manual')):'')+'</small></span></label>'+
    '<input type="text" inputmode="numeric" autocomplete="off" data-score="'+i+'" value="'+esc(points(h.score))+'" aria-label="'+esc(tr('score'))+'">'+
    (r.kind==='perf'&&$('#nocrType',root).value==='kvk_prep'?'<input type="number" min="1" max="200" step="1" data-rank="'+i+'" value="'+esc(h.rank||'')+'" aria-label="'+esc(tr('rank'))+'">':'')+
    reviewStatus(h,r,st)+(needsEvidence?'<div class="nocr-status error">'+esc(tr('evidenceRequired'))+'</div>':'')+
-   (r.kind==='law'&&st?.post_contact_confirmation_required?'<label class="nocr-post-contact-confirm"><input type="checkbox" data-post-contact-confirm="'+i+'" '+(h.postContactConfirmed?'checked':'')+'><span><strong>'+esc(postContactText('title'))+'</strong><small>'+esc(postContactText('hint'))+'</small></span></label>':'')+
+   (r.kind==='law'&&!tracking&&st?.post_contact_confirmation_required?'<label class="nocr-post-contact-confirm"><input type="checkbox" data-post-contact-confirm="'+i+'" '+(h.postContactConfirmed?'checked':'')+'><span><strong>'+esc(postContactText('title'))+'</strong><small>'+esc(postContactText('hint'))+'</small></span></label>':'')+
    (h.image?'<details><summary>'+esc(tr('frame'))+'</summary><img src="'+h.image+'" alt="'+esc(tr('frame'))+'"></details>':'')+'</article>'
  }).join('')+
  (r.kind==='law'&&preview.some(x=>x.status==='exempt')?'<details class="nocr-exempt-compact"><summary><span class="nocr-exempt-icon" aria-hidden="true">✓</span><strong>'+preview.filter(x=>x.status==='exempt').length+' '+esc(reviewText('exemptCollapsed'))+'</strong><span>'+esc(reviewText('exemptShort'))+'</span></summary><p>'+esc(reviewText('exemptNote'))+'</p><div class="nocr-exempt-names">'+preview.filter(x=>x.status==='exempt').map(x=>'<span>'+esc(x.player_name||'')+'</span>').join('')+'</div></details>':'')+
@@ -962,7 +966,9 @@ function showReview(r){
  '<label>'+esc(tr('unmatched'))+'<select id="nocrUnknown">'+r.unmatched.map((x,i)=>selectOption(x.raw,i)).join('')+'</select></label>'+
  '<label>'+esc(reviewText('chooseAlliance'))+'<select id="nocrMapAlliance"><option value="">– '+esc(reviewText('chooseAlliance'))+' –</option>'+allianceOptions(r.members)+'</select></label>'+ 
  '<label>'+esc(tr('selectPlayer'))+'<select id="nocrMapPlayer"><option value="">–</option></select></label>'+
- '<button class="btn secondary" type="button" id="nocrMapConfirm">'+esc(tr('assign'))+'</button></details>':'')+
+ '<button class="btn secondary" type="button" id="nocrMapConfirm">'+esc(tr('assign'))+'</button>'+
+ '<div id="nocrPoolCandidate" hidden><p>'+esc(ocr2('poolHint'))+'</p><label>'+esc(tr('name'))+'<input type="text" id="nocrPoolName" maxlength="64"></label>'+
+ '<button class="btn secondary" type="button" id="nocrPoolConfirm">'+esc(ocr2('poolCandidate'))+'</button><div class="nocr-status" id="nocrPoolStatus" role="status"></div></div></details>':'')+
  '<details class="nocr-add-missing" id="nocrAddMissing" '+(r.addOpen||!r.hits.length?'open':'')+'><summary>'+esc(reviewText('addPlayer'))+'</summary>'+
  '<p>'+esc(reviewText('addHint'))+'</p>'+
  '<label>'+esc(reviewText('chooseAlliance'))+'<select id="nocrNewAlliance"><option value="">– '+esc(reviewText('chooseAlliance'))+' –</option>'+allianceOptions(r.members)+'</select></label>'+ 
@@ -1026,6 +1032,40 @@ function showReview(r){
   r.unmatched.splice(index,1);
   r.hits.sort((x,y)=>y.score-x.score);refreshReview(r);
  };
+ const poolBox=$('#nocrPoolCandidate',root),poolName=$('#nocrPoolName',root),poolStatus=$('#nocrPoolStatus',root);
+ const syncPoolCandidate=()=>{
+  if(!poolBox)return;
+  const idx=Number($('#nocrUnknown',root)?.value||0),row=r.unmatched[idx];
+  const eligible=!!row&&r.kind==='law'&&!String(row.alliance||'').trim();
+  poolBox.hidden=!eligible;
+  if(eligible&&poolName&&document.activeElement!==poolName)poolName.value=row.name||'';
+ };
+ syncPoolCandidate();
+ $('#nocrUnknown',root)?.addEventListener('change',syncPoolCandidate);
+ const poolButton=$('#nocrPoolConfirm',root);
+ if(poolButton)poolButton.onclick=async()=>{
+  const index=Number($('#nocrUnknown',root)?.value||0),row=r.unmatched[index];
+  if(!row||String(row.alliance||'').trim())return;
+  const name=String(poolName?.value||row.name||'').trim();
+  if(!name){poolStatus.textContent=reviewText('missingPlayer');return}
+  poolButton.disabled=true;poolStatus.textContent=tr('saving');
+  try{
+   const result=await rpc('confirm_unaffiliated_screen_candidate',{p_player_name:name});
+   if(result?.status==='existing_alliance_conflict'){
+    poolStatus.textContent=ocr2('poolConflict');return;
+   }
+   if(!result?.player_id)throw Error('Player could not be created');
+   const p={player_id:result.player_id,player_game_id:result.player_game_id||null,player_name:result.player_name||name,alliance_code:null,aliases:[]};
+   if(!r.members.some(x=>String(x.player_id||'')===String(p.player_id)))r.members.push(p);
+   const h={...row,player:p,name:p.player_name,alliance:null,manual:true,trackingOnly:true,
+    observations:row.variantCount||row.observations||1,consensus:1};
+   r.hits.push(h);r.unmatched.splice(index,1);
+   r.hits.sort((x,y)=>(x.rank&&y.rank?x.rank-y.rank:y.score-x.score));
+   poolStatus.textContent=ocr2('poolCreated');
+   await refreshReview(r);
+  }catch(e){poolStatus.textContent=e.message||String(e)}
+  finally{poolButton.disabled=false}
+ };
  const sel=$('#nocrNewPlayer',root),alliance=$('#nocrNewAlliance',root);
  const filter=$('#nocrSearchRoster',root);
  const list=()=>{
@@ -1064,13 +1104,12 @@ async function save(){
  const r=run,root=r.root;if(r.busy)return;
  let scoreError=false,rankError=false;
  const selected=r.hits.filter((h,i)=>{
-  const c=$('[data-hit="'+i+'"]',root);
-  if(!c?.checked)return false;
+  const box=$('[data-hit="'+i+'"]',root);
+  if(!box?.checked)return false;
   const score=parsePoints($('[data-score="'+i+'"]',root)?.value);
   if(score===null){scoreError=true;return false}h.score=score;
   if(r.kind==='perf'&&$('#nocrType',root).value==='kvk_prep'){
-   const field=$('[data-rank="'+i+'"]',root);
-   const rank=field?.value?.trim()?Number(field.value):NaN;
+   const field=$('[data-rank="'+i+'"]',root),rank=field?.value?.trim()?Number(field.value):NaN;
    if(!Number.isInteger(rank)||rank<1||rank>200){rankError=true;return false}h.rank=rank;
   }
   return true;
@@ -1081,48 +1120,65 @@ async function save(){
  r.busy=true;$('#nocrSave',root).disabled=true;
  const out=$('#nocrSaveStatus',root);out.textContent=tr('saving');
  try{
-  let response,evidenceWarning='';
+  let response={created:0,updated:0,unchanged:0,unresolved:0,results:[]},evidenceWarning='',trackingSaved=0;
   if(r.kind==='law'){
-   const occ=selectedOcc();
-   const args={p_event_schedule_id:occ.event_schedule_id,p_event_name:$('#nocrEvent',root).value,
-    p_phase_name:$('#nocrPhase',root).value,p_recording_day:$('#nocrDay',root).value,
-    p_recording_captured_at:null,p_video_hash:r.fileHash,p_hits:selected.map(hitPayload)};
-   // Mandatory fresh preview after editable scores, before any database write.
-   const checked=await rpc('preview_screen_recording_nap_occurrence_v2',{
-    p_event_schedule_id:args.p_event_schedule_id,p_event_name:args.p_event_name,p_phase_name:args.p_phase_name,
-    p_recording_day:args.p_recording_day,p_recording_captured_at:null,p_hits:args.p_hits
-   });
-   const previewByPlayer=new Map((checked.results||[]).map(x=>[String(x.player_game_id||x.player_id),x]));
-   const importable=selected.filter(h=>{
-    const row=previewByPlayer.get(String(h.player.player_game_id||h.player.player_id));
-    return !!row&&canPassThroughForEvidence(row.status,!!h.image);
-   });
-   if(!importable.length){out.textContent=reviewText('noChanges');return}
-   // "already_recorded" is intentionally allowed through when we have a still:
-   // the RPC keeps the violation unchanged but refreshes the import-case link,
-   // so evidence registration can safely target the existing violation.
-   args.p_hits=importable.map(hitPayload);
-   response=await rpc('import_screen_recording_nap_occurrence_v2',args);
-   const evidenceRows=(response.results||[]).filter(x=>['created','updated','unchanged'].includes(x.status)&&x.violation_id);
-   if(evidenceRows.length){
-    out.textContent=tr('upload');
-    const items=evidenceRows.map(row=>{
-     const h=importable.find(x=>x.player.player_name===row.player_name&&x.player.alliance_code===row.assigned_alliance);
-     return h?.image?{p_violation_id:row.violation_id,p_source_video_hash:r.fileHash,
-       p_frame_time_seconds:h.time,p_data_url:h.image}:null;
-    }).filter(Boolean);
-    if(items.length){
-     const failed=await uploadEvidenceBatch(items,3);
-     r.pendingEvidence=failed;
-     const retry=$('#nocrEvidenceRetry',root);
-     if(failed.length){
-      evidenceWarning=' · '+tr('evidenceFailed')+' ('+failed.length+')';
-      retry.hidden=false;
-     }else{
-      retry.hidden=true;
+   const occ=selectedOcc(),trackingSelected=selected.filter(isTrackingHit),regularSelected=selected.filter(h=>!isTrackingHit(h));
+   let regularImportable=[];
+   if(regularSelected.length){
+    const baseArgs={p_event_schedule_id:occ.event_schedule_id,p_event_name:$('#nocrEvent',root).value,
+     p_phase_name:$('#nocrPhase',root).value,p_recording_day:$('#nocrDay',root).value,
+     p_recording_captured_at:null,p_video_hash:r.fileHash};
+    const checked=await rpc('preview_screen_recording_nap_occurrence_v2',{
+     p_event_schedule_id:baseArgs.p_event_schedule_id,p_event_name:baseArgs.p_event_name,p_phase_name:baseArgs.p_phase_name,
+     p_recording_day:baseArgs.p_recording_day,p_recording_captured_at:null,p_hits:regularSelected.map(hitPayload)
+    });
+    const previewByPlayer=new Map((checked.results||[]).map(x=>[String(x.player_game_id||x.player_id),x]));
+    regularImportable=regularSelected.filter(h=>{
+     const row=previewByPlayer.get(String(h.player.player_game_id||h.player.player_id));
+     return !!row&&canPassThroughForEvidence(row.status,!!h.image);
+    });
+    if(regularImportable.length){
+     response=await rpc('import_screen_recording_nap_occurrence_v2',{...baseArgs,p_hits:regularImportable.map(hitPayload)});
+     const evidenceRows=(response.results||[]).filter(x=>['created','updated','unchanged'].includes(x.status)&&x.violation_id);
+     if(evidenceRows.length){
+      out.textContent=tr('upload');
+      const items=evidenceRows.map(row=>{
+       const h=regularImportable.find(x=>x.player.player_name===row.player_name&&x.player.alliance_code===row.assigned_alliance);
+       return h?.image?{p_violation_id:row.violation_id,p_source_video_hash:r.fileHash,p_frame_time_seconds:h.time,p_data_url:h.image}:null;
+      }).filter(Boolean);
+      if(items.length){
+       const failed=await uploadEvidenceBatch(items,3);
+       r.pendingEvidence=(r.pendingEvidence||[]).concat(failed);
+       if(failed.length)evidenceWarning=' · '+tr('evidenceFailed')+' ('+failed.length+')';
+      }
      }
     }
    }
+
+   if(trackingSelected.length){
+    out.textContent=tr('upload');
+    const trackingEvidence=[];
+    for(const h of trackingSelected){
+     const obs=await rpc('record_unaffiliated_screen_observation',{
+      p_player_id:h.player.player_id,p_event_schedule_id:occ.event_schedule_id,
+      p_event_name:$('#nocrEvent',root).value,p_phase_name:$('#nocrPhase',root).value,
+      p_recording_day:$('#nocrDay',root).value,p_score:h.score,p_server_rank:h.rank||null,p_video_hash:r.fileHash
+     });
+     if(obs?.observation_id){
+      trackingSaved++;
+      if(h.image)trackingEvidence.push({p_observation_id:obs.observation_id,p_source_video_hash:r.fileHash,
+       p_frame_time_seconds:h.time,p_data_url:h.image});
+     }
+    }
+    if(trackingEvidence.length){
+     const failed=await uploadEvidenceBatch(trackingEvidence,3);
+     r.pendingEvidence=(r.pendingEvidence||[]).concat(failed);
+     if(failed.length)evidenceWarning=' · '+tr('evidenceFailed')+' ('+(r.pendingEvidence?.length||failed.length)+')';
+    }
+   }
+
+   if(!regularImportable.length&&!trackingSaved){out.textContent=reviewText('noChanges');return}
+   const retry=$('#nocrEvidenceRetry',root);if(retry)retry.hidden=!(r.pendingEvidence?.length);
   }else{
    const type=$('#nocrType',root).value,occ=perfOcc();
    const method=type==='kvk_prep'?'import_player_kvk_performance_batch':'import_player_performance_batch';
@@ -1130,18 +1186,20 @@ async function save(){
     {p_performance_type:'alliance_mobilization',p_event_schedule_id:occ.event_schedule_id,p_video_hash:r.fileHash,p_hits:selected.map(hitPayload)};
    response=await rpc(method,args);
   }
+
   const created=Number(response?.created||0),updated=Number(response?.updated||0),
    unchanged=Number(response?.unchanged||0),unresolved=Number(response?.unresolved||0);
   const piece=(count,one,many)=>points(count)+' '+reviewText(count===1?one:many);
   const parts=r.kind==='law'?[
-   piece(created,'newViolationOne','newViolationMany'),
-   piece(updated,'scoreUpdateOne','scoreUpdateMany'),
-   ...(unchanged?[piece(unchanged,'alreadyOne','alreadyMany')]:[])
+   ...(created?[piece(created,'newViolationOne','newViolationMany')]:[]),
+   ...(updated?[piece(updated,'scoreUpdateOne','scoreUpdateMany')]:[]),
+   ...(unchanged?[piece(unchanged,'alreadyOne','alreadyMany')]:[]),
+   ...(trackingSaved?[points(trackingSaved)+' '+ocr2('trackingSaved')]:[])
   ]:[
    piece(created,'importedPerformanceOne','importedPerformanceMany'),
    ...(unresolved?[piece(unresolved,'notMatchedOne','notMatchedMany')]:[])
   ];
-  out.textContent='✓ '+reviewText('saveSummary')+': '+parts.join(' · ')+
+  out.textContent='✓ '+reviewText('saveSummary')+': '+(parts.length?parts.join(' · '):reviewText('noDataChanged'))+
    (response?.duplicate_video?' · '+reviewText('existingVideo'):'')+evidenceWarning;
   window.postMessage({type:'nap-screen-import-saved'},location.origin);
  }catch(e){out.textContent=(e.message||String(e));console.error('native OCR save',e)}
@@ -1158,20 +1216,11 @@ function mount(root,kind,allowed=[]){
   if(event&&EVENTS.includes(event))$('#nocrEvent',root).value=event;
   $('#nocrEvent',root).onchange=lawOccurrence;$('#nocrOcc',root).onchange=setLawPhase;
   $('#nocrPhase',root).onchange=async()=>{
-  const occ=selectedOcc(),phase=$('#nocrPhase',root).value,event=$('#nocrEvent',root).value;
-  if(occ&&(event==='Strongest Governor'||event==='Alliance Brawl'))
-   $('#nocrDay',root).value=dayUTC(occ.begin_at,Number(phase.slice(2))-1);
   if(r.hits.length)await refreshReview(r);
  };
  $('#nocrDay',root).addEventListener('change',async()=>{
-  const occ=selectedOcc(),day=$('#nocrDay',root).value,event=$('#nocrEvent',root).value,phase=$('#nocrPhase',root);
-  if(!occ||!validDay(day,occ)){status(tr('wrongDay'),true);return}
-  if(event==='Strongest Governor'||event==='Alliance Brawl'){
-   const offset=Math.round((dayNum(day)-dayNum(dayUTC(occ.begin_at)))/86400000)+1;
-   const next=(event==='Strongest Governor'?'sg':'b')+offset;
-   if(!Array.from(phase.options).some(option=>option.value===next)){status(tr('wrongDay'),true);return}
-   phase.value=next;
-  }
+  const occ=selectedOcc(),day=$('#nocrDay',root).value;
+  if(!occ||!validRecordingDay(day,occ)){status(tr('wrongDay'),true);return}
   status(reviewText('dayUpdated'));
   if(r.hits.length)await refreshReview(r);
  });
