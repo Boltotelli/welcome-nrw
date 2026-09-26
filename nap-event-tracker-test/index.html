@@ -645,6 +645,20 @@ img[src*="./assets/alliance/"]{
 </style>
 <link rel="stylesheet" href="./native-screen-import.css?v=20260926-ocr-v2-mobile1">
 </head>
+<script id="nap2-build-guard">
+(function(){
+  var BUILD='20260926-mobile-cache-v17';
+  window.NAP2_BUILD=BUILD;
+  try{
+    var u=new URL(window.location.href);
+    if(u.searchParams.get('_nap2build')!==BUILD){
+      u.searchParams.set('_nap2build',BUILD);
+      window.location.replace(u.toString());
+      return;
+    }
+  }catch(e){}
+})();
+</script>
 <body>
 <div class="app">
   <aside class="sidebar" id="sidebar">
@@ -1796,9 +1810,9 @@ document.getElementById('settingsSaveDemo')?.addEventListener('click',()=>{
 });
 
 </script>
-<script>window.NAP2_BUILD='20260925-profile-current-sanction-r3';</script>
-<script src="./live-adapter.js?v=20260926-unaffiliated-roster-v1"></script>
-<script src="./native-screen-import.js?v=20260926-unaffiliated-auto-v16"></script>
+<script>window.NAP2_BUILD='20260926-mobile-cache-v17';</script>
+<script src="./live-adapter.js?v=20260926-unaffiliated-roster-cache-v2"></script>
+<script src="./native-screen-import.js?v=20260926-unaffiliated-auto-cache-v17"></script>
 <script src="./live-translations-v2.js?v=20260925-overdue-days-i18n"></script>
 </body>
 </html>
