@@ -835,7 +835,11 @@ const ACTIVITY_EXTRA_TITLES2={
  }
 };
 function activityTitle2(a){
- const act=String(a?.action||''),extra=(ACTIVITY_EXTRA_TITLES2[L()]||ACTIVITY_EXTRA_TITLES2.de)[act];
+ const act=String(a?.action||'');
+ if(act==='violation_deleted'){
+  return ({de:'Verstoß gelöscht',en:'Violation deleted',fr:'Infraction supprimée',es:'Infracción eliminada'}[L()]||'Verstoß gelöscht');
+ }
+ const extra=(ACTIVITY_EXTRA_TITLES2[L()]||ACTIVITY_EXTRA_TITLES2.de)[act];
  if(extra)return extra;
  const map={
   violation_created:'Verstoß eingetragen',violation_created_vnext:'Verstoß eingetragen',violation_updated:'Verstoß aktualisiert',
@@ -857,14 +861,20 @@ function activityTitle2(a){
  return map[act]||act.replaceAll('_',' ');
 }
 function activityMeta2(a){
- const d=a?.details||{},p={...(d.public||{}),...(d.private||{}),...d},bits=[];
+ const d=a?.details||{},p={...(d.public||{}),...(d.private||{}),...d},bits=[],isDeleted=String(a?.action||'')==='violation_deleted';
  if(p.player_name)bits.push(p.player_name);
  if(p.event_name)bits.push(p.event_name);
  if(p.phase_name)bits.push(p.phase_name);
+ if(isDeleted&&p.violation_day){
+  const dateLabel={de:'Verstoßdatum',en:'Violation date',fr:'Date de l’infraction',es:'Fecha de la infracción'}[L()]||'Verstoßdatum';
+  bits.push(dateLabel+': '+p.violation_day);
+ }
  if(p.from_alliance&&p.to_alliance)bits.push(p.from_alliance+' → '+p.to_alliance);
  if(p.score!=null)bits.push(N(p.score));
  if(a?.reason){
-  const label={de:'Grund',en:'Reason',fr:'Motif',es:'Motivo'}[L()]||'Grund';
+  const label=isDeleted
+   ?({de:'Löschkommentar',en:'Deletion comment',fr:'Commentaire de suppression',es:'Comentario de eliminación'}[L()]||'Löschkommentar')
+   :({de:'Grund',en:'Reason',fr:'Motif',es:'Motivo'}[L()]||'Grund');
   bits.push(label+': '+a.reason);
  }
  return bits.join(' · ');
@@ -899,13 +909,21 @@ async function loadMoreActivity2(){
  }catch(err){if(btn){btn.disabled=false;btn.textContent='Weitere Einträge laden'}alert(err.message||String(err))}
  finally{activityLoading2=false}
 }
+function activityScopeText2(){
+ return ({
+  de:'Serverweites Aktivitätsprotokoll: Bei anderen Allianzen werden ausschließlich öffentliche Log-Informationen angezeigt. Bei gelöschten Verstößen sind Spieler, Event/Phase, Verstoßdatum und Löschkommentar serverweit sichtbar; Punkte und andere private Verstoßdetails bleiben verborgen.',
+  en:'Server-wide activity log: Other alliances only see public log information. For deleted violations, the player, event/phase, violation date and deletion comment are visible server-wide; scores and other private violation details remain hidden.',
+  fr:'Journal d’activité serveur : les autres alliances ne voient que les informations publiques. Pour les infractions supprimées, le joueur, l’événement/la phase, la date de l’infraction et le commentaire de suppression sont visibles sur tout le serveur ; les scores et autres détails privés restent masqués.',
+  es:'Registro de actividad del servidor: las demás alianzas solo ven información pública. En las infracciones eliminadas, el jugador, evento/fase, fecha de la infracción y comentario de eliminación son visibles para todo el servidor; las puntuaciones y otros detalles privados permanecen ocultos.'
+ }[L()]||'Serverweites Aktivitätsprotokoll');
+}
 function paintActivity2(){
  const v=document.getElementById('view-activity');if(!v)return;
  const types=[['all','Alle'],['uploads','Uploads'],['players','Spieler'],['events','Events'],['violations','Verstöße'],['deleted','Gelöscht']];
  const rows=S.activity||[],alliances=activityAlliances2||[];
  v.innerHTML='<div class="hero"><div><div class="kicker">AKTIVITÄT · LIVE</div><h1>Filterbarer Audit-Feed.</h1><p>Uploads, Spieleränderungen, Verstöße und Maßnahmen.</p></div><div class="hero-actions"><button id="liveActivityRefresh" class="btn secondary">↻ Aktualisieren</button></div></div>'+
  '<div class="toolbar"><div class="toolbar-left">'+types.map(x=>'<button class="filter-chip '+(activityType2===x[0]?'active':'')+'" data-acttype="'+x[0]+'">'+x[1]+'</button>').join('')+'</div><div class="toolbar-right"><label class="live-activity-alliance-label"><span>Allianz</span><select id="liveActivityAlliance" aria-label="Allianz"><option value="all">Alle Allianzen</option>'+alliances.map(a=>'<option value="'+E(a)+'" '+(activityAlliance2===a?'selected':'')+'>'+E(a)+'</option>').join('')+'</select></label></div></div>'+
- '<div class="live-note live-audit-scope">Serverweites Aktivitätsprotokoll: Bei anderen Allianzen werden ausschließlich öffentliche Log-Informationen angezeigt. Private Verstoßdetails, Gründe und Kommentare bleiben verborgen.</div>'+
+ '<div class="live-note live-audit-scope">'+E(activityScopeText2())+'</div>'+
  '<section class="card"><div class="card-body live-list">'+(rows.length?rows.map(a=>'<div class="live-row"><div><b>'+E(a.alliance_code||'System')+' · '+E(activityTitle2(a))+'</b><small>'+E(activityMeta2(a))+'</small></div><time class="muted tiny">'+E(D(a.created_at))+'</time></div>').join(''):'<div class="live-empty-state">Keine Aktivitäten für diesen Filter.</div>')+'</div></section>'+(activityMore2?'<div class="hero-actions" style="margin-top:14px"><button type="button" class="btn secondary" id="liveActivityMore">Weitere Einträge laden</button></div>':'');
  v.querySelectorAll('[data-acttype]').forEach(b=>b.onclick=async()=>{if(activityLoading2)return;activityType2=b.dataset.acttype;activityOffset2=0;await renderActivityLive()});
  v.querySelector('#liveActivityAlliance')?.addEventListener('change',async e=>{if(activityLoading2)return;activityAlliance2=e.target.value;activityOffset2=0;await renderActivityLive()});
