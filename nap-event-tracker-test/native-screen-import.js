@@ -66,6 +66,13 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const norm=s=>String(s||'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase().replace(/[^\p{L}\p{N}]/gu,'');
 const lng=()=>$('#languagePicker')?.value||'de';
 const tr=k=>(WORDS[lng()]||WORDS.de)[k]||k;
+const OCR2_WORDS={
+ de:{coverage:'Rangabdeckung',complete:'Rangfolge vollständig',missing:'Nicht sicher erkannt',rescue:'Fehlende Ränge werden gezielt nachgescannt',manual:'Bitte fehlende Ränge vor dem Speichern manuell prüfen'},
+ en:{coverage:'Rank coverage',complete:'Rank sequence complete',missing:'Not confidently detected',rescue:'Missing ranks are being rescanned',manual:'Please review missing ranks manually before saving'},
+ fr:{coverage:'Couverture des rangs',complete:'Séquence des rangs complète',missing:'Non détecté avec certitude',rescue:'Nouvelle analyse ciblée des rangs manquants',manual:'Vérifiez manuellement les rangs manquants avant d’enregistrer'},
+ es:{coverage:'Cobertura de rangos',complete:'Secuencia de rangos completa',missing:'No detectado con seguridad',rescue:'Se vuelven a analizar los rangos que faltan',manual:'Revisa manualmente los rangos que faltan antes de guardar'}
+};
+const ocr2=k=>(OCR2_WORDS[lng()]||OCR2_WORDS.de)[k]||k;
 const fmt=x=>Number(x||0).toLocaleString(lng()==='de'?'de-DE':lng()==='fr'?'fr-FR':lng()==='es'?'es-ES':'en-US');
 let run=null,workerPromise=null,rosterPromise=null;
 function getSession(){try{return JSON.parse(localStorage.getItem(SESSION_KEY)||'null')}catch{return null}}
@@ -150,7 +157,11 @@ async function ensureWorker(){
     el.onload=resolve;el.onerror=()=>reject(Error('OCR library could not be loaded'));document.head.appendChild(el);
    });
   }
-  return window.Tesseract.createWorker('eng',1);
+  let worker;
+  try{worker=await window.Tesseract.createWorker(['eng','kor'],1)}
+  catch(err){console.warn('Korean OCR language unavailable, using English only',err);worker=await window.Tesseract.createWorker('eng',1)}
+  try{await worker.setParameters({preserve_interword_spaces:'1',tessedit_pageseg_mode:'6'})}catch(err){console.warn('OCR parameters',err)}
+  return worker;
  })().catch(e=>{workerPromise=null;throw e});
  return workerPromise;
 }
@@ -168,21 +179,30 @@ async function sha256(file){
  const hash=await crypto.subtle.digest('SHA-256',bytes);
  return Array.from(new Uint8Array(hash),x=>x.toString(16).padStart(2,'0')).join('');
 }
+function ocrDigits(raw){
+ return String(raw||'').replace(/[Oo]/g,'0').replace(/[Il|]/g,'1');
+}
 function sourceRank(line){
- const m=String(line||'').match(/^\s*#?\s*(\d{1,3})\s*[.)\-:]?\s+(?=\S)/);
- return m?Number(m[1]):null;
+ const lead=ocrDigits(String(line||'').trimStart());
+ const m=lead.match(/^#?\s*(\d{1,3})\s*[.)\-:]?\s+(?=\S)/);
+ if(!m)return null;
+ const n=Number(m[1]);return Number.isInteger(n)&&n>=1&&n<=999?n:null;
 }
 function extractRows(text){
  const out=[],lines=String(text||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
  for(let i=0;i<lines.length;i++){
-  let line=lines[i];
-  let m=line.match(/(\d{1,3}(?:[.,\s]\d{3}){1,4}|\d{4,12})\s*$/);
-  if(!m&&i+1<lines.length&&/^(?:\d{1,3}(?:[.,\s]\d{3})+|\d{4,12})$/.test(lines[i+1])){
-   line+=' '+lines[++i];m=line.match(/(\d{1,3}(?:[.,\s]\d{3}){1,4}|\d{4,12})\s*$/);
+  let line=lines[i],numeric=ocrDigits(line);
+  let m=numeric.match(/(\d{1,3}(?:[.,\s]\d{3}){1,4}|\d{4,12})\s*$/);
+  if(!m&&i+1<lines.length){
+   const next=ocrDigits(lines[i+1]);
+   if(/^(?:\d{1,3}(?:[.,\s]\d{3})+|\d{4,12})$/.test(next)){
+    line+=' '+lines[++i];numeric=ocrDigits(line);m=numeric.match(/(\d{1,3}(?:[.,\s]\d{3}){1,4}|\d{4,12})\s*$/);
+   }
   }
   if(!m)continue;
   const score=Number(m[1].replace(/[.,\s]/g,''));if(!Number.isSafeInteger(score)||score<1000)continue;
-  const left=line.slice(0,m.index).replace(/^\s*#?\s*\d{1,3}\s*[.)\-:]?\s*/,'').trim();
+  const scoreStart=m.index;
+  const left=line.slice(0,scoreStart).replace(/^\s*#?\s*[0-9OoIl|]{1,3}\s*[.)\-:]?\s*/,'').trim();
   if(!left||left.length<2||/^(total|score|points|punkte|rang|rank|ranking|mission|server)\b/i.test(left))continue;
   const tag=left.match(/[\[(]\s*([a-z0-9]{2,6})\s*[\])]/i);
   out.push({name:left.replace(/[\[(]\s*[a-z0-9]{2,6}\s*[\])]/gi,' ').trim(),alliance:tag?.[1]||'',score,rank:sourceRank(line),raw:line});
@@ -213,6 +233,98 @@ function frameCanvas(video){
  canvas.width=Math.max(1,Math.round(video.videoWidth*scale));canvas.height=Math.max(1,Math.round(video.videoHeight*scale));
  const cx=canvas.getContext('2d',{willReadFrequently:true});cx.drawImage(video,0,0,canvas.width,canvas.height);
  return canvas;
+}
+function rankingCanvas(frame){
+ const x=Math.round(frame.width*.035),y=Math.round(frame.height*.245),w=Math.round(frame.width*.93),h=Math.round(frame.height*.665);
+ const scale=Math.min(2.45,1850/Math.max(1,w)),out=document.createElement('canvas');
+ out.width=Math.max(1,Math.round(w*scale));out.height=Math.max(1,Math.round(h*scale));
+ const cx=out.getContext('2d',{willReadFrequently:true});cx.imageSmoothingEnabled=true;cx.imageSmoothingQuality='high';
+ cx.drawImage(frame,x,y,w,h,0,0,out.width,out.height);return out;
+}
+function enhancedCanvas(src){
+ const out=document.createElement('canvas');out.width=src.width;out.height=src.height;
+ const cx=out.getContext('2d',{willReadFrequently:true});cx.drawImage(src,0,0);
+ const img=cx.getImageData(0,0,out.width,out.height),d=img.data;
+ for(let i=0;i<d.length;i+=4){
+  const g=.2126*d[i]+.7152*d[i+1]+.0722*d[i+2],v=Math.max(0,Math.min(255,(g-128)*1.42+128));
+  d[i]=d[i+1]=d[i+2]=v;
+ }
+ cx.putImageData(img,0,0);return out;
+}
+function sharpnessScore(src){
+ const tiny=document.createElement('canvas'),w=160,h=Math.max(60,Math.round(src.height*(w/src.width)));
+ tiny.width=w;tiny.height=h;const cx=tiny.getContext('2d',{willReadFrequently:true});cx.drawImage(src,0,0,w,h);
+ const d=cx.getImageData(0,0,w,h).data;let sum=0,n=0;
+ const lum=i=>.2126*d[i]+.7152*d[i+1]+.0722*d[i+2];
+ for(let y=1;y<h-1;y+=2)for(let x=1;x<w-1;x+=2){
+  const i=(y*w+x)*4,gx=Math.abs(lum(i+4)-lum(i-4)),gy=Math.abs(lum(i+w*4)-lum(i-w*4));sum+=gx+gy;n++;
+ }
+ return n?sum/n:0;
+}
+function recordRank(rank,time,map){
+ if(!Number.isInteger(rank)||rank<1||rank>999)return;
+ if(!map.has(rank))map.set(rank,[]);map.get(rank).push(time);
+}
+function rankCoverage(map){
+ const ranks=[...map.keys()].filter(r=>r>=1&&r<=999).sort((a,b)=>a-b);
+ if(ranks.length<2)return {min:ranks[0]||null,max:ranks[0]||null,seen:ranks,missing:[]};
+ const trusted=ranks.filter((r,i)=>((map.get(r)||[]).length>1)||ranks.some((x,j)=>j!==i&&Math.abs(x-r)<=3));
+ const use=trusted.length>=2?trusted:ranks;
+ let min=use[0],max=use[use.length-1];
+ if(max-min>250){
+  let best=[min,min],start=0;
+  for(let i=0;i<use.length;i++){
+   while(use[i]-use[start]>250)start++;
+   if(i-start>best[1]-best[0])best=[start,i];
+  }
+  min=use[best[0]];max=use[best[1]];
+ }
+ const set=new Set(ranks),missing=[];for(let r=min;r<=max;r++)if(!set.has(r))missing.push(r);
+ return {min,max,seen:ranks.filter(r=>r>=min&&r<=max),missing};
+}
+function medianTime(arr){if(!arr?.length)return null;const a=[...arr].sort((x,y)=>x-y);return a[Math.floor(a.length/2)]}
+function rescueTimes(coverage,rankMap,dur,used){
+ const out=new Set(),seen=[...rankMap.keys()].sort((a,b)=>a-b);
+ for(const m of coverage.missing.slice(0,36)){
+  const lo=[...seen].reverse().find(r=>r<m),hi=seen.find(r=>r>m);
+  const lt=lo!=null?medianTime(rankMap.get(lo)):null,ht=hi!=null?medianTime(rankMap.get(hi)):null;
+  let a,b;
+  if(lt!=null&&ht!=null){a=Math.min(lt,ht)-.45;b=Math.max(lt,ht)+.45}
+  else{const t=lt??ht;if(t==null)continue;a=t-.9;b=t+.9}
+  a=Math.max(.03,a);b=Math.min(Math.max(.03,dur-.03),b);
+  for(let t=a;t<=b+.001;t+=.18){
+   const v=Math.round(t*100)/100;if(!used.some(x=>Math.abs(x-v)<.075))out.add(v);
+  }
+ }
+ return [...out].sort((a,b)=>a-b).slice(0,80);
+}
+function consensusHit(list){
+ if(!list?.length)return null;
+ const scores=new Map();
+ for(const o of list){const k=String(o.row.score);if(!scores.has(k))scores.set(k,[]);scores.get(k).push(o)}
+ const groups=[...scores.values()].sort((a,b)=>b.length-a.length||Math.max(...b.map(x=>x.player.confidence||0))-Math.max(...a.map(x=>x.player.confidence||0)));
+ let chosen=groups[0];
+ if(groups.length>1&&groups[0].length===groups[1].length){
+  const nums=list.map(x=>x.row.score).sort((a,b)=>a-b),med=nums[Math.floor(nums.length/2)];
+  chosen=[...list].sort((a,b)=>Math.abs(a.row.score-med)-Math.abs(b.row.score-med)||(b.player.confidence||0)-(a.player.confidence||0)).slice(0,1);
+ }
+ const exemplar=[...chosen].sort((a,b)=>(b.player.confidence||0)-(a.player.confidence||0))[0];
+ const ranks=new Map();for(const o of list)if(o.row.rank){ranks.set(o.row.rank,(ranks.get(o.row.rank)||0)+1)}
+ const rank=[...ranks.entries()].sort((a,b)=>b[1]-a[1])[0]?.[0]||exemplar.row.rank||null;
+ return {...exemplar.row,player:exemplar.player,time:exemplar.time,image:exemplar.image,rank,observations:list.length,consensus:chosen.length};
+}
+async function chooseSharpTimes(video,dur){
+ const bucket=.78,count=Math.max(1,Math.ceil(dur/bucket)),times=[];
+ for(let b=0;b<count;b++){
+  const a=b*bucket,z=Math.min(dur-.04,(b+1)*bucket),candidates=[a+.12,(a+z)/2,z-.08].filter(t=>t>=.02&&t<dur);
+  let best=null;
+  for(const t of candidates){
+   await seek(video,t);const full=frameCanvas(video),roi=rankingCanvas(full),q=sharpnessScore(roi);
+   if(!best||q>best.q)best={t,q};
+  }
+  if(best)times.push(Math.min(dur-.04,Math.max(.02,best.t)));
+ }
+ return times.slice(0,55);
 }
 async function seek(video,time){
  if(Math.abs(video.currentTime-time)<.03&&video.readyState>=2)return;
@@ -339,41 +451,54 @@ async function analyze(){
     for(const p of extras||[]){const id=String(p.player_game_id||p.player_id);if(!ids.has(id)){members.push(p);ids.add(id)}}
    }catch(e){console.warn('Performance transfer roster unavailable',e)}
   }
-  r.members=members;
-  r.fileHash=await sha256(file);
-  worker=await ensureWorker();
-  video=document.createElement('video');url=await metadata(video,file);
-  if(r!==run)return;
-  progress(1,6,0);
-  const dur=video.duration;
-  const count=Math.min(46,Math.max(1,Math.floor(dur/.85)));
-  const times=Array.from({length:count},(_,i)=>Math.min(Math.max(0,dur-.08),.25+i*Math.max(.85,(dur-.5)/Math.max(1,count))));
-  const best=new Map(),unmatched=new Map();r.frames=[];
-  for(let i=0;i<times.length;i++){
-   if(run!==r)break;
-   const sec=times[i];await seek(video,sec);
-   const canvas=frameCanvas(video);
-   if(r.frames.length<12&&i%Math.max(1,Math.floor(times.length/12))===0)r.frames.push({time:sec,image:canvas.toDataURL('image/jpeg',.72)});
-   const text=(await worker.recognize(canvas)).data?.text||'';
-   const rows=extractRows(text);
+  r.members=members;r.fileHash=await sha256(file);worker=await ensureWorker();
+  video=document.createElement('video');url=await metadata(video,file);if(r!==run)return;
+  const dur=video.duration;progress(1,3,0);
+  const times=await chooseSharpTimes(video,dur),observations=new Map(),unmatched=new Map(),rankMap=new Map();r.frames=[];
+  const processRows=(rows,sec,full)=>{
    let still=null;
    for(const row of rows){
+    recordRank(row.rank,sec,rankMap);
     const p=matchPlayer(row,members);
-    if(!p){const k=norm(row.name)+'|'+row.score;if(!unmatched.has(k)){if(!still)still=canvas.toDataURL('image/jpeg',.74);unmatched.set(k,{...row,time:sec,image:still})}continue}
-    if(r.kind==='perf'&&$('#nocrType',root).value==='kvk_prep'&&!(row.rank>=1&&row.rank<=200))row.rank=null;
-    const key=p.player_game_id||p.player_id;
-    const existing=best.get(key);
-    if(!existing||row.score>existing.score){
-     if(!still)still=canvas.toDataURL('image/jpeg',.74);
-     best.set(key,{...row,player:p,time:sec,image:still});
+    if(!p){
+     const k=(row.rank||'')+'|'+norm(row.name)+'|'+row.score;
+     if(!unmatched.has(k)){if(!still)still=full.toDataURL('image/jpeg',.76);unmatched.set(k,{...row,time:sec,image:still})}
+     continue;
     }
+    if(r.kind==='perf'&&$('#nocrType',root).value==='kvk_prep'&&!(row.rank>=1&&row.rank<=200))row.rank=null;
+    const key=String(p.player_game_id||p.player_id);if(!observations.has(key))observations.set(key,[]);
+    if(!still)still=full.toDataURL('image/jpeg',.76);
+    observations.get(key).push({row:{...row},player:p,time:sec,image:still});
    }
-   progress(1,6+86*((i+1)/times.length),best.size);
-   await new Promise(resolve=>setTimeout(resolve,0));
+  };
+  for(let i=0;i<times.length;i++){
+   if(run!==r)break;const sec=times[i];await seek(video,sec);const full=frameCanvas(video),roi=rankingCanvas(full);
+   if(r.frames.length<12&&i%Math.max(1,Math.floor(times.length/12))===0)r.frames.push({time:sec,image:full.toDataURL('image/jpeg',.72)});
+   const text=(await worker.recognize(roi)).data?.text||'';processRows(extractRows(text),sec,full);
+   progress(1,6+65*((i+1)/times.length),observations.size);await new Promise(resolve=>setTimeout(resolve,0));
   }
   if(run!==r)return;
-  r.hits=[...best.values()].sort((a,b)=>b.score-a.score);
-  r.unmatched=[...unmatched.values()].slice(0,30);
+  let coverage=rankCoverage(rankMap),rescue=rescueTimes(coverage,rankMap,dur,times);
+  if(coverage.missing.length&&rescue.length){
+   status(ocr2('rescue')+': '+coverage.missing.join(', '));
+   const missingSet=new Set(coverage.missing);
+   for(let i=0;i<rescue.length;i++){
+    if(run!==r)break;const sec=rescue[i];await seek(video,sec);const full=frameCanvas(video),roi=rankingCanvas(full);
+    let rows=extractRows((await worker.recognize(roi)).data?.text||'');
+    if(!rows.some(x=>missingSet.has(x.rank))){
+     const enhanced=enhancedCanvas(roi),extra=extractRows((await worker.recognize(enhanced)).data?.text||'');
+     const seen=new Set(rows.map(x=>(x.rank||'')+'|'+norm(x.name)+'|'+x.score));
+     rows=rows.concat(extra.filter(x=>!seen.has((x.rank||'')+'|'+norm(x.name)+'|'+x.score)));
+    }
+    processRows(rows,sec,full);
+    progress(1,72+22*((i+1)/rescue.length),observations.size);await new Promise(resolve=>setTimeout(resolve,0));
+   }
+   coverage=rankCoverage(rankMap);
+  }
+  if(run!==r)return;
+  r.coverage=coverage;
+  r.hits=[...observations.values()].map(consensusHit).filter(Boolean).sort((a,b)=>(a.rank&&b.rank?a.rank-b.rank:b.score-a.score));
+  r.unmatched=[...unmatched.values()].sort((a,b)=>(a.rank||999)-(b.rank||999)).slice(0,40);
   progress(2,96,r.hits.length);
   if(r.kind==='law'){
    const occ=selectedOcc();
@@ -383,8 +508,11 @@ async function analyze(){
     p_recording_captured_at:null,p_hits:r.hits.map(hitPayload)
    });
   }
-  progress(2,100,r.hits.length);
-  showReview(r);status(r.hits.length?tr('ready'):reviewText('nothing'),false);
+  progress(2,100,r.hits.length);showReview(r);
+  const cov=r.coverage;
+  if(cov?.min&&cov?.max&&cov.missing.length)status(ocr2('coverage')+' '+cov.min+'–'+cov.max+' · '+ocr2('missing')+': '+cov.missing.join(', ')+' · '+ocr2('manual'),true);
+  else if(cov?.min&&cov?.max)status(ocr2('coverage')+' '+cov.min+'–'+cov.max+' · '+ocr2('complete'),false);
+  else status(r.hits.length?tr('ready'):reviewText('nothing'),false);
  }catch(e){console.error('native screen OCR',e);status(tr('error')+': '+(e.message||e),true)}
  finally{if(url)URL.revokeObjectURL(url);if(video){video.removeAttribute('src');video.load()}r.busy=false;if(root.isConnected){btn.disabled=false;$('#nocrSave',root).disabled=!r.hits?.length}}
 }
@@ -425,7 +553,8 @@ function showReview(r){
  [r.preview.already_recorded,reviewText('alreadyCount')]
  ].filter(x=>Number(x[0])>0).map(x=>points(x[0])+' '+x[1]):[];
  const visibleCount=r.hits.filter(h=>r.kind!=='law'||statuses.get(String(h.player?.player_game_id||h.player?.player_id||''))?.status!=='exempt').length;
- $('#nocrCount',root).textContent=visibleCount+' '+tr('found')+(counts.length?' · '+counts.join(' · '):'');
+ const cov=r.coverage,covText=cov?.min&&cov?.max?' · '+ocr2('coverage')+' '+cov.min+'–'+cov.max+(cov.missing.length?' · ⚠ '+ocr2('missing')+': '+cov.missing.join(', '):' · ✓'):'';
+ $('#nocrCount',root).textContent=visibleCount+' '+tr('found')+(counts.length?' · '+counts.join(' · '):'')+covText;
  $('#nocrResults',root).innerHTML=r.hits.map((h,i)=>{
   const lookup=statuses.get(String(h.player?.player_game_id||h.player?.player_id||''));
   if(r.kind==='law'&&lookup?.status==='exempt')return '';
@@ -436,7 +565,7 @@ function showReview(r){
   const checked=r.selection?.has(key)?r.selection.get(key):allowed;
   const tone=r.kind==='perf'?'performance':label==='violation'?'new':label==='update'?'update':label==='already_recorded'?'already':'other';
   return '<article class="nocr-hit nocr-hit--'+tone+'"><label class="nocr-hit-check"><input type="checkbox" data-hit="'+i+'" '+(checked?'checked':'')+' '+(needsEvidence?'disabled':'')+'>'+
-   '<span><strong>'+esc(h.player.player_name)+'</strong><small>'+esc(h.player.alliance_code||'')+' · '+esc(h.player.player_game_id||'')+(h.manual?' · '+esc(reviewText('manual')):'')+'</small></span></label>'+
+   '<span><strong>'+esc(h.player.player_name)+'</strong><small>'+esc(h.player.alliance_code||'')+' · '+esc(h.player.player_game_id||'')+(h.rank?' · '+esc(tr('rank'))+' '+esc(h.rank):'')+(h.observations>1?' · '+esc(h.consensus)+'/'+esc(h.observations):'')+(h.manual?' · '+esc(reviewText('manual')):'')+'</small></span></label>'+
    '<input type="text" inputmode="numeric" autocomplete="off" data-score="'+i+'" value="'+esc(points(h.score))+'" aria-label="'+esc(tr('score'))+'">'+
    (r.kind==='perf'&&$('#nocrType',root).value==='kvk_prep'?'<input type="number" min="1" max="200" step="1" data-rank="'+i+'" value="'+esc(h.rank||'')+'" aria-label="'+esc(tr('rank'))+'">':'')+
    reviewStatus(h,r,st)+(needsEvidence?'<div class="nocr-status error">'+esc(tr('evidenceRequired'))+'</div>':'')+
