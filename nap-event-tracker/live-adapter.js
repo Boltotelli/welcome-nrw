@@ -389,6 +389,7 @@ function addLiveCss(){
  if(document.getElementById('n2LiveCss'))return;
  const s=document.createElement('style');s.id='n2LiveCss';s.textContent=
  '.live-avatar{overflow:hidden}.live-avatar img{width:100%;height:100%;object-fit:cover;display:block}.alliance-top-logo{width:22px;height:26px;object-fit:contain;display:block}.alliance-user-logo{width:24px;height:28px;object-fit:contain;display:block}.alliance-logo-badge{display:inline-flex;align-items:center;gap:5px;min-height:24px;padding:3px 7px;border:1px solid var(--line);border-radius:999px;background:var(--panel-3);font-size:9px;font-weight:900;white-space:nowrap;vertical-align:middle}.alliance-logo-badge img{width:15px;height:18px;object-fit:contain}.alliance-badge,.user-pill{display:flex;align-items:center;gap:7px}.profile-alliance-line{display:flex;align-items:center;gap:6px;flex-wrap:wrap}.live-transfer-route{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:4px}.live-transfer-route>small{margin-left:2px}.live-language-editor{margin-top:12px;padding:10px 11px;border:1px solid var(--line);border-radius:11px;background:var(--panel-2)}.live-language-editor summary{cursor:pointer;font-size:10px;font-weight:850}.live-language-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:10px}.live-language-option{display:flex!important;align-items:center!important;gap:6px!important;padding:7px 8px;border:1px solid var(--line);border-radius:9px;background:var(--panel);font-size:9px!important;color:var(--text)!important}.live-language-option input{width:auto!important;min-height:0!important}.r1-home-timer{display:flex;gap:6px;align-items:center}.r1-home-end{min-height:31px!important;height:31px!important;width:175px!important;padding:4px 6px!important;font-size:9px!important}@media(max-width:700px){.r1-home-timer{flex-wrap:wrap}.r1-home-end{width:100%!important}}@media(max-width:700px){.live-language-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}'+
+ '.player-message-action{margin-top:12px;justify-content:flex-start}.player-message-modal{width:min(680px,calc(100vw - 28px))}.player-message-langs{display:flex;gap:7px;flex-wrap:wrap}.player-message-preview{width:100%;min-height:300px;resize:vertical;line-height:1.5;white-space:pre-wrap}.player-message-modal .hero-actions{margin-top:2px}@media(max-width:700px){.player-message-action .btn{width:100%}.player-message-modal{max-height:calc(100dvh - 32px);overflow:auto}.player-message-preview{min-height:330px;font-size:14px}}'+
  '.live-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 14px;padding:5px;background:var(--panel);border:1px solid var(--line);border-radius:14px;width:max-content;max-width:100%}'+
  '.live-tab{border:0;background:transparent;color:var(--muted);font:inherit;font-weight:850;font-size:10px;padding:8px 12px;border-radius:9px;cursor:pointer}.live-tab.active{background:var(--panel-3);color:var(--text);box-shadow:inset 0 0 0 1px var(--line)}'+
  '.live-panel-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(300px,.75fr);gap:14px;align-items:start}'+
@@ -1314,6 +1315,132 @@ async function startExtendedExclusion2(id,input){
   if(document.getElementById('view-profile')?.classList.contains('active'))await openProfile2(s.player_name);
  }catch(err){alert(err.message||String(err))}
 }
+const PLAYER_MESSAGE_UI2={
+ de:{open:'💬 Spielernachricht',title:'Nachricht an Spieler',copy:'Kopieren',copied:'✓ Kopiert',close:'Schließen',fallback:'Für die hinterlegte Sprache gibt es noch keine eigene Vorlage – Englisch wird verwendet.'},
+ en:{open:'💬 Player message',title:'Message to player',copy:'Copy',copied:'✓ Copied',close:'Close',fallback:'No dedicated template exists for the saved language yet – English is used.'},
+ fr:{open:'💬 Message au joueur',title:'Message au joueur',copy:'Copier',copied:'✓ Copié',close:'Fermer',fallback:'Il n’existe pas encore de modèle dédié pour la langue enregistrée – l’anglais est utilisé.'},
+ es:{open:'💬 Mensaje al jugador',title:'Mensaje al jugador',copy:'Copiar',copied:'✓ Copiado',close:'Cerrar',fallback:'Aún no existe una plantilla propia para el idioma guardado – se usa inglés.'}
+};
+function playerMessageUi2(){return PLAYER_MESSAGE_UI2[L()]||PLAYER_MESSAGE_UI2.de}
+function messageLocale2(lang){return {de:'de-DE',en:'en-US',fr:'fr-FR',es:'es-ES'}[lang]||'en-US'}
+function messageNumber2(value,lang){return Number(value||0).toLocaleString(messageLocale2(lang))}
+function messageDate2(value,lang){
+ if(!value)return '';
+ const d=new Date(value);if(Number.isNaN(d.getTime()))return '';
+ return d.toLocaleString(messageLocale2(lang),{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+}
+function messagePhaseLabel2(v,lang){
+ const key=String(v?.phase_name||''),row=(PHASES2[v?.event_name]||[]).find(x=>x[0]===key),raw=row?.[1]||key;
+ const m=key.match(/^(?:sg|b)(\d+)$/);
+ if(m){
+  const n=m[1];
+  return ({de:'Tag ',en:'Day ',fr:'Jour ',es:'Día '}[lang]||'Day ')+n;
+ }
+ if(/^ac1$/i.test(key))return ({de:'Phase 1',en:'Phase 1',fr:'Phase 1',es:'Fase 1'}[lang]||'Phase 1');
+ return raw;
+}
+function messageEventLabel2(v,lang){
+ const event=String(v?.event_name||'Event'),phase=messagePhaseLabel2(v,lang);
+ return phase?event+' – '+phase:event;
+}
+function playerMessageStageText2(level,s,lang){
+ const end=s?.end_at?messageDate2(s.end_at,lang):'';
+ const started=!!s?.started_at;
+ const texts={
+  de:{
+   1:'Dies ist aktuell Stufe 1 und damit eine Verwarnung gemäß Law 14.',
+   2:'Da dies aktuell Stufe 2 ist, folgt gemäß Law 14 R1. Während der Maßnahme bist du außerdem von Ministerposten ausgeschlossen.'+(end?' Die Maßnahme läuft bis '+end+'.':''),
+   3:'Da dies aktuell Stufe 3 ist, folgt gemäß Law 14 eine 24h NAP-Exclusion.'+(end?' Sie läuft bis '+end+'.':''),
+   4:started?('Da dies aktuell Stufe 4 ist, ist eine verlängerte NAP-Exclusion aktiv.'+(end?' Sie läuft bis '+end+'.':'')):'Da dies aktuell Stufe 4 ist, wird eine längere NAP-Exclusion gemäß Law 14 durch eine NAP-Abstimmung festgelegt.'
+  },
+  en:{
+   1:'This is currently Level 1 and therefore a warning under Law 14.',
+   2:'As this is currently Level 2, R1 applies under Law 14. During the measure, you are also excluded from minister positions.'+(end?' The measure runs until '+end+'.':''),
+   3:'As this is currently Level 3, a 24-hour NAP Exclusion applies under Law 14.'+(end?' It runs until '+end+'.':''),
+   4:started?('As this is currently Level 4, an extended NAP Exclusion is active.'+(end?' It runs until '+end+'.':'')):'As this is currently Level 4, a longer NAP Exclusion will be determined by a NAP vote under Law 14.'
+  },
+  fr:{
+   1:'Il s’agit actuellement du niveau 1, donc d’un avertissement conformément à la Law 14.',
+   2:'Comme il s’agit actuellement du niveau 2, le rang R1 s’applique conformément à la Law 14. Pendant cette mesure, tu es également exclu des postes de ministre.'+(end?' La mesure est active jusqu’au '+end+'.':''),
+   3:'Comme il s’agit actuellement du niveau 3, une exclusion NAP de 24 h s’applique conformément à la Law 14.'+(end?' Elle est active jusqu’au '+end+'.':''),
+   4:started?('Comme il s’agit actuellement du niveau 4, une exclusion NAP prolongée est active.'+(end?' Elle est active jusqu’au '+end+'.':'')):'Comme il s’agit actuellement du niveau 4, une exclusion NAP plus longue sera déterminée par un vote NAP conformément à la Law 14.'
+  },
+  es:{
+   1:'Actualmente es nivel 1 y, por tanto, una advertencia según la Law 14.',
+   2:'Como actualmente es nivel 2, se aplica R1 según la Law 14. Durante la medida también quedas excluido de los puestos de ministro.'+(end?' La medida estará activa hasta el '+end+'.':''),
+   3:'Como actualmente es nivel 3, se aplica una exclusión NAP de 24 h según la Law 14.'+(end?' Estará activa hasta el '+end+'.':''),
+   4:started?('Como actualmente es nivel 4, hay una exclusión NAP ampliada activa.'+(end?' Estará activa hasta el '+end+'.':'')):'Como actualmente es nivel 4, una exclusión NAP más larga se determinará mediante una votación NAP según la Law 14.'
+  }
+ };
+ return (texts[lang]||texts.en)[Number(level)||1]||'';
+}
+function buildPlayerMessage2(s,v,P,lang){
+ lang=['de','en','fr','es'].includes(lang)?lang:'en';
+ const name=P?.name||P?.player_name||v?.player_name||'';
+ const target=Number(v?.target_value||0),score=Number(v?.score||0);
+ const mult=violationLimit2(v)?.multiplier||3,limit=target*mult,event=messageEventLabel2(v,lang);
+ const stage=playerMessageStageText2(Number(s?.level||1),s,lang);
+ const parts={
+  de:[
+   'Hi '+name+' 👋',
+   'kurze Info zu deinem aktuellen Law-14-Verstoß:',
+   'Beim '+event+' hast du '+messageNumber2(score,lang)+' Punkte erreicht. Das Tagesziel liegt bei '+messageNumber2(target,lang)+', die erlaubte '+mult+'×-Grenze somit bei '+messageNumber2(limit,lang)+' Punkten. Damit wurde die Grenze überschritten.',
+   stage,
+   'Bitte achte bei den kommenden Events wieder auf die jeweilige Grenze. Danke dir! 🙏'
+  ],
+  en:[
+   'Hi '+name+' 👋',
+   'a quick note about your current Law 14 violation:',
+   'In '+event+' you reached '+messageNumber2(score,lang)+' points. The target is '+messageNumber2(target,lang)+', so the allowed '+mult+'× limit is '+messageNumber2(limit,lang)+' points. This means the limit was exceeded.',
+   stage,
+   'Please keep an eye on the applicable limit in upcoming events. Thank you! 🙏'
+  ],
+  fr:[
+   'Salut '+name+' 👋',
+   'petite information concernant ton infraction actuelle à la Law 14 :',
+   'Lors de '+event+', tu as atteint '+messageNumber2(score,lang)+' points. L’objectif est de '+messageNumber2(target,lang)+', donc la limite autorisée de '+mult+'× est de '+messageNumber2(limit,lang)+' points. La limite a donc été dépassée.',
+   stage,
+   'Merci de faire attention à la limite applicable lors des prochains événements. 🙏'
+  ],
+  es:[
+   'Hola '+name+' 👋',
+   'un breve aviso sobre tu infracción actual de la Law 14:',
+   'En '+event+' alcanzaste '+messageNumber2(score,lang)+' puntos. El objetivo es de '+messageNumber2(target,lang)+', por lo que el límite permitido de '+mult+'× es de '+messageNumber2(limit,lang)+' puntos. Por tanto, se superó el límite.',
+   stage,
+   'Por favor, ten en cuenta el límite correspondiente en los próximos eventos. ¡Gracias! 🙏'
+  ]
+ };
+ return (parts[lang]||parts.en).filter(Boolean).join('\n\n');
+}
+async function copyPlayerMessageText2(text){
+ try{await navigator.clipboard.writeText(text);return true}catch{}
+ const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();
+ let ok=false;try{ok=document.execCommand('copy')}catch{}ta.remove();return ok;
+}
+function openPlayerMessage2(sanctionId){
+ const s=S.x.find(x=>String(x.id)===String(sanctionId));if(!s)return;
+ const v=S.v.find(x=>String(x.id)===String(s.violation_id));if(!v)return;
+ const P=p(s.player_name),ui=playerMessageUi2(),saved=(P.languages||[]).map(x=>String(x).toLowerCase());
+ const supported=saved.filter(x=>['de','en','fr','es'].includes(x));
+ const langs=[...new Set(supported.length?supported:['en'])],fallback=saved.length>0&&!supported.length;
+ let current=langs[0];
+ document.getElementById('livePlayerMessageModal')?.remove();
+ const modal=document.createElement('div');modal.id='livePlayerMessageModal';modal.className='modal-backdrop';
+ modal.innerHTML='<div class="modal-card player-message-modal"><div class="modal-head"><div><b>'+E(ui.title)+'</b><small>'+E(s.player_name)+' · Stufe '+E(s.level)+'</small></div><button class="icon-btn player-message-close" type="button">×</button></div>'+
+  '<div class="live-form">'+(langs.length>1?'<div class="player-message-langs">'+langs.map((x,i)=>'<button class="btn small '+(i===0?'primary':'secondary')+' player-message-lang" data-lang="'+E(x)+'" type="button">'+E(languageName2(x))+'</button>').join('')+'</div>':'')+
+  (fallback?'<div class="notice warn">'+E(ui.fallback)+'</div>':'')+
+  '<textarea class="player-message-preview" readonly></textarea>'+
+  '<div class="hero-actions"><button class="btn secondary player-message-close" type="button">'+E(ui.close)+'</button><button class="btn primary player-message-copy" type="button">📋 '+E(ui.copy)+'</button></div><div class="live-status player-message-status"></div></div></div>';
+ document.body.appendChild(modal);
+ const preview=modal.querySelector('.player-message-preview'),copy=modal.querySelector('.player-message-copy'),status=modal.querySelector('.player-message-status');
+ const paint=()=>{preview.value=buildPlayerMessage2(s,v,P,current);modal.querySelectorAll('.player-message-lang').forEach(b=>{b.classList.toggle('primary',b.dataset.lang===current);b.classList.toggle('secondary',b.dataset.lang!==current)})};
+ modal.querySelectorAll('.player-message-lang').forEach(b=>b.onclick=()=>{current=b.dataset.lang;paint()});
+ modal.querySelectorAll('.player-message-close').forEach(b=>b.onclick=()=>modal.remove());
+ modal.onclick=e=>{if(e.target===modal)modal.remove()};
+ copy.onclick=async()=>{const ok=await copyPlayerMessageText2(preview.value);status.textContent=ok?ui.copied:'Copy failed';if(ok){copy.textContent='✓ '+ui.copied.replace(/^✓\s*/,'');setTimeout(()=>{if(copy.isConnected)copy.textContent='📋 '+ui.copy},1400)}};
+ paint();
+}
+
 function profileActionCard2(s){
  const v=S.v.find(v=>String(v.id)===String(s.violation_id))||null;
  const status=sanctionStatus2(s,v),start=Number(s.level)===1?v?.contacted_at||s.started_at:s.started_at;
@@ -1321,11 +1448,12 @@ function profileActionCard2(s){
   l4Open=Number(s.level)===4&&!s.started_at,w4=extendedActionWords2();
  const remaining=status.key==='active'&&s.end_at?dur(new Date(s.end_at)-Date.now()):
    status.key==='expired'?(SANCTION_STATUS_WORDS2[L()]||SANCTION_STATUS_WORDS2.de).expired:'–';
- return '<article class="card" data-profile-sanction="'+E(s.id)+'"><div class="card-head"><div><div class="card-title">Stufe '+E(s.level)+' · '+E(Number(s.level)===2?'R1':Number(s.level)===3?'24h NAP OUT':Number(s.level)===4?'Extended':'Kontakt')+'</div><div class="card-sub">Erstellt '+E(D(s.created_at))+'</div></div><span class="pill '+E(status.cls)+'">'+E(status.label)+'</span></div><div class="card-body">'+(r1Missing?'<div class="notice warn" style="margin-bottom:10px">⚠ R1 bestätigt – individuelle Endzeit noch setzen.</div><div class="live-form-row"><label>Ende<input class="profile-r1-end" type="datetime-local" value="'+E(toLocalInput2(s.end_at))+'"></label><div style="display:flex;align-items:end"><button class="btn secondary profile-r1-save" data-id="'+E(s.id)+'">Timer setzen</button></div></div>':'')+(l4Open?'<div class="notice warn" style="margin-bottom:10px">⚠ '+E(w4.notice)+'</div><div class="live-form-row"><label>'+E(w4.end)+'<input class="profile-l4-end" type="datetime-local"></label><div style="display:flex;align-items:end"><button class="btn primary profile-l4-start" data-id="'+E(s.id)+'">'+E(w4.start)+'</button></div></div>':'')+'<div class="action-date-grid"><div><span>Start</span><b>'+E(D(start))+'</b></div><div><span>Ende</span><b>'+E(D(s.end_at))+'</b></div><div><span>Restzeit</span><b>'+E(remaining)+'</b></div><div><span>Status</span><b>'+E(status.label)+'</b></div></div></div></article>';
+ return '<article class="card" data-profile-sanction="'+E(s.id)+'"><div class="card-head"><div><div class="card-title">Stufe '+E(s.level)+' · '+E(Number(s.level)===2?'R1':Number(s.level)===3?'24h NAP OUT':Number(s.level)===4?'Extended':'Kontakt')+'</div><div class="card-sub">Erstellt '+E(D(s.created_at))+'</div></div><span class="pill '+E(status.cls)+'">'+E(status.label)+'</span></div><div class="card-body">'+(r1Missing?'<div class="notice warn" style="margin-bottom:10px">⚠ R1 bestätigt – individuelle Endzeit noch setzen.</div><div class="live-form-row"><label>Ende<input class="profile-r1-end" type="datetime-local" value="'+E(toLocalInput2(s.end_at))+'"></label><div style="display:flex;align-items:end"><button class="btn secondary profile-r1-save" data-id="'+E(s.id)+'">Timer setzen</button></div></div>':'')+(l4Open?'<div class="notice warn" style="margin-bottom:10px">⚠ '+E(w4.notice)+'</div><div class="live-form-row"><label>'+E(w4.end)+'<input class="profile-l4-end" type="datetime-local"></label><div style="display:flex;align-items:end"><button class="btn primary profile-l4-start" data-id="'+E(s.id)+'">'+E(w4.start)+'</button></div></div>':'')+'<div class="action-date-grid"><div><span>Start</span><b>'+E(D(start))+'</b></div><div><span>Ende</span><b>'+E(D(s.end_at))+'</b></div><div><span>Restzeit</span><b>'+E(remaining)+'</b></div><div><span>Status</span><b>'+E(status.label)+'</b></div></div><div class="hero-actions player-message-action"><button class="btn secondary profile-player-message" data-id="'+E(s.id)+'" type="button">'+E(playerMessageUi2().open)+'</button></div></div></article>';
 }
 function bindProfileR1Timers2(){
  document.querySelectorAll('.profile-r1-save').forEach(b=>b.onclick=()=>setR1Timer2(b.dataset.id,b.closest('[data-profile-sanction]')?.querySelector('.profile-r1-end')));
  document.querySelectorAll('.profile-l4-start').forEach(b=>b.onclick=()=>startExtendedExclusion2(b.dataset.id,b.closest('[data-profile-sanction]')?.querySelector('.profile-l4-end')));
+ document.querySelectorAll('.profile-player-message').forEach(b=>b.onclick=()=>openPlayerMessage2(b.dataset.id));
 }
 
 const SHARED_SPENDING_WORDS2={
