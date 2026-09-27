@@ -43,10 +43,11 @@ function postContactText(key){const d=POST_CONTACT_WORDS[lang()]||POST_CONTACT_W
 const reviewText=(key)=>((REVIEW_WORDS[lng()]||REVIEW_WORDS.de)[key]||key);
 const points=n=>Number(n).toLocaleString('de-DE');
 const NAP_ORDER=['NWO','THM','CWR','NRW','PxR','NwO'];
+const REQUIRED_SCREEN_ALLIANCES=[...NAP_ORDER,'TWD'];
 let alliancePower=new Map();
 const alphabeticalRoster=members=>members.map((p,i)=>({p,i})).sort((a,b)=>String(a.p.player_name||'').localeCompare(String(b.p.player_name||''),'de',{sensitivity:'base',numeric:true})||String(a.p.player_game_id||'').localeCompare(String(b.p.player_game_id||''),'de',{numeric:true}));
 function orderedAlliances(members){
- const names=[...new Set(members.map(p=>p.alliance_code).filter(Boolean))];
+ const names=[...new Set([...REQUIRED_SCREEN_ALLIANCES,...members.map(p=>p.alliance_code).filter(Boolean)])];
  return names.sort((a,b)=>{
   const pa=Number(alliancePower.get(a)||0),pb=Number(alliancePower.get(b)||0);
   if(pa>0&&pb>0&&pa!==pb)return pb-pa;
