@@ -1197,7 +1197,10 @@ function violationRule2(v){
  const phases=PHASES2[v.event_name]||[];
  return phases.find(x=>x[0]===v.phase_name)||[v.phase_name||'general',v.phase_name||'General',v.target_value??null];
 }
-function canDeleteViolation2(v){return !!v&&String(v.alliance_code||'')===String(S.a||'')}
+function canDeleteViolation2(v){
+ const own=String(S.a||'').trim(),row=String(v?.alliance_code||'').trim();
+ return !!v&&!!own&&row===own;
+}
 function openViolationEditor2(id){
  const v=S.v.find(x=>String(x.id)===String(id));if(!v)return;
  document.getElementById('liveViolationEditModal')?.remove();
@@ -1209,7 +1212,7 @@ function openViolationEditor2(id){
  '<label>Phase<select id="liveVioPhase"></select></label>'+
  '<div class="live-form-row" id="liveVioScoreRow"><label>Ziel<input id="liveVioTarget" inputmode="numeric" value="'+E(v.target_value??'')+'"></label><label>Punkte<input id="liveVioScore" inputmode="numeric" value="'+E(v.score??'')+'"></label></div>'+
  '<div id="liveVioThreshold" class="live-note"></div><label>Zeitpunkt<input id="liveVioOccurred" type="datetime-local" value="'+E(local)+'"></label><label>Notiz<textarea id="liveVioNote" maxlength="500">'+E(v.note||'')+'</textarea></label>'+
- '<div class="hero-actions"><button class="btn primary" type="submit">Änderungen speichern</button><button class="btn danger" id="liveDeleteViolation" type="button">'+E(profileWords2().delete)+'</button></div><div id="liveVioEditStatus" class="live-status"></div></form></div>';
+ '<div class="hero-actions"><button class="btn primary" type="submit">Änderungen speichern</button><button class="btn danger" id="liveDeleteViolation" data-id="'+E(v.id)+'" type="button">'+E(profileWords2().delete)+'</button></div><div id="liveVioEditStatus" class="live-status"></div></form></div>';
  document.body.appendChild(modal);
  const event=document.getElementById('liveVioEvent'),phase=document.getElementById('liveVioPhase');
  function sync(){
@@ -1275,14 +1278,37 @@ async function askDeleteReason2(v){
  });
 }
 async function deleteViolation2(v){
- if(!canDeleteViolation2(v))return;
- const details=await askDeleteReason2(v);if(!details)return;
+ if(!v){alert('Der Verstoß konnte nicht geladen werden. Bitte die Seite neu laden.');return}
+ if(!canDeleteViolation2(v)){
+  alert('Dieser Verstoß gehört nicht zur aktuell angemeldeten Allianz. Bitte die Seite neu laden.');
+  return;
+ }
+ let details;
+ try{details=await askDeleteReason2(v)}
+ catch(err){alert(err?.message||String(err));return}
+ if(!details)return;
  const out=document.getElementById('liveVioEditStatus');if(out)out.textContent=actionWord2('deleting');
  try{
-  await rpc('delete_violation_fast_attributed',{p_id:v.id,p_reason:details.reason,p_deleted_by_player_id:details.officerId});
+  const ok=await rpc('delete_violation_fast_attributed',{p_id:v.id,p_reason:details.reason,p_deleted_by_player_id:details.officerId});
+  if(ok!==true)throw Error('Der Verstoß wurde nicht gelöscht. Bitte die Seite neu laden und erneut versuchen.');
   document.getElementById('liveViolationEditModal')?.remove();
   await load();renderHomeFull2();renderPlayers2();await openProfile2(v.player_name);
- }catch(err){if(out)out.textContent=err.message||String(err)}
+ }catch(err){
+  const msg=err?.message||String(err);
+  if(out)out.textContent=msg;else alert(msg);
+ }
+}
+if(!window.__NAP2_DELETE_DELEGATION){
+ window.__NAP2_DELETE_DELEGATION=true;
+ document.addEventListener('click',e=>{
+  const target=e.target instanceof Element?e.target.closest('.live-delete-violation,#liveDeleteViolation'):null;
+  if(!target)return;
+  const id=String(target.getAttribute('data-id')||'');
+  const v=S.v.find(x=>String(x.id)===id);
+  e.preventDefault();
+  e.stopImmediatePropagation();
+  deleteViolation2(v);
+ },true);
 }
 function profileStage2(name,l){
  const text={
