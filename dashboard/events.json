@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "kingdom": 1044,
   "timezone": "UTC",
-  "updatedAt": "2026-09-26T00:16:13Z",
+  "updatedAt": "2026-09-27T00:14:02Z",
   "events": [
     {
       "id": "golden-glaives-prep-2026-09-20",
@@ -1010,6 +1010,40 @@
             ]
           }
         }
+      },
+      "sourceUrl": "https://v2.kingshot.net/calendar"
+    },
+    {
+      "id": "alliance-mobilization-2026-09-28",
+      "start": "2026-09-28",
+      "end": "2026-10-03",
+      "icon": "📋",
+      "manual": false,
+      "confidence": "predicted",
+      "name": {
+        "de": "Allianz-Mobilisierung",
+        "en": "Alliance Mobilization",
+        "fr": "Mobilisation d’alliance"
+      },
+      "tips": {
+        "de": [
+          "Der Termin folgt dem öffentlichen 4‑Wochen-Rhythmus und bleibt bis zur Ingame-Bestätigung voraussichtlich.",
+          "Nimm nur Missionen an, die du zuverlässig abschließen kannst; Absprachen der Allianz haben Vorrang.",
+          "Wähle möglichst Missionen, die mit ohnehin geplanten Aktionen oder dem aktiven Stärkster-Gouverneur-Tag zusammenfallen.",
+          "Verbrauche keine zusätzlichen KvK-Ressourcen nur für Mobilisierungspunkte."
+        ],
+        "en": [
+          "The date follows the public 4-week cycle and remains predicted until confirmed in game.",
+          "Only accept missions you can reliably complete; alliance coordination takes priority.",
+          "Whenever possible, choose missions that overlap with actions you already planned or the active Strongest Governor day.",
+          "Do not spend extra KvK resources solely for Mobilization points."
+        ],
+        "fr": [
+          "La date suit le cycle public de 4 semaines et reste prévisionnelle jusqu’à confirmation en jeu.",
+          "N’accepte que les missions que tu peux terminer avec certitude ; la coordination de l’alliance est prioritaire.",
+          "Choisis si possible des missions qui coïncident avec des actions déjà prévues ou avec la journée active de Gouverneur le plus puissant.",
+          "Ne dépense pas de ressources KvK supplémentaires uniquement pour les points de Mobilisation."
+        ]
       },
       "sourceUrl": "https://v2.kingshot.net/calendar"
     },
