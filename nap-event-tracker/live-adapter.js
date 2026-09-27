@@ -1137,15 +1137,35 @@ async function renderWelcomeLanguageQueue2(){
 }
 function languageEditor2(P){
  const selected=new Set((P.languages||[]).map(x=>String(x).toLowerCase()));
- return '<details class="live-language-editor"><summary>🌐 Sprachen bearbeiten</summary><div class="live-language-grid">'+LANG_OPTIONS2.map(x=>'<label class="live-language-option"><input type="checkbox" value="'+E(x[0])+'" '+(selected.has(x[0])?'checked':'')+'><span>'+E(x[1])+'</span></label>').join('')+'</div><div class="hero-actions" style="margin-top:10px"><button type="button" class="btn secondary" id="liveSaveLanguages">Sprachen speichern</button><span id="liveLanguageStatus" class="live-status"></span></div></details>';
+ return '<details class="live-language-editor"><summary>🌐 Sprachen bearbeiten</summary><div class="live-language-grid">'+LANG_OPTIONS2.map(x=>'<label class="live-language-option"><input type="checkbox" value="'+E(x[0])+'" '+(selected.has(x[0])?'checked':'')+'><span>'+E(x[1])+'</span></label>').join('')+'</div><div class="hero-actions" style="margin-top:10px"><button type="button" class="btn secondary" id="liveSaveLanguages" data-player-id="'+E(P.id)+'">Sprachen speichern</button><span id="liveLanguageStatus" class="live-status"></span></div></details>';
 }
 async function saveLanguages2(P){
- const out=document.getElementById('liveLanguageStatus'),langs=[...document.querySelectorAll('.live-language-option input:checked')].map(x=>x.value);if(out)out.textContent=actionWord2('saving');
+ const out=document.getElementById('liveLanguageStatus');
+ const editor=document.querySelector('.live-language-editor');
+ const langs=[...(editor?.querySelectorAll('.live-language-option input:checked')||[])].map(x=>x.value);
+ if(!P?.id){if(out)out.textContent='Spieler konnte nicht geladen werden.';return}
+ if(out)out.textContent=actionWord2('saving');
  try{
-   const rows=await upd('players',P.id,{languages:langs}),updated=rows?.[0]||{...P,languages:langs},idx=S.p.findIndex(x=>x.id===P.id);if(idx>=0)S.p[idx]=updated;
+   const updated=await rpc('set_player_languages',{p_player_id:P.id,p_languages:langs});
+   const idx=S.p.findIndex(x=>String(x.id)===String(P.id));
+   if(idx>=0)S.p[idx]=updated;
+   P.languages=updated?.languages||langs;
    if(out)out.textContent=actionWord2('saved');
-   const line=document.querySelector('.profile-alliance-line');if(line)line.innerHTML='Player ID '+E(updated.game_id||'–')+' · '+allianceBadge2(S.a)+' · '+E(langs.map(languageName2).join(' / ')||'–');
- }catch(err){if(out)out.textContent=err.message||String(err)}
+   const line=document.querySelector('.profile-main .muted.small');
+   if(line)line.innerHTML='Player ID '+E(updated?.game_id||P.game_id||'–')+' · <span class="pill">'+E(S.a)+'</span> · '+E((updated?.languages||langs).map(languageName2).join(' / ')||'–');
+ }catch(err){if(out)out.textContent=err?.message||String(err)}
+}
+if(!window.__NAP2_LANGUAGE_SAVE_DELEGATION){
+ window.__NAP2_LANGUAGE_SAVE_DELEGATION=true;
+ document.addEventListener('click',e=>{
+   const btn=e.target instanceof Element?e.target.closest('#liveSaveLanguages'):null;
+   if(!btn)return;
+   e.preventDefault();
+   e.stopPropagation();
+   const id=String(btn.getAttribute('data-player-id')||'');
+   const P=S.p.find(x=>String(x.id)===id);
+   saveLanguages2(P);
+ },true);
 }
 function renderPlayers2(){
  const g=document.getElementById('playerGrid');if(!g)return;
@@ -1553,7 +1573,7 @@ async function paintProfileTab2(name,tab){
  if(tab==='overview'){
   const lawCases=V.filter(isLaw14Case2),internalCases=V.filter(isInternalCase2),cw=playerCaseWords2();
   body.innerHTML='<div class="live-panel-grid"><section class="card"><div class="card-head"><div><div class="card-title">Übersicht</div></div></div><div class="card-body"><div class="live-stat-grid"><div class="live-stat"><b>'+lawCases.length+'</b><small>'+E(cw.lawCases)+'</small></div><div class="live-stat"><b>'+lawCases.filter(active).length+'</b><small>'+E(cw.lawActive)+'</small></div><div class="live-stat"><b>'+internalCases.length+'</b><small>'+E(cw.internalCases)+'</small></div><div class="live-stat"><b>'+l+'</b><small>'+E(cw.stage)+'</small></div><div class="live-stat"><b>'+E((P.languages||[]).map(languageName2).join(' / ')||'–')+'</b><small>Sprachen</small></div></div>'+languageEditor2(P)+'<form id="livePlayerIdForm" class="live-form"><label>Player ID<input id="livePlayerId" value="'+E(P.game_id||'')+'" inputmode="numeric"></label><button class="btn secondary">Player ID speichern</button><div id="livePlayerIdStatus" class="live-status"></div></form></div></section><section>'+ (latest?profileActionCard2(latest):'<div class="live-empty-state">Keine Maßnahme vorhanden.</div>') +'</section></div>';
-  document.getElementById('liveSaveLanguages')?.addEventListener('click',()=>saveLanguages2(P));bindProfileR1Timers2();document.getElementById('livePlayerIdForm').onsubmit=async e=>{e.preventDefault();const out=document.getElementById('livePlayerIdStatus');try{const d=await rpc('set_player_game_id',{p_player_name:name,p_game_id:document.getElementById('livePlayerId').value.replace(/\D/g,'')});if(d){const i=S.p.findIndex(x=>x.id===P.id);if(i>=0)S.p[i]=d}out.textContent=actionWord2('saved');await loadAvatars();renderPlayers2()}catch(err){out.textContent=err.message||String(err)}};return;
+  bindProfileR1Timers2();document.getElementById('livePlayerIdForm').onsubmit=async e=>{e.preventDefault();const out=document.getElementById('livePlayerIdStatus');try{const d=await rpc('set_player_game_id',{p_player_name:name,p_game_id:document.getElementById('livePlayerId').value.replace(/\D/g,'')});if(d){const i=S.p.findIndex(x=>x.id===P.id);if(i>=0)S.p[i]=d}out.textContent=actionWord2('saved');await loadAvatars();renderPlayers2()}catch(err){out.textContent=err.message||String(err)}};return;
  }
  if(tab==='violations'){
   const w=profileWords2();
