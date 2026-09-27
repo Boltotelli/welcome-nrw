@@ -43,6 +43,7 @@ function postContactText(key){const d=POST_CONTACT_WORDS[lang()]||POST_CONTACT_W
 const reviewText=(key)=>((REVIEW_WORDS[lng()]||REVIEW_WORDS.de)[key]||key);
 const points=n=>Number(n).toLocaleString('de-DE');
 const NAP_ORDER=['NWO','THM','CWR','NRW','PxR','NwO'];
+const REQUIRED_EXTERNAL_ALLIANCES=['TWD'];
 const UNAFFILIATED_CODE='__UNAFFILIATED__';
 let alliancePower=new Map();
 const alphabeticalRoster=members=>members.map((p,i)=>({p,i})).sort((a,b)=>String(a.p.player_name||'').localeCompare(String(b.p.player_name||''),'de',{sensitivity:'base',numeric:true})||String(a.p.player_game_id||'').localeCompare(String(b.p.player_game_id||''),'de',{numeric:true}));
@@ -50,14 +51,14 @@ const allianceValueForPlayer=p=>p?.alliance_code==null?UNAFFILIATED_CODE:String(
 const allianceLabelForValue=a=>a===UNAFFILIATED_CODE?ocr2('unaffiliated'):a;
 function orderedAlliances(members){
  const names=[...new Set(members.map(p=>p.alliance_code).filter(Boolean))];
- const nap=NAP_ORDER.filter(a=>names.includes(a));
- const external=names.filter(a=>!NAP_ORDER.includes(a)).sort((a,b)=>{
+ const pinned=[...NAP_ORDER,...REQUIRED_EXTERNAL_ALLIANCES];
+ const external=names.filter(a=>!pinned.includes(a)).sort((a,b)=>{
   const pa=Number(alliancePower.get(a)||0),pb=Number(alliancePower.get(b)||0);
   if(pa>0&&pb>0&&pa!==pb)return pb-pa;
   if(pa>0)return -1;if(pb>0)return 1;
   return a.localeCompare(b,'de',{sensitivity:'base',numeric:true});
  });
- return [...nap,...(members.some(p=>p.alliance_code==null)?[UNAFFILIATED_CODE]:[]),...external];
+ return [...pinned,...(members.some(p=>p.alliance_code==null)?[UNAFFILIATED_CODE]:[]),...external];
 }
 function allianceOptions(members){
  return orderedAlliances(members).map(a=>selectOption(
