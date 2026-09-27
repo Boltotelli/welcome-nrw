@@ -1173,7 +1173,7 @@ function openViolationEditor2(id){
  '<label>Phase<select id="liveVioPhase"></select></label>'+
  '<div class="live-form-row" id="liveVioScoreRow"><label>Ziel<input id="liveVioTarget" inputmode="numeric" value="'+E(v.target_value??'')+'"></label><label>Punkte<input id="liveVioScore" inputmode="numeric" value="'+E(v.score??'')+'"></label></div>'+
  '<div id="liveVioThreshold" class="live-note"></div><label>Zeitpunkt<input id="liveVioOccurred" type="datetime-local" value="'+E(local)+'"></label><label>Notiz<textarea id="liveVioNote" maxlength="500">'+E(v.note||'')+'</textarea></label>'+
- '<div class="hero-actions"><button class="btn primary" type="submit">Änderungen speichern</button><button class="btn danger" id="liveDeleteViolation" type="button">Verstoß löschen</button></div><div id="liveVioEditStatus" class="live-status"></div></form></div>';
+ '<div class="hero-actions"><button class="btn primary" type="submit">Änderungen speichern</button><button class="btn danger" id="liveDeleteViolation" data-id="'+E(v.id)+'" type="button">Verstoß löschen</button></div><div id="liveVioEditStatus" class="live-status"></div></form></div>';
  document.body.appendChild(modal);
  const event=document.getElementById('liveVioEvent'),phase=document.getElementById('liveVioPhase');
  function sync(){
@@ -1205,19 +1205,24 @@ async function saveViolationEdit2(e,old){
  }catch(err){out.textContent=err.message||String(err)}
 }
 const DELETE_REASON_WORDS2={
- de:{title:'Verstoß löschen',sub:'Die zugehörige Sanktionskette wird neu berechnet.',label:'Begründung',hint:'Mindestens 5 Zeichen. Die Begründung wird im Audit-Log gespeichert.',cancel:'Abbrechen',confirm:'Endgültig löschen',short:'Bitte eine Begründung mit mindestens 5 Zeichen eingeben.'},
- en:{title:'Delete violation',sub:'The linked sanction chain will be recalculated.',label:'Reason',hint:'At least 5 characters. The reason is stored in the audit log.',cancel:'Cancel',confirm:'Delete permanently',short:'Enter a reason with at least 5 characters.'},
- fr:{title:'Supprimer l’infraction',sub:'La chaîne de sanctions associée sera recalculée.',label:'Motif',hint:'Au moins 5 caractères. Le motif est enregistré dans le journal d’audit.',cancel:'Annuler',confirm:'Supprimer définitivement',short:'Saisissez un motif d’au moins 5 caractères.'},
- es:{title:'Eliminar infracción',sub:'Se recalculará la cadena de sanciones asociada.',label:'Motivo',hint:'Mínimo 5 caracteres. El motivo se guarda en el registro de auditoría.',cancel:'Cancelar',confirm:'Eliminar definitivamente',short:'Introduce un motivo de al menos 5 caracteres.'}
+ de:{title:'Verstoß löschen',sub:'Die zugehörige Sanktionskette wird neu berechnet.',label:'Begründung',hint:'Mindestens 5 Zeichen. Die Begründung wird im Audit-Log gespeichert.',by:'Gelöscht von',choose:'R4/R5 auswählen',byHint:'Nur aktuell per API erkannte R4/R5 deiner Allianz werden angezeigt.',unavailable:'Keine frische R4/R5-Liste verfügbar. Bitte später erneut versuchen.',needOfficer:'Bitte die verantwortliche R4/R5-Person auswählen.',cancel:'Abbrechen',confirm:'Endgültig löschen',short:'Bitte eine Begründung mit mindestens 5 Zeichen eingeben.'},
+ en:{title:'Delete violation',sub:'The linked sanction chain will be recalculated.',label:'Reason',hint:'At least 5 characters. The reason is stored in the audit log.',by:'Deleted by',choose:'Select R4/R5',byHint:'Only current R4/R5 members of your alliance detected by the API are shown.',unavailable:'No fresh R4/R5 list is available. Please try again later.',needOfficer:'Select the responsible R4/R5 member.',cancel:'Cancel',confirm:'Delete permanently',short:'Enter a reason with at least 5 characters.'},
+ fr:{title:'Supprimer l’infraction',sub:'La chaîne de sanctions associée sera recalculée.',label:'Motif',hint:'Au moins 5 caractères. Le motif est enregistré dans le journal d’audit.',by:'Supprimé par',choose:'Sélectionner R4/R5',byHint:'Seuls les R4/R5 actuels de votre alliance détectés par l’API sont affichés.',unavailable:'Aucune liste R4/R5 récente disponible. Réessayez plus tard.',needOfficer:'Sélectionnez le membre R4/R5 responsable.',cancel:'Annuler',confirm:'Supprimer définitivement',short:'Saisissez un motif d’au moins 5 caractères.'},
+ es:{title:'Eliminar infracción',sub:'Se recalculará la cadena de sanciones asociada.',label:'Motivo',hint:'Mínimo 5 caracteres. El motivo se guarda en el registro de auditoría.',by:'Eliminado por',choose:'Seleccionar R4/R5',byHint:'Solo se muestran los R4/R5 actuales de tu alianza detectados por la API.',unavailable:'No hay una lista R4/R5 reciente disponible. Inténtalo más tarde.',needOfficer:'Selecciona al miembro R4/R5 responsable.',cancel:'Cancelar',confirm:'Eliminar definitivamente',short:'Introduce un motivo de al menos 5 caracteres.'}
 };
-function askDeleteReason2(v){
+async function askDeleteReason2(v){
  const w=DELETE_REASON_WORDS2[L()]||DELETE_REASON_WORDS2.de;
  document.getElementById('liveDeleteReasonModal')?.remove();
+ let officers=[],loadError=null;
+ try{officers=await rpc('get_my_deletion_officers',{})||[]}catch(err){loadError=err}
  return new Promise(resolve=>{
   const modal=document.createElement('div');modal.id='liveDeleteReasonModal';modal.className='modal-backdrop';
+  const options=officers.map(o=>'<option value="'+E(o.player_id)+'">'+E(o.player_name||'–')+' · '+E(o.alliance_rank_label||('R'+o.alliance_rank))+'</option>').join('');
   modal.innerHTML='<div class="modal-card"><div class="modal-head"><div><b>'+E(w.title)+'</b><small>'+E(v.player_name||'–')+' · '+E(v.event_name||'')+'</small></div><button class="icon-btn live-delete-close" type="button">×</button></div>'+
-   '<div class="live-form"><div class="notice warn">'+E(w.sub)+'</div><label>'+E(w.label)+'<textarea class="live-delete-reason" maxlength="500" rows="4" placeholder="'+E(w.hint)+'"></textarea></label>'+
-   '<div class="hero-actions"><button class="btn secondary live-delete-cancel" type="button">'+E(w.cancel)+'</button><button class="btn danger live-delete-confirm" type="button">'+E(w.confirm)+'</button></div><div class="live-status live-delete-status"></div></div></div>';
+   '<div class="live-form"><div class="notice warn">'+E(w.sub)+'</div><label>'+E(w.by)+'<select class="live-delete-officer"><option value="">'+E(w.choose)+'</option>'+options+'</select></label><div class="live-note">'+E(w.byHint)+'</div>'+
+   ((!officers.length||loadError)?'<div class="notice warn">'+E(w.unavailable)+'</div>':'')+
+   '<label>'+E(w.label)+'<textarea class="live-delete-reason" maxlength="500" rows="4" placeholder="'+E(w.hint)+'"></textarea></label>'+
+   '<div class="hero-actions"><button class="btn secondary live-delete-cancel" type="button">'+E(w.cancel)+'</button><button class="btn danger live-delete-confirm" type="button" '+(!officers.length?'disabled':'')+'>'+E(w.confirm)+'</button></div><div class="live-status live-delete-status"></div></div></div>';
   document.body.appendChild(modal);
   const close=val=>{modal.remove();resolve(val)};
   modal.querySelector('.live-delete-close').onclick=()=>close(null);
@@ -1225,20 +1230,41 @@ function askDeleteReason2(v){
   modal.onclick=e=>{if(e.target===modal)close(null)};
   modal.querySelector('.live-delete-confirm').onclick=()=>{
    const reason=modal.querySelector('.live-delete-reason').value.trim();
+   const officerId=modal.querySelector('.live-delete-officer').value;
+   if(!officerId){modal.querySelector('.live-delete-status').textContent=w.needOfficer;return}
    if(reason.length<5){modal.querySelector('.live-delete-status').textContent=w.short;return}
-   close(reason);
+   close({reason,officerId});
   };
-  modal.querySelector('.live-delete-reason').focus();
+  modal.querySelector('.live-delete-officer')?.focus();
  });
 }
 async function deleteViolation2(v){
- const reason=await askDeleteReason2(v);if(!reason)return;
+ if(!v){alert('Der Verstoß konnte nicht geladen werden. Bitte die Seite neu laden.');return}
+ let details;
+ try{details=await askDeleteReason2(v)}catch(err){alert(err?.message||String(err));return}
+ if(!details)return;
  const out=document.getElementById('liveVioEditStatus');if(out)out.textContent=actionWord2('deleting');
  try{
-  await rpc('delete_violation_fast',{p_id:v.id,p_reason:reason});
+  const ok=await rpc('delete_violation_fast_attributed',{p_id:v.id,p_reason:details.reason,p_deleted_by_player_id:details.officerId});
+  if(ok!==true)throw Error('Der Verstoß wurde nicht gelöscht. Bitte die Seite neu laden und erneut versuchen.');
   document.getElementById('liveViolationEditModal')?.remove();
   await load();renderHomeFull2();renderPlayers2();await openProfile2(v.player_name);
- }catch(err){if(out)out.textContent=err.message||String(err)}
+ }catch(err){
+  const msg=err?.message||String(err);
+  if(out)out.textContent=msg;else alert(msg);
+ }
+}
+if(!window.__NAP2_DELETE_DELEGATION){
+ window.__NAP2_DELETE_DELEGATION=true;
+ document.addEventListener('click',e=>{
+  const target=e.target instanceof Element?e.target.closest('#liveDeleteViolation'):null;
+  if(!target)return;
+  const id=String(target.getAttribute('data-id')||'');
+  const v=S.v.find(x=>String(x.id)===id);
+  e.preventDefault();
+  e.stopImmediatePropagation();
+  deleteViolation2(v);
+ },true);
 }
 function profileStage2(name,l){
  const text={
