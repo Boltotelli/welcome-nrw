@@ -254,7 +254,7 @@ function shell(root,kind){
  (perf?'<label>'+esc(tr('type'))+'<select id="nocrType"><option value="alliance_mobilization">Alliance Mobilization</option><option value="kvk_prep">KvK Prep · Top 200</option></select></label>':'')+
  (perf?'':'<label>'+esc(tr('event'))+'<select id="nocrEvent"></select></label>')+
  '<label>'+esc(tr('occ'))+'<select id="nocrOcc"></select></label>'+
- (perf?'':'<label>'+esc(tr('day'))+'<select id="nocrPhase"></select></label><label>'+esc(tr('date'))+'<input id="nocrDay" type="date"></label>')+
+  (perf?'':'<label>'+esc(tr('day'))+'<select id="nocrPhase"></select></label><label>'+esc(tr('date'))+'<select id="nocrDay"></select></label>')+
  '</div><label class="nocr-file"><span class="nocr-file-icon">▣</span><strong>'+esc(tr('file'))+'</strong><small id="nocrFilename">MP4 / MOV</small><input id="nocrFile" type="file" accept="video/mp4,video/quicktime,video/*"></label>'+
  '<p class="nocr-note">'+esc(tr('video'))+'</p><button type="button" class="btn primary nocr-analyze" id="nocrAnalyze">'+esc(tr('analyze'))+'</button><div class="nocr-status" id="nocrStatus" role="status" aria-live="polite"></div></section>'+
  '<section class="nocr-panel nocr-progress" id="nocrProgress" hidden><h3>'+esc(tr('prep'))+'</h3><p id="nocrProgressText"></p><div class="nocr-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="nocrBar"></span></div><div class="nocr-progress-foot"><b id="nocrPercent">0%</b><span id="nocrFound">0 '+esc(tr('found'))+'</span></div><div class="nocr-stages"><div data-step="0">✓ '+esc(tr('prep'))+'</div><div data-step="1">◎ '+esc(tr('recognize'))+'</div><div data-step="2">○ '+esc(tr('check'))+'</div></div></section></div>'+
@@ -293,9 +293,27 @@ async function lawOccurrence(){
  }catch(e){occ.innerHTML=selectOption(tr('missingEvent'),'');status(e.message||String(e),true)}
 }
 function selectedOcc(){return run?.occurrences?.find(o=>String(o.event_schedule_id)===$('#nocrOcc',run.root)?.value)}
+function occurrenceDays(occ){
+ if(!occ?.begin_at||!occ?.end_at)return [];
+ const start=dayNum(dayUTC(occ.begin_at));
+ const last=dayNum(dayUTC(new Date(Math.min(Date.now(),Date.parse(occ.end_at)-1))));
+ if(!Number.isFinite(start)||!Number.isFinite(last)||last<start)return [];
+ const days=[];
+ for(let t=start;t<=last&&days.length<31;t+=86400000)days.push(new Date(t).toISOString().slice(0,10));
+ return days;
+}
+function fillRecordingDays(root,occ,preferred=''){
+ const input=$('#nocrDay',root),days=occurrenceDays(occ);
+ input.innerHTML=days.length?days.map(d=>selectOption(d,d)).join(''):selectOption('–','');
+ input.disabled=!days.length;
+ if(preferred&&days.includes(preferred))input.value=preferred;
+ else if(days.length)input.value=days[days.length-1];
+ return days;
+}
 function setLawPhase(){
  const r=run;if(!r||r.kind!=='law')return;
- const root=r.root,event=$('#nocrEvent',root).value,occ=selectedOcc(),phase=$('#nocrPhase',root);
+ const root=r.root,event=$('#nocrEvent',root).value,occ=selectedOcc(),phase=$('#nocrPhase',root),dayInput=$('#nocrDay',root);
+ const previousPhase=phase.value,previousDay=dayInput.value;
  const list=(PHASES[event]||[]).filter(p=>{
   if(occ?.phase_hint&&p[0]!==occ.phase_hint)return false;
   if((event==='Strongest Governor'||event==='Alliance Brawl')&&occ){
@@ -303,25 +321,25 @@ function setLawPhase(){
   }
   return true;
  });
- const previous=phase.value;
  phase.innerHTML=list.map(p=>{
   const n=Number(p[0].slice(2)),day=(event==='Strongest Governor'||event==='Alliance Brawl')&&occ?dayUTC(occ.begin_at,n-1):'';
   return selectOption(p[1]+(day?' · '+day:''),p[0]);
  }).join('');
- if(list.some(p=>p[0]===previous))phase.value=previous;
+ if(list.some(p=>p[0]===previousPhase))phase.value=previousPhase;
  else if(list.length)phase.value=list[list.length-1][0];
- if(event==='Strongest Governor'||event==='Alliance Brawl'){
-  const first=phase.value,offset=Number(first.slice(2))-1;
-  const suggested=occ?dayUTC(occ.begin_at,offset):dayUTC(new Date());
-  $('#nocrDay',root).value=suggested;
- }else{
-  const now=dayUTC(new Date()),start=occ?dayUTC(occ.begin_at):now,end=occ?dayUTC(new Date(Math.min(Date.now(),Date.parse(occ.end_at)-1000))):now;
-  $('#nocrDay',root).value=dayNum(now)>=dayNum(start)&&dayNum(now)<=dayNum(end)?now:end;
+
+ const days=fillRecordingDays(root,occ,previousDay);
+ if((event==='Strongest Governor'||event==='Alliance Brawl')&&occ&&list.length){
+  if(previousDay&&days.includes(previousDay)){
+   const offset=Math.round((dayNum(previousDay)-dayNum(dayUTC(occ.begin_at)))/86400000)+1;
+   const matching=(event==='Strongest Governor'?'sg':'b')+offset;
+   if(list.some(p=>p[0]===matching))phase.value=matching;
+  }else{
+   const offset=Number(phase.value.slice(2))-1;
+   const matchingDay=dayUTC(occ.begin_at,offset);
+   if(days.includes(matchingDay))dayInput.value=matchingDay;
+  }
  }
- const input=$('#nocrDay',root);input.min=occ?dayUTC(occ.begin_at):'';input.max=occ?dayUTC(new Date(Math.min(Date.now(),Date.parse(occ.end_at)-1000))):dayUTC(new Date());
- input.readOnly=false;
- input.disabled=!occ;
- input.title=reviewText('dayReadOnly');
 }
 async function performanceOptions(){
  const r=run,root=r.root;if(!root.isConnected)return;
@@ -655,17 +673,22 @@ function mount(root,kind,allowed=[]){
  shell(root,kind);
  const r=run;$('#nocrAnalyze',root).onclick=analyze;$('#nocrSave',root).onclick=save;$('#nocrEvidenceRetry',root).onclick=retryPendingEvidence;
  if(kind==='law'){
-  const event=$('#liveScreenEvent')?.value||allowed[0]?.event_name;
-  // ScreenRecording is allowed to select a recent historical occurrence explicitly.
+   const manual=(window.NAP_V2_SCREEN_MANUAL_EVENTS||[]).find(x=>EVENTS.includes(x));
+   const event=manual||allowed.find(x=>EVENTS.includes(x.event_name))?.event_name||EVENTS[0];
+   // OCR has its own event selector. Manual availability may choose the default;
+   // recent historical occurrences remain explicitly selectable.
+   $('#nocrEvent',root).disabled=false;
   $('#nocrEvent',root).innerHTML=EVENTS.map(x=>selectOption(x,x)).join('');
   if(event&&EVENTS.includes(event))$('#nocrEvent',root).value=event;
   $('#nocrEvent',root).onchange=lawOccurrence;$('#nocrOcc',root).onchange=setLawPhase;
-  $('#nocrPhase',root).onchange=async()=>{
-  const occ=selectedOcc(),phase=$('#nocrPhase',root).value,event=$('#nocrEvent',root).value;
-  if(occ&&(event==='Strongest Governor'||event==='Alliance Brawl'))
-   $('#nocrDay',root).value=dayUTC(occ.begin_at,Number(phase.slice(2))-1);
-  if(r.hits.length)await refreshReview(r);
- };
+   $('#nocrPhase',root).onchange=async()=>{
+   const occ=selectedOcc(),phase=$('#nocrPhase',root).value,event=$('#nocrEvent',root).value,dayInput=$('#nocrDay',root);
+   if(occ&&(event==='Strongest Governor'||event==='Alliance Brawl')){
+    const day=dayUTC(occ.begin_at,Number(phase.slice(2))-1);
+    if(Array.from(dayInput.options).some(option=>option.value===day))dayInput.value=day;
+   }
+   if(r.hits.length)await refreshReview(r);
+  };
  $('#nocrDay',root).addEventListener('change',async()=>{
   const occ=selectedOcc(),day=$('#nocrDay',root).value,event=$('#nocrEvent',root).value,phase=$('#nocrPhase',root);
   if(!occ||!validDay(day,occ)){status(tr('wrongDay'),true);return}
