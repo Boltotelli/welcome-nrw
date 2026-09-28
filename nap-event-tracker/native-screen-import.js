@@ -252,7 +252,7 @@ function shell(root,kind){
  const perf=kind==='perf';root.innerHTML=
  '<div class="nocr-layout"><section class="nocr-panel"><div class="nocr-fields">'+
  (perf?'<label>'+esc(tr('type'))+'<select id="nocrType"><option value="alliance_mobilization">Alliance Mobilization</option><option value="kvk_prep">KvK Prep · Top 200</option></select></label>':'')+
- (perf?'':'<label>'+esc(tr('event'))+'<select id="nocrEvent" disabled></select></label>')+
+ (perf?'':'<label>'+esc(tr('event'))+'<select id="nocrEvent"></select></label>')+
  '<label>'+esc(tr('occ'))+'<select id="nocrOcc"></select></label>'+
  (perf?'':'<label>'+esc(tr('day'))+'<select id="nocrPhase"></select></label><label>'+esc(tr('date'))+'<input id="nocrDay" type="date"></label>')+
  '</div><label class="nocr-file"><span class="nocr-file-icon">▣</span><strong>'+esc(tr('file'))+'</strong><small id="nocrFilename">MP4 / MOV</small><input id="nocrFile" type="file" accept="video/mp4,video/quicktime,video/*"></label>'+
