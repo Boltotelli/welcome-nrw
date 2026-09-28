@@ -458,7 +458,7 @@ function renderAddLive(){
 }
 async function setupAddData2(){
  let opts=[];try{opts=await rpc('get_open_event_entry_options',{})||[]}catch(e){console.warn(e)}
- S.eventOptions=opts;window.NAP_V2_SCREEN_OPTIONS=opts.filter(x=>['Strongest Governor','Alliance Brawl','Officer Project','Armament Competition'].includes(x.event_name));
+  S.eventOptions=opts;window.NAP_V2_SCREEN_OPTIONS=opts.filter(x=>['Strongest Governor','Alliance Brawl','Officer Project','Armament Competition'].includes(x.event_name));window.NAP_V2_SCREEN_MANUAL_EVENTS=Object.entries(S.settings?.manual_event_entry_overrides||{}).filter(([,enabled])=>enabled===true).map(([event])=>event);
  const eventNames=[...new Set(opts.map(x=>x.event_name).filter(Boolean))];
  const options=eventNames.length?eventNames.map(x=>'<option value="'+E(x)+'">'+E(x)+'</option>').join(''):'<option value="">Kein Event freigegeben</option>';
  const me=document.getElementById('liveManualEvent');if(me)me.innerHTML=options;
