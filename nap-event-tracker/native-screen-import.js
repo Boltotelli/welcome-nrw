@@ -651,7 +651,7 @@ function mount(root,kind,allowed=[]){
  if(kind==='law'){
    const manual=(window.NAP_V2_SCREEN_MANUAL_EVENTS||[]).filter(x=>EVENTS.includes(x));
    const automatic=allowed.map(x=>x.event_name).filter(x=>EVENTS.includes(x));
-   const visibleEvents=[...new Set(manual.length?manual:automatic)];
+   const visibleEvents=[...new Set([...automatic,...manual])];
    const event=manual[0]||automatic[0]||'';
    // OCR only shows events that are automatically available or explicitly
    // enabled in Settings. Historical days are selected separately.
