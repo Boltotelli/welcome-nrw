@@ -46,6 +46,16 @@ const NAP_ORDER=['NWO','THM','CWR','NRW','PxR','NwO'];
 const REQUIRED_SCREEN_ALLIANCES=[...NAP_ORDER,'TWD'];
 let alliancePower=new Map();
 const alphabeticalRoster=members=>members.map((p,i)=>({p,i})).sort((a,b)=>String(a.p.player_name||'').localeCompare(String(b.p.player_name||''),'de',{sensitivity:'base',numeric:true})||String(a.p.player_game_id||'').localeCompare(String(b.p.player_game_id||''),'de',{numeric:true}));
+const sameAlliance=(a,b)=>String(a||'').trim().toLocaleLowerCase()===String(b||'').trim().toLocaleLowerCase();
+function dedupeRoster(rows){
+ const seen=new Set(),out=[];
+ for(const p of rows||[]){
+  const key=String(p.player_id||p.player_game_id||'').trim();
+  if(!key||seen.has(key))continue;
+  seen.add(key);out.push(p);
+ }
+ return out;
+}
 function orderedAlliances(members){
  const names=[...new Set([...REQUIRED_SCREEN_ALLIANCES,...members.map(p=>p.alliance_code).filter(Boolean)])];
  return names.sort((a,b)=>{
@@ -124,11 +134,15 @@ async function retryPendingEvidence(){
   }
  }finally{r.busy=false;button.disabled=false}
 }
-async function roster(){
+async function roster(force=false){
+ if(force)rosterPromise=null;
  if(rosterPromise)return rosterPromise;
  rosterPromise=(async()=>{
   const [rows,own,alliances]=await Promise.all([
-   rpc('get_nap_screen_import_directory_test'),
+   rpc('get_nap_screen_import_directory_v3').catch(async e=>{
+    console.warn('Full screen-import directory unavailable, using legacy directory',e);
+    return await rpc('get_nap_screen_import_directory_test');
+   }),
    rpc('get_own_player_identity_directory'),
    (async()=>{try{
     const res=await fetch(API+'/rest/v1/alliance_registry?select=alliance_code,power&enabled=eq.true&limit=1000',{headers:await headers(false)});
@@ -138,7 +152,7 @@ async function roster(){
   ]);
   alliancePower=new Map((alliances||[]).filter(x=>x.alliance_code&&Number(x.power)>0).map(x=>[x.alliance_code,Number(x.power)]));
   const aliases=new Map((own||[]).map(x=>[String(x.player_game_id),x.aliases||[]]));
-  return (rows||[]).map(x=>({...x,aliases:aliases.get(String(x.player_game_id))||[],player_id:x.player_id||null}));
+  return dedupeRoster((rows||[]).map(x=>({...x,aliases:aliases.get(String(x.player_game_id))||[],player_id:x.player_id||null})));
  })().catch(e=>{rosterPromise=null;throw e});
  return rosterPromise;
 }
@@ -269,8 +283,9 @@ async function lawOccurrence(){
  try{
   const options=await rpc('get_screen_import_occurrences',{p_event_name:event});
   if(run!==r)return;
-  const permitted=r.allowed.filter(x=>x.event_name===event);
-  const open=(options||[]).filter(o=>permitted.some(p=>p.begin_at&&o.begin_at&&Date.parse(p.begin_at)===Date.parse(o.begin_at)));
+  // ScreenRecording may target recent historical occurrences returned by the backend.
+  // Manual entry remains restricted to get_open_event_entry_options().
+  const open=(options||[]);
   r.occurrences=open;
   occ.innerHTML=open.length?open.map(o=>selectOption(dayUTC(o.begin_at)+' · '+(dayUTC(o.end_at))+(o.phase_hint?' · '+o.phase_hint:''),o.event_schedule_id)).join(''):selectOption(tr('missingEvent'),'');
   setLawPhase();
@@ -332,7 +347,7 @@ async function analyze(){
  let url,video,worker;
  try{
   progress(0,1,0);
-  let members=[...(await roster())];
+  let members=[...(await roster(true))];
   if(r.kind==='perf'&&$('#nocrType',root).value==='alliance_mobilization'&&perfOcc()?.event_schedule_id){
    try{
     const extras=await rpc('get_performance_candidate_roster',{p_event_schedule_id:perfOcc().event_schedule_id});
@@ -485,7 +500,7 @@ function showReview(r){
   const populate=()=>{
    const code=mapAlliance.value;
    mapPlayer.innerHTML='<option value="">–</option>'+alphabeticalRoster(r.members)
-    .filter(({p})=>code&&p.alliance_code===code)
+    .filter(({p})=>code&&sameAlliance(p.alliance_code,code))
     .map(({p,i})=>selectOption(p.player_name+' · '+(p.player_game_id||''),i)).join('');
   };
   mapAlliance.onchange=populate;
@@ -517,7 +532,7 @@ function showReview(r){
  const filter=$('#nocrSearchRoster',root);
  const list=()=>{
   const q=norm(filter.value),code=alliance.value;
-  const options=alphabeticalRoster(r.members).filter(({p})=>code&&p.alliance_code===code&&(!q||norm(p.player_name+' '+p.player_game_id).includes(q)));
+  const options=alphabeticalRoster(r.members).filter(({p})=>code&&sameAlliance(p.alliance_code,code)&&(!q||norm(p.player_name+' '+p.player_game_id).includes(q)));
   sel.innerHTML='<option value="">–</option>'+options.map(({p,i})=>selectOption(p.player_name+' · '+(p.player_game_id||''),i)).join('');
  };
  list();filter.addEventListener('input',list);alliance.addEventListener('change',list);
@@ -641,7 +656,8 @@ function mount(root,kind,allowed=[]){
  const r=run;$('#nocrAnalyze',root).onclick=analyze;$('#nocrSave',root).onclick=save;$('#nocrEvidenceRetry',root).onclick=retryPendingEvidence;
  if(kind==='law'){
   const event=$('#liveScreenEvent')?.value||allowed[0]?.event_name;
-  $('#nocrEvent',root).innerHTML=EVENTS.filter(n=>allowed.some(o=>o.event_name===n)).map(x=>selectOption(x,x)).join('');
+  // ScreenRecording is allowed to select a recent historical occurrence explicitly.
+  $('#nocrEvent',root).innerHTML=EVENTS.map(x=>selectOption(x,x)).join('');
   if(event&&EVENTS.includes(event))$('#nocrEvent',root).value=event;
   $('#nocrEvent',root).onchange=lawOccurrence;$('#nocrOcc',root).onchange=setLawPhase;
   $('#nocrPhase',root).onchange=async()=>{
