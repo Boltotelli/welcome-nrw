@@ -673,13 +673,17 @@ function mount(root,kind,allowed=[]){
  shell(root,kind);
  const r=run;$('#nocrAnalyze',root).onclick=analyze;$('#nocrSave',root).onclick=save;$('#nocrEvidenceRetry',root).onclick=retryPendingEvidence;
  if(kind==='law'){
-   const manual=(window.NAP_V2_SCREEN_MANUAL_EVENTS||[]).find(x=>EVENTS.includes(x));
-   const event=manual||allowed.find(x=>EVENTS.includes(x.event_name))?.event_name||EVENTS[0];
-   // OCR has its own event selector. Manual availability may choose the default;
-   // recent historical occurrences remain explicitly selectable.
-   $('#nocrEvent',root).disabled=false;
-  $('#nocrEvent',root).innerHTML=EVENTS.map(x=>selectOption(x,x)).join('');
-  if(event&&EVENTS.includes(event))$('#nocrEvent',root).value=event;
+   const manual=(window.NAP_V2_SCREEN_MANUAL_EVENTS||[]).filter(x=>EVENTS.includes(x));
+   const automatic=allowed.map(x=>x.event_name).filter(x=>EVENTS.includes(x));
+   const visibleEvents=[...new Set([...manual,...automatic])];
+   const event=manual[0]||automatic[0]||'';
+   // OCR only shows events that are automatically available or explicitly
+   // enabled in Settings. Historical days are selected separately.
+   $('#nocrEvent',root).disabled=visibleEvents.length<2;
+   $('#nocrEvent',root).innerHTML=visibleEvents.length
+    ?visibleEvents.map(x=>selectOption(x,x)).join('')
+    :selectOption(tr('missingEvent'),'');
+   if(event&&visibleEvents.includes(event))$('#nocrEvent',root).value=event;
   $('#nocrEvent',root).onchange=lawOccurrence;$('#nocrOcc',root).onchange=setLawPhase;
    $('#nocrPhase',root).onchange=async()=>{
    const occ=selectedOcc(),phase=$('#nocrPhase',root).value,event=$('#nocrEvent',root).value,dayInput=$('#nocrDay',root);
