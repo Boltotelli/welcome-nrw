@@ -170,7 +170,7 @@ const TIMER_VIEW_WORDS2={
 };
 function timerViewWords2(){return TIMER_VIEW_WORDS2[L()]||TIMER_VIEW_WORDS2.de}
 function timerRemaining2(end){const ms=new Date(end).getTime()-Date.now(),w=SANCTION_STATUS_WORDS2[L()]||SANCTION_STATUS_WORDS2.de;return Number.isFinite(ms)&&ms>0?dur(ms):w.expired}
-function activeOwnTimers2(){return (S.x||[]).filter(s=>{if(!s?.end_at||Number(s.level)<2)return false;const v=(S.v||[]).find(v=>String(v.id)===String(s.violation_id));return sanctionStatus2(s,v).key==='active'}).sort((a,b)=>new Date(a.end_at)-new Date(b.end_at))}
+function activeOwnTimers2(){return [...new Set((S.x||[]).map(s=>s.player_name).filter(Boolean))].map(name=>sanctionState2(name).currentSanction).filter(s=>{if(!s?.end_at||Number(s.level)<2)return false;const v=(S.v||[]).find(v=>String(v.id)===String(s.violation_id));return sanctionStatus2(s,v).key==='active'}).sort((a,b)=>new Date(a.end_at)-new Date(b.end_at))}
 function refreshSanctionTimerLabels2(){document.querySelectorAll('[data-timer-end]').forEach(el=>{const end=el.getAttribute('data-timer-end');if(end)el.textContent=timerRemaining2(end)})}
 function actions(){
  return [...new Set(S.v.filter(v=>
@@ -668,7 +668,7 @@ let law9SelectedCycle2=null;
 function law9CycleLabel2(x){
  const dt=x?.prep_start?new Date(x.prep_start):null;
  if(!dt||Number.isNaN(dt.getTime()))return 'KvK';
- return dt.toLocaleDateString(L()==='de'?'de-DE':L()==='fr'?'fr-FR':L()==='es'?'es-ES':'en-GB',{month:'short',year:'numeric'});
+ return dt.toLocaleDateString(L()==='de'?'de-DE':L()==='fr'?'fr-FR':L()==='es'?'es-ES':'en-GB',{month:'short',year:'numeric',timeZone:'UTC'});
 }
 function law9Normalized2(v){
  if(v==null||!Number.isFinite(Number(v)))return '–';
