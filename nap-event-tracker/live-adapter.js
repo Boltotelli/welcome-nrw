@@ -23,8 +23,10 @@ function isSessionAuthError2(err){
  return status===401||(status===400&&/(refresh|token|jwt|session)/.test(msg));
 }
 const loc=()=>({de:'de-DE',en:'en-US',fr:'fr-FR',es:'es-ES'}[L()]||'de-DE');
-const N=n=>Number(n||0).toLocaleString(loc()), D=x=>x?new Date(x).toLocaleString(loc(),{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'–';
-function monthYear2(x){if(!x)return '';const d=new Date(x);return Number.isFinite(d.getTime())?d.toLocaleDateString(loc(),{month:'long',year:'numeric'}):''}
+function utcInputDate2(value){if(!value)return null;const raw=String(value).trim(),hasZone=/[zZ]$|[+-]\\d{2}:?\\d{2}$/.test(raw),d=new Date(hasZone?raw:raw+'Z');return Number.isNaN(d.getTime())?null:d}
+function utcInputIso2(value){const d=utcInputDate2(value);if(!d)throw Error('Invalid UTC time');return d.toISOString()}
+const N=n=>Number(n||0).toLocaleString(loc()), D=x=>{if(!x)return '–';const d=new Date(x);return Number.isNaN(d.getTime())?'–':d.toLocaleString(loc(),{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',timeZone:'UTC'})+' UTC'};
+function monthYear2(x){if(!x)return '';const d=new Date(x);return Number.isFinite(d.getTime())?d.toLocaleDateString(loc(),{month:'long',year:'numeric',timeZone:'UTC'}):''}
 function performanceDate2(e){return monthYear2(e?.period_start||e?.period_end)||String(e?.label||'').trim()}
 function dur(ms){ms=Math.max(0,ms||0);return Math.floor(ms/3600000)+'h '+String(Math.floor(ms%3600000/60000)).padStart(2,'0')+'m'}
 function durLong2(ms){
@@ -173,11 +175,11 @@ function dl(a){const z=new Date((a.s||a.v)?.created_at||(a.v?.occurred_at)||0).g
 function renderHome(){document.querySelectorAll('[data-current-alliance]').forEach(x=>x.textContent=S.a);const A=actions(),k=document.querySelectorAll('#view-home .home-kpis .stat-value');if(k[0])k[0].textContent=A.length;if(k[1])k[1].textContent=S.o.length;if(k[2])k[2].textContent=S.e.length;if(k[3])k[3].textContent=S.t.length;homeActionCountBadge.textContent=A.length+' '+t('actions');const box=document.querySelector('#view-home .home-main-grid > .stack:first-child .card:first-child .card-body');if(box)box.innerHTML=A.length?A.map(a=>{const P=p(a.name),r1Missing=a.l===2&&a.s?.completed&&(!a.s.started_at||!a.s.end_at),lab=a.l===1?'Stufe 1 · Kontakt':a.l===2?(r1Missing?'Stufe 2 · R1 · Timer fehlt':'Stufe 2 · R1'):a.l===3?'Stufe 3 · 24h NAP OUT':'Stufe 4 · Extended',b=a.l===1?`<button class="btn small primary n2act" data-k="contact" data-id="${E(a.v.id)}">${E(t('contact'))}</button>`:a.l===2?`<button class="btn small primary n2act" data-k="r1" data-id="${E(a.s.id)}">${E(t('r1'))}</button>`:a.l===3?`<button class="btn small primary n2act" data-k="nap" data-id="${E(a.s.id)}">${E(t('nap'))}</button>`:'';return `<div class="action-item"><div><div class="player-line"><div class="player-avatar">${E(a.name[0])}</div><div><div class="player-name">${E(a.name)}</div><div class="player-id">ID ${E(P.game_id||'–')} · ${E(S.a)}</div></div></div></div><div class="action-right"><span class="pill gold">${E(lab)}</span><span class="deadline">${E(dl(a))}</span><div class="home-action-buttons">${b}<button class="btn small secondary n2message" data-id="${E(a.s.id)}" type="button">${E(playerMessageUi2().open)}</button><button class="mini-link n2open" data-p="${E(a.name)}">${E(t('open'))}</button></div></div></div>`}).join(''):`<div class="n2empty">✓ ${E(t('none'))}</div>`;const tb=document.querySelector('#view-home .home-main-grid > .stack:first-child .card:nth-child(2) tbody');if(tb)tb.innerHTML=S.v.slice(0,8).map(v=>`<tr><td><b>${E(v.player_name)}</b><br><span class="muted tiny">${E(S.a)}</span></td><td>${E(v.event_name||'')} · ${E(v.phase_name||'')}</td><td>${N(v.score)}</td><td>${violationLimit2(v)?N(violationLimit2(v).points):'–'}</td><td><span class="pill">${level(v.player_name)}</span></td><td>${v.contacted?'✓':'–'}</td></tr>`).join('')||`<tr><td colspan="6">${E(t('none'))}</td></tr>`;const tr=document.querySelector('#homeTransfers');if(tr)tr.innerHTML=S.t.length?S.t.map(x=>`<div class="transfer-card"><div class="transfer-main"><div class="player-line"><div class="player-avatar">${E((x.player_name||'?')[0])}</div><div><b>${E(x.player_name||'–')}</b><div class="muted tiny">ID ${E(x.game_id||'–')}</div></div></div><div class="transfer-route"><span class="pill">${E(x.from_alliance||'POOL')}</span><span>→</span><span class="pill blue">${E(x.to_alliance||'POOL')}</span></div></div><div class="muted small">${E(D(x.detected_since))}</div></div>`).join(''):`<div class="n2empty">${E(t('none'))}</div>`;document.querySelectorAll('.n2act').forEach(b=>b.onclick=()=>doAct(b.dataset.k,b.dataset.id));document.querySelectorAll('.n2message').forEach(b=>b.onclick=()=>openPlayerMessage2(b.dataset.id));document.querySelectorAll('.n2open').forEach(b=>b.onclick=()=>openProfile(b.dataset.p))}
 function renderPlayers(){const g=document.querySelector('#playerGrid');if(!g)return;g.innerHTML=S.p.map(P=>{const name=P.name||P.player_name||'',V=vv(name),l=level(name),att=V.some(v=>v.kind==='swordland'||/swordland|trialliance|triforce/i.test(String(v.event_name||''))),last=V[0],A=act(name);let val=l===1?(V.some(v=>active(v)&&!v.contacted)?'offen':'✓'):l===2?(A?dl({s:A}):'–'):l===3?(A?.end_at?dur(new Date(A.end_at)-Date.now()):'offen'):'OK';return `<div class="player-card" data-p="${E(name)}" data-has-entry="${V.length||ss(name).length?'1':'0'}" data-attendance="${att?'1':'0'}" data-search="${E((name+' '+(P.game_id||'')).toLowerCase())}"><div class="player-card-top"><div class="player-meta"><div class="player-avatar">${E((name[0]||'?').toUpperCase())}</div><div><div class="player-name">${E(name)}</div><div class="player-id">${E(P.game_id||'–')}</div></div></div><span class="pill">${E(S.a)}</span></div><div class="metric-row"><div class="metric"><b>${V.length}</b><span>Verstöße</span></div><div class="metric"><b>${l}</b><span>Stufe</span></div><div class="metric"><b>${E(val)}</b><span>Status</span></div></div><div class="player-card-foot">${att?'<span class="pill gold">Swordland / TriAlliance</span>':'<span></span>'}<span class="muted tiny">${last?E(D(last.occurred_at)):'–'}</span></div></div>`}).join('');g.querySelectorAll('[data-p]').forEach(c=>c.onclick=()=>openProfile(c.dataset.p));if(typeof applyPlayerFilters==='function')applyPlayerFilters()}
 function openProfile(name){const P=p(name),V=vv(name),X=ss(name),l=level(name),view=document.querySelector('#view-profile');if(!view)return;view.querySelector('.profile-name').textContent=name;view.querySelector('.profile-main .profile-avatar span').textContent=(name[0]||'?').toUpperCase();view.querySelector('.profile-main .muted.small').innerHTML=`Player ID ${E(P.game_id||'–')} · <span class="pill">${E(S.a)}</span> · ${E((P.languages||[]).map(languageName2).join(' / ')||'–')}`;const h=view.querySelector('[data-profile-panel="violations"] tbody');if(h)h.innerHTML=V.map(v=>`<tr><td>${E(D(v.occurred_at))}</td><td>${E(v.event_name||'')} · ${E(v.phase_name||'')}</td><td>${N(v.score)}</td><td>${violationLimit2(v)?N(violationLimit2(v).points):'–'}</td><td>${E(v.source_type||'manual')}</td><td>–</td></tr>`).join('');setView('profile');if(typeof setProfileTab==='function')setProfileTab('violations')}
-function toLocalInput2(d){if(!d)return '';const x=new Date(d);if(Number.isNaN(x.getTime()))return '';const z=new Date(x.getTime()-x.getTimezoneOffset()*60000);return z.toISOString().slice(0,16)}
+function toLocalInput2(d){if(!d)return '';const x=new Date(d);if(Number.isNaN(x.getTime()))return '';return x.toISOString().slice(0,16)}
 async function setR1Timer2(id,input){
  const s=S.x.find(x=>String(x.id)===String(id));const val=typeof input==='string'?input:input?.value;
  if(!s||!val){alert(actionWord2('endRequired'));return}
- const end=new Date(val);if(Number.isNaN(end.getTime())||end<=new Date()){alert(actionWord2('endFuture'));return}
+ const end=utcInputDate2(val);if(!end||end<=new Date()){alert(actionWord2('endFuture'));return}
  try{await upd('sanctions',id,{started_at:s.started_at||new Date().toISOString(),end_at:end.toISOString()});await load();renderHomeFull2();renderPlayers2();if(document.getElementById('view-profile')?.classList.contains('active'))await openProfile2(s.player_name)}catch(err){alert(err.message||String(err))}
 }
 async function doAct(k,id){
@@ -410,7 +412,7 @@ function phaseMultiplier2(event,phase,dateValue){
  // Date-only recording days are already UTC; datetime-local inputs must first
  // be converted to UTC, exactly as the timestamp sent to Supabase is.
  const raw=String(dateValue||''),dateOnly=/^\d{4}-\d{2}-\d{2}$/.test(raw);
- const parsed=dateOnly?null:raw?new Date(raw):null;
+ const parsed=dateOnly?null:raw?utcInputDate2(raw):null;
  const day=dateOnly?raw:parsed&&!Number.isNaN(parsed.getTime())?
    parsed.toISOString().slice(0,10):'';
  return event==='Strongest Governor'&&((phase==='sg2'&&day==='2026-09-22')||
@@ -449,7 +451,7 @@ function renderAddLive(){
  '<div id="addScreenPanel"><section class="card"><div class="card-head"><div><div class="card-title">ScreenRecording</div><div class="card-sub">Event und Tag auswählen · Video prüfen · Treffer speichern.</div></div></div><div class="card-body"><div id="liveImporterHost">Verfügbare Events werden geladen …</div></div></section></div>'+
  '<div id="addManualPanel" hidden><div class="live-panel-grid"><section class="card"><div class="card-head"><div><div class="card-title">Manuell eintragen</div><div class="card-sub">Nur aktuell freigegebene Events.</div></div></div><div class="card-body"><form id="liveManualForm" class="live-form">'+
  '<label>Spieler<select id="liveManualPlayer"></select></label><label>Event<select id="liveManualEvent"></select></label><label>Phase<select id="liveManualPhase"></select></label>'+
- '<div class="live-form-row"><label>Punkte<input id="liveManualScore" inputmode="numeric"></label><label>Zeitpunkt<input id="liveManualOccurred" type="datetime-local"></label></div>'+
+ '<div class="live-form-row"><label>Punkte<input id="liveManualScore" inputmode="numeric"></label><label>Zeitpunkt (UTC)<input id="liveManualOccurred" type="datetime-local"></label></div>'+
  '<label>Notiz<textarea id="liveManualNote"></textarea></label><div id="liveManualPreview" class="live-note"></div>'+
  '<button class="btn primary" type="submit">Verstoß speichern</button><div id="liveManualStatus" class="live-status"></div></form></div></section>'+
  '<section class="card"><div class="card-head"><div><div class="card-title">Regelprüfung</div><div class="card-sub">Grenze aus den Allianz-Einstellungen.</div></div></div><div class="card-body"><div id="liveRuleCard" class="live-empty-state">Event und Phase auswählen.</div></div></section></div></div>';
@@ -464,7 +466,7 @@ async function setupAddData2(){
  const me=document.getElementById('liveManualEvent');if(me)me.innerHTML=options;
  if(document.getElementById('liveImporterHost'))window.NAP_NATIVE_IMPORTER?.openLaw?.(true);
  const player=document.getElementById('liveManualPlayer');if(player)player.innerHTML=S.p.map(p=>'<option value="'+E(p.name||p.player_name)+'">'+E(p.name||p.player_name)+' · '+E(p.game_id||'–')+'</option>').join('');
- const occ=document.getElementById('liveManualOccurred');if(occ){const d=new Date(Date.now()-new Date().getTimezoneOffset()*60000);occ.value=d.toISOString().slice(0,16)}
+ const occ=document.getElementById('liveManualOccurred');if(occ)occ.value=new Date().toISOString().slice(0,16)
  function syncPhases(){
    const event=me?.value||'',ph=document.getElementById('liveManualPhase'),source=S.eventOptions.find(x=>x.event_name===event)?.source_event_id,phases=PHASES2[event]||[['general','General',null]];
    if(ph)ph.innerHTML=phases.map(x=>'<option value="'+E(x[0])+'">'+E(x[1])+'</option>').join('');
@@ -482,7 +484,7 @@ function updateManualPreview2(sourceId){
 async function saveManualViolation2(e){
  e.preventDefault();const out=document.getElementById('liveManualStatus');out.textContent=actionWord2('saving');
  try{
-   const player=document.getElementById('liveManualPlayer').value,event=document.getElementById('liveManualEvent').value,phase=document.getElementById('liveManualPhase').value,note=document.getElementById('liveManualNote').value.trim()||null,occurred=new Date(document.getElementById('liveManualOccurred').value).toISOString(),source=S.eventOptions.find(x=>x.event_name===event)?.source_event_id,target=targetFor2(event,phase),score=Number(String(document.getElementById('liveManualScore').value||'').replace(/\D/g,'')),kind=(event==='Swordland Showdown'||event==='Tri-Alliance Clash')?'swordland':'overspend',mult=phaseMultiplier2(event,phase,document.getElementById('liveManualOccurred').value);
+   const player=document.getElementById('liveManualPlayer').value,event=document.getElementById('liveManualEvent').value,phase=document.getElementById('liveManualPhase').value,note=document.getElementById('liveManualNote').value.trim()||null,occurred=utcInputIso2(document.getElementById('liveManualOccurred').value),source=S.eventOptions.find(x=>x.event_name===event)?.source_event_id,target=targetFor2(event,phase),score=Number(String(document.getElementById('liveManualScore').value||'').replace(/\D/g,'')),kind=(event==='Swordland Showdown'||event==='Tri-Alliance Clash')?'swordland':'overspend',mult=phaseMultiplier2(event,phase,document.getElementById('liveManualOccurred').value);
    if(kind==='overspend'&&(!Number.isFinite(score)||score<=Number(target||0)*mult))throw Error(actionWord2('pointsMustExceed',{mult}));
    await rpc('record_violation_fast',{p_player_name:player,p_event_name:event,p_phase_name:phase,p_kind:kind,p_score:kind==='swordland'?0:score,p_target_value:target,p_occurred_at:occurred,p_expiry_days:Number(S.settings?.violation_expiry_days||30),p_note:note});
    out.textContent=actionWord2('saved');await load();renderHome();renderPlayers();document.getElementById('liveManualScore').value='';
@@ -560,7 +562,7 @@ function renderNapLive(){
  if(liveNapTab==='exclusions'){
    body.innerHTML='<div class="live-panel-grid"><section class="card"><div class="card-head"><div><div class="card-title">Aktive Exclusions</div></div><span class="pill red">'+S.e.length+'</span></div><div class="card-body live-list">'+
    (S.e.length?S.e.map(x=>napRow2(x.player_name,(x.alliance_code||'')+' · Stufe '+x.level,(Number(x.level)===4&&x.alliance_code===S.a&&x.id?'<div class="hero-actions"><span class="pill">'+(x.end_at?E(D(x.end_at)):'∞')+'</span><button class="btn small secondary live-end-exclusion" data-id="'+E(x.id)+'">'+E(extendedActionWords2().endNow)+'</button></div>':'<span class="pill">'+(x.end_at?E(D(x.end_at)):'∞')+'</span>'))).join(''):'<div class="live-empty-state">Keine aktive Exclusion.</div>')+
-   '</div></section><section class="card"><div class="card-head"><div><div class="card-title">Manuelle Exclusion</div><div class="card-sub">Wie in 1.0: zusätzliche NAP-Exclusion anlegen.</div></div></div><div class="card-body"><form id="liveExclusionForm" class="live-form"><label>Spieler<input id="liveExPlayer" required></label><div class="live-form-row"><label>Stufe<select id="liveExLevel"><option value="3">3 · 24h</option><option value="4">4 · Extended</option></select></label><label>Ende<input id="liveExEnd" type="datetime-local"></label></div><button class="btn primary" type="submit">Exclusion speichern</button><div id="liveExStatus" class="live-status"></div></form></div></section></div>';
+   '</div></section><section class="card"><div class="card-head"><div><div class="card-title">Manuelle Exclusion</div><div class="card-sub">Wie in 1.0: zusätzliche NAP-Exclusion anlegen.</div></div></div><div class="card-body"><form id="liveExclusionForm" class="live-form"><label>Spieler<input id="liveExPlayer" required></label><div class="live-form-row"><label>Stufe<select id="liveExLevel"><option value="3">3 · 24h</option><option value="4">4 · Extended</option></select></label><label>Ende (UTC)<input id="liveExEnd" type="datetime-local"></label></div><button class="btn primary" type="submit">Exclusion speichern</button><div id="liveExStatus" class="live-status"></div></form></div></section></div>';
    document.getElementById('liveExclusionForm').onsubmit=saveManualExclusion2;document.querySelectorAll('.live-end-exclusion').forEach(b=>b.onclick=()=>endExclusion2(b.dataset.id));return;
  }
  if(liveNapTab==='bans'){
@@ -591,7 +593,7 @@ async function endExclusion2(id){
 }
 async function saveManualExclusion2(e){
  e.preventDefault();const out=document.getElementById('liveExStatus');out.textContent=actionWord2('saving');
- try{const name=document.getElementById('liveExPlayer').value.trim(),level=Number(document.getElementById('liveExLevel').value),end=document.getElementById('liveExEnd').value;await rpc('create_manual_nap_exclusion',{p_player_name:name,p_level:level,p_started_at:new Date().toISOString(),p_end_at:end?new Date(end).toISOString():null});await load();out.textContent=actionWord2('saved');renderNapLive()}catch(err){out.textContent=err.message||String(err)}
+ try{const name=document.getElementById('liveExPlayer').value.trim(),level=Number(document.getElementById('liveExLevel').value),end=document.getElementById('liveExEnd').value;await rpc('create_manual_nap_exclusion',{p_player_name:name,p_level:level,p_started_at:new Date().toISOString(),p_end_at:end?utcInputIso2(end):null});await load();out.textContent=actionWord2('saved');renderNapLive()}catch(err){out.textContent=err.message||String(err)}
 }
 async function saveBan2(e){
  e.preventDefault();const out=document.getElementById('liveBanStatus');out.textContent=actionWord2('saving');
@@ -764,15 +766,15 @@ function openLawReport2(key){
  modal.innerHTML='<div class="modal-card"><div class="modal-head"><div><b>Law '+E(l.display_number)+' melden</b><small>Fall bleibt für die meldende Allianz privat.</small></div><button class="icon-btn" id="liveLawClose">×</button></div><form id="liveLawForm" class="live-form">'+
  '<div class="live-form-row"><label>Verursacher / Beschuldigter<input id="liveLawSubject" required></label><label>Player ID<input id="liveLawSubjectId"></label></div>'+
  '<div class="live-form-row"><label>Betroffene Partei<input id="liveLawAffected"></label><label>Betroffene Player ID<input id="liveLawAffectedId"></label></div>'+
- '<label>Zeitpunkt<input id="liveLawOccurred" type="datetime-local" required></label><label>Beschreibung<textarea id="liveLawDesc" required></textarea></label><label>Evidence-Notiz<textarea id="liveLawNote"></textarea></label><label>Screenshots / Evidence<input id="liveLawFiles" type="file" accept="image/png,image/jpeg,image/webp" multiple></label>'+
+ '<label>Zeitpunkt (UTC)<input id="liveLawOccurred" type="datetime-local" required></label><label>Beschreibung<textarea id="liveLawDesc" required></textarea></label><label>Evidence-Notiz<textarea id="liveLawNote"></textarea></label><label>Screenshots / Evidence<input id="liveLawFiles" type="file" accept="image/png,image/jpeg,image/webp" multiple></label>'+
  '<button class="btn primary" type="submit">Fall speichern</button><div id="liveLawStatus" class="live-status"></div></form></div>';document.body.appendChild(modal);
- const d=new Date(Date.now()-new Date().getTimezoneOffset()*60000);document.getElementById('liveLawOccurred').value=d.toISOString().slice(0,16);document.getElementById('liveLawClose').onclick=()=>modal.remove();modal.onclick=e=>{if(e.target===modal)modal.remove()};document.getElementById('liveLawForm').onsubmit=e=>saveLawReport2(e,l);
+ document.getElementById('liveLawOccurred').value=new Date().toISOString().slice(0,16);document.getElementById('liveLawClose').onclick=()=>modal.remove();modal.onclick=e=>{if(e.target===modal)modal.remove()};document.getElementById('liveLawForm').onsubmit=e=>saveLawReport2(e,l);
 }
 async function saveLawReport2(e,l){
  e.preventDefault();const out=document.getElementById('liveLawStatus'),files=[...document.getElementById('liveLawFiles').files];out.textContent=actionWord2('saving');
  try{
   for(const f of files)if(!['image/png','image/jpeg','image/webp'].includes(f.type)||f.size>8388608)throw Error(actionWord2('lawImageRule'));
-  const d=await rpc('record_nap_law_violation_v2',{p_law_key:l.law_key,p_subject_label:document.getElementById('liveLawSubject').value.trim(),p_subject_game_id:document.getElementById('liveLawSubjectId').value.trim()||null,p_affected_party:document.getElementById('liveLawAffected').value.trim()||null,p_affected_game_id:document.getElementById('liveLawAffectedId').value.trim()||null,p_occurred_at:new Date(document.getElementById('liveLawOccurred').value).toISOString(),p_description:document.getElementById('liveLawDesc').value.trim(),p_evidence_note:document.getElementById('liveLawNote').value.trim()||null,p_sanction_type:null,p_sanction_start:null,p_sanction_end:null});
+  const d=await rpc('record_nap_law_violation_v2',{p_law_key:l.law_key,p_subject_label:document.getElementById('liveLawSubject').value.trim(),p_subject_game_id:document.getElementById('liveLawSubjectId').value.trim()||null,p_affected_party:document.getElementById('liveLawAffected').value.trim()||null,p_affected_game_id:document.getElementById('liveLawAffectedId').value.trim()||null,p_occurred_at:utcInputIso2(document.getElementById('liveLawOccurred').value),p_description:document.getElementById('liveLawDesc').value.trim(),p_evidence_note:document.getElementById('liveLawNote').value.trim()||null,p_sanction_type:null,p_sanction_start:null,p_sanction_end:null});
   const vid=d?.id;if(!vid)throw Error(actionWord2('caseIdMissing'));const uid=ses?.user?.id||'user';
   for(const file of files){const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,'_'),path=uid+'/'+vid+'/'+Date.now()+'-'+safe;await uploadStorage2('nap-law-evidence',path,file);await ins('nap_law_evidence',{violation_id:vid,storage_path:path,file_name:file.name,mime_type:file.type,size_bytes:file.size})}
   document.getElementById('liveLawModal')?.remove();liveLawTab='cases';await renderLawsLive();
@@ -1189,13 +1191,13 @@ function openViolationEditor2(id){
  const v=S.v.find(x=>String(x.id)===String(id));if(!v)return;
  document.getElementById('liveViolationEditModal')?.remove();
  const modal=document.createElement('div');modal.id='liveViolationEditModal';modal.className='modal-backdrop';
- const events=Object.keys(PHASES2),date=new Date(v.occurred_at);const local=new Date(date.getTime()-date.getTimezoneOffset()*60000).toISOString().slice(0,16);
+ const events=Object.keys(PHASES2),date=new Date(v.occurred_at);const local=Number.isNaN(date.getTime())?'':date.toISOString().slice(0,16);
  modal.innerHTML='<div class="modal-card"><div class="modal-head"><div><b>Verstoß korrigieren</b><small>'+E(v.player_name)+' · '+E(v.event_name||'')+'</small></div><button class="icon-btn" id="liveVioEditClose">×</button></div>'+
  '<form id="liveVioEditForm" class="live-form"><label>Spieler<input id="liveVioPlayer" value="'+E(v.player_name)+'" required></label>'+
  '<label>Event<select id="liveVioEvent">'+events.map(ev=>'<option '+(ev===v.event_name?'selected':'')+'>'+E(ev)+'</option>').join('')+'</select></label>'+
  '<label>Phase<select id="liveVioPhase"></select></label>'+
  '<div class="live-form-row" id="liveVioScoreRow"><label>Ziel<input id="liveVioTarget" inputmode="numeric" value="'+E(v.target_value??'')+'"></label><label>Punkte<input id="liveVioScore" inputmode="numeric" value="'+E(v.score??'')+'"></label></div>'+
- '<div id="liveVioThreshold" class="live-note"></div><label>Zeitpunkt<input id="liveVioOccurred" type="datetime-local" value="'+E(local)+'"></label><label>Notiz<textarea id="liveVioNote" maxlength="500">'+E(v.note||'')+'</textarea></label>'+
+ '<div id="liveVioThreshold" class="live-note"></div><label>Zeitpunkt (UTC)<input id="liveVioOccurred" type="datetime-local" value="'+E(local)+'"></label><label>Notiz<textarea id="liveVioNote" maxlength="500">'+E(v.note||'')+'</textarea></label>'+
  '<div class="hero-actions"><button class="btn primary" type="submit">Änderungen speichern</button><button class="btn danger" id="liveDeleteViolation" data-id="'+E(v.id)+'" type="button">Verstoß löschen</button></div><div id="liveVioEditStatus" class="live-status"></div></form></div>';
  document.body.appendChild(modal);
  const event=document.getElementById('liveVioEvent'),phase=document.getElementById('liveVioPhase');
@@ -1223,7 +1225,7 @@ async function saveViolationEdit2(e,old){
  if(!special&&(!target||!(score>target*mult))){out.textContent='Der korrigierte Wert ist kein Verstoß mehr. Nutze „Verstoß löschen“. ';return}
  out.textContent=actionWord2('saving');
  try{
-  const editedPlayer=document.getElementById('liveVioPlayer').value.trim();await rpc('update_violation_fast',{p_id:old.id,p_player_name:editedPlayer,p_event_name:event,p_phase_name:phase,p_kind:special?'swordland':'overspend',p_score:special?null:score,p_target_value:target,p_occurred_at:new Date(document.getElementById('liveVioOccurred').value).toISOString(),p_expiry_days:Number(S.settings?.violation_expiry_days||30),p_note:document.getElementById('liveVioNote').value.trim()||null});
+  const editedPlayer=document.getElementById('liveVioPlayer').value.trim();await rpc('update_violation_fast',{p_id:old.id,p_player_name:editedPlayer,p_event_name:event,p_phase_name:phase,p_kind:special?'swordland':'overspend',p_score:special?null:score,p_target_value:target,p_occurred_at:utcInputIso2(document.getElementById('liveVioOccurred').value),p_expiry_days:Number(S.settings?.violation_expiry_days||30),p_note:document.getElementById('liveVioNote').value.trim()||null});
   document.getElementById('liveViolationEditModal')?.remove();await load();await openProfile2(editedPlayer||old.player_name);
  }catch(err){out.textContent=err.message||String(err)}
 }
@@ -1327,7 +1329,7 @@ const EXTENDED_ACTION_WORDS2={
 function extendedActionWords2(){return EXTENDED_ACTION_WORDS2[L()]||EXTENDED_ACTION_WORDS2.de}
 async function startExtendedExclusion2(id,input){
  const s=S.x.find(x=>String(x.id)===String(id));if(!s||Number(s.level)!==4||s.started_at)return;
- const w=extendedActionWords2(),raw=input?.value?.trim()||'',end=raw?new Date(raw):null;
+ const w=extendedActionWords2(),raw=input?.value?.trim()||'',end=raw?utcInputDate2(raw):null;
  if(end&&(Number.isNaN(end.getTime())||end<=new Date())){alert(w.badEnd);return}
  if(!confirm(w.confirm))return;
  try{
@@ -1348,7 +1350,7 @@ function messageNumber2(value,lang){return Number(value||0).toLocaleString(messa
 function messageDate2(value,lang){
  if(!value)return '';
  const d=new Date(value);if(Number.isNaN(d.getTime()))return '';
- return d.toLocaleString(messageLocale2(lang),{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+ return d.toLocaleString(messageLocale2(lang),{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',timeZone:'UTC'})+' UTC';
 }
 function messagePhaseLabel2(v,lang){
  const key=String(v?.phase_name||''),row=(PHASES2[v?.event_name]||[]).find(x=>x[0]===key),raw=row?.[1]||key;
@@ -1506,7 +1508,7 @@ function sharedSpendingPanel2(violations){
  if(!days.length)return '';
  return '<details class="card live-shared-spending"><summary style="cursor:pointer;padding:14px 17px;list-style:revert"><b>'+E(w.title)+'</b><div class="card-sub">'+E(w.sub)+'</div></summary><div class="card-body live-list">'+
  days.map(([day,entries])=>{
-   const date=new Date(day+'T00:00:00Z').toLocaleDateString(loc());
+   const date=new Date(day+'T00:00:00Z').toLocaleDateString(loc(),{timeZone:'UTC'});
    const allIds=new Set(entries.map(v=>String(v.id)));
    const existing=(S.shared||[]).filter(x=>
      x.player_id===entries[0].player_id && String(x.violation_day)===day &&
@@ -1662,7 +1664,7 @@ async function markTransferTemporary2(id,rejectIncoming=false){
 }
 function postContactReviewCard2(r){
  const P=p(r.player_name),source=r.detected_by_alliance&&r.detected_by_alliance!==S.a?r.detected_by_alliance:'ScreenRecording';
- const date=r.recording_day?new Date(String(r.recording_day)+'T00:00:00Z').toLocaleDateString(loc()):'–';
+ const date=r.recording_day?new Date(String(r.recording_day)+'T00:00:00Z').toLocaleDateString(loc(),{timeZone:'UTC'}):'–';
  return '<div class="action-item home-v2-action post-contact-review-card"><div><div class="player-line">'+avatarHtml(P,'player-avatar')+
   '<div><div class="player-name">'+E(r.player_name||'–')+'</div><div class="player-id">ID '+E(r.player_game_id||P.game_id||'–')+' · '+E(r.event_name||'')+' · '+E(r.phase_name||'')+' · '+E(date)+'</div></div></div>'+
   '<div class="live-note" style="margin-top:9px"><b>'+E(postContactReviewText2('newScore'))+'</b><br>'+
@@ -1695,7 +1697,7 @@ const HOME_SYNC_WORDS2={
 function exactDateTime2(value){
  if(!value)return '–';
  const d=new Date(value);if(Number.isNaN(d.getTime()))return '–';
- return d.toLocaleString(loc(),{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+ return d.toLocaleString(loc(),{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit',timeZone:'UTC'})+' UTC';
 }
 function relativeSyncAge2(value){
  const w=HOME_SYNC_WORDS2[L()]||HOME_SYNC_WORDS2.de;
