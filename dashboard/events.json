@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "kingdom": 1044,
   "timezone": "UTC",
-  "updatedAt": "2026-09-28T00:17:16Z",
+  "updatedAt": "2026-09-29T00:17:36Z",
   "events": [
     {
       "id": "golden-glaives-prep-2026-09-20",
@@ -802,6 +802,354 @@
         ]
       },
       "sourceUrl": "https://v2.kingshot.net/calendar"
+    },
+    {
+      "id": "armament-competition-type1-2026-09-28",
+      "start": "2026-09-28",
+      "end": "2026-09-29",
+      "icon": "🛡️",
+      "iconUrl": "https://kingshotdata.com/uploads/2025/04/city-development-event-icon.webp",
+      "manual": false,
+      "confidence": "predicted",
+      "name": {
+        "de": "Rüstungswettbewerb · Handwerkervision",
+        "en": "Armament Competition · Artisan’s Vision",
+        "fr": "Compétition d’armement · Vision d’artisan"
+      },
+      "dailyPlans": {
+        "2026-09-28": {
+          "points": {
+            "de": "Ausrüstung +1: 3 · Truegold: 100 · Truegoldstaub: 50 · Gehärtetes Truegold: 1.500 · Splitter mythisch/episch/selten: 125/50/15 · Meisteremblem: 200 · Manuskript: 2 · 1 Min. Beschleuniger: 1",
+            "en": "Gear +1: 3 · Truegold: 100 · Truegold Dust: 50 · Tempered Truegold: 1,500 · mythic/epic/rare shard: 125/50/15 · Master Emblem: 200 · Manuscript: 2 · 1 min speedup: 1",
+            "fr": "Équipement +1 : 3 · Or véritable : 100 · Poussière : 50 · Or trempé : 1 500 · fragment mythique/épique/rare : 125/50/15 · Emblème : 200 · Manuscrit : 2 · 1 min d’accélération : 1"
+          },
+          "steps": {
+            "de": [
+              "Dieses Event kann vollständig ausgelassen werden; die Belohnungen rechtfertigen den Einsatz von KvK-Ressourcen nicht.",
+              "Truegold, Gehärtetes Truegold, Splitter, Meistermaterialien und Beschleuniger für die KvK-Vorbereitung sparen.",
+              "Wenn du trotzdem Punkte machst, ausschließlich ohnehin geplante Aktionen nutzen und spätestens bei insgesamt 60.000 Punkten stoppen.",
+              "60.000 Punkte sind die strikte 3×-Gesamtgrenze und ausdrücklich keine Empfehlung."
+            ],
+            "en": [
+              "This event can be skipped completely; the rewards do not justify spending KvK resources.",
+              "Save Truegold, Tempered Truegold, shards, Master materials and speedups for KvK preparation.",
+              "If you score anyway, use only actions you already planned and stop at 60,000 total points at the latest.",
+              "60,000 points is the strict 3× total limit and explicitly not a recommendation."
+            ],
+            "fr": [
+              "Cet événement peut être entièrement ignoré ; les récompenses ne justifient pas l’utilisation de ressources KvK.",
+              "Conserve l’Or véritable, l’Or trempé, les fragments, les matériaux de Maître et les accélérateurs pour la préparation KvK.",
+              "Si tu marques malgré tout, utilise uniquement des actions déjà prévues et arrête-toi au plus tard à 60 000 points au total.",
+              "60 000 points constituent la limite totale stricte de 3× et ne sont explicitement pas une recommandation."
+            ]
+          },
+          "limits": {
+            "hardCap": 60000,
+            "note": {
+              "de": "60.000 Punkte sind die strikte 3×-Gesamtgrenze – keine Empfehlung.",
+              "en": "60,000 points is the strict 3× total limit, not a recommendation.",
+              "fr": "60 000 points constituent la limite totale stricte de 3×, pas une recommandation."
+            }
+          }
+        },
+        "2026-09-29": {
+          "points": {
+            "de": "Ausrüstung +1: 3 · Truegold: 100 · Truegoldstaub: 50 · Gehärtetes Truegold: 1.500 · Splitter mythisch/episch/selten: 125/50/15 · Meisteremblem: 200 · Manuskript: 2 · 1 Min. Beschleuniger: 1",
+            "en": "Gear +1: 3 · Truegold: 100 · Truegold Dust: 50 · Tempered Truegold: 1,500 · mythic/epic/rare shard: 125/50/15 · Master Emblem: 200 · Manuscript: 2 · 1 min speedup: 1",
+            "fr": "Équipement +1 : 3 · Or véritable : 100 · Poussière : 50 · Or trempé : 1 500 · fragment mythique/épique/rare : 125/50/15 · Emblème : 200 · Manuscrit : 2 · 1 min d’accélération : 1"
+          },
+          "steps": {
+            "de": [
+              "Dieses Event kann vollständig ausgelassen werden; die Belohnungen rechtfertigen den Einsatz von KvK-Ressourcen nicht.",
+              "Truegold, Gehärtetes Truegold, Splitter, Meistermaterialien und Beschleuniger für die KvK-Vorbereitung sparen.",
+              "Wenn du trotzdem Punkte machst, ausschließlich ohnehin geplante Aktionen nutzen und spätestens bei insgesamt 60.000 Punkten stoppen.",
+              "60.000 Punkte sind die strikte 3×-Gesamtgrenze und ausdrücklich keine Empfehlung."
+            ],
+            "en": [
+              "This event can be skipped completely; the rewards do not justify spending KvK resources.",
+              "Save Truegold, Tempered Truegold, shards, Master materials and speedups for KvK preparation.",
+              "If you score anyway, use only actions you already planned and stop at 60,000 total points at the latest.",
+              "60,000 points is the strict 3× total limit and explicitly not a recommendation."
+            ],
+            "fr": [
+              "Cet événement peut être entièrement ignoré ; les récompenses ne justifient pas l’utilisation de ressources KvK.",
+              "Conserve l’Or véritable, l’Or trempé, les fragments, les matériaux de Maître et les accélérateurs pour la préparation KvK.",
+              "Si tu marques malgré tout, utilise uniquement des actions déjà prévues et arrête-toi au plus tard à 60 000 points au total.",
+              "60 000 points constituent la limite totale stricte de 3× et ne sont explicitement pas une recommandation."
+            ]
+          },
+          "limits": {
+            "hardCap": 60000,
+            "note": {
+              "de": "60.000 Punkte sind die strikte 3×-Gesamtgrenze – keine Empfehlung.",
+              "en": "60,000 points is the strict 3× total limit, not a recommendation.",
+              "fr": "60 000 points constituent la limite totale stricte de 3×, pas une recommandation."
+            }
+          }
+        }
+      },
+      "sourceUrl": "https://kingshotdata.com/events/armament-competition/"
+    },
+    {
+      "id": "officer-project-forgehammers-2026-09-30",
+      "start": "2026-09-30",
+      "end": "2026-10-01",
+      "icon": "🎖️",
+      "iconUrl": "https://kingshotdata.com/uploads/2025/03/power-up-event-icon.webp",
+      "manual": false,
+      "confidence": "predicted",
+      "name": {
+        "de": "Offiziersprojekt · Schmiedehämmer",
+        "en": "Officer Project · Forgehammers",
+        "fr": "Projet d’officier · Marteaux de forge"
+      },
+      "dailyPlans": {
+        "2026-09-30": {
+          "points": {
+            "de": "Amulette +1: 70 · Schmiedehammer: 6.000 · Mithril: 60.000 · Widget: 12.000 · Truppen T11–T1: 37/30/22/17/12/9/6/4/3/2/1",
+            "en": "Charm +1: 70 · Forgehammer: 6,000 · Mithril: 60,000 · Widget: 12,000 · troops T11–T1: 37/30/22/17/12/9/6/4/3/2/1",
+            "fr": "Amulette +1 : 70 · Marteau : 6 000 · Mithril : 60 000 · Widget : 12 000 · troupes T11–T1 : 37/30/22/17/12/9/6/4/3/2/1"
+          },
+          "steps": {
+            "de": [
+              "Die Belohnung sind Schmiedehämmer; Punkte entstehen durch Amulette, Mithril, Widgets, Schmiedehämmer und Truppen.",
+              "Mithril, Widgets, Schmiedehämmer und Amulettmaterialien möglichst vollständig für KvK Tag 4/5 sparen.",
+              "Truppen nur normal weitertrainieren; keinen zusätzlichen KvK-Vorrat ausschließlich für dieses Event verbrauchen.",
+              "Wenn du ein lohnendes persönliches Ziel abschließt, spätestens bei insgesamt 930.000 Punkten stoppen. Das ist die strikte 3×-Grenze, keine Empfehlung."
+            ],
+            "en": [
+              "The reward is Forgehammers; points come from Charms, Mithril, Widgets, Forgehammers and troops.",
+              "Save Mithril, Widgets, Forgehammers and Charm materials for KvK Day 4/5 whenever possible.",
+              "Train troops normally; do not consume extra KvK stock solely for this event.",
+              "If you complete a worthwhile personal milestone, stop at 930,000 total points at the latest. This is the strict 3× limit, not a recommendation."
+            ],
+            "fr": [
+              "La récompense est constituée de Marteaux ; les points viennent des Amulettes, du Mithril, des Widgets, des Marteaux et des troupes.",
+              "Conserve autant que possible le Mithril, les Widgets, les Marteaux et les matériaux d’Amulette pour les Jours KvK 4/5.",
+              "Entraîne les troupes normalement ; ne consomme pas de réserve KvK supplémentaire uniquement pour cet événement.",
+              "Si tu atteins un palier personnel rentable, arrête-toi au plus tard à 930 000 points au total. C’est la limite stricte de 3×, pas une recommandation."
+            ]
+          },
+          "limits": {
+            "hardCap": 930000,
+            "note": {
+              "de": "930.000 Punkte sind die strikte 3×-Gesamtgrenze – keine Empfehlung.",
+              "en": "930,000 points is the strict 3× total limit, not a recommendation.",
+              "fr": "930 000 points constituent la limite totale stricte de 3×, pas une recommandation."
+            }
+          }
+        },
+        "2026-10-01": {
+          "points": {
+            "de": "Amulette +1: 70 · Schmiedehammer: 6.000 · Mithril: 60.000 · Widget: 12.000 · Truppen T11–T1: 37/30/22/17/12/9/6/4/3/2/1",
+            "en": "Charm +1: 70 · Forgehammer: 6,000 · Mithril: 60,000 · Widget: 12,000 · troops T11–T1: 37/30/22/17/12/9/6/4/3/2/1",
+            "fr": "Amulette +1 : 70 · Marteau : 6 000 · Mithril : 60 000 · Widget : 12 000 · troupes T11–T1 : 37/30/22/17/12/9/6/4/3/2/1"
+          },
+          "steps": {
+            "de": [
+              "Die Belohnung sind Schmiedehämmer; Punkte entstehen durch Amulette, Mithril, Widgets, Schmiedehämmer und Truppen.",
+              "Mithril, Widgets, Schmiedehämmer und Amulettmaterialien möglichst vollständig für KvK Tag 4/5 sparen.",
+              "Truppen nur normal weitertrainieren; keinen zusätzlichen KvK-Vorrat ausschließlich für dieses Event verbrauchen.",
+              "Wenn du ein lohnendes persönliches Ziel abschließt, spätestens bei insgesamt 930.000 Punkten stoppen. Das ist die strikte 3×-Grenze, keine Empfehlung."
+            ],
+            "en": [
+              "The reward is Forgehammers; points come from Charms, Mithril, Widgets, Forgehammers and troops.",
+              "Save Mithril, Widgets, Forgehammers and Charm materials for KvK Day 4/5 whenever possible.",
+              "Train troops normally; do not consume extra KvK stock solely for this event.",
+              "If you complete a worthwhile personal milestone, stop at 930,000 total points at the latest. This is the strict 3× limit, not a recommendation."
+            ],
+            "fr": [
+              "La récompense est constituée de Marteaux ; les points viennent des Amulettes, du Mithril, des Widgets, des Marteaux et des troupes.",
+              "Conserve autant que possible le Mithril, les Widgets, les Marteaux et les matériaux d’Amulette pour les Jours KvK 4/5.",
+              "Entraîne les troupes normalement ; ne consomme pas de réserve KvK supplémentaire uniquement pour cet événement.",
+              "Si tu atteins un palier personnel rentable, arrête-toi au plus tard à 930 000 points au total. C’est la limite stricte de 3×, pas une recommandation."
+            ]
+          },
+          "limits": {
+            "hardCap": 930000,
+            "note": {
+              "de": "930.000 Punkte sind die strikte 3×-Gesamtgrenze – keine Empfehlung.",
+              "en": "930,000 points is the strict 3× total limit, not a recommendation.",
+              "fr": "930 000 points constituent la limite totale stricte de 3×, pas une recommandation."
+            }
+          }
+        }
+      },
+      "sourceUrl": "https://kingshotdata.com/events/officer-project-event/"
+    },
+    {
+      "id": "armament-competition-type2-2026-10-02",
+      "start": "2026-10-02",
+      "end": "2026-10-03",
+      "icon": "🛡️",
+      "iconUrl": "https://kingshotdata.com/uploads/2025/04/city-development-event-icon.webp",
+      "manual": false,
+      "confidence": "predicted",
+      "name": {
+        "de": "Rüstungswettbewerb · Truegold",
+        "en": "Armament Competition · Truegold",
+        "fr": "Compétition d’armement · Or véritable"
+      },
+      "dailyPlans": {
+        "2026-10-02": {
+          "points": {
+            "de": "Truegold: 100 · Truegoldstaub: 50 · Gehärtetes Truegold: 1.500 · Ausrüstung +1: 3 · Schmiedehammer: 800 · Mithril: 8.000 · Widget: 1.600 · 1 Min. Beschleuniger: 1",
+            "en": "Truegold: 100 · Truegold Dust: 50 · Tempered Truegold: 1,500 · Gear +1: 3 · Forgehammer: 800 · Mithril: 8,000 · Widget: 1,600 · 1 min speedup: 1",
+            "fr": "Or véritable : 100 · Poussière : 50 · Or trempé : 1 500 · Équipement +1 : 3 · Marteau : 800 · Mithril : 8 000 · Widget : 1 600 · 1 min d’accélération : 1"
+          },
+          "steps": {
+            "de": [
+              "Dieses Event kann vollständig ausgelassen werden; die Belohnungen sind den Einsatz der unmittelbar vor KvK benötigten Materialien nicht wert.",
+              "Truegold, Mithril, Widgets, Schmiedehämmer und Beschleuniger für die KvK-Vorbereitung zurückhalten.",
+              "Wenn du trotzdem Punkte machst, nur ohnehin geplante Aktionen nutzen und spätestens bei insgesamt 60.000 Punkten stoppen.",
+              "60.000 Punkte sind die strikte 3×-Gesamtgrenze und ausdrücklich keine Empfehlung."
+            ],
+            "en": [
+              "This event can be skipped completely; the rewards are not worth using materials needed immediately for KvK.",
+              "Hold Truegold, Mithril, Widgets, Forgehammers and speedups for KvK preparation.",
+              "If you score anyway, use only actions you already planned and stop at 60,000 total points at the latest.",
+              "60,000 points is the strict 3× total limit and explicitly not a recommendation."
+            ],
+            "fr": [
+              "Cet événement peut être entièrement ignoré ; les récompenses ne valent pas les matériaux nécessaires immédiatement pour le KvK.",
+              "Garde l’Or véritable, le Mithril, les Widgets, les Marteaux et les accélérateurs pour la préparation KvK.",
+              "Si tu marques malgré tout, utilise uniquement des actions déjà prévues et arrête-toi au plus tard à 60 000 points au total.",
+              "60 000 points constituent la limite totale stricte de 3× et ne sont explicitement pas une recommandation."
+            ]
+          },
+          "limits": {
+            "hardCap": 60000,
+            "note": {
+              "de": "60.000 Punkte sind die strikte 3×-Gesamtgrenze – keine Empfehlung.",
+              "en": "60,000 points is the strict 3× total limit, not a recommendation.",
+              "fr": "60 000 points constituent la limite totale stricte de 3×, pas une recommandation."
+            }
+          }
+        },
+        "2026-10-03": {
+          "points": {
+            "de": "Truegold: 100 · Truegoldstaub: 50 · Gehärtetes Truegold: 1.500 · Ausrüstung +1: 3 · Schmiedehammer: 800 · Mithril: 8.000 · Widget: 1.600 · 1 Min. Beschleuniger: 1",
+            "en": "Truegold: 100 · Truegold Dust: 50 · Tempered Truegold: 1,500 · Gear +1: 3 · Forgehammer: 800 · Mithril: 8,000 · Widget: 1,600 · 1 min speedup: 1",
+            "fr": "Or véritable : 100 · Poussière : 50 · Or trempé : 1 500 · Équipement +1 : 3 · Marteau : 800 · Mithril : 8 000 · Widget : 1 600 · 1 min d’accélération : 1"
+          },
+          "steps": {
+            "de": [
+              "Dieses Event kann vollständig ausgelassen werden; die Belohnungen sind den Einsatz der unmittelbar vor KvK benötigten Materialien nicht wert.",
+              "Truegold, Mithril, Widgets, Schmiedehämmer und Beschleuniger für die KvK-Vorbereitung zurückhalten.",
+              "Wenn du trotzdem Punkte machst, nur ohnehin geplante Aktionen nutzen und spätestens bei insgesamt 60.000 Punkten stoppen.",
+              "60.000 Punkte sind die strikte 3×-Gesamtgrenze und ausdrücklich keine Empfehlung."
+            ],
+            "en": [
+              "This event can be skipped completely; the rewards are not worth using materials needed immediately for KvK.",
+              "Hold Truegold, Mithril, Widgets, Forgehammers and speedups for KvK preparation.",
+              "If you score anyway, use only actions you already planned and stop at 60,000 total points at the latest.",
+              "60,000 points is the strict 3× total limit and explicitly not a recommendation."
+            ],
+            "fr": [
+              "Cet événement peut être entièrement ignoré ; les récompenses ne valent pas les matériaux nécessaires immédiatement pour le KvK.",
+              "Garde l’Or véritable, le Mithril, les Widgets, les Marteaux et les accélérateurs pour la préparation KvK.",
+              "Si tu marques malgré tout, utilise uniquement des actions déjà prévues et arrête-toi au plus tard à 60 000 points au total.",
+              "60 000 points constituent la limite totale stricte de 3× et ne sont explicitement pas une recommandation."
+            ]
+          },
+          "limits": {
+            "hardCap": 60000,
+            "note": {
+              "de": "60.000 Punkte sind die strikte 3×-Gesamtgrenze – keine Empfehlung.",
+              "en": "60,000 points is the strict 3× total limit, not a recommendation.",
+              "fr": "60 000 points constituent la limite totale stricte de 3×, pas une recommandation."
+            }
+          }
+        }
+      },
+      "sourceUrl": "https://kingshotdata.com/events/armament-competition/"
+    },
+    {
+      "id": "officer-project-charm-designs-2026-10-04",
+      "start": "2026-10-04",
+      "end": "2026-10-05",
+      "icon": "🎖️",
+      "iconUrl": "https://kingshotdata.com/uploads/2025/03/power-up-event-icon.webp",
+      "manual": false,
+      "confidence": "predicted",
+      "name": {
+        "de": "Offiziersprojekt · Amulettdesigns",
+        "en": "Officer Project · Charm Designs",
+        "fr": "Projet d’officier · Plans d’amulette"
+      },
+      "dailyPlans": {
+        "2026-10-04": {
+          "points": {
+            "de": "Ausrüstung +1: 70 · Splitter mythisch/episch/selten: 3.040/1.220/350 · Schmiedehammer: 6.000 · Widget: 12.000",
+            "en": "Gear +1: 70 · mythic/epic/rare shard: 3,040/1,220/350 · Forgehammer: 6,000 · Widget: 12,000",
+            "fr": "Équipement +1 : 70 · fragment mythique/épique/rare : 3 040/1 220/350 · Marteau : 6 000 · Widget : 12 000"
+          },
+          "steps": {
+            "de": [
+              "Die Belohnung sind Amulettdesigns; Punkte entstehen dagegen durch Ausrüstung, Heldensplitter, Widgets und Schmiedehämmer.",
+              "Am 04.10. während des Matchmakings nichts nur für dieses Event ausgeben. Splitter und Ausrüstungsmaterialien für die passenden KvK-Tage sparen.",
+              "Am 05.10. hat der KvK-Tagesplan Vorrang; Offiziersprojekt nur als Überschneidung nutzen, wenn dieselbe geplante Aktion in beiden Events zählt.",
+              "Spätestens bei insgesamt 1.359.000 Punkten stoppen. Das ist die strikte 3×-Grenze, keine Empfehlung."
+            ],
+            "en": [
+              "The reward is Charm Designs; points instead come from Gear, Hero Shards, Widgets and Forgehammers.",
+              "Do not spend solely for this event during matchmaking on 4 Oct. Save shards and gear materials for the matching KvK days.",
+              "On 5 Oct, the KvK daily plan takes priority; use Officer Project only as an overlap when the same planned action scores in both events.",
+              "Stop at 1,359,000 total points at the latest. This is the strict 3× limit, not a recommendation."
+            ],
+            "fr": [
+              "La récompense est constituée de Plans d’Amulette ; les points viennent toutefois de l’Équipement, des fragments de héros, des Widgets et des Marteaux.",
+              "Le 4 octobre, pendant le matchmaking, ne dépense rien uniquement pour cet événement. Garde les fragments et matériaux d’équipement pour les jours KvK adaptés.",
+              "Le 5 octobre, le plan quotidien KvK est prioritaire ; utilise le Projet d’officier seulement si une même action planifiée marque dans les deux événements.",
+              "Arrête-toi au plus tard à 1 359 000 points au total. C’est la limite stricte de 3×, pas une recommandation."
+            ]
+          },
+          "limits": {
+            "hardCap": 1359000,
+            "note": {
+              "de": "1.359.000 Punkte sind die strikte 3×-Gesamtgrenze – keine Empfehlung.",
+              "en": "1,359,000 points is the strict 3× total limit, not a recommendation.",
+              "fr": "1 359 000 points constituent la limite totale stricte de 3×, pas une recommandation."
+            }
+          }
+        },
+        "2026-10-05": {
+          "points": {
+            "de": "Ausrüstung +1: 70 · Splitter mythisch/episch/selten: 3.040/1.220/350 · Schmiedehammer: 6.000 · Widget: 12.000",
+            "en": "Gear +1: 70 · mythic/epic/rare shard: 3,040/1,220/350 · Forgehammer: 6,000 · Widget: 12,000",
+            "fr": "Équipement +1 : 70 · fragment mythique/épique/rare : 3 040/1 220/350 · Marteau : 6 000 · Widget : 12 000"
+          },
+          "steps": {
+            "de": [
+              "Die Belohnung sind Amulettdesigns; Punkte entstehen dagegen durch Ausrüstung, Heldensplitter, Widgets und Schmiedehämmer.",
+              "Am 04.10. während des Matchmakings nichts nur für dieses Event ausgeben. Splitter und Ausrüstungsmaterialien für die passenden KvK-Tage sparen.",
+              "Am 05.10. hat der KvK-Tagesplan Vorrang; Offiziersprojekt nur als Überschneidung nutzen, wenn dieselbe geplante Aktion in beiden Events zählt.",
+              "Spätestens bei insgesamt 1.359.000 Punkten stoppen. Das ist die strikte 3×-Grenze, keine Empfehlung."
+            ],
+            "en": [
+              "The reward is Charm Designs; points instead come from Gear, Hero Shards, Widgets and Forgehammers.",
+              "Do not spend solely for this event during matchmaking on 4 Oct. Save shards and gear materials for the matching KvK days.",
+              "On 5 Oct, the KvK daily plan takes priority; use Officer Project only as an overlap when the same planned action scores in both events.",
+              "Stop at 1,359,000 total points at the latest. This is the strict 3× limit, not a recommendation."
+            ],
+            "fr": [
+              "La récompense est constituée de Plans d’Amulette ; les points viennent toutefois de l’Équipement, des fragments de héros, des Widgets et des Marteaux.",
+              "Le 4 octobre, pendant le matchmaking, ne dépense rien uniquement pour cet événement. Garde les fragments et matériaux d’équipement pour les jours KvK adaptés.",
+              "Le 5 octobre, le plan quotidien KvK est prioritaire ; utilise le Projet d’officier seulement si une même action planifiée marque dans les deux événements.",
+              "Arrête-toi au plus tard à 1 359 000 points au total. C’est la limite stricte de 3×, pas une recommandation."
+            ]
+          },
+          "limits": {
+            "hardCap": 1359000,
+            "note": {
+              "de": "1.359.000 Punkte sind die strikte 3×-Gesamtgrenze – keine Empfehlung.",
+              "en": "1,359,000 points is the strict 3× total limit, not a recommendation.",
+              "fr": "1 359 000 points constituent la limite totale stricte de 3×, pas une recommandation."
+            }
+          }
+        }
+      },
+      "sourceUrl": "https://kingshotdata.com/events/officer-project-event/"
     },
     {
       "id": "kvk-2026-10-04",
