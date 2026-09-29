@@ -162,6 +162,16 @@ function sanctionStatus2(s,v=null){
  }
  return {key:'open',label:w.open,short:w.open,cls:'gold'};
 }
+const TIMER_VIEW_WORDS2={
+ de:{title:'Aktive Straf-Timer',sub:'Laufende R1- und NAP-Out-Zeiten deiner Allianz.',level:'Stufe',remaining:'Restzeit',ends:'Ende',open:'Spieler öffnen',timer:'Timer'},
+ en:{title:'Active punishment timers',sub:'Running R1 and NAP OUT timers for your alliance.',level:'Level',remaining:'Time remaining',ends:'Ends',open:'Open player',timer:'Timer'},
+ fr:{title:'Minuteurs de sanction actifs',sub:'Minuteurs R1 et NAP OUT actifs de votre alliance.',level:'Niveau',remaining:'Temps restant',ends:'Fin',open:'Ouvrir le joueur',timer:'Minuteur'},
+ es:{title:'Temporizadores de sanción activos',sub:'Temporizadores R1 y NAP OUT activos de tu alianza.',level:'Nivel',remaining:'Tiempo restante',ends:'Fin',open:'Abrir jugador',timer:'Temporizador'}
+};
+function timerViewWords2(){return TIMER_VIEW_WORDS2[L()]||TIMER_VIEW_WORDS2.de}
+function timerRemaining2(end){const ms=new Date(end).getTime()-Date.now(),w=SANCTION_STATUS_WORDS2[L()]||SANCTION_STATUS_WORDS2.de;return Number.isFinite(ms)&&ms>0?dur(ms):w.expired}
+function activeOwnTimers2(){return (S.x||[]).filter(s=>{if(!s?.end_at||Number(s.level)<2)return false;const v=(S.v||[]).find(v=>String(v.id)===String(s.violation_id));return sanctionStatus2(s,v).key==='active'}).sort((a,b)=>new Date(a.end_at)-new Date(b.end_at))}
+function refreshSanctionTimerLabels2(){document.querySelectorAll('[data-timer-end]').forEach(el=>{const end=el.getAttribute('data-timer-end');if(end)el.textContent=timerRemaining2(end)})}
 function actions(){
  return [...new Set(S.v.filter(v=>
    v.kind==='overspend'&&v.sanction_eligible!==false&&active(v)
@@ -401,7 +411,7 @@ function addLiveCss(){
  '.live-import-frame{width:100%;min-height:690px;border:1px solid var(--line);border-radius:14px;background:var(--panel-2)}'+
  '.live-stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:13px}.live-stat{padding:12px;border:1px solid var(--line);border-radius:13px;background:var(--panel);min-width:0}.live-stat b{font-size:20px;display:block;max-width:100%;font-variant-numeric:tabular-nums;line-height:1.12;white-space:nowrap}.live-stat small{color:var(--muted);font-size:8px;text-transform:uppercase;letter-spacing:.06em}.performance-panel-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.performance-kpi-grid{display:grid;grid-template-columns:104px minmax(0,1fr) minmax(0,1fr) 96px;gap:10px;margin-bottom:13px}.performance-kpi{min-width:0;min-height:88px;padding:14px 16px;border:1px solid var(--line);border-radius:13px;background:var(--panel);display:flex;flex-direction:column;justify-content:center}.performance-kpi b{font-size:21px;line-height:1.05;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:clip}.performance-kpi small{margin-top:8px;color:var(--muted);font-size:7.5px;line-height:1.15;text-transform:uppercase;letter-spacing:.045em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.performance-kpi.compact{padding:14px 10px;text-align:center;align-items:center}.performance-kpi.compact b{font-size:21px}.performance-kpi.compact small{text-align:center;max-width:100%}.performance-kpi.score{background:color-mix(in srgb,var(--panel) 88%,var(--panel-2));padding-left:17px;padding-right:17px}'+
  '.live-violation-card-head{align-items:flex-start}.live-violation-badges{display:flex;align-items:center;justify-content:flex-end;gap:7px;flex-wrap:wrap}.live-violation-card-actions{display:flex;justify-content:flex-end;gap:8px;padding:10px 18px;border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--panel-2) 45%,transparent)}.live-violation-card-actions .btn{min-width:108px}@media(max-width:700px){.live-violation-card-head{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;padding:14px 14px 12px}.live-violation-badges{justify-content:flex-end}.live-violation-badges .pill{max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.live-violation-card-actions{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;padding:10px 14px 12px}.live-violation-card-actions .btn{width:100%;min-width:0;height:40px;padding:0 10px;white-space:nowrap}.live-violation-card-actions .live-violation-message{grid-column:1/-1}}'+
- '.live-list{display:grid;gap:7px}.live-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:11px;background:var(--panel-2)}.live-row small{display:block;color:var(--muted);font-size:8px;margin-top:3px}'+
+ '.live-list{display:grid;gap:7px}.live-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:11px;background:var(--panel-2)}.live-row small{display:block;color:var(--muted);font-size:8px;margin-top:3px}.player-timer-strip{margin-top:10px;padding:8px 10px;border:1px solid color-mix(in srgb,var(--red) 28%,var(--line));border-radius:10px;background:color-mix(in srgb,var(--red) 7%,var(--panel-2));display:flex;align-items:center;gap:7px;flex-wrap:wrap;font-size:9px}.player-timer-strip b{margin-left:auto;font-variant-numeric:tabular-nums}.player-timer-strip small{width:100%;color:var(--muted);font-size:8px}.home-timer-right{text-align:right;display:grid;gap:4px;justify-items:end}.home-timer-right strong{font-variant-numeric:tabular-nums}'+
  '.live-empty-state{padding:24px;text-align:center;border:1px dashed var(--line);border-radius:13px;color:var(--muted);font-size:10px;background:var(--panel)}'+
  '.live-status{font-size:9px;color:var(--muted);min-height:16px}'+
  '@media(max-width:900px){.live-panel-grid,.performance-panel-grid{grid-template-columns:1fr}.live-stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.performance-kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.performance-kpi,.performance-kpi.compact{min-height:82px;padding:13px 14px;text-align:left;align-items:flex-start}.performance-kpi small,.performance-kpi.compact small{text-align:left}.live-form-row{grid-template-columns:1fr}.live-import-frame{min-height:580px}}';
@@ -1170,18 +1180,20 @@ if(!window.__NAP2_LANGUAGE_SAVE_DELEGATION){
  },true);
 }
 function renderPlayers2(){
- const g=document.getElementById('playerGrid');if(!g)return;
- const w=playerCaseWords2();
- g.innerHTML=S.p.map(P=>{
-  const name=P.name||P.player_name||'',V=vv(name),law=V.filter(isLaw14Case2),internal=V.filter(isInternalCase2),
-   state=sanctionState2(name),l=state.level,last=V[0],
-   status=sanctionStatus2(state.currentSanction,state.currentViolation),val=status.short;
-  return '<div class="player-card" data-p="'+E(name)+'" data-has-entry="'+(V.length||ss(name).length?'1':'0')+'" data-attendance="'+(internal.length?'1':'0')+'" data-search="'+E((name+' '+(P.game_id||'')).toLowerCase())+'">'+
-   '<div class="player-card-top"><div class="player-meta">'+avatarHtml(P,'player-avatar')+'<div><div class="player-name">'+E(name)+'</div><div class="player-id">'+E(P.game_id||'–')+'</div></div></div>'+allianceBadge2(S.a)+'</div>'+
-   '<div class="metric-row"><div class="metric"><b>'+law.length+'</b><span>'+E(w.law)+'</span></div><div class="metric"><b>'+l+'</b><span>'+E(w.stage)+'</span></div><div class="metric"><b>'+E(val)+'</b><span>'+E(w.status)+'</span></div></div>'+
-   '<div class="player-card-foot">'+(internal.length?'<span class="pill blue">'+E(w.internal)+' · '+internal.length+'</span>':'<span></span>')+'<span class="muted tiny">'+(last?E(D(last.occurred_at)):'–')+'</span></div></div>';
- }).join('')||'<div class="live-empty-state">Keine Spieler.</div>';
- g.querySelectorAll('[data-p]').forEach(c=>c.onclick=()=>openProfile2(c.dataset.p));if(typeof applyPlayerFilters==='function')applyPlayerFilters();renderWelcomeLanguageQueue2();
+  const g=document.getElementById('playerGrid');if(!g)return;
+  const w=playerCaseWords2(),tw=timerViewWords2();
+  g.innerHTML=S.p.map(P=>{
+   const name=P.name||P.player_name||'',V=vv(name),law=V.filter(isLaw14Case2),internal=V.filter(isInternalCase2),
+    state=sanctionState2(name),l=state.level,last=V[0],
+    status=sanctionStatus2(state.currentSanction,state.currentViolation),val=status.short,
+    timer=status.key==='active'&&state.currentSanction?.end_at?state.currentSanction:null;
+   return '<div class="player-card" data-p="'+E(name)+'" data-has-entry="'+(V.length||ss(name).length?'1':'0')+'" data-attendance="'+(internal.length?'1':'0')+'" data-search="'+E((name+' '+(P.game_id||'')).toLowerCase())+'">'+
+    '<div class="player-card-top"><div class="player-meta">'+avatarHtml(P,'player-avatar')+'<div><div class="player-name">'+E(name)+'</div><div class="player-id">'+E(P.game_id||'–')+'</div></div></div>'+allianceBadge2(S.a)+'</div>'+
+    '<div class="metric-row"><div class="metric"><b>'+law.length+'</b><span>'+E(w.law)+'</span></div><div class="metric"><b>'+l+'</b><span>'+E(w.stage)+'</span></div><div class="metric"><b>'+E(val)+'</b><span>'+E(w.status)+'</span></div></div>'+
+    (timer?'<div class="player-timer-strip"><span>⏱ '+E(tw.level)+' '+E(timer.level)+'</span><b data-timer-end="'+E(timer.end_at)+'">'+E(timerRemaining2(timer.end_at))+'</b><small>'+E(tw.ends)+': '+E(D(timer.end_at))+'</small></div>':'')+
+    '<div class="player-card-foot">'+(internal.length?'<span class="pill blue">'+E(w.internal)+' · '+internal.length+'</span>':'<span></span>')+'<span class="muted tiny">'+(last?E(D(last.occurred_at)):'–')+'</span></div></div>';
+  }).join('')||'<div class="live-empty-state">Keine Spieler.</div>';
+  g.querySelectorAll('[data-p]').forEach(c=>c.onclick=()=>openProfile2(c.dataset.p));if(typeof applyPlayerFilters==='function')applyPlayerFilters();renderWelcomeLanguageQueue2();refreshSanctionTimerLabels2();
 }
 function violationRule2(v){
  const phases=PHASES2[v.event_name]||[];
@@ -1465,18 +1477,32 @@ function openPlayerMessage2(sanctionId){
 }
 
 function profileActionCard2(s){
- const v=S.v.find(v=>String(v.id)===String(s.violation_id))||null;
- const status=sanctionStatus2(s,v),start=Number(s.level)===1?v?.contacted_at||s.started_at:s.started_at;
- const r1Missing=status.key==='timer_missing'&&Number(s.level)===2,
-  l4Open=Number(s.level)===4&&!s.started_at,w4=extendedActionWords2();
- const remaining=status.key==='active'&&s.end_at?dur(new Date(s.end_at)-Date.now()):
-   status.key==='expired'?(SANCTION_STATUS_WORDS2[L()]||SANCTION_STATUS_WORDS2.de).expired:'–';
- return '<article class="card" data-profile-sanction="'+E(s.id)+'"><div class="card-head"><div><div class="card-title">Stufe '+E(s.level)+' · '+E(Number(s.level)===2?'R1':Number(s.level)===3?'24h NAP OUT':Number(s.level)===4?'Extended':'Kontakt')+'</div><div class="card-sub">Erstellt '+E(D(s.created_at))+'</div></div><span class="pill '+E(status.cls)+'">'+E(status.label)+'</span></div><div class="card-body">'+(r1Missing?'<div class="notice warn" style="margin-bottom:10px">⚠ R1 bestätigt – individuelle Endzeit noch setzen.</div><div class="live-form-row"><label>Ende<input class="profile-r1-end" type="datetime-local" value="'+E(toLocalInput2(s.end_at))+'"></label><div style="display:flex;align-items:end"><button class="btn secondary profile-r1-save" data-id="'+E(s.id)+'">Timer setzen</button></div></div>':'')+(l4Open?'<div class="notice warn" style="margin-bottom:10px">⚠ '+E(w4.notice)+'</div><div class="live-form-row"><label>'+E(w4.end)+'<input class="profile-l4-end" type="datetime-local"></label><div style="display:flex;align-items:end"><button class="btn primary profile-l4-start" data-id="'+E(s.id)+'">'+E(w4.start)+'</button></div></div>':'')+'<div class="action-date-grid"><div><span>Start</span><b>'+E(D(start))+'</b></div><div><span>Ende</span><b>'+E(D(s.end_at))+'</b></div><div><span>Restzeit</span><b>'+E(remaining)+'</b></div><div><span>Status</span><b>'+E(status.label)+'</b></div></div><div class="hero-actions player-message-action"><button class="btn secondary profile-player-message" data-id="'+E(s.id)+'" type="button">'+E(playerMessageUi2().open)+'</button></div></div></article>';
+  const v=S.v.find(v=>String(v.id)===String(s.violation_id))||null;
+  const status=sanctionStatus2(s,v),start=Number(s.level)===1?v?.contacted_at||s.started_at:s.started_at,lvl=Number(s.level)||0;
+  const r1Missing=status.key==='timer_missing'&&lvl===2,l4Open=lvl===4&&!s.started_at,w4=extendedActionWords2();
+  const aw={
+   de:{level:'Stufe',created:'Erstellt',start:'Start',end:'Ende',remaining:'Restzeit',status:'Status',contact:'Kontakt',r1Notice:'R1 bestätigt – individuelle Endzeit noch setzen.',setTimer:'Timer setzen'},
+   en:{level:'Level',created:'Created',start:'Start',end:'End',remaining:'Time remaining',status:'Status',contact:'Contact',r1Notice:'R1 confirmed – set the individual end time.',setTimer:'Set timer'},
+   fr:{level:'Niveau',created:'Créé',start:'Début',end:'Fin',remaining:'Temps restant',status:'Statut',contact:'Contact',r1Notice:'R1 confirmé – définissez l’heure de fin individuelle.',setTimer:'Définir le minuteur'},
+   es:{level:'Nivel',created:'Creado',start:'Inicio',end:'Fin',remaining:'Tiempo restante',status:'Estado',contact:'Contacto',r1Notice:'R1 confirmado – establece la hora de fin individual.',setTimer:'Configurar temporizador'}
+  }[L()]||{level:'Stufe',created:'Erstellt',start:'Start',end:'Ende',remaining:'Restzeit',status:'Status',contact:'Kontakt',r1Notice:'R1 bestätigt – individuelle Endzeit noch setzen.',setTimer:'Timer setzen'};
+  const stageName=lvl===2?'R1':lvl===3?'24h NAP OUT':lvl===4?'Extended':aw.contact;
+  const remaining=status.key==='active'&&s.end_at?timerRemaining2(s.end_at):status.key==='expired'?(SANCTION_STATUS_WORDS2[L()]||SANCTION_STATUS_WORDS2.de).expired:'–';
+  const pending=lvl===1&&v&&!profileActionDone2(s)?'<button class="btn primary profile-sanction-act" data-k="contact" data-id="'+E(v.id)+'" data-player="'+E(s.player_name)+'">'+E(t('contact'))+'</button>':
+    lvl===2&&!s.completed?'<button class="btn primary profile-sanction-act" data-k="r1" data-id="'+E(s.id)+'" data-player="'+E(s.player_name)+'">'+E(t('r1'))+'</button>':
+    lvl===3&&!s.completed?'<button class="btn primary profile-sanction-act" data-k="nap" data-id="'+E(s.id)+'" data-player="'+E(s.player_name)+'">'+E(t('nap'))+'</button>':'';
+  return '<article class="card" data-profile-sanction="'+E(s.id)+'"><div class="card-head"><div><div class="card-title">'+E(aw.level)+' '+E(s.level)+' · '+E(stageName)+'</div><div class="card-sub">'+E(aw.created)+' '+E(D(s.created_at))+'</div></div><span class="pill '+E(status.cls)+'">'+E(status.label)+'</span></div><div class="card-body">'+
+   (pending?'<div class="hero-actions" style="margin-bottom:10px">'+pending+'</div>':'')+
+   (r1Missing?'<div class="notice warn" style="margin-bottom:10px">⚠ '+E(aw.r1Notice)+'</div><div class="live-form-row"><label>'+E(aw.end)+' (UTC)<input class="profile-r1-end" type="datetime-local" value="'+E(toLocalInput2(s.end_at))+'"></label><div style="display:flex;align-items:end"><button class="btn secondary profile-r1-save" data-id="'+E(s.id)+'">'+E(aw.setTimer)+'</button></div></div>':'')+
+   (l4Open?'<div class="notice warn" style="margin-bottom:10px">⚠ '+E(w4.notice)+'</div><div class="live-form-row"><label>'+E(w4.end)+' (UTC)<input class="profile-l4-end" type="datetime-local"></label><div style="display:flex;align-items:end"><button class="btn primary profile-l4-start" data-id="'+E(s.id)+'">'+E(w4.start)+'</button></div></div>':'')+
+   '<div class="action-date-grid"><div><span>'+E(aw.start)+'</span><b>'+E(D(start))+'</b></div><div><span>'+E(aw.end)+'</span><b>'+E(D(s.end_at))+'</b></div><div><span>'+E(aw.remaining)+'</span><b'+(status.key==='active'&&s.end_at?' data-timer-end="'+E(s.end_at)+'"':'')+'>'+E(remaining)+'</b></div><div><span>'+E(aw.status)+'</span><b>'+E(status.label)+'</b></div></div><div class="hero-actions player-message-action"><button class="btn secondary profile-player-message" data-id="'+E(s.id)+'" type="button">'+E(playerMessageUi2().open)+'</button></div></div></article>';
 }
 function bindProfileR1Timers2(){
- document.querySelectorAll('.profile-r1-save').forEach(b=>b.onclick=()=>setR1Timer2(b.dataset.id,b.closest('[data-profile-sanction]')?.querySelector('.profile-r1-end')));
- document.querySelectorAll('.profile-l4-start').forEach(b=>b.onclick=()=>startExtendedExclusion2(b.dataset.id,b.closest('[data-profile-sanction]')?.querySelector('.profile-l4-end')));
- document.querySelectorAll('.profile-player-message').forEach(b=>b.onclick=()=>openPlayerMessage2(b.dataset.id));
+  document.querySelectorAll('.profile-r1-save').forEach(b=>b.onclick=()=>setR1Timer2(b.dataset.id,b.closest('[data-profile-sanction]')?.querySelector('.profile-r1-end')));
+  document.querySelectorAll('.profile-l4-start').forEach(b=>b.onclick=()=>startExtendedExclusion2(b.dataset.id,b.closest('[data-profile-sanction]')?.querySelector('.profile-l4-end')));
+  document.querySelectorAll('.profile-sanction-act').forEach(b=>b.onclick=async()=>{await doAct(b.dataset.k,b.dataset.id);if(b.dataset.player)await openProfile2(b.dataset.player)});
+  document.querySelectorAll('.profile-player-message').forEach(b=>b.onclick=()=>openPlayerMessage2(b.dataset.id));
+  refreshSanctionTimerLabels2();
 }
 
 const SHARED_SPENDING_WORDS2={
