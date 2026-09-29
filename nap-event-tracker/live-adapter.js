@@ -75,7 +75,7 @@ function login(){const d=document.createElement('div');d.id='n2login';d.classNam
  document.querySelector('#n2form').onsubmit=async e=>{
   e.preventDefault();const a=n2a.value,p=n2p.value,errBox=d.querySelector('#n2e');if(retry)retry.hidden=true;
   try{
-   const z=await q(C.u+'/auth/v1/token?grant_type=password',{method:'POST',headers:{apikey:C.k,'Content-Type':'application/json'},body:JSON.stringify({email:a.toLowerCase()+'@nap-tracker.invalid',password:p})});
+   const z=await q(C.u+'/auth/v1/token?grant_type=password',{method:'POST',headers:{apikey:C.k,'Content-Type':'application/json'},body:JSON.stringify({email:(a==='NwO'?'nwo2':a.toLowerCase())+'@nap-tracker.invalid',password:p})});
    save({...z,expires_at:Math.floor(Date.now()/1000)+(z.expires_in||3600)});await enter(a);
   }catch(x){
    if(isSessionAuthError2(x)||x?.code==='ACCOUNT_INCOMPLETE'||x?.code==='ACCOUNT_MISMATCH')save(null);
