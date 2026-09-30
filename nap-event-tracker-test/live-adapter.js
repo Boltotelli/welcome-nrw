@@ -97,8 +97,8 @@ function css(){const s=document.createElement('style');s.textContent=`body.n2loc
 .n2pen-line{stroke-dasharray:28;stroke-dashoffset:28;transition:stroke-dashoffset .28s ease .02s}
 .n2access-option[data-access="write"].active .n2pen-line{stroke-dashoffset:0}
 .n2access-hint{min-height:16px;font-size:9px;color:var(--muted);padding:0 2px;transition:opacity .15s ease}
-.n2access-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 7px;border:1px solid color-mix(in srgb,var(--gold) 50%,var(--line));border-radius:999px;background:color-mix(in srgb,var(--gold) 8%,var(--panel-2));color:var(--gold-text,var(--gold-2));font-size:8px;font-weight:1000;letter-spacing:.04em}
-body.n2-readonly [data-go="add"],
+.n2access-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 7px;border:1px solid color-mix(in srgb,var(--gold) 50%,var(--line));border-radius:999px;background:color-mix(in srgb,var(--gold) 8%,var(--panel-2));color:var(--gold-text,var(--gold-2));font-size:8px;font-weight:1000;letter-spacing:.04em}.fab.n2-read-fab{cursor:default}.fab.n2-read-fab svg{width:31px;height:31px;display:block}.fab.n2-read-fab path,.fab.n2-read-fab circle{stroke:currentColor;fill:none;stroke-width:1.8}
+body.n2-readonly [data-go="add"]:not(.fab),
 body.n2-readonly .n2act,
 body.n2-readonly .live-r1-timer,
 body.n2-readonly .live-transfer-confirm,
@@ -301,7 +301,33 @@ async function syncCrownVisibility2(){
  if(!permitted&&document.getElementById('view-crown')?.classList.contains('active'))setView('home');
  return permitted;
 }
-function decorate(){const ab=document.querySelector('.alliance-badge');if(ab)ab.innerHTML=allianceLogo2(S.a,'alliance-top-logo')+'<span>'+E(S.a)+'</span>';document.querySelectorAll('[data-current-alliance]').forEach(x=>x.textContent=S.a);const u=document.querySelector('.user-pill');if(u){u.innerHTML=allianceLogo2(S.a,'alliance-user-logo')+'<span>'+E(S.a)+'</span> '+(isReadOnly2()?'<span class="n2access-badge">◉ '+E(accessWords2().readOnly)+'</span>':'<span class="n2live">'+E(t('live'))+'</span>');u.title=t('logout');u.onclick=()=>{if(confirm(t('logout')+'?')){save(null);location.reload()}}}}
+async function logout2(){
+ if(!confirm(t('logout')+'?'))return;
+ try{
+  const access=ses?.access_token;
+  if(access)await fetch(C.u+'/auth/v1/logout',{method:'POST',headers:{apikey:C.k,Authorization:'Bearer '+access}});
+ }catch{}
+ save(null);location.reload();
+}
+function syncReadOnlyChrome2(){
+ const fab=document.querySelector('.fab');
+ if(fab){
+  if(isReadOnly2()){
+   fab.removeAttribute('data-go');fab.classList.add('n2-read-fab');fab.setAttribute('aria-label',accessWords2().readOnly);fab.title=accessWords2().readHint;
+   fab.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.7 12s3.4-5.2 9.3-5.2S21.3 12 21.3 12 17.9 17.2 12 17.2 2.7 12 2.7 12Z"/><circle cx="12" cy="12" r="2.4"/></svg>';
+  }else{
+   fab.dataset.go='add';fab.classList.remove('n2-read-fab');fab.setAttribute('aria-label',t('add'));fab.title='';fab.textContent='＋';
+  }
+ }
+ const grid=document.querySelector('#moreSheet .more-grid');
+ if(grid){
+  let b=document.getElementById('n2MobileLogout');
+  if(!b){b=document.createElement('button');b.className='more-item';b.id='n2MobileLogout';b.type='button';grid.appendChild(b)}
+  b.innerHTML='<span class="more-icon">↪</span><span class="more-label">'+E(t('logout'))+'</span>';
+  b.onclick=logout2;
+ }
+}
+function decorate(){const ab=document.querySelector('.alliance-badge');if(ab)ab.innerHTML=allianceLogo2(S.a,'alliance-top-logo')+'<span>'+E(S.a)+'</span>';document.querySelectorAll('[data-current-alliance]').forEach(x=>x.textContent=S.a);const u=document.querySelector('.user-pill');if(u){u.innerHTML=allianceLogo2(S.a,'alliance-user-logo')+'<span>'+E(S.a)+'</span> '+(isReadOnly2()?'<span class="n2access-badge">◉ '+E(accessWords2().readOnly)+'</span>':'<span class="n2live">'+E(t('live'))+'</span>');u.title=t('logout');u.onclick=logout2}syncReadOnlyChrome2()}
 async function load(){
  const a=encodeURIComponent(S.a);
  const [p1,poolPlayers,v,x,e,o,tr,bans,spend,settings,reviews,shared,notificationReads,syncStatus,level4Hosting,napStats,sgWindow,performance,supportUnread]=await Promise.all([
@@ -778,7 +804,7 @@ async function renderKvkLive(){
    (memberPlan.length?memberPlan.map(r=>'<form class="live-row live-member-plan" data-code="'+E(r.alliance_code)+'"><div><b>'+E(r.alliance_code)+'</b><small>Tracker '+N(r.tracker_member_count)+' · '+(r.overridden?'manuell überschrieben':'kein Override')+(r.frozen_member_count!=null?' · eingefroren '+N(r.frozen_member_count):'')+'</small></div><input style="width:100px" inputmode="numeric" value="'+E(r.effective_member_count??r.tracker_member_count??'')+'" '+(!canEditMembers||cycle.baseline_locked?'disabled':'')+'><button class="btn small secondary" '+(!canEditMembers||cycle.baseline_locked?'disabled':'')+'>Speichern</button></form>').join(''):'<div class="live-empty-state">Kein Mitgliederplan vorhanden.</div>')+
    '</div></section>'+
    '<section class="card" style="margin-top:14px"><div class="card-head"><div><div class="card-title">Prep Scores</div><div class="card-sub">'+E(cycle.score_entry_open?'Eingabe offen':'Eingabe noch gesperrt')+'</div></div></div><div class="card-body"><div class="live-list">'+
-   ranking.map(r=>'<form class="live-row live-prep-score" data-code="'+E(r.alliance_code)+'"><div><b>'+E(r.alliance_code)+'</b><small>'+N(r.member_count)+' Mitglieder</small></div><input style="width:150px" inputmode="numeric" value="'+E(r.prep_score??'')+'" '+(cycle.score_entry_open?'':'disabled')+'><button class="btn small primary" '+(cycle.score_entry_open?'':'disabled')+'>Speichern</button></form>').join('')+
+   ranking.map(r=>'<form class="live-row live-prep-score" data-code="'+E(r.alliance_code)+'"><div><b>'+E(r.alliance_code)+'</b><small>'+N(r.member_count)+' Mitglieder</small></div><input style="width:150px" inputmode="numeric" value="'+E(r.prep_score??'')+'" '+(cycle.score_entry_open&&!isReadOnly2()?'':'disabled')+'><button class="btn small primary" '+(cycle.score_entry_open&&!isReadOnly2()?'':'disabled')+'>Speichern</button></form>').join('')+
    '</div></div></section><div id="liveKvkTop" style="margin-top:14px"></div>';
   const cycleSelect=document.getElementById('liveLaw9Cycle');if(cycleSelect)cycleSelect.onchange=()=>{law9SelectedCycle2=cycleSelect.value;renderKvkLive()};
   v.querySelectorAll('.live-member-plan').forEach(form=>form.onsubmit=saveMemberPlan2);v.querySelectorAll('.live-prep-score').forEach(form=>form.onsubmit=savePrepScore2);
