@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "kingdom": 1044,
   "timezone": "UTC",
-  "updatedAt": "2026-09-29T00:17:36Z",
+  "updatedAt": "2026-09-30T00:12:05Z",
   "events": [
     {
       "id": "golden-glaives-prep-2026-09-20",
@@ -804,93 +804,6 @@
       "sourceUrl": "https://v2.kingshot.net/calendar"
     },
     {
-      "id": "armament-competition-type1-2026-09-28",
-      "start": "2026-09-28",
-      "end": "2026-09-29",
-      "icon": "🛡️",
-      "iconUrl": "https://kingshotdata.com/uploads/2025/04/city-development-event-icon.webp",
-      "manual": false,
-      "confidence": "predicted",
-      "name": {
-        "de": "Rüstungswettbewerb · Handwerkervision",
-        "en": "Armament Competition · Artisan’s Vision",
-        "fr": "Compétition d’armement · Vision d’artisan"
-      },
-      "dailyPlans": {
-        "2026-09-28": {
-          "points": {
-            "de": "Ausrüstung +1: 3 · Truegold: 100 · Truegoldstaub: 50 · Gehärtetes Truegold: 1.500 · Splitter mythisch/episch/selten: 125/50/15 · Meisteremblem: 200 · Manuskript: 2 · 1 Min. Beschleuniger: 1",
-            "en": "Gear +1: 3 · Truegold: 100 · Truegold Dust: 50 · Tempered Truegold: 1,500 · mythic/epic/rare shard: 125/50/15 · Master Emblem: 200 · Manuscript: 2 · 1 min speedup: 1",
-            "fr": "Équipement +1 : 3 · Or véritable : 100 · Poussière : 50 · Or trempé : 1 500 · fragment mythique/épique/rare : 125/50/15 · Emblème : 200 · Manuscrit : 2 · 1 min d’accélération : 1"
-          },
-          "steps": {
-            "de": [
-              "Dieses Event kann vollständig ausgelassen werden; die Belohnungen rechtfertigen den Einsatz von KvK-Ressourcen nicht.",
-              "Truegold, Gehärtetes Truegold, Splitter, Meistermaterialien und Beschleuniger für die KvK-Vorbereitung sparen.",
-              "Wenn du trotzdem Punkte machst, ausschließlich ohnehin geplante Aktionen nutzen und spätestens bei insgesamt 60.000 Punkten stoppen.",
-              "60.000 Punkte sind die strikte 3×-Gesamtgrenze und ausdrücklich keine Empfehlung."
-            ],
-            "en": [
-              "This event can be skipped completely; the rewards do not justify spending KvK resources.",
-              "Save Truegold, Tempered Truegold, shards, Master materials and speedups for KvK preparation.",
-              "If you score anyway, use only actions you already planned and stop at 60,000 total points at the latest.",
-              "60,000 points is the strict 3× total limit and explicitly not a recommendation."
-            ],
-            "fr": [
-              "Cet événement peut être entièrement ignoré ; les récompenses ne justifient pas l’utilisation de ressources KvK.",
-              "Conserve l’Or véritable, l’Or trempé, les fragments, les matériaux de Maître et les accélérateurs pour la préparation KvK.",
-              "Si tu marques malgré tout, utilise uniquement des actions déjà prévues et arrête-toi au plus tard à 60 000 points au total.",
-              "60 000 points constituent la limite totale stricte de 3× et ne sont explicitement pas une recommandation."
-            ]
-          },
-          "limits": {
-            "hardCap": 60000,
-            "note": {
-              "de": "60.000 Punkte sind die strikte 3×-Gesamtgrenze – keine Empfehlung.",
-              "en": "60,000 points is the strict 3× total limit, not a recommendation.",
-              "fr": "60 000 points constituent la limite totale stricte de 3×, pas une recommandation."
-            }
-          }
-        },
-        "2026-09-29": {
-          "points": {
-            "de": "Ausrüstung +1: 3 · Truegold: 100 · Truegoldstaub: 50 · Gehärtetes Truegold: 1.500 · Splitter mythisch/episch/selten: 125/50/15 · Meisteremblem: 200 · Manuskript: 2 · 1 Min. Beschleuniger: 1",
-            "en": "Gear +1: 3 · Truegold: 100 · Truegold Dust: 50 · Tempered Truegold: 1,500 · mythic/epic/rare shard: 125/50/15 · Master Emblem: 200 · Manuscript: 2 · 1 min speedup: 1",
-            "fr": "Équipement +1 : 3 · Or véritable : 100 · Poussière : 50 · Or trempé : 1 500 · fragment mythique/épique/rare : 125/50/15 · Emblème : 200 · Manuscrit : 2 · 1 min d’accélération : 1"
-          },
-          "steps": {
-            "de": [
-              "Dieses Event kann vollständig ausgelassen werden; die Belohnungen rechtfertigen den Einsatz von KvK-Ressourcen nicht.",
-              "Truegold, Gehärtetes Truegold, Splitter, Meistermaterialien und Beschleuniger für die KvK-Vorbereitung sparen.",
-              "Wenn du trotzdem Punkte machst, ausschließlich ohnehin geplante Aktionen nutzen und spätestens bei insgesamt 60.000 Punkten stoppen.",
-              "60.000 Punkte sind die strikte 3×-Gesamtgrenze und ausdrücklich keine Empfehlung."
-            ],
-            "en": [
-              "This event can be skipped completely; the rewards do not justify spending KvK resources.",
-              "Save Truegold, Tempered Truegold, shards, Master materials and speedups for KvK preparation.",
-              "If you score anyway, use only actions you already planned and stop at 60,000 total points at the latest.",
-              "60,000 points is the strict 3× total limit and explicitly not a recommendation."
-            ],
-            "fr": [
-              "Cet événement peut être entièrement ignoré ; les récompenses ne justifient pas l’utilisation de ressources KvK.",
-              "Conserve l’Or véritable, l’Or trempé, les fragments, les matériaux de Maître et les accélérateurs pour la préparation KvK.",
-              "Si tu marques malgré tout, utilise uniquement des actions déjà prévues et arrête-toi au plus tard à 60 000 points au total.",
-              "60 000 points constituent la limite totale stricte de 3× et ne sont explicitement pas une recommandation."
-            ]
-          },
-          "limits": {
-            "hardCap": 60000,
-            "note": {
-              "de": "60.000 Punkte sind die strikte 3×-Gesamtgrenze – keine Empfehlung.",
-              "en": "60,000 points is the strict 3× total limit, not a recommendation.",
-              "fr": "60 000 points constituent la limite totale stricte de 3×, pas une recommandation."
-            }
-          }
-        }
-      },
-      "sourceUrl": "https://kingshotdata.com/events/armament-competition/"
-    },
-    {
       "id": "officer-project-forgehammers-2026-09-30",
       "start": "2026-09-30",
       "end": "2026-10-01",
@@ -1194,20 +1107,23 @@
           "steps": {
             "de": [
               "Noch keine KvK-Ressourcen ausgeben. Gegner und NRW-Plan nach Bekanntgabe im Discord prüfen.",
-              "00:00- und 08:00-UTC-Intel-Missionen normal abschließen und Belohnungen abholen.",
-              "16:00-UTC-Missionen weder abschließen noch abholen. Nach 16:00 UTC Pans zusätzliche Intel-Mission aktivieren und ebenfalls offen lassen.",
+              "00:00 UTC: Intel-Missionen abschließen und Belohnungen abholen.",
+              "08:00 UTC: Intel-Missionen abschließen, Belohnungen wegen Golden Glaives aber NICHT abholen.",
+              "16:00 UTC: Intel-Missionen weder abschließen noch abholen. Danach Pans zusätzliche Intel-Mission aktivieren und ebenfalls offen lassen.",
               "Gebäude-, Forschungs- und Meisterprojekte so vorbereiten, dass sie erst nach dem Reset am 05.10. abgeschlossen werden."
             ],
             "en": [
               "Do not spend KvK resources yet. Check the opponent and NRW plan in Discord once announced.",
-              "Complete and claim the 00:00 and 08:00 UTC Intel Missions normally.",
-              "Do not complete or claim the 16:00 UTC missions. After 16:00 UTC, activate Pan’s extra Intel Mission and leave it unfinished too.",
+              "00:00 UTC: complete Intel Missions and claim rewards.",
+              "08:00 UTC: complete Intel Missions, but do NOT claim rewards because Golden Glaives starts next.",
+              "16:00 UTC: neither complete nor claim Intel Missions. Then activate Pan’s extra Intel Mission and leave it unfinished too.",
               "Prepare building, research and Master projects so they finish only after the 5 Oct reset."
             ],
             "fr": [
               "Ne dépense pas encore de ressources KvK. Vérifie l’adversaire et le plan NRW sur Discord après l’annonce.",
-              "Termine et récupère normalement les missions de renseignement de 00:00 et 08:00 UTC.",
-              "Ne termine ni ne récupère les missions de 16:00 UTC. Après 16:00 UTC, active la mission supplémentaire de Pan et laisse-la également inachevée.",
+              "00:00 UTC : termine les missions de renseignement et récupère les récompenses.",
+              "08:00 UTC : termine les missions, mais NE récupère PAS les récompenses à cause du début de Golden Glaives.",
+              "16:00 UTC : ne termine ni ne récupère les missions. Active ensuite la mission supplémentaire de Pan et laisse-la également inachevée.",
               "Prépare les constructions, recherches et projets de Maître pour qu’ils se terminent seulement après le reset du 5 octobre."
             ]
           }
@@ -1220,19 +1136,19 @@
           },
           "steps": {
             "de": [
-              "Nach dem Reset zuerst die vorbereiteten 16:00-/Pan-Intel-Missionen abschließen und abholen.",
+              "Nach dem Reset zuerst die zurückgehaltenen 08:00-Belohnungen abholen; danach die offenen 16:00-/Pan-Intel-Missionen abschließen und abholen.",
               "Bau-, Forschungs- und Meisterbuffs vor großen Projekten aktivieren; dann Truegold, Gehärtetes Truegold, Truegoldstaub und passende Beschleuniger einsetzen.",
               "Gouverneursamulette nur erhöhen, wenn sie in den NRW-Plan passen. Das tägliche Ingame-Ziel und Discord-Absprachen beachten.",
               "Vor dem nächsten Reset lange Sammler losschicken. Bison erst aktivieren, sobald die Truppen tatsächlich sammeln."
             ],
             "en": [
-              "After reset, first complete and claim the prepared 16:00/Pan Intel Missions.",
+              "After reset, first claim the held 08:00 rewards; then complete and claim the unfinished 16:00/Pan Intel Missions.",
               "Activate construction, research and Master buffs before large projects; then use Truegold, Tempered Truegold, Truegold Dust and matching speedups.",
               "Upgrade Governor Charms only when they fit the NRW plan. Follow the daily in-game target and Discord instructions.",
               "Before the next reset, send long gathering marches. Activate Bison only once the troops are actively gathering."
             ],
             "fr": [
-              "Après le reset, termine et récupère d’abord les missions de renseignement préparées de 16:00 et de Pan.",
+              "Après le reset, récupère d’abord les récompenses conservées de 08:00 ; termine et récupère ensuite les missions ouvertes de 16:00 et de Pan.",
               "Active les bonus de construction, recherche et Maître avant les grands projets ; utilise ensuite l’Or véritable, l’Or véritable trempé, la poussière et les accélérateurs adaptés.",
               "Améliore les amulettes du Gouverneur seulement si cela correspond au plan NRW. Suis l’objectif quotidien en jeu et les consignes Discord.",
               "Avant le prochain reset, envoie de longues marches de collecte. Active le Bison seulement lorsque les troupes collectent réellement."
@@ -1349,6 +1265,94 @@
         }
       },
       "sourceUrl": "https://kingshotdata.com/events/kingdom-of-power-kvk-event/"
+    },
+    {
+      "id": "golden-glaives-2026-10-05",
+      "start": "2026-10-05",
+      "end": "2026-10-06",
+      "icon": "⚔️",
+      "iconUrl": "https://kingshotdata.com/uploads/2025/05/golden-glaives-event-icon.webp",
+      "manual": false,
+      "confidence": "predicted",
+      "name": {
+        "de": "Golden Glaives",
+        "en": "Golden Glaives",
+        "fr": "Golden Glaives"
+      },
+      "tips": {
+        "de": [
+          "Der Termin folgt dem öffentlichen Event-Rhythmus und bleibt bis zur Ingame-Anzeige voraussichtlich.",
+          "Die Sammelphase läuft zwei Tage; der Tausch bleibt anschließend noch einen weiteren Tag geöffnet.",
+          "Nicht verwendete Trübgoldsteine werden nach Ende der Tauschphase automatisch in Brot umgewandelt."
+        ],
+        "en": [
+          "The date follows the public event cycle and remains predicted until it appears in game.",
+          "Collection lasts two days; the exchange remains open for one additional day.",
+          "Unused Dim Goldstones are automatically converted into Bread after the exchange period."
+        ],
+        "fr": [
+          "La date suit le cycle public des événements et reste prévisionnelle jusqu’à son affichage en jeu.",
+          "La collecte dure deux jours ; l’échange reste ouvert un jour supplémentaire.",
+          "Les Pierres d’or ternes inutilisées sont automatiquement converties en Pain après la période d’échange."
+        ]
+      },
+      "dailyPlans": {
+        "2026-10-05": {
+          "points": {
+            "de": "Normale Intel-Mission: 1 Trübgoldstein · Golden Glaive: 10 Trübgoldsteine",
+            "en": "Regular Intel Mission: 1 Dim Goldstone · Golden Glaive: 10 Dim Goldstones",
+            "fr": "Mission de renseignement normale : 1 Pierre d’or terne · Golden Glaive : 10 Pierres d’or ternes"
+          },
+          "steps": {
+            "de": [
+              "Direkt nach dem Reset zuerst die zurückgehaltenen Belohnungen der 08:00-UTC-Missionen abholen.",
+              "Danach die offenen 16:00-UTC-Missionen und Pans zusätzliche Mission abschließen und abholen.",
+              "Alle neuen Intel-Zyklen des Tages vollständig abschließen und abholen; Golden Glaives bringen jeweils zehn Trübgoldsteine.",
+              "Im Tauschshop zuerst die knappen Fortschrittsmaterialien prüfen. Auf TG8 kann Gehärtetes Truegold verfügbar sein; danach Truegold und benötigte Beschleuniger priorisieren."
+            ],
+            "en": [
+              "Immediately after reset, first claim the held rewards from the 08:00 UTC missions.",
+              "Then complete and claim the unfinished 16:00 UTC missions and Pan’s extra mission.",
+              "Complete and claim every new Intel cycle that day; each Golden Glaive gives ten Dim Goldstones.",
+              "Check scarce progression materials first in the exchange shop. Tempered Truegold may be available at TG8; then prioritize Truegold and the speedups you need."
+            ],
+            "fr": [
+              "Juste après le reset, récupère d’abord les récompenses conservées des missions de 08:00 UTC.",
+              "Termine et récupère ensuite les missions ouvertes de 16:00 UTC et la mission supplémentaire de Pan.",
+              "Termine et récupère tous les nouveaux cycles de renseignement du jour ; chaque Golden Glaive rapporte dix Pierres d’or ternes.",
+              "Vérifie d’abord les matériaux de progression rares dans la boutique. L’Or véritable trempé peut être disponible à TG8 ; priorise ensuite l’Or véritable et les accélérateurs nécessaires."
+            ]
+          }
+        },
+        "2026-10-06": {
+          "points": {
+            "de": "Normale Intel-Mission: 1 Trübgoldstein · Golden Glaive: 10 Trübgoldsteine",
+            "en": "Regular Intel Mission: 1 Dim Goldstone · Golden Glaive: 10 Dim Goldstones",
+            "fr": "Mission de renseignement normale : 1 Pierre d’or terne · Golden Glaive : 10 Pierres d’or ternes"
+          },
+          "steps": {
+            "de": [
+              "Alle verfügbaren Intel-Zyklen abschließen und Belohnungen abholen; heute ist der zweite und letzte Sammeltag.",
+              "Pans zusätzliche Intel-Mission für weitere Chancen nutzen und innerhalb der verbleibenden Sammelphase abschließen.",
+              "Golden Glaives priorisieren: Sie geben je zehn Trübgoldsteine statt eines Steins bei normalen Missionen.",
+              "Vor Schließung der Tauschphase alle Steine ausgeben; übrig gebliebene Steine werden später automatisch in Brot umgewandelt."
+            ],
+            "en": [
+              "Complete every available Intel cycle and claim the rewards; this is the second and final collection day.",
+              "Use Pan’s extra Intel Mission for more chances and complete it within the remaining collection period.",
+              "Prioritize Golden Glaives: they give ten Dim Goldstones each instead of one from a regular mission.",
+              "Spend all stones before the exchange closes; leftovers are later converted into Bread automatically."
+            ],
+            "fr": [
+              "Termine tous les cycles de renseignement disponibles et récupère les récompenses ; c’est le deuxième et dernier jour de collecte.",
+              "Utilise la mission supplémentaire de Pan pour obtenir plus d’occasions et termine-la pendant la période de collecte restante.",
+              "Priorise les Golden Glaives : ils donnent dix Pierres d’or ternes chacun contre une pour une mission normale.",
+              "Dépense toutes les pierres avant la fermeture de l’échange ; les restes seront ensuite convertis automatiquement en Pain."
+            ]
+          }
+        }
+      },
+      "sourceUrl": "https://kingshotdata.com/events/golden-glaives-event/"
     },
     {
       "id": "new-master-2026-09-14",
