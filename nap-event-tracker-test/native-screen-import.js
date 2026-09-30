@@ -238,10 +238,16 @@ function scoreTail(line,minScore=1000){
  // letters in the player name (e.g. the "ll" in "Hell") into score digits.
  // Alliance Mobilization can legitimately end below 1,000 points, so its
  // dedicated parser opts into plain 1–12 digit tails with minScore=1.
- const token=minScore<=1
-  ?'[0-9OoIl|]{1,3}(?:[.,\\s][0-9OoIl|]{3}){1,4}|[0-9OoIl|]{1,12}'
-  :'[0-9OoIl|]{1,3}(?:[.,\\s][0-9OoIl|]{3}){1,4}|[0-9OoIl|]{4,12}';
- const m=s.match(new RegExp('(?:^|\\\\s)('+token+')\\\\s*
+ const pattern=minScore<=1
+  ?/(?:^|\s)([0-9OoIl|]{1,3}(?:[.,\s][0-9OoIl|]{3}){1,4}|[0-9OoIl|]{1,12})\s*$/
+  :/(?:^|\s)([0-9OoIl|]{1,3}(?:[.,\s][0-9OoIl|]{3}){1,4}|[0-9OoIl|]{4,12})\s*$/;
+ const m=s.match(pattern);
+ if(!m)return null;
+ const raw=m[1],normalized=ocrDigits(raw),score=Number(normalized.replace(/[.,\s]/g,''));
+ if(!Number.isSafeInteger(score)||score<minScore)return null;
+ const tokenStart=s.lastIndexOf(raw);
+ return {raw,score,start:tokenStart};
+}
 function extractRows(text,minScore=1000){
  const out=[],lines=String(text||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
  for(let i=0;i<lines.length;i++){
@@ -249,7 +255,7 @@ function extractRows(text,minScore=1000){
   if(!tail&&i+1<lines.length){
    const next=scoreTail(lines[i+1],minScore);
    if(next&&next.start===0){
-    line+=' '+lines[++i];tail=scoreTail(line);
+    line+=' '+lines[++i];tail=scoreTail(line,minScore);
    }
   }
   if(!tail)continue;
