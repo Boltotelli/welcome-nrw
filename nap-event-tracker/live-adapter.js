@@ -4,9 +4,22 @@ const C={u:'https://bdzlgirowutasrsycjfj.supabase.co',k:'sb_publishable_8i1ismeQ
 let crownAllowed2=false;
 const S={a:null,profile:null,p:[],v:[],x:[],e:[],o:[],t:[],bans:[],spend:[],reviews:[],shared:[],settings:null,avatars:{},laws:[],lawCases:[],lawEvidence:[],performance:null,crown:null,activity:[],eventOptions:[],features:null,law9:null,notificationReads:new Set(),syncStatus:null,level4Hosting:[],napStats:[],sgWindow:null,supportTickets:[],supportMessages:[],supportEvidence:[]};
 let ses=null;try{ses=JSON.parse(localStorage.getItem(C.s)||'null')}catch{}
+let loginMode2='write';try{loginMode2=localStorage.getItem('nap_v2_login_mode')==='read'?'read':'write'}catch{}
+const isReadOnly2=()=>S.profile?.access_mode==='read';
 const L=()=>window.currentLang||document.querySelector('#languagePicker')?.value||'de';
 const T={de:{login:'Anmelden',alliance:'Allianz',password:'Passwort',hint:'Ein zentraler Login pro Allianz. Private Daten bleiben innerhalb der eigenen Allianz.',fail:'Login fehlgeschlagen.',logout:'Abmelden',live:'LIVE DATEN',open:'Öffnen',contact:'Kontaktiert',r1:'R1 umgesetzt',nap:'24h NAP OUT aktivieren',none:'Keine Einträge.',actions:'offen',over:'überfällig',left:'verbleibend',tempTransfer:'Als temporär markieren',rejectTemp:'Ablehnen · temporär',tempTransferQ:'Diesen Wechsel als temporär markieren? Die Spielerakte bleibt in der Heimatallianz; der Hinweis wird 7 Tage ausgeblendet.',rejectTempQ:'Diesen Neuzugang als temporär ablehnen? Die Spielerakte bleibt bei der bisherigen Allianz. Der Hinweis wird 7 Tage ausgeblendet und erscheint erneut, falls der Spieler danach weiterhin bei deiner Allianz geführt wird.'},en:{login:'Sign in',alliance:'Alliance',password:'Password',hint:'One central login per alliance. Private data stays within your alliance.',fail:'Login failed.',logout:'Sign out',live:'LIVE DATA',open:'Open',contact:'Contacted',r1:'R1 implemented',nap:'Activate 24h NAP OUT',none:'No entries.',actions:'open',over:'overdue',left:'remaining',tempTransfer:'Mark as temporary',rejectTemp:'Reject · temporary',tempTransferQ:'Mark this transfer as temporary? The player file stays with the home alliance and the notice is hidden for 7 days.',rejectTempQ:'Reject this incoming player as temporary? The player file stays with the previous alliance. The notice is hidden for 7 days and will appear again if the player is still listed with your alliance afterwards.'},fr:{login:'Connexion',alliance:'Alliance',password:'Mot de passe',hint:'Un login central par alliance. Les données privées restent dans votre alliance.',fail:'Échec de connexion.',logout:'Déconnexion',live:'DONNÉES LIVE',open:'Ouvrir',contact:'Contacté',r1:'R1 appliqué',nap:'Activer NAP OUT 24 h',none:'Aucune entrée.',actions:'ouvert',over:'en retard',left:'restant',tempTransfer:'Marquer temporaire',rejectTemp:'Refuser · temporaire',tempTransferQ:'Marquer ce transfert comme temporaire ? Le dossier reste dans l’alliance d’origine et l’alerte est masquée pendant 7 jours.',rejectTempQ:'Refuser ce joueur entrant comme transfert temporaire ? Le dossier reste dans l’alliance précédente. L’alerte est masquée pendant 7 jours et réapparaît si le joueur est toujours dans votre alliance ensuite.'},es:{login:'Iniciar sesión',alliance:'Alianza',password:'Contraseña',hint:'Un login central por alianza. Los datos privados permanecen en tu alianza.',fail:'Error de inicio de sesión.',logout:'Cerrar sesión',live:'DATOS LIVE',open:'Abrir',contact:'Contactado',r1:'R1 aplicado',nap:'Activar NAP OUT 24 h',none:'No hay entradas.',actions:'abiertas',over:'vencido',left:'restante',tempTransfer:'Marcar temporal',rejectTemp:'Rechazar · temporal',tempTransferQ:'¿Marcar este cambio como temporal? El expediente permanece en la alianza de origen y el aviso se oculta durante 7 días.',rejectTempQ:'¿Rechazar este jugador entrante como temporal? El expediente permanece en la alianza anterior. El aviso se oculta durante 7 días y volverá a aparecer si el jugador sigue en tu alianza después.'}};
 const t=k=>(T[L()]||T.de)[k]||k, E=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const ACCESS_WORDS2={
+ de:{access:'Zugriffsmodus',read:'Read',write:'Write',readHint:'Alles ansehen · Änderungen deaktiviert',writeHint:'Vollzugriff für die Allianzverwaltung',readOnly:'READ ONLY'},
+ en:{access:'Access mode',read:'Read',write:'Write',readHint:'View everything · changes disabled',writeHint:'Full access for alliance management',readOnly:'READ ONLY'},
+ fr:{access:"Mode d’accès",read:'Read',write:'Write',readHint:'Tout consulter · modifications désactivées',writeHint:"Accès complet à la gestion de l’alliance",readOnly:'READ ONLY'},
+ es:{access:'Modo de acceso',read:'Read',write:'Write',readHint:'Ver todo · cambios desactivados',writeHint:'Acceso completo para gestionar la alianza',readOnly:'READ ONLY'}
+};
+const accessWords2=()=>ACCESS_WORDS2[L()]||ACCESS_WORDS2.de;
+function loginEmail2(alliance,mode){
+ const base=alliance==='NwO'?'nwo2':String(alliance||'').toLowerCase();
+ return base+(mode==='read'?'-read':'')+'@nap-tracker.invalid';
+}
 const ACTION_WORDS2={
  de:{connectionFail:'Verbindung fehlgeschlagen.',connectionRetry:'Die Daten konnten nicht geladen werden. Deine Sitzung bleibt erhalten.',retry:'Erneut versuchen',accountIncomplete:'Account ist nicht vollständig eingerichtet.',wrongAlliance:'Der Account gehört zu einer anderen Allianz.',endRequired:'Bitte eine Endzeit auswählen.',endFuture:'Bitte eine Endzeit in der Zukunft auswählen.',contactComment:'Optionaler Akten-Kommentar zum Kontakt:',activateNapOut:'24h NAP OUT aktivieren?',endSpending:'Spending Exclusion beenden?',deactivateBan:'NAP Ban deaktivieren?',confirmTransfer:'Diesen Allianzwechsel jetzt bestätigen? Die Spielerakte wird der neuen Allianz zugeordnet.',memberCountCheck:'Mitgliederzahl prüfen.',pointsMustExceed:'Punkte müssen über {mult}× Ziel liegen.',sgNotRunning:'Aktuell läuft kein Strongest Governor.',noPerformance:'Kein Performance-Durchlauf vorhanden.',scoreCheck:'Score prüfen.',kvkRankCheck:'KvK benötigt Serverrang 1–200.',lawImageRule:'Nur PNG/JPEG/WebP, max. 8 MB.',caseIdMissing:'Fall-ID fehlt.',saving:'Speichere …',saved:'✓ Gespeichert',deleting:'Lösche …',loadingMore:'Lade weitere Einträge …',importerMissing:'Importer nicht geladen. Bitte Seite aktualisieren.'},
  en:{connectionFail:'Connection failed.',connectionRetry:'The data could not be loaded. Your session has been kept.',retry:'Try again',accountIncomplete:'The account is not fully configured.',wrongAlliance:'This account belongs to another alliance.',endRequired:'Please select an end time.',endFuture:'Please select an end time in the future.',contactComment:'Optional player-file comment for the contact:',activateNapOut:'Activate 24h NAP OUT?',endSpending:'End Spending Exclusion?',deactivateBan:'Deactivate NAP ban?',confirmTransfer:'Confirm this alliance transfer now? The player file will be assigned to the new alliance.',memberCountCheck:'Check the member count.',pointsMustExceed:'Points must be above {mult}× the target.',sgNotRunning:'No Strongest Governor is currently running.',noPerformance:'No performance occurrence is available.',scoreCheck:'Check the score.',kvkRankCheck:'KvK requires a server rank from 1–200.',lawImageRule:'PNG/JPEG/WebP only, max. 8 MB.',caseIdMissing:'Case ID is missing.',saving:'Saving …',saved:'✓ Saved',deleting:'Deleting …',loadingMore:'Loading more entries …',importerMissing:'Importer is not loaded. Please refresh the page.'},
@@ -67,17 +80,98 @@ async function token(){
 async function h(json=false){const a=await token();return {apikey:C.k,...(a?{Authorization:'Bearer '+a}:{}),...(json?{'Content-Type':'application/json'}:{})}}
 async function tab(n,s=''){return q(C.u+'/rest/v1/'+n+(s?'?'+s:''),{headers:await h()})}
 async function rpc(n,b={}){return q(C.u+'/rest/v1/rpc/'+n,{method:'POST',headers:await h(true),body:JSON.stringify(b)})}
-async function upd(n,id,b){return q(C.u+'/rest/v1/'+n+'?id=eq.'+encodeURIComponent(id),{method:'PATCH',headers:{...(await h(true)),Prefer:'return=minimal'},body:JSON.stringify(b)})}
-function css(){const s=document.createElement('style');s.textContent=`body.n2lock .app{filter:blur(5px);pointer-events:none}.n2login{position:fixed;inset:0;z-index:999;background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(16px);display:grid;place-items:center;padding:18px}.n2login[hidden]{display:none}.n2box{width:min(420px,100%);padding:24px;border:1px solid var(--line);border-radius:22px;background:var(--panel);box-shadow:var(--shadow)}.n2box h2{margin:5px 0}.n2box p{color:var(--muted);font-size:11px}.n2grid{display:grid;gap:10px;margin-top:16px}.n2grid label{display:grid;gap:5px;font-size:10px;color:var(--muted);font-weight:800}.n2grid input,.n2grid select{min-height:42px;border:1px solid var(--line);border-radius:11px;background:var(--panel-2);color:var(--text);padding:9px 11px}.n2err{min-height:16px;color:var(--red);font-size:10px}.n2live{font-size:8px;padding:4px 7px;border-radius:999px;background:var(--green);color:#08140d;font-weight:900}.n2empty{padding:18px;text-align:center;color:var(--muted);font-size:10px}.user-pill{cursor:pointer}@media(min-width:801px){.sidebar:hover{--sidebar:var(--sidebar-open)}.sidebar:hover~.shell{margin-left:var(--sidebar-open)}.sidebar:hover .brandtext,.sidebar:hover .nav-label{opacity:1;transform:none}.sidebar:hover .nav-section,.sidebar:hover .concept{opacity:.9}}.home-hero-tools{min-width:220px}.home-sync-status{margin-top:9px;padding:9px 12px;border:1px solid var(--line);border-radius:12px;background:var(--panel-2);display:grid;gap:4px;min-width:220px}.home-sync-status>span,.home-sync-status small{font-size:9px;color:var(--muted);font-weight:800}.home-sync-status b{font-size:11px}.home-sync-meta{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}.home-sync-meta b,.home-sync-meta small{white-space:nowrap}@media(max-width:640px){.home-hero-tools{width:100%;min-width:0}.home-hero-tools .hero-actions{margin-bottom:10px}.home-sync-status{min-width:0;width:100%;margin-top:0;padding:9px 11px;gap:5px}.home-sync-meta{justify-content:space-between;column-gap:12px;row-gap:4px}}.support-thread{display:grid;gap:9px}.support-msg{max-width:min(760px,92%);padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:var(--panel-2);display:grid;gap:5px}.support-msg.alliance{justify-self:end;background:color-mix(in srgb,var(--blue) 8%,var(--panel-2));border-color:color-mix(in srgb,var(--blue) 28%,var(--line))}.support-msg.support{justify-self:start;background:color-mix(in srgb,var(--green) 8%,var(--panel-2));border-color:color-mix(in srgb,var(--green) 28%,var(--line))}.support-msg small{color:var(--muted);font-size:9px}.support-evidence-grid{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.support-evidence-grid a{display:block;width:88px;height:66px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--panel-3)}.support-evidence-grid img{width:100%;height:100%;object-fit:cover}.support-ticket{margin-bottom:14px}.support-safety-note{border-color:color-mix(in srgb,var(--blue) 30%,var(--line));background:color-mix(in srgb,var(--blue) 6%,var(--panel-2))}`;document.head.appendChild(s)}
-function login(){const d=document.createElement('div');d.id='n2login';d.className='n2login';d.innerHTML=`<div class="n2box"><div class="kicker">NAP Event Tracker 2.0</div><h2>Kingdom 1044</h2><p>${E(t('hint'))}</p><form class="n2grid" id="n2form"><label>${E(t('alliance'))}<select id="n2a" class="n2alliance-select" tabindex="-1" aria-hidden="true"><option>NRW</option><option>THM</option><option>NWO</option><option>NwO</option><option>CWR</option><option>PxR</option></select></label><div class="n2alliance-grid" role="group" aria-label="${E(t('alliance'))}">${['NRW','THM','NWO','NwO','CWR','PxR'].map(a=>`<button type="button" class="n2alliance-choice ${a==='NRW'?'active':''}" data-login-alliance="${a}" aria-pressed="${a==='NRW'}">${a}</button>`).join('')}</div><label>${E(t('password'))}<input id="n2p" type="password" required></label><div id="n2e" class="n2err"></div><button class="btn primary" type="submit">${E(t('login'))}</button><button class="btn secondary" type="button" id="n2retry" hidden>${E(actionWord2('retry'))}</button></form></div>`;document.body.appendChild(d);d.querySelectorAll('[data-login-alliance]').forEach(b=>b.onclick=()=>{
- const code=b.dataset.loginAlliance;d.querySelector('#n2a').value=code;
- d.querySelectorAll('[data-login-alliance]').forEach(x=>{const selected=x.dataset.loginAlliance===code;x.classList.toggle('active',selected);x.setAttribute('aria-pressed',String(selected))});
-});
+async function upd(n,id,b){if(isReadOnly2())throw Error(accessWords2().readHint);return q(C.u+'/rest/v1/'+n+'?id=eq.'+encodeURIComponent(id),{method:'PATCH',headers:{...(await h(true)),Prefer:'return=minimal'},body:JSON.stringify(b)})}
+function css(){const s=document.createElement('style');s.textContent=`body.n2lock .app{filter:blur(5px);pointer-events:none}.n2login{position:fixed;inset:0;z-index:999;background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(16px);display:grid;place-items:center;padding:18px}.n2login[hidden]{display:none}.n2box{width:min(420px,100%);padding:24px;border:1px solid var(--line);border-radius:22px;background:var(--panel);box-shadow:var(--shadow)}.n2box h2{margin:5px 0}.n2box p{color:var(--muted);font-size:11px}.n2grid{display:grid;gap:10px;margin-top:16px}.n2grid label{display:grid;gap:5px;font-size:10px;color:var(--muted);font-weight:800}.n2grid input,.n2grid select{min-height:42px;border:1px solid var(--line);border-radius:11px;background:var(--panel-2);color:var(--text);padding:9px 11px}.n2err{min-height:16px;color:var(--red);font-size:10px}.n2live{font-size:8px;padding:4px 7px;border-radius:999px;background:var(--green);color:#08140d;font-weight:900}.n2empty{padding:18px;text-align:center;color:var(--muted);font-size:10px}.user-pill{cursor:pointer}@media(min-width:801px){.sidebar:hover{--sidebar:var(--sidebar-open)}.sidebar:hover~.shell{margin-left:var(--sidebar-open)}.sidebar:hover .brandtext,.sidebar:hover .nav-label{opacity:1;transform:none}.sidebar:hover .nav-section,.sidebar:hover .concept{opacity:.9}}.home-hero-tools{min-width:220px}.home-sync-status{margin-top:9px;padding:9px 12px;border:1px solid var(--line);border-radius:12px;background:var(--panel-2);display:grid;gap:4px;min-width:220px}.home-sync-status>span,.home-sync-status small{font-size:9px;color:var(--muted);font-weight:800}.home-sync-status b{font-size:11px}.home-sync-meta{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}.home-sync-meta b,.home-sync-meta small{white-space:nowrap}@media(max-width:640px){.home-hero-tools{width:100%;min-width:0}.home-hero-tools .hero-actions{margin-bottom:10px}.home-sync-status{min-width:0;width:100%;margin-top:0;padding:9px 11px;gap:5px}.home-sync-meta{justify-content:space-between;column-gap:12px;row-gap:4px}}.support-thread{display:grid;gap:9px}.support-msg{max-width:min(760px,92%);padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:var(--panel-2);display:grid;gap:5px}.support-msg.alliance{justify-self:end;background:color-mix(in srgb,var(--blue) 8%,var(--panel-2));border-color:color-mix(in srgb,var(--blue) 28%,var(--line))}.support-msg.support{justify-self:start;background:color-mix(in srgb,var(--green) 8%,var(--panel-2));border-color:color-mix(in srgb,var(--green) 28%,var(--line))}.support-msg small{color:var(--muted);font-size:9px}.support-evidence-grid{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.support-evidence-grid a{display:block;width:88px;height:66px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--panel-3)}.support-evidence-grid img{width:100%;height:100%;object-fit:cover}.support-ticket{margin-bottom:14px}.support-safety-note{border-color:color-mix(in srgb,var(--blue) 30%,var(--line));background:color-mix(in srgb,var(--blue) 6%,var(--panel-2))}`;s.textContent+=`
+.n2access-wrap{display:grid;gap:6px;margin-top:2px}
+.n2access-label{font-size:10px;color:var(--muted);font-weight:800}
+.n2access-switch{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;border:1px solid color-mix(in srgb,var(--gold) 24%,var(--line));border-radius:14px;background:linear-gradient(180deg,color-mix(in srgb,var(--panel-2) 90%,var(--gold) 2%),var(--panel-2));box-shadow:0 8px 24px rgba(0,0,0,.16),inset 0 1px 0 rgba(255,255,255,.025);overflow:hidden}
+.n2access-switch:before{content:"";position:absolute;left:4px;top:4px;bottom:4px;width:calc(50% - 6px);border-radius:10px;background:linear-gradient(180deg,color-mix(in srgb,var(--gold) 15%,var(--panel-3)),color-mix(in srgb,var(--gold) 7%,var(--panel-2)));border:1px solid color-mix(in srgb,var(--gold) 68%,var(--line));box-shadow:0 0 18px color-mix(in srgb,var(--gold) 13%,transparent);transition:transform .2s ease}
+.n2access-switch[data-mode="write"]:before{transform:translateX(calc(100% + 4px))}
+.n2access-option{position:relative;z-index:1;min-height:48px;border:0;background:transparent;color:var(--muted);border-radius:10px;font:inherit;font-weight:900;display:flex;align-items:center;justify-content:center;gap:9px;cursor:pointer;transition:color .18s ease,transform .18s ease}
+.n2access-option.active{color:var(--gold-text,var(--gold-2))}
+.n2access-option:active{transform:scale(.985)}
+.n2access-icon{width:23px;height:23px;display:block;overflow:visible}
+.n2eye-open,.n2eye-closed{transition:opacity .18s ease,transform .18s ease;transform-origin:center}
+.n2eye-open{opacity:0;transform:scale(.82)}
+.n2eye-closed{opacity:1;transform:scale(1)}
+.n2access-option[data-access="read"].active .n2eye-open{opacity:1;transform:scale(1)}
+.n2access-option[data-access="read"].active .n2eye-closed{opacity:0;transform:scale(.82)}
+.n2pen-line{stroke-dasharray:28;stroke-dashoffset:28;transition:stroke-dashoffset .28s ease .02s}
+.n2access-option[data-access="write"].active .n2pen-line{stroke-dashoffset:0}
+.n2access-hint{min-height:16px;font-size:9px;color:var(--muted);padding:0 2px;transition:opacity .15s ease}
+.n2access-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 7px;border:1px solid color-mix(in srgb,var(--gold) 50%,var(--line));border-radius:999px;background:color-mix(in srgb,var(--gold) 8%,var(--panel-2));color:var(--gold-text,var(--gold-2));font-size:8px;font-weight:1000;letter-spacing:.04em}
+.fab.n2-read-fab{cursor:default;display:grid;place-items:center;padding:0;line-height:0}
+.fab.n2-read-fab svg{width:31px;height:31px;display:block;margin:0}
+.fab.n2-read-fab path,.fab.n2-read-fab circle{stroke:currentColor;fill:none;stroke-width:1.8}
+body.n2-readonly [data-go="add"]:not(.fab),
+body.n2-readonly .n2act,
+body.n2-readonly .live-r1-timer,
+body.n2-readonly .live-transfer-confirm,
+body.n2-readonly .live-transfer-temp,
+body.n2-readonly .live-manual-transfer,
+body.n2-readonly .live-post-contact-confirm,
+body.n2-readonly .live-post-contact-dismiss,
+body.n2-readonly .live-end-exclusion,
+body.n2-readonly .live-end-ban,
+body.n2-readonly .live-end-spend,
+body.n2-readonly #livePerfScreen,
+body.n2-readonly #livePerfManual,
+body.n2-readonly .live-report-law,
+body.n2-readonly .profile-r1-save,
+body.n2-readonly .profile-l4-start,
+body.n2-readonly .profile-sanction-act,
+body.n2-readonly .live-edit-violation,
+body.n2-readonly .live-delete-violation,
+body.n2-readonly #liveDeleteViolation,
+body.n2-readonly .live-delete-confirm,
+body.n2-readonly #liveSaveLanguages,
+body.n2-readonly .live-event-override,
+body.n2-readonly #liveFeatKvk,
+body.n2-readonly #liveFeatMob,
+body.n2-readonly #markAllRead{display:none!important}
+body.n2-readonly #view-add{display:none!important}
+body.n2-readonly #liveSettingsForm button[type="submit"],
+body.n2-readonly #liveTargetsForm button[type="submit"],
+body.n2-readonly #liveSupportCreate,
+body.n2-readonly .live-support-reply,
+body.n2-readonly #liveCommentForm,
+body.n2-readonly #livePlayerIdForm,
+body.n2-readonly .live-shared-form,
+body.n2-readonly .live-member-plan button[type="submit"],
+body.n2-readonly .live-prep-score button[type="submit"],
+body.n2-readonly #liveLawForm button[type="submit"],
+body.n2-readonly #livePerfForm button[type="submit"]{display:none!important}
+body.n2-readonly #view-settings input,
+body.n2-readonly #view-settings select,
+body.n2-readonly #view-settings textarea,
+body.n2-readonly #livePlayerIdForm input,
+body.n2-readonly .live-language-editor input{pointer-events:none;opacity:.72}
+body.n2-readonly .live-language-editor{pointer-events:none;opacity:.82}
+`;document.head.appendChild(s)}
+function login(){
+ const w=accessWords2(),d=document.createElement('div');
+ d.id='n2login';d.className='n2login';
+ const eye='<svg class="n2access-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path class="n2eye-open" d="M2.7 12s3.4-5.2 9.3-5.2S21.3 12 21.3 12 17.9 17.2 12 17.2 2.7 12 2.7 12Z" stroke="currentColor" stroke-width="1.8"/><circle class="n2eye-open" cx="12" cy="12" r="2.4" stroke="currentColor" stroke-width="1.8"/><path class="n2eye-closed" d="M3.1 12.7c2.1-2.3 5.1-3.5 8.9-3.5s6.8 1.2 8.9 3.5M7 10.3l-1.4-2M12 9.2V6.8M17 10.3l1.4-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
+ const pen='<svg class="n2access-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5.2 15.8 4.5 19.5l3.7-.7L18.5 8.5 15.5 5.5 5.2 15.8Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="m14.9 6.1 3 3" stroke="currentColor" stroke-width="1.8"/><path class="n2pen-line" d="M3.8 21c4.4-.9 9.7.8 16.4-.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
+ d.innerHTML=`<div class="n2box"><div class="kicker">NAP Event Tracker 2.0</div><h2>Kingdom 1044</h2><p>${E(t('hint'))}</p><form class="n2grid" id="n2form"><label>${E(t('alliance'))}<select id="n2a" class="n2alliance-select" tabindex="-1" aria-hidden="true"><option>NRW</option><option>THM</option><option>NWO</option><option>NwO</option><option>CWR</option><option>PxR</option></select></label><div class="n2alliance-grid" role="group" aria-label="${E(t('alliance'))}">${['NRW','THM','NWO','NwO','CWR','PxR'].map(a=>`<button type="button" class="n2alliance-choice ${a==='NRW'?'active':''}" data-login-alliance="${a}" aria-pressed="${a==='NRW'}">${a}</button>`).join('')}</div><div class="n2access-wrap"><span class="n2access-label">${E(w.access)}</span><div class="n2access-switch" id="n2accessSwitch" data-mode="${E(loginMode2)}" role="group" aria-label="${E(w.access)}"><button class="n2access-option ${loginMode2==='read'?'active':''}" type="button" data-access="read" aria-pressed="${loginMode2==='read'}">${eye}<span>${E(w.read)}</span></button><button class="n2access-option ${loginMode2==='write'?'active':''}" type="button" data-access="write" aria-pressed="${loginMode2==='write'}">${pen}<span>${E(w.write)}</span></button></div><div class="n2access-hint" id="n2accessHint">${E(loginMode2==='read'?w.readHint:w.writeHint)}</div></div><label>${E(t('password'))}<input id="n2p" type="password" required autocomplete="current-password"></label><div id="n2e" class="n2err"></div><button class="btn primary" type="submit">${E(t('login'))}</button><button class="btn secondary" type="button" id="n2retry" hidden>${E(actionWord2('retry'))}</button></form></div>`;
+ document.body.appendChild(d);
+ d.querySelectorAll('[data-login-alliance]').forEach(b=>b.onclick=()=>{
+  const code=b.dataset.loginAlliance;d.querySelector('#n2a').value=code;
+  d.querySelectorAll('[data-login-alliance]').forEach(x=>{const selected=x.dataset.loginAlliance===code;x.classList.toggle('active',selected);x.setAttribute('aria-pressed',String(selected))});
+ });
+ const setMode=mode=>{
+  loginMode2=mode==='read'?'read':'write';
+  try{localStorage.setItem('nap_v2_login_mode',loginMode2)}catch{}
+  const sw=d.querySelector('#n2accessSwitch');if(sw)sw.dataset.mode=loginMode2;
+  d.querySelectorAll('[data-access]').forEach(x=>{const selected=x.dataset.access===loginMode2;x.classList.toggle('active',selected);x.setAttribute('aria-pressed',String(selected))});
+  const hint=d.querySelector('#n2accessHint');if(hint)hint.textContent=loginMode2==='read'?w.readHint:w.writeHint;
+ };
+ d.querySelectorAll('[data-access]').forEach(b=>b.onclick=()=>setMode(b.dataset.access));
  const retry=d.querySelector('#n2retry');if(retry)retry.onclick=retrySavedSession2;
- document.querySelector('#n2form').onsubmit=async e=>{
-  e.preventDefault();const a=n2a.value,p=n2p.value,errBox=d.querySelector('#n2e');if(retry)retry.hidden=true;
+ d.querySelector('#n2form').onsubmit=async e=>{
+  e.preventDefault();const a=d.querySelector('#n2a').value,p=d.querySelector('#n2p').value,errBox=d.querySelector('#n2e');if(retry)retry.hidden=true;
   try{
-   const z=await q(C.u+'/auth/v1/token?grant_type=password',{method:'POST',headers:{apikey:C.k,'Content-Type':'application/json'},body:JSON.stringify({email:(a==='NwO'?'nwo2':a.toLowerCase())+'@nap-tracker.invalid',password:p})});
+   const z=await q(C.u+'/auth/v1/token?grant_type=password',{method:'POST',headers:{apikey:C.k,'Content-Type':'application/json'},body:JSON.stringify({email:loginEmail2(a,loginMode2),password:p})});
    save({...z,expires_at:Math.floor(Date.now()/1000)+(z.expires_in||3600)});await enter(a);
   }catch(x){
    if(isSessionAuthError2(x)||x?.code==='ACCOUNT_INCOMPLETE'||x?.code==='ACCOUNT_MISMATCH')save(null);
@@ -227,7 +321,33 @@ async function syncCrownVisibility2(){
  if(!permitted&&document.getElementById('view-crown')?.classList.contains('active'))setView('home');
  return permitted;
 }
-function decorate(){const ab=document.querySelector('.alliance-badge');if(ab)ab.innerHTML=allianceLogo2(S.a,'alliance-top-logo')+'<span>'+E(S.a)+'</span>';document.querySelectorAll('[data-current-alliance]').forEach(x=>x.textContent=S.a);const u=document.querySelector('.user-pill');if(u){u.innerHTML=allianceLogo2(S.a,'alliance-user-logo')+'<span>'+E(S.a)+'</span> <span class="n2live">'+E(t('live'))+'</span>';u.title=t('logout');u.onclick=()=>{if(confirm(t('logout')+'?')){save(null);location.reload()}}}}
+async function logout2(){
+ if(!confirm(t('logout')+'?'))return;
+ try{
+  const access=ses?.access_token;
+  if(access)await fetch(C.u+'/auth/v1/logout',{method:'POST',headers:{apikey:C.k,Authorization:'Bearer '+access}});
+ }catch{}
+ save(null);location.reload();
+}
+function syncReadOnlyChrome2(){
+ const fab=document.querySelector('.fab');
+ if(fab){
+  if(isReadOnly2()){
+   fab.removeAttribute('data-go');fab.classList.add('n2-read-fab');fab.setAttribute('aria-label',accessWords2().readOnly);fab.title=accessWords2().readHint;
+   fab.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.7 12s3.4-5.2 9.3-5.2S21.3 12 21.3 12 17.9 17.2 12 17.2 2.7 12 2.7 12Z"/><circle cx="12" cy="12" r="2.4"/></svg>';
+  }else{
+   fab.dataset.go='add';fab.classList.remove('n2-read-fab');fab.setAttribute('aria-label',t('add'));fab.title='';fab.textContent='＋';
+  }
+ }
+ const grid=document.querySelector('#moreSheet .more-grid');
+ if(grid){
+  let b=document.getElementById('n2MobileLogout');
+  if(!b){b=document.createElement('button');b.className='more-item';b.id='n2MobileLogout';b.type='button';grid.appendChild(b)}
+  b.innerHTML='<span class="more-icon">↪</span><span class="more-label">'+E(t('logout'))+'</span>';
+  b.onclick=logout2;
+ }
+}
+function decorate(){const ab=document.querySelector('.alliance-badge');if(ab)ab.innerHTML=allianceLogo2(S.a,'alliance-top-logo')+'<span>'+E(S.a)+'</span>';document.querySelectorAll('[data-current-alliance]').forEach(x=>x.textContent=S.a);const u=document.querySelector('.user-pill');if(u){u.innerHTML=allianceLogo2(S.a,'alliance-user-logo')+'<span>'+E(S.a)+'</span> '+(isReadOnly2()?'<span class="n2access-badge">◉ '+E(accessWords2().readOnly)+'</span>':'<span class="n2live">'+E(t('live'))+'</span>');u.title=t('logout');u.onclick=logout2}syncReadOnlyChrome2()}
 async function load(){
  const a=encodeURIComponent(S.a);
  const [p1,v,x,e,o,tr,bans,spend,settings,reviews,shared,notificationReads,syncStatus,level4Hosting,napStats,sgWindow,performance,supportUnread]=await Promise.all([
@@ -257,10 +377,10 @@ async function load(){
  window.NAP2_PLAYER_AVATARS=S.avatars;loadAvatars().catch(e=>console.warn('avatar load',e));
 }
 async function enter(expected){
- const P=await tab('profiles','select=alliance_code,can_manage_bans,is_admin&limit=1'),prof=P?.[0]||null,a=prof?.alliance_code;
+ const P=await tab('profiles','select=alliance_code,can_manage_bans,is_admin,access_mode&limit=1'),prof=P?.[0]||null,a=prof?.alliance_code;
  if(!a){const err=Error(actionWord2('accountIncomplete'));err.code='ACCOUNT_INCOMPLETE';throw err}
  if(expected&&expected!==a){const err=Error(actionWord2('wrongAlliance'));err.code='ACCOUNT_MISMATCH';throw err}
- S.a=a;S.profile=prof;await load();await migrateLocalNotificationReads2();
+ S.a=a;S.profile=prof;document.body.classList.toggle('n2-readonly',isReadOnly2());await load();if(!isReadOnly2())await migrateLocalNotificationReads2();
  n2login.hidden=true;document.body.classList.remove('n2lock');decorate();await syncCrownVisibility2();renderSupportUnreadBadge2();startSupportUnreadPolling2();renderHome();renderPlayers();if(typeof applyTranslations==='function')applyTranslations();
  requestAnimationFrame(()=>syncCrownVisibility2().catch(err=>console.warn('Crown refresh',err)));
 }
@@ -702,7 +822,7 @@ async function renderKvkLive(){
    (memberPlan.length?memberPlan.map(r=>'<form class="live-row live-member-plan" data-code="'+E(r.alliance_code)+'"><div><b>'+E(r.alliance_code)+'</b><small>Tracker '+N(r.tracker_member_count)+' · '+(r.overridden?'manuell überschrieben':'kein Override')+(r.frozen_member_count!=null?' · eingefroren '+N(r.frozen_member_count):'')+'</small></div><input style="width:100px" inputmode="numeric" value="'+E(r.effective_member_count??r.tracker_member_count??'')+'" '+(!canEditMembers||cycle.baseline_locked?'disabled':'')+'><button class="btn small secondary" '+(!canEditMembers||cycle.baseline_locked?'disabled':'')+'>Speichern</button></form>').join(''):'<div class="live-empty-state">Kein Mitgliederplan vorhanden.</div>')+
    '</div></section>'+
    '<section class="card" style="margin-top:14px"><div class="card-head"><div><div class="card-title">Prep Scores</div><div class="card-sub">'+E(cycle.score_entry_open?'Eingabe offen':'Eingabe noch gesperrt')+'</div></div></div><div class="card-body"><div class="live-list">'+
-   ranking.map(r=>'<form class="live-row live-prep-score" data-code="'+E(r.alliance_code)+'"><div><b>'+E(r.alliance_code)+'</b><small>'+N(r.member_count)+' Mitglieder</small></div><input style="width:150px" inputmode="numeric" value="'+E(r.prep_score??'')+'" '+(cycle.score_entry_open?'':'disabled')+'><button class="btn small primary" '+(cycle.score_entry_open?'':'disabled')+'>Speichern</button></form>').join('')+
+   ranking.map(r=>'<form class="live-row live-prep-score" data-code="'+E(r.alliance_code)+'"><div><b>'+E(r.alliance_code)+'</b><small>'+N(r.member_count)+' Mitglieder</small></div><input style="width:150px" inputmode="numeric" value="'+E(r.prep_score??'')+'" '+(cycle.score_entry_open&&!isReadOnly2()?'':'disabled')+'><button class="btn small primary" '+(cycle.score_entry_open&&!isReadOnly2()?'':'disabled')+'>Speichern</button></form>').join('')+
    '</div></div></section><div id="liveKvkTop" style="margin-top:14px"></div>';
   const cycleSelect=document.getElementById('liveLaw9Cycle');if(cycleSelect)cycleSelect.onchange=()=>{law9SelectedCycle2=cycleSelect.value;renderKvkLive()};
   v.querySelectorAll('.live-member-plan').forEach(form=>form.onsubmit=saveMemberPlan2);v.querySelectorAll('.live-prep-score').forEach(form=>form.onsubmit=savePrepScore2);
@@ -710,12 +830,12 @@ async function renderKvkLive(){
  }catch(err){v.innerHTML+='<div class="live-empty-state">'+E(err.message||String(err))+'</div>'}
 }
 async function saveMemberPlan2(e){
- e.preventDefault();const form=e.currentTarget,count=Number(String(form.querySelector('input').value||'').replace(/\D/g,''));
+ e.preventDefault();if(isReadOnly2())return;const form=e.currentTarget,count=Number(String(form.querySelector('input').value||'').replace(/\D/g,''));
  if(!Number.isInteger(count)||count<0||count>200){alert(actionWord2('memberCountCheck'));return}
  try{await rpc('set_law9_member_override',{p_cycle_id:S.law9.cycle.id,p_alliance_code:form.dataset.code,p_member_count:count});await renderKvkLive()}catch(err){alert(err.message||String(err))}
 }
 async function savePrepScore2(e){
- e.preventDefault();const form=e.currentTarget,score=Number(String(form.querySelector('input').value||'').replace(/\D/g,''));try{await rpc('upsert_law9_prep_score',{p_cycle_id:S.law9.cycle.id,p_alliance_code:form.dataset.code,p_prep_score:score});await renderKvkLive()}catch(err){alert(err.message||String(err))}
+ e.preventDefault();if(isReadOnly2())return;const form=e.currentTarget,score=Number(String(form.querySelector('input').value||'').replace(/\D/g,''));try{await rpc('upsert_law9_prep_score',{p_cycle_id:S.law9.cycle.id,p_alliance_code:form.dataset.code,p_prep_score:score});await renderKvkLive()}catch(err){alert(err.message||String(err))}
 }
 async function loadKvkTop2(id){
  const box=document.getElementById('liveKvkTop');if(!box)return;
@@ -1886,6 +2006,7 @@ let liveNotificationFilter='all';
 function notificationReadSet2(){return new Set(S.notificationReads||[])}
 function notificationId2(x){return x.key||[x.cat,x.title,x.go].join('|')}
 async function markNotificationReads2(ids){
+ if(isReadOnly2())return;
  const clean=[...new Set((ids||[]).map(String).filter(id=>id&&id.length<=300))];
  if(!S.a||!clean.length)return;
  const url=C.u+'/rest/v1/notification_read_state?on_conflict=alliance_code,notification_id';
