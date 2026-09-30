@@ -311,13 +311,15 @@ function qualityScoreCanvas(roi,bbox){
  const cx=out.getContext('2d',{willReadFrequently:true});cx.imageSmoothingEnabled=true;cx.imageSmoothingQuality='high';
  cx.drawImage(roi,x0,y0,w,h,0,0,out.width,out.height);return out;
 }
+function stripMissionText(text){
+ return String(text||'').replace(/\s*(?:[·|/\-]\s*)?(?:no\s+)?mission(?:en|s)?\s*[:：]?\s*\d+\s*\/\s*\d+.*$/i,'').trim();
+}
 function isMissionLine(text){
  const s=String(text||'').trim();
- return /^(?:no\s+)?mission(?:en|s)?\s*[:：]?\s*\d+\s*\/\s*\d+/i.test(s)||
-        /\bmission(?:en|s)?\s*[:：]?\s*\d+\s*\/\s*\d+/i.test(s);
+ return !!s&&!stripMissionText(s);
 }
 function parseNameOnly(text,fallbackAlliance=''){
- const lines=String(text||'').split(/\r?\n/).map(x=>x.trim()).filter(x=>x&&!isMissionLine(x));
+ const lines=String(text||'').split(/\r?\n/).map(stripMissionText).filter(Boolean);
  if(!lines.length)return null;
  let best=lines.sort((a,b)=>(b.match(/[\p{L}\p{N}]/gu)||[]).length-(a.match(/[\p{L}\p{N}]/gu)||[]).length)[0]||'';
  best=best.replace(/^\s*#?\s*[0-9OoIl|]{1,3}\s*[.)\-:]?\s*/,'').replace(/\s*[0-9OoIl|]{1,3}(?:[.,\s][0-9OoIl|]{3}){1,4}\s*$/,'').trim();
@@ -938,8 +940,10 @@ async function analyze(){
    let still=null;
    for(const row of rows){
     recordRank(row.rank,sec,rankMap);
-    if(isMobilization&&isMissionLine(row.name))continue;
-    const p=matchPlayer(isMobilization?{...row,alliance:'',quality:true}:row,members);
+    const cleanedName=isMobilization?stripMissionText(row.name):row.name;
+    if(isMobilization&&!norm(cleanedName))continue;
+    const matchRow=isMobilization?{...row,name:cleanedName,alliance:'',quality:true}:row;
+    const p=matchPlayer(matchRow,members);
     if(!p){
      const k=(row.rank||'')+'|'+norm(row.name)+'|'+row.score;
      if(!unmatched.has(k)){
