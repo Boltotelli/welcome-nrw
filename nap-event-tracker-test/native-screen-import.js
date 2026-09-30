@@ -232,25 +232,26 @@ function sourceRank(line){
  if(!m)return null;
  const n=Number(m[1]);return Number.isInteger(n)&&n>=1&&n<=999?n:null;
 }
-function scoreTail(line){
+function scoreTail(line,minScore=1000){
  const s=String(line||'');
- // Only normalize OCR lookalikes inside the final numeric token. Never convert
- // letters in the player name (e.g. the "ll" in "Hell") into score digits.
- const m=s.match(/(?:^|\s)([0-9OoIl|]{1,3}(?:[.,\s][0-9OoIl|]{3}){1,4}|[0-9OoIl|]{4,12})\s*$/);
+ const pattern=minScore<=1
+  ?/(?:^|\s)([0-9OoIl|]{1,3}(?:[.,\s][0-9OoIl|]{3}){1,4}|[0-9OoIl|]{1,12})\s*$/
+  :/(?:^|\s)([0-9OoIl|]{1,3}(?:[.,\s][0-9OoIl|]{3}){1,4}|[0-9OoIl|]{4,12})\s*$/;
+ const m=s.match(pattern);
  if(!m)return null;
  const raw=m[1],normalized=ocrDigits(raw),score=Number(normalized.replace(/[.,\s]/g,''));
- if(!Number.isSafeInteger(score)||score<1000)return null;
+ if(!Number.isSafeInteger(score)||score<minScore)return null;
  const tokenStart=s.lastIndexOf(raw);
  return {raw,score,start:tokenStart};
 }
-function extractRows(text){
+function extractRows(text,minScore=1000){
  const out=[],lines=String(text||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
  for(let i=0;i<lines.length;i++){
-  let line=lines[i],tail=scoreTail(line);
+  let line=lines[i],tail=scoreTail(line,minScore);
   if(!tail&&i+1<lines.length){
-   const next=scoreTail(lines[i+1]);
+   const next=scoreTail(lines[i+1],minScore);
    if(next&&next.start===0){
-    line+=' '+lines[++i];tail=scoreTail(line);
+    line+=' '+lines[++i];tail=scoreTail(line,minScore);
    }
   }
   if(!tail)continue;
@@ -275,20 +276,20 @@ function ocrLinesFromBlocks(blocks){
  }
  return out;
 }
-function attachLayout(rows,blocks){
+function attachLayout(rows,blocks,minScore=1000){
  const lines=ocrLinesFromBlocks(blocks);
  if(!lines.length)return rows;
  return (rows||[]).map(row=>{
   const candidates=lines.map(line=>{
-   const tail=scoreTail(line.text),nameText=line.text.replace(/\s*[0-9OoIl|]{1,3}(?:[.,\s][0-9OoIl|]{3}){1,4}\s*$/,'');
+   const tail=scoreTail(line.text,minScore),nameText=line.text.replace(/\s*[0-9OoIl|]{1,3}(?:[.,\s][0-9OoIl|]{3}){1,4}\s*$/,'');
    const score=(tail&&tail.score===row.score?1:0)+(similarity(nameText,row.name)*.45);
    return {line,score};
   }).sort((a,b)=>b.score-a.score);
   return candidates[0]?.score>=.32?{...row,bbox:candidates[0].line.bbox}:{...row};
  });
 }
-function parseOcrData(data){
- return attachLayout(repairSequentialRanks(extractRows(data?.text||'')),data?.blocks||[]);
+function parseOcrData(data,minScore=1000){
+ return attachLayout(repairSequentialRanks(extractRows(data?.text||'',minScore)),data?.blocks||[],minScore);
 }
 function qualityNameCanvas(roi,bbox){
  if(!bbox||![bbox.x0,bbox.y0,bbox.x1,bbox.y1].every(Number.isFinite))return null;
@@ -310,8 +311,13 @@ function qualityScoreCanvas(roi,bbox){
  const cx=out.getContext('2d',{willReadFrequently:true});cx.imageSmoothingEnabled=true;cx.imageSmoothingQuality='high';
  cx.drawImage(roi,x0,y0,w,h,0,0,out.width,out.height);return out;
 }
+function isMissionLine(text){
+ const s=String(text||'').trim();
+ return /^(?:no\s+)?mission(?:en|s)?\s*[:：]?\s*\d+\s*\/\s*\d+/i.test(s)||
+        /\bmission(?:en|s)?\s*[:：]?\s*\d+\s*\/\s*\d+/i.test(s);
+}
 function parseNameOnly(text,fallbackAlliance=''){
- const lines=String(text||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+ const lines=String(text||'').split(/\r?\n/).map(x=>x.trim()).filter(x=>x&&!isMissionLine(x));
  if(!lines.length)return null;
  let best=lines.sort((a,b)=>(b.match(/[\p{L}\p{N}]/gu)||[]).length-(a.match(/[\p{L}\p{N}]/gu)||[]).length)[0]||'';
  best=best.replace(/^\s*#?\s*[0-9OoIl|]{1,3}\s*[.)\-:]?\s*/,'').replace(/\s*[0-9OoIl|]{1,3}(?:[.,\s][0-9OoIl|]{3}){1,4}\s*$/,'').trim();
@@ -325,14 +331,15 @@ function parseNameOnly(text,fallbackAlliance=''){
  if(norm(name).length<2)return null;
  return {name,alliance:tag?.[1]||fallbackAlliance||'',raw:best};
 }
-function parseScoreOnly(text){
+function parseScoreOnly(text,minScore=1000){
  const lines=String(text||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
  for(const line of lines){
   const cleaned=ocrDigits(line).replace(/[^0-9.,\s]/g,' ').trim();
-  const m=cleaned.match(/(\d{1,3}(?:[.,\s]\d{3}){1,4}|\d{4,12})/);
+  const pattern=minScore<=1?/(\d{1,3}(?:[.,\s]\d{3}){1,4}|\d{1,12})/:/(\d{1,3}(?:[.,\s]\d{3}){1,4}|\d{4,12})/;
+  const m=cleaned.match(pattern);
   if(!m)continue;
   const n=Number(m[1].replace(/[.,\s]/g,''));
-  if(Number.isSafeInteger(n)&&n>=1000)return n;
+  if(Number.isSafeInteger(n)&&n>=minScore)return n;
  }
  return null;
 }
@@ -672,6 +679,15 @@ function baseFrameTimes(dur){
  add(end);
  return times.sort((a,b)=>a-b).slice(0,11);
 }
+function performanceFrameTimes(dur){
+ const end=Math.max(.08,dur-.10),times=[];
+ const add=t=>{const v=Math.max(.05,Math.min(end,t));if(!times.some(x=>Math.abs(x-v)<.12))times.push(v)};
+ [0.10,0.45,0.90].forEach(add);
+ const count=Math.min(28,Math.max(14,Math.ceil(dur/1.6)));
+ for(let i=1;i<=count;i++)add(.90+(end-.90)*(i/(count+1)));
+ add(end);
+ return times.sort((a,b)=>a-b);
+}
 function videoErrorMessage(video){
  const code=Number(video?.error?.code||0);
  return code===1?'video load aborted':
@@ -898,24 +914,32 @@ async function analyze(){
  try{
   progress(0,2,0);
   let members=[...(await roster(true))];
-  if(r.kind==='perf'&&$('#nocrType',root).value==='alliance_mobilization'&&perfOcc()?.event_schedule_id){
+  const perfType=r.kind==='perf'?$('#nocrType',root).value:'';
+  const isMobilization=r.kind==='perf'&&perfType==='alliance_mobilization';
+  if(isMobilization&&perfOcc()?.event_schedule_id){
    try{
     const extras=await rpc('get_performance_candidate_roster',{p_event_schedule_id:perfOcc().event_schedule_id});
-    const ids=new Set(members.map(x=>String(x.player_game_id||x.player_id)));
-    for(const p of extras||[]){const id=String(p.player_game_id||p.player_id);if(!ids.has(id)){members.push(p);ids.add(id)}}
-   }catch(e){console.warn('Performance transfer roster unavailable',e)}
+    if(extras?.length){
+     const known=new Map(members.map(p=>[String(p.player_game_id||p.player_id),p]));
+     members=extras.map(p=>{
+      const prior=known.get(String(p.player_game_id||p.player_id));
+      return {...prior,...p,aliases:p.aliases||prior?.aliases||[]};
+     });
+    }
+   }catch(e){console.warn('Performance candidate roster unavailable',e)}
   }
   const poolCount=members.filter(p=>p.alliance_code==null).length;
   if(!poolCount)console.warn('ScreenImporter roster contains no alliance-less players');
   r.members=members;r.fileHash=await sha256(file);worker=await ensureWorker();
   video=document.createElement('video');url=await metadata(video,file);if(r!==run)return;
   const dur=video.duration;progress(1,5,0);
-  const times=baseFrameTimes(dur),observations=new Map(),unmatched=new Map(),rankMap=new Map();r.frames=[];
+  const times=isMobilization?performanceFrameTimes(dur):baseFrameTimes(dur),observations=new Map(),unmatched=new Map(),rankMap=new Map();r.frames=[];
   const processRows=(rows,sec,full)=>{
    let still=null;
    for(const row of rows){
     recordRank(row.rank,sec,rankMap);
-    const p=matchPlayer(row,members);
+    if(isMobilization&&isMissionLine(row.name))continue;
+    const p=matchPlayer(isMobilization?{...row,alliance:'',quality:true}:row,members);
     if(!p){
      const k=(row.rank||'')+'|'+norm(row.name)+'|'+row.score;
      if(!unmatched.has(k)){
@@ -949,7 +973,7 @@ async function analyze(){
    if(r.frames.length<12&&i%Math.max(1,Math.floor(times.length/12))===0)r.frames.push({time:sec,image:full.toDataURL('image/jpeg',.72)});
    const ocr=(await worker.recognize(roi,{}, {text:true,blocks:true})).data||{};
    for(const rank of ranksFromText(ocr.text||''))recordRank(rank,sec,rankMap);
-   const parsed=parseOcrData(ocr);
+   const parsed=parseOcrData(ocr,isMobilization?1:1000);
    processRows(parsed,sec,full);
    if(i===0){
     const podium=podiumCanvas(full),cards=splitPodiumCards(podium),podiumRows=[];
@@ -958,7 +982,7 @@ async function analyze(){
      const nameText=(await worker.recognize(podiumNameCanvas(cards[pi]))).data?.text||'';
      const parsedName=parseNameOnly(nameText,'');
      try{await worker.setParameters({preserve_interword_spaces:'1',tessedit_pageseg_mode:'7',tessedit_char_whitelist:'0123456789.,'})}catch{}
-     const scoreText=(await worker.recognize(podiumScoreCanvas(cards[pi]))).data?.text||'',score=parseScoreOnly(scoreText);
+     const scoreText=(await worker.recognize(podiumScoreCanvas(cards[pi]))).data?.text||'',score=parseScoreOnly(scoreText,isMobilization?1:1000);
      try{await worker.setParameters({preserve_interword_spaces:'1',tessedit_pageseg_mode:'7',tessedit_char_whitelist:''})}catch{}
      if(parsedName&&Number.isSafeInteger(score))podiumRows.push({...parsedName,score,rank:pi+1,podium:true,quality:true,raw:'Podium '+(pi+1)+' · '+parsedName.raw+' · '+score});
     }
@@ -982,7 +1006,7 @@ async function analyze(){
     catch(err){console.warn('Skipping unreadable rescue frame',sec,err);continue}
     const rescueData=(await worker.recognize(roi)).data||{};
     for(const rank of ranksFromText(rescueData.text||''))recordRank(rank,sec,rankMap);
-    const rows=repairSequentialRanks(extractRows(rescueData.text||''));
+    const rows=repairSequentialRanks(extractRows(rescueData.text||'',isMobilization?1:1000));
     processRows(rows,sec,full);
     progress(1,72+22*((i+1)/rescue.length),observations.size,'rescue');
     await new Promise(resolve=>setTimeout(resolve,0));
@@ -1019,7 +1043,7 @@ async function analyze(){
      let score=null;
      if(scoreCrop){
       try{await worker.setParameters({preserve_interword_spaces:'1',tessedit_pageseg_mode:'7',tessedit_char_whitelist:'0123456789.,'})}catch{}
-      score=parseScoreOnly((await worker.recognize(scoreCrop)).data?.text||'');
+      score=parseScoreOnly((await worker.recognize(scoreCrop)).data?.text||'',isMobilization?1:1000);
      }
      const row=qualityNameRow(nameText,group,score);
      if(row)processRows([row],source.time,full);
