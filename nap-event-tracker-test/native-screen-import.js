@@ -1049,7 +1049,7 @@ async function analyze(){
     let full,roi;
     try{await seek(video,sec);full=frameCanvas(video);roi=isMobilization?performanceRankingCanvas(full):rankingCanvas(full)}
     catch(err){console.warn('Skipping unreadable rescue frame',sec,err);continue}
-    const rescueData=(await worker.recognize(roi)).data||{};
+    const rescueData=(await worker.recognize(roi,{}, {text:true,blocks:true})).data||{};
     for(const rank of ranksFromText(rescueData.text||''))recordRank(rank,sec,rankMap);
     const rows=isMobilization?parsePerformanceOcrData(rescueData,roi.width):repairSequentialRanks(extractRows(rescueData.text||''));
     processRows(rows,sec,full);
