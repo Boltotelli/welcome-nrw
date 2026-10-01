@@ -309,46 +309,70 @@ function performanceNameFromLine(text){
  if(!/[\p{L}]/u.test(cleaned))return null;
  return parseNameOnly(cleaned,'');
 }
-function parseMobilizationLayout(data,roiWidth){
- const lines=ocrLinesFromBlocks(data?.blocks||[]);
- const width=Math.max(1,Number(roiWidth)||1),scores=[],ranks=[],names=[],rows=[];
- for(const line of lines){
-  const b=line.bbox;if(!b)continue;
-  const x0=Number(b.x0),x1=Number(b.x1),cx=(x0+x1)/2;
-  if(!Number.isFinite(cx))continue;
-  const num=numericOnly(line.text,1);
-  if(num!=null){
-   if(cx>=width*.72||x0>=width*.64)scores.push({value:num,line});
-   if(cx<=width*.23||x1<=width*.27){
-    if(num>=1&&num<=999)ranks.push({value:num,line});
-   }
-   continue;
-  }
-  const parsed=performanceNameFromLine(line.text);
-  if(parsed&&(cx>=width*.20&&cx<=width*.73||x0<width*.58&&x1>width*.27))names.push({parsed,line});
- }
- const nearest=(items,y,tol)=>items.map(item=>({item,d:Math.abs(bboxMidY(item.line.bbox)-y)}))
-   .filter(x=>x.d<=tol).sort((a,b)=>a.d-b.d)[0]?.item||null;
- for(const sc of scores){
-  const y=bboxMidY(sc.line.bbox),tol=Math.max(34,bboxHeight(sc.line.bbox)*1.25);
-  const nm=nearest(names,y,tol);if(!nm)continue;
-  const rk=nearest(ranks,bboxMidY(nm.line.bbox),Math.max(38,bboxHeight(nm.line.bbox)*1.35));
-  rows.push({...nm.parsed,score:sc.value,rank:rk?.value||null,bbox:nm.line.bbox,
-   raw:(rk?'#'+rk.value+' ':'')+nm.parsed.raw+' · '+sc.value,layout:true});
- }
- // Some Tesseract builds merge a complete row into one line. Keep this fallback
- // conservative: low 1/2-digit values are accepted only from the explicit
- // right-column path above, never from a merged line.
- for(const line of lines){
-  if(isMissionLine(line.text))continue;
-  const tail=scoreTail(line.text,100);if(!tail)continue;
-  const left=line.text.slice(0,tail.start).trim(),parsed=performanceNameFromLine(left);
-  if(!parsed)continue;
-  const row={...parsed,score:tail.score,rank:sourceRank(line.text),bbox:line.bbox,raw:line.text,layoutMerged:true};
-  if(!rows.some(r=>r.rank&&row.rank&&r.rank===row.rank||r.score===row.score&&similarity(r.name,row.name)>.9))rows.push(row);
- }
- return repairSequentialRanks(rows);
+function cropRelative(frame,x0,y0,x1,y1,maxWidth=900){
+ const x=Math.max(0,Math.round(frame.width*x0)),y=Math.max(0,Math.round(frame.height*y0));
+ const w=Math.max(1,Math.min(frame.width-x,Math.round(frame.width*(x1-x0))));
+ const h=Math.max(1,Math.min(frame.height-y,Math.round(frame.height*(y1-y0))));
+ const scale=Math.min(2.0,maxWidth/Math.max(1,w)),out=document.createElement('canvas');
+ out.width=Math.max(1,Math.round(w*scale));out.height=Math.max(1,Math.round(h*scale));
+ const cx=out.getContext('2d',{willReadFrequently:true});cx.imageSmoothingEnabled=true;cx.imageSmoothingQuality='high';
+ cx.drawImage(frame,x,y,w,h,0,0,out.width,out.height);return out;
 }
+function performanceColumnCanvases(frame){
+ // Relative to the full Kingshot frame; no handset-specific pixel values.
+ // The vertical band includes only the four scrolling ranking cards and excludes
+ // the yellow header and sticky own-player footer.
+ return {
+  rank:cropRelative(frame,.105,.425,.245,.758,420),
+  name:cropRelative(frame,.285,.425,.715,.758,920),
+  score:cropRelative(frame,.735,.425,.905,.758,520)
+ };
+}
+function columnTextLines(text){
+ return String(text||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+}
+function parseMobilizationNames(text){
+ const out=[];
+ for(const raw of columnTextLines(text)){
+  const cleaned=stripMissionText(raw);
+  if(!cleaned||isMissionLine(raw))continue;
+  const parsed=parseNameOnly(cleaned,'');
+  if(!parsed)continue;
+  if(/^(rang|rank|gouverneur|governor|pers[oö]nliche|personal|punkte|points|score)$/i.test(parsed.name))continue;
+  out.push(parsed);
+ }
+ return out.slice(0,6);
+}
+function parseMobilizationNumbers(text,kind){
+ const out=[];
+ for(const raw of columnTextLines(text)){
+  const s=ocrDigits(raw).replace(/[^0-9.,\s]/g,' ').trim();
+  if(!s||s.includes('/'))continue;
+  const matches=[...s.matchAll(/\d{1,3}(?:[.,\s]\d{3}){1,4}|\d{1,12}/g)];
+  for(const m of matches){
+   const n=Number(m[0].replace(/[.,\s]/g,''));
+   if(!Number.isSafeInteger(n))continue;
+   if(kind==='rank'&&n>=1&&n<=999)out.push(n);
+   if(kind==='score'&&n>=1)out.push(n);
+  }
+ }
+ return out.slice(0,6);
+}
+function zipMobilizationColumns(names,ranks,scores){
+ const count=Math.min(4,names.length,scores.length),rows=[];
+ if(!count)return rows;
+ // Rank OCR can occasionally miss a medal glyph. Only zip rank when the count
+ // plausibly matches; otherwise leave it null rather than attaching a wrong rank.
+ const useRanks=ranks.length>=count?ranks.slice(0,count):[];
+ for(let i=0;i<count;i++){
+  const n=names[i],score=scores[i];
+  if(!n||!Number.isSafeInteger(score))continue;
+  rows.push({...n,score,rank:useRanks[i]||null,columnOcr:true,
+   raw:(useRanks[i]?'#'+useRanks[i]+' ':'')+n.raw+' · '+score});
+ }
+ return rows;
+}
+
 function qualityNameCanvas(roi,bbox){
  if(!bbox||![bbox.x0,bbox.y0,bbox.x1,bbox.y1].every(Number.isFinite))return null;
  const x0=Math.max(0,Math.round(roi.width*.285)),x1=Math.min(roi.width,Math.round(roi.width*.735));
@@ -742,9 +766,9 @@ function baseFrameTimes(dur){
 function performanceFrameTimes(dur){
  const end=Math.max(.08,dur-.10),times=[];
  const add=t=>{const v=Math.max(.05,Math.min(end,t));if(!times.some(x=>Math.abs(x-v)<.12))times.push(v)};
- [0.10,0.45,0.90].forEach(add);
- const count=Math.min(28,Math.max(14,Math.ceil(dur/1.6)));
- for(let i=1;i<=count;i++)add(.90+(end-.90)*(i/(count+1)));
+ [0.12,0.65].forEach(add);
+ const count=Math.min(18,Math.max(12,Math.ceil(dur/2.5)));
+ for(let i=1;i<=count;i++)add(.65+(end-.65)*(i/(count+1)));
  add(end);
  return times.sort((a,b)=>a-b);
 }
@@ -1033,11 +1057,26 @@ async function analyze(){
     continue;
    }
    if(r.frames.length<12&&i%Math.max(1,Math.floor(times.length/12))===0)r.frames.push({time:sec,image:full.toDataURL('image/jpeg',.72)});
-   const ocr=(await worker.recognize(roi,{}, {text:true,blocks:true})).data||{};
-   for(const rank of ranksFromText(ocr.text||''))recordRank(rank,sec,rankMap);
-   const parsed=isMobilization?parseMobilizationLayout(ocr,roi.width):parseOcrData(ocr);
+   let parsed=[];
+   if(isMobilization){
+    const cols=performanceColumnCanvases(full);
+    try{await worker.setParameters({preserve_interword_spaces:'1',tessedit_pageseg_mode:'6',tessedit_char_whitelist:'0123456789'})}catch{}
+    const rankText=(await worker.recognize(cols.rank)).data?.text||'';
+    try{await worker.setParameters({preserve_interword_spaces:'1',tessedit_pageseg_mode:'6',tessedit_char_whitelist:''})}catch{}
+    const nameText=(await worker.recognize(cols.name)).data?.text||'';
+    try{await worker.setParameters({preserve_interword_spaces:'1',tessedit_pageseg_mode:'6',tessedit_char_whitelist:'0123456789.,'})}catch{}
+    const scoreText=(await worker.recognize(cols.score)).data?.text||'';
+    try{await worker.setParameters({preserve_interword_spaces:'1',tessedit_pageseg_mode:'6',tessedit_char_whitelist:''})}catch{}
+    const ranks=parseMobilizationNumbers(rankText,'rank'),names=parseMobilizationNames(nameText),scores=parseMobilizationNumbers(scoreText,'score');
+    parsed=zipMobilizationColumns(names,ranks,scores);
+    for(const rank of ranks)recordRank(rank,sec,rankMap);
+   }else{
+    const ocr=(await worker.recognize(roi,{}, {text:true,blocks:true})).data||{};
+    for(const rank of ranksFromText(ocr.text||''))recordRank(rank,sec,rankMap);
+    parsed=parseOcrData(ocr);
+   }
    processRows(parsed,sec,full);
-   if(i===0){
+   if(i===0&&!isMobilization){
     const podium=podiumCanvas(full),cards=splitPodiumCards(podium),podiumRows=[];
     try{await worker.setParameters({preserve_interword_spaces:'1',tessedit_pageseg_mode:'7',tessedit_char_whitelist:''})}catch{}
     for(let pi=0;pi<cards.length;pi++){
@@ -1058,7 +1097,7 @@ async function analyze(){
   if(decodedFrames===0)throw Error('No video frame could be decoded. Please export the recording as H.264 MP4 and try again.');
   if(skippedFrames)console.warn('OCR continued after skipped video frames',skippedFrames);
   let coverage=rankCoverage(rankMap),rescue=rescueTimes(coverage,rankMap,dur,times);
-  if(coverage.missing.length&&rescue.length){
+  if(!isMobilization&&coverage.missing.length&&rescue.length){
    progress(1,72,observations.size,'rescue');
    const missingSet=new Set(coverage.missing);
    for(let i=0;i<rescue.length;i++){
