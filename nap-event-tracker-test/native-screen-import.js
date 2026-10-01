@@ -1316,6 +1316,43 @@ async function analyze(){
   if(isMobilization)r.hits=applyMobilizationPodiumRanks(r.hits,podiumRankByScore);
   r.hits.sort((a,b)=>(a.rank&&b.rank?a.rank-b.rank:b.score-a.score));
   let matchedRanks=new Set(r.hits.map(h=>h.rank).filter(Boolean));
+
+  // AM targeted rescue: revisit ranks that were clearly seen in the rank column
+  // but still have no matched player. This catches brief rows near the viewport
+  // edge (e.g. ranks 14/46 in fast scroll recordings) without redoing the video.
+  if(isMobilization){
+   const missingNow=(coverage?.seen||[]).filter(rank=>!matchedRanks.has(rank));
+   const rescueTimesAm=[];
+   const addRescue=t=>{
+    if(!Number.isFinite(t))return;
+    const v=Math.max(.05,Math.min(Math.max(.05,dur-.08),t));
+    if(!rescueTimesAm.some(x=>Math.abs(x-v)<.55))rescueTimesAm.push(v);
+   };
+   for(const rank of missingNow){
+    addRescue(medianTime(rankMap.get(rank)));
+    if(rescueTimesAm.length>=8)break;
+   }
+   if(rescueTimesAm.length){
+    progress(2,90,observations.size,'rescue');
+    for(let ri=0;ri<rescueTimesAm.length;ri++){
+     if(run!==r)break;
+     const sec=rescueTimesAm[ri];
+     let full;
+     try{await seek(video,sec);full=frameCanvas(video)}
+     catch(err){console.warn('Skipping unreadable AM rescue frame',sec,err);continue}
+     const rows=await readMobilizationSlots(full,worker);
+     for(const rank of rows.allRanks||[])recordRank(rank,sec,rankMap);
+     processRows(rows,sec,full);
+     progress(2,90+3*((ri+1)/rescueTimesAm.length),observations.size,'rescue');
+     await new Promise(resolve=>setTimeout(resolve,0));
+    }
+    r.hits=[...observations.values()].map(consensusHit).filter(Boolean);
+    r.hits=applyMobilizationPodiumRanks(r.hits,podiumRankByScore);
+    r.hits.sort((a,b)=>(a.rank&&b.rank?a.rank-b.rank:b.score-a.score));
+    matchedRanks=new Set(r.hits.map(h=>h.rank).filter(Boolean));
+   }
+  }
+
   const rawUnmatched=[...unmatched.values()].filter(u=>!matchedRanks.has(u.rank)&&!r.hits.some(h=>
    u.score===h.score&&(
     similarity(u.name,h.player?.player_name||'')>=.62||
