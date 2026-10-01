@@ -663,8 +663,8 @@ function ocrWindowSimilarity(haystack,target){
  const hay=ocrNorm(haystack),needle=ocrNorm(target);
  if(!hay||!needle)return 0;
  if(hay===needle)return 1;
- if(hay.includes(needle))return needle.length<=4?.985:.995;
- if(needle.includes(hay)&&hay.length>=3)return hay.length<=4?.94:.97;
+ if(hay.includes(needle))return needle.length<=4 ? .985 : .995;
+ if(needle.includes(hay)&&hay.length>=3)return hay.length<=4 ? .94 : .97;
  let best=0;
  const minLen=Math.max(2,needle.length-1),maxLen=Math.min(hay.length,needle.length+1);
  for(let len=minLen;len<=maxLen;len++){
