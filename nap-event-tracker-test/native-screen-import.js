@@ -328,49 +328,63 @@ function performanceColumnCanvases(frame){
   score:cropRelative(frame,.735,.425,.905,.758,520)
  };
 }
-function columnTextLines(text){
- return String(text||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+function normalizedLineY(line,canvas){
+ const b=line?.bbox;if(!b||!canvas?.height)return null;
+ const y=(Number(b.y0)+Number(b.y1))/2;
+ return Number.isFinite(y)?y/canvas.height:null;
 }
-function parseMobilizationNames(text){
+function parseMobilizationNameLines(data,canvas){
  const out=[];
- for(const raw of columnTextLines(text)){
-  const cleaned=stripMissionText(raw);
-  if(!cleaned||isMissionLine(raw))continue;
+ for(const line of ocrLinesFromBlocks(data?.blocks||[])){
+  const cleaned=stripMissionText(line.text);
+  if(!cleaned||isMissionLine(line.text))continue;
   const parsed=parseNameOnly(cleaned,'');
-  if(!parsed)continue;
+  const y=normalizedLineY(line,canvas);
+  if(!parsed||y==null)continue;
   if(/^(rang|rank|gouverneur|governor|pers[oö]nliche|personal|punkte|points|score)$/i.test(parsed.name))continue;
-  out.push(parsed);
+  out.push({...parsed,y,bbox:line.bbox});
  }
- return out.slice(0,6);
+ return out;
 }
-function parseMobilizationNumbers(text,kind){
+function parseMobilizationNumberLines(data,canvas,kind){
  const out=[];
- for(const raw of columnTextLines(text)){
+ for(const line of ocrLinesFromBlocks(data?.blocks||[])){
+  const y=normalizedLineY(line,canvas);if(y==null)continue;
+  const raw=String(line.text||'').trim();
+  if(!raw||/[\/]/.test(raw))continue;
   const s=ocrDigits(raw).replace(/[^0-9.,\s]/g,' ').trim();
-  if(!s||s.includes('/'))continue;
+  if(!s)continue;
   const matches=[...s.matchAll(/\d{1,3}(?:[.,\s]\d{3}){1,4}|\d{1,12}/g)];
   for(const m of matches){
    const n=Number(m[0].replace(/[.,\s]/g,''));
    if(!Number.isSafeInteger(n))continue;
-   if(kind==='rank'&&n>=1&&n<=999)out.push(n);
-   if(kind==='score'&&n>=1)out.push(n);
+   if(kind==='rank'&&n>=1&&n<=999)out.push({value:n,y,bbox:line.bbox});
+   if(kind==='score'&&n>=1)out.push({value:n,y,bbox:line.bbox});
   }
  }
- return out.slice(0,6);
+ return out;
 }
-function zipMobilizationColumns(names,ranks,scores){
- const count=Math.min(4,names.length,scores.length),rows=[];
- if(!count)return rows;
- // Rank OCR can occasionally miss a medal glyph. Only zip rank when the count
- // plausibly matches; otherwise leave it null rather than attaching a wrong rank.
- const useRanks=ranks.length>=count?ranks.slice(0,count):[];
- for(let i=0;i<count;i++){
-  const n=names[i],score=scores[i];
-  if(!n||!Number.isSafeInteger(score))continue;
-  rows.push({...n,score,rank:useRanks[i]||null,columnOcr:true,
-   raw:(useRanks[i]?'#'+useRanks[i]+' ':'')+n.raw+' · '+score});
+function pairMobilizationColumns(names,ranks,scores){
+ const rows=[],usedScores=new Set(),usedRanks=new Set();
+ const nearest=(items,y,used,tol)=>{
+  let best=null,bestD=Infinity,bestI=-1;
+  for(let i=0;i<items.length;i++){
+   if(used.has(i))continue;
+   const d=Math.abs(items[i].y-y);
+   if(d<bestD){best=items[i];bestD=d;bestI=i}
+  }
+  return best&&bestD<=tol?{item:best,index:bestI,d:bestD}:null;
+ };
+ for(const n of names){
+  const sc=nearest(scores,n.y,usedScores,.085);
+  if(!sc)continue;
+  usedScores.add(sc.index);
+  const rk=nearest(ranks,n.y,usedRanks,.10);
+  if(rk)usedRanks.add(rk.index);
+  rows.push({...n,score:sc.item.value,rank:rk?.item.value||null,columnOcr:true,
+   raw:(rk?'#'+rk.item.value+' ':'')+n.raw+' · '+sc.item.value});
  }
- return rows;
+ return rows.sort((a,b)=>a.y-b.y);
 }
 
 function qualityNameCanvas(roi,bbox){
@@ -1061,15 +1075,17 @@ async function analyze(){
    if(isMobilization){
     const cols=performanceColumnCanvases(full);
     try{await worker.setParameters({preserve_interword_spaces:'1',tessedit_pageseg_mode:'6',tessedit_char_whitelist:'0123456789'})}catch{}
-    const rankText=(await worker.recognize(cols.rank)).data?.text||'';
+    const rankData=(await worker.recognize(cols.rank,{}, {text:true,blocks:true})).data||{};
     try{await worker.setParameters({preserve_interword_spaces:'1',tessedit_pageseg_mode:'6',tessedit_char_whitelist:''})}catch{}
-    const nameText=(await worker.recognize(cols.name)).data?.text||'';
+    const nameData=(await worker.recognize(cols.name,{}, {text:true,blocks:true})).data||{};
     try{await worker.setParameters({preserve_interword_spaces:'1',tessedit_pageseg_mode:'6',tessedit_char_whitelist:'0123456789.,'})}catch{}
-    const scoreText=(await worker.recognize(cols.score)).data?.text||'';
+    const scoreData=(await worker.recognize(cols.score,{}, {text:true,blocks:true})).data||{};
     try{await worker.setParameters({preserve_interword_spaces:'1',tessedit_pageseg_mode:'6',tessedit_char_whitelist:''})}catch{}
-    const ranks=parseMobilizationNumbers(rankText,'rank'),names=parseMobilizationNames(nameText),scores=parseMobilizationNumbers(scoreText,'score');
-    parsed=zipMobilizationColumns(names,ranks,scores);
-    for(const rank of ranks)recordRank(rank,sec,rankMap);
+    const ranks=parseMobilizationNumberLines(rankData,cols.rank,'rank');
+    const names=parseMobilizationNameLines(nameData,cols.name);
+    const scores=parseMobilizationNumberLines(scoreData,cols.score,'score');
+    parsed=pairMobilizationColumns(names,ranks,scores);
+    for(const rank of ranks)recordRank(rank.value,sec,rankMap);
    }else{
     const ocr=(await worker.recognize(roi,{}, {text:true,blocks:true})).data||{};
     for(const rank of ranksFromText(ocr.text||''))recordRank(rank,sec,rankMap);
