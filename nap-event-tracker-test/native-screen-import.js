@@ -318,50 +318,65 @@ function cropRelative(frame,x0,y0,x1,y1,maxWidth=900){
  const cx=out.getContext('2d',{willReadFrequently:true});cx.imageSmoothingEnabled=true;cx.imageSmoothingQuality='high';
  cx.drawImage(frame,x,y,w,h,0,0,out.width,out.height);return out;
 }
-function mobilizationRowBands(frame){
- // Detect the light Kingshot ranking cards directly from the pixels in the
- // right-hand points area. This follows rows while scrolling and does not
- // assume handset pixels or fixed Y positions.
- const x0=Math.round(frame.width*.70),x1=Math.round(frame.width*.93);
- const y0=Math.round(frame.height*.355),y1=Math.round(frame.height*.765);
- const cx=frame.getContext('2d',{willReadFrequently:true});
+function mobilizationRowGeometry(frame){
+ // Detect the repeating row phase from horizontal card transitions. The list
+ // may sit at any scroll offset, so fixed Y slots are intentionally avoided.
+ const W=frame.width,H=frame.height,cx=frame.getContext('2d',{willReadFrequently:true});
+ const x0=Math.round(W*.05),x1=Math.round(W*.95);
+ const y0=Math.round(H*.34),y1=Math.round(H*.77);
  const img=cx.getImageData(x0,y0,Math.max(1,x1-x0),Math.max(1,y1-y0));
- const w=img.width,h=img.height,d=img.data,bright=[];
- for(let y=0;y<h;y++){
+ const iw=img.width,ih=img.height,d=img.data,step=Math.max(1,Math.floor(iw/90)),profile=new Array(ih).fill(0);
+ for(let y=0;y<ih;y++){
   let sum=0,n=0;
-  for(let x=0;x<w;x+=Math.max(1,Math.floor(w/42))){
-   const i=(y*w+x)*4;
-   sum+=.2126*d[i]+.7152*d[i+1]+.0722*d[i+2];n++;
+  for(let x=0;x<iw;x+=step){
+   const i=(y*iw+x)*4;sum+=.2126*d[i]+.7152*d[i+1]+.0722*d[i+2];n++;
   }
-  bright[y]=(sum/Math.max(1,n))>202;
+  profile[y]=sum/Math.max(1,n);
  }
- const raw=[];let start=null;
- for(let y=0;y<=h;y++){
-  if(y<h&&bright[y]){if(start==null)start=y;continue}
-  if(start!=null){
-   const end=y-1,len=end-start+1;
-   if(len>=frame.height*.026)raw.push({start:y0+start,end:y0+end});
-   start=null;
-  }
+ const smooth=new Array(ih).fill(0),radius=3;
+ for(let y=0;y<ih;y++){
+  let sum=0,n=0;
+  for(let q=Math.max(0,y-radius);q<=Math.min(ih-1,y+radius);q++){sum+=profile[q];n++}
+  smooth[y]=sum/Math.max(1,n);
  }
- // Merge tiny dark seams inside one card but keep the real gap between cards.
- const merged=[];
- for(const band of raw){
-  const prev=merged[merged.length-1];
-  if(prev&&band.start-prev.end<frame.height*.010)prev.end=band.end;
-  else merged.push({...band});
+ const k=4,candidates=[];
+ for(let y=k+1;y<ih-k-1;y++){
+  const absY=y0+y;
+  if(absY<H*.36||absY>H*.76)continue;
+  const grad=smooth[y+k]-smooth[y-k];
+  const prev=smooth[y-1+k]-smooth[y-1-k],next=smooth[y+1+k]-smooth[y+1-k];
+  if(grad>30&&grad>=prev&&grad>next)candidates.push({y:absY,grad});
  }
- return merged.filter(b=>{
-  const height=b.end-b.start+1,cy=(b.start+b.end)/2;
-  return height>=frame.height*.035&&height<=frame.height*.135&&cy<frame.height*.755;
- }).slice(0,6);
+ const selected=[];
+ for(const cand of [...candidates].sort((a,b)=>b.grad-a.grad)){
+  if(selected.every(x=>Math.abs(x.y-cand.y)>H*.02))selected.push(cand);
+ }
+ selected.sort((a,b)=>a.y-b.y);
+ const diffs=[];
+ for(let i=0;i<selected.length;i++)for(let j=i+1;j<selected.length;j++){
+  const delta=selected[j].y-selected[i].y;
+  if(delta>=H*.07&&delta<=H*.105)diffs.push(delta);
+ }
+ diffs.sort((a,b)=>a-b);
+ const period=diffs.length?diffs[Math.floor(diffs.length/2)]:H*.087;
+ const strongest=selected.length?[...selected].sort((a,b)=>b.grad-a.grad)[0].y:H*.46;
+ let start=strongest;
+ while(start-period>=H*.34)start-=period;
+ const centers=[];
+ for(let s=start;s<=H*.76;s+=period){
+  const cy=s+period*.48;
+  if(cy>=H*.39&&cy<=H*.72)centers.push(cy);
+ }
+ return {period,centers};
 }
-function mobilizationCropsForBand(frame,band){
- const cy=(band.start+band.end)/2/frame.height;
- const hh=Math.max(.024,Math.min(.040,(band.end-band.start)/frame.height*.32));
+function mobilizationCropsForCenter(frame,center,period){
+ const cy=center/frame.height,py=period/frame.height;
+ // The player name is the upper text line; the mission-progress line sits below.
+ const nameY0=cy-py*.25,nameY1=cy+py*.08;
+ const scoreY0=cy-py*.22,scoreY1=cy+py*.17;
  return {
-  name:cropRelative(frame,.255,cy-hh,.735,cy+hh,1050),
-  score:cropRelative(frame,.700,cy-hh,.945,cy+hh,680),
+  name:cropRelative(frame,.27,nameY0,.70,nameY1,1050),
+  score:cropRelative(frame,.72,scoreY0,.93,scoreY1,680),
   center:cy
  };
 }
@@ -385,14 +400,12 @@ function parseMobilizationNameText(text){
  return parsed;
 }
 async function readMobilizationSlots(frame,worker){
- const rows=[],bands=mobilizationRowBands(frame);
- for(const band of bands){
-  const slot=mobilizationCropsForBand(frame,band);
+ const rows=[],geometry=mobilizationRowGeometry(frame);
+ for(const center of geometry.centers){
+  const slot=mobilizationCropsForCenter(frame,center,geometry.period);
   try{await worker.setParameters({preserve_interword_spaces:'1',tessedit_pageseg_mode:'7',tessedit_char_whitelist:'0123456789.,'})}catch{}
   let scoreText=(await worker.recognize(slot.score)).data?.text||'',score=parseMobilizationScoreText(scoreText);
   if(!Number.isSafeInteger(score)){
-   // One enhanced retry helps thin punctuation and small 3-digit scores without
-   // multiplying OCR work for rows already read correctly.
    scoreText=(await worker.recognize(enhancedCanvas(slot.score))).data?.text||'';
    score=parseMobilizationScoreText(scoreText);
   }
