@@ -693,13 +693,13 @@ function matchPlayer(row,members){
  const same=alliance?members.filter(p=>String(p.alliance_code||'').toLowerCase()===alliance):members;
  let list=rankedPlayerCandidates(row,same),best=list[0],second=list[1];
  const am=!!row.mobilization;
- const threshold=am?.80:(quality?(row.alliance?.84:.90):(row.alliance?.92:.96));
- const margin=am?.12:(quality?.06:.07);
+ const threshold=am ? .80 : (quality?(row.alliance?.84:.90):(row.alliance?.92:.96));
+ const margin=am ? .12 : (quality?.06:.07);
  const accept=(b,s,t=threshold)=>{
   if(!b||b.s<t)return false;
-  if(s&&b.s-s.s<margin&&b.s<(am?.94:(quality?.97:.995)))return false;
+  if(s&&b.s-s.s<margin&&b.s<(am ? .94 : (quality?.97:.995)))return false;
   const rowLen=ocrNorm(row.name).length;
-  if(rowLen<=4&&b.s<(am?.88:(quality?.94:.995)))return false;
+  if(rowLen<=4&&b.s<(am ? .88 : (quality?.94:.995)))return false;
   return true;
  };
  if(accept(best,second))return {...best.p,confidence:best.s,allianceMismatch:false};
