@@ -467,7 +467,7 @@ function parseMobilizationScoreText(text){
  return null;
 }
 async function readMobilizationPodiumScores(frame,worker){
- const centers=[.331,.391,.456],out=[];
+ const centers=[.443,.531,.618],out=[];
  for(let i=0;i<centers.length;i++){
   const cy=centers[i],crop=cropRelative(frame,.695,cy-.025,.935,cy+.025,720);
   try{await worker.setParameters({preserve_interword_spaces:'1',tessedit_pageseg_mode:'7',tessedit_char_whitelist:'0123456789.,'})}catch{}
@@ -1259,7 +1259,7 @@ async function analyze(){
    if(r.frames.length<12&&i%Math.max(1,Math.floor(times.length/12))===0)r.frames.push({time:sec,image:full.toDataURL('image/jpeg',.72)});
    let parsed=[];
    if(isMobilization){
-    if(i<3&&podiumRankByScore.size<3){
+    if(i<2&&podiumRankByScore.size<3){
      const podiumScores=await readMobilizationPodiumScores(full,worker);
      for(const item of podiumScores){podiumRankByScore.set(item.score,item.rank);recordRank(item.rank,sec,rankMap)}
     }
