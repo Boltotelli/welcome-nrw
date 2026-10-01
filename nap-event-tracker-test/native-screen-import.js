@@ -371,11 +371,13 @@ function mobilizationRowGeometry(frame){
 }
 function mobilizationCropsForCenter(frame,center,period){
  const cy=center/frame.height,py=period/frame.height;
- // The player name is the upper text line; the mission-progress line sits below.
+ // First pass stays tight on the player-name line. The wider fallback includes
+ // more left/right glyphs and a little more height for decorated/symbol names.
  const nameY0=cy-py*.25,nameY1=cy+py*.08;
  const scoreY0=cy-py*.22,scoreY1=cy+py*.17;
  return {
   name:cropRelative(frame,.27,nameY0,.70,nameY1,1050),
+  nameWide:cropRelative(frame,.22,cy-py*.34,.73,cy+py*.14,1200),
   score:cropRelative(frame,.72,scoreY0,.93,scoreY1,680),
   center:cy
  };
@@ -410,8 +412,26 @@ async function readMobilizationSlots(frame,worker){
    score=parseMobilizationScoreText(scoreText);
   }
   if(!Number.isSafeInteger(score))continue;
+
+  let parsed=null,nameText='';
   try{await worker.setParameters({preserve_interword_spaces:'1',tessedit_pageseg_mode:'7',tessedit_char_whitelist:''})}catch{}
-  const nameText=(await worker.recognize(slot.name)).data?.text||'',parsed=parseMobilizationNameText(nameText);
+  nameText=(await worker.recognize(slot.name)).data?.text||'';
+  parsed=parseMobilizationNameText(nameText);
+
+  if(!parsed){
+   nameText=(await worker.recognize(enhancedCanvas(slot.name))).data?.text||'';
+   parsed=parseMobilizationNameText(nameText);
+  }
+  if(!parsed){
+   try{await worker.setParameters({preserve_interword_spaces:'1',tessedit_pageseg_mode:'6',tessedit_char_whitelist:''})}catch{}
+   nameText=(await worker.recognize(slot.nameWide)).data?.text||'';
+   parsed=parseMobilizationNameText(nameText);
+  }
+  if(!parsed){
+   try{await worker.setParameters({preserve_interword_spaces:'1',tessedit_pageseg_mode:'11',tessedit_char_whitelist:''})}catch{}
+   nameText=(await worker.recognize(enhancedCanvas(slot.nameWide))).data?.text||'';
+   parsed=parseMobilizationNameText(nameText);
+  }
   if(!parsed)continue;
   rows.push({...parsed,score,rank:null,dynamicRowOcr:true,rowCenter:slot.center,raw:parsed.raw+' · '+score});
  }
@@ -811,12 +831,12 @@ function baseFrameTimes(dur){
 }
 function performanceFrameTimes(dur){
  const end=Math.max(.08,dur-.10),times=[];
- const add=t=>{const v=Math.max(.05,Math.min(end,t));if(!times.some(x=>Math.abs(x-v)<.14))times.push(v)};
- [0.12,0.65,1.20].forEach(add);
- // Slot OCR is independent per card. Fewer, well-spaced frames are enough
- // because every stable frame yields up to five independent card attempts.
- const count=Math.min(18,Math.max(14,Math.ceil(dur/2.5)));
- for(let i=1;i<=count;i++)add(1.20+(end-1.20)*(i/(count+1)));
+ const add=t=>{const v=Math.max(.05,Math.min(end,t));if(!times.some(x=>Math.abs(x-v)<.10))times.push(v)};
+ // Keep extra early samples for podium/decorated rows, then sample densely
+ // enough that faster scroll sections cannot skip blocks of 3–4 players.
+ [0.10,0.35,0.65,0.95,1.25].forEach(add);
+ const count=Math.min(34,Math.max(28,Math.ceil(dur/1.15)));
+ for(let i=1;i<=count;i++)add(1.25+(end-1.25)*(i/(count+1)));
  add(end);
  return times.sort((a,b)=>a-b);
 }
