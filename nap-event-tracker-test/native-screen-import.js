@@ -466,6 +466,20 @@ function parseMobilizationScoreText(text){
  }
  return null;
 }
+async function readMobilizationPodiumScores(frame,worker){
+ const centers=[.331,.391,.456],out=[];
+ for(let i=0;i<centers.length;i++){
+  const cy=centers[i],crop=cropRelative(frame,.695,cy-.025,.935,cy+.025,720);
+  try{await worker.setParameters({preserve_interword_spaces:'1',tessedit_pageseg_mode:'7',tessedit_char_whitelist:'0123456789.,'})}catch{}
+  let text=(await worker.recognize(crop)).data?.text||'',score=parseMobilizationScoreText(text);
+  if(!Number.isSafeInteger(score)){
+   text=(await worker.recognize(enhancedCanvas(crop))).data?.text||'';
+   score=parseMobilizationScoreText(text);
+  }
+  if(Number.isSafeInteger(score))out.push({rank:i+1,score});
+ }
+ return out;
+}
 function parseMobilizationNameText(text){
  const parsed=parseNameOnly(text,'');
  if(!parsed)return null;
@@ -645,6 +659,19 @@ function similarity(a,b){
  for(let i=1;i<=x.length;i++){const next=[i];for(let j=1;j<=y.length;j++)next[j]=Math.min(next[j-1]+1,prev[j]+1,prev[j-1]+(x[i-1]===y[j-1]?0:1));prev=next}
  return Math.max(0,1-prev[y.length]/Math.max(x.length,y.length));
 }
+function ocrWindowSimilarity(haystack,target){
+ const hay=ocrNorm(haystack),needle=ocrNorm(target);
+ if(!hay||!needle)return 0;
+ if(hay===needle)return 1;
+ if(hay.includes(needle))return needle.length<=4?.985:.995;
+ if(needle.includes(hay)&&hay.length>=3)return hay.length<=4?.94:.97;
+ let best=0;
+ const minLen=Math.max(2,needle.length-1),maxLen=Math.min(hay.length,needle.length+1);
+ for(let len=minLen;len<=maxLen;len++){
+  for(let i=0;i+len<=hay.length;i++)best=Math.max(best,similarity(hay.slice(i,i+len),needle));
+ }
+ return best;
+}
 function playerNameSimilarity(row,p){
  const rawVariants=ocrNameVariants(row?.name),code=ocrNorm(p?.alliance_code||''),variants=[...rawVariants];
  for(const raw of rawVariants)if(code&&raw.startsWith(code)&&raw.length>code.length)variants.push(raw.slice(code.length));
@@ -656,6 +683,7 @@ function playerNameSimilarity(row,p){
    if(!nn)continue;
    for(const v of variants){
     best=Math.max(best,similarity(v,nn));
+    if(row?.mobilization)best=Math.max(best,ocrWindowSimilarity(v,nn));
     // OCR often glues the alliance code/noise to very short names (PxRJAK1 -> Ak1).
     if(nn.length<=4&&v.endsWith(nn)&&code&&v.startsWith(code))best=Math.max(best,.995);
     else if(nn.length>=5&&v.endsWith(nn))best=Math.max(best,.97);
@@ -680,6 +708,17 @@ function uniquePoolNumericSuffixMatch(row,members){
  );
  return hits.length===1&&hits[0].alliance_code==null?hits[0]:null;
 }
+function uniqueMobilizationShortMatch(row,members){
+ if(!row?.mobilization)return null;
+ const scored=members.map(p=>({p,s:playerNameSimilarity(row,p)})).sort((a,b)=>b.s-a.s);
+ const best=scored[0],second=scored[1];
+ if(!best||best.s<.64)return null;
+ const variants=[best.p.player_name,...(best.p.aliases||[])].flatMap(ocrNameVariants);
+ const short=variants.some(v=>v.length>=3&&v.length<=4);
+ if(!short&&best.s<.80)return null;
+ if(second&&best.s-second.s<.22)return null;
+ return best;
+}
 function matchPlayer(row,members){
  const rowVariants=ocrNameVariants(row.name);if(!rowVariants.length)return null;
  const rowNorm=rowVariants[0];
@@ -689,6 +728,8 @@ function matchPlayer(row,members){
  if(exact.length===1)return {...exact[0],confidence:1,allianceMismatch:!!row.alliance&&String(exact[0].alliance_code||'').toLowerCase()!==String(row.alliance).toLowerCase(),exactName:true};
  const numericPool=uniquePoolNumericSuffixMatch(row,members);
  if(numericPool)return {...numericPool,confidence:.985,allianceMismatch:!!row.alliance,numericSuffixCorrected:true};
+ const shortAm=uniqueMobilizationShortMatch(row,members);
+ if(shortAm)return {...shortAm.p,confidence:shortAm.s,allianceMismatch:false,ocrShortRescue:true};
  const quality=!!row.quality,alliance=String(row.alliance||'').toLowerCase();
  const same=alliance?members.filter(p=>String(p.alliance_code||'').toLowerCase()===alliance):members;
  let list=rankedPlayerCandidates(row,same),best=list[0],second=list[1];
@@ -886,6 +927,13 @@ function rescueTimes(coverage,rankMap,dur,used){
   }
  }
  return out.sort((a,b)=>a-b).slice(0,12);
+}
+function applyMobilizationPodiumRanks(hits,podiumRankByScore){
+ if(!Array.isArray(hits)||!podiumRankByScore?.size)return hits||[];
+ return hits.map(h=>{
+  const rank=podiumRankByScore.get(Number(h.score));
+  return rank?{...h,rank,podiumRank:true}:h;
+ });
 }
 function consensusHit(list){
  if(!list?.length)return null;
@@ -1169,7 +1217,7 @@ async function analyze(){
   r.members=members;r.fileHash=await sha256(file);worker=await ensureWorker();
   video=document.createElement('video');url=await metadata(video,file);if(r!==run)return;
   const dur=video.duration;progress(1,5,0);
-  const times=isMobilization?performanceFrameTimes(dur):baseFrameTimes(dur),observations=new Map(),unmatched=new Map(),rankMap=new Map();r.frames=[];
+  const times=isMobilization?performanceFrameTimes(dur):baseFrameTimes(dur),observations=new Map(),unmatched=new Map(),rankMap=new Map(),podiumRankByScore=new Map();r.frames=[];
   const processRows=(rows,sec,full)=>{
    let still=null;
    for(const row of rows){
@@ -1211,6 +1259,10 @@ async function analyze(){
    if(r.frames.length<12&&i%Math.max(1,Math.floor(times.length/12))===0)r.frames.push({time:sec,image:full.toDataURL('image/jpeg',.72)});
    let parsed=[];
    if(isMobilization){
+    if(i<3&&podiumRankByScore.size<3){
+     const podiumScores=await readMobilizationPodiumScores(full,worker);
+     for(const item of podiumScores){podiumRankByScore.set(item.score,item.rank);recordRank(item.rank,sec,rankMap)}
+    }
     parsed=await readMobilizationSlots(full,worker);
     for(const rank of parsed.allRanks||[])recordRank(rank,sec,rankMap);
    }else{
@@ -1260,9 +1312,16 @@ async function analyze(){
   if(run!==r)return;
   coverage=rankCoverage(rankMap);
   r.coverage=coverage;
-  r.hits=[...observations.values()].map(consensusHit).filter(Boolean).sort((a,b)=>(a.rank&&b.rank?a.rank-b.rank:b.score-a.score));
+  r.hits=[...observations.values()].map(consensusHit).filter(Boolean);
+  if(isMobilization)r.hits=applyMobilizationPodiumRanks(r.hits,podiumRankByScore);
+  r.hits.sort((a,b)=>(a.rank&&b.rank?a.rank-b.rank:b.score-a.score));
   let matchedRanks=new Set(r.hits.map(h=>h.rank).filter(Boolean));
-  const rawUnmatched=[...unmatched.values()].filter(u=>!matchedRanks.has(u.rank)&&!r.hits.some(h=>u.score===h.score&&similarity(u.name,h.player?.player_name||'')>=.62));
+  const rawUnmatched=[...unmatched.values()].filter(u=>!matchedRanks.has(u.rank)&&!r.hits.some(h=>
+   u.score===h.score&&(
+    similarity(u.name,h.player?.player_name||'')>=.62||
+    (isMobilization&&podiumRankByScore.has(Number(u.score)))
+   )
+  ));
   let groupedUnmatched=groupUnmatchedRows(rawUnmatched,matchedRanks);
   r.looseUnmatched=groupedUnmatched.loose||[];
 
@@ -1297,7 +1356,9 @@ async function analyze(){
    }
    try{await worker.setParameters({preserve_interword_spaces:'1',tessedit_pageseg_mode:'6',tessedit_char_whitelist:''})}catch{}
    // Rebuild candidate groups after the dedicated row OCR.
-   r.hits=[...observations.values()].map(consensusHit).filter(Boolean).sort((a,b)=>(a.rank&&b.rank?a.rank-b.rank:b.score-a.score));
+   r.hits=[...observations.values()].map(consensusHit).filter(Boolean);
+   if(isMobilization)r.hits=applyMobilizationPodiumRanks(r.hits,podiumRankByScore);
+   r.hits.sort((a,b)=>(a.rank&&b.rank?a.rank-b.rank:b.score-a.score));
    matchedRanks=new Set(r.hits.map(h=>h.rank).filter(Boolean));
    const refreshedRaw=[...unmatched.values()].filter(u=>!matchedRanks.has(u.rank)&&!r.hits.some(h=>u.score===h.score&&similarity(u.name,h.player?.player_name||'')>=.62));
    groupedUnmatched=groupUnmatchedRows(refreshedRaw,matchedRanks);
@@ -1310,7 +1371,9 @@ async function analyze(){
    rescued.push(hit);usedPlayers.add(memberKey(hit.player));
    if(hit.rank)matchedRanks.add(hit.rank);
   }
-  if(rescued.length)r.hits=r.hits.concat(rescued).sort((a,b)=>(a.rank&&b.rank?a.rank-b.rank:b.score-a.score));
+  if(rescued.length)r.hits=r.hits.concat(rescued);
+  if(isMobilization)r.hits=applyMobilizationPodiumRanks(r.hits,podiumRankByScore);
+  r.hits.sort((a,b)=>(a.rank&&b.rank?a.rank-b.rank:b.score-a.score));
   matchedRanks=new Set(r.hits.map(h=>h.rank).filter(Boolean));
   r.missingMatchedRanks=isMobilization?(r.coverage?.seen||[]).filter(rank=>!matchedRanks.has(rank)):[];
   r.unmatched=groupedUnmatched.filter(g=>Number.isInteger(g.rank)&&!matchedRanks.has(g.rank)).slice(0,40);
