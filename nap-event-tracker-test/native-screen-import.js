@@ -385,6 +385,11 @@ function mobilizationCropsForCenter(frame,center,period){
 function mobilizationRankStrip(frame){
  return cropRelative(frame,.055,.34,.205,.76,460);
 }
+function normalizedLineY(line,canvas){
+ const b=line?.bbox;if(!b||!canvas?.height)return null;
+ const y=(Number(b.y0)+Number(b.y1))/2;
+ return Number.isFinite(y)?y/canvas.height:null;
+}
 function parseMobilizationRankValue(text){
  const s=ocrDigits(String(text||'').trim()).replace(/[^0-9]/g,'');
  if(!s)return null;
