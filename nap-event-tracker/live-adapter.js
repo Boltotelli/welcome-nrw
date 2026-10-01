@@ -424,7 +424,7 @@ function allianceBadge2(code){
 const PHASES2={
  'Strongest Governor':[['sg1','Day 1',333000],['sg2','Day 2',312000],['sg3','Day 3',362000],['sg4','Day 4',250000],['sg5','Day 5',296000],['sg6','Day 6',380000],['sg7','Day 7',345000]],
  'Alliance Brawl':[['b1','Day 1',125000],['b2','Day 2',125000],['b3','Day 3',125000],['b4','Day 4',125000],['b5','Day 5',187500],['b6','Day 6',187500]],
- 'Officer Project':[['op1','Charms',310000],['op2','Forgehammers',453000]],
+ 'Officer Project':[['op1','Charms',310000],['op2','Forgehammers',310000]],
  'Armament Competition':[['ac1','Phase 1',20000],['ac2','Truegold',38000]],
  'Swordland Showdown':[['sword','Attendance',null]],
  'Tri-Alliance Clash':[['tri','Attendance',null]]
