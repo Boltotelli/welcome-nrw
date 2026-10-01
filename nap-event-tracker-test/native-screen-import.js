@@ -70,6 +70,23 @@ const parsePoints=raw=>{const x=String(raw??'').trim();if(!/^(?:\d+|\d{1,3}(?:\.
 const $=(s,root=document)=>root.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
 const norm=s=>String(s||'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase().replace(/[^\p{L}\p{N}]/gu,'');
+const ocrNorm=s=>{
+ let x=String(s||'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase();
+ // OCR-friendly visual confusables seen in real Kingshot player names.
+ x=x.replace(/ƶ/g,'z').replace(/ҽ/g,'e').replace(/ɾ/g,'r').replace(/[σς]/g,'o').replace(/и/g,'n');
+ return x.replace(/[^\p{L}\p{N}]/gu,'');
+};
+function ocrNameVariants(value){
+ const source=String(value||''),base=ocrNorm(source),out=[];
+ if(base)out.push(base);
+ // Decorative nationality/style suffixes are often omitted completely by OCR.
+ // Only create the shortened form when the real source contains non-ASCII chars.
+ if(/[^\x00-\x7F]/.test(source)&&base){
+  const shortened=base.replace(/(?:ger|fr|gr|swe\d*)$/,'');
+  if(shortened!==base&&shortened.length>=4)out.push(shortened);
+ }
+ return [...new Set(out)];
+}
 const lng=()=>$('#languagePicker')?.value||'de';
 const tr=k=>(WORDS[lng()]||WORDS.de)[k]||k;
 const OCR2_WORDS={
@@ -613,7 +630,7 @@ function repairSequentialRanks(rows){
  return out;
 }
 function similarity(a,b){
- const x=norm(a),y=norm(b);if(!x||!y)return 0;if(x===y)return 1;
+ const x=ocrNorm(a),y=ocrNorm(b);if(!x||!y)return 0;if(x===y)return 1;
  if(x.length<3||y.length<3)return 0;
  if(x.length>=5&&y.length>=5&&(x.includes(y)||y.includes(x)))return .94;
  let prev=Array.from({length:y.length+1},(_,i)=>i);
@@ -621,17 +638,20 @@ function similarity(a,b){
  return Math.max(0,1-prev[y.length]/Math.max(x.length,y.length));
 }
 function playerNameSimilarity(row,p){
- const raw=norm(row?.name),code=norm(p?.alliance_code||''),variants=[raw];
- if(code&&raw.startsWith(code)&&raw.length>code.length)variants.push(raw.slice(code.length));
+ const rawVariants=ocrNameVariants(row?.name),code=ocrNorm(p?.alliance_code||''),variants=[...rawVariants];
+ for(const raw of rawVariants)if(code&&raw.startsWith(code)&&raw.length>code.length)variants.push(raw.slice(code.length));
  const names=[p.player_name,...(p.aliases||[])].filter(Boolean);
  let best=0;
  for(const n of names){
-  const nn=norm(n);if(!nn)continue;
-  for(const v of variants){
-   best=Math.max(best,similarity(v,nn));
-   // OCR often glues the alliance code/noise to very short names (PxRJAK1 -> Ak1).
-   if(nn.length<=4&&v.endsWith(nn)&&code&&v.startsWith(code))best=Math.max(best,.995);
-   else if(nn.length>=5&&v.endsWith(nn))best=Math.max(best,.97);
+  const nameVariants=ocrNameVariants(n);
+  for(const nn of nameVariants){
+   if(!nn)continue;
+   for(const v of variants){
+    best=Math.max(best,similarity(v,nn));
+    // OCR often glues the alliance code/noise to very short names (PxRJAK1 -> Ak1).
+    if(nn.length<=4&&v.endsWith(nn)&&code&&v.startsWith(code))best=Math.max(best,.995);
+    else if(nn.length>=5&&v.endsWith(nn))best=Math.max(best,.97);
+   }
   }
  }
  return best;
@@ -653,8 +673,11 @@ function uniquePoolNumericSuffixMatch(row,members){
  return hits.length===1&&hits[0].alliance_code==null?hits[0]:null;
 }
 function matchPlayer(row,members){
- const rowNorm=norm(row.name);if(!rowNorm)return null;
- const exact=members.filter(p=>[p.player_name,...(p.aliases||[])].some(n=>norm(n)===rowNorm));
+ const rowVariants=ocrNameVariants(row.name);if(!rowVariants.length)return null;
+ const rowNorm=rowVariants[0];
+ const exact=members.filter(p=>[p.player_name,...(p.aliases||[])].some(n=>{
+  const nv=ocrNameVariants(n);return nv.some(x=>rowVariants.includes(x));
+ }));
  if(exact.length===1)return {...exact[0],confidence:1,allianceMismatch:!!row.alliance&&String(exact[0].alliance_code||'').toLowerCase()!==String(row.alliance).toLowerCase(),exactName:true};
  const numericPool=uniquePoolNumericSuffixMatch(row,members);
  if(numericPool)return {...numericPool,confidence:.985,allianceMismatch:!!row.alliance,numericSuffixCorrected:true};
