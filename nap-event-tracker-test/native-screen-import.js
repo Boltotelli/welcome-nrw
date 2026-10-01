@@ -291,6 +291,64 @@ function attachLayout(rows,blocks,minScore=1000){
 function parseOcrData(data,minScore=1000){
  return attachLayout(repairSequentialRanks(extractRows(data?.text||'',minScore)),data?.blocks||[],minScore);
 }
+function bboxMidY(b){return (Number(b?.y0)+Number(b?.y1))/2}
+function bboxHeight(b){return Math.max(1,Number(b?.y1)-Number(b?.y0))}
+function numericOnly(text,minScore=1){
+ const s=ocrDigits(String(text||'').trim());
+ if(!s||/[\/]/.test(s))return null;
+ const m=s.match(/^#?\s*([0-9]{1,3}(?:[.,\s][0-9]{3}){1,4}|[0-9]{1,12})\s*$/);
+ if(!m)return null;
+ const n=Number(m[1].replace(/[.,\s]/g,''));
+ return Number.isSafeInteger(n)&&n>=minScore?n:null;
+}
+function performanceNameFromLine(text){
+ const cleaned=stripMissionText(text)
+  .replace(/^\s*#?\s*[0-9OoIl|]{1,3}\s*[.)\-:]?\s*/,'')
+  .trim();
+ if(!cleaned||/^(rang|rank|gouverneur|governor|pers[oö]nliche|personal|punkte|points|score)$/i.test(cleaned))return null;
+ if(!/[\p{L}]/u.test(cleaned))return null;
+ return parseNameOnly(cleaned,'');
+}
+function parseMobilizationLayout(data,roiWidth){
+ const lines=ocrLinesFromBlocks(data?.blocks||[]);
+ const width=Math.max(1,Number(roiWidth)||1),scores=[],ranks=[],names=[],rows=[];
+ for(const line of lines){
+  const b=line.bbox;if(!b)continue;
+  const x0=Number(b.x0),x1=Number(b.x1),cx=(x0+x1)/2;
+  if(!Number.isFinite(cx))continue;
+  const num=numericOnly(line.text,1);
+  if(num!=null){
+   if(cx>=width*.72||x0>=width*.64)scores.push({value:num,line});
+   if(cx<=width*.23||x1<=width*.27){
+    if(num>=1&&num<=999)ranks.push({value:num,line});
+   }
+   continue;
+  }
+  const parsed=performanceNameFromLine(line.text);
+  if(parsed&&(cx>=width*.20&&cx<=width*.73||x0<width*.58&&x1>width*.27))names.push({parsed,line});
+ }
+ const nearest=(items,y,tol)=>items.map(item=>({item,d:Math.abs(bboxMidY(item.line.bbox)-y)}))
+   .filter(x=>x.d<=tol).sort((a,b)=>a.d-b.d)[0]?.item||null;
+ for(const sc of scores){
+  const y=bboxMidY(sc.line.bbox),tol=Math.max(34,bboxHeight(sc.line.bbox)*1.25);
+  const nm=nearest(names,y,tol);if(!nm)continue;
+  const rk=nearest(ranks,bboxMidY(nm.line.bbox),Math.max(38,bboxHeight(nm.line.bbox)*1.35));
+  rows.push({...nm.parsed,score:sc.value,rank:rk?.value||null,bbox:nm.line.bbox,
+   raw:(rk?'#'+rk.value+' ':'')+nm.parsed.raw+' · '+sc.value,layout:true});
+ }
+ // Some Tesseract builds merge a complete row into one line. Keep this fallback
+ // conservative: low 1/2-digit values are accepted only from the explicit
+ // right-column path above, never from a merged line.
+ for(const line of lines){
+  if(isMissionLine(line.text))continue;
+  const tail=scoreTail(line.text,100);if(!tail)continue;
+  const left=line.text.slice(0,tail.start).trim(),parsed=performanceNameFromLine(left);
+  if(!parsed)continue;
+  const row={...parsed,score:tail.score,rank:sourceRank(line.text),bbox:line.bbox,raw:line.text,layoutMerged:true};
+  if(!rows.some(r=>r.rank&&row.rank&&r.rank===row.rank||r.score===row.score&&similarity(r.name,row.name)>.9))rows.push(row);
+ }
+ return repairSequentialRanks(rows);
+}
 function qualityNameCanvas(roi,bbox){
  if(!bbox||![bbox.x0,bbox.y0,bbox.x1,bbox.y1].every(Number.isFinite))return null;
  const x0=Math.max(0,Math.round(roi.width*.285)),x1=Math.min(roi.width,Math.round(roi.width*.735));
@@ -977,7 +1035,7 @@ async function analyze(){
    if(r.frames.length<12&&i%Math.max(1,Math.floor(times.length/12))===0)r.frames.push({time:sec,image:full.toDataURL('image/jpeg',.72)});
    const ocr=(await worker.recognize(roi,{}, {text:true,blocks:true})).data||{};
    for(const rank of ranksFromText(ocr.text||''))recordRank(rank,sec,rankMap);
-   const parsed=parseOcrData(ocr,isMobilization?1:1000);
+   const parsed=isMobilization?parseMobilizationLayout(ocr,roi.width):parseOcrData(ocr);
    processRows(parsed,sec,full);
    if(i===0){
     const podium=podiumCanvas(full),cards=splitPodiumCards(podium),podiumRows=[];
@@ -1008,9 +1066,9 @@ async function analyze(){
     let full,roi;
     try{await seek(video,sec);full=frameCanvas(video);roi=rankingCanvas(full)}
     catch(err){console.warn('Skipping unreadable rescue frame',sec,err);continue}
-    const rescueData=(await worker.recognize(roi)).data||{};
+    const rescueData=(await worker.recognize(roi,{}, {text:true,blocks:true})).data||{};
     for(const rank of ranksFromText(rescueData.text||''))recordRank(rank,sec,rankMap);
-    const rows=repairSequentialRanks(extractRows(rescueData.text||'',isMobilization?1:1000));
+    const rows=isMobilization?parseMobilizationLayout(rescueData,roi.width):repairSequentialRanks(extractRows(rescueData.text||''));
     processRows(rows,sec,full);
     progress(1,72+22*((i+1)/rescue.length),observations.size,'rescue');
     await new Promise(resolve=>setTimeout(resolve,0));
