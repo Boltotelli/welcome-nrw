@@ -319,14 +319,14 @@ function cropRelative(frame,x0,y0,x1,y1,maxWidth=900){
  cx.drawImage(frame,x,y,w,h,0,0,out.width,out.height);return out;
 }
 function performanceColumnCanvases(frame){
- // Score strip is the row anchor. Names are read later from a small crop at
- // exactly the same vertical position, so missed OCR lines cannot shift rows.
+ // Keep the score strip tight around the actual points column. A wider strip
+ // includes card decorations and makes mobile Tesseract collapse several rows.
  return {
-  score:cropRelative(frame,.700,.285,.940,.815,640)
+  score:cropRelative(frame,.720,.300,.925,.800,620)
  };
 }
 function mobilizationNameCropAtScore(frame,scoreY){
- const bandTop=.285,bandBottom=.815;
+ const bandTop=.300,bandBottom=.800;
  const center=bandTop+(bandBottom-bandTop)*Math.max(0,Math.min(1,scoreY));
  // Player name sits on the same top line as the score; keep the crop shallow
  // enough to avoid the mission-progress line below it.
@@ -363,8 +363,19 @@ function parseMobilizationScoreLines(data,canvas){
  }
  return out;
 }
+function mergeMobilizationScores(...lists){
+ const flat=lists.flat().filter(Boolean).sort((a,b)=>a.y-b.y),out=[];
+ for(const item of flat){
+  const same=out.find(x=>Math.abs(x.y-item.y)<=.025);
+  if(!same){out.push({...item});continue}
+  // Prefer the more plausible thousands-form score when two OCR modes disagree
+  // at the same vertical position (e.g. "3" vs "3.971").
+  if(item.value>same.value)Object.assign(same,item);
+ }
+ return out.sort((a,b)=>a.y-b.y);
+}
 async function readMobilizationRows(frame,scoreData,scoreCanvas,worker){
- const scores=parseMobilizationScoreLines(scoreData,scoreCanvas),rows=[];
+ const scores=Array.isArray(scoreData?._scores)?scoreData._scores:parseMobilizationScoreLines(scoreData,scoreCanvas),rows=[];
  for(const sc of scores){
   const crop=mobilizationNameCropAtScore(frame,sc.y);
   try{await worker.setParameters({preserve_interword_spaces:'1',tessedit_pageseg_mode:'7',tessedit_char_whitelist:''})}catch{}
@@ -1067,8 +1078,14 @@ async function analyze(){
    if(isMobilization){
     const cols=performanceColumnCanvases(full);
     try{await worker.setParameters({preserve_interword_spaces:'1',tessedit_pageseg_mode:'6',tessedit_char_whitelist:'0123456789.,'})}catch{}
-    const scoreData=(await worker.recognize(cols.score,{}, {text:true,blocks:true})).data||{};
-    parsed=await readMobilizationRows(full,scoreData,cols.score,worker);
+    const scoreDataBlock=(await worker.recognize(cols.score,{}, {text:true,blocks:true})).data||{};
+    try{await worker.setParameters({preserve_interword_spaces:'1',tessedit_pageseg_mode:'11',tessedit_char_whitelist:'0123456789.,'})}catch{}
+    const scoreDataSparse=(await worker.recognize(cols.score,{}, {text:true,blocks:true})).data||{};
+    const mergedScores=mergeMobilizationScores(
+      parseMobilizationScoreLines(scoreDataBlock,cols.score),
+      parseMobilizationScoreLines(scoreDataSparse,cols.score)
+    );
+    parsed=await readMobilizationRows(full,{_scores:mergedScores},cols.score,worker);
    }else{
     const ocr=(await worker.recognize(roi,{}, {text:true,blocks:true})).data||{};
     for(const rank of ranksFromText(ocr.text||''))recordRank(rank,sec,rankMap);
