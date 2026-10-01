@@ -73,7 +73,11 @@ const norm=s=>String(s||'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toL
 const ocrNorm=s=>{
  let x=String(s||'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase();
  // OCR-friendly visual confusables seen in real Kingshot player names.
- x=x.replace(/ƶ/g,'z').replace(/ҽ/g,'e').replace(/ɾ/g,'r').replace(/[σς]/g,'o').replace(/и/g,'n');
+ x=x
+  .replace(/[ƶʐ]/g,'z').replace(/[ҽєε]/g,'e').replace(/[ɾг]/g,'r').replace(/[σςοо]/g,'o')
+  .replace(/[иɴ]/g,'n').replace(/[аα]/g,'a').replace(/[сϲ]/g,'c').replace(/[κк]/g,'k')
+  .replace(/[мμ]/g,'m').replace(/[тτ]/g,'t').replace(/[хχ]/g,'x').replace(/[уγ]/g,'y')
+  .replace(/[рρ]/g,'p').replace(/[вβ]/g,'b');
  return x.replace(/[^\p{L}\p{N}]/gu,'');
 };
 function ocrNameVariants(value){
@@ -436,12 +440,16 @@ async function readMobilizationRanks(frame,geometry,worker){
  }
  const bestOffset=[...offsets.entries()].sort((a,b)=>b[1]-a[1])[0]||null;
  const byIndex=new Map(direct);
- if(bestOffset&&bestOffset[1]>=2){
+ // AM is a dense 1–50 list. Even one clean numeric anchor (for example rank 4
+ // below the medal rows) defines the contiguous ranks of the other visible cards.
+ if(bestOffset&&bestOffset[1]>=1){
   const off=bestOffset[0];
-  geometry.centers.forEach((_,i)=>{
-   const rank=off+i;
-   if(rank>=1&&rank<=50)byIndex.set(i,rank);
-  });
+  if(off>=1&&off<=50){
+   geometry.centers.forEach((_,i)=>{
+    const rank=off+i;
+    if(rank>=1&&rank<=50)byIndex.set(i,rank);
+   });
+  }
  }
  return {byIndex,allRanks:[...new Set(byIndex.values())].sort((a,b)=>a-b)};
 }
@@ -684,11 +692,14 @@ function matchPlayer(row,members){
  const quality=!!row.quality,alliance=String(row.alliance||'').toLowerCase();
  const same=alliance?members.filter(p=>String(p.alliance_code||'').toLowerCase()===alliance):members;
  let list=rankedPlayerCandidates(row,same),best=list[0],second=list[1];
- const threshold=quality?(row.alliance?.84:.90):(row.alliance?.92:.96),margin=quality?.06:.07;
+ const am=!!row.mobilization;
+ const threshold=am?.80:(quality?(row.alliance?.84:.90):(row.alliance?.92:.96));
+ const margin=am?.12:(quality?.06:.07);
  const accept=(b,s,t=threshold)=>{
   if(!b||b.s<t)return false;
-  if(s&&b.s-s.s<margin&&b.s<(quality?.97:.995))return false;
-  if(norm(row.name).length<=4&&b.s<(quality?.94:.995))return false;
+  if(s&&b.s-s.s<margin&&b.s<(am?.94:(quality?.97:.995)))return false;
+  const rowLen=ocrNorm(row.name).length;
+  if(rowLen<=4&&b.s<(am?.88:(quality?.94:.995)))return false;
   return true;
  };
  if(accept(best,second))return {...best.p,confidence:best.s,allianceMismatch:false};
@@ -1165,7 +1176,7 @@ async function analyze(){
     recordRank(row.rank,sec,rankMap);
     const cleanedName=isMobilization?stripMissionText(row.name):row.name;
     if(isMobilization&&!norm(cleanedName))continue;
-    const matchRow=isMobilization?{...row,name:cleanedName,alliance:'',quality:true}:row;
+    const matchRow=isMobilization?{...row,name:cleanedName,alliance:'',quality:true,mobilization:true}:row;
     const p=matchPlayer(matchRow,members);
     if(!p){
      const k=(row.rank||'')+'|'+norm(row.name)+'|'+row.score;
