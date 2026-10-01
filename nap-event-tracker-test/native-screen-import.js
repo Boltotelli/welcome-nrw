@@ -318,17 +318,54 @@ function cropRelative(frame,x0,y0,x1,y1,maxWidth=900){
  const cx=out.getContext('2d',{willReadFrequently:true});cx.imageSmoothingEnabled=true;cx.imageSmoothingQuality='high';
  cx.drawImage(frame,x,y,w,h,0,0,out.width,out.height);return out;
 }
-function mobilizationRowSlots(frame){
- // Kingshot keeps four scrollable result cards between the column header and
- // sticky own-player footer. Use normalized positions only, so resolution and
- // aspect-ratio changes do not affect the logic.
- const centers=[.445,.515,.585,.655,.725];
- return centers.map(center=>({
-  name:cropRelative(frame,.255,center-.026,.725,center+.022,980),
-  score:cropRelative(frame,.735,center-.026,.920,center+.022,520),
-  center
- }));
+function mobilizationRowBands(frame){
+ // Detect the light Kingshot ranking cards directly from the pixels in the
+ // right-hand points area. This follows rows while scrolling and does not
+ // assume handset pixels or fixed Y positions.
+ const x0=Math.round(frame.width*.70),x1=Math.round(frame.width*.93);
+ const y0=Math.round(frame.height*.355),y1=Math.round(frame.height*.765);
+ const cx=frame.getContext('2d',{willReadFrequently:true});
+ const img=cx.getImageData(x0,y0,Math.max(1,x1-x0),Math.max(1,y1-y0));
+ const w=img.width,h=img.height,d=img.data,bright=[];
+ for(let y=0;y<h;y++){
+  let sum=0,n=0;
+  for(let x=0;x<w;x+=Math.max(1,Math.floor(w/42))){
+   const i=(y*w+x)*4;
+   sum+=.2126*d[i]+.7152*d[i+1]+.0722*d[i+2];n++;
+  }
+  bright[y]=(sum/Math.max(1,n))>202;
+ }
+ const raw=[];let start=null;
+ for(let y=0;y<=h;y++){
+  if(y<h&&bright[y]){if(start==null)start=y;continue}
+  if(start!=null){
+   const end=y-1,len=end-start+1;
+   if(len>=frame.height*.026)raw.push({start:y0+start,end:y0+end});
+   start=null;
+  }
+ }
+ // Merge tiny dark seams inside one card but keep the real gap between cards.
+ const merged=[];
+ for(const band of raw){
+  const prev=merged[merged.length-1];
+  if(prev&&band.start-prev.end<frame.height*.010)prev.end=band.end;
+  else merged.push({...band});
+ }
+ return merged.filter(b=>{
+  const height=b.end-b.start+1,cy=(b.start+b.end)/2;
+  return height>=frame.height*.035&&height<=frame.height*.135&&cy<frame.height*.755;
+ }).slice(0,6);
 }
+function mobilizationCropsForBand(frame,band){
+ const cy=(band.start+band.end)/2/frame.height;
+ const hh=Math.max(.024,Math.min(.040,(band.end-band.start)/frame.height*.32));
+ return {
+  name:cropRelative(frame,.255,cy-hh,.735,cy+hh,1050),
+  score:cropRelative(frame,.700,cy-hh,.945,cy+hh,680),
+  center:cy
+ };
+}
+
 function parseMobilizationScoreText(text){
  const lines=String(text||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
  for(const raw of lines){
@@ -348,15 +385,22 @@ function parseMobilizationNameText(text){
  return parsed;
 }
 async function readMobilizationSlots(frame,worker){
- const rows=[];
- for(const slot of mobilizationRowSlots(frame)){
+ const rows=[],bands=mobilizationRowBands(frame);
+ for(const band of bands){
+  const slot=mobilizationCropsForBand(frame,band);
   try{await worker.setParameters({preserve_interword_spaces:'1',tessedit_pageseg_mode:'7',tessedit_char_whitelist:'0123456789.,'})}catch{}
-  const scoreText=(await worker.recognize(slot.score)).data?.text||'',score=parseMobilizationScoreText(scoreText);
+  let scoreText=(await worker.recognize(slot.score)).data?.text||'',score=parseMobilizationScoreText(scoreText);
+  if(!Number.isSafeInteger(score)){
+   // One enhanced retry helps thin punctuation and small 3-digit scores without
+   // multiplying OCR work for rows already read correctly.
+   scoreText=(await worker.recognize(enhancedCanvas(slot.score))).data?.text||'';
+   score=parseMobilizationScoreText(scoreText);
+  }
   if(!Number.isSafeInteger(score))continue;
   try{await worker.setParameters({preserve_interword_spaces:'1',tessedit_pageseg_mode:'7',tessedit_char_whitelist:''})}catch{}
   const nameText=(await worker.recognize(slot.name)).data?.text||'',parsed=parseMobilizationNameText(nameText);
   if(!parsed)continue;
-  rows.push({...parsed,score,rank:null,slotOcr:true,raw:parsed.raw+' · '+score});
+  rows.push({...parsed,score,rank:null,dynamicRowOcr:true,rowCenter:slot.center,raw:parsed.raw+' · '+score});
  }
  try{await worker.setParameters({preserve_interword_spaces:'1',tessedit_pageseg_mode:'6',tessedit_char_whitelist:''})}catch{}
  return rows;
