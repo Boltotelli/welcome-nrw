@@ -319,13 +319,12 @@ function cropRelative(frame,x0,y0,x1,y1,maxWidth=900){
  cx.drawImage(frame,x,y,w,h,0,0,out.width,out.height);return out;
 }
 function performanceColumnCanvases(frame){
- // Relative to the full Kingshot frame; no handset-specific pixel values.
- // The vertical band includes only the four scrolling ranking cards and excludes
- // the yellow header and sticky own-player footer.
+ // Relative coordinates only. Use a taller ranking band so fast scrolling or
+ // different phone aspect ratios cannot hide a row between samples. The bottom
+ // edge still stays above the sticky own-player footer.
  return {
-  rank:cropRelative(frame,.105,.425,.245,.758,420),
-  name:cropRelative(frame,.285,.425,.715,.758,920),
-  score:cropRelative(frame,.735,.425,.905,.758,520)
+  name:cropRelative(frame,.265,.300,.725,.800,980),
+  score:cropRelative(frame,.720,.300,.925,.800,560)
  };
 }
 function normalizedLineY(line,canvas){
@@ -346,7 +345,7 @@ function parseMobilizationNameLines(data,canvas){
  }
  return out;
 }
-function parseMobilizationNumberLines(data,canvas,kind){
+function parseMobilizationScoreLines(data,canvas){
  const out=[];
  for(const line of ocrLinesFromBlocks(data?.blocks||[])){
   const y=normalizedLineY(line,canvas);if(y==null)continue;
@@ -354,18 +353,18 @@ function parseMobilizationNumberLines(data,canvas,kind){
   if(!raw||/[\/]/.test(raw))continue;
   const s=ocrDigits(raw).replace(/[^0-9.,\s]/g,' ').trim();
   if(!s)continue;
-  const matches=[...s.matchAll(/\d{1,3}(?:[.,\s]\d{3}){1,4}|\d{1,12}/g)];
+  const matches=[...s.matchAll(/\d{1,3}(?:[.,\s]\d{3}){1,4}|\d{3,12}/g)];
   for(const m of matches){
    const n=Number(m[0].replace(/[.,\s]/g,''));
-   if(!Number.isSafeInteger(n))continue;
-   if(kind==='rank'&&n>=1&&n<=999)out.push({value:n,y,bbox:line.bbox});
-   if(kind==='score'&&n>=1)out.push({value:n,y,bbox:line.bbox});
+   // AM scores in this ranking are meaningful three-digit-or-higher values.
+   // Reject isolated OCR fragments such as "1" from 1.111 or "3" from 3.971.
+   if(Number.isSafeInteger(n)&&n>=100)out.push({value:n,y,bbox:line.bbox});
   }
  }
  return out;
 }
-function pairMobilizationColumns(names,ranks,scores){
- const rows=[],usedScores=new Set(),usedRanks=new Set();
+function pairMobilizationColumns(names,scores){
+ const rows=[],usedScores=new Set();
  const nearest=(items,y,used,tol)=>{
   let best=null,bestD=Infinity,bestI=-1;
   for(let i=0;i<items.length;i++){
@@ -376,13 +375,10 @@ function pairMobilizationColumns(names,ranks,scores){
   return best&&bestD<=tol?{item:best,index:bestI,d:bestD}:null;
  };
  for(const n of names){
-  const sc=nearest(scores,n.y,usedScores,.085);
+  const sc=nearest(scores,n.y,usedScores,.075);
   if(!sc)continue;
   usedScores.add(sc.index);
-  const rk=nearest(ranks,n.y,usedRanks,.10);
-  if(rk)usedRanks.add(rk.index);
-  rows.push({...n,score:sc.item.value,rank:rk?.item.value||null,columnOcr:true,
-   raw:(rk?'#'+rk.item.value+' ':'')+n.raw+' · '+sc.item.value});
+  rows.push({...n,score:sc.item.value,rank:null,columnOcr:true,raw:n.raw+' · '+sc.item.value});
  }
  return rows.sort((a,b)=>a.y-b.y);
 }
@@ -779,10 +775,10 @@ function baseFrameTimes(dur){
 }
 function performanceFrameTimes(dur){
  const end=Math.max(.08,dur-.10),times=[];
- const add=t=>{const v=Math.max(.05,Math.min(end,t));if(!times.some(x=>Math.abs(x-v)<.12))times.push(v)};
- [0.12,0.65].forEach(add);
- const count=Math.min(18,Math.max(12,Math.ceil(dur/2.5)));
- for(let i=1;i<=count;i++)add(.65+(end-.65)*(i/(count+1)));
+ const add=t=>{const v=Math.max(.05,Math.min(end,t));if(!times.some(x=>Math.abs(x-v)<.10))times.push(v)};
+ [0.10,0.45,0.85].forEach(add);
+ const count=Math.min(34,Math.max(20,Math.ceil(dur/1.15)));
+ for(let i=1;i<=count;i++)add(.85+(end-.85)*(i/(count+1)));
  add(end);
  return times.sort((a,b)=>a-b);
 }
@@ -1074,18 +1070,14 @@ async function analyze(){
    let parsed=[];
    if(isMobilization){
     const cols=performanceColumnCanvases(full);
-    try{await worker.setParameters({preserve_interword_spaces:'1',tessedit_pageseg_mode:'6',tessedit_char_whitelist:'0123456789'})}catch{}
-    const rankData=(await worker.recognize(cols.rank,{}, {text:true,blocks:true})).data||{};
     try{await worker.setParameters({preserve_interword_spaces:'1',tessedit_pageseg_mode:'6',tessedit_char_whitelist:''})}catch{}
     const nameData=(await worker.recognize(cols.name,{}, {text:true,blocks:true})).data||{};
     try{await worker.setParameters({preserve_interword_spaces:'1',tessedit_pageseg_mode:'6',tessedit_char_whitelist:'0123456789.,'})}catch{}
     const scoreData=(await worker.recognize(cols.score,{}, {text:true,blocks:true})).data||{};
     try{await worker.setParameters({preserve_interword_spaces:'1',tessedit_pageseg_mode:'6',tessedit_char_whitelist:''})}catch{}
-    const ranks=parseMobilizationNumberLines(rankData,cols.rank,'rank');
     const names=parseMobilizationNameLines(nameData,cols.name);
-    const scores=parseMobilizationNumberLines(scoreData,cols.score,'score');
-    parsed=pairMobilizationColumns(names,ranks,scores);
-    for(const rank of ranks)recordRank(rank.value,sec,rankMap);
+    const scores=parseMobilizationScoreLines(scoreData,cols.score);
+    parsed=pairMobilizationColumns(names,scores);
    }else{
     const ocr=(await worker.recognize(roi,{}, {text:true,blocks:true})).data||{};
     for(const rank of ranksFromText(ocr.text||''))recordRank(rank,sec,rankMap);
