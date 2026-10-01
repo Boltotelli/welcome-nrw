@@ -319,32 +319,32 @@ function cropRelative(frame,x0,y0,x1,y1,maxWidth=900){
  cx.drawImage(frame,x,y,w,h,0,0,out.width,out.height);return out;
 }
 function performanceColumnCanvases(frame){
- // Relative coordinates only. Use a taller ranking band so fast scrolling or
- // different phone aspect ratios cannot hide a row between samples. The bottom
- // edge still stays above the sticky own-player footer.
+ // Score strip is the row anchor. Names are read later from a small crop at
+ // exactly the same vertical position, so missed OCR lines cannot shift rows.
  return {
-  name:cropRelative(frame,.265,.300,.725,.800,980),
-  score:cropRelative(frame,.720,.300,.925,.800,560)
+  score:cropRelative(frame,.700,.285,.940,.815,640)
  };
+}
+function mobilizationNameCropAtScore(frame,scoreY){
+ const bandTop=.285,bandBottom=.815;
+ const center=bandTop+(bandBottom-bandTop)*Math.max(0,Math.min(1,scoreY));
+ // Player name sits on the same top line as the score; keep the crop shallow
+ // enough to avoid the mission-progress line below it.
+ const y0=Math.max(.18,center-.030),y1=Math.min(.86,center+.025);
+ return cropRelative(frame,.245,y0,.735,y1,980);
 }
 function normalizedLineY(line,canvas){
  const b=line?.bbox;if(!b||!canvas?.height)return null;
  const y=(Number(b.y0)+Number(b.y1))/2;
  return Number.isFinite(y)?y/canvas.height:null;
 }
-function parseMobilizationNameLines(data,canvas){
- const out=[];
- for(const line of ocrLinesFromBlocks(data?.blocks||[])){
-  const cleaned=stripMissionText(line.text);
-  if(!cleaned||isMissionLine(line.text))continue;
-  const parsed=parseNameOnly(cleaned,'');
-  const y=normalizedLineY(line,canvas);
-  if(!parsed||y==null)continue;
-  if(/^(rang|rank|gouverneur|governor|pers[oö]nliche|personal|punkte|points|score)$/i.test(parsed.name))continue;
-  out.push({...parsed,y,bbox:line.bbox});
- }
- return out;
+function parseMobilizationNameText(text){
+ const parsed=parseNameOnly(text,'');
+ if(!parsed)return null;
+ if(/^(rang|rank|gouverneur|governor|pers[oö]nliche|personal|punkte|points|score)$/i.test(parsed.name))return null;
+ return parsed;
 }
+
 function parseMobilizationScoreLines(data,canvas){
  const out=[];
  for(const line of ocrLinesFromBlocks(data?.blocks||[])){
@@ -363,24 +363,18 @@ function parseMobilizationScoreLines(data,canvas){
  }
  return out;
 }
-function pairMobilizationColumns(names,scores){
- const rows=[],usedScores=new Set();
- const nearest=(items,y,used,tol)=>{
-  let best=null,bestD=Infinity,bestI=-1;
-  for(let i=0;i<items.length;i++){
-   if(used.has(i))continue;
-   const d=Math.abs(items[i].y-y);
-   if(d<bestD){best=items[i];bestD=d;bestI=i}
-  }
-  return best&&bestD<=tol?{item:best,index:bestI,d:bestD}:null;
- };
- for(const n of names){
-  const sc=nearest(scores,n.y,usedScores,.075);
-  if(!sc)continue;
-  usedScores.add(sc.index);
-  rows.push({...n,score:sc.item.value,rank:null,columnOcr:true,raw:n.raw+' · '+sc.item.value});
+async function readMobilizationRows(frame,scoreData,scoreCanvas,worker){
+ const scores=parseMobilizationScoreLines(scoreData,scoreCanvas),rows=[];
+ for(const sc of scores){
+  const crop=mobilizationNameCropAtScore(frame,sc.y);
+  try{await worker.setParameters({preserve_interword_spaces:'1',tessedit_pageseg_mode:'7',tessedit_char_whitelist:''})}catch{}
+  const text=(await worker.recognize(crop)).data?.text||'';
+  const parsed=parseMobilizationNameText(text);
+  if(!parsed)continue;
+  rows.push({...parsed,score:sc.value,rank:null,columnOcr:true,scoreY:sc.y,raw:parsed.raw+' · '+sc.value});
  }
- return rows.sort((a,b)=>a.y-b.y);
+ try{await worker.setParameters({preserve_interword_spaces:'1',tessedit_pageseg_mode:'6',tessedit_char_whitelist:''})}catch{}
+ return rows;
 }
 
 function qualityNameCanvas(roi,bbox){
@@ -775,10 +769,12 @@ function baseFrameTimes(dur){
 }
 function performanceFrameTimes(dur){
  const end=Math.max(.08,dur-.10),times=[];
- const add=t=>{const v=Math.max(.05,Math.min(end,t));if(!times.some(x=>Math.abs(x-v)<.10))times.push(v)};
- [0.10,0.45,0.85].forEach(add);
- const count=Math.min(34,Math.max(20,Math.ceil(dur/1.15)));
- for(let i=1;i<=count;i++)add(.85+(end-.85)*(i/(count+1)));
+ const add=t=>{const v=Math.max(.05,Math.min(end,t));if(!times.some(x=>Math.abs(x-v)<.12))times.push(v)};
+ [0.10,0.55,1.00].forEach(add);
+ // Per-row name OCR is more accurate but more expensive. Around 18–22 stable
+ // samples are enough for a normal full-alliance scroll while keeping mobile usable.
+ const count=Math.min(22,Math.max(16,Math.ceil(dur/2.1)));
+ for(let i=1;i<=count;i++)add(1.00+(end-1.00)*(i/(count+1)));
  add(end);
  return times.sort((a,b)=>a-b);
 }
@@ -1070,14 +1066,9 @@ async function analyze(){
    let parsed=[];
    if(isMobilization){
     const cols=performanceColumnCanvases(full);
-    try{await worker.setParameters({preserve_interword_spaces:'1',tessedit_pageseg_mode:'6',tessedit_char_whitelist:''})}catch{}
-    const nameData=(await worker.recognize(cols.name,{}, {text:true,blocks:true})).data||{};
     try{await worker.setParameters({preserve_interword_spaces:'1',tessedit_pageseg_mode:'6',tessedit_char_whitelist:'0123456789.,'})}catch{}
     const scoreData=(await worker.recognize(cols.score,{}, {text:true,blocks:true})).data||{};
-    try{await worker.setParameters({preserve_interword_spaces:'1',tessedit_pageseg_mode:'6',tessedit_char_whitelist:''})}catch{}
-    const names=parseMobilizationNameLines(nameData,cols.name);
-    const scores=parseMobilizationScoreLines(scoreData,cols.score);
-    parsed=pairMobilizationColumns(names,scores);
+    parsed=await readMobilizationRows(full,scoreData,cols.score,worker);
    }else{
     const ocr=(await worker.recognize(roi,{}, {text:true,blocks:true})).data||{};
     for(const rank of ranksFromText(ocr.text||''))recordRank(rank,sec,rankMap);
