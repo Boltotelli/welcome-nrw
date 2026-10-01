@@ -73,10 +73,10 @@ const norm=s=>String(s||'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toL
 const lng=()=>$('#languagePicker')?.value||'de';
 const tr=k=>(WORDS[lng()]||WORDS.de)[k]||k;
 const OCR2_WORDS={
- de:{coverage:'Rangabdeckung',complete:'Rangfolge vollständig',missing:'Nicht sicher erkannt',rescue:'Einige Stellen werden noch einmal geprüft',manual:'Bitte fehlende Ränge vor dem Speichern manuell prüfen',version:'Erkennung V2',scan:'Video wird geprüft',collect:'Spieler werden erfasst',finish:'Ergebnis wird geprüft',rankSlots:'Rankingplätze gelesen',matched:'Spieler zugeordnet',unassigned:'nicht zugeordnet',reviewable:'prüfbare Ergebnisse',exemptCount:'ausgenommen',poolCandidate:'Als allianzlosen Spieler anlegen',poolHint:'Kein Allianz-Tag erkannt. Namen prüfen und als allianzlosen Tracking-Spieler anlegen. Es wird keine Sanktion erzeugt.',poolCreated:'Allianzloser Spieler wurde dem Tracking-Pool hinzugefügt.',poolConflict:'Ein Spieler mit diesem Namen existiert bereits in einer Allianz. Bitte manuell zuordnen.',tracking:'Allianzloses Tracking',trackingHint:'Historisch gespeichert · keine Law-14-Sanktion, solange keine Allianz zugeordnet ist.',unaffiliated:'Allianzlos',trackingSaved:'allianzloser Tracking-Eintrag gespeichert'},
- en:{coverage:'Rank coverage',complete:'Rank sequence complete',missing:'Not confidently detected',rescue:'A few areas are being checked again',manual:'Please review missing ranks manually before saving',version:'Recognition V2',scan:'Checking video',collect:'Reading players',finish:'Checking results',rankSlots:'ranking positions read',matched:'players matched',unassigned:'unmatched',reviewable:'reviewable results',exemptCount:'exempt',poolCandidate:'Add as alliance-less player',poolHint:'No alliance tag detected. Verify the name and add this player to alliance-less tracking. No sanction will be created.',poolCreated:'Alliance-less player added to the tracking pool.',poolConflict:'A player with this name already exists in an alliance. Assign manually instead.',tracking:'Alliance-less tracking',trackingHint:'Stored as history · no Law 14 sanction while no alliance is assigned.',unaffiliated:'Alliance-less',trackingSaved:'alliance-less tracking entry saved'},
- fr:{coverage:'Couverture des rangs',complete:'Séquence des rangs complète',missing:'Non détecté avec certitude',rescue:'Certaines zones sont vérifiées à nouveau',manual:'Vérifiez manuellement les rangs manquants avant d’enregistrer',version:'Reconnaissance V2',scan:'Vérification de la vidéo',collect:'Lecture des joueurs',finish:'Vérification du résultat',rankSlots:'places du classement lues',matched:'joueurs associés',unassigned:'non associés',reviewable:'résultats à vérifier',exemptCount:'exemptés',poolCandidate:'Ajouter comme joueur sans alliance',poolHint:'Aucun tag d’alliance détecté. Vérifiez le nom et ajoutez le joueur au suivi sans alliance. Aucune sanction ne sera créée.',poolCreated:'Joueur sans alliance ajouté au suivi.',poolConflict:'Un joueur portant ce nom existe déjà dans une alliance. Attribuez-le manuellement.',tracking:'Suivi sans alliance',trackingHint:'Historique enregistré · aucune sanction Law 14 tant qu’aucune alliance n’est attribuée.',unaffiliated:'Sans alliance',trackingSaved:'entrée de suivi sans alliance enregistrée'},
- es:{coverage:'Cobertura de rangos',complete:'Secuencia de rangos completa',missing:'No detectado con seguridad',rescue:'Se están revisando de nuevo algunas zonas',manual:'Revisa manualmente los rangos que faltan antes de guardar',version:'Reconocimiento V2',scan:'Revisando vídeo',collect:'Leyendo jugadores',finish:'Revisando resultado',rankSlots:'puestos leídos',matched:'jugadores asociados',unassigned:'sin asociar',reviewable:'resultados revisables',exemptCount:'exentos',poolCandidate:'Añadir como jugador sin alianza',poolHint:'No se detectó etiqueta de alianza. Revisa el nombre y añádelo al seguimiento sin alianza. No se creará ninguna sanción.',poolCreated:'Jugador sin alianza añadido al seguimiento.',poolConflict:'Ya existe un jugador con este nombre en una alianza. Asígnalo manualmente.',tracking:'Seguimiento sin alianza',trackingHint:'Guardado como historial · sin sanción Law 14 mientras no tenga alianza.',unaffiliated:'Sin alianza',trackingSaved:'entrada de seguimiento sin alianza guardada'}
+ de:{coverage:'Rangabdeckung',complete:'Rangfolge vollständig',missing:'Nicht sicher erkannt',rescue:'Einige Stellen werden noch einmal geprüft',manual:'Bitte fehlende Ränge vor dem Speichern manuell prüfen',version:'Erkennung V2',scan:'Video wird geprüft',collect:'Spieler werden erfasst',finish:'Ergebnis wird geprüft',rankSlots:'Rankingplätze gelesen',matched:'Spieler zugeordnet',unassigned:'nicht zugeordnet',missingHits:'Fehlende Treffer auf Rang',reviewable:'prüfbare Ergebnisse',exemptCount:'ausgenommen',poolCandidate:'Als allianzlosen Spieler anlegen',poolHint:'Kein Allianz-Tag erkannt. Namen prüfen und als allianzlosen Tracking-Spieler anlegen. Es wird keine Sanktion erzeugt.',poolCreated:'Allianzloser Spieler wurde dem Tracking-Pool hinzugefügt.',poolConflict:'Ein Spieler mit diesem Namen existiert bereits in einer Allianz. Bitte manuell zuordnen.',tracking:'Allianzloses Tracking',trackingHint:'Historisch gespeichert · keine Law-14-Sanktion, solange keine Allianz zugeordnet ist.',unaffiliated:'Allianzlos',trackingSaved:'allianzloser Tracking-Eintrag gespeichert'},
+ en:{coverage:'Rank coverage',complete:'Rank sequence complete',missing:'Not confidently detected',rescue:'A few areas are being checked again',manual:'Please review missing ranks manually before saving',version:'Recognition V2',scan:'Checking video',collect:'Reading players',finish:'Checking results',rankSlots:'ranking positions read',matched:'players matched',unassigned:'unmatched',missingHits:'Missing hits at rank',reviewable:'reviewable results',exemptCount:'exempt',poolCandidate:'Add as alliance-less player',poolHint:'No alliance tag detected. Verify the name and add this player to alliance-less tracking. No sanction will be created.',poolCreated:'Alliance-less player added to the tracking pool.',poolConflict:'A player with this name already exists in an alliance. Assign manually instead.',tracking:'Alliance-less tracking',trackingHint:'Stored as history · no Law 14 sanction while no alliance is assigned.',unaffiliated:'Alliance-less',trackingSaved:'alliance-less tracking entry saved'},
+ fr:{coverage:'Couverture des rangs',complete:'Séquence des rangs complète',missing:'Non détecté avec certitude',rescue:'Certaines zones sont vérifiées à nouveau',manual:'Vérifiez manuellement les rangs manquants avant d’enregistrer',version:'Reconnaissance V2',scan:'Vérification de la vidéo',collect:'Lecture des joueurs',finish:'Vérification du résultat',rankSlots:'places du classement lues',matched:'joueurs associés',unassigned:'non associés',missingHits:'Résultats manquants au rang',reviewable:'résultats à vérifier',exemptCount:'exemptés',poolCandidate:'Ajouter comme joueur sans alliance',poolHint:'Aucun tag d’alliance détecté. Vérifiez le nom et ajoutez le joueur au suivi sans alliance. Aucune sanction ne sera créée.',poolCreated:'Joueur sans alliance ajouté au suivi.',poolConflict:'Un joueur portant ce nom existe déjà dans une alliance. Attribuez-le manuellement.',tracking:'Suivi sans alliance',trackingHint:'Historique enregistré · aucune sanction Law 14 tant qu’aucune alliance n’est attribuée.',unaffiliated:'Sans alliance',trackingSaved:'entrée de suivi sans alliance enregistrée'},
+ es:{coverage:'Cobertura de rangos',complete:'Secuencia de rangos completa',missing:'No detectado con seguridad',rescue:'Se están revisando de nuevo algunas zonas',manual:'Revisa manualmente los rangos que faltan antes de guardar',version:'Reconocimiento V2',scan:'Revisando vídeo',collect:'Leyendo jugadores',finish:'Revisando resultado',rankSlots:'puestos leídos',matched:'jugadores asociados',unassigned:'sin asociar',missingHits:'Resultados faltantes en puesto',reviewable:'resultados revisables',exemptCount:'exentos',poolCandidate:'Añadir como jugador sin alianza',poolHint:'No se detectó etiqueta de alianza. Revisa el nombre y añádelo al seguimiento sin alianza. No se creará ninguna sanción.',poolCreated:'Jugador sin alianza añadido al seguimiento.',poolConflict:'Ya existe un jugador con este nombre en una alianza. Asígnalo manualmente.',tracking:'Seguimiento sin alianza',trackingHint:'Guardado como historial · sin sanción Law 14 mientras no tenga alianza.',unaffiliated:'Sin alianza',trackingSaved:'entrada de seguimiento sin alianza guardada'}
 };
 const ocr2=k=>(OCR2_WORDS[lng()]||OCR2_WORDS.de)[k]||k;
 const fmt=x=>Number(x||0).toLocaleString(lng()==='de'?'de-DE':lng()==='fr'?'fr-FR':lng()==='es'?'es-ES':'en-US');
@@ -382,6 +382,47 @@ function mobilizationCropsForCenter(frame,center,period){
   center:cy
  };
 }
+function mobilizationRankStrip(frame){
+ return cropRelative(frame,.055,.34,.205,.76,460);
+}
+function parseMobilizationRankValue(text){
+ const s=ocrDigits(String(text||'').trim()).replace(/[^0-9]/g,'');
+ if(!s)return null;
+ const n=Number(s);
+ return Number.isInteger(n)&&n>=1&&n<=50?n:null;
+}
+async function readMobilizationRanks(frame,geometry,worker){
+ const strip=mobilizationRankStrip(frame),direct=new Map();
+ try{await worker.setParameters({preserve_interword_spaces:'1',tessedit_pageseg_mode:'6',tessedit_char_whitelist:'0123456789'})}catch{}
+ const data=(await worker.recognize(strip,{}, {text:true,blocks:true})).data||{};
+ const H=frame.height,periodNorm=geometry.period/H;
+ for(const line of ocrLinesFromBlocks(data.blocks||[])){
+  const rank=parseMobilizationRankValue(line.text),y=normalizedLineY(line,strip);
+  if(rank==null||y==null)continue;
+  const fullY=.34+y*(.76-.34);
+  let best=-1,bestD=Infinity;
+  geometry.centers.forEach((center,i)=>{
+   const d=Math.abs(center/H-fullY);
+   if(d<bestD){best=i;bestD=d}
+  });
+  if(best>=0&&bestD<=periodNorm*.42)direct.set(best,rank);
+ }
+ const offsets=new Map();
+ for(const [i,rank] of direct){
+  const off=rank-i;
+  offsets.set(off,(offsets.get(off)||0)+1);
+ }
+ const bestOffset=[...offsets.entries()].sort((a,b)=>b[1]-a[1])[0]||null;
+ const byIndex=new Map(direct);
+ if(bestOffset&&bestOffset[1]>=2){
+  const off=bestOffset[0];
+  geometry.centers.forEach((_,i)=>{
+   const rank=off+i;
+   if(rank>=1&&rank<=50)byIndex.set(i,rank);
+  });
+ }
+ return {byIndex,allRanks:[...new Set(byIndex.values())].sort((a,b)=>a-b)};
+}
 
 function parseMobilizationScoreText(text){
  const lines=String(text||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
@@ -403,8 +444,11 @@ function parseMobilizationNameText(text){
 }
 async function readMobilizationSlots(frame,worker){
  const rows=[],geometry=mobilizationRowGeometry(frame);
- for(const center of geometry.centers){
+ const rankInfo=await readMobilizationRanks(frame,geometry,worker);
+ for(let rowIndex=0;rowIndex<geometry.centers.length;rowIndex++){
+  const center=geometry.centers[rowIndex];
   const slot=mobilizationCropsForCenter(frame,center,geometry.period);
+  const rank=rankInfo.byIndex.get(rowIndex)||null;
   try{await worker.setParameters({preserve_interword_spaces:'1',tessedit_pageseg_mode:'7',tessedit_char_whitelist:'0123456789.,'})}catch{}
   let scoreText=(await worker.recognize(slot.score)).data?.text||'',score=parseMobilizationScoreText(scoreText);
   if(!Number.isSafeInteger(score)){
@@ -433,8 +477,9 @@ async function readMobilizationSlots(frame,worker){
    parsed=parseMobilizationNameText(nameText);
   }
   if(!parsed)continue;
-  rows.push({...parsed,score,rank:null,dynamicRowOcr:true,rowCenter:slot.center,raw:parsed.raw+' · '+score});
+  rows.push({...parsed,score,rank,dynamicRowOcr:true,rowCenter:slot.center,raw:(rank?'#'+rank+' ':'')+parsed.raw+' · '+score});
  }
+ rows.allRanks=rankInfo.allRanks;
  try{await worker.setParameters({preserve_interword_spaces:'1',tessedit_pageseg_mode:'6',tessedit_char_whitelist:''})}catch{}
  return rows;
 }
@@ -1128,6 +1173,7 @@ async function analyze(){
    let parsed=[];
    if(isMobilization){
     parsed=await readMobilizationSlots(full,worker);
+    for(const rank of parsed.allRanks||[])recordRank(rank,sec,rankMap);
    }else{
     const ocr=(await worker.recognize(roi,{}, {text:true,blocks:true})).data||{};
     for(const rank of ranksFromText(ocr.text||''))recordRank(rank,sec,rankMap);
@@ -1226,6 +1272,8 @@ async function analyze(){
    if(hit.rank)matchedRanks.add(hit.rank);
   }
   if(rescued.length)r.hits=r.hits.concat(rescued).sort((a,b)=>(a.rank&&b.rank?a.rank-b.rank:b.score-a.score));
+  matchedRanks=new Set(r.hits.map(h=>h.rank).filter(Boolean));
+  r.missingMatchedRanks=isMobilization?(r.coverage?.seen||[]).filter(rank=>!matchedRanks.has(rank)):[];
   r.unmatched=groupedUnmatched.filter(g=>Number.isInteger(g.rank)&&!matchedRanks.has(g.rank)).slice(0,40);
   progress(2,96,r.hits.length);
   if(r.kind==='law'){
@@ -1239,9 +1287,11 @@ async function analyze(){
   progress(2,100,r.hits.length);showReview(r);
   const cov=r.coverage,coveredRanks=cov?.seen?.length||0;
   const unassignedRanks=r.unmatched?.length||0;
-  const assignment=' · '+r.hits.length+' '+ocr2('matched')+(unassignedRanks?' · '+unassignedRanks+' '+ocr2('unassigned'):'');
+  const missingHitRanks=r.missingMatchedRanks||[];
+  const missingHitText=missingHitRanks.length?' · '+ocr2('missingHits')+': '+missingHitRanks.join(', '):'';
+  const assignment=' · '+r.hits.length+' '+ocr2('matched')+(unassignedRanks?' · '+unassignedRanks+' '+ocr2('unassigned'):'')+missingHitText;
   if(cov?.min&&cov?.max&&cov.missing.length)status(coveredRanks+' '+ocr2('rankSlots')+' · '+ocr2('coverage')+' '+cov.min+'–'+cov.max+' · '+ocr2('missing')+': '+cov.missing.join(', ')+assignment+' · '+ocr2('manual'),true);
-  else if(cov?.min&&cov?.max)status(coveredRanks+' '+ocr2('rankSlots')+' · '+ocr2('coverage')+' '+cov.min+'–'+cov.max+' · '+ocr2('complete')+assignment,false);
+  else if(cov?.min&&cov?.max)status(coveredRanks+' '+ocr2('rankSlots')+' · '+ocr2('coverage')+' '+cov.min+'–'+cov.max+' · '+ocr2('complete')+assignment,missingHitRanks.length>0);
   else status(r.hits.length?tr('ready'):reviewText('nothing'),false);
  }catch(e){console.error('native screen OCR',e);status(tr('error')+': '+(e.message||e),true)}
  finally{
@@ -1303,8 +1353,10 @@ function showReview(r){
   ...(exemptCount?[exemptCount+' '+ocr2('exemptCount')]:[]),
   ...counts
  ];
+ const missingHitRanks=r.missingMatchedRanks||[];
+ const missingHitText=missingHitRanks.length?' · ⚠ '+ocr2('missingHits')+': '+missingHitRanks.join(', '):'';
  const covText=cov?.min&&cov?.max?' · '+ocr2('coverage')+' '+cov.min+'–'+cov.max+(cov.missing.length?' · ⚠ '+ocr2('missing')+': '+cov.missing.join(', '):' · ✓'):'';
- $('#nocrCount',root).textContent=parts.join(' · ')+covText;
+ $('#nocrCount',root).textContent=parts.join(' · ')+covText+missingHitText;
  $('#nocrResults',root).innerHTML=r.hits.map((h,i)=>{
   const lookup=statuses.get(String(h.player?.player_game_id||h.player?.player_id||''));
   if(r.kind==='law'&&lookup?.status==='exempt')return '';
