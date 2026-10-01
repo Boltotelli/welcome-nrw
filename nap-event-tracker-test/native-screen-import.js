@@ -1107,7 +1107,7 @@ async function analyze(){
     catch(err){console.warn('Skipping unreadable rescue frame',sec,err);continue}
     const rescueData=(await worker.recognize(roi,{}, {text:true,blocks:true})).data||{};
     for(const rank of ranksFromText(rescueData.text||''))recordRank(rank,sec,rankMap);
-    const rows=isMobilization?parseMobilizationLayout(rescueData,roi.width):repairSequentialRanks(extractRows(rescueData.text||''));
+    const rows=repairSequentialRanks(extractRows(rescueData.text||''));
     processRows(rows,sec,full);
     progress(1,72+22*((i+1)/rescue.length),observations.size,'rescue');
     await new Promise(resolve=>setTimeout(resolve,0));
