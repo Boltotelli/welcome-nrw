@@ -827,29 +827,30 @@
             "de": [
               "Dieses Event kann vollständig ausgelassen werden; die Belohnungen sind den Einsatz der unmittelbar vor KvK benötigten Materialien nicht wert.",
               "Truegold, Mithril, Widgets, Schmiedehämmer und Beschleuniger für die KvK-Vorbereitung zurückhalten.",
-              "Wenn du trotzdem Punkte machst, nur ohnehin geplante Aktionen nutzen und spätestens bei insgesamt 60.000 Punkten stoppen.",
-              "60.000 Punkte sind die strikte 3×-Gesamtgrenze und ausdrücklich keine Empfehlung."
+              "Wenn du trotzdem Punkte machst, nur ohnehin geplante Aktionen nutzen und spätestens bei insgesamt 114.000 Punkten stoppen.",
+              "114.000 Punkte sind die strikte 3×-Gesamtgrenze und ausdrücklich keine Empfehlung."
             ],
             "en": [
               "This event can be skipped completely; the rewards are not worth using materials needed immediately for KvK.",
               "Hold Truegold, Mithril, Widgets, Forgehammers and speedups for KvK preparation.",
-              "If you score anyway, use only actions you already planned and stop at 60,000 total points at the latest.",
-              "60,000 points is the strict 3× total limit and explicitly not a recommendation."
+              "If you score anyway, use only actions you already planned and stop at 114,000 total points at the latest.",
+              "114,000 points is the strict 3× total limit and explicitly not a recommendation."
             ],
             "fr": [
               "Cet événement peut être entièrement ignoré ; les récompenses ne valent pas les matériaux nécessaires immédiatement pour le KvK.",
               "Garde l’Or véritable, le Mithril, les Widgets, les Marteaux et les accélérateurs pour la préparation KvK.",
-              "Si tu marques malgré tout, utilise uniquement des actions déjà prévues et arrête-toi au plus tard à 60 000 points au total.",
-              "60 000 points constituent la limite totale stricte de 3× et ne sont explicitement pas une recommandation."
+              "Si tu marques malgré tout, utilise uniquement des actions déjà prévues et arrête-toi au plus tard à 114 000 points au total.",
+              "114 000 points constituent la limite totale stricte de 3× et ne sont explicitement pas une recommandation."
             ]
           },
           "limits": {
-            "hardCap": 60000,
+            "hardCap": 114000,
             "note": {
-              "de": "60.000 Punkte sind die strikte 3×-Gesamtgrenze – keine Empfehlung.",
-              "en": "60,000 points is the strict 3× total limit, not a recommendation.",
-              "fr": "60 000 points constituent la limite totale stricte de 3×, pas une recommandation."
-            }
+              "de": "38.000 Punkte Mindestziel · 114.000 Punkte sind die strikte 3×-Gesamtgrenze – keine Empfehlung.",
+              "en": "38,000-point minimum target · 114,000 points is the strict 3× total limit, not a recommendation.",
+              "fr": "Objectif minimum de 38 000 points · 114 000 points constituent la limite totale stricte de 3×, pas une recommandation."
+            },
+            "target": 38000
           }
         },
         "2026-10-03": {
@@ -862,29 +863,30 @@
             "de": [
               "Dieses Event kann vollständig ausgelassen werden; die Belohnungen sind den Einsatz der unmittelbar vor KvK benötigten Materialien nicht wert.",
               "Truegold, Mithril, Widgets, Schmiedehämmer und Beschleuniger für die KvK-Vorbereitung zurückhalten.",
-              "Wenn du trotzdem Punkte machst, nur ohnehin geplante Aktionen nutzen und spätestens bei insgesamt 60.000 Punkten stoppen.",
-              "60.000 Punkte sind die strikte 3×-Gesamtgrenze und ausdrücklich keine Empfehlung."
+              "Wenn du trotzdem Punkte machst, nur ohnehin geplante Aktionen nutzen und spätestens bei insgesamt 114.000 Punkten stoppen.",
+              "114.000 Punkte sind die strikte 3×-Gesamtgrenze und ausdrücklich keine Empfehlung."
             ],
             "en": [
               "This event can be skipped completely; the rewards are not worth using materials needed immediately for KvK.",
               "Hold Truegold, Mithril, Widgets, Forgehammers and speedups for KvK preparation.",
-              "If you score anyway, use only actions you already planned and stop at 60,000 total points at the latest.",
-              "60,000 points is the strict 3× total limit and explicitly not a recommendation."
+              "If you score anyway, use only actions you already planned and stop at 114,000 total points at the latest.",
+              "114,000 points is the strict 3× total limit and explicitly not a recommendation."
             ],
             "fr": [
               "Cet événement peut être entièrement ignoré ; les récompenses ne valent pas les matériaux nécessaires immédiatement pour le KvK.",
               "Garde l’Or véritable, le Mithril, les Widgets, les Marteaux et les accélérateurs pour la préparation KvK.",
-              "Si tu marques malgré tout, utilise uniquement des actions déjà prévues et arrête-toi au plus tard à 60 000 points au total.",
-              "60 000 points constituent la limite totale stricte de 3× et ne sont explicitement pas une recommandation."
+              "Si tu marques malgré tout, utilise uniquement des actions déjà prévues et arrête-toi au plus tard à 114 000 points au total.",
+              "114 000 points constituent la limite totale stricte de 3× et ne sont explicitement pas une recommandation."
             ]
           },
           "limits": {
-            "hardCap": 60000,
+            "hardCap": 114000,
             "note": {
-              "de": "60.000 Punkte sind die strikte 3×-Gesamtgrenze – keine Empfehlung.",
-              "en": "60,000 points is the strict 3× total limit, not a recommendation.",
-              "fr": "60 000 points constituent la limite totale stricte de 3×, pas une recommandation."
-            }
+              "de": "38.000 Punkte Mindestziel · 114.000 Punkte sind die strikte 3×-Gesamtgrenze – keine Empfehlung.",
+              "en": "38,000-point minimum target · 114,000 points is the strict 3× total limit, not a recommendation.",
+              "fr": "Objectif minimum de 38 000 points · 114 000 points constituent la limite totale stricte de 3×, pas une recommandation."
+            },
+            "target": 38000
           }
         }
       },
