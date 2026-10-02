@@ -100,15 +100,14 @@ API base: `https://bdzlgirowutasrsycjfj.supabase.co`
 Existing Edge Function:
 `https://bdzlgirowutasrsycjfj.supabase.co/functions/v1/nrw-welcome-language`
 
-Function behavior already in production:
+Current deployed function behavior:
 - POST / OPTIONS
 - public CORS
-- validates player name + digits-only player ID
-- allowed fixed language values: `de,en,tr,es,fr`
-- `other:` value is limited to 40 chars
-- server-side service-role lookup matches active NRW player by `game_id` and case-insensitive name
-- updates only `players.languages`
-- invalid player returns 404 `player_not_found`
+- POST is intentionally **temporarily disabled**
+- POST returns HTTP 503 with `temporarily_disabled`
+- the current deployed version performs no player-table read or write
+
+The former active implementation validated player identity and wrote `players.languages`. That behavior is historical and must be deliberately restored/reimplemented before the UI can save languages again. The Welcome and Player Dashboard frontends still call this function and currently show their normal error state while it is disabled.
 
 Existing table columns relevant to this feature:
 `players(id uuid, alliance_code text, name text, active boolean, created_at timestamptz, game_id text, languages ARRAY)`
@@ -234,4 +233,6 @@ For every future production change:
 
 ## Setup status
 - GitHub source and Vercel production project are connected.
-- Production alias: `https://welcome-nrw.vercel.app`
+- Production alias: `https://welcome-nrw.vercel.app`.
+- Legacy embedded NAP production/test code was removed from this repository on 2026-10-02 after the dedicated NAP repository cutover was verified.
+- Current repository boundary is Welcome + Laws + Player Dashboard + their API routes only.
