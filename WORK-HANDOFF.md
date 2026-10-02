@@ -4,8 +4,9 @@
 Build and maintain the public Kingshot onboarding site for `[NRW]United` on Server 1044. The user wants a **zero-manual-step workflow after setup**: they should be able to ask ChatGPT for changes in natural language, and Work should update the GitHub source, let Vercel deploy automatically, verify production, and report the result.
 
 ## Hard safety boundary
-- **Do not modify** the existing NAP/Event Tracker apps, repositories, deployments, database logic, or production behavior.
-- Existing apps include `nap-event-tracker`, `nap-event-tracker-test`, `nap-event-tracker-admin`, `nap-event-tracker-sg` and related projects.
+- **Do not modify** the NAP/Event Tracker apps, repositories, deployments, database logic, or production behavior from this repository.
+- NAP production now lives in the dedicated `Boltotelli/nap-event-tracker` repository. NAP Admin and SG/test systems are separate as documented in `Boltotelli/kingshot-1044-infra`.
+- This repository contains only the NRW Welcome site, Server Laws page, Player Dashboard, their assets, and Welcome/Dashboard API routes.
 - Reuse the existing Supabase project **only** for the already-created Welcome language profile endpoint/data integration.
 - Do not create a second Supabase project.
 - Do not expose service-role or other secrets.
