@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "kingdom": 1044,
   "timezone": "UTC",
-  "updatedAt": "2026-09-30T00:12:05Z",
+  "updatedAt": "2026-10-02T00:16:37Z",
   "events": [
     {
       "id": "golden-glaives-prep-2026-09-20",
@@ -802,93 +802,6 @@
         ]
       },
       "sourceUrl": "https://v2.kingshot.net/calendar"
-    },
-    {
-      "id": "officer-project-forgehammers-2026-09-30",
-      "start": "2026-09-30",
-      "end": "2026-10-01",
-      "icon": "🎖️",
-      "iconUrl": "https://kingshotdata.com/uploads/2025/03/power-up-event-icon.webp",
-      "manual": false,
-      "confidence": "predicted",
-      "name": {
-        "de": "Offiziersprojekt · Schmiedehämmer",
-        "en": "Officer Project · Forgehammers",
-        "fr": "Projet d’officier · Marteaux de forge"
-      },
-      "dailyPlans": {
-        "2026-09-30": {
-          "points": {
-            "de": "Amulette +1: 70 · Schmiedehammer: 6.000 · Mithril: 60.000 · Widget: 12.000 · Truppen T11–T1: 37/30/22/17/12/9/6/4/3/2/1",
-            "en": "Charm +1: 70 · Forgehammer: 6,000 · Mithril: 60,000 · Widget: 12,000 · troops T11–T1: 37/30/22/17/12/9/6/4/3/2/1",
-            "fr": "Amulette +1 : 70 · Marteau : 6 000 · Mithril : 60 000 · Widget : 12 000 · troupes T11–T1 : 37/30/22/17/12/9/6/4/3/2/1"
-          },
-          "steps": {
-            "de": [
-              "Die Belohnung sind Schmiedehämmer; Punkte entstehen durch Amulette, Mithril, Widgets, Schmiedehämmer und Truppen.",
-              "Mithril, Widgets, Schmiedehämmer und Amulettmaterialien möglichst vollständig für KvK Tag 4/5 sparen.",
-              "Truppen nur normal weitertrainieren; keinen zusätzlichen KvK-Vorrat ausschließlich für dieses Event verbrauchen.",
-              "Wenn du ein lohnendes persönliches Ziel abschließt, spätestens bei insgesamt 930.000 Punkten stoppen. Das ist die strikte 3×-Grenze, keine Empfehlung."
-            ],
-            "en": [
-              "The reward is Forgehammers; points come from Charms, Mithril, Widgets, Forgehammers and troops.",
-              "Save Mithril, Widgets, Forgehammers and Charm materials for KvK Day 4/5 whenever possible.",
-              "Train troops normally; do not consume extra KvK stock solely for this event.",
-              "If you complete a worthwhile personal milestone, stop at 930,000 total points at the latest. This is the strict 3× limit, not a recommendation."
-            ],
-            "fr": [
-              "La récompense est constituée de Marteaux ; les points viennent des Amulettes, du Mithril, des Widgets, des Marteaux et des troupes.",
-              "Conserve autant que possible le Mithril, les Widgets, les Marteaux et les matériaux d’Amulette pour les Jours KvK 4/5.",
-              "Entraîne les troupes normalement ; ne consomme pas de réserve KvK supplémentaire uniquement pour cet événement.",
-              "Si tu atteins un palier personnel rentable, arrête-toi au plus tard à 930 000 points au total. C’est la limite stricte de 3×, pas une recommandation."
-            ]
-          },
-          "limits": {
-            "hardCap": 930000,
-            "note": {
-              "de": "930.000 Punkte sind die strikte 3×-Gesamtgrenze – keine Empfehlung.",
-              "en": "930,000 points is the strict 3× total limit, not a recommendation.",
-              "fr": "930 000 points constituent la limite totale stricte de 3×, pas une recommandation."
-            }
-          }
-        },
-        "2026-10-01": {
-          "points": {
-            "de": "Amulette +1: 70 · Schmiedehammer: 6.000 · Mithril: 60.000 · Widget: 12.000 · Truppen T11–T1: 37/30/22/17/12/9/6/4/3/2/1",
-            "en": "Charm +1: 70 · Forgehammer: 6,000 · Mithril: 60,000 · Widget: 12,000 · troops T11–T1: 37/30/22/17/12/9/6/4/3/2/1",
-            "fr": "Amulette +1 : 70 · Marteau : 6 000 · Mithril : 60 000 · Widget : 12 000 · troupes T11–T1 : 37/30/22/17/12/9/6/4/3/2/1"
-          },
-          "steps": {
-            "de": [
-              "Die Belohnung sind Schmiedehämmer; Punkte entstehen durch Amulette, Mithril, Widgets, Schmiedehämmer und Truppen.",
-              "Mithril, Widgets, Schmiedehämmer und Amulettmaterialien möglichst vollständig für KvK Tag 4/5 sparen.",
-              "Truppen nur normal weitertrainieren; keinen zusätzlichen KvK-Vorrat ausschließlich für dieses Event verbrauchen.",
-              "Wenn du ein lohnendes persönliches Ziel abschließt, spätestens bei insgesamt 930.000 Punkten stoppen. Das ist die strikte 3×-Grenze, keine Empfehlung."
-            ],
-            "en": [
-              "The reward is Forgehammers; points come from Charms, Mithril, Widgets, Forgehammers and troops.",
-              "Save Mithril, Widgets, Forgehammers and Charm materials for KvK Day 4/5 whenever possible.",
-              "Train troops normally; do not consume extra KvK stock solely for this event.",
-              "If you complete a worthwhile personal milestone, stop at 930,000 total points at the latest. This is the strict 3× limit, not a recommendation."
-            ],
-            "fr": [
-              "La récompense est constituée de Marteaux ; les points viennent des Amulettes, du Mithril, des Widgets, des Marteaux et des troupes.",
-              "Conserve autant que possible le Mithril, les Widgets, les Marteaux et les matériaux d’Amulette pour les Jours KvK 4/5.",
-              "Entraîne les troupes normalement ; ne consomme pas de réserve KvK supplémentaire uniquement pour cet événement.",
-              "Si tu atteins un palier personnel rentable, arrête-toi au plus tard à 930 000 points au total. C’est la limite stricte de 3×, pas une recommandation."
-            ]
-          },
-          "limits": {
-            "hardCap": 930000,
-            "note": {
-              "de": "930.000 Punkte sind die strikte 3×-Gesamtgrenze – keine Empfehlung.",
-              "en": "930,000 points is the strict 3× total limit, not a recommendation.",
-              "fr": "930 000 points constituent la limite totale stricte de 3×, pas une recommandation."
-            }
-          }
-        }
-      },
-      "sourceUrl": "https://kingshotdata.com/events/officer-project-event/"
     },
     {
       "id": "armament-competition-type2-2026-10-02",
