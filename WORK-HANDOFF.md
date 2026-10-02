@@ -119,7 +119,7 @@ Dedicated `laws.html`, languages DE/EN/FR, search/categories/expandable law card
 Dark mode and language switching must work.
 Law 14 must start **collapsed**.
 Law 13A badge must remain on one row (`LAW 13A`).
-Laws 14 and 14A should be highlighted in the spending category.
+Laws 14, 14A and 15 should be highlighted in the spending category.
 
 Public laws summary/facts:
 1. No internal NAP attacks/scouting except by agreement/approved event.
@@ -138,6 +138,7 @@ Public laws summary/facts:
 13A. King/Queen tie-break.
 14. Strictly **>3.00×**; exactly 3.00× is NOT a violation; KvK Prep excluded; progressive sanctions.
 14A. Strongest Governor Rotation.
+15. Event Rotation Enforcement: non-NAP players who compete for a ranking position designated for a NAP nominee may be declared unprotected by NAP for a duration determined by NAP leadership; otherwise non-NAP players may participate in events normally.
 
 Law 14A English body:
 `To reduce overall spending during Strongest Governor (SG), NAP alliances rotate nominations of players who are permitted to compete and rank in SG. Nominated players are exempt from the 3× spending limit for that SG, while still demonstrating sensible spending. All other players remain subject to Law #14. The goal is to concentrate spending among nominated players, while allowing the rest of the kingdom to save resources for kingdom-vs-kingdom events.`
