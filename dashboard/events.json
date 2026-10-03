@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "kingdom": 1044,
   "timezone": "UTC",
-  "updatedAt": "2026-10-02T00:16:37Z",
+  "updatedAt": "2026-10-03T00:18:34Z",
   "events": [
     {
       "id": "golden-glaives-prep-2026-09-20",
@@ -982,32 +982,32 @@
     {
       "id": "kvk-2026-10-04",
       "start": "2026-10-04",
-      "end": "2026-10-09",
+      "end": "2026-10-10",
       "icon": "⚔️",
       "iconUrl": "https://kingshotdata.com/uploads/2025/05/kingdom-of-power-event-icon.webp",
       "manual": false,
       "confidence": "predicted",
       "name": {
-        "de": "KvK · Matchmaking & Vorbereitung",
-        "en": "KvK · Matchmaking & Preparation",
-        "fr": "KvK · Matchmaking et préparation"
+        "de": "KvK · Matchmaking, Vorbereitung & Schlacht",
+        "en": "KvK · Matchmaking, Preparation & Battle",
+        "fr": "KvK · Matchmaking, préparation et bataille"
       },
       "tips": {
         "de": [
           "Der Termin folgt dem öffentlichen 4‑Wochen-Rhythmus und bleibt bis zur Ingame-Anzeige voraussichtlich.",
-          "Das Matchmaking beginnt am 04.10.; die fünf Vorbereitungstage sind für den 05.–09.10. vorgesehen.",
+          "Das Matchmaking beginnt am 04.10.; die Vorbereitung läuft vom 05.–09.10., die Schlachtphase am 10.10. von 10:00–22:00 UTC.",
           "In der KvK-Vorbereitung gilt keine 3×-Grenze. NRW- und Discord-Absprachen haben Vorrang.",
           "Prüfe vor größeren Ausgaben immer die Punktequellen im Spiel; Live-Werte haben Vorrang vor öffentlichen Tabellen."
         ],
         "en": [
           "The date follows the public 4-week cycle and remains predicted until it appears in game.",
-          "Matchmaking begins on 4 Oct; the five preparation days are expected from 5–9 Oct.",
+          "Matchmaking begins on 4 Oct; preparation runs from 5–9 Oct, followed by the Battle Phase on 10 Oct from 10:00–22:00 UTC.",
           "The 3× limit does not apply during KvK preparation. NRW and Discord coordination take priority.",
           "Always check the in-game scoring table before major spending; live values override public tables."
         ],
         "fr": [
           "La date suit le cycle public de 4 semaines et reste prévisionnelle jusqu’à son affichage en jeu.",
-          "Le matchmaking commence le 4 octobre ; les cinq jours de préparation sont prévus du 5 au 9 octobre.",
+          "Le matchmaking commence le 4 octobre ; la préparation se déroule du 5 au 9 octobre, puis la phase de bataille le 10 octobre de 10:00 à 22:00 UTC.",
           "La limite de 3× ne s’applique pas pendant la préparation KvK. Les consignes NRW et Discord sont prioritaires.",
           "Vérifie toujours le barème en jeu avant une dépense importante ; les valeurs en direct priment sur les tableaux publics."
         ]
@@ -1175,6 +1175,36 @@
               "Regroupe les actions prévues de familiers, équipement, Or véritable, construction, recherche et accélération avec tous les bonus disponibles.",
               "Ne dépense pas aveuglément : vérifie l’objectif NRW, le score adverse et le barème en jeu, puis contribue seulement selon les consignes.",
               "Avant la fin de la préparation, rappelle les troupes, vide l’infirmerie et consulte le plan de bataille Discord. Garde un bouclier prêt pour la fenêtre de combat suivante."
+            ]
+          }
+        },
+        "2026-10-10": {
+          "points": {
+            "de": "Schlachtphase 10:00–22:00 UTC · Besatzung von Burg/Türmen: 1 Punkt je 1.000 Macht pro 60 Sek. · gegnerische oder verlorene Truppen T10–T1: 13/11/9/7/5/4/3/2/1/1 Punkte",
+            "en": "Battle Phase 10:00–22:00 UTC · Castle/Turret occupation: 1 point per 1,000 power per 60 sec · enemy troops defeated or own troops lost T10–T1: 13/11/9/7/5/4/3/2/1/1 points",
+            "fr": "Phase de bataille 10:00–22:00 UTC · occupation Château/Tourelles : 1 point par 1 000 de puissance pendant 60 s · troupes ennemies éliminées ou troupes perdues T10–T1 : 13/11/9/7/5/4/3/2/1/1 points"
+          },
+          "steps": {
+            "de": [
+              "Vor 10:00 UTC alle Sammler zurückholen, das Lazarett leeren und den NRW-Schlachtplan im Discord prüfen.",
+              "Wer nicht aktiv an der Schlacht teilnimmt, aktiviert rechtzeitig einen Schutzschild und lässt ihn während des gesamten Kampffensters aktiv.",
+              "Ab 10:00 UTC öffnen die Cross-Kingdom-Teleporter. Bei Stadtangriffen zählen nur gegnerische Ziele innerhalb von drei TC-Stufen.",
+              "Die Burgschlacht beginnt um 12:00 UTC. Nur abgestimmten Rallys, Verstärkungen und Zielansagen folgen; keine unkoordinierten Einzelangriffe.",
+              "Nach der Schlacht die Feldtriage sofort nutzen: Medizinische Taschen und Rettungsbefehle können die Rückholquote verlorener Truppen von 30 % auf bis zu 90 % erhöhen."
+            ],
+            "en": [
+              "Before 10:00 UTC, recall all gatherers, clear the infirmary and check the NRW battle plan in Discord.",
+              "Anyone not actively fighting should activate a shield in time and keep it active throughout the combat window.",
+              "Cross-Kingdom Teleporters open at 10:00 UTC. For city attacks, points only count against enemy targets within three Town Center levels.",
+              "The Castle Battle begins at 12:00 UTC. Follow coordinated rallies, reinforcements and target calls only; avoid uncoordinated solo attacks.",
+              "Use Field Triage immediately after battle: Medical Satchels and Rescue Orders can raise recovery of lost troops from 30% up to 90%."
+            ],
+            "fr": [
+              "Avant 10:00 UTC, rappelle tous les collecteurs, vide l’infirmerie et consulte le plan de bataille NRW sur Discord.",
+              "Toute personne qui ne participe pas activement doit activer un bouclier à temps et le garder pendant toute la fenêtre de combat.",
+              "Les téléporteurs inter-royaumes ouvrent à 10:00 UTC. Pour les attaques de villes, seuls les ennemis situés à trois niveaux de Centre-ville au maximum rapportent des points.",
+              "La bataille du Château commence à 12:00 UTC. Suis uniquement les rallyes, renforts et cibles coordonnés ; évite les attaques individuelles non coordonnées.",
+              "Utilise immédiatement le triage après la bataille : les Sacoches médicales et Ordres de sauvetage peuvent faire passer la récupération des troupes perdues de 30 % à 90 %."
             ]
           }
         }
