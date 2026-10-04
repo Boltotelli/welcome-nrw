@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "kingdom": 1044,
   "timezone": "UTC",
-  "updatedAt": "2026-10-03T00:18:34Z",
+  "updatedAt": "2026-10-04T00:13:44Z",
   "events": [
     {
       "id": "golden-glaives-prep-2026-09-20",
@@ -768,129 +768,6 @@
         ]
       },
       "sourceUrl": "https://centurygames.helpshift.com/hc/en/140-kingshot/section/1399-fishing-tournament/"
-    },
-    {
-      "id": "alliance-mobilization-2026-09-28",
-      "start": "2026-09-28",
-      "end": "2026-10-03",
-      "icon": "📋",
-      "manual": false,
-      "confidence": "predicted",
-      "name": {
-        "de": "Allianz-Mobilisierung",
-        "en": "Alliance Mobilization",
-        "fr": "Mobilisation d’alliance"
-      },
-      "tips": {
-        "de": [
-          "Der Termin folgt dem öffentlichen 4‑Wochen-Rhythmus und bleibt bis zur Ingame-Bestätigung voraussichtlich.",
-          "Nimm nur Missionen an, die du zuverlässig abschließen kannst; Absprachen der Allianz haben Vorrang.",
-          "Wähle möglichst Missionen, die mit ohnehin geplanten Aktionen oder dem aktiven Stärkster-Gouverneur-Tag zusammenfallen.",
-          "Verbrauche keine zusätzlichen KvK-Ressourcen nur für Mobilisierungspunkte."
-        ],
-        "en": [
-          "The date follows the public 4-week cycle and remains predicted until confirmed in game.",
-          "Only accept missions you can reliably complete; alliance coordination takes priority.",
-          "Whenever possible, choose missions that overlap with actions you already planned or the active Strongest Governor day.",
-          "Do not spend extra KvK resources solely for Mobilization points."
-        ],
-        "fr": [
-          "La date suit le cycle public de 4 semaines et reste prévisionnelle jusqu’à confirmation en jeu.",
-          "N’accepte que les missions que tu peux terminer avec certitude ; la coordination de l’alliance est prioritaire.",
-          "Choisis si possible des missions qui coïncident avec des actions déjà prévues ou avec la journée active de Gouverneur le plus puissant.",
-          "Ne dépense pas de ressources KvK supplémentaires uniquement pour les points de Mobilisation."
-        ]
-      },
-      "sourceUrl": "https://v2.kingshot.net/calendar"
-    },
-    {
-      "id": "armament-competition-type2-2026-10-02",
-      "start": "2026-10-02",
-      "end": "2026-10-03",
-      "icon": "🛡️",
-      "iconUrl": "https://kingshotdata.com/uploads/2025/04/city-development-event-icon.webp",
-      "manual": false,
-      "confidence": "predicted",
-      "name": {
-        "de": "Rüstungswettbewerb · Truegold",
-        "en": "Armament Competition · Truegold",
-        "fr": "Compétition d’armement · Or véritable"
-      },
-      "dailyPlans": {
-        "2026-10-02": {
-          "points": {
-            "de": "Truegold: 100 · Truegoldstaub: 50 · Gehärtetes Truegold: 1.500 · Ausrüstung +1: 3 · Schmiedehammer: 800 · Mithril: 8.000 · Widget: 1.600 · 1 Min. Beschleuniger: 1",
-            "en": "Truegold: 100 · Truegold Dust: 50 · Tempered Truegold: 1,500 · Gear +1: 3 · Forgehammer: 800 · Mithril: 8,000 · Widget: 1,600 · 1 min speedup: 1",
-            "fr": "Or véritable : 100 · Poussière : 50 · Or trempé : 1 500 · Équipement +1 : 3 · Marteau : 800 · Mithril : 8 000 · Widget : 1 600 · 1 min d’accélération : 1"
-          },
-          "steps": {
-            "de": [
-              "Dieses Event kann vollständig ausgelassen werden; die Belohnungen sind den Einsatz der unmittelbar vor KvK benötigten Materialien nicht wert.",
-              "Truegold, Mithril, Widgets, Schmiedehämmer und Beschleuniger für die KvK-Vorbereitung zurückhalten.",
-              "Wenn du trotzdem Punkte machst, nur ohnehin geplante Aktionen nutzen und spätestens bei insgesamt 114.000 Punkten stoppen.",
-              "114.000 Punkte sind die strikte 3×-Gesamtgrenze und ausdrücklich keine Empfehlung."
-            ],
-            "en": [
-              "This event can be skipped completely; the rewards are not worth using materials needed immediately for KvK.",
-              "Hold Truegold, Mithril, Widgets, Forgehammers and speedups for KvK preparation.",
-              "If you score anyway, use only actions you already planned and stop at 114,000 total points at the latest.",
-              "114,000 points is the strict 3× total limit and explicitly not a recommendation."
-            ],
-            "fr": [
-              "Cet événement peut être entièrement ignoré ; les récompenses ne valent pas les matériaux nécessaires immédiatement pour le KvK.",
-              "Garde l’Or véritable, le Mithril, les Widgets, les Marteaux et les accélérateurs pour la préparation KvK.",
-              "Si tu marques malgré tout, utilise uniquement des actions déjà prévues et arrête-toi au plus tard à 114 000 points au total.",
-              "114 000 points constituent la limite totale stricte de 3× et ne sont explicitement pas une recommandation."
-            ]
-          },
-          "limits": {
-            "hardCap": 114000,
-            "note": {
-              "de": "38.000 Punkte Mindestziel · 114.000 Punkte sind die strikte 3×-Gesamtgrenze – keine Empfehlung.",
-              "en": "38,000-point minimum target · 114,000 points is the strict 3× total limit, not a recommendation.",
-              "fr": "Objectif minimum de 38 000 points · 114 000 points constituent la limite totale stricte de 3×, pas une recommandation."
-            },
-            "target": 38000
-          }
-        },
-        "2026-10-03": {
-          "points": {
-            "de": "Truegold: 100 · Truegoldstaub: 50 · Gehärtetes Truegold: 1.500 · Ausrüstung +1: 3 · Schmiedehammer: 800 · Mithril: 8.000 · Widget: 1.600 · 1 Min. Beschleuniger: 1",
-            "en": "Truegold: 100 · Truegold Dust: 50 · Tempered Truegold: 1,500 · Gear +1: 3 · Forgehammer: 800 · Mithril: 8,000 · Widget: 1,600 · 1 min speedup: 1",
-            "fr": "Or véritable : 100 · Poussière : 50 · Or trempé : 1 500 · Équipement +1 : 3 · Marteau : 800 · Mithril : 8 000 · Widget : 1 600 · 1 min d’accélération : 1"
-          },
-          "steps": {
-            "de": [
-              "Dieses Event kann vollständig ausgelassen werden; die Belohnungen sind den Einsatz der unmittelbar vor KvK benötigten Materialien nicht wert.",
-              "Truegold, Mithril, Widgets, Schmiedehämmer und Beschleuniger für die KvK-Vorbereitung zurückhalten.",
-              "Wenn du trotzdem Punkte machst, nur ohnehin geplante Aktionen nutzen und spätestens bei insgesamt 114.000 Punkten stoppen.",
-              "114.000 Punkte sind die strikte 3×-Gesamtgrenze und ausdrücklich keine Empfehlung."
-            ],
-            "en": [
-              "This event can be skipped completely; the rewards are not worth using materials needed immediately for KvK.",
-              "Hold Truegold, Mithril, Widgets, Forgehammers and speedups for KvK preparation.",
-              "If you score anyway, use only actions you already planned and stop at 114,000 total points at the latest.",
-              "114,000 points is the strict 3× total limit and explicitly not a recommendation."
-            ],
-            "fr": [
-              "Cet événement peut être entièrement ignoré ; les récompenses ne valent pas les matériaux nécessaires immédiatement pour le KvK.",
-              "Garde l’Or véritable, le Mithril, les Widgets, les Marteaux et les accélérateurs pour la préparation KvK.",
-              "Si tu marques malgré tout, utilise uniquement des actions déjà prévues et arrête-toi au plus tard à 114 000 points au total.",
-              "114 000 points constituent la limite totale stricte de 3× et ne sont explicitement pas une recommandation."
-            ]
-          },
-          "limits": {
-            "hardCap": 114000,
-            "note": {
-              "de": "38.000 Punkte Mindestziel · 114.000 Punkte sind die strikte 3×-Gesamtgrenze – keine Empfehlung.",
-              "en": "38,000-point minimum target · 114,000 points is the strict 3× total limit, not a recommendation.",
-              "fr": "Objectif minimum de 38 000 points · 114 000 points constituent la limite totale stricte de 3×, pas une recommandation."
-            },
-            "target": 38000
-          }
-        }
-      },
-      "sourceUrl": "https://kingshotdata.com/events/armament-competition/"
     },
     {
       "id": "officer-project-charm-designs-2026-10-04",
