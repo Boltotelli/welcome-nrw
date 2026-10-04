@@ -30,6 +30,21 @@ function categoryLabel(cat,lang){
  return (m[lang]||m.en)[cat]||cat.toUpperCase();
 }
 function esc(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));}
+function law14BlockHtml(block,number){
+ const inline=number==='14.2'?block.match(/^([\s\S]*?:)\s*1[\.)]\s*([\s\S]*?)\s+2[\.)]\s*([\s\S]*?)\s+3[\.)]\s*([\s\S]*?)\s+4[\.)]\s*([\s\S]*?)(?=\s+(?:For penalties|Bei den Strafen|Pour les sanctions)\b|$)([\s\S]*)$/):null;
+ if(inline){
+  const items=inline.slice(2,6);
+  return '<p>'+esc(inline[1])+'</p><div class="law14-penalties">'+items.map((x,i)=>'<div class="law14-penalty"><span>'+(i+1)+'</span><b>'+esc(x.trim())+'</b></div>').join('')+'</div>'+(inline[6]?.trim()?'<p class="law14-after-list">'+esc(inline[6].trim())+'</p>':'');
+ }
+ const lines=block.split('\n').map(x=>x.trim()).filter(Boolean);
+ if(lines.length>1&&lines.every(x=>/^\d+[\.)]\s+/.test(x))){
+  return '<div class="law14-penalties">'+lines.map(x=>{
+   const mm=x.match(/^(\d+)[\.)]\s+([\s\S]+)$/);
+   return '<div class="law14-penalty"><span>'+esc(mm?.[1]||'')+'</span><b>'+esc(mm?.[2]||x)+'</b></div>';
+  }).join('')+'</div>';
+ }
+ return '<p>'+esc(block).replaceAll('\n','<br>')+'</p>';
+}
 function lawBodyHtml(l,lang){
  const raw=lang==='de'?l.de:lang==='fr'?l.fr:l.en;
  if(String(l.n)!=='14')return esc(raw);
@@ -37,20 +52,11 @@ function lawBodyHtml(l,lang){
  if(parts.length<2)return esc(raw);
  return '<div class="law14-sections">'+parts.map(part=>{
   const m=part.match(/^(14\.[1-4])\s*[–-]\s*([^\n]+)\n*([\s\S]*)$/);
-  if(!m)return '<section class="law14-section"><div class="law14-copy">'+esc(part)+'</div></section>';
+  if(!m)return '<div class="law14-section"><div class="law14-copy">'+esc(part)+'</div></div>';
   const number=m[1],title=m[2].trim(),body=m[3].trim();
   const blocks=body.split(/\n\s*\n/).map(x=>x.trim()).filter(Boolean);
-  const content=blocks.map(block=>{
-   const lines=block.split('\n').map(x=>x.trim()).filter(Boolean);
-   if(lines.length>1&&lines.every(x=>/^\d+\)\s+|^\d+\.\s+/.test(x))){
-    return '<div class="law14-penalties">'+lines.map(x=>{
-     const mm=x.match(/^(\d+)[\.)]\s+([\s\S]+)$/);
-     return '<div class="law14-penalty"><span>'+esc(mm?.[1]||'')+'</span><b>'+esc(mm?.[2]||x)+'</b></div>';
-    }).join('')+'</div>';
-   }
-   return '<p>'+esc(block).replaceAll('\n','<br>')+'</p>';
-  }).join('');
-  return '<section class="law14-section"><div class="law14-section-head"><span>'+esc(number)+'</span><strong>'+esc(title)+'</strong></div><div class="law14-copy">'+content+'</div></section>';
+  const content=blocks.map(block=>law14BlockHtml(block,number)).join('');
+  return '<div class="law14-section"><div class="law14-section-head"><span>'+esc(number)+'</span><strong>'+esc(title)+'</strong></div><div class="law14-copy">'+content+'</div></div>';
  }).join('')+'</div>';
 }
 function renderLaws(){
