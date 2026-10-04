@@ -119,7 +119,7 @@ Dedicated `laws.html`, languages DE/EN/FR, search/categories/expandable law card
 Dark mode and language switching must work.
 Law 14 must start **collapsed**.
 Law 13A badge must remain on one row (`LAW 13A`).
-Laws 14, 14A and 15 should be highlighted in the spending category.
+Law 14 should be highlighted in the spending category.
 
 Public laws summary/facts:
 1. No internal NAP attacks/scouting except by agreement/approved event.
@@ -136,16 +136,12 @@ Public laws summary/facts:
 12. Inactivity >14 days; announced absence max 21 days.
 13. Dispute evidence/recusal/review within 36h/simple majority/implement within 48h.
 13A. King/Queen tie-break.
-14. Strictly **>3.00×**; exactly 3.00× is NOT a violation; KvK Prep excluded; progressive sanctions.
-14A. Strongest Governor Rotation.
-15. Event Rotation Enforcement: non-NAP players who compete for a ranking position designated for a NAP nominee may be declared unprotected by NAP for a duration determined by NAP leadership; otherwise non-NAP players may participate in events normally.
-
-Law 14A English body:
-`To reduce overall spending during Strongest Governor (SG), NAP alliances rotate nominations of players who are permitted to compete and rank in SG. Nominated players are exempt from the 3× spending limit for that SG, while still demonstrating sensible spending. All other players remain subject to Law #14. The goal is to concentrate spending among nominated players, while allowing the rest of the kingdom to save resources for kingdom-vs-kingdom events.`
-
-DE title: `Strongest-Governor-Rotation`
-EN title: `Strongest Governor Rotation`
-FR title: `Rotation du Strongest Governor`
+14. **Event Spending** is the only active spending law and now contains sections 14.1–14.4:
+   - 14.1: strictly **>3×** the resources required for all non-ranking rewards in a non-KvK event; KvK prep days and resources not needed for KvK prep are excluded.
+   - 14.2: progressive sanctions: warning → R1/no ministers → 24h NAP exclusion → extended exclusion by NAP vote. For stages 3/4, if the player remains in the alliance, the alliance shares the NAP restrictions for the penalty duration.
+   - 14.3: Non-NAP players must respect event rotations/resource-saving. First violation = warning to player + R5; further violation = 7 days without Law #5 protection. The current king's alliance handles enforcement.
+   - 14.4: Strongest Governor nomination rotation; nominated players are exempt from the 3× limit for that SG while expected to spend reasonably.
+14A and 15 are retired and must not be shown as active laws.
 
 Note: Law 4 may still mention Castle Battle as part of the factual KE law. The “no Castle Battle” restriction only applies to the Welcome page event presentation.
 
