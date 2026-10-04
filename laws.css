@@ -90,14 +90,14 @@ h2{font-size:clamp(38px,5vw,63px);line-height:1;letter-spacing:-.055em;margin:10
 .law-body{display:none;padding:0 20px 19px 77px;color:var(--muted);font-size:13px;line-height:1.7}.law-card.open .law-body{display:block}.law-card.open .law-plus{transform:rotate(45deg)}
 .law-card[data-n="14"]{border-color:color-mix(in srgb,var(--brand) 35%,var(--line));background:linear-gradient(135deg,color-mix(in srgb,var(--surface) 94%,var(--brand) 6%),var(--surface))}
 .law-card[data-n="14"] .law-body{padding-top:4px}
-.law14-sections{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.law14-section{border:1px solid var(--line);border-radius:16px;background:color-mix(in srgb,var(--surface2) 72%,var(--surface));overflow:hidden}
+.law14-sections{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:start}
+.law14-section{border:1px solid var(--line);border-radius:16px;background:color-mix(in srgb,var(--surface2) 72%,var(--surface));overflow:hidden;align-self:start}
 .law14-section-head{display:flex;align-items:center;gap:10px;padding:12px 13px;border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--gold) 7%,var(--surface))}
 .law14-section-head span{display:inline-grid;place-items:center;min-width:48px;height:30px;padding:0 9px;border-radius:10px;background:color-mix(in srgb,var(--gold) 20%,var(--surface));color:var(--ink);font-size:11px;font-weight:950}
 .law14-section-head strong{color:var(--ink);font-size:13px;line-height:1.25}
 .law14-copy{padding:13px 14px;font-size:12px;line-height:1.65}
-.law14-copy p{margin:0 0 10px}.law14-copy p:last-child{margin-bottom:0}
-.law14-penalties{display:grid;gap:7px;margin-top:2px}
+.law14-copy p{margin:0 0 10px}.law14-copy p:last-child{margin-bottom:0}.law14-after-list{margin-top:11px!important}
+.law14-penalties{display:grid;gap:7px;margin:8px 0 2px}
 .law14-penalty{display:grid;grid-template-columns:27px minmax(0,1fr);gap:8px;align-items:start}
 .law14-penalty span{width:26px;height:26px;border-radius:9px;display:grid;place-items:center;background:var(--surface);border:1px solid var(--line);color:var(--ink);font-size:10px;font-weight:950}
 .law14-penalty b{padding-top:3px;color:var(--ink);font-size:11px;line-height:1.5;font-weight:750}
