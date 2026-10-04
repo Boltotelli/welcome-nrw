@@ -30,6 +30,29 @@ function categoryLabel(cat,lang){
  return (m[lang]||m.en)[cat]||cat.toUpperCase();
 }
 function esc(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));}
+function lawBodyHtml(l,lang){
+ const raw=lang==='de'?l.de:lang==='fr'?l.fr:l.en;
+ if(String(l.n)!=='14')return esc(raw);
+ const parts=String(raw||'').trim().split(/(?=14\.[1-4]\s*[–-]\s*)/g).map(x=>x.trim()).filter(Boolean);
+ if(parts.length<2)return esc(raw);
+ return '<div class="law14-sections">'+parts.map(part=>{
+  const m=part.match(/^(14\.[1-4])\s*[–-]\s*([^\n]+)\n*([\s\S]*)$/);
+  if(!m)return '<section class="law14-section"><div class="law14-copy">'+esc(part)+'</div></section>';
+  const number=m[1],title=m[2].trim(),body=m[3].trim();
+  const blocks=body.split(/\n\s*\n/).map(x=>x.trim()).filter(Boolean);
+  const content=blocks.map(block=>{
+   const lines=block.split('\n').map(x=>x.trim()).filter(Boolean);
+   if(lines.length>1&&lines.every(x=>/^\d+\)\s+|^\d+\.\s+/.test(x))){
+    return '<div class="law14-penalties">'+lines.map(x=>{
+     const mm=x.match(/^(\d+)[\.)]\s+([\s\S]+)$/);
+     return '<div class="law14-penalty"><span>'+esc(mm?.[1]||'')+'</span><b>'+esc(mm?.[2]||x)+'</b></div>';
+    }).join('')+'</div>';
+   }
+   return '<p>'+esc(block).replaceAll('\n','<br>')+'</p>';
+  }).join('');
+  return '<section class="law14-section"><div class="law14-section-head"><span>'+esc(number)+'</span><strong>'+esc(title)+'</strong></div><div class="law14-copy">'+content+'</div></section>';
+ }).join('')+'</div>';
+}
 function renderLaws(){
  const lang=document.body.dataset.lang||'de',q=document.getElementById('lawSearch').value.trim().toLowerCase();
  const list=document.getElementById('lawList');
@@ -44,7 +67,7 @@ function renderLaws(){
     <div class="law-title"><b>${esc(lang==='de'?l.de_title:lang==='fr'?l.fr_title:l.en_title)}</b><small>${esc(categoryLabel(l.cat,lang))}</small></div>
     <div class="law-plus">+</div>
    </div>
-   <div class="law-body">${esc(lang==='de'?l.de:lang==='fr'?l.fr:l.en)}</div>
+   <div class="law-body">${lawBodyHtml(l,lang)}</div>
   </article>`).join('');
  document.getElementById('emptyState').style.display=filtered.length?'none':'block';
  list.querySelectorAll('.law-head').forEach(h=>h.addEventListener('click',()=>h.closest('.law-card').classList.toggle('open')));
