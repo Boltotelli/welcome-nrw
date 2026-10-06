@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "kingdom": 1044,
   "timezone": "UTC",
-  "updatedAt": "2026-10-04T00:13:44Z",
+  "updatedAt": "2026-10-06T00:10:16Z",
   "events": [
     {
       "id": "golden-glaives-prep-2026-09-20",
@@ -768,93 +768,6 @@
         ]
       },
       "sourceUrl": "https://centurygames.helpshift.com/hc/en/140-kingshot/section/1399-fishing-tournament/"
-    },
-    {
-      "id": "officer-project-charm-designs-2026-10-04",
-      "start": "2026-10-04",
-      "end": "2026-10-05",
-      "icon": "🎖️",
-      "iconUrl": "https://kingshotdata.com/uploads/2025/03/power-up-event-icon.webp",
-      "manual": false,
-      "confidence": "predicted",
-      "name": {
-        "de": "Offiziersprojekt · Amulettdesigns",
-        "en": "Officer Project · Charm Designs",
-        "fr": "Projet d’officier · Plans d’amulette"
-      },
-      "dailyPlans": {
-        "2026-10-04": {
-          "points": {
-            "de": "Ausrüstung +1: 70 · Splitter mythisch/episch/selten: 3.040/1.220/350 · Schmiedehammer: 6.000 · Widget: 12.000",
-            "en": "Gear +1: 70 · mythic/epic/rare shard: 3,040/1,220/350 · Forgehammer: 6,000 · Widget: 12,000",
-            "fr": "Équipement +1 : 70 · fragment mythique/épique/rare : 3 040/1 220/350 · Marteau : 6 000 · Widget : 12 000"
-          },
-          "steps": {
-            "de": [
-              "Die Belohnung sind Amulettdesigns; Punkte entstehen dagegen durch Ausrüstung, Heldensplitter, Widgets und Schmiedehämmer.",
-              "Am 04.10. während des Matchmakings nichts nur für dieses Event ausgeben. Splitter und Ausrüstungsmaterialien für die passenden KvK-Tage sparen.",
-              "Am 05.10. hat der KvK-Tagesplan Vorrang; Offiziersprojekt nur als Überschneidung nutzen, wenn dieselbe geplante Aktion in beiden Events zählt.",
-              "Spätestens bei insgesamt 1.359.000 Punkten stoppen. Das ist die strikte 3×-Grenze, keine Empfehlung."
-            ],
-            "en": [
-              "The reward is Charm Designs; points instead come from Gear, Hero Shards, Widgets and Forgehammers.",
-              "Do not spend solely for this event during matchmaking on 4 Oct. Save shards and gear materials for the matching KvK days.",
-              "On 5 Oct, the KvK daily plan takes priority; use Officer Project only as an overlap when the same planned action scores in both events.",
-              "Stop at 1,359,000 total points at the latest. This is the strict 3× limit, not a recommendation."
-            ],
-            "fr": [
-              "La récompense est constituée de Plans d’Amulette ; les points viennent toutefois de l’Équipement, des fragments de héros, des Widgets et des Marteaux.",
-              "Le 4 octobre, pendant le matchmaking, ne dépense rien uniquement pour cet événement. Garde les fragments et matériaux d’équipement pour les jours KvK adaptés.",
-              "Le 5 octobre, le plan quotidien KvK est prioritaire ; utilise le Projet d’officier seulement si une même action planifiée marque dans les deux événements.",
-              "Arrête-toi au plus tard à 1 359 000 points au total. C’est la limite stricte de 3×, pas une recommandation."
-            ]
-          },
-          "limits": {
-            "hardCap": 1359000,
-            "note": {
-              "de": "1.359.000 Punkte sind die strikte 3×-Gesamtgrenze – keine Empfehlung.",
-              "en": "1,359,000 points is the strict 3× total limit, not a recommendation.",
-              "fr": "1 359 000 points constituent la limite totale stricte de 3×, pas une recommandation."
-            }
-          }
-        },
-        "2026-10-05": {
-          "points": {
-            "de": "Ausrüstung +1: 70 · Splitter mythisch/episch/selten: 3.040/1.220/350 · Schmiedehammer: 6.000 · Widget: 12.000",
-            "en": "Gear +1: 70 · mythic/epic/rare shard: 3,040/1,220/350 · Forgehammer: 6,000 · Widget: 12,000",
-            "fr": "Équipement +1 : 70 · fragment mythique/épique/rare : 3 040/1 220/350 · Marteau : 6 000 · Widget : 12 000"
-          },
-          "steps": {
-            "de": [
-              "Die Belohnung sind Amulettdesigns; Punkte entstehen dagegen durch Ausrüstung, Heldensplitter, Widgets und Schmiedehämmer.",
-              "Am 04.10. während des Matchmakings nichts nur für dieses Event ausgeben. Splitter und Ausrüstungsmaterialien für die passenden KvK-Tage sparen.",
-              "Am 05.10. hat der KvK-Tagesplan Vorrang; Offiziersprojekt nur als Überschneidung nutzen, wenn dieselbe geplante Aktion in beiden Events zählt.",
-              "Spätestens bei insgesamt 1.359.000 Punkten stoppen. Das ist die strikte 3×-Grenze, keine Empfehlung."
-            ],
-            "en": [
-              "The reward is Charm Designs; points instead come from Gear, Hero Shards, Widgets and Forgehammers.",
-              "Do not spend solely for this event during matchmaking on 4 Oct. Save shards and gear materials for the matching KvK days.",
-              "On 5 Oct, the KvK daily plan takes priority; use Officer Project only as an overlap when the same planned action scores in both events.",
-              "Stop at 1,359,000 total points at the latest. This is the strict 3× limit, not a recommendation."
-            ],
-            "fr": [
-              "La récompense est constituée de Plans d’Amulette ; les points viennent toutefois de l’Équipement, des fragments de héros, des Widgets et des Marteaux.",
-              "Le 4 octobre, pendant le matchmaking, ne dépense rien uniquement pour cet événement. Garde les fragments et matériaux d’équipement pour les jours KvK adaptés.",
-              "Le 5 octobre, le plan quotidien KvK est prioritaire ; utilise le Projet d’officier seulement si une même action planifiée marque dans les deux événements.",
-              "Arrête-toi au plus tard à 1 359 000 points au total. C’est la limite stricte de 3×, pas une recommandation."
-            ]
-          },
-          "limits": {
-            "hardCap": 1359000,
-            "note": {
-              "de": "1.359.000 Punkte sind die strikte 3×-Gesamtgrenze – keine Empfehlung.",
-              "en": "1,359,000 points is the strict 3× total limit, not a recommendation.",
-              "fr": "1 359 000 points constituent la limite totale stricte de 3×, pas une recommandation."
-            }
-          }
-        }
-      },
-      "sourceUrl": "https://kingshotdata.com/events/officer-project-event/"
     },
     {
       "id": "kvk-2026-10-04",
