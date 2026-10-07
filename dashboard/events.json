@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "kingdom": 1044,
   "timezone": "UTC",
-  "updatedAt": "2026-10-06T00:10:16Z",
+  "updatedAt": "2026-10-07T00:11:41Z",
   "events": [
     {
       "id": "golden-glaives-prep-2026-09-20",
@@ -1000,94 +1000,6 @@
         }
       },
       "sourceUrl": "https://kingshotdata.com/events/kingdom-of-power-kvk-event/"
-    },
-    {
-      "id": "golden-glaives-2026-10-05",
-      "start": "2026-10-05",
-      "end": "2026-10-06",
-      "icon": "⚔️",
-      "iconUrl": "https://kingshotdata.com/uploads/2025/05/golden-glaives-event-icon.webp",
-      "manual": false,
-      "confidence": "predicted",
-      "name": {
-        "de": "Golden Glaives",
-        "en": "Golden Glaives",
-        "fr": "Golden Glaives"
-      },
-      "tips": {
-        "de": [
-          "Der Termin folgt dem öffentlichen Event-Rhythmus und bleibt bis zur Ingame-Anzeige voraussichtlich.",
-          "Die Sammelphase läuft zwei Tage; der Tausch bleibt anschließend noch einen weiteren Tag geöffnet.",
-          "Nicht verwendete Trübgoldsteine werden nach Ende der Tauschphase automatisch in Brot umgewandelt."
-        ],
-        "en": [
-          "The date follows the public event cycle and remains predicted until it appears in game.",
-          "Collection lasts two days; the exchange remains open for one additional day.",
-          "Unused Dim Goldstones are automatically converted into Bread after the exchange period."
-        ],
-        "fr": [
-          "La date suit le cycle public des événements et reste prévisionnelle jusqu’à son affichage en jeu.",
-          "La collecte dure deux jours ; l’échange reste ouvert un jour supplémentaire.",
-          "Les Pierres d’or ternes inutilisées sont automatiquement converties en Pain après la période d’échange."
-        ]
-      },
-      "dailyPlans": {
-        "2026-10-05": {
-          "points": {
-            "de": "Normale Intel-Mission: 1 Trübgoldstein · Golden Glaive: 10 Trübgoldsteine",
-            "en": "Regular Intel Mission: 1 Dim Goldstone · Golden Glaive: 10 Dim Goldstones",
-            "fr": "Mission de renseignement normale : 1 Pierre d’or terne · Golden Glaive : 10 Pierres d’or ternes"
-          },
-          "steps": {
-            "de": [
-              "Direkt nach dem Reset zuerst die zurückgehaltenen Belohnungen der 08:00-UTC-Missionen abholen.",
-              "Danach die offenen 16:00-UTC-Missionen und Pans zusätzliche Mission abschließen und abholen.",
-              "Alle neuen Intel-Zyklen des Tages vollständig abschließen und abholen; Golden Glaives bringen jeweils zehn Trübgoldsteine.",
-              "Im Tauschshop zuerst die knappen Fortschrittsmaterialien prüfen. Auf TG8 kann Gehärtetes Truegold verfügbar sein; danach Truegold und benötigte Beschleuniger priorisieren."
-            ],
-            "en": [
-              "Immediately after reset, first claim the held rewards from the 08:00 UTC missions.",
-              "Then complete and claim the unfinished 16:00 UTC missions and Pan’s extra mission.",
-              "Complete and claim every new Intel cycle that day; each Golden Glaive gives ten Dim Goldstones.",
-              "Check scarce progression materials first in the exchange shop. Tempered Truegold may be available at TG8; then prioritize Truegold and the speedups you need."
-            ],
-            "fr": [
-              "Juste après le reset, récupère d’abord les récompenses conservées des missions de 08:00 UTC.",
-              "Termine et récupère ensuite les missions ouvertes de 16:00 UTC et la mission supplémentaire de Pan.",
-              "Termine et récupère tous les nouveaux cycles de renseignement du jour ; chaque Golden Glaive rapporte dix Pierres d’or ternes.",
-              "Vérifie d’abord les matériaux de progression rares dans la boutique. L’Or véritable trempé peut être disponible à TG8 ; priorise ensuite l’Or véritable et les accélérateurs nécessaires."
-            ]
-          }
-        },
-        "2026-10-06": {
-          "points": {
-            "de": "Normale Intel-Mission: 1 Trübgoldstein · Golden Glaive: 10 Trübgoldsteine",
-            "en": "Regular Intel Mission: 1 Dim Goldstone · Golden Glaive: 10 Dim Goldstones",
-            "fr": "Mission de renseignement normale : 1 Pierre d’or terne · Golden Glaive : 10 Pierres d’or ternes"
-          },
-          "steps": {
-            "de": [
-              "Alle verfügbaren Intel-Zyklen abschließen und Belohnungen abholen; heute ist der zweite und letzte Sammeltag.",
-              "Pans zusätzliche Intel-Mission für weitere Chancen nutzen und innerhalb der verbleibenden Sammelphase abschließen.",
-              "Golden Glaives priorisieren: Sie geben je zehn Trübgoldsteine statt eines Steins bei normalen Missionen.",
-              "Vor Schließung der Tauschphase alle Steine ausgeben; übrig gebliebene Steine werden später automatisch in Brot umgewandelt."
-            ],
-            "en": [
-              "Complete every available Intel cycle and claim the rewards; this is the second and final collection day.",
-              "Use Pan’s extra Intel Mission for more chances and complete it within the remaining collection period.",
-              "Prioritize Golden Glaives: they give ten Dim Goldstones each instead of one from a regular mission.",
-              "Spend all stones before the exchange closes; leftovers are later converted into Bread automatically."
-            ],
-            "fr": [
-              "Termine tous les cycles de renseignement disponibles et récupère les récompenses ; c’est le deuxième et dernier jour de collecte.",
-              "Utilise la mission supplémentaire de Pan pour obtenir plus d’occasions et termine-la pendant la période de collecte restante.",
-              "Priorise les Golden Glaives : ils donnent dix Pierres d’or ternes chacun contre une pour une mission normale.",
-              "Dépense toutes les pierres avant la fermeture de l’échange ; les restes seront ensuite convertis automatiquement en Pain."
-            ]
-          }
-        }
-      },
-      "sourceUrl": "https://kingshotdata.com/events/golden-glaives-event/"
     },
     {
       "id": "new-master-2026-09-14",
