@@ -313,7 +313,7 @@ function updateAdvisor(){
  for(const a of advice){
   const line=document.createElement('p');line.textContent=a.suggestion+' statt '+a.current+' ('+a.type+') – '+a.reason;box.append(line);
  }
- const source=document.createElement('a');source.href='https://ks-atlas.com/';source.target='_blank';source.rel='noopener noreferrer';source.textContent='KS Atlas · Bear Rally Heroes';box.append(source);
+ const source=document.createElement('a');source.href='https://ks-atlas.com/tools/atlas-database/bear-rally-heroes';source.target='_blank';source.rel='noopener noreferrer';source.textContent='KS Atlas · Bear Rally Heroes';box.append(source);
 }
 function updateProgress(){
  const v=B.model()?.values||{};
