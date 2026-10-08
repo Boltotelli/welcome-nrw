@@ -194,7 +194,25 @@ window.NRW_BEAR_CATALOG = {
     {
       "name": "War Bear",
       "img": "https://got-global-wiki.s3.us-west-1.amazonaws.com/wp-content/uploads/2026/05/1.png",
-      "maxLevel": 80
+      "maxLevel": 100,
+      "bearSkill": {
+        "id": "enemy_defense",
+        "skill": "Ursa's Rage",
+        "category": "conditional",
+        "values": [
+          2.5,
+          3,
+          3.5,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ],
+        "unit": "percent"
+      }
     },
     {
       "name": "White Lion",
@@ -204,22 +222,94 @@ window.NRW_BEAR_CATALOG = {
     {
       "name": "Black Panther",
       "img": "https://got-global-wiki.s3.us-west-1.amazonaws.com/wp-content/uploads/2025/10/%E7%BB%84-31-150x150.png",
-      "maxLevel": 80
+      "maxLevel": 100,
+      "bearSkill": {
+        "id": "lethality",
+        "skill": "Deadly Bite",
+        "category": "damage",
+        "values": [
+          2.5,
+          3,
+          3.5,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ],
+        "unit": "percent"
+      }
     },
     {
       "name": "Great Moose",
       "img": "https://got-global-wiki.s3.us-west-1.amazonaws.com/wp-content/uploads/2025/10/%E7%BB%84-30-150x150.png",
-      "maxLevel": 80
+      "maxLevel": 100,
+      "bearSkill": {
+        "id": "rally_capacity",
+        "skill": "Antler Impact",
+        "category": "rally",
+        "values": [
+          60000,
+          70000,
+          80000,
+          90000,
+          100000,
+          110000,
+          120000,
+          130000,
+          140000,
+          150000
+        ],
+        "unit": "flat"
+      }
     },
     {
       "name": "Mighty Bison",
       "img": "https://got-global-wiki.s3.us-west-1.amazonaws.com/wp-content/uploads/2025/10/%E7%BB%84-29-150x150.png",
-      "maxLevel": 80
+      "maxLevel": 100,
+      "bearSkill": {
+        "id": "squad_capacity",
+        "skill": "Fearless Roar",
+        "category": "capacity",
+        "values": [
+          1500,
+          3000,
+          4500,
+          6000,
+          7500,
+          9000,
+          10500,
+          12000,
+          13500,
+          15000
+        ],
+        "unit": "flat"
+      }
     },
     {
       "name": "Giant Rhino",
       "img": "https://got-global-wiki.s3.us-west-1.amazonaws.com/wp-content/uploads/2025/10/%E7%BB%84-28-150x150.png",
-      "maxLevel": 80
+      "maxLevel": 100,
+      "bearSkill": {
+        "id": "attack",
+        "skill": "Wild Charge",
+        "category": "damage",
+        "values": [
+          2.5,
+          3,
+          3.5,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ],
+        "unit": "percent"
+      }
     }
   ],
   "valora": [
