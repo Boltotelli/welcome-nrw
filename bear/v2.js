@@ -11,6 +11,7 @@ fr:{marches:'Emplacements de marche',joins:'Renforts disponibles',manualTroops:"
 };
 for(const lang of ['de','en','fr'])Object.assign(translations[lang],{"de":{"petBelowTier":"Ab Level 10 ist der erste dokumentierte Skill-Rang erreicht.","petRank":"Skill-Rang","buffAttack":"Truppenangriff","buffLethality":"Tödlichkeit","buffSquad":"Marschkapazität","buffRally":"Rally-Kapazität","buffDefense":"Gegnerische Verteidigung ↓","conditionalBuff":"Wirkung auf Bären-Boss noch nicht bestätigt","rallyOnly":"Nur beim Starten der eigenen Rally","applyBison":"Aktiven Bison-Bonus übernehmen","petDisclaimer":"Automatisch aus dem Tierlevel und der Skill-Rang-Tabelle berechnet (10 Level pro Rang). Tierlevel stammen nicht aus der API. Buffs nur einmal in den Stats berücksichtigen."},"en":{"petBelowTier":"First documented skill rank at pet level 10.","petRank":"Skill rank","buffAttack":"Squad attack","buffLethality":"Lethality","buffSquad":"March capacity","buffRally":"Rally capacity","buffDefense":"Enemy defense ↓","conditionalBuff":"Bear boss interaction not yet verified","rallyOnly":"Only when starting your own rally","applyBison":"Apply active bison bonus","petDisclaimer":"Automatically derived from pet level and skill tier tables (one rank per ten levels). The API does not supply pet levels. Avoid counting active buffs twice."},"fr":{"petBelowTier":"Premier palier documenté au niveau 10.","petRank":"Rang de compétence","buffAttack":"Attaque","buffLethality":"Létalité","buffSquad":"Capacité de marche","buffRally":"Capacité du rallye","buffDefense":"Défense ennemie ↓","conditionalBuff":"Effet sur le boss ours non confirmé","rallyOnly":"Uniquement en lançant ton propre rallye","applyBison":"Appliquer le bonus bison actif","petDisclaimer":"Calculé automatiquement selon le niveau et les paliers de compétence (10 niveaux par rang). Les niveaux ne viennent pas de l'API. Ne compte pas deux fois les bonus."}}[lang]);
 for(const lang of ['de','en','fr'])Object.assign(translations[lang],{"de":{"openHeroGallery":"＋ Held hinzufügen","saveHeroCard":"Heldenwerte speichern","petHelp":"Nur Bären-relevante aktive Pet-Fähigkeiten. Trage das Tierlevel ein: Skill-Rang und Buff-Wert werden automatisch ermittelt.","heroShortHelp":"Tippe eine Karte an, um ihre Sterne, das Widget und ihre Fähigkeiten zu bearbeiten. Über + weitere Helden hinzufügen."},"en":{"openHeroGallery":"＋ Add a hero","saveHeroCard":"Save hero stats","petHelp":"Only active pet skills relevant to Bear Trap. Enter the pet level to calculate skill rank and bonus automatically.","heroShortHelp":"Tap a card to edit stars, widget and skills. Use + to add other heroes."},"fr":{"openHeroGallery":"＋ Ajouter un héros","saveHeroCard":"Enregistrer les stats","petHelp":"Uniquement les capacités actives utiles contre l’ours. Saisis le niveau pour calculer automatiquement le rang et le bonus.","heroShortHelp":"Touche une carte pour modifier étoiles, équipement et compétences. Utilise + pour ajouter d’autres héros."}}[lang]);
+for(const lang of ['de','en','fr'])Object.assign(translations[lang],{"de":{"troopTierHeading":"Truppenstufen für die Schadensberechnung","troopTierHelp":"Pro Typ T1–T11 und TG0–TG8 wählen. Nicht gesetzte Stufen werden nicht geschätzt.","typeInf":"Infanterie","typeCav":"Kavallerie","typeArch":"Bogenschützen","heroCapacityOverride":"Helden-Marschbonus (optional überschreiben)","heroCapacityNote":"Drei gewählte Helden auf Level 80 liefern automatisch +40.410. Bei anderen Leveln bitte den exakten Spielbonus eingeben.","squadAttack":"Schwadron Angriff %","squadLethality":"Schwadron Tödlichkeit %","squadSeparate":"Nur zusätzlich zählen, wenn NICHT bereits in Truppen-Kampfwerten enthalten","heroGearNote":"Ausrüstung dokumentieren; im Kampfbericht enthaltene Boni nicht doppelt rechnen."},"en":{"troopTierHeading":"Troop tiers for estimated damage","troopTierHelp":"Select T1–T11 and TG0–TG8 per troop type. Missing tiers are not guessed.","typeInf":"Infantry","typeCav":"Cavalry","typeArch":"Archers","heroCapacityOverride":"Hero capacity bonus (optional override)","heroCapacityNote":"Three selected Lv.80 heroes automatically add +40,410. Otherwise enter exact game bonus.","squadAttack":"Squad attack %","squadLethality":"Squad lethality %","squadSeparate":"Add only if NOT included in the per-class battle stats","heroGearNote":"Gear is recorded, but values already included in battle reports must not be counted twice."},"fr":{"troopTierHeading":"Niveaux des troupes","troopTierHelp":"Choisis T1–T11 et TG0–TG8. Aucune valeur manquante n'est inventée.","typeInf":"Infanterie","typeCav":"Cavalerie","typeArch":"Archers","heroCapacityOverride":"Bonus de capacité (facultatif)","heroCapacityNote":"Trois héros sélectionnés de niveau 80 ajoutent automatiquement 40 410.","squadAttack":"Attaque escouade %","squadLethality":"Létalité escouade %","squadSeparate":"Ajouter uniquement si non inclus dans les stats de classe","heroGearNote":"Équipement enregistré sans double comptage des bonus."}}[lang]);
 const tx=k=>(translations[document.documentElement.lang]||translations.en)[k]||k;
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const max=(v,a,b)=>Math.max(a,Math.min(b,Math.floor(Number(v)||0)));
@@ -18,7 +19,7 @@ const choices=(entries,current)=>entries.map(([value,label])=>'<option value="'+
 const catalogHero=n=>C.heroes.find(h=>h.name===n)||{name:n,img:''};
 const catImg=n=>catalogHero(n).img||'';
 const validModel=()=>B.profile()&&B.model();
-const defaults=()=>({joinCount:0,petLevels:{},petActive:{},petEffects:{},petValues:{},valora:[0,0,0,0],valoraTalent:0,gear:{},manualHeroes:{},ownHeroes:['','','']});
+const defaults=()=>({joinCount:0,petLevels:{},petActive:{},petEffects:{},petValues:{},valora:[0,0,0,0],valoraTalent:0,gear:{},manualHeroes:{},ownHeroes:['','',''],troopTiers:[{tier:0,tg:0},{tier:0,tg:0},{tier:0,tg:0}],squadSeparate:false});
 function state(){
  const m=B.model();
  if(!m.v2||typeof m.v2!=='object')m.v2=defaults();
@@ -29,6 +30,7 @@ function state(){
  if(!Array.isArray(s.valora))s.valora=[0,0,0,0];
  if(!s.gear)s.gear={};if(!s.manualHeroes)s.manualHeroes={};
  if(!Array.isArray(s.ownHeroes))s.ownHeroes=['','',''];
+ if(!Array.isArray(s.troopTiers)||s.troopTiers.length!==3)s.troopTiers=[{tier:0,tg:0},{tier:0,tg:0},{tier:0,tg:0}];
  return s;
 }
 let sourceHeroes=[];
@@ -112,7 +114,8 @@ function heroBuilder(){
  '<div id="heroEditor" class="bear-card-editor" hidden>'+
  '<div class="bear-hero-preview"><img id="heroPreviewImage" alt=""><div><b id="heroPreviewName"></b><small>★ NRW HERO CARD</small></div><button type="button" class="bear-editor-close" id="closeHeroEditor" aria-label="Close">✕</button></div>'+
  '<div class="bear-star-progress"><label class="field">'+esc(tx('star'))+'<output id="heroStarDisplay">—</output></label><div class="bear-step-row"><button type="button" id="stepDown">−</button><input type="range" id="heroStarStep" min="0" max="30" step="1" value="0" aria-label="'+esc(tx('star'))+'"><button type="button" id="stepUp">+</button></div><small>4★ T5 → 5★ (MAX)</small></div>'+
- '<label class="field bear-widget-input">Widget +<input id="heroWidget" type="number" min="0" max="10"></label>'+
+ '<div class="bear-hero-basic-fields"><label class="field">'+esc(tx('level'))+'<input id="heroLevel" type="number" min="1" max="80" placeholder="80"></label><label class="field">Widget +<input id="heroWidget" type="number" min="0" max="10"></label></div>'+ 
+ '<details class="bear-hero-gear"><summary>🛡️ Hero Gear · 4 Slots</summary><p class="hint">'+esc(tx('heroGearNote'))+'</p><div class="bear-hero-gear-grid">'+[0,1,2,3].map(i=>'<div class="bear-gear-entry"><b>'+(['①','②','③','④'][i])+'</b><label>Qualität<select id="heroGearQuality'+i+'">'+choices([['','—'],['green','Green'],['blue','Blue'],['purple','Purple'],['gold','Gold'],['red','Red']],'')+'</select></label><label>Enhance<input id="heroGearEnhance'+i+'" type="number" min="0" max="200" value="0"></label><label>Refine<input id="heroGearRefine'+i+'" type="number" min="0" max="20" value="0"></label></div>').join('')+'</div></details>'+
  '<details class="bear-skills-advanced"><summary>'+esc(tx('skill'))+' · <span id="skillMaximum"></span></summary>'+
  '<div class="bear-skill-row">'+[1,2,3].map(i=>'<label class="field">'+esc(tx('skill'))+' '+i+'<select id="heroSkill'+i+'"></select></label>').join('')+'</div><p class="hint">'+esc(tx('skillHint'))+'</p></details>'+
  '<div class="bear-hero-actions"><button type="button" class="primary" id="saveHero">'+esc(tx('saveHeroCard'))+'</button><button type="button" class="secondary-btn" id="deleteHero">'+esc(tx('removeHero'))+'</button></div></div>';
@@ -146,6 +149,12 @@ function heroBuilder(){
    const portrait=rosterPanel.querySelector('#heroPreviewImage');portrait.src=catImg(name)||saved.icon||'';portrait.alt=name;
    selector.value=heroSteps(saved.stars,saved.tier);
    rosterPanel.querySelector('#heroWidget').value=saved.widget??0;
+   rosterPanel.querySelector('#heroLevel').value=saved.level??'';
+   for(let i=0;i<4;i++){const g=Array.isArray(saved.gear)?saved.gear[i]||{}:{};
+    rosterPanel.querySelector('#heroGearQuality'+i).value=g.quality||'';
+    rosterPanel.querySelector('#heroGearEnhance'+i).value=g.enhancement??0;
+    rosterPanel.querySelector('#heroGearRefine'+i).value=g.refine??0;
+   }
    skillOptions(saved,false);
    const isManual=Boolean(state().manualHeroes[name]);
    rosterPanel.querySelector('#deleteHero').hidden=!isManual;
@@ -164,6 +173,8 @@ function heroBuilder(){
    const progress=Number(selector.value),stars=Math.floor(progress/6),tier=progress%6;
    state().manualHeroes[selectedHeroName]={
      name:selectedHeroName,stars,tier:stars>=5?0:tier,widget:max(rosterPanel.querySelector('#heroWidget').value,0,10),
+     level:max(rosterPanel.querySelector('#heroLevel').value,0,80),
+     gear:Array.from({length:4},(_,i)=>({quality:rosterPanel.querySelector('#heroGearQuality'+i).value,enhancement:max(rosterPanel.querySelector('#heroGearEnhance'+i).value,0,200),refine:max(rosterPanel.querySelector('#heroGearRefine'+i).value,0,20)})),
      skills:[1,2,3].map(i=>max(rosterPanel.querySelector('#heroSkill'+i).value,0,5)),source:'manual'
    };
    B.save();renderRoster();renderEditor();
@@ -183,7 +194,7 @@ function renderRoster(){
    const btn=document.createElement('button');btn.type='button';btn.className='hero-tile bear-character';btn.title=h.name;
    const art=document.createElement('div');art.className='portrait';art.appendChild(icon(catImg(h.name)||h.icon,h.name));btn.appendChild(art);
    const progress=heroSteps(h.stars,h.tier);
-   btn.insertAdjacentHTML('beforeend','<b>'+esc(h.name)+'</b><span class="stars">'+esc(starStepLabel(progress))+'</span><small>Widget +'+esc(h.widget??'?')+'</small>');
+   btn.insertAdjacentHTML('beforeend','<b>'+esc(h.name)+'</b><span class="stars">'+esc(starStepLabel(progress))+'</span><small>Lv. '+esc(h.level??'?')+' · Widget +'+esc(h.widget??'?')+'</small>');
    btn.addEventListener('click',()=>{openCurrent(h.name);});
    list.appendChild(btn);
  });
@@ -337,7 +348,12 @@ function renderEditor(){
  const m=B.model().marches[active];
  const join=joinSelect.querySelector('select');join.innerHTML=choices(options,m?.hero||'');
  joinSelect.hidden=active===0;ownPickers.hidden=active!==0;
- ['pickOwnI','pickOwnC','pickOwnA'].forEach((id,i)=>{document.getElementById(id).innerHTML=choices(options,s.ownHeroes[i]);});
+ ['pickOwnI','pickOwnC','pickOwnA'].forEach((id,i)=>{
+   const troopType=['infantry','cavalry','archer'][i];
+   const allowed=[['',tx('pickEmpty')],...availableHeroes().filter(h=>C.heroTypes[h.name]===troopType).map(h=>[h.name,h.name])];
+   if(s.ownHeroes[i]&&!allowed.some(([n])=>n===s.ownHeroes[i])){s.ownHeroes[i]='';B.save();}
+   document.getElementById(id).innerHTML=choices(allowed,s.ownHeroes[i]);
+ });
  const help=document.querySelector('.hero-note');if(help)help.textContent=tx('heroShortHelp');
 }
 function showForProfile(evt){
