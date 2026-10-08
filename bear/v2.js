@@ -86,61 +86,108 @@ function makeLayout(){
  const heroList=document.getElementById('heroes');heroList.classList.add('bear-hero-roster');
  document.querySelector('.stickers').querySelectorAll('.sticker')[1].textContent='⚔ 1–7 RALLIES';
 }
-function heroCap(s){return Number(s)>=4?5:Math.max(1,Number(s)+1);}
+
+function heroCap(stars){return Number(stars)>=4?5:Math.max(1,Number(stars)+1);}
+function heroSteps(stars,tier){
+ if(Number(stars)>=5)return 30;
+ return Math.max(0,Math.min(29,(Number(stars)||0)*6+Math.max(0,Math.min(5,Number(tier)||0))));
+}
+function starStepLabel(step){
+ step=max(step,0,30);
+ if(step===30)return '★★★★★ · MAX';
+ const stars=Math.floor(step/6),tier=step%6;
+ return '★'.repeat(stars)+'☆'.repeat(5-stars)+(tier?' · T'+tier:'');
+}
+let selectedHeroName='';
 function heroBuilder(){
- const selectOptions=C.heroes.map(h=>[h.name,h.name]);const old=rosterPanel.querySelector('#heroName');
- const chosen=old&&old.value||'Yang';const entries=availableHeroes();
- rosterPanel.innerHTML='<div class="bear-hero-preview"><img id="heroPreviewImage" alt=""><div><b id="heroPreviewName"></b><small>★ NRW HERO CARD</small></div></div><div class="bear-hero-maker"><label class="field">'+esc(tx('hero'))+'<select id="heroName">'+choices(selectOptions,chosen)+'</select></label><label class="field">'+esc(tx('star'))+'<select id="heroStars">'+choices(Array.from({length:6},(_,i)=>[i,i+' ★']),4)+'</select></label><label class="field">'+esc(tx('tier'))+'<select id="heroTier">'+choices(Array.from({length:7},(_,i)=>[i,i?'T'+i:'—']),4)+'</select></label><label class="field">Widget +<input type="number" id="heroWidget" min="0" max="10" value="0"></label></div>'+
- '<div class="bear-skill-row">'+[1,2,3].map(n=>'<label class="field">'+esc(tx('skill'))+' '+n+'<select id="heroSkill'+n+'"></select></label>').join('')+'</div>'+
- '<div class="bear-skill-tip" id="heroSkillTip"></div>'+
- '<div class="bear-hero-actions"><button type="button" class="primary" id="saveHero">'+esc(tx('addHero'))+'</button><button type="button" class="secondary-btn" id="deleteHero">'+esc(tx('removeHero'))+'</button></div>';
- const selector=rosterPanel.querySelector('#heroName');
- function fillHero(){
-   const name=selector.value,h=state().manualHeroes[name]||entries.find(v=>v.name===name)||{};
-   const preview=rosterPanel.querySelector('#heroPreviewImage');preview.src=catImg(name)||h.icon||'';preview.alt=name;
-   rosterPanel.querySelector('#heroPreviewName').textContent=name;
-   rosterPanel.querySelector('#heroStars').value=Number.isFinite(Number(h.stars))?String(h.stars):'4';
-   rosterPanel.querySelector('#heroTier').value=String(max(h.tier||0,0,6));
-   rosterPanel.querySelector('#heroWidget').value=max(h.widget||0,0,10);
-   fillSkills(Array.isArray(h.skills)?h.skills:[],false);
+ // Compact two-stage editor: portraits first, details only after a card is selected.
+ const keep=selectedHeroName;
+ rosterPanel.innerHTML='<div class="bear-hero-controls"><button type="button" class="secondary-btn" id="showHeroCatalog">＋ '+esc(tx('addHero'))+'</button><div class="bear-current-count" id="heroCount"></div></div>'+
+ '<div class="bear-hero-browser" id="heroBrowser" hidden><input type="search" id="heroSearch" placeholder="'+esc(tx('hero'))+'…"><div id="heroGallery" class="bear-portrait-gallery"></div></div>'+
+ '<div id="heroEditor" class="bear-card-editor" hidden>'+
+ '<div class="bear-hero-preview"><img id="heroPreviewImage" alt=""><div><b id="heroPreviewName"></b><small>★ NRW HERO CARD</small></div><button type="button" class="bear-editor-close" id="closeHeroEditor" aria-label="Close">✕</button></div>'+
+ '<div class="bear-star-progress"><label class="field">'+esc(tx('star'))+'<output id="heroStarDisplay">—</output></label><div class="bear-step-row"><button type="button" id="stepDown">−</button><input type="range" id="heroStarStep" min="0" max="30" step="1" value="0" aria-label="'+esc(tx('star'))+'"><button type="button" id="stepUp">+</button></div><small>4★ T5 → 5★ (MAX)</small></div>'+
+ '<label class="field bear-widget-input">Widget +<input id="heroWidget" type="number" min="0" max="10"></label>'+
+ '<details class="bear-skills-advanced"><summary>'+esc(tx('skill'))+' · <span id="skillMaximum"></span></summary>'+
+ '<div class="bear-skill-row">'+[1,2,3].map(i=>'<label class="field">'+esc(tx('skill'))+' '+i+'<select id="heroSkill'+i+'"></select></label>').join('')+'</div><p class="hint">'+esc(tx('skillHint'))+'</p></details>'+
+ '<div class="bear-hero-actions"><button type="button" class="primary" id="saveHero">'+esc(tx('addHero'))+'</button><button type="button" class="secondary-btn" id="deleteHero">'+esc(tx('removeHero'))+'</button></div></div>';
+ const browser=rosterPanel.querySelector('#heroBrowser'),editor=rosterPanel.querySelector('#heroEditor');
+ const selector=rosterPanel.querySelector('#heroStarStep');
+ function renderGallery(filter=''){
+   const gallery=rosterPanel.querySelector('#heroGallery');gallery.innerHTML='';
+   const query=filter.trim().toLocaleLowerCase();
+   C.heroes.filter(h=>h.name.toLocaleLowerCase().includes(query)).forEach(h=>{
+     const btn=document.createElement('button');btn.type='button';btn.className='bear-portrait-pick';
+     btn.appendChild(icon(h.img,h.name));
+     const label=document.createElement('span');label.textContent=h.name;btn.appendChild(label);
+     btn.addEventListener('click',()=>{browser.hidden=true;openEditor(h.name);});
+     gallery.appendChild(btn);
+   });
  }
- function fillSkills(skills,keep){
-   const stars=Number(rosterPanel.querySelector('#heroStars').value),cap=heroCap(stars);
+ function skillOptions(h,keepExisting=false){
+   const progress=Number(selector.value),stars=Math.floor(progress/6),cap=heroCap(stars),savedSkills=Array.isArray(h?.skills)?h.skills:[];
+   rosterPanel.querySelector('#heroStarDisplay').textContent=starStepLabel(progress);
+   rosterPanel.querySelector('#skillMaximum').textContent=tx('skillMax')+' '+cap;
    for(let i=1;i<=3;i++){
-      const x=rosterPanel.querySelector('#heroSkill'+i);const prior=keep?Number(x.value):Number(skills[i-1]||0);
-      x.innerHTML=choices(Array.from({length:cap+1},(_,v)=>[v,v===0?tx('notSet'):'Lv. '+v]),Math.min(prior,cap));
+     const input=rosterPanel.querySelector('#heroSkill'+i);
+     const prior=keepExisting?Number(input.value):Number(savedSkills[i-1]||0);
+     input.innerHTML=choices(Array.from({length:cap+1},(_,v)=>[v,v===0?tx('notSet'):'Lv. '+v]),Math.min(Math.max(0,prior),cap));
    }
-   rosterPanel.querySelector('#heroSkillTip').textContent=tx('skillMax')+': '+cap+' · '+tx('skillHint');
  }
- selector.addEventListener('change',fillHero);
- rosterPanel.querySelector('#heroStars').addEventListener('change',()=>fillSkills([],true));
+ function openEditor(name){
+   selectedHeroName=name;editor.hidden=false;browser.hidden=true;
+   const saved=state().manualHeroes[name]||availableHeroes().find(h=>h.name===name)||{};
+   rosterPanel.querySelector('#heroPreviewName').textContent=name;
+   const portrait=rosterPanel.querySelector('#heroPreviewImage');portrait.src=catImg(name)||saved.icon||'';portrait.alt=name;
+   selector.value=heroSteps(saved.stars,saved.tier);
+   rosterPanel.querySelector('#heroWidget').value=saved.widget??0;
+   skillOptions(saved,false);
+   const isManual=Boolean(state().manualHeroes[name]);
+   rosterPanel.querySelector('#deleteHero').hidden=!isManual;
+   editor.scrollIntoView({behavior:'smooth',block:'nearest'});
+ }
+ rosterPanel.querySelector('#showHeroCatalog').addEventListener('click',()=>{
+   const next=browser.hidden;browser.hidden=!next;if(next){renderGallery();rosterPanel.querySelector('#heroSearch').focus();}
+ });
+ rosterPanel.querySelector('#heroSearch').addEventListener('input',e=>renderGallery(e.target.value));
+ rosterPanel.querySelector('#closeHeroEditor').addEventListener('click',()=>{selectedHeroName='';editor.hidden=true;});
+ rosterPanel.querySelector('#stepDown').addEventListener('click',()=>{selector.value=max(Number(selector.value)-1,0,30);skillOptions(null,true);});
+ rosterPanel.querySelector('#stepUp').addEventListener('click',()=>{selector.value=max(Number(selector.value)+1,0,30);skillOptions(null,true);});
+ selector.addEventListener('input',()=>skillOptions(null,true));
  rosterPanel.querySelector('#saveHero').addEventListener('click',()=>{
-   const name=selector.value;
-   state().manualHeroes[name]={
-    name,stars:max(rosterPanel.querySelector('#heroStars').value,0,5),
-    tier:max(rosterPanel.querySelector('#heroTier').value,0,6),
-    widget:max(rosterPanel.querySelector('#heroWidget').value,0,10),
-    skills:[1,2,3].map(n=>max(rosterPanel.querySelector('#heroSkill'+n).value,0,5)),source:'manual'
+   if(!selectedHeroName)return;
+   const progress=Number(selector.value),stars=Math.floor(progress/6),tier=progress%6;
+   state().manualHeroes[selectedHeroName]={
+     name:selectedHeroName,stars,tier:stars>=5?0:tier,widget:max(rosterPanel.querySelector('#heroWidget').value,0,10),
+     skills:[1,2,3].map(i=>max(rosterPanel.querySelector('#heroSkill'+i).value,0,5)),source:'manual'
    };
    B.save();renderRoster();renderEditor();
+   rosterPanel.querySelector('#deleteHero').hidden=false;
  });
- rosterPanel.querySelector('#deleteHero').addEventListener('click',()=>{delete state().manualHeroes[selector.value];B.save();renderRoster();renderEditor();});
- fillHero();
+ rosterPanel.querySelector('#deleteHero').addEventListener('click',()=>{
+   if(!selectedHeroName)return;
+   delete state().manualHeroes[selectedHeroName];B.save();selectedHeroName='';editor.hidden=true;renderRoster();renderEditor();
+ });
+ if(keep&&availableHeroes().some(h=>h.name===keep))openEditor(keep);
 }
 function renderRoster(){
- const el=document.getElementById('heroes');el.innerHTML='';
- const list=availableHeroes();
- if(!list.length){el.innerHTML='<p class="hint">'+esc(tx('addFirst'))+'</p>';return;}
- list.forEach(h=>{
-   const div=document.createElement('button');div.type='button';div.className='hero-tile bear-character';div.title=h.name;
-   const picture=icon(catImg(h.name)||h.icon,h.name);
-   const image=document.createElement('div');image.className='portrait';image.appendChild(picture);
-   div.appendChild(image);
-   const stars=Number.isFinite(Number(h.stars))?Number(h.stars):null;
-   div.insertAdjacentHTML('beforeend','<b>'+esc(h.name)+'</b><span class="stars">'+(stars===null?'☆ ?':'★'.repeat(Math.max(0,stars))+'☆'.repeat(Math.max(0,5-stars)))+(h.tier?' T'+esc(h.tier):'')+'</span><small>Widget +'+esc(h.widget??'?')+'</small><br><small>'+esc((h.skills||[]).map(v=>v?'Lv '+v:'?').join(' / '))+'</small><br><small>'+esc(h.source==='manual'?tx('manual'):tx('imported'))+'</small>');
-   div.addEventListener('click',()=>{rosterPanel.querySelector('#heroName').value=h.name;rosterPanel.querySelector('#heroName').dispatchEvent(new Event('change'));rosterPanel.scrollIntoView({behavior:'smooth',block:'nearest'});});
-   el.appendChild(div);
+ const list=document.getElementById('heroes');list.innerHTML='';
+ const heroes=availableHeroes();
+ if(!heroes.length){list.innerHTML='<span class="hint">'+esc(tx('addFirst'))+'</span>';return;}
+ heroes.forEach(h=>{
+   const btn=document.createElement('button');btn.type='button';btn.className='hero-tile bear-character';btn.title=h.name;
+   const art=document.createElement('div');art.className='portrait';art.appendChild(icon(catImg(h.name)||h.icon,h.name));btn.appendChild(art);
+   const progress=heroSteps(h.stars,h.tier);
+   btn.insertAdjacentHTML('beforeend','<b>'+esc(h.name)+'</b><span class="stars">'+esc(starStepLabel(progress))+'</span><small>Widget +'+esc(h.widget??'?')+'</small>');
+   btn.addEventListener('click',()=>{openCurrent(h.name);});
+   list.appendChild(btn);
  });
+ const count=rosterPanel.querySelector('#heroCount');if(count)count.textContent=heroes.length+' '+tx('heroDeck');
+}
+function openCurrent(name){
+ selectedHeroName=name;
+ const btn=rosterPanel.querySelector('#showHeroCatalog');if(!btn)return;
+ heroBuilder();
 }
 function makeStepper(parent,{id,name,url,maxLevel,value,callback,note}){
  const tile=document.createElement('div');tile.className='bear-art-card';
