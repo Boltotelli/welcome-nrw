@@ -90,13 +90,15 @@ function heroCap(s){return Number(s)>=4?5:Math.max(1,Number(s)+1);}
 function heroBuilder(){
  const selectOptions=C.heroes.map(h=>[h.name,h.name]);const old=rosterPanel.querySelector('#heroName');
  const chosen=old&&old.value||'Yang';const entries=availableHeroes();
- rosterPanel.innerHTML='<div class="bear-hero-maker"><label class="field">'+esc(tx('hero'))+'<select id="heroName">'+choices(selectOptions,chosen)+'</select></label><label class="field">'+esc(tx('star'))+'<select id="heroStars">'+choices(Array.from({length:6},(_,i)=>[i,i+' ★']),4)+'</select></label><label class="field">'+esc(tx('tier'))+'<select id="heroTier">'+choices(Array.from({length:7},(_,i)=>[i,i?'T'+i:'—']),4)+'</select></label><label class="field">Widget +<input type="number" id="heroWidget" min="0" max="10" value="0"></label></div>'+
+ rosterPanel.innerHTML='<div class="bear-hero-preview"><img id="heroPreviewImage" alt=""><div><b id="heroPreviewName"></b><small>★ NRW HERO CARD</small></div></div><div class="bear-hero-maker"><label class="field">'+esc(tx('hero'))+'<select id="heroName">'+choices(selectOptions,chosen)+'</select></label><label class="field">'+esc(tx('star'))+'<select id="heroStars">'+choices(Array.from({length:6},(_,i)=>[i,i+' ★']),4)+'</select></label><label class="field">'+esc(tx('tier'))+'<select id="heroTier">'+choices(Array.from({length:7},(_,i)=>[i,i?'T'+i:'—']),4)+'</select></label><label class="field">Widget +<input type="number" id="heroWidget" min="0" max="10" value="0"></label></div>'+
  '<div class="bear-skill-row">'+[1,2,3].map(n=>'<label class="field">'+esc(tx('skill'))+' '+n+'<select id="heroSkill'+n+'"></select></label>').join('')+'</div>'+
  '<div class="bear-skill-tip" id="heroSkillTip"></div>'+
  '<div class="bear-hero-actions"><button type="button" class="primary" id="saveHero">'+esc(tx('addHero'))+'</button><button type="button" class="secondary-btn" id="deleteHero">'+esc(tx('removeHero'))+'</button></div>';
  const selector=rosterPanel.querySelector('#heroName');
  function fillHero(){
    const name=selector.value,h=state().manualHeroes[name]||entries.find(v=>v.name===name)||{};
+   const preview=rosterPanel.querySelector('#heroPreviewImage');preview.src=catImg(name)||h.icon||'';preview.alt=name;
+   rosterPanel.querySelector('#heroPreviewName').textContent=name;
    rosterPanel.querySelector('#heroStars').value=Number.isFinite(Number(h.stars))?String(h.stars):'4';
    rosterPanel.querySelector('#heroTier').value=String(max(h.tier||0,0,6));
    rosterPanel.querySelector('#heroWidget').value=max(h.widget||0,0,10);
