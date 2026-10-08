@@ -70,7 +70,7 @@ function makeLayout(){
  joinSelect=document.createElement('div');joinSelect.className='field';
  joinSelect.innerHTML='<label>'+esc(tx('joinHero'))+'</label><select id="joinHeroPick"></select>';
  editGrid.insertBefore(joinSelect,editGrid.firstElementChild);
- editGrid.querySelector('.field:has(#heroInput)').hidden=true;
+ document.getElementById('heroInput').closest('.field').hidden=true;
  ownPickers=document.createElement('div');ownPickers.className='bear-own-pickers';ownPickers.innerHTML='<p class="micro">'+esc(tx('leadHeroes'))+'</p><div class="bear-own-grid"><label class="field">🛡️ <span>Infanterie</span><select id="pickOwnI"></select></label><label class="field">🐴 <span>Kavallerie</span><select id="pickOwnC"></select></label><label class="field">🏹 <span>Bogenschützen</span><select id="pickOwnA"></select></label></div>';
  editGrid.after(ownPickers);
  const count=document.createElement('div');count.className='bear-march-count';
@@ -172,6 +172,7 @@ function renderPets(){
 function renderValora(){
  masterPanel.innerHTML='';masterPanel.className='bear-art-grid bear-master-grid';
  C.valora.forEach((s,i)=>makeStepper(masterPanel,{name:s.name,url:s.img,maxLevel:s.max,value:state().valora[i],note:i===3?'+3,000 / Lv. squad':i===0?'+30,000 / Lv. rally':'Rewards only',callback:v=>{state().valora[i]=v;B.save();}}));
+ const previous=masterPanel.parentElement.querySelector('.bear-valora-footer');if(previous)previous.remove();
  const control=document.createElement('div');control.className='bear-valora-footer';
  control.innerHTML='<p class="hint">'+esc(tx('valoraHint'))+'</p><button class="secondary-btn" type="button">'+esc(tx('valoraApply'))+'</button>';
  control.querySelector('button').addEventListener('click',()=>{const v=state().valora[3]*3000;const x=document.getElementById('master');x.value=v;x.dispatchEvent(new Event('input'));});
@@ -213,12 +214,12 @@ function renderEditor(){
  const join=joinSelect.querySelector('select');join.innerHTML=choices(options,m?.hero||'');
  joinSelect.hidden=active===0;ownPickers.hidden=active!==0;
  ['pickOwnI','pickOwnC','pickOwnA'].forEach((id,i)=>{document.getElementById(id).innerHTML=choices(options,s.ownHeroes[i]);});
- const help=document.getElementById('heroNote');if(help)help.textContent=tx('heroInfo');
+ const help=document.querySelector('.hero-note');if(help)help.textContent=tx('heroInfo');
 }
 function showForProfile(evt){
  if(!validModel())return;
  const data=evt?.detail||{};
- sourceHeroes=Array.isArray(data.heroes)?data.heroes.map(h=>Object.assign({},h,{stars:Number.isFinite(Number(h.stars))?h.stars:parseInt(String(h.star_label||'').slice(0,1),10)})):[];
+ sourceHeroes=Array.isArray(data.heroes)?data.heroes.map(h=>Object.assign({},h,{stars:Number.isFinite(Number(h.stars))?h.stars:parseInt(String(h.star_label||'').slice(0,1),10),tier:Number((String(h.star_label||'').match(/Tier (\d+)/)||[])[1]||0)})):[];
  // Initial seed from older freeform hero fields, not from assumption of owned heroes.
  state();
  heroBuilder();renderRoster();renderPets();renderValora();renderGear();renderEditor();
@@ -228,6 +229,11 @@ B.renderV2=()=>renderEditor();
 window.NRW_BEAR_ENHANCE={renderEditor};
 window.addEventListener('nrw-bear-loaded',showForProfile);
 document.querySelectorAll('button[data-lang]').forEach(b=>b.addEventListener('click',()=>{
- setTimeout(()=>{if(!validModel())return;container.querySelectorAll('.panel-head span').forEach(()=>{});heroBuilder();renderRoster();renderPets();renderValora();renderGear();renderEditor();},0);
+ setTimeout(()=>{if(!validModel())return;const heads=container.querySelectorAll('section.panel');
+const tKeys=[['heroDeck','heroInfo'],['pets','petsInfo'],['valora','valoraHint'],['gear','gearInfo']];
+heads.forEach((panel,i)=>{if(!tKeys[i])return;panel.querySelector('h2 span').textContent=tx(tKeys[i][0]);panel.querySelector('.panel-body>p.hint').textContent=tx(tKeys[i][1]);});
+document.querySelector('.bear-march-count>label').textContent=tx('joins');
+document.querySelector('.bear-data-note').textContent='✍️ '+tx('manualTroops');
+heroBuilder();renderRoster();renderPets();renderValora();renderGear();renderEditor();},0);
 }));
 })();
