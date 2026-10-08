@@ -145,7 +145,7 @@ details{border-top:1px solid var(--line);margin-top:14px;padding-top:14px}summar
    <div class="march-list" id="marches"></div>
    <div class="editor">
     <div class="editor-header"><strong id="editTitle">Rally leader</strong><span class="micro" data-t="edit">EDIT MARCH</span></div>
-    <div class="editor-grid"><div class="field"><label data-t="firstHero">First hero / lineup</label><input type="text" id="heroInput" maxlength="70" placeholder="Hero name"></div><div class="field"><label data-t="preset">Formation preset</label><select id="preset"><option value="1/12/87">1 / 12 / 87</option><option value="1/10/89">1 / 10 / 89</option><option value="5/5/90">5 / 5 / 90</option><option value="10/10/80">10 / 10 / 80</option><option value="2.5/15/82.5">2.5 / 15 / 82.5</option><option value="custom" data-t="custom">Custom</option></select></div></div>
+    <div class="editor-grid"><div class="field"><label data-t="firstHero">First hero / lineup</label><input type="text" id="heroInput" maxlength="70" placeholder="Hero name"></div><div class="field"><label data-t="preset">Formation preset</label><select id="preset"><option value="1/12/87">1 / 12 / 87</option><option value="1/10/89">1 / 10 / 89</option><option value="5/5/90">5 / 5 / 90</option><option value="5/15/80">5 / 15 / 80</option><option value="1/1/98">1 / 1 / 98</option><option value="10/10/80">10 / 10 / 80</option><option value="2.5/15/82.5">2.5 / 15 / 82.5</option><option value="custom" data-t="custom">Custom</option></select></div></div>
     <div class="percent"><span data-t="inf">Infantry</span><span id="infLabel">1%</span></div><input id="iSlider" type="range" min="0" max="60" step=".5">
     <div class="percent"><span data-t="cav">Cavalry</span><span id="cavLabel">12%</span></div><input id="cSlider" type="range" min="0" max="60" step=".5">
     <div class="percent"><span data-t="arch">Archers</span><span id="archLabel">87%</span></div>
@@ -313,7 +313,7 @@ function render(){
  compare(haveData&&result.score!==null);
 }
 function compare(hasData){
- var options=[[5,5,'5/5/90'],[10,10,'10/10/80'],[2.5,15,'2.5/15/82.5']];
+ var options=[[5,5,'5/5/90'],[5,15,'5/15/80'],[10,10,'10/10/80'],[1,1,'1/1/98'],[2.5,15,'2.5/15/82.5']];
  var outcomes=options.map(function(x){
    var marches=model.marches.map(function(m,j){return j===0?Object.assign({},m):Object.assign({},m,{i:x[0],c:x[1]});});
    return {label:x[2],result:calculate(marches)};
