@@ -324,6 +324,7 @@ function render(){
  var known=Array.from(el('preset').options).some(function(o){return o.value===preset;});
  el('preset').value=known?preset:'custom';
  compare(haveData&&result.score!==null);
+ if(window.NRW_BEAR_ENHANCE)window.NRW_BEAR_ENHANCE.renderEditor();
 }
 function compare(hasData){
  var options=[[5,5,'5/5/90'],[5,15,'5/15/80'],[10,10,'10/10/80'],[1,1,'1/1/98'],[2.5,15,'2.5/15/82.5']];
@@ -362,7 +363,7 @@ function activate(data,online){
  el('playerMeta').textContent=(online?'NRW ✓':'UNVERIFIED')+' · K'+profile.kid+' · '+num(profile.power||0);
  el('playerAvatar').src=profile.avatar_url||'./assets/nrw-banner.svg';
  el('playerInfo').classList.add('show');el('restricted').hidden=false;
- renderHeroes(data);message(online?'saved':'offlineNotice','ok');render();window.dispatchEvent(new Event('nrw-bear-loaded'));
+ renderHeroes(data);message(online?'saved':'offlineNotice','ok');render();window.dispatchEvent(new CustomEvent('nrw-bear-loaded',{detail:data}));
 }
 el('offlineMode').addEventListener('click',function(){
  var id=el('governorId').value.trim();
