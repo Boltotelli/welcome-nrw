@@ -66,7 +66,11 @@ details{border-top:1px solid var(--line);margin-top:14px;padding-top:14px}summar
    <div class="sub" data-t="profileInfo">Enter your Governor ID. Only members of [NRW]United, alliance 105300097 on kingdom 1044, can use the optimizer.</div>
    <form id="lookupForm" class="lookup"><input id="governorId" inputmode="numeric" pattern="[0-9]{5,20}" maxlength="20" placeholder="Governor ID" aria-label="Governor ID" required><button class="primary" id="lookupButton" type="submit" data-t="load">Load player</button></form>
    <div class="preset"><button class="secondary-btn" type="button" id="offlineMode" data-t="offlineMode">🛠 Offline testen</button><label class="secondary-btn" style="cursor:pointer">📂 <span data-t="jsonImportLabel">MightPulse-JSON importieren</span><input id="jsonImport" hidden type="file" accept=".json,application/json"></label></div>
-   <p class="hint" data-t="offlineWarning">Offline-Daten werden nicht gegen die NRW-Mitgliedschaft geprüft und bleiben nur auf deinem Gerät.</p>
+   <details><summary data-t="jsonPasteTitle">API-JSON direkt einfügen</summary>
+  <textarea id="jsonText" rows="4" style="width:100%;margin-top:10px;resize:vertical;background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:12px;padding:12px" placeholder='{ "ok": true, "player": { ... } }'></textarea>
+  <button id="jsonPasteSubmit" class="secondary-btn" type="button" data-t="jsonPasteButton">JSON lokal übernehmen</button>
+ </details>
+ <p class="hint" data-t="offlineWarning">Offline-Daten werden nicht gegen die NRW-Mitgliedschaft geprüft und bleiben nur auf deinem Gerät.</p>
    <div class="msg" id="lookupMessage" role="status" aria-live="polite"></div>
    <div class="player" id="playerInfo"><img id="playerAvatar" alt=""><div><b id="playerName"></b><small id="playerMeta"></small></div></div>
  </div>
@@ -216,6 +220,11 @@ for(var loc of ['de','en','fr'])Object.assign(languages[loc],{
  leaderStatsHelp:loc==='de'?'Beim Join wirken die Stats des Rallyleaders, NICHT deine eigenen. Für Vergleiche bitte alle sechs Werte je Rallyleader aus dem Kampfbericht ergänzen.':loc==='fr'?'En renfort les statistiques du chef sont utilisées, pas les tiennes. Renseigne les six valeurs par chef.':'Joins use the rally leader’s stats, NOT your own. Enter all six stats for each leader for comparisons.',
  leaderMissing:loc==='de'?'Noch kein Schadenvergleich: Bitte deine Angriffs-/Tödlichkeitswerte und die Werte aller sechs Rallyleader ergänzen. Die Truppenverteilung funktioniert bereits.':loc==='fr'?'Pas de comparaison de dégâts sans les statistiques de chaque chef et les tiennes. Les troupes peuvent déjà être réparties.':'No damage comparison until your offensive stats and the stats of all six rally leaders are filled in. Troop allocation is ready.'
 });
+for(var pLang of ['de','en','fr'])Object.assign(languages[pLang],{
+ jsonPasteTitle:pLang==='de'?'API-JSON direkt einfügen':pLang==='fr'?'Coller directement le JSON API':'Paste API JSON',
+ jsonPasteButton:pLang==='de'?'JSON lokal übernehmen':pLang==='fr'?'Importer le JSON localement':'Import JSON locally',
+ pagesApiPending:pLang==='de'?'GitHub Pages kann keinen geheimen API-Schlüssel verwenden. Bis der sichere Server-Endpunkt eingerichtet ist, bitte Offline testen oder API-JSON einfügen.':pLang==='fr'?'GitHub Pages ne peut pas garder une clé secrète. Utilise le mode hors ligne ou importe le JSON.':'GitHub Pages cannot hold a private API key. Until the secure endpoint is set up, use offline mode or import API JSON.'
+});
 var num = function(value){ return Math.round(value).toLocaleString(document.documentElement.lang === 'de' ? 'de-DE' : document.documentElement.lang === 'fr' ? 'fr-FR' : 'en-GB'); };
 var defaultMar = [
  {hero:'', i:1,c:12},
@@ -355,18 +364,22 @@ el('offlineMode').addEventListener('click',function(){
  var id=el('governorId').value.trim();
  activate({player:{governor_id:/^\d{5,20}$/.test(id)?id:'offline-demo',name:'Local demo',kid:1044,power:0},heroes:[]},false);
 });
+function applyApiJson(raw){
+ var p=raw&&raw.player||{};
+ if(Number(p.kid)!==1044||Number((p.alliance||{}).aid)!==105300097||!/^[0-9]{5,20}$/.test(String(p.governor_id)))throw Error('invalid');
+ var heroes=(Array.isArray(raw.heroes)?raw.heroes:[]).slice(0,5).map(function(h){return {name:h.name,level:h.level,star_label:h.star_label,widget:h.exclusive_gear_level,skills:(h.skill_levels||[]).map(function(v){return v.level;})};});
+ activate({player:{governor_id:p.governor_id,name:p.nick_name,kid:p.kid,power:p.power,avatar_url:p.avatar_url},heroes:heroes},false);
+}
 el('jsonImport').addEventListener('change',async function(){
  var file=this.files&&this.files[0];if(!file)return;
- try{
- var raw=JSON.parse(await file.text()),p=raw.player||{};
- if(Number(p.kid)!==1044||Number((p.alliance||{}).aid)!==105300097||!/^[0-9]{5,20}$/.test(String(p.governor_id)))throw Error('invalid');
- var heroes=(raw.heroes||[]).slice(0,5).map(function(h){return {name:h.name,level:h.level,star_label:h.star_label,widget:h.exclusive_gear_level,skills:(h.skill_levels||[]).map(function(v){return v.level;})};});
- activate({player:{governor_id:p.governor_id,name:p.nick_name,kid:p.kid,power:p.power,avatar_url:p.avatar_url},heroes:heroes},false);
- }catch(_){message('offlineError','error');}finally{this.value='';}
+ try{applyApiJson(JSON.parse(await file.text()));}catch(_){message('offlineError','error');}finally{this.value='';}
+});
+el('jsonPasteSubmit').addEventListener('click',function(){
+ try{applyApiJson(JSON.parse(el('jsonText').value));}catch(_){message('offlineError','error');}
 });
 el('lookupForm').addEventListener('submit',async function(e){
  e.preventDefault();var id=el('governorId').value.trim();if(!/^\d{5,20}$/.test(id)){message('badId','error');return;}
- var button=el('lookupButton');button.disabled=true;message('busy');
+ if(location.hostname.endsWith('.github.io')){message('pagesApiPending','error');return;}var button=el('lookupButton');button.disabled=true;message('busy');
  try{
   var response=await fetch('/api/bear-profile?id='+encodeURIComponent(id),{headers:{Accept:'application/json'}});
   var data=await response.json().catch(function(){return {error:'provider_unavailable'};});
