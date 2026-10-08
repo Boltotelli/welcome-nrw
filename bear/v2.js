@@ -62,6 +62,9 @@ function makeLayout(){
  const gearSection=cardSection('🛡','gear','gearInfo','gearVisuals');
  container.append(heroSection,petSection,masterSection,gearSection);
  rosterPanel=heroSection.querySelector('#heroBuilder');
+ // One compact panel for imported heroes plus the extra hero picker.
+ rosterPanel.before(document.getElementById('heroes'));
+ originalHeroPanel.hidden=true;
  petPanel=petSection.querySelector('#petsVisuals');
  masterPanel=masterSection.querySelector('#masterVisuals');
  gearPanel=gearSection.querySelector('#gearVisuals');
@@ -339,6 +342,7 @@ function renderEditor(){
 function showForProfile(evt){
  if(!validModel())return;
  const data=evt?.detail||{};
+ selectedHeroName='';
  sourceHeroes=Array.isArray(data.heroes)?data.heroes.map(h=>Object.assign({},h,{stars:Number.isFinite(Number(h.stars))?h.stars:parseInt(String(h.star_label||'').slice(0,1),10),tier:Number((String(h.star_label||'').match(/Tier (\d+)/)||[])[1]||0)})):[];
  // Initial seed from older freeform hero fields, not from assumption of owned heroes.
  state();
