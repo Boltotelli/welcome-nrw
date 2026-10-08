@@ -21,6 +21,7 @@ function fromProviderHero(h) {
   return {
     id: Number(h.id || 0),
     name: String(h.name || ''),
+    icon: /^\/assets\/icons\/hero_headpic_\d+\.png$/.test(String(h.icon || '')) ? 'https://api.mightpulse.com' + h.icon : '',
     level: Number(h.level || 0),
     stars: Number(h.stars || 0),
     star_label: String(h.star_label || ''),
