@@ -33,3 +33,14 @@ Endpoint: /api/bear-profile?id={governor_id}
 
 ## Deferred
 Do not edit the existing live dashboard navigation until the user approves the game page. Do not merge this branch into main automatically.
+
+## GitHub Pages preview (October 8, 2026)
+
+- Frontend is developed and deployed ONLY through GitHub Actions on branch `feature/bear-optimizer-nrw-prototype`.
+- Pages test URL: https://boltotelli.github.io/welcome-nrw/
+- Pages artifact contains only the Bear Optimizer HTML and NRW banner image, not the entire Welcome site.
+- Vercel preview deployments are disabled on `welcome-nrw` to preserve deployment quota. Production remains linked to `main` and was not changed for this prototype.
+- GitHub Pages cannot host a secure API key or run Vercel serverless functions. Automatic profile lookup on the Pages preview intentionally displays an explanatory message. For UI testing use Offline mode, upload a MightPulse JSON export or paste the raw JSON response into the browser. No keys are stored or copied into the static page.
+- Manual locally saved inputs: all three troop totals, march cap, Valora + Bison capacity boosts, offensive attack/lethality values, pet levels/buffs, Valora skill levels, affinity, gear/charm notes, missing starter heroes, six join hero names and per-join leader offensive stats.
+- Damage modeling is disabled until own and all six rallyleader offensive values are present. There is NO universal claim that 5/15/80 wins: model depends on leader focus. More archer-heavy joins can require smaller marches because of shared archer inventory.
+- Future production API work requires a NEW private provider key set server-side, anti-abuse/rate limiting, and separate security approval. The previously chat-exposed BEAR_OPTIMIZER key must be revoked. Never use the existing NAP key.
