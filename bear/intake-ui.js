@@ -103,6 +103,42 @@ function cropToThumb(src,x,y,w,h){
  c.getContext('2d').drawImage(src,x*src.width,y*src.height,w*src.width,h*src.height,0,0,c.width,c.height);
  return c.toDataURL('image/jpeg',.74);
 }
+function inferStars(canvas,row,col){
+ // The card's bottom edge displays five flower-shaped stars. Full stars
+ // are light ivory; unfilled stars are dark orange. Compare relative light
+ // pixel counts against the same card, not absolute colour alone.
+ // Screenshot calibration: 716×1536, 4-column Kingshot hero inventory.
+ const cx=canvas.getContext('2d',{willReadFrequently:true});
+ const sx=canvas.width/716,sy=canvas.height/1536;
+ const yCenter=(371+row*276)*sy;
+ function lights(x,y){
+  const left=Math.max(0,Math.round(x-9*sx)),top=Math.max(0,Math.round(y-11*sy));
+  const w=Math.min(canvas.width-left,Math.max(1,Math.round(19*sx)));
+  const h=Math.min(canvas.height-top,Math.max(1,Math.round(23*sy)));
+  if(w<4||h<4)return 0;
+  const pixels=cx.getImageData(left,top,w,h).data;let bright=0;
+  for(let i=0;i<pixels.length;i+=4){
+   const r=pixels[i],g=pixels[i+1],b=pixels[i+2];
+   if(r>170&&g>160&&b>100&&r-g<90&&r>b)bright++;
+  }
+  return bright/(w*h);
+ }
+ const xs=Array.from({length:5},(_,i)=>(33+col*167+22+i*27)*sx);
+ let best=null;
+ for(let dy=-24;dy<=24;dy+=3){
+  const yy=yCenter+dy*sy,values=xs.map(x=>lights(x,yy));
+  const score=values[0]+values[1]+values[2];
+  if(!best||score>best.score)best={score,values};
+ }
+ if(!best)return {starSteps:null,confidence:0};
+ const head=Math.max(...best.values.slice(0,3));
+ if(head<.17)return {starSteps:null,confidence:0};
+ let full=0;
+ for(const n of best.values){if(n/head>=.77)full++;else break;}
+ if(full<1)return {starSteps:null,confidence:0};
+ const confidence=Math.min(1,(head/.28));
+ return {starSteps:full*6,confidence,partiallyFilled:full<5&&best.values[full]/head>.45};
+}
 function overviewTiles(canvas,text){
  // Four-column Kingshot hero overview: names are absent, so the user must
  // confirm portrait identity. Never guess a name from text-only OCR.
@@ -111,7 +147,9 @@ function overviewTiles(canvas,text){
   const x=.038+col*.232,y=.082+row*.177;
   if(y+.145>.945)continue;
   const index=col+row*4;
-  collected.push({image:cropToThumb(canvas,x,y,.211,.171),name:'',level:matches.length>index?matches[index]:null,starSteps:null,selected:false});
+  const stars=inferStars(canvas,row,col);
+  collected.push({image:cropToThumb(canvas,x,y,.211,.171),name:'',level:matches.length>index?matches[index]:null,
+    starSteps:stars.starSteps,starConfidence:stars.confidence,partialStar:stars.partiallyFilled,selected:false});
  }
  return collected;
 }
@@ -231,7 +269,10 @@ function renderQueue(){
     level.addEventListener('change',()=>tile.level=level.value?Number(level.value):null);
     const stars=inputChoice(starOptions(),tile.starSteps??'');
     stars.addEventListener('change',()=>tile.starSteps=stars.value?Number(stars.value):null);
-    const details=document.createElement('small');details.textContent='Level / ★';
+    const details=document.createElement('small');
+    details.textContent=tile.starSteps!==null?
+      '★ '+say('Bildvorschlag – prüfen','image guess – review')+(tile.partialStar?' · T?':''):
+      say('Level / Sterne prüfen','Check level/stars');
     cell.append(name,level,details,stars);grid.append(cell);
    });
    content.append(grid);
