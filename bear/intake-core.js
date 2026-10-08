@@ -27,9 +27,16 @@ function parseTroops(text){
  const pattern=/\b\d{1,3}(?:[., ]\d{3}){1,3}\b|\b\d{4,9}\b/g;
  for(let i=0;i<ls.length;i++){
   const type=classFrom(ls[i]);if(type<0)continue;
-  const segment=[ls[i],ls[i+1]||''].join(' ');
-  const candidates=[...segment.matchAll(pattern)].map(m=>normalizeNumber(m[0])).filter(n=>Number.isInteger(n)&&n>=100);
-  if(candidates.length)values[['troopsI','troopsC','troopsA'][type]]=candidates[0];
+  const combined=[ls[i],ls[i+1]||''].join(' ');
+  // If OCR puts two troop cards on the same line, never assign both
+  // quantities to the first class. Split at each class heading.
+  const segments=combined.split(/(?=spitzen\s+(?:infant|kaval|bogen)|(?:(?:infantry|cavalry|archers?)\s*[:\-]))/i);
+  for(const segment of segments){
+   const kind=classFrom(segment);
+   if(kind<0)continue;
+   const candidates=[...segment.matchAll(pattern)].map(m=>normalizeNumber(m[0])).filter(n=>Number.isInteger(n)&&n>=100);
+   if(candidates.length)values[['troopsI','troopsC','troopsA'][kind]]=candidates[0];
+  }
  }
  if(Object.keys(values).length===0&&/spitzen|troop|trupp|schwadronvorschau/i.test(text)){
   const found=[...String(text).matchAll(pattern)].map(x=>normalizeNumber(x[0])).filter(n=>n>=1000&&n<200000000);
