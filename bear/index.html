@@ -416,7 +416,17 @@ el('preset').addEventListener('change',function(){
 el('copyJoins').addEventListener('click',function(){var m=model.marches[active];for(var j=1;j<activeMarchCount();j++){model.marches[j].i=m.i;model.marches[j].c=m.c;}save();render();});
 el('simulate').addEventListener('click',function(){if(!profile)return;render();var score=el('score');score.animate([{transform:'scale(1)',opacity:.65},{transform:'scale(1.11)',opacity:1},{transform:'scale(1)',opacity:1}],{duration:600,easing:'ease-out'});});
 function activate(data,online){
- profile=data.player;model={values:{},textValues:{},marches:defaultMar.map(function(m){return Object.assign({},m);})};active=0;read(profile.governor_id);
+ profile=data.player;
+ // Browser-local cache of previously imported API hero metadata. Reopening
+ // a cached ID never implies currently verified NRW membership.
+ try{
+  var key='nrw_bear_heroes_cache_v1_'+profile.governor_id;
+  if(Array.isArray(data.heroes)&&data.heroes.length){
+   localStorage.setItem(key,JSON.stringify(data.heroes.slice(0,5)));
+  }else if(!online){
+   data.heroes=JSON.parse(localStorage.getItem(key)||'[]')||[];
+  }
+ }catch(_){}model={values:{},textValues:{},marches:defaultMar.map(function(m){return Object.assign({},m);})};active=0;read(profile.governor_id);
  el('playerName').textContent=profile.name+(online?'':' · OFFLINE');
  el('playerMeta').textContent=(online?'NRW ✓':'UNVERIFIED')+' · K'+profile.kid+' · '+num(profile.power||0);
  el('playerAvatar').src=profile.avatar_url||'./assets/nrw-banner.svg';
