@@ -47,27 +47,27 @@ window.NRW_BEAR_CATALOG = {
     },
     {
       "name": "Howard",
-      "img": ""
+      "img": "https://got-global-wiki.s3.us-west-1.amazonaws.com/wp-content/uploads/2025/10/%E7%B4%AB%E3%80%90.png"
     },
     {
       "name": "Saul",
-      "img": ""
+      "img": "https://got-global-wiki.s3.us-west-1.amazonaws.com/wp-content/uploads/2025/10/%E7%BB%84-20.png"
     },
     {
       "name": "Jabel",
-      "img": ""
+      "img": "https://got-global-wiki.s3.us-west-1.amazonaws.com/wp-content/uploads/2025/10/%E7%BB%84-24.png"
     },
     {
       "name": "Helga",
-      "img": ""
+      "img": "https://got-global-wiki.s3.us-west-1.amazonaws.com/wp-content/uploads/2025/10/%E7%BB%84-27.png"
     },
     {
       "name": "Amadeus",
-      "img": ""
+      "img": "https://got-global-wiki.s3.us-west-1.amazonaws.com/wp-content/uploads/2025/10/%E7%BB%84-25.png"
     },
     {
       "name": "Marlin",
-      "img": ""
+      "img": "https://got-global-wiki.s3.us-west-1.amazonaws.com/wp-content/uploads/2025/10/%E7%BB%84-19.png"
     },
     {
       "name": "Hilde",
@@ -79,7 +79,7 @@ window.NRW_BEAR_CATALOG = {
     },
     {
       "name": "Jaegar",
-      "img": ""
+      "img": "https://got-global-wiki.s3.us-west-1.amazonaws.com/wp-content/uploads/2025/10/%E7%BB%84-18.png"
     },
     {
       "name": "Petra",
@@ -87,7 +87,7 @@ window.NRW_BEAR_CATALOG = {
     },
     {
       "name": "Eric",
-      "img": ""
+      "img": "https://got-global-wiki.s3.us-west-1.amazonaws.com/wp-content/uploads/2025/10/%E7%BB%84-26.png"
     },
     {
       "name": "Rosa",
@@ -107,7 +107,7 @@ window.NRW_BEAR_CATALOG = {
     },
     {
       "name": "Thrud",
-      "img": ""
+      "img": "https://got-global-wiki.s3.us-west-1.amazonaws.com/wp-content/uploads/2025/10/%E7%BB%84-13.png"
     },
     {
       "name": "Long Fei",
