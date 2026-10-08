@@ -57,3 +57,18 @@ Do not edit the existing live dashboard navigation until the user approves the g
 - **Files:** `bear/catalog.js`, `bear/v2.js`, `bear/v2.css`, extended `bear/index.html`. GitHub Pages workflow copies all frontend assets.
 - **Security:** No Keys embedded in static pages. The Github Pages preview is intentionally offline/JSON-import capable. It is NOT authenticated authorization; NRW membership for production must be validated server-side through the separate protected backend.
 - **Simulation:** Troop constraints can be used without all stats. Damage indices remain unavailable until own and each leader's six attack/lethality values are known, and even then they are unvalidated relative heuristics, never exact Bear points.
+
+## Hero/Pet usability revision (2026-10-08)
+
+- User feedback: two nested hero panels were too cumbersome. Now the imported Arena heroes and manually added hero cards share one compact roster. Tap a card to edit; add heroes with a searchable image gallery. The editor stays closed until selected.
+- Hero advancement uses a **single 0–30 star-step** progression: 24 = 4★; 25–29 = 4★ T1–T5; 30 = 5★ MAX. No tiers beyond five stars. Existing `stars` and `tier` storage remains readable. At 4★ the UI explicitly shows possible skill cap Lv. 5, but it never guesses a hero's actually upgraded skills.
+- Only **five relevant active bear pets** appear: Mighty Bison (squad/march size), Giant Rhino (attack), Alpha Black Panther (lethality), Great Moose (starter rally capacity), Ironclad War Bear (enemy-defense debuff, boss effectiveness unverified). Old Wolf, Lion, Cheetah, gathering Bison, etc. are hidden; passive stat refinements are not inferred here.
+- Pet display value is derived from level via the documented skill rank milestones (Lv. 10 / 20 / ... / 100), not MightPulse API. Ranks below level 10 are conservatively left unverified. Source arrays:
+  - Mighty Bison: +1500 to +15000 squad capacity (10 ranks)
+  - Giant Rhino: +2.5% to +10% troop attack (10 ranks)
+  - Alpha Black Panther: +2.5% to +10% lethality (10 ranks)
+  - Great Moose: +60000 to +150000 rally capacity (10 ranks, starter rally only)
+  - War Bear: 2.5–10% enemy defense down (10 ranks; boss interaction not guaranteed)
+- Skill tables cross-checked against Kingshot Portal and Kingshot Guide references (e.g. https://kingshot.gg/database/pets/mighty-bison, https://kingshot.gg/database/pets/giant-rhino, https://kingshot.gg/database/pets/alpha-black-panther, https://kingshotguide.org/data-center/kingshot-pets-database/great-moose, https://kingshotguide.org/data-center/kingshot-pets-database/ironclad-war-bear). Level-50 means rank 5, level-80 rank 8. Derived effects are never silently added to already entered battle stats. The Bison has an explicit Apply button to fill the separate march-bonus input only when its active toggle is on.
+- Per-profile browser storage remains intact for hero cards, troop inventory, pets and Valora. New image gallery uses original remote game art.
+- All changes remain GitHub Pages preview only; no main merge, no NAP/Supabase changes, no Vercel deploy.
