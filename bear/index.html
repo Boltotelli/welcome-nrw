@@ -41,6 +41,7 @@ details{border-top:1px solid var(--line);margin-top:14px;padding-top:14px}summar
 @media(max-width:940px){.dashboard{grid-template-columns:1fr}.hero{grid-template-columns:1fr 220px}.right{grid-template-columns:repeat(2,minmax(0,1fr))}.right .panel:last-child{grid-column:1 / -1}}
 @media(max-width:650px){.shell{width:min(100% - 22px,1220px)}.top{gap:6px}.back{display:none}.brand{font-size:13px}.brand img{width:40px}.top-actions{gap:4px}.lang button{font-size:10px;padding:7px}.hero{grid-template-columns:1fr!important;min-height:unset!important;padding:24px!important;gap:5px}.hero h1{font-size:39px}.hero p{font-size:13px}.boss{min-height:150px}.boss img{width:112px}.boss:before{width:145px}.boss:after{width:120px}.boss-label{bottom:-4px}.panel-head{padding:16px 15px 0}.panel-body{padding:15px}.inputs{gap:8px}.buff-row{gap:8px}.right{display:grid;grid-template-columns:1fr}.right .panel:last-child{grid-column:auto}.march{grid-template-columns:43px 1fr auto;gap:7px;padding:9px}.march-id{width:39px;height:43px;font-size:10px}.march-info b{font-size:12px}.march-info small{font-size:9px}.march-name b{font-size:12px}.editor-grid{grid-template-columns:1fr}.comparison-item{grid-template-columns:76px 1fr 45px}}
 </style>
+<link rel="stylesheet" href="./v2.css">
 </head>
 <body>
 <div class="shell">
@@ -237,6 +238,7 @@ function el(id){return document.getElementById(id);}
 function t(k){return (languages[lang]||languages.en)[k]||languages.en[k]||k;}
 function safe(s){return String(s||'').replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 function n(id){return Math.max(0,Number(model.values[id])||0);}
+function activeMarchCount(){return 1+Math.max(0,Math.min(6,Math.floor(Number(model.v2&&model.v2.joinCount)||0)));}
 function available(){return [Math.floor(n('troopsI')),Math.floor(n('troopsC')),Math.floor(n('troopsA'))];}
 function capacity(){return Math.max(0,Math.floor(n('cap')+n('master')+n('pet')));}
 function ratio(m){return [m.i,m.c,100-m.i-m.c];}
@@ -247,11 +249,11 @@ function calculate(marches){
  for(var k=0;k<3;k++){if(raw[0][k]>0)startFactor=Math.min(startFactor,stock[k]/raw[0][k]);}
  var start=raw[0].map(function(v){return Math.floor(v*startFactor);});
  var remainder=stock.map(function(v,k){return v-start[k];});
- var demand=[0,0,0];for(var j=1;j<7;j++)for(k=0;k<3;k++)demand[k]+=raw[j][k];
+ var demand=[0,0,0];for(var j=1;j<marches.length;j++)for(k=0;k<3;k++)demand[k]+=raw[j][k];
  var joinFactor=1;for(k=0;k<3;k++){if(demand[k]>0)joinFactor=Math.min(joinFactor,remainder[k]/demand[k]);}
  joinFactor=Math.max(0,Math.min(1,joinFactor));
  var actual=[start],spent=start.slice();
- for(j=1;j<7;j++){var picked=raw[j].map(function(v){return Math.floor(v*joinFactor);});actual.push(picked);for(k=0;k<3;k++)spent[k]+=picked[k];}
+ for(j=1;j<marches.length;j++){var picked=raw[j].map(function(v){return Math.floor(v*joinFactor);});actual.push(picked);for(k=0;k<3;k++)spent[k]+=picked[k];}
  // Own battle stats must never be substituted for those of another rally leader.
  var fullOwn=leaderFields.every(function(k){return Object.prototype.hasOwnProperty.call(model.values,k);});
  var fullJoins=marches.slice(1).every(function(m){return leaderFields.every(function(k){return m.leaderStats&&Object.prototype.hasOwnProperty.call(m.leaderStats,k);});});
@@ -269,7 +271,7 @@ function calculate(marches){
  return {raw:raw,actual:actual,spent:spent,stock:stock,joinFactor:joinFactor,cap:cap,score:score};
 }
 function save(){if(profile)try{localStorage.setItem('nrw_bear_profile_v1_'+profile.governor_id,JSON.stringify(model));}catch(_){}}
-function read(id){try{var value=JSON.parse(localStorage.getItem('nrw_bear_profile_v1_'+id)||'null');if(value&&typeof value==='object'){fields.forEach(function(k){if(value.values&&Object.prototype.hasOwnProperty.call(value.values,k)){var v=Number(value.values[k]);if(Number.isFinite(v)&&v>=0)model.values[k]=v;}});model.textValues=value.textValues||{};if(Array.isArray(value.marches)&&value.marches.length===7){value.marches.forEach(function(m,j){var i=Number(m.i),c=Number(m.c);if(Number.isFinite(i)&&Number.isFinite(c)&&i>=0&&c>=0&&i+c<=100){model.marches[j]={hero:String(m.hero||'').slice(0,70),i:i,c:c,leaderStats:(m.leaderStats&&typeof m.leaderStats==='object')?m.leaderStats:{}};}});}}}catch(_){}
+function read(id){try{var value=JSON.parse(localStorage.getItem('nrw_bear_profile_v1_'+id)||'null');if(value&&typeof value==='object'){model.v2=value.v2||{};fields.forEach(function(k){if(value.values&&Object.prototype.hasOwnProperty.call(value.values,k)){var v=Number(value.values[k]);if(Number.isFinite(v)&&v>=0)model.values[k]=v;}});model.textValues=value.textValues||{};if(Array.isArray(value.marches)&&value.marches.length===7){value.marches.forEach(function(m,j){var i=Number(m.i),c=Number(m.c);if(Number.isFinite(i)&&Number.isFinite(c)&&i>=0&&c>=0&&i+c<=100){model.marches[j]={hero:String(m.hero||'').slice(0,70),i:i,c:c,leaderStats:(m.leaderStats&&typeof m.leaderStats==='object')?m.leaderStats:{}};}});}}}catch(_){}
  fields.forEach(function(k){el(k).value=Object.prototype.hasOwnProperty.call(model.values,k)?model.values[k]:'';});textFields.forEach(function(k){el(k).value=String((model.textValues||{})[k]||'');});}
 function message(key,type){var node=el('lookupMessage');node.className='msg show'+(type?' '+type:'');node.textContent=t(key);}
 function language(value){
@@ -289,9 +291,11 @@ function renderHeroes(data){var list=el('heroes');list.innerHTML='';
  });}
 function render(){
  if(!profile)return;
- var result=calculate(model.marches);lastResult=result;
+ active=Math.min(active,Math.max(0,Number(model.v2&&model.v2.joinCount)||0));
+ var relevant=model.marches.slice(0,activeMarchCount());
+ var result=calculate(relevant);lastResult=result;
  var entries=el('marches');entries.innerHTML='';
- model.marches.forEach(function(m,j){
+ relevant.forEach(function(m,j){
   var actual=result.actual[j],sum=actual.reduce(function(a,b){return a+b;},0);
   var wrapper=document.createElement('button');wrapper.type='button';wrapper.className='march'+(j===active?' active':'');
   wrapper.style.width='100%';wrapper.style.textAlign='left';wrapper.style.color='inherit';wrapper.style.cursor='pointer';
@@ -324,7 +328,7 @@ function render(){
 function compare(hasData){
  var options=[[5,5,'5/5/90'],[5,15,'5/15/80'],[10,10,'10/10/80'],[1,1,'1/1/98'],[2.5,15,'2.5/15/82.5']];
  var outcomes=options.map(function(x){
-   var marches=model.marches.map(function(m,j){return j===0?Object.assign({},m):Object.assign({},m,{i:x[0],c:x[1]});});
+   var marches=model.marches.slice(0,activeMarchCount()).map(function(m,j){return j===0?Object.assign({},m):Object.assign({},m,{i:x[0],c:x[1]});});
    return {label:x[2],result:calculate(marches)};
  });
  var max=Math.max.apply(null,outcomes.map(function(x){return x.result.score||0;}))||1;
@@ -350,7 +354,7 @@ el('preset').addEventListener('change',function(){
   save();render();
  });
 });
-el('copyJoins').addEventListener('click',function(){var m=model.marches[active];for(var j=1;j<7;j++){model.marches[j].i=m.i;model.marches[j].c=m.c;}save();render();});
+el('copyJoins').addEventListener('click',function(){var m=model.marches[active];for(var j=1;j<activeMarchCount();j++){model.marches[j].i=m.i;model.marches[j].c=m.c;}save();render();});
 el('simulate').addEventListener('click',function(){if(!profile)return;render();var score=el('score');score.animate([{transform:'scale(1)',opacity:.65},{transform:'scale(1.11)',opacity:1},{transform:'scale(1)',opacity:1}],{duration:600,easing:'ease-out'});});
 function activate(data,online){
  profile=data.player;model={values:{},textValues:{},marches:defaultMar.map(function(m){return Object.assign({},m);})};active=0;read(profile.governor_id);
@@ -358,7 +362,7 @@ function activate(data,online){
  el('playerMeta').textContent=(online?'NRW ✓':'UNVERIFIED')+' · K'+profile.kid+' · '+num(profile.power||0);
  el('playerAvatar').src=profile.avatar_url||'./assets/nrw-banner.svg';
  el('playerInfo').classList.add('show');el('restricted').hidden=false;
- renderHeroes(data);message(online?'saved':'offlineNotice','ok');render();
+ renderHeroes(data);message(online?'saved':'offlineNotice','ok');render();window.dispatchEvent(new Event('nrw-bear-loaded'));
 }
 el('offlineMode').addEventListener('click',function(){
  var id=el('governorId').value.trim();
@@ -394,8 +398,10 @@ el('themeButton').addEventListener('click',function(){
  document.documentElement.dataset.theme=theme;try{localStorage.setItem('nrw_theme',theme);}catch(_){}
 });
 document.querySelectorAll('button[data-lang]').forEach(function(btn){btn.addEventListener('click',function(){language(btn.dataset.lang);});});
+window.NRW_BEAR_BRIDGE={model:function(){return model;},save:save,render:render,profile:function(){return profile;},activeMarchCount:activeMarchCount,active:function(){return active;},selectMarch:function(i){active=i;render();}};
 try{document.documentElement.dataset.theme=localStorage.getItem('nrw_theme')||'dark';language(localStorage.getItem('nrw_page_lang')||'en');}catch(_){language('en');}
 })();
 </script>
+<script src="./catalog.js"></script><script src="./v2.js"></script>
 </body>
 </html>
