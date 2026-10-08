@@ -1,0 +1,60 @@
+/* Multi-upload NRW Bear wizard: screenshots → verify → calculate */
+.bear-intake-wizard{border:1px solid rgba(246,188,100,.46);box-shadow:var(--shadow)}
+.bear-intake-header{padding:22px 22px 15px;background:linear-gradient(110deg,rgba(227,158,48,.14),transparent 70%)}
+.bear-intake-header h2{font-size:clamp(19px,3vw,24px);font-weight:900;margin:6px 0}
+.bear-intake-header>p.hint{margin:6px 0 12px}
+.bear-intake-pickers{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+#intakePicker{display:inline-flex;align-items:center;justify-content:center;cursor:pointer;padding:12px 18px}
+.bear-intake-pickers>.secondary-btn{min-height:42px}
+#intakeStatus{font-size:12px;line-height:1.5;color:var(--amber);margin:12px 0 0;font-weight:800}
+.bear-intake-queue{display:grid;gap:12px;padding:3px 20px 17px}
+.bear-intake-item{border:1px solid var(--line);background:var(--card);border-radius:14px;padding:12px;min-width:0}
+.bear-intake-item-head{display:flex;gap:12px;justify-content:space-between;align-items:center;margin-bottom:11px}
+.bear-intake-item-head b{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px}
+.bear-intake-item-head select{max-width:210px;font-size:12px;padding:8px 7px}
+.bear-intake-values{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;align-items:start}
+.bear-intake-values>.hint{grid-column:1/-1;margin:3px 0}
+.bear-intake-value{display:grid;gap:5px;font-size:11px;font-weight:800;color:var(--muted);min-width:0}
+.bear-intake-value input,.bear-intake-value select{width:100%;padding:8px 9px;font-size:13px}
+.bear-intake-actions{display:flex;gap:10px;flex-wrap:wrap;padding:0 20px 18px}
+.bear-intake-progress{border-top:1px solid var(--line);padding:13px 20px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:var(--card)}
+.bear-intake-progress strong{white-space:nowrap;font-size:13px;font-weight:900;color:var(--amber)}
+.bear-intake-progress span{font-size:11px;min-width:0}
+.bear-intake-advice{display:grid;gap:6px;padding:0 20px}
+.bear-intake-advice:empty{display:none}
+.bear-intake-advice:not(:empty){padding-top:12px;padding-bottom:12px;border-top:1px solid var(--line)}
+.bear-intake-advice strong{font-size:13px;color:var(--amber)}
+.bear-intake-advice p{margin:0;font-size:12px;color:var(--text)}
+.bear-intake-advice a{font-size:11px;color:var(--amber);text-decoration:underline}
+#intakeResultSlot{padding:0 20px 19px}
+#intakeResultSlot .bear-optimize-box{margin:0}
+.bear-intake-missing,.bear-intake-gear-details{border:1px solid var(--line);background:var(--panel);border-radius:16px;overflow:hidden;margin:0}
+.bear-intake-missing>summary,.bear-intake-gear-details>summary{padding:15px 18px;font-weight:900;font-size:13px}
+.bear-intake-missing>#uxQuickStart{border:0;box-shadow:none;margin:0;border-radius:0}
+.bear-intake-missing>#uxQuickStart .ux-top-optimize{display:none}
+.bear-intake-gear-details>.bear-import-card{border:0;box-shadow:none;border-radius:0}
+.bear-intake-roster{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;grid-column:1/-1}
+.bear-intake-roster-tile{display:grid;gap:6px;background:var(--panel);border:1px solid var(--line);padding:7px;border-radius:12px;min-width:0}
+.bear-intake-roster-tile img{width:100%;height:150px;object-fit:cover;border-radius:8px}
+.bear-intake-roster-tile select,.bear-intake-roster-tile input{width:100%;padding:7px 5px;font-size:12px}
+.bear-intake-roster-tile small{color:var(--muted);font-size:10px}
+@media(max-width:800px){
+ .bear-intake-values{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .bear-intake-roster{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:560px){
+ .bear-intake-header{padding:16px 13px 12px}
+ .bear-intake-pickers{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+ #intakePicker,.bear-intake-pickers>.secondary-btn{font-size:11px;padding:10px 5px;text-align:center}
+ .bear-intake-queue{padding:0 12px 12px}
+ .bear-intake-item-head{flex-direction:column;align-items:stretch;gap:7px}
+ .bear-intake-item-head select{max-width:none}
+ .bear-intake-values{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ .bear-intake-roster{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .bear-intake-roster-tile img{height:140px}
+ .bear-intake-actions{padding:0 12px 12px}
+ .bear-intake-actions button{width:100%}
+ .bear-intake-progress{padding:12px 13px}
+ .bear-intake-advice{padding-left:13px;padding-right:13px}
+ #intakeResultSlot{padding:0 12px 14px}
+}
