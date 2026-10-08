@@ -359,6 +359,37 @@ function compare(hasData){
    return '<div class="comparison-item"><span>'+x.label+'</span><span class="bar"><i style="width:'+((x.result.totalScore||0)/max*100).toFixed(1)+'%"></i></span><span>'+num(x.result.totalScore)+'</span></div>';
  }).join('') :'<div class="hint">'+safe(t('leaderMissing'))+'</div>';
 }
+function optimizeStarter(){
+ var out=el('optimizeResults'),engine=window.NRW_BEAR_COMBAT,levels=engine.configure(model.v2);
+ if(!out||!engine.ready(model.values,levels)||capacity()<=0||available().reduce(function(a,b){return a+b;},0)<=0){
+  if(out)out.textContent=lang==='de'?'Bitte T-/TG-Stufen, alle sechs Angriff-/Tödlichkeitswerte, Truppenanzahl und Marschkapazität eintragen.':
+   lang==='fr'?'Renseigne les niveaux, les stats, les troupes et la capacité.':'Enter all tiers, six offensive stats, troop counts and march capacity first.';
+  return;
+ }
+ var ownStats=offensiveStats(model.values,true),nMarch=activeMarchCount(),candidates=[];
+ var prior=calculate(model.marches.slice(0,nMarch)).ownScore;
+ for(var i=0;i<=100;i++)for(var c=0;c<=100-i;c++){
+  var a=100-i-c;
+  var form=model.marches.slice(0,nMarch);
+  form[0]=Object.assign({},form[0],{i:i,c:c});
+  var r=calculate(form),used=r.actual[0].reduce(function(sum,x){return sum+x;},0);
+  if(!used||r.ownScore===null)continue;
+  candidates.push({i:i,c:c,a:a,score:r.ownScore,troops:used});
+ }
+ candidates.sort(function(a,b){return b.score-a.score||a.i-b.i||a.c-b.c;});
+ if(!candidates.length){out.textContent='No available troop formation.';return;}
+ var best=candidates[0],choices=[];
+ candidates.forEach(function(p){if(choices.length>=5)return;if(choices.every(function(v){return Math.abs(v.i-p.i)+Math.abs(v.c-p.c)+Math.abs(v.a-p.a)>=6;}))choices.push(p);});
+ model.marches[0].i=best.i;model.marches[0].c=best.c;
+ active=0;save();render();
+ var gain=prior>0?((best.score/prior-1)*100):null;
+ out.innerHTML='<strong>'+(lang==='de'?'Modell-Empfehlung':lang==='fr'?'Estimation':'Model recommendation')+
+  ': '+best.i+' / '+best.c+' / '+best.a+'</strong>'+
+  '<p class="hint">'+(lang==='de'?'Starter vor Joins reserviert · '+num(best.troops)+' Truppen · '+(gain===null?'—':(gain>=0?'+':'')+gain.toFixed(2)+'%')+' zum bisherigen Starter':
+   lang==='fr'?'Départ prioritaire · '+num(best.troops)+' troupes': 'Starter reserved first · '+num(best.troops)+' troops · '+(gain===null?'—':(gain>=0?'+':'')+gain.toFixed(2)+'%')+' vs current')+'</p>'+
+  choices.map(function(v,j){return '<div class="bear-optimize-option"><b>#'+(j+1)+'</b><span>'+v.i+' / '+v.c+' / '+v.a+'</span><small>'+num(v.score)+' · '+num(v.troops)+'</small></div>';}).join('')+
+  '<p class="hint">'+(lang==='de'?'Vorläufig: keine genaue Skill-/Widget-/Proc-Simulation, keine garantierten Bear-Punkte.':'Provisional: hero skills/widgets/procs not fully simulated. Not actual Bear points.')+'</p>';
+}
 function syncField(id){var raw=el(id).value.trim(),value=Number(raw);if(raw===''||!Number.isFinite(value)||value<0)delete model.values[id];else model.values[id]=value;save();render();}
 fields.forEach(function(k){el(k).addEventListener('input',function(){syncField(k);});});textFields.forEach(function(k){el(k).addEventListener('input',function(){model.textValues=model.textValues||{};model.textValues[k]=this.value.slice(0,100);save();});});
 leaderFields.forEach(function(k){el('leader_'+k).addEventListener('input',function(){
@@ -421,7 +452,7 @@ el('themeButton').addEventListener('click',function(){
  document.documentElement.dataset.theme=theme;try{localStorage.setItem('nrw_theme',theme);}catch(_){}
 });
 document.querySelectorAll('button[data-lang]').forEach(function(btn){btn.addEventListener('click',function(){language(btn.dataset.lang);});});
-window.NRW_BEAR_BRIDGE={model:function(){return model;},save:save,render:render,profile:function(){return profile;},activeMarchCount:activeMarchCount,active:function(){return active;},selectMarch:function(i){active=i;render();}};
+window.NRW_BEAR_BRIDGE={model:function(){return model;},save:save,render:render,optimizeStarter:optimizeStarter,profile:function(){return profile;},activeMarchCount:activeMarchCount,active:function(){return active;},selectMarch:function(i){active=i;render();}};
 try{document.documentElement.dataset.theme=localStorage.getItem('nrw_theme')||'dark';language(localStorage.getItem('nrw_page_lang')||'en');}catch(_){language('en');}
 })();
 </script>
