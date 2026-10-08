@@ -10,6 +10,7 @@ en:{marches:'March slots',joins:'Available join marches',manualTroops:'The API d
 fr:{marches:'Emplacements de marche',joins:'Renforts disponibles',manualTroops:"L’API ne fournit pas les quantités de troupes. Saisis-les manuellement.",heroDeck:'Tes cartes de héros',heroInfo:"L’API montre cinq héros d’arène. Ajoute les autres du catalogue, avec étoiles et niveaux de compétence réels.",hero:'Choisir le héros',star:'Étoiles',tier:'Palier',widget:'Équipement',skill:'Compétence expédition',skillHint:'Quatre étoiles permettent le niveau de compétence maximal 5. Indique les niveaux réellement améliorés.',addHero:'Enregistrer le héros',removeHero:'Supprimer le héros',pets:'Tes animaux',petsInfo:'Ajuste les niveaux avec +/− ou saisis-les. Renseigne éventuellement effet et valeur du bonus actif sans le compter deux fois.',valora:'Valora – chasseuse d’ours',valoraHint:"Savage Advantage ajoute 3 000 places par niveau à la marche d’ours. Dance of the Hunt concerne la capacité du rallye.",valoraApply:'Appliquer Savage Advantage à la marche',gear:'Équipements & talismans',gearInfo:'Six équipements de gouverneur avec trois talismans chacun. Tout est sauvegardé localement, sans double comptage.',grade:'Qualité',gearTier:'Palier',gearStar:'Étoiles',charms:'Talismans',leadHeroes:'Trois héros pour ton rallye',joinHero:'Premier héros de ce renfort',pickEmpty:'Non sélectionné',addFirst:'Ajouter une carte',petActive:'Actif en combat',level:'Niveau',imported:'API · Arène',manual:'Manuel',skillMax:'Maximum selon les étoiles',notSet:'Non saisi',buffValue:'Valeur du bonus',buffType:'Type de bonus',talent:'Hunter Instinct (talent)',talentInfo:'Bonus aux points personnels contre l’ours, non pris en compte automatiquement'}
 };
 for(const lang of ['de','en','fr'])Object.assign(translations[lang],{"de":{"petBelowTier":"Ab Level 10 ist der erste dokumentierte Skill-Rang erreicht.","petRank":"Skill-Rang","buffAttack":"Truppenangriff","buffLethality":"Tödlichkeit","buffSquad":"Marschkapazität","buffRally":"Rally-Kapazität","buffDefense":"Gegnerische Verteidigung ↓","conditionalBuff":"Wirkung auf Bären-Boss noch nicht bestätigt","rallyOnly":"Nur beim Starten der eigenen Rally","applyBison":"Aktiven Bison-Bonus übernehmen","petDisclaimer":"Automatisch aus dem Tierlevel und der Skill-Rang-Tabelle berechnet (10 Level pro Rang). Tierlevel stammen nicht aus der API. Buffs nur einmal in den Stats berücksichtigen."},"en":{"petBelowTier":"First documented skill rank at pet level 10.","petRank":"Skill rank","buffAttack":"Squad attack","buffLethality":"Lethality","buffSquad":"March capacity","buffRally":"Rally capacity","buffDefense":"Enemy defense ↓","conditionalBuff":"Bear boss interaction not yet verified","rallyOnly":"Only when starting your own rally","applyBison":"Apply active bison bonus","petDisclaimer":"Automatically derived from pet level and skill tier tables (one rank per ten levels). The API does not supply pet levels. Avoid counting active buffs twice."},"fr":{"petBelowTier":"Premier palier documenté au niveau 10.","petRank":"Rang de compétence","buffAttack":"Attaque","buffLethality":"Létalité","buffSquad":"Capacité de marche","buffRally":"Capacité du rallye","buffDefense":"Défense ennemie ↓","conditionalBuff":"Effet sur le boss ours non confirmé","rallyOnly":"Uniquement en lançant ton propre rallye","applyBison":"Appliquer le bonus bison actif","petDisclaimer":"Calculé automatiquement selon le niveau et les paliers de compétence (10 niveaux par rang). Les niveaux ne viennent pas de l'API. Ne compte pas deux fois les bonus."}}[lang]);
+for(const lang of ['de','en','fr'])Object.assign(translations[lang],{"de":{"openHeroGallery":"＋ Held hinzufügen","saveHeroCard":"Heldenwerte speichern","petHelp":"Nur Bären-relevante aktive Pet-Fähigkeiten. Trage das Tierlevel ein: Skill-Rang und Buff-Wert werden automatisch ermittelt.","heroShortHelp":"Tippe eine Karte an, um ihre Sterne, das Widget und ihre Fähigkeiten zu bearbeiten. Über + weitere Helden hinzufügen."},"en":{"openHeroGallery":"＋ Add a hero","saveHeroCard":"Save hero stats","petHelp":"Only active pet skills relevant to Bear Trap. Enter the pet level to calculate skill rank and bonus automatically.","heroShortHelp":"Tap a card to edit stars, widget and skills. Use + to add other heroes."},"fr":{"openHeroGallery":"＋ Ajouter un héros","saveHeroCard":"Enregistrer les stats","petHelp":"Uniquement les capacités actives utiles contre l’ours. Saisis le niveau pour calculer automatiquement le rang et le bonus.","heroShortHelp":"Touche une carte pour modifier étoiles, équipement et compétences. Utilise + pour ajouter d’autres héros."}}[lang]);
 const tx=k=>(translations[document.documentElement.lang]||translations.en)[k]||k;
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const max=(v,a,b)=>Math.max(a,Math.min(b,Math.floor(Number(v)||0)));
@@ -56,8 +57,8 @@ function makeLayout(){
  v1.classList.add('bear-v1-manual');
  container=document.createElement('div');container.className='bear-v2-mount';
  r.insertBefore(container,v1);
- const heroSection=cardSection('🃏','heroDeck','heroInfo','heroBuilder');
- const petSection=cardSection('🐾','pets','petsInfo','petsVisuals');
+ const heroSection=cardSection('🃏','heroDeck','heroShortHelp','heroBuilder');
+ const petSection=cardSection('🐾','pets','petHelp','petsVisuals');
  const masterSection=cardSection('🏹','valora','valoraHint','masterVisuals');
  const gearSection=cardSection('🛡','gear','gearInfo','gearVisuals');
  container.append(heroSection,petSection,masterSection,gearSection);
@@ -106,7 +107,7 @@ let selectedHeroName='';
 function heroBuilder(){
  // Compact two-stage editor: portraits first, details only after a card is selected.
  const keep=selectedHeroName;
- rosterPanel.innerHTML='<div class="bear-hero-controls"><button type="button" class="secondary-btn" id="showHeroCatalog">＋ '+esc(tx('addHero'))+'</button><div class="bear-current-count" id="heroCount"></div></div>'+
+ rosterPanel.innerHTML='<div class="bear-hero-controls"><button type="button" class="secondary-btn" id="showHeroCatalog">'+esc(tx('openHeroGallery'))+'</button><div class="bear-current-count" id="heroCount"></div></div>'+
  '<div class="bear-hero-browser" id="heroBrowser" hidden><input type="search" id="heroSearch" placeholder="'+esc(tx('hero'))+'…"><div id="heroGallery" class="bear-portrait-gallery"></div></div>'+
  '<div id="heroEditor" class="bear-card-editor" hidden>'+
  '<div class="bear-hero-preview"><img id="heroPreviewImage" alt=""><div><b id="heroPreviewName"></b><small>★ NRW HERO CARD</small></div><button type="button" class="bear-editor-close" id="closeHeroEditor" aria-label="Close">✕</button></div>'+
@@ -114,7 +115,7 @@ function heroBuilder(){
  '<label class="field bear-widget-input">Widget +<input id="heroWidget" type="number" min="0" max="10"></label>'+
  '<details class="bear-skills-advanced"><summary>'+esc(tx('skill'))+' · <span id="skillMaximum"></span></summary>'+
  '<div class="bear-skill-row">'+[1,2,3].map(i=>'<label class="field">'+esc(tx('skill'))+' '+i+'<select id="heroSkill'+i+'"></select></label>').join('')+'</div><p class="hint">'+esc(tx('skillHint'))+'</p></details>'+
- '<div class="bear-hero-actions"><button type="button" class="primary" id="saveHero">'+esc(tx('addHero'))+'</button><button type="button" class="secondary-btn" id="deleteHero">'+esc(tx('removeHero'))+'</button></div></div>';
+ '<div class="bear-hero-actions"><button type="button" class="primary" id="saveHero">'+esc(tx('saveHeroCard'))+'</button><button type="button" class="secondary-btn" id="deleteHero">'+esc(tx('removeHero'))+'</button></div></div>';
  const browser=rosterPanel.querySelector('#heroBrowser'),editor=rosterPanel.querySelector('#heroEditor');
  const selector=rosterPanel.querySelector('#heroStarStep');
  function renderGallery(filter=''){
@@ -337,7 +338,7 @@ function renderEditor(){
  const join=joinSelect.querySelector('select');join.innerHTML=choices(options,m?.hero||'');
  joinSelect.hidden=active===0;ownPickers.hidden=active!==0;
  ['pickOwnI','pickOwnC','pickOwnA'].forEach((id,i)=>{document.getElementById(id).innerHTML=choices(options,s.ownHeroes[i]);});
- const help=document.querySelector('.hero-note');if(help)help.textContent=tx('heroInfo');
+ const help=document.querySelector('.hero-note');if(help)help.textContent=tx('heroShortHelp');
 }
 function showForProfile(evt){
  if(!validModel())return;
@@ -354,7 +355,7 @@ window.NRW_BEAR_ENHANCE={renderEditor};
 window.addEventListener('nrw-bear-loaded',showForProfile);
 document.querySelectorAll('button[data-lang]').forEach(b=>b.addEventListener('click',()=>{
  setTimeout(()=>{if(!validModel())return;const heads=container.querySelectorAll('section.panel');
-const tKeys=[['heroDeck','heroInfo'],['pets','petsInfo'],['valora','valoraHint'],['gear','gearInfo']];
+const tKeys=[['heroDeck','heroShortHelp'],['pets','petHelp'],['valora','valoraHint'],['gear','gearInfo']];
 heads.forEach((panel,i)=>{if(!tKeys[i])return;panel.querySelector('h2 span').textContent=tx(tKeys[i][0]);panel.querySelector('.panel-body>p.hint').textContent=tx(tKeys[i][1]);});
 document.querySelector('.bear-march-count>label').textContent=tx('joins');
 document.querySelector('.bear-data-note').textContent='✍️ '+tx('manualTroops');
