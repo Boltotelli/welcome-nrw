@@ -404,6 +404,7 @@ function showForProfile(evt){
  selectedHeroName='';
  sourceHeroes=Array.isArray(data.heroes)?data.heroes.map(h=>Object.assign({},h,{stars:Number.isFinite(Number(h.stars))?h.stars:parseInt(String(h.star_label||'').slice(0,1),10),tier:Number((String(h.star_label||'').match(/Tier (\d+)/)||[])[1]||0)})):[];
  state().heroesLevelCache=Object.fromEntries(sourceHeroes.map(h=>[h.name,{level:h.level}]));
+ window.NRW_BEAR_IMPORTED_HEROES=sourceHeroes.map(h=>({...h}));
  // Initial seed from older freeform hero fields, not from assumption of owned heroes.
  state();
  heroBuilder();renderRoster();renderPets();renderValora();renderGear();renderEditor();
@@ -416,7 +417,7 @@ function showForProfile(evt){
 }
 makeLayout();
 B.renderV2=()=>renderEditor();
-window.NRW_BEAR_ENHANCE={renderEditor,refreshGear:renderGear};
+window.NRW_BEAR_ENHANCE={renderEditor,refreshGear:renderGear,refreshHeroes:()=>{heroBuilder();renderRoster();renderEditor();}};
 window.addEventListener('nrw-bear-loaded',showForProfile);
 document.querySelectorAll('button[data-lang]').forEach(b=>b.addEventListener('click',()=>{
  setTimeout(()=>{if(!validModel())return;const heads=container.querySelectorAll('section.panel');
