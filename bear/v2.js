@@ -17,6 +17,7 @@ de:{optimizeStart:"Ideale Starter-Formation berechnen",optimizeHint:"Durchsucht 
 en:{optimizeStart:"Calculate best starter formation",optimizeHint:"Searches integer ratios using your inventory and capacity. Provisional model estimate, not guaranteed Kingshot damage."},
 fr:{optimizeStart:"Calculer la formation de départ",optimizeHint:"Compare les ratios entiers avec tes stocks et ta capacité. Estimation non validée, pas des dégâts garantis."}
 }[lang]);
+for(const lang of ['de','en','fr'])Object.assign(translations[lang],{de:{pitfall:"Bärenfalle-Forschungsstufe"},en:{pitfall:"Bear Trap level"},fr:{pitfall:"Niveau piège à ours"}}[lang]);
 const tx=k=>(translations[document.documentElement.lang]||translations.en)[k]||k;
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const max=(v,a,b)=>Math.max(a,Math.min(b,Math.floor(Number(v)||0)));
@@ -118,7 +119,8 @@ function makeLayout(){
  '<p class="hint">'+esc(tx('heroCapacityNote'))+'</p>'+
  '<div class="bear-squad-buffs"><label class="field">'+esc(tx('squadAttack'))+'<input id="squadAtk" min="0" step="0.1" type="number" placeholder="275.2"></label>'+
  '<label class="field">'+esc(tx('squadLethality'))+'<input id="squadLet" min="0" step="0.1" type="number" placeholder="60.1"></label>'+
- '<label class="bear-active"><input type="checkbox" id="squadSeparate"> '+esc(tx('squadSeparate'))+'</label></div>';
+ '<label class="bear-active"><input type="checkbox" id="squadSeparate"> '+esc(tx('squadSeparate'))+'</label></div>'+ 
+ '<label class="bear-pitfall">🐻 '+esc(tx('pitfall'))+'<select id="pitfall">'+choices(Array.from({length:6},(_,i)=>[i,'Lv. '+i+' ('+(i*5)+'% ATK)']),0)+'</select></label>';
  levelPanel.after(extra);
  ['heroCapManual','squadAtk','squadLet'].forEach(id=>{
   const field=extra.querySelector('#'+id);
@@ -128,6 +130,7 @@ function makeLayout(){
   });
  });
  extra.querySelector('#squadSeparate').addEventListener('change',e=>{state().squadSeparate=e.target.checked;B.save();B.render();});
+ extra.querySelector('#pitfall').addEventListener('change',e=>{B.model().values.pitfall=Number(e.target.value);B.save();B.render();});
  document.querySelector('.stickers').querySelectorAll('.sticker')[1].textContent='⚔ 1–7 RALLIES';
 }
 
@@ -408,6 +411,7 @@ function showForProfile(evt){
  document.querySelectorAll('.bear-troop-tg').forEach(x=>x.value=v.troopTiers[Number(x.dataset.idx)].tg);
  const box=document.getElementById('squadSeparate');if(box)box.checked=Boolean(v.squadSeparate);
  ['heroCapManual','squadAtk','squadLet'].forEach(id=>{const x=document.getElementById(id);if(x)x.value=Object.prototype.hasOwnProperty.call(B.model().values,id)?B.model().values[id]:'';});
+ const pitfall=document.getElementById('pitfall');if(pitfall)pitfall.value=B.model().values.pitfall??0;
 }
 makeLayout();
 B.renderV2=()=>renderEditor();
