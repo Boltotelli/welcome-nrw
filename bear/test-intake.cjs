@@ -1,0 +1,33 @@
+/* Regression fixtures transcribed from actual user-provided Kingshot screenshots.
+ * The screenshots themselves are not copied to the repository.
+ */
+'use strict';
+const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
+const w={window:{}};vm.runInNewContext(fs.readFileSync(__dirname+'/intake-core.js','utf8'),w);
+const C=w.window.NRW_BEAR_INTAKE_CORE;
+const troops='Schwadronvorschau\nAlle Trupps 2,2M/2,2M\nSpitzen Infanterie 553.225 Spitzen Kavallerie 555.230\nSpitzen Bogenschütze 1.113.108';
+const army=C.parseTroops(troops);
+assert.equal(army.troopsI,553225);assert.equal(army.troopsC,555230);assert.equal(army.troopsA,1113108);
+assert.equal(C.category(troops),'troops');
+const stats1='Bonusübersicht\nSchwadron Angriff 274,8%\nSchwadron Verteidigung 264,3%\nSchwadron Tödlichkeit 60,1%\nSchwadron Gesundheit 53,6%\nInfanterie-Angriff 181,5%\nInfanterie-Verteidigung 196,5%\nInfanterie-Gesundheit 287,8%\nInfanterie-Tödlichkeit 276,5%\nKavallerie-Angriff 169,2%\nKavallerie-Verteidigung 167,2%\nKavallerie-Gesundheit 246,0%\nKavallerie-Tödlichkeit 250,7%';
+const stats2='Bonusübersicht\nInfanterie-Angriff 181,5%\nInfanterie-Verteidigung 196,5%\nInfanterie-Gesundheit 287,8%\nInfanterie-Tödlichkeit 276,5%\nKavallerie-Angriff 169,2%\nKavallerie-Verteidigung 167,2%\nKavallerie-Gesundheit 246,0%\nKavallerie-Tödlichkeit 250,7%\nBogenschützen-Angriff 244,3%\nBogenschützen-Verteidigung 187,3%\nBogenschützen-Gesundheit 294,5%\nBogenschützen-Tödlichkeit 314,0%';
+const both={...C.parseStats(stats1),...C.parseStats(stats2)};
+assert.equal(C.category(stats1),'stats');assert.equal(C.category(stats2),'stats');
+for(const [key,value] of Object.entries({squadAtk:274.8,squadLet:60.1,iAtk:181.5,iLet:276.5,cAtk:169.2,cLet:250.7,aAtk:244.3,aLet:314}))assert.equal(both[key],value,key);
+assert.equal(C.normalizeNumber('1.113.108'),1113108);
+assert.equal(C.normalizeNumber('+492,17%'),492.17);
+assert.equal(C.normalizeNumber('60,1%'),60.1);
+const yang=C.parseHeroDetail('Yang S6\nGesamteigenschaften des Helden\nMaximales Level erreicht!\nExpedition\nBogenschützen-Angriff +492,17%\nBogenschützen-Tödlichkeit +300,70%', ['Yang','Petra','Zoe']);
+assert.equal(yang.name,'Yang');assert.equal(yang.level,80);
+assert.equal(yang.expeditionStats.aAtk,492.17);assert.equal(yang.expeditionStats.aLet,300.70);
+assert.equal('stars' in yang,false,'S6 marks generation, not stars');
+assert.equal(C.maxSkill(4),5);assert.equal(C.maxSkill(3),4);assert.equal(C.maxSkill(5),5);
+const types={Yang:'archer',Rosa:'archer',Petra:'cavalry',Zoe:'infantry'};
+const owned=[{name:'Yang',level:80,stars:4,widget:5},{name:'Rosa',level:80,stars:5,widget:3},{name:'Petra',level:80,stars:5},{name:'Zoe',level:80,stars:5}];
+const suggestion=C.advise(owned,['Zoe','Petra','Rosa'],types);
+assert.equal(suggestion.length,1);assert.equal(suggestion[0].suggestion,'Yang');
+assert.equal(suggestion[0].current,'Rosa');assert.equal(suggestion[0].slot,2);
+assert.equal(C.advise(owned,['Zoe','Petra','Yang'],types).length,0);
+const html=fs.readFileSync(__dirname+'/index.html','utf8');
+for(const filename of ['intake-core.js','intake-ui.js','intake-ui.css'])assert.ok(html.includes('./'+filename));
+console.log('BEAR INTAKE: troop amounts, 2 scrolling stats screenshots, hero detail/max-skill and class-safe advisor passed.');
