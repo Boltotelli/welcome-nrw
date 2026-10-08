@@ -117,3 +117,49 @@
  .bear-card-editor .bear-skill-row{grid-template-columns:repeat(3,minmax(0,1fr))}
  .bear-star-progress output{font-size:13px}
 }
+
+
+/* Troop tiers / combat setup (October 2026) */
+.bear-troop-tier-wrap{margin:14px 0;padding:13px;border:1px solid var(--line);border-radius:14px;background:var(--card)}
+.bear-troop-tier-wrap>p:first-child{margin:0 0 10px}
+.bear-troop-tier-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.bear-troop-tier-card{display:grid;gap:8px;border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:11px}
+.bear-troop-tier-card>b{font-size:12px;min-height:25px}
+.bear-troop-tier-card label{display:grid;gap:4px;font-size:11px;font-weight:800;color:var(--muted)}
+.bear-troop-tier-card select{width:100%;padding:9px 6px}
+.bear-cap-extra{border-top:1px solid var(--line);padding:12px 0;display:grid;gap:9px}
+.bear-cap-extra>.field{max-width:340px;font-weight:800;font-size:12px;color:var(--muted)}
+.bear-cap-extra>.field input{margin-top:4px}
+.bear-cap-extra>p{margin:0}
+.bear-squad-buffs{display:grid;grid-template-columns:1fr 1fr;gap:9px;align-items:end}
+.bear-squad-buffs>.field{font-size:12px;color:var(--muted);font-weight:800}
+.bear-squad-buffs .bear-active{grid-column:1/-1;line-height:1.5}
+.bear-pitfall{display:flex;align-items:center;gap:13px;flex-wrap:wrap;font-size:12px;font-weight:900;color:var(--amber)}
+.bear-pitfall select{max-width:220px}
+.bear-hero-basic-fields{display:grid;grid-template-columns:1fr 1fr;max-width:340px;gap:13px;margin:12px 0}
+.bear-hero-basic-fields>.field{font-size:12px;font-weight:800;color:var(--muted)}
+.bear-hero-basic-fields input{width:100%;margin-top:5px}
+.bear-hero-gear{padding:12px;margin:13px 0;border:1px solid var(--line);background:var(--panel);border-radius:13px}
+.bear-hero-gear-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:12px}
+.bear-gear-entry{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;min-width:0;background:var(--card);padding:9px;border:1px solid var(--line);border-radius:11px}
+.bear-gear-entry>b{grid-column:1/-1;font-size:12px;color:var(--amber)}
+.bear-gear-entry label{display:grid;gap:4px;font-size:10px;color:var(--muted);min-width:0}
+.bear-gear-entry input,.bear-gear-entry select{width:100%;padding:7px 5px;font-size:12px}
+.bear-optimize-box{border:1px solid rgba(247,184,91,.4);background:linear-gradient(135deg,rgba(235,150,40,.11),transparent),var(--panel);border-radius:13px;padding:12px;margin:12px 0}
+.bear-optimize-box>.primary{width:100%}
+.bear-optimize-results{margin-top:10px;font-size:13px}
+.bear-optimize-results>strong{color:var(--amber)}
+.bear-optimize-option{display:grid;grid-template-columns:38px 1fr auto;align-items:center;gap:8px;border-bottom:1px solid var(--line);padding:7px 0}
+.bear-optimize-option small{font-size:11px;color:var(--muted)}
+/* Distinct thumb and track so users can operate all three coupled sliders. */
+.editor input[type=range]{appearance:none;-webkit-appearance:none;height:9px;border-radius:9px;background:linear-gradient(90deg,rgba(253,194,96,.4),var(--track))}
+.editor input[type=range]::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;height:24px;width:24px;border:3px solid #fff3d4;border-radius:50%;background:#c88832;box-shadow:0 1px 5px rgba(0,0,0,.4)}
+.editor input[type=range]::-moz-range-thumb{height:18px;width:18px;border:3px solid #fff3d4;border-radius:50%;background:#c88832;box-shadow:0 1px 5px rgba(0,0,0,.4)}
+@media(max-width:650px){
+ .bear-troop-tier-grid{grid-template-columns:1fr}
+ .bear-troop-tier-card{grid-template-columns:1fr 1fr;align-items:end}
+ .bear-troop-tier-card>b{grid-column:1/-1}
+ .bear-hero-gear-grid{grid-template-columns:1fr}
+ .bear-optimize-option{grid-template-columns:26px 1fr auto}
+ .bear-optimize-option small{font-size:10px}
+}
