@@ -126,7 +126,7 @@ details{border-top:1px solid var(--line);margin-top:14px;padding-top:14px}summar
     <div class="field"><label for="master" data-t="masterBuff">Valora bonus</label><input id="master" type="number" min="0" step="1" placeholder="0"></div>
     <div class="field"><label for="pet" data-t="petBuff">Bison bonus</label><input id="pet" type="number" min="0" step="1" placeholder="0"></div>
   </div>
-  <details><summary data-t="extraStats">Optional: offensive battle stats for theoretical scoring</summary>
+  <details open><summary data-t="extraStats">Optional: offensive battle stats for theoretical scoring</summary>
     <p class="hint" data-t="statsHelp">Enter attack and lethality percentages for each troop class. Missing values are treated as 0%, not estimated from gear.</p>
     <div class="inputs">
       <div class="field"><label data-t="iAtk">Infantry attack %</label><input id="iAtk" type="number" step=".1" min="0"></div>
@@ -323,7 +323,7 @@ function compare(hasData){
    return '<div class="comparison-item"><span>'+x.label+'</span><span class="bar"><i style="width:'+((x.result.score||0)/max*100).toFixed(1)+'%"></i></span><span>'+num(x.result.score)+'</span></div>';
  }).join('') :'<div class="hint">'+safe(t('leaderMissing'))+'</div>';
 }
-function syncField(id){var value=Number(el(id).value);model.values[id]=Number.isFinite(value)&&value>=0?value:0;save();render();}
+function syncField(id){var raw=el(id).value.trim(),value=Number(raw);if(raw===''||!Number.isFinite(value)||value<0)delete model.values[id];else model.values[id]=value;save();render();}
 fields.forEach(function(k){el(k).addEventListener('input',function(){syncField(k);});});textFields.forEach(function(k){el(k).addEventListener('input',function(){model.textValues=model.textValues||{};model.textValues[k]=this.value.slice(0,100);save();});});
 leaderFields.forEach(function(k){el('leader_'+k).addEventListener('input',function(){
   var m=model.marches[active];m.leaderStats=m.leaderStats||{};
