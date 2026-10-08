@@ -36,6 +36,7 @@ jobs:
           node --check bear/charm-references.js
           node --check bear/charm-shapes.js
           node --check bear/screenshot-importer.js
+          python3 -m py_compile bear/build-charm-shapes.py
           node bear/test-screenshot.cjs
           node - <<'NODE'
           global.window = {};
@@ -61,6 +62,12 @@ jobs:
           cp assets/nrw-banner.svg _site/assets/nrw-banner.svg
           sed -i 's|/assets/nrw-banner.svg|./assets/nrw-banner.svg|g' _site/index.html
           sed -i 's|href="/dashboard/"|href="https://welcome-nrw.vercel.app/dashboard/"|g' _site/index.html
+          # Best effort: only compact shape signatures (no copied artwork).
+          if python3 -m venv /tmp/bear-charm-venv && /tmp/bear-charm-venv/bin/pip install --quiet Pillow; then
+            /tmp/bear-charm-venv/bin/python bear/build-charm-shapes.py _site/charm-signatures.json || true
+          else
+            echo 'Online charm signatures unavailable; local Lv3–Lv8 examples remain usable.'
+          fi
           touch _site/.nojekyll
       - uses: actions/upload-pages-artifact@v3
         with:
