@@ -33,6 +33,7 @@ jobs:
           cp bear/index.html _site/index.html
           cp assets/nrw-banner.svg _site/assets/nrw-banner.svg
           sed -i 's|/assets/nrw-banner.svg|./assets/nrw-banner.svg|g' _site/index.html
+          sed -i 's|href="/dashboard/"|href="https://welcome-nrw.vercel.app/dashboard/"|g' _site/index.html
           touch _site/.nojekyll
       - uses: actions/upload-pages-artifact@v3
         with:
