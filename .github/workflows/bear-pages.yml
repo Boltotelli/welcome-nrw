@@ -27,11 +27,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
+      - name: Verify Bear scripts and combat data
+        run: |
+          node --check bear/catalog.js
+          node --check bear/combat.js
+          node --check bear/v2.js
+          node bear/test-combat.cjs
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          text = Path('bear/index.html').read_text()
+          scripts = re.findall(r'<script(?:[^>]*)>(.*?)</script>', text, re.S)
+          Path('/tmp/bear-inline.js').write_text('\n'.join(scripts))
+          PY
+          node --check /tmp/bear-inline.js
       - name: Build isolated static test
         run: |
           mkdir -p _site/assets
           cp bear/index.html _site/index.html
-          cp bear/catalog.js bear/v2.js bear/v2.css _site/
+          cp bear/catalog.js bear/combat.js bear/v2.js bear/v2.css _site/
           cp assets/nrw-banner.svg _site/assets/nrw-banner.svg
           sed -i 's|/assets/nrw-banner.svg|./assets/nrw-banner.svg|g' _site/index.html
           sed -i 's|href="/dashboard/"|href="https://welcome-nrw.vercel.app/dashboard/"|g' _site/index.html
