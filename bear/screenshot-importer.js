@@ -117,6 +117,43 @@ function rarity(ctx,pos){
  if(gold>denom*.07&&gold>purple*1.7)return 'gold';
  return '';
 }
+function readGearStars(ctx,pos){
+ // Count isolated yellow star components along the LEFT edge of the gear
+ // icon. Only return a proposal when their size and position are plausible.
+ const sx=ctx.canvas.width/W,sy=ctx.canvas.height/H;
+ const x=Math.max(0,Math.round((pos[0]-58)*sx));
+ const y=Math.max(0,Math.round((pos[1]-25)*sy));
+ const w=Math.min(ctx.canvas.width-x,Math.round(40*sx));
+ const h=Math.min(ctx.canvas.height-y,Math.round(89*sy));
+ if(w<15||h<40)return null;
+ const d=ctx.getImageData(x,y,w,h).data;
+ const yes=new Uint8Array(w*h),seen=new Uint8Array(w*h);
+ for(let i=0;i<w*h;i++){
+  const p=i*4,R=d[p],G=d[p+1],Blue=d[p+2];
+  if(R>150&&G>115&&Blue<155&&R>Blue*1.20&&G>Blue*1.09)yes[i]=1;
+ }
+ const candidates=[];
+ for(let i=0;i<yes.length;i++){
+  if(!yes[i]||seen[i])continue;
+  let a=0,sumX=0,sumY=0;const stack=[i];seen[i]=1;
+  while(stack.length){
+   const id=stack.pop(),px=id%w,py=Math.floor(id/w);
+   a++;sumX+=px;sumY+=py;
+   for(const v of [px>0?id-1:-1,px+1<w?id+1:-1,py>0?id-w:-1,py+1<h?id+w:-1]){
+    if(v>=0&&yes[v]&&!seen[v]){seen[v]=1;stack.push(v);}
+   }
+  }
+  const nx=sumX/Math.max(1,a)/w,ny=sumY/Math.max(1,a)/h;
+  const scaled=a/(sx*sy);
+  if(scaled>=80&&scaled<=420&&nx>.22&&nx<.81&&ny>.12&&ny<.82)candidates.push({x:nx,y:ny});
+ }
+ // Nearby fragments of one star could be counted twice; require distinct
+ // vertical centres separated by roughly 12 original screenshot pixels.
+ candidates.sort((a,b)=>a.y-b.y);
+ const distinct=[];
+ for(const c of candidates)if(distinct.every(v=>Math.abs(v.y-c.y)>12/89))distinct.push(c);
+ return distinct.length>=1&&distinct.length<=3?distinct.length:null;
+}
 async function getRemoteTemplates(){
  if(cacheImages!==null)return cacheImages;
  cacheImages=[];
@@ -173,7 +210,7 @@ function review(scans,onlineCount){
   const qualities=[['',T().skip],['green','Green'],['blue','Blue'],['purple','Purple'],['gold','Gold'],['red','Red']];
   const q=selectOptions(g.quality,qualities);q.dataset.slot=String(gi);q.dataset.field='quality';
   const tier=selectOptions('',[['',T().skip],...Array.from({length:6},(_,i)=>[i+1,'T'+(i+1)])]);tier.dataset.slot=String(gi);tier.dataset.field='tier';
-  const star=selectOptions('',[['',T().skip],...Array.from({length:4},(_,i)=>[i,i+'★'])]);star.dataset.slot=String(gi);star.dataset.field='stars';
+  const star=selectOptions(g.stars??'',[['',T().skip],...Array.from({length:4},(_,i)=>[i,i+'★'])]);star.dataset.slot=String(gi);star.dataset.field='stars';
   meta.append(label('q',T().quality,q),label('tier',T().tier,tier),label('stars',T().stars,star));card.appendChild(meta);
   const grid=document.createElement('div');grid.className='bear-import-charms';
   g.charms.forEach((ch,j)=>{
@@ -204,7 +241,7 @@ async function analyse(file){
   const ctx=canvas.getContext('2d',{willReadFrequently:true});ctx.drawImage(image,0,0);
   const remote=await getRemoteTemplates();
   const output=slots.map(slot=>({
-   ...slot,thumb:drawThumb(ctx,slot.gear,47),quality:rarity(ctx,slot.gear),
+   ...slot,thumb:drawThumb(ctx,slot.gear,47),quality:rarity(ctx,slot.gear),stars:readGearStars(ctx,slot.gear),
    charms:slot.charms.map(pos=>{
     const input=maskOf(getCrop(ctx,pos,18),slot.type);
     const extra=remote.map(x=>({level:x.level,bits:x.bits,source:'online'}));
