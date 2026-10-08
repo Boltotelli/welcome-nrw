@@ -388,8 +388,8 @@ function renderEditor(){
  const options=[['',tx('pickEmpty')],...availableHeroes().map(h=>[h.name,h.name])];
  const m=B.model().marches[active];
  const join=joinSelect.querySelector('select');join.innerHTML=choices(options,m?.hero||'');
- joinSelect.hidden=active===0;ownPickers.hidden=active!==0;
- const optimize=document.querySelector('.bear-optimize-box');if(optimize)optimize.hidden=active!==0;
+ joinSelect.hidden=active===0;ownPickers.hidden=active!==0 && !ownPickers.closest('#uxQuickStart');
+ const optimize=document.querySelector('.bear-optimize-box');if(optimize)optimize.hidden=active!==0 && !optimize.closest('#uxQuickStart');
  ['pickOwnI','pickOwnC','pickOwnA'].forEach((id,i)=>{
    const troopType=['infantry','cavalry','archer'][i];
    const allowed=[['',tx('pickEmpty')],...availableHeroes().filter(h=>C.heroTypes[h.name]===troopType).map(h=>[h.name,h.name])];
