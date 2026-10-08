@@ -91,6 +91,33 @@ function makeLayout(){
  const arsenal=document.getElementById('troopsI').closest('section.panel');
  arsenal.querySelector('.panel-body').insertAdjacentHTML('afterbegin','<p class="bear-data-note">✍️ '+esc(tx('manualTroops'))+'</p>');
  const heroList=document.getElementById('heroes');heroList.classList.add('bear-hero-roster');
+ const levelPanel=document.createElement('div');levelPanel.className='bear-troop-tier-wrap';
+ levelPanel.innerHTML='<p class="micro">'+esc(tx('troopTierHeading'))+'</p><div class="bear-troop-tier-grid">'+
+ ['🛡️','🐴','🏹'].map((emoji,i)=>'<div class="bear-troop-tier-card"><b>'+emoji+' '+esc([tx('typeInf'),tx('typeCav'),tx('typeArch')][i])+'</b>'+
+ '<label>T-Stufe<select class="bear-troop-tier" data-idx="'+i+'">'+choices([['0','—'],...Array.from({length:11},(_,j)=>[j+1,'T'+(j+1)])],0)+'</select></label>'+
+ '<label>Truegold<select class="bear-troop-tg" data-idx="'+i+'">'+choices(Array.from({length:9},(_,j)=>[j,'TG'+j]),0)+'</select></label></div>').join('')+'</div><p class="hint">'+esc(tx('troopTierHelp'))+'</p>';
+ arsenal.querySelector('.buff-row').before(levelPanel);
+ levelPanel.querySelectorAll('select').forEach(node=>node.addEventListener('change',()=>{
+  const i=Number(node.dataset.idx),obj=state().troopTiers[i];
+  if(node.classList.contains('bear-troop-tier'))obj.tier=max(node.value,0,11);
+  else obj.tg=max(node.value,0,8);
+  B.save();B.render();
+ }));
+ const extra=document.createElement('div');extra.className='bear-cap-extra';
+ extra.innerHTML='<label class="field">'+esc(tx('heroCapacityOverride'))+'<input id="heroCapManual" type="number" min="0" placeholder="Auto 3 × Lv80 = 40410"></label>'+
+ '<p class="hint">'+esc(tx('heroCapacityNote'))+'</p>'+
+ '<div class="bear-squad-buffs"><label class="field">'+esc(tx('squadAttack'))+'<input id="squadAtk" min="0" step="0.1" type="number" placeholder="275.2"></label>'+
+ '<label class="field">'+esc(tx('squadLethality'))+'<input id="squadLet" min="0" step="0.1" type="number" placeholder="60.1"></label>'+
+ '<label class="bear-active"><input type="checkbox" id="squadSeparate"> '+esc(tx('squadSeparate'))+'</label></div>';
+ levelPanel.after(extra);
+ ['heroCapManual','squadAtk','squadLet'].forEach(id=>{
+  const field=extra.querySelector('#'+id);
+  field.addEventListener('input',()=>{
+   if(field.value.trim()==='')delete B.model().values[id];else B.model().values[id]=Math.max(0,Number(field.value)||0);
+   B.save();B.render();
+  });
+ });
+ extra.querySelector('#squadSeparate').addEventListener('change',e=>{state().squadSeparate=e.target.checked;B.save();B.render();});
  document.querySelector('.stickers').querySelectorAll('.sticker')[1].textContent='⚔ 1–7 RALLIES';
 }
 
@@ -364,6 +391,11 @@ function showForProfile(evt){
  // Initial seed from older freeform hero fields, not from assumption of owned heroes.
  state();
  heroBuilder();renderRoster();renderPets();renderValora();renderGear();renderEditor();
+ const v=state();
+ document.querySelectorAll('.bear-troop-tier').forEach(x=>x.value=v.troopTiers[Number(x.dataset.idx)].tier);
+ document.querySelectorAll('.bear-troop-tg').forEach(x=>x.value=v.troopTiers[Number(x.dataset.idx)].tg);
+ const box=document.getElementById('squadSeparate');if(box)box.checked=Boolean(v.squadSeparate);
+ ['heroCapManual','squadAtk','squadLet'].forEach(id=>{const x=document.getElementById(id);if(x)x.value=Object.prototype.hasOwnProperty.call(B.model().values,id)?B.model().values[id]:'';});
 }
 makeLayout();
 B.renderV2=()=>renderEditor();
