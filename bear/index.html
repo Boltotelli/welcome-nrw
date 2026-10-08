@@ -44,6 +44,7 @@ details{border-top:1px solid var(--line);margin-top:14px;padding-top:14px}summar
 <link rel="stylesheet" href="./v2.css">
 <link rel="stylesheet" href="./ux.css">
 <link rel="stylesheet" href="./screenshot-importer.css">
+<link rel="stylesheet" href="./intake-ui.css">
 </head>
 <body>
 <div class="shell">
@@ -381,7 +382,7 @@ function optimizeStarter(){
  candidates.sort(function(a,b){return b.score-a.score||a.i-b.i||a.c-b.c;});
  if(!candidates.length){out.textContent='No available troop formation.';return;}
  var best=candidates[0],choices=[];
- candidates.forEach(function(p){if(choices.length>=5)return;if(choices.every(function(v){return Math.abs(v.i-p.i)+Math.abs(v.c-p.c)+Math.abs(v.a-p.a)>=6;}))choices.push(p);});
+ candidates.forEach(function(p){if(choices.length>=3)return;if(choices.every(function(v){return Math.abs(v.i-p.i)+Math.abs(v.c-p.c)+Math.abs(v.a-p.a)>=6;}))choices.push(p);});
  model.marches[0].i=best.i;model.marches[0].c=best.c;
  active=0;save();render();
  var gain=prior>0?((best.score/prior-1)*100):null;
@@ -456,10 +457,10 @@ el('themeButton').addEventListener('click',function(){
  document.documentElement.dataset.theme=theme;try{localStorage.setItem('nrw_theme',theme);}catch(_){}
 });
 document.querySelectorAll('button[data-lang]').forEach(function(btn){btn.addEventListener('click',function(){language(btn.dataset.lang);});});
-window.NRW_BEAR_BRIDGE={model:function(){return model;},save:save,render:render,optimizeStarter:optimizeStarter,profile:function(){return profile;},activeMarchCount:activeMarchCount,active:function(){return active;},selectMarch:function(i){active=i;render();}};
+window.NRW_BEAR_BRIDGE={model:function(){return model;},save:save,render:render,calculate:calculate,capacity:capacity,optimizeStarter:optimizeStarter,profile:function(){return profile;},activeMarchCount:activeMarchCount,active:function(){return active;},selectMarch:function(i){active=i;render();}};
 try{document.documentElement.dataset.theme=localStorage.getItem('nrw_theme')||'dark';language(localStorage.getItem('nrw_page_lang')||'en');}catch(_){language('en');}
 })();
 </script>
-<script src="./catalog.js"></script><script src="./v2.js"></script><script src="./ux.js"></script><script src="./charm-references.js"></script><script src="./charm-shapes.js"></script><script src="./tier-recognizer.js"></script><script src="./screenshot-importer.js"></script>
+<script src="./catalog.js"></script><script src="./v2.js"></script><script src="./ux.js"></script><script src="./charm-references.js"></script><script src="./charm-shapes.js"></script><script src="./tier-recognizer.js"></script><script src="./screenshot-importer.js"></script><script src="./intake-core.js"></script><script src="./intake-ui.js"></script>
 </body>
 </html>
