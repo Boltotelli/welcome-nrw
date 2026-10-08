@@ -92,3 +92,11 @@ Do not edit the existing live dashboard navigation until the user approves the g
 1. Verify the actual Kingshot implementation for expedition skill priorities/stacks, class-specific hero gear/refine stats, exclusive widget skills and chance/proc distributions. A hero's presence/level/gear **does not yet yield all battle effects automatically**. Do not present generated ratio as universally optimal.
 2. Support multiple troop tiers inside each class, independent march capacity per join, detailed joiner-first-skill eligibility and hero skill attribution. Add defensible pet/Valora activation effects only when clearly separate from combat report stats.
 3. Compare at least two real Bear reports per distinct ratio for the same captain, classes and stat snapshot. Calibrate numerical estimates before claiming raw damage accuracy.
+
+## Quick-start UX revision — 2026-10-08
+
+- In response to usability feedback, the first visible profile workspace is a **three-step quick setup**: (1) troop amount + T/TG tier in one row per class; (2) base march capacity, number of joins and three troop-type-filtered starter heroes; (3) six class-specific attack/lethality percentages. The provisional starter optimization action and its 5,151-ratio results also appear directly below these steps.
+- Existing DOM **input nodes** are moved rather than recreated. Their event listeners, model references and `localStorage` persistence remain unchanged. Older saved data remains readable.
+- The detailed hero portraits/skills/gear editor, pets, Valora, governor gear, extra bonus fields and individual march editor are grouped under **one collapsed advanced disclosure**. The starter-hero selectors and optimize button stay visible even when an individual join is selected.
+- The top status distinguishes incomplete required model inputs from ready-to-estimate. Neither missing offensive percentages nor troop-tier values are silently invented. Outputs remain explicitly labeled **unvalidated provisional model recommendations**, not real Kingshot damage points.
+- Files: new `bear/ux.js`, `bear/ux.css`, indexed after existing `v2.js`/CSS. The GitHub Pages test workflow publishes them and syntax-checks `ux.js`. No production merge, Supabase, NAP or Vercel deploy.
