@@ -65,6 +65,8 @@ details{border-top:1px solid var(--line);margin-top:14px;padding-top:14px}summar
  <div class="panel-body">
    <div class="sub" data-t="profileInfo">Enter your Governor ID. Only members of [NRW]United, alliance 105300097 on kingdom 1044, can use the optimizer.</div>
    <form id="lookupForm" class="lookup"><input id="governorId" inputmode="numeric" pattern="[0-9]{5,20}" maxlength="20" placeholder="Governor ID" aria-label="Governor ID" required><button class="primary" id="lookupButton" type="submit" data-t="load">Load player</button></form>
+   <div class="preset"><button class="secondary-btn" type="button" id="offlineMode" data-t="offlineMode">🛠 Offline testen</button><label class="secondary-btn" style="cursor:pointer">📂 <span data-t="jsonImportLabel">MightPulse-JSON importieren</span><input id="jsonImport" hidden type="file" accept=".json,application/json"></label></div>
+   <p class="hint" data-t="offlineWarning">Offline-Daten werden nicht gegen die NRW-Mitgliedschaft geprüft und bleiben nur auf deinem Gerät.</p>
    <div class="msg" id="lookupMessage" role="status" aria-live="polite"></div>
    <div class="player" id="playerInfo"><img id="playerAvatar" alt=""><div><b id="playerName"></b><small id="playerMeta"></small></div></div>
  </div>
@@ -74,6 +76,43 @@ details{border-top:1px solid var(--line);margin-top:14px;padding-top:14px}summar
  <div class="panel-head"><h2><span class="gold">02.</span> <span data-t="heroTitleSection">Hero deck</span></h2><span class="micro">★ ARENA FIVE</span></div>
  <div class="panel-body"><div class="hero-row" id="heroes"></div><p class="hint hero-note" data-t="heroNote">The API only reveals the five arena defense heroes. Starter and join heroes can be edited manually below.</p></div>
 </section>
+<section class="panel">
+<div class="panel-head"><h2>🎒 <span data-t="missingTitle">Fehlende Spieldaten ergänzen</span></h2><span class="micro">LOCAL SAVE</span></div>
+<div class="panel-body">
+<p class="hint" data-t="missingHelp">Diese Angaben werden nur dokumentiert. Aktuelle Truppen, Offensive und Marschkapazität gibst du im Truppenarsenal ein. Keine Boni doppelt addieren!</p>
+<details open><summary data-t="petLevels">Begleiter / Aktive Fähigkeiten</summary><div class="inputs">
+<div class="field"><label>Panther Level</label><input id="pantherLevel" type="number" min="0"></div>
+<div class="field"><label>Nashorn Level</label><input id="rhinoLevel" type="number" min="0"></div>
+<div class="field"><label>Bison Level</label><input id="bisonLevel" type="number" min="0"></div>
+<div class="field"><label>Elch Level</label><input id="mooseLevel" type="number" min="0"></div>
+<div class="field"><label>Panther Tödlichkeit %</label><input id="pantherBuff" type="number" min="0" step=".1"></div>
+<div class="field"><label>Nashorn Angriff %</label><input id="rhinoBuff" type="number" min="0" step=".1"></div>
+</div></details>
+<details><summary data-t="valoraLevels">Valora / Meister</summary><div class="inputs">
+<div class="field"><label>Skill 1</label><input id="valora1" type="number" min="0"></div>
+<div class="field"><label>Skill 2</label><input id="valora2" type="number" min="0"></div>
+<div class="field"><label>Skill 3</label><input id="valora3" type="number" min="0"></div>
+<div class="field"><label>Skill 4</label><input id="valora4" type="number" min="0"></div>
+<div class="field"><label>Affinität</label><input id="affinity" type="number" min="0"></div>
+<div class="field"><label>Rally-Kapazität extra</label><input id="rallyCapacity" type="number" min="0"></div>
+</div></details>
+<details><summary data-t="gearLevels">GovGear und Talismane</summary><div class="inputs">
+<div class="field"><label>GovGear Infanterie</label><input id="gearInf" maxlength="100"></div>
+<div class="field"><label>GovGear Kavallerie</label><input id="gearCav" maxlength="100"></div>
+<div class="field"><label>GovGear Bogenschützen</label><input id="gearArch" maxlength="100"></div>
+<div class="field"><label>Talismane Infanterie</label><input id="charmInf" maxlength="100" placeholder="4/4/4"></div>
+<div class="field"><label>Talismane Kavallerie</label><input id="charmCav" maxlength="100" placeholder="4/4/4"></div>
+<div class="field"><label>Talismane Bogenschützen</label><input id="charmArch" maxlength="100" placeholder="4/4/4"></div>
+</div></details>
+<details><summary data-t="missingHeroes">Helden außerhalb des Arena-Teams</summary><div class="inputs">
+<div class="field"><label>Infanterie-Held</label><input id="infHero" maxlength="90"></div>
+<div class="field"><label>Sterne / Skills / Widget</label><input id="infHeroStats" maxlength="90"></div>
+<div class="field"><label>Kavallerie-Held</label><input id="cavHero" maxlength="90"></div>
+<div class="field"><label>Sterne / Skills / Widget</label><input id="cavHeroStats" maxlength="90"></div>
+<div class="field"><label>Bogenschützen-Held</label><input id="archHero" maxlength="90"></div>
+<div class="field"><label>Sterne / Skills / Widget</label><input id="archHeroStats" maxlength="90"></div>
+</div></details>
+</div></section>
 <section class="panel">
  <div class="panel-head"><h2><span class="gold">03.</span> <span data-t="army">Troop arsenal</span></h2><span class="micro" data-t="private">LOCAL ONLY</span></div>
  <div class="panel-body">
@@ -149,14 +188,27 @@ var languages = {
  de:{back:'← Spieler-Dashboard',heroTitle:'Jeder Marsch',heroTitle2:'zählt.',heroDesc:'Stelle deine sieben Märsche zusammen, vergleiche Truppenformationen und simuliere die Bärenfalle vor dem nächsten Kampf.',profileTitle:'Dein Governor',profileInfo:'Gib deine Governor-ID ein. Nur [NRW]United, Allianz-ID 105300097 auf Server 1044, kann den Optimierer nutzen.',load:'Spieler laden',heroTitleSection:'Heldendeck',heroNote:'Die API zeigt nur fünf Arena-Verteidigungshelden. Starter- und Join-Helden lassen sich unten manuell anpassen.',army:'Truppenarsenal',private:'NUR AUF DIESEM GERÄT',inf:'Infanterie',cav:'Kavallerie',arch:'Bogenschützen',baseCap:'Marschkapazität ohne Buffs',masterBuff:'Valora-Bonus',petBuff:'Bison-Bonus',extraStats:'Optional: Offensive Kampfstats für theoretische Prognosen',statsHelp:'Gib Angriff und Tödlichkeit je Truppenklasse in Prozent ein. Leere Felder zählen als 0 %, nicht als ausgerüstete Boni.',iAtk:'Infanterie Angriff %',iLet:'Infanterie Tödlichkeit %',cAtk:'Kavallerie Angriff %',cLet:'Kavallerie Tödlichkeit %',aAtk:'Bogenschützen Angriff %',aLet:'Bogenschützen Tödlichkeit %',formation:'Sieben-Marsch-Kommandozentrale',edit:'MARSCH BEARBEITEN',firstHero:'Erster Held / Aufstellung',preset:'Formationsvorlage',custom:'Eigene Formation',allJoins:'Diese Formation auf alle 6 Joins anwenden',formationHelp:'Tippe einen Marsch an, um Helden und Formation zu ändern. Alle sieben Märsche werden neu berechnet.',resources:'Truppencheck',perMarch:'Kapazität je Marsch',totalDeployed:'Eingesetzte Truppen',archLeft:'Bogenschützen übrig',joinFill:'Join-Auslastung',unlockHint:'Lade ein bestätigtes NRW-Profil, um den Optimierer freizuschalten.',simTitle:'Bären-Simulator',simHelp:'Ein experimenteller relativer Index, KEIN echter Kingshot-Schaden. Helden-Auslösungen, Truppenbasiswerte und fremde Rallyleader sind noch nicht vollständig modelliert.',damageIndex:'Geschätzter relativer Schadensindex',simFoot:'Nur zum Vergleichen · unvalidiertes Modell',simulate:'⚔ Angriff simulieren',compare:'Formationsduell',compareHelp:'Vergleich von Join-Vorlagen mit gleicher eigener Rally und denselben verfügbaren Truppen.',footerNote:'Kein Login, keine zentrale Speicherung. Persönliche Eingaben bleiben in deinem Browser.',starter:'START',join:'JOIN',hero:'Held',fill:'gefüllt',noData:'Trage deine Truppenanzahlen und die Marschkapazität ein.',shortage:'Nicht alle Märsche können mit diesem Verhältnis gefüllt werden. Die eigene Rally erhält Vorrang; die sechs Joins werden gleichmäßig verkleinert.',ready:'Alle sieben Märsche sind bei der angenommenen Kapazität vollständig gefüllt.',notMember:'Diese Governor-ID gehört derzeit nicht zur Allianz NRW auf Server 1044.',missingKey:'Der API-Schlüssel für diesen Teststand ist noch nicht serverseitig eingerichtet. Die Oberfläche ist fertig, aber die Spielerabfrage noch nicht aktiv.',notFound:'Spieler-ID nicht gefunden.',badId:'Bitte gib eine gültige Governor-ID ein.',busy:'Profil wird geladen … die API kann bis zu einer Minute benötigen.',rate:'Der Datenanbieter begrenzt gerade die Anfragen. Später erneut versuchen.',failed:'Spielerabruf fehlgeschlagen. Bitte später erneut versuchen.',saved:'Profil geladen. Eigene Eingaben bleiben auf deinem Gerät.',lead:'EIGENE RALLY',heroesUnavailable:'Keine Arena-Helden geliefert.',privateStats:'Nur Arena-Helden · verborgene Ausrüstung wird nicht importiert',unknownStats:'Für sinnvolle Schadensvergleiche bitte die offensiven Werte ergänzen.'},
  fr:{back:'← Tableau de bord',heroTitle:'Chaque marche',heroTitle2:'compte.',heroDesc:'Compose tes sept marches, compare les formations et simule le piège à ours avant le prochain combat.',profileTitle:'Ton gouverneur',profileInfo:'Saisis ton identifiant. Seuls les joueurs de [NRW]United (alliance 105300097, royaume 1044) peuvent utiliser cet outil.',load:'Charger le joueur',heroTitleSection:'Cartes de héros',heroNote:"L’API ne montre que cinq héros de défense d’arène. Tu peux modifier les héros de départ et de renfort ci-dessous.",army:'Réserve de troupes',private:'LOCAL UNIQUEMENT',inf:'Infanterie',cav:'Cavalerie',arch:'Archers',baseCap:'Capacité sans bonus',masterBuff:'Bonus Valora',petBuff:'Bonus Bison',extraStats:'Facultatif : statistiques offensives pour les estimations',statsHelp:'Saisis attaque et létalité de chaque type de troupes en %. Les champs vides valent 0 %, sans estimation des équipements.',iAtk:'Attaque infanterie %',iLet:'Létalité infanterie %',cAtk:'Attaque cavalerie %',cLet:'Létalité cavalerie %',aAtk:'Attaque archers %',aLet:'Létalité archers %',formation:'Salle de guerre : sept marches',edit:'MODIFIER LA MARCHE',firstHero:'Premier héros / équipe',preset:'Formation prédéfinie',custom:'Personnalisée',allJoins:'Appliquer aux 6 renforts',formationHelp:'Touche une marche pour modifier ses héros et sa formation. Les sept marches sont recalculées.',resources:'Contrôle des troupes',perMarch:'Capacité par marche',totalDeployed:'Troupes déployées',archLeft:'Archers restants',joinFill:'Remplissage renforts',unlockHint:'Charge un profil NRW confirmé pour débloquer les fonctions.',simTitle:'Simulateur',simHelp:"Indicateur relatif expérimental, PAS les dégâts réels du jeu. Les talents aléatoires, les valeurs de base et les chefs d'autres rallyes ne sont pas complètement modélisés.",damageIndex:'Indice relatif de dégâts estimés',simFoot:'Comparaison uniquement · modèle non validé',simulate:'⚔ Simuler',compare:'Duels de formations',compareHelp:'Comparaison des renforts avec le même rallye personnel et les mêmes troupes.',footerNote:'Sans connexion ni stockage central. Tes valeurs restent sur cet appareil.',starter:'DÉPART',join:'RENFORT',hero:'Héros',fill:'rempli',noData:'Saisis tes troupes et ta capacité de marche.',shortage:'Toutes les marches ne sont pas complètes. Le rallye personnel est prioritaire et les six renforts sont réduits équitablement.',ready:'Les sept marches sont complètes avec cette capacité.',notMember:"Cet identifiant n'appartient pas à NRW dans le royaume 1044.",missingKey:"La clé API n'est pas encore configurée pour cet aperçu. L’interface est prête, mais l'import du profil est désactivé.",notFound:'Identifiant introuvable.',badId:'Saisis un identifiant valide.',busy:'Chargement du profil… cela peut durer une minute.',rate:'Le fournisseur limite les requêtes. Réessaie plus tard.',failed:'Échec du chargement. Réessaie plus tard.',saved:'Profil chargé. Les saisies manuelles restent sur cet appareil.',lead:'MON RALLYE',heroesUnavailable:"Aucun héros d'arène fourni.",privateStats:"Héros d’arène seulement · équipements masqués non importés",unknownStats:'Renseigne les statistiques offensives pour des comparaisons significatives.'}
 };
+for(var l of ['de','en','fr'])Object.assign(languages[l],{
+ offlineMode:l==='de'?'Offline testen':l==='fr'?'Tester hors ligne':'Try offline',
+ jsonImportLabel:l==='de'?'MightPulse-JSON importieren':l==='fr'?'Importer le JSON MightPulse':'Import MightPulse JSON',
+ offlineWarning:l==='de'?'Offline-Eingaben sind nicht NRW-verifiziert und bleiben nur auf deinem Gerät.':l==='fr'?'Le mode hors ligne ne vérifie pas NRW. Les données restent sur cet appareil.':'Offline data is not NRW-verified and remains on this device.',
+ missingTitle:l==='de'?'Fehlende Spieldaten ergänzen':l==='fr'?'Compléter les données manquantes':'Enter missing game data',
+ missingHelp:l==='de'?'Gear, Pets und Skills werden lokal gespeichert. Offensive Kampfboni bitte separat eintragen und nicht doppelt zählen.':l==='fr'?'Les équipements, animaux et compétences restent en local. Évite de compter les bonus deux fois.':'Gear, pets and skills are saved locally. Enter total attack/lethality stats separately, without double-counting.',
+ petLevels:l==='de'?'Begleiter und Buffs':l==='fr'?'Animaux et bonus':'Pets and buffs',
+ valoraLevels:l==='de'?'Valora und Meister':l==='fr'?'Valora et Maître':'Valora and master',
+ gearLevels:l==='de'?'GovGear und Talismane':l==='fr'?'Équipement et talismans':'Governor gear and charms',
+ missingHeroes:l==='de'?'Nicht per API geladene Helden':l==='fr'?'Héros non inclus dans l’API':'Heroes missing from the API',
+ offlineNotice:l==='de'?'Offline-Test: keine Allianzprüfung, alle Eingaben bleiben lokal.':l==='fr'?'Test hors ligne : aucune vérification de l’alliance.':'Offline test: no alliance verification; your inputs stay local.',
+ offlineError:l==='de'?'JSON ungültig oder nicht NRW/1044.':l==='fr'?'JSON invalide ou hors NRW/1044.':'Invalid JSON or not NRW/1044.'
+});
 var num = function(value){ return Math.round(value).toLocaleString(document.documentElement.lang === 'de' ? 'de-DE' : document.documentElement.lang === 'fr' ? 'fr-FR' : 'en-GB'); };
 var defaultMar = [
  {hero:'', i:1,c:12},
  {hero:'',i:10,c:10},{hero:'',i:10,c:10},{hero:'',i:10,c:10},
  {hero:'',i:10,c:10},{hero:'',i:10,c:10},{hero:'',i:10,c:10}
 ];
-var fields=['troopsI','troopsC','troopsA','cap','master','pet','iAtk','iLet','cAtk','cLet','aAtk','aLet'];
-var active=0,profile=null,model={values:{},marches:defaultMar.map(function(m){return Object.assign({},m);})},lang='en',lastResult=null;
+var fields=['troopsI','troopsC','troopsA','cap','master','pet','iAtk','iLet','cAtk','cLet','aAtk','aLet','pantherLevel','rhinoLevel','bisonLevel','mooseLevel','pantherBuff','rhinoBuff','valora1','valora2','valora3','valora4','affinity','rallyCapacity'];var textFields=['gearInf','gearCav','gearArch','charmInf','charmCav','charmArch','infHero','infHeroStats','cavHero','cavHeroStats','archHero','archHeroStats'];
+var active=0,profile=null,model={values:{},textValues:{},marches:defaultMar.map(function(m){return Object.assign({},m);})},lang='en',lastResult=null;
 function el(id){return document.getElementById(id);}
 function t(k){return (languages[lang]||languages.en)[k]||languages.en[k]||k;}
 function safe(s){return String(s||'').replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
@@ -182,8 +234,8 @@ function calculate(marches){
  return {raw:raw,actual:actual,spent:spent,stock:stock,joinFactor:joinFactor,cap:cap,score:score};
 }
 function save(){if(profile)try{localStorage.setItem('nrw_bear_profile_v1_'+profile.governor_id,JSON.stringify(model));}catch(_){}}
-function read(id){try{var value=JSON.parse(localStorage.getItem('nrw_bear_profile_v1_'+id)||'null');if(value&&typeof value==='object'){fields.forEach(function(k){var v=Number(value.values&&value.values[k]);model.values[k]=Number.isFinite(v)&&v>=0?v:0;});if(Array.isArray(value.marches)&&value.marches.length===7){value.marches.forEach(function(m,j){var i=Number(m.i),c=Number(m.c);if(Number.isFinite(i)&&Number.isFinite(c)&&i>=0&&c>=0&&i+c<=100){model.marches[j]={hero:String(m.hero||'').slice(0,70),i:i,c:c};}});}}}catch(_){}
- fields.forEach(function(k){el(k).value=model.values[k]||'';});}
+function read(id){try{var value=JSON.parse(localStorage.getItem('nrw_bear_profile_v1_'+id)||'null');if(value&&typeof value==='object'){fields.forEach(function(k){if(value.values&&Object.prototype.hasOwnProperty.call(value.values,k)){var v=Number(value.values[k]);if(Number.isFinite(v)&&v>=0)model.values[k]=v;}});model.textValues=value.textValues||{};if(Array.isArray(value.marches)&&value.marches.length===7){value.marches.forEach(function(m,j){var i=Number(m.i),c=Number(m.c);if(Number.isFinite(i)&&Number.isFinite(c)&&i>=0&&c>=0&&i+c<=100){model.marches[j]={hero:String(m.hero||'').slice(0,70),i:i,c:c};}});}}}catch(_){}
+ fields.forEach(function(k){el(k).value=Object.prototype.hasOwnProperty.call(model.values,k)?model.values[k]:'';});textFields.forEach(function(k){el(k).value=String((model.textValues||{})[k]||'');});}
 function message(key,type){var node=el('lookupMessage');node.className='msg show'+(type?' '+type:'');node.textContent=t(key);}
 function language(value){
  lang=languages[value]?value:'en';document.documentElement.lang=lang;document.body.dataset.lang=lang;
@@ -244,7 +296,7 @@ function compare(hasData){
  }).join(''):'<div class="hint">'+safe(t('noData'))+'</div>';
 }
 function syncField(id){var value=Number(el(id).value);model.values[id]=Number.isFinite(value)&&value>=0?value:0;save();render();}
-fields.forEach(function(k){el(k).addEventListener('input',function(){syncField(k);});});
+fields.forEach(function(k){el(k).addEventListener('input',function(){syncField(k);});});textFields.forEach(function(k){el(k).addEventListener('input',function(){model.textValues=model.textValues||{};model.textValues[k]=this.value.slice(0,100);save();});});
 el('heroInput').addEventListener('input',function(){model.marches[active].hero=this.value.slice(0,70);save();var rows=document.querySelectorAll('.march');if(rows[active])rows[active].querySelector('.march-name b').textContent=this.value||(active===0?t('lead'):t('hero')+' '+active);});
 el('preset').addEventListener('change',function(){
  if(this.value==='custom')return;var p=this.value.split('/').map(Number);
@@ -258,6 +310,27 @@ el('preset').addEventListener('change',function(){
 });
 el('copyJoins').addEventListener('click',function(){var m=model.marches[active];for(var j=1;j<7;j++){model.marches[j].i=m.i;model.marches[j].c=m.c;}save();render();});
 el('simulate').addEventListener('click',function(){if(!profile)return;render();var score=el('score');score.animate([{transform:'scale(1)',opacity:.65},{transform:'scale(1.11)',opacity:1},{transform:'scale(1)',opacity:1}],{duration:600,easing:'ease-out'});});
+function activate(data,online){
+ profile=data.player;model={values:{},textValues:{},marches:defaultMar.map(function(m){return Object.assign({},m);})};active=0;read(profile.governor_id);
+ el('playerName').textContent=profile.name+(online?'':' · OFFLINE');
+ el('playerMeta').textContent=(online?'NRW ✓':'UNVERIFIED')+' · K'+profile.kid+' · '+num(profile.power||0);
+ el('playerAvatar').src=profile.avatar_url||'./assets/nrw-banner.svg';
+ el('playerInfo').classList.add('show');el('restricted').hidden=false;
+ renderHeroes(data);message(online?'saved':'offlineNotice','ok');render();
+}
+el('offlineMode').addEventListener('click',function(){
+ var id=el('governorId').value.trim();
+ activate({player:{governor_id:/^\d{5,20}$/.test(id)?id:'offline-demo',name:'Local demo',kid:1044,power:0},heroes:[]},false);
+});
+el('jsonImport').addEventListener('change',async function(){
+ var file=this.files&&this.files[0];if(!file)return;
+ try{
+ var raw=JSON.parse(await file.text()),p=raw.player||{};
+ if(Number(p.kid)!==1044||Number((p.alliance||{}).aid)!==105300097||!/^[0-9]{5,20}$/.test(String(p.governor_id)))throw Error('invalid');
+ var heroes=(raw.heroes||[]).slice(0,5).map(function(h){return {name:h.name,level:h.level,star_label:h.star_label,widget:h.exclusive_gear_level,skills:(h.skill_levels||[]).map(function(v){return v.level;})};});
+ activate({player:{governor_id:p.governor_id,name:p.nick_name,kid:p.kid,power:p.power,avatar_url:p.avatar_url},heroes:heroes},false);
+ }catch(_){message('offlineError','error');}finally{this.value='';}
+});
 el('lookupForm').addEventListener('submit',async function(e){
  e.preventDefault();var id=el('governorId').value.trim();if(!/^\d{5,20}$/.test(id)){message('badId','error');return;}
  var button=el('lookupButton');button.disabled=true;message('busy');
@@ -267,12 +340,7 @@ el('lookupForm').addEventListener('submit',async function(e){
   if(!response.ok||!data.ok){
    var error=data.error==='not_nrw_member'?'notMember':data.error==='bear_api_not_configured'?'missingKey':data.error==='player_not_found'?'notFound':data.error==='provider_rate_limited'?'rate':'failed';message(error,'error');return;
   }
-  profile=data.player;model={values:{},marches:defaultMar.map(function(m){return Object.assign({},m);})};active=0;read(profile.governor_id);
-  el('playerName').textContent=profile.name;el('playerMeta').textContent='NRW · K'+profile.kid+' · '+num(profile.power);
-  el('playerAvatar').src=profile.avatar_url||'/assets/nrw-banner.svg';
-  el('playerInfo').classList.add('show');
-  el('restricted').hidden=false;
-  renderHeroes(data);message('saved','ok');render();
+  activate(data,true);
  }catch(_){message('failed','error');}finally{button.disabled=false;}
 });
 el('themeButton').addEventListener('click',function(){
