@@ -150,7 +150,17 @@ details{border-top:1px solid var(--line);margin-top:14px;padding-top:14px}summar
     <div class="percent"><span data-t="cav">Cavalry</span><span id="cavLabel">12%</span></div><input id="cSlider" type="range" min="0" max="60" step=".5">
     <div class="percent"><span data-t="arch">Archers</span><span id="archLabel">87%</span></div>
     <div class="preset"><button type="button" id="copyJoins" data-t="allJoins">Apply selected ratio to all 6 joins</button></div>
-    <p class="tip" data-t="formationHelp">Tap any march to change its lineup and formation. Values recalculate for all seven marches.</p>
+    <details id="leaderPanel" hidden><summary data-t="leaderStatsTitle">Kampfwerte des Rallyleaders</summary>
+<p class="hint" data-t="leaderStatsHelp">Für Joins gelten die Stats des Rallyleaders. Ohne seine Werte keine persönliche Schadensprognose.</p>
+<div class="inputs">
+<div class="field"><label>Inf Angriff %</label><input id="leader_iAtk" type="number" min="0" step=".1"></div>
+<div class="field"><label>Inf Tödlichkeit %</label><input id="leader_iLet" type="number" min="0" step=".1"></div>
+<div class="field"><label>Kav Angriff %</label><input id="leader_cAtk" type="number" min="0" step=".1"></div>
+<div class="field"><label>Kav Tödlichkeit %</label><input id="leader_cLet" type="number" min="0" step=".1"></div>
+<div class="field"><label>Bog Angriff %</label><input id="leader_aAtk" type="number" min="0" step=".1"></div>
+<div class="field"><label>Bog Tödlichkeit %</label><input id="leader_aLet" type="number" min="0" step=".1"></div>
+</div></details>
+<p class="tip" data-t="formationHelp">Tap any march to change its lineup and formation. Values recalculate for all seven marches.</p>
    </div>
  </div>
 </section>
@@ -201,13 +211,18 @@ for(var l of ['de','en','fr'])Object.assign(languages[l],{
  offlineNotice:l==='de'?'Offline-Test: keine Allianzprüfung, alle Eingaben bleiben lokal.':l==='fr'?'Test hors ligne : aucune vérification de l’alliance.':'Offline test: no alliance verification; your inputs stay local.',
  offlineError:l==='de'?'JSON ungültig oder nicht NRW/1044.':l==='fr'?'JSON invalide ou hors NRW/1044.':'Invalid JSON or not NRW/1044.'
 });
+for(var loc of ['de','en','fr'])Object.assign(languages[loc],{
+ leaderStatsTitle:loc==='de'?'Kampfwerte des Rallyleaders':loc==='fr'?'Statistiques du chef de rallye':'Rally leader battle stats',
+ leaderStatsHelp:loc==='de'?'Beim Join wirken die Stats des Rallyleaders, NICHT deine eigenen. Für Vergleiche bitte alle sechs Werte je Rallyleader aus dem Kampfbericht ergänzen.':loc==='fr'?'En renfort les statistiques du chef sont utilisées, pas les tiennes. Renseigne les six valeurs par chef.':'Joins use the rally leader’s stats, NOT your own. Enter all six stats for each leader for comparisons.',
+ leaderMissing:loc==='de'?'Noch kein Schadenvergleich: Bitte deine Angriffs-/Tödlichkeitswerte und die Werte aller sechs Rallyleader ergänzen. Die Truppenverteilung funktioniert bereits.':loc==='fr'?'Pas de comparaison de dégâts sans les statistiques de chaque chef et les tiennes. Les troupes peuvent déjà être réparties.':'No damage comparison until your offensive stats and the stats of all six rally leaders are filled in. Troop allocation is ready.'
+});
 var num = function(value){ return Math.round(value).toLocaleString(document.documentElement.lang === 'de' ? 'de-DE' : document.documentElement.lang === 'fr' ? 'fr-FR' : 'en-GB'); };
 var defaultMar = [
  {hero:'', i:1,c:12},
  {hero:'',i:10,c:10},{hero:'',i:10,c:10},{hero:'',i:10,c:10},
  {hero:'',i:10,c:10},{hero:'',i:10,c:10},{hero:'',i:10,c:10}
 ];
-var fields=['troopsI','troopsC','troopsA','cap','master','pet','iAtk','iLet','cAtk','cLet','aAtk','aLet','pantherLevel','rhinoLevel','bisonLevel','mooseLevel','pantherBuff','rhinoBuff','valora1','valora2','valora3','valora4','affinity','rallyCapacity'];var textFields=['gearInf','gearCav','gearArch','charmInf','charmCav','charmArch','infHero','infHeroStats','cavHero','cavHeroStats','archHero','archHeroStats'];
+var leaderFields=['iAtk','iLet','cAtk','cLet','aAtk','aLet'];var fields=['troopsI','troopsC','troopsA','cap','master','pet','iAtk','iLet','cAtk','cLet','aAtk','aLet','pantherLevel','rhinoLevel','bisonLevel','mooseLevel','pantherBuff','rhinoBuff','valora1','valora2','valora3','valora4','affinity','rallyCapacity'];var textFields=['gearInf','gearCav','gearArch','charmInf','charmCav','charmArch','infHero','infHeroStats','cavHero','cavHeroStats','archHero','archHeroStats'];
 var active=0,profile=null,model={values:{},textValues:{},marches:defaultMar.map(function(m){return Object.assign({},m);})},lang='en',lastResult=null;
 function el(id){return document.getElementById(id);}
 function t(k){return (languages[lang]||languages.en)[k]||languages.en[k]||k;}
@@ -228,13 +243,24 @@ function calculate(marches){
  joinFactor=Math.max(0,Math.min(1,joinFactor));
  var actual=[start],spent=start.slice();
  for(j=1;j<7;j++){var picked=raw[j].map(function(v){return Math.floor(v*joinFactor);});actual.push(picked);for(k=0;k<3;k++)spent[k]+=picked[k];}
- var weights=[[n('iAtk'),n('iLet')],[n('cAtk'),n('cLet')],[n('aAtk'),n('aLet')]].map(function(p){return (1+p[0]/100)*(1+p[1]/100);});
- // Relative heuristic only. Not an implementation of the actual Kingshot damage formula.
- var score=actual.reduce(function(sum,row){return sum+row.reduce(function(sub,v,k){return sub+Math.sqrt(Math.max(0,v))*weights[k];},0);},0);
+ // Own battle stats must never be substituted for those of another rally leader.
+ var fullOwn=leaderFields.every(function(k){return Object.prototype.hasOwnProperty.call(model.values,k);});
+ var fullJoins=marches.slice(1).every(function(m){return leaderFields.every(function(k){return m.leaderStats&&Object.prototype.hasOwnProperty.call(m.leaderStats,k);});});
+ var score=null;
+ if(fullOwn&&fullJoins){
+   score=actual.reduce(function(sum,row,j){
+     var stats=j===0?model.values:marches[j].leaderStats;
+     var weights=[['iAtk','iLet'],['cAtk','cLet'],['aAtk','aLet']].map(function(keys){
+       return (1+Number(stats[keys[0]])/100)*(1+Number(stats[keys[1]])/100);
+     });
+     return sum+row.reduce(function(sub,v,k){return sub+Math.sqrt(Math.max(0,v))*weights[k];},0);
+   },0);
+ }
+ // Illustrative index only: does not include troop-base values or hero procs.
  return {raw:raw,actual:actual,spent:spent,stock:stock,joinFactor:joinFactor,cap:cap,score:score};
 }
 function save(){if(profile)try{localStorage.setItem('nrw_bear_profile_v1_'+profile.governor_id,JSON.stringify(model));}catch(_){}}
-function read(id){try{var value=JSON.parse(localStorage.getItem('nrw_bear_profile_v1_'+id)||'null');if(value&&typeof value==='object'){fields.forEach(function(k){if(value.values&&Object.prototype.hasOwnProperty.call(value.values,k)){var v=Number(value.values[k]);if(Number.isFinite(v)&&v>=0)model.values[k]=v;}});model.textValues=value.textValues||{};if(Array.isArray(value.marches)&&value.marches.length===7){value.marches.forEach(function(m,j){var i=Number(m.i),c=Number(m.c);if(Number.isFinite(i)&&Number.isFinite(c)&&i>=0&&c>=0&&i+c<=100){model.marches[j]={hero:String(m.hero||'').slice(0,70),i:i,c:c};}});}}}catch(_){}
+function read(id){try{var value=JSON.parse(localStorage.getItem('nrw_bear_profile_v1_'+id)||'null');if(value&&typeof value==='object'){fields.forEach(function(k){if(value.values&&Object.prototype.hasOwnProperty.call(value.values,k)){var v=Number(value.values[k]);if(Number.isFinite(v)&&v>=0)model.values[k]=v;}});model.textValues=value.textValues||{};if(Array.isArray(value.marches)&&value.marches.length===7){value.marches.forEach(function(m,j){var i=Number(m.i),c=Number(m.c);if(Number.isFinite(i)&&Number.isFinite(c)&&i>=0&&c>=0&&i+c<=100){model.marches[j]={hero:String(m.hero||'').slice(0,70),i:i,c:c,leaderStats:(m.leaderStats&&typeof m.leaderStats==='object')?m.leaderStats:{}};}});}}}catch(_){}
  fields.forEach(function(k){el(k).value=Object.prototype.hasOwnProperty.call(model.values,k)?model.values[k]:'';});textFields.forEach(function(k){el(k).value=String((model.textValues||{})[k]||'');});}
 function message(key,type){var node=el('lookupMessage');node.className='msg show'+(type?' '+type:'');node.textContent=t(key);}
 function language(value){
@@ -273,16 +299,18 @@ function render(){
  el('joinFill').textContent=(result.joinFactor*100).toFixed(1)+'%';
  var haveData=result.cap>0&&result.stock.reduce(function(a,b){return a+b;},0)>0;
  el('resourceNotice').textContent=haveData?(result.joinFactor<.999?t('shortage'):t('ready')):t('noData');
- if(haveData){el('score').textContent=num(result.score);}else{el('score').textContent='—';}
+ el('score').textContent=haveData&&result.score!==null?num(result.score):'—';
  var m=model.marches[active];
  el('editTitle').textContent=(active===0?t('lead'):t('join')+' '+active);
  if(document.activeElement!==el('heroInput'))el('heroInput').value=m.hero;
  el('iSlider').value=m.i;el('cSlider').value=m.c;
+ el('leaderPanel').hidden=active===0;
+ leaderFields.forEach(function(k){var stats=m.leaderStats||{};if(document.activeElement!==el('leader_'+k))el('leader_'+k).value=Object.prototype.hasOwnProperty.call(stats,k)?stats[k]:'';});
  el('infLabel').textContent=m.i+'%';el('cavLabel').textContent=m.c+'%';el('archLabel').textContent=(100-m.i-m.c)+'%';
  var preset=ratio(m).join('/');
  var known=Array.from(el('preset').options).some(function(o){return o.value===preset;});
  el('preset').value=known?preset:'custom';
- compare(haveData);
+ compare(haveData&&result.score!==null);
 }
 function compare(hasData){
  var options=[[5,5,'5/5/90'],[10,10,'10/10/80'],[2.5,15,'2.5/15/82.5']];
@@ -290,13 +318,18 @@ function compare(hasData){
    var marches=model.marches.map(function(m,j){return j===0?Object.assign({},m):Object.assign({},m,{i:x[0],c:x[1]});});
    return {label:x[2],result:calculate(marches)};
  });
- var max=Math.max.apply(null,outcomes.map(function(x){return x.result.score;}))||1;
+ var max=Math.max.apply(null,outcomes.map(function(x){return x.result.score||0;}))||1;
  el('compareResults').innerHTML=hasData?outcomes.map(function(x){
-   return '<div class="comparison-item"><span>'+x.label+'</span><span class="bar"><i style="width:'+(x.result.score/max*100).toFixed(1)+'%"></i></span><span>'+num(x.result.score)+'</span></div>';
- }).join(''):'<div class="hint">'+safe(t('noData'))+'</div>';
+   return '<div class="comparison-item"><span>'+x.label+'</span><span class="bar"><i style="width:'+((x.result.score||0)/max*100).toFixed(1)+'%"></i></span><span>'+num(x.result.score)+'</span></div>';
+ }).join('') :'<div class="hint">'+safe(t('leaderMissing'))+'</div>';
 }
 function syncField(id){var value=Number(el(id).value);model.values[id]=Number.isFinite(value)&&value>=0?value:0;save();render();}
 fields.forEach(function(k){el(k).addEventListener('input',function(){syncField(k);});});textFields.forEach(function(k){el(k).addEventListener('input',function(){model.textValues=model.textValues||{};model.textValues[k]=this.value.slice(0,100);save();});});
+leaderFields.forEach(function(k){el('leader_'+k).addEventListener('input',function(){
+  var m=model.marches[active];m.leaderStats=m.leaderStats||{};
+  if(this.value.trim()==='')delete m.leaderStats[k];else m.leaderStats[k]=Math.max(0,Number(this.value)||0);
+  save();render();
+});});
 el('heroInput').addEventListener('input',function(){model.marches[active].hero=this.value.slice(0,70);save();var rows=document.querySelectorAll('.march');if(rows[active])rows[active].querySelector('.march-name b').textContent=this.value||(active===0?t('lead'):t('hero')+' '+active);});
 el('preset').addEventListener('change',function(){
  if(this.value==='custom')return;var p=this.value.split('/').map(Number);
