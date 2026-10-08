@@ -1,0 +1,267 @@
+/* NRW Bear screenshot wizard — all OCR runs on the player's own device.
+ * The only remote traffic is on-demand Tesseract.js code and language data.
+ * Screenshot pixels are NEVER sent to a remote API. User confirmation
+ * precedes ALL modifications to persistent player data.
+ */
+(function(){
+'use strict';
+const B=window.NRW_BEAR_BRIDGE,Core=window.NRW_BEAR_INTAKE_CORE,cat=window.NRW_BEAR_CATALOG;
+const restricted=document.getElementById('restricted'),quick=document.getElementById('uxQuickStart');
+if(!B||!Core||!cat||!restricted||!quick)return;
+const locale=()=>document.documentElement.lang||'de';
+const isDe=()=>locale()==='de';
+const say=(de,en)=>isDe()?de:en;
+const $=id=>document.getElementById(id);
+const types={troops:'🪖 Truppen',stats:'📊 Kampfstats',starter:'⚔️ Starter-Details',roster:'🃏 Heldenübersicht',gear:'🛡️ GovGear',unknown:'❓ Unbekannt'};
+const captions={troopsI:'Infanterie',troopsC:'Kavallerie',troopsA:'Bogenschützen',
+ iAtk:'Infanterie Angriff',iLet:'Infanterie Tödlichkeit',cAtk:'Kavallerie Angriff',cLet:'Kavallerie Tödlichkeit',
+ aAtk:'Bogenschützen Angriff',aLet:'Bogenschützen Tödlichkeit',
+ squadAtk:'Schwadron Angriff',squadLet:'Schwadron Tödlichkeit',
+ squadDef:'Schwadron Verteidigung',squadHp:'Schwadron Gesundheit',
+ iDef:'Infanterie Verteidigung',iHp:'Infanterie Gesundheit',
+ cDef:'Kavallerie Verteidigung',cHp:'Kavallerie Gesundheit',
+ aDef:'Bogenschützen Verteidigung',aHp:'Bogenschützen Gesundheit'};
+const required=['troopsI','troopsC','troopsA','iAtk','iLet','cAtk','cLet','aAtk','aLet'];
+const shell=document.createElement('section');shell.className='panel bear-intake-wizard';shell.id='bearIntakeWizard';
+shell.innerHTML='<div class="bear-intake-header"><span class="micro">NRW · BEAR TRAP</span><h2>📸 '+say('Screenshots statt Eingabe','Screenshots instead of typing')+'</h2>'+
+ '<p class="hint">'+say('Alle Bilder gleichzeitig auswählen – auch mehrere Stats- und Helden-Screenshots. Werte werden zusammengeführt und vor dem Speichern geprüft.','Choose multiple troop, combat and hero screenshots at once. Review all values before saving.')+'</p>'+
+ '<div class="bear-intake-pickers"><label class="primary" id="intakePicker"><span>📂 '+say('Screenshots auswählen','Select screenshots')+'</span><input id="intakeFiles" type="file" accept="image/*" multiple hidden></label>'+
+ '<button type="button" class="secondary-btn" id="intakeGear">🛡️ '+say('GovGear-Screenshot','GovGear screenshot')+'</button></div>'+
+ '<p class="hint">🔒 '+say('Bilder bleiben lokal. OCR läuft auf deinem Gerät; dafür wird die Erkennungssoftware beim ersten Mal geladen.','Screenshots stay on-device. OCR libraries download once and run locally.')+'</p>'+
+ '<div id="intakeStatus" role="status" aria-live="polite"></div></div>'+
+ '<div id="intakeQueue" class="bear-intake-queue" hidden></div>'+
+ '<div class="bear-intake-actions" id="intakeApplyRow" hidden><button class="primary" type="button" id="intakeApply">✓ '+say('Geprüfte Angaben übernehmen','Apply reviewed values')+'</button><button class="secondary-btn" type="button" id="intakeClear">'+say('Verwerfen','Discard')+'</button></div>'+
+ '<div class="bear-intake-progress"><strong id="intakeProgress"></strong><span id="intakeMissing" class="hint"></span></div>'+
+ '<div id="intakeAdvice" class="bear-intake-advice"></div>'+
+ '<div id="intakeResultSlot"></div>';
+restricted.insertBefore(shell,quick);
+const missingDetails=document.createElement('details');missingDetails.id='intakeMissingDetails';missingDetails.className='bear-intake-missing';
+const missingSummary=document.createElement('summary');missingSummary.textContent='✏️ '+say('Fehlende Werte / Einstellungen','Missing values / settings');
+missingDetails.appendChild(missingSummary);quick.before(missingDetails);missingDetails.appendChild(quick);
+const optimizeBox=document.querySelector('.bear-optimize-box');if(optimizeBox) $('intakeResultSlot').appendChild(optimizeBox);
+const gear=document.querySelector('.bear-import-card');
+if(gear){const gearDetails=document.createElement('details');gearDetails.className='bear-intake-gear-details';gearDetails.innerHTML='<summary>🛡️ '+say('GovGear & Talismane – Import prüfen','GovGear & charms – review')+'</summary>';gear.before(gearDetails);gearDetails.appendChild(gear);}
+$('intakeGear').addEventListener('click',()=>{
+ const d=gear?.closest('details');if(d)d.open=true;
+ document.getElementById('bearGearPhoto')?.click();
+});
+let ocrWorker=null,queue=[],busy=false;
+function state(){const m=B.model();if(!m.v2)m.v2={};if(!m.v2.manualHeroes)m.v2.manualHeroes={};if(!Array.isArray(m.v2.ownHeroes))m.v2.ownHeroes=['','',''];return m.v2;}
+function esc(str){return String(str??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function status(t){$('intakeStatus').textContent=t;}
+async function loadOCR(){
+ if(ocrWorker)return ocrWorker;
+ if(!window.Tesseract){
+  await new Promise((resolve,reject)=>{
+   const script=document.createElement('script');script.src='https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js';
+   script.onload=resolve;script.onerror=()=>reject(new Error('OCR library blocked'));document.head.appendChild(script);
+  });
+ }
+ status(say('OCR wird vorbereitet …','Preparing OCR …'));
+ try{ocrWorker=await window.Tesseract.createWorker('deu+eng',1,{logger:m=>{
+  if(m.status==='recognizing text')status(say('Bilder werden lokal gelesen','Reading images locally')+' '+Math.round((m.progress||0)*100)+'%');
+ }});}
+ catch(_){ocrWorker=await window.Tesseract.createWorker('eng',1);}
+ return ocrWorker;
+}
+async function imageCanvas(file){
+ const url=URL.createObjectURL(file);
+ try{
+  const img=await new Promise((resolve,reject)=>{
+   const el=new Image();el.onload=()=>resolve(el);el.onerror=reject;el.src=url;
+  });
+  const canvas=document.createElement('canvas'),scale=Math.min(1.7,1400/img.naturalWidth,1800/img.naturalHeight);
+  canvas.width=Math.round(img.naturalWidth*scale);canvas.height=Math.round(img.naturalHeight*scale);
+  const cx=canvas.getContext('2d',{willReadFrequently:true});cx.drawImage(img,0,0,canvas.width,canvas.height);
+  return canvas;
+ }finally{URL.revokeObjectURL(url);}
+}
+function cropToThumb(src,x,y,w,h){
+ const c=document.createElement('canvas');c.width=130;c.height=170;
+ c.getContext('2d').drawImage(src,x*src.width,y*src.height,w*src.width,h*src.height,0,0,c.width,c.height);
+ return c.toDataURL('image/jpeg',.74);
+}
+function overviewTiles(canvas,text){
+ // Four-column Kingshot hero overview: names are absent, so the user must
+ // confirm portrait identity. Never guess a name from text-only OCR.
+ const collected=[],matches=[...String(text).matchAll(/Lv\.?\s*(\d{1,3})/ig)].map(m=>Number(m[1]));
+ for(let row=0;row<5;row++)for(let col=0;col<4;col++){
+  const x=.038+col*.232,y=.082+row*.177;
+  if(y+.145>.945)continue;
+  const index=col+row*4;
+  collected.push({image:cropToThumb(canvas,x,y,.211,.171),name:'',level:matches.length>index?matches[index]:null,starSteps:null,selected:false});
+ }
+ return collected;
+}
+function allKnown(){
+ const owned=Object.keys(state().manualHeroes||{});
+ return [...new Set([...(cat.heroes||[]).map(h=>h.name),...owned])].sort((a,b)=>a.localeCompare(b));
+}
+async function inspect(file){
+ const canvas=await imageCanvas(file);
+ const worker=await loadOCR();
+ const result=await worker.recognize(canvas);
+ const text=result.data.text||'';
+ let type=Core.category(text);
+ // A portrait-only roster can be recognized from its dense 4-column grid;
+ // unknown layouts remain unrecognized and manually selectable.
+ const values={...Core.parseTroops(type==='troops'?text:''),...Core.parseStats(type==='stats'?text:'')};
+ let detail=type==='starter'?Core.parseHeroDetail(text,allKnown()):null;
+ if(type==='unknown'&&detail)type='starter';
+ return {fileName:file.name,type,text,values,detail,canvas,
+  cards:type==='roster'?overviewTiles(canvas,text):[],applied:false};
+}
+function inputChoice(items,current=''){
+ const sel=document.createElement('select');
+ for(const [value,title] of items){const o=document.createElement('option');o.value=String(value);o.textContent=title;if(String(value)===String(current))o.selected=true;sel.appendChild(o);}
+ return sel;
+}
+const heroChoices=()=>[['',say('Nicht zuordnen','Skip')],...allKnown().map(n=>[n,n])];
+function starOptions(){return [['',say('Sterne unbekannt','Stars unknown')],...Array.from({length:30},(_,n)=>{
+ const step=n+1,stars=Math.floor(step/6),tier=step%6;
+ return [step,stars+'★'+(tier?' T'+tier:'')];
+ })];}
+function renderQueue(){
+ const holder=$('intakeQueue');holder.innerHTML='';holder.hidden=queue.length===0;
+ $('intakeApplyRow').hidden=queue.length===0;
+ queue.forEach((item,i)=>{
+  const card=document.createElement('div');card.className='bear-intake-item';
+  const header=document.createElement('div');header.className='bear-intake-item-head';
+  const title=document.createElement('b');title.textContent=item.fileName;
+  const type=inputChoice(Object.entries(types).map(([key,name])=>[key,name]),item.type);
+  type.addEventListener('change',()=>{item.type=type.value;item.values={...Core.parseTroops(item.type==='troops'?item.text:''),...Core.parseStats(item.type==='stats'?item.text:'')};item.detail=item.type==='starter'?Core.parseHeroDetail(item.text,allKnown()):null;item.cards=item.type==='roster'?overviewTiles(item.canvas,item.text):[];renderQueue();});
+  header.append(title,type);card.appendChild(header);
+  const content=document.createElement('div');content.className='bear-intake-values';
+  if(item.type==='troops'||item.type==='stats'){
+   const relevant=item.type==='troops'?['troopsI','troopsC','troopsA']:['squadAtk','squadLet','iAtk','iLet','cAtk','cLet','aAtk','aLet'];
+   relevant.forEach(id=>{
+    const label=document.createElement('label');label.className='bear-intake-value';
+    const cap=document.createElement('span');cap.textContent=captions[id]||id;
+    const field=document.createElement('input');field.type='number';field.step=id.startsWith('troops')?'1':'0.01';field.min='0';
+    field.value=item.values[id]??'';field.dataset.field=id;
+    field.addEventListener('input',()=>{if(field.value!=='')item.values[id]=Number(field.value);else delete item.values[id];});
+    label.append(cap,field);content.appendChild(label);
+   });
+  }else if(item.type==='starter'){
+   const picker=document.createElement('label');picker.className='bear-intake-value';
+   picker.append(say('Heldenname','Hero name'));
+   const name=inputChoice(heroChoices(),item.detail?.name||'');picker.append(name);content.appendChild(picker);
+   name.addEventListener('change',()=>{item.detail=item.detail||{};item.detail.name=name.value;});
+   const lvl=document.createElement('label');lvl.className='bear-intake-value';lvl.textContent='Level';
+   const val=document.createElement('input');val.type='number';val.min='0';val.max='80';val.value=item.detail?.level??'';
+   val.addEventListener('input',()=>{item.detail=item.detail||{};item.detail.level=val.value===''?null:Number(val.value);});
+   lvl.append(val);content.append(lvl);
+   const note=document.createElement('p');note.className='hint';
+   note.textContent=say('Expeditionswerte werden separat zur Heldendokumentation gespeichert – NICHT zu den Kampfstats addiert.','Expedition values are saved separately and not added twice to battle stats.');
+   content.append(note);
+  }else if(item.type==='roster'){
+   const note=document.createElement('p');note.className='hint';
+   note.textContent=say('Die Heldennamen stehen nicht auf den Karten. Bitte nur relevante Bear-Helden zuordnen und Sterne bestätigen. Skill-Maximum wird aus Sternen vorgeschlagen.','Hero names are absent from overview cards. Match relevant portraits and confirm stars; skills default to the allowed maximum.');
+   content.append(note);
+   const grid=document.createElement('div');grid.className='bear-intake-roster';
+   (item.cards||[]).forEach((tile,index)=>{
+    const cell=document.createElement('div');cell.className='bear-intake-roster-tile';
+    const image=new Image();image.src=tile.image;image.alt='Hero '+(index+1);cell.append(image);
+    const name=inputChoice(heroChoices(),tile.name);name.setAttribute('aria-label','Hero '+(index+1));
+    name.addEventListener('change',()=>{tile.name=name.value;tile.selected=Boolean(tile.name);});
+    const level=document.createElement('input');level.type='number';level.min='1';level.max='80';level.value=tile.level??'';level.placeholder='Lv';
+    level.addEventListener('change',()=>tile.level=level.value?Number(level.value):null);
+    const stars=inputChoice(starOptions(),tile.starSteps??'');
+    stars.addEventListener('change',()=>tile.starSteps=stars.value?Number(stars.value):null);
+    const details=document.createElement('small');details.textContent='Level / ★';
+    cell.append(name,level,details,stars);grid.append(cell);
+   });
+   content.append(grid);
+  }else{
+   const note=document.createElement('p');note.className='hint';
+   note.textContent=item.type==='gear'?say('GovGear wird über den bereits vorhandenen, spezialisierten Importer erkannt.','GovGear uses the dedicated visual gear importer.'):say('Bildtyp nicht erkannt. Typ oben auswählen oder weglassen.','Screenshot type unknown. Select a type or skip.');
+   content.append(note);
+  }
+  card.append(content);holder.append(card);
+ });
+}
+function availableOwned(){
+ const m=B.model(),api=window.NRW_BEAR_IMPORTED_HEROES||[];
+ return [...new Map([...api,...Object.values(state().manualHeroes)].filter(h=>h&&h.name).map(h=>[h.name,h])).values()];
+}
+function updateAdvisor(){
+ const m=B.model(),v=state();
+ const advice=Core.advise(availableOwned(),v.ownHeroes,cat.heroTypes);
+ const box=$('intakeAdvice');box.innerHTML='';
+ if(!advice.length)return;
+ const heading=document.createElement('strong');heading.textContent='🐻 '+say('Mögliche bessere Bear-Starter','Potentially better Bear starters');box.append(heading);
+ for(const a of advice){
+  const line=document.createElement('p');line.textContent=a.suggestion+' statt '+a.current+' ('+a.type+') – '+a.reason;box.append(line);
+ }
+ const source=document.createElement('a');source.href='https://ks-atlas.com/';source.target='_blank';source.rel='noopener noreferrer';source.textContent='KS Atlas · Bear Rally Heroes';box.append(source);
+}
+function updateProgress(){
+ const v=B.model()?.values||{};
+ const present=required.filter(id=>Number.isFinite(Number(v[id]))&&v[id]!==undefined).length;
+ const own=state().ownHeroes.filter(Boolean).length;
+ $('intakeProgress').textContent=present+'/'+required.length+' '+say('Pflichtwerte','required values')+' · '+own+'/3 Starter';
+ const missing=required.filter(k=>v[k]===undefined).map(k=>captions[k]);
+ const tier=(state().troopTiers||[]).filter(t=>Number(t.tier)>=1).length;
+ $('intakeMissing').textContent=missing.length? say('Fehlt: ','Missing: ')+missing.join(', '):tier<3?say('Truppen-T-Stufen fehlen noch im Detailbereich.','Troop tiers still needed in details.'):say('Grundwerte vollständig; Modellvergleich möglich.','Base values present; model ready.');
+ updateAdvisor();
+}
+function apply(){
+ const m=B.model(),v=state();
+ let accepted=0;
+ for(const item of queue){
+  if(item.type==='troops'||item.type==='stats'){
+   for(const [key,num] of Object.entries(item.values)){
+    if(!Number.isFinite(Number(num))||Number(num)<0)continue;
+    m.values[key]=Number(num);const input=$(key);if(input){input.value=num;input.dispatchEvent(new Event('input',{bubbles:true}));}
+    accepted++;
+   }
+  }else if(item.type==='starter'&&item.detail?.name){
+   const h=item.detail;const previous=v.manualHeroes[h.name]||{};
+   v.manualHeroes[h.name]={...previous,name:h.name,level:h.level||previous.level||0,
+    expeditionStats:{...(previous.expeditionStats||{}),...(h.expeditionStats||{})},source:'screenshot'};
+   const slot=['infantry','cavalry','archer'].indexOf(cat.heroTypes[h.name]);
+   if(slot>=0&&!v.ownHeroes[slot])v.ownHeroes[slot]=h.name;
+   accepted++;
+  }else if(item.type==='roster'){
+   for(const tile of item.cards){
+    if(!tile.name)continue;
+    const old=v.manualHeroes[tile.name]||{};
+    const stars=tile.starSteps===null?Number(old.stars||0):Math.floor(tile.starSteps/6);
+    const tier=tile.starSteps===null?Number(old.tier||0):tile.starSteps%6;
+    const cap=Core.maxSkill(stars);
+    v.manualHeroes[tile.name]={...old,name:tile.name,level:tile.level||old.level||0,stars,tier,
+     skills:Array.isArray(old.skills)&&old.skills.some(Number)?old.skills:(cap?[cap,cap,cap]:[0,0,0]),
+     skillsAssumedMax:!(Array.isArray(old.skills)&&old.skills.some(Number)),source:'screenshot'};
+    accepted++;
+   }
+  }else if(item.type==='gear'){
+   status(say('GovGear bitte im gesonderten Importfeld bestätigen.','Confirm GovGear separately.'));
+  }
+ }
+ // Combat report percentages already include governor equipment. The
+ // squad percentages are tracked but NOT silently added twice.
+ v.squadSeparate=false;const toggle=$('squadSeparate');if(toggle)toggle.checked=false;
+ B.save();B.render();window.NRW_BEAR_ENHANCE?.refreshHeroes?.();
+ updateProgress();status(accepted+' '+say('Angaben lokal gespeichert; unbekannte Werte bleiben unverändert.','values saved locally. Unknown values untouched.'));
+ queue=[];renderQueue();
+}
+$('intakeApply').addEventListener('click',apply);
+$('intakeClear').addEventListener('click',()=>{queue=[];renderQueue();status(say('Import verworfen.','Import discarded.'));});
+$('intakeFiles').addEventListener('change',async e=>{
+ const files=[...e.target.files||[]].filter(f=>f.type.startsWith('image/')).slice(0,24);
+ e.target.value='';if(!files.length||busy)return;busy=true;$('intakeFiles').disabled=true;
+ let success=0;
+ for(let i=0;i<files.length;i++){
+  status((i+1)+'/'+files.length+' · '+files[i].name);
+  try{queue.push(await inspect(files[i]));success++;}
+  catch(err){queue.push({fileName:files[i].name,type:'unknown',text:'',values:{},detail:null,cards:[],error:String(err)});}
+ }
+ busy=false;$('intakeFiles').disabled=false;
+ status(success+'/'+files.length+' '+say('Bilder gelesen. Bitte alle Vorschläge prüfen und übernehmen.','screenshots read. Review and apply suggestions.'));
+ renderQueue();
+});
+window.addEventListener('nrw-bear-loaded',updateProgress);
+document.querySelectorAll('button[data-lang]').forEach(b=>b.addEventListener('click',()=>setTimeout(updateProgress,0)));
+document.querySelectorAll('input').forEach(input=>{if(input.id&&required.includes(input.id))input.addEventListener('input',updateProgress);});
+updateProgress();
+})();
