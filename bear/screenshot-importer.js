@@ -120,6 +120,19 @@ function rarity(ctx,pos){
 async function getRemoteTemplates(){
  if(cacheImages!==null)return cacheImages;
  cacheImages=[];
+ // Prefer small same-origin, build-time generated glyph silhouettes.
+ // Browser never sends a player screenshot to the reference image host.
+ try{
+  const response=await fetch('./charm-signatures.json',{cache:'force-cache'});
+  if(response.ok){
+   const bundle=await response.json();
+   if(bundle&&bundle.shape_only===true&&bundle.levels&&typeof bundle.levels==='object'){
+    const shapes=Object.entries(bundle.levels).filter(([lv,code])=>Number(lv)>=1&&Number(lv)<=22&&typeof code==='string')
+     .map(([level,code])=>{try{return {level:Number(level),bits:unpack(code),source:'compiled'};}catch(_){return null;}}).filter(Boolean);
+    if(shapes.length>=4){cacheImages=shapes;return cacheImages;}
+   }
+  }
+ }catch(_){}
  // Cross-origin pixel access is permitted only if the public host explicitly
  // supplies an Access-Control-Allow-Origin response. No screenshot sent.
  const load=(level)=>new Promise(resolve=>{
