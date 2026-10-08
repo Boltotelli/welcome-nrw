@@ -45,6 +45,28 @@ $('intakeGear').addEventListener('click',()=>{
  const d=gear?.closest('details');if(d)d.open=true;
  document.getElementById('bearGearPhoto')?.click();
 });
+// Fast re-entry for players who have previously imported or edited a profile.
+ // This is a local picker, NOT a substitute for fresh API membership checking.
+const governorInput=$('governorId'),lookup=$('lookupForm');
+if(governorInput&&lookup){
+ let savedIds=[];
+ try{
+  savedIds=Object.keys(localStorage).filter(k=>k.startsWith('nrw_bear_profile_v1_'))
+   .map(k=>k.slice('nrw_bear_profile_v1_'.length)).filter(k=>/^\d{5,20}$/.test(k));
+ }catch(_){}
+ if(savedIds.length){
+  const localRow=document.createElement('div');localRow.className='bear-local-id-row';
+  const savedPick=inputChoice([['',say('Gespeicherte ID auswählen','Select saved ID')],...savedIds.map(id=>[id,id])]);
+  const open=document.createElement('button');open.type='button';open.className='secondary-btn';
+  open.textContent=say('Gespeicherten Stand öffnen','Open saved profile');
+  savedPick.addEventListener('change',()=>{if(savedPick.value)governorInput.value=savedPick.value;});
+  open.addEventListener('click',()=>{if(savedPick.value){governorInput.value=savedPick.value;$('offlineMode')?.click();}});
+  localRow.append(savedPick,open);lookup.after(localRow);
+  const note=document.createElement('p');note.className='hint';
+  note.textContent=say('Lokale Daten sind kein erneuter Allianz-Check; für frische API-Daten ist eine sichere Serververbindung nötig.','Saved local data does not verify current alliance membership; live API access needs a secure backend.');
+  localRow.after(note);
+ }
+}
 let ocrWorker=null,queue=[],busy=false;
 function state(){const m=B.model();if(!m.v2)m.v2={};if(!m.v2.manualHeroes)m.v2.manualHeroes={};if(!Array.isArray(m.v2.ownHeroes))m.v2.ownHeroes=['','',''];return m.v2;}
 function esc(str){return String(str??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
