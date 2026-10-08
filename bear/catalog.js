@@ -208,7 +208,14 @@ window.NRW_BEAR_CATALOG = {
     {
       "name": "Moose",
       "img": "https://got-global-wiki.s3.us-west-1.amazonaws.com/wp-content/uploads/2025/10/%E7%BB%84-37-150x150.png",
-      "maxLevel": 60
+      "maxLevel": 70,
+      "bearSkill": {
+        "id": "enemy_health",
+        "skill": "Horror Stare",
+        "category": "conditional",
+        "values": [1.5,2,2.5,3,3.5,4,5],
+        "unit": "percent"
+      }
     },
     {
       "name": "Cheetah",
