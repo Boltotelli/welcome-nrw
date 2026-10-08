@@ -76,25 +76,14 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    // Verify membership BEFORE requesting and exposing additional fields.
-    const first = await upstream('/players/' + encodeURIComponent(id) + '?include=base', secret);
-    if (first.status === 404) return reply(res, 404, { ok: false, error: 'player_not_found' });
-    if (first.status === 429) return reply(res, 429, { ok: false, error: 'provider_rate_limited' });
-    if (!first.payload || !first.payload.ok || first.status !== 200) {
-      return reply(res, 502, { ok: false, error: 'provider_unavailable' });
-    }
-    const player = first.payload.player || {};
-    if (Number(player.kid) !== KID || Number(player.alliance && player.alliance.aid) !== NRW_AID) {
-      return reply(res, 403, { ok: false, error: 'not_nrw_member' });
-    }
-
+    // One upstream call reduces wait time and API quota usage. Never reveal
+    // any requested fields until the current alliance ID is verified.
     const details = await upstream('/players/' + encodeURIComponent(id) + '?include=base,heroes,gov_gear', secret);
+    if (details.status === 404) return reply(res, 404, { ok: false, error: 'player_not_found' });
     if (details.status === 429) return reply(res, 429, { ok: false, error: 'provider_rate_limited' });
     if (details.status !== 200 || !details.payload || !details.payload.ok) {
       return reply(res, 502, { ok: false, error: 'provider_unavailable' });
     }
-
-    // A transfer could have happened between queries; validate again.
     const fullPlayer = details.payload.player || {};
     if (Number(fullPlayer.kid) !== KID || Number(fullPlayer.alliance && fullPlayer.alliance.aid) !== NRW_AID) {
       return reply(res, 403, { ok: false, error: 'not_nrw_member' });
