@@ -195,13 +195,13 @@ const gearSlots=[
 function renderGear(){
  gearPanel.innerHTML='';gearPanel.className='bear-gear-grid';
  gearSlots.forEach(([id,emoji,title])=>{
-   const s=state();if(!s.gear[id])s.gear[id]={quality:'purple',tier:1,stars:1,charms:[0,0,0]};
+   const s=state();if(!s.gear[id])s.gear[id]={quality:'none',tier:0,stars:0,charms:[0,0,0]};
    const value=s.gear[id],div=document.createElement('div');div.className='bear-gear-card';
    const head=document.createElement('div');head.className='bear-gear-head';
    head.appendChild(icon(C.govIcon,title));
    head.insertAdjacentHTML('beforeend','<div><b>'+emoji+' '+esc(title)+'</b><small>'+esc(tx('gear'))+'</small></div>');
    div.appendChild(head);
-   div.insertAdjacentHTML('beforeend','<div class="bear-gear-settings"><label>'+esc(tx('grade'))+'<select data-f="quality">'+choices([['green','Green'],['blue','Blue'],['purple','Purple'],['gold','Gold'],['red','Red']],value.quality)+'</select></label><label>'+esc(tx('gearTier'))+'<select data-f="tier">'+choices(Array.from({length:7},(_,i)=>[i,i?'T'+i:'–']),value.tier)+'</select></label><label>'+esc(tx('gearStar'))+'<select data-f="stars">'+choices(Array.from({length:4},(_,i)=>[i,i+'★']),value.stars)+'</select></label></div>');
+   div.insertAdjacentHTML('beforeend','<div class="bear-gear-settings"><label>'+esc(tx('grade'))+'<select data-f="quality">'+choices([['none','—'],['green','Green'],['blue','Blue'],['purple','Purple'],['gold','Gold'],['red','Red']],value.quality)+'</select></label><label>'+esc(tx('gearTier'))+'<select data-f="tier">'+choices(Array.from({length:7},(_,i)=>[i,i?'T'+i:'–']),value.tier)+'</select></label><label>'+esc(tx('gearStar'))+'<select data-f="stars">'+choices(Array.from({length:4},(_,i)=>[i,i+'★']),value.stars)+'</select></label></div>');
    const charmDiv=document.createElement('div');charmDiv.className='bear-charm-row';
    for(let i=0;i<3;i++){
       const label=document.createElement('label');label.innerHTML='<span>💠 '+(i+1)+'</span><input type="number" min="0" max="22" inputmode="numeric" value="'+max(value.charms?.[i],0,22)+'">';
