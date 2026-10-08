@@ -65,3 +65,7 @@
  .bear-hero-actions{flex-direction:column}
  .bear-hero-actions button{width:100%}
 }
+
+.bear-pet-buff{width:100%;border-top:1px solid var(--line);padding-top:9px;display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.bear-pet-buff label{display:grid;gap:4px;font-size:10px;color:var(--muted);min-width:0}
+.bear-pet-buff input,.bear-pet-buff select{width:100%;padding:6px 3px;font-size:11px;min-width:0}
