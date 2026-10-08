@@ -139,7 +139,16 @@ function inferStars(canvas,row,col){
  const confidence=Math.min(1,(head/.28));
  return {starSteps:full*6,confidence,partiallyFilled:full<5&&best.values[full]/head>.45};
 }
-function overviewTiles(canvas,text){
+function heroLevelFromWords(words,canvas,row,col){
+ const x0=(33+col*167)*canvas.width/716,x1=x0+152*canvas.width/716;
+ const y0=(124+row*276+190)*canvas.height/1536,y1=(124+row*276+248)*canvas.height/1536;
+ const candidates=(words||[]).filter(w=>w.bbox&&((w.bbox.x0+w.bbox.x1)/2)>=x0&&((w.bbox.x0+w.bbox.x1)/2)<=x1&&
+  ((w.bbox.y0+w.bbox.y1)/2)>=y0&&((w.bbox.y0+w.bbox.y1)/2)<=y1)
+  .sort((a,b)=>a.bbox.x0-b.bbox.x0).map(w=>w.text).join(' ');
+ const match=candidates.match(/(?:Lv|Level)\s*\.?\s*(\d{1,3})/i);
+ return match&&Number(match[1])<=80?Number(match[1]):null;
+}
+function overviewTiles(canvas,text,words){
  // Four-column Kingshot hero overview: names are absent, so the user must
  // confirm portrait identity. Never guess a name from text-only OCR.
  const collected=[],matches=[...String(text).matchAll(/Lv\.?\s*(\d{1,3})/ig)].map(m=>Number(m[1]));
@@ -147,8 +156,10 @@ function overviewTiles(canvas,text){
   const x=.038+col*.232,y=.082+row*.177;
   if(y+.145>.945)continue;
   const index=col+row*4;
-  const stars=inferStars(canvas,row,col);
-  collected.push({image:cropToThumb(canvas,x,y,.211,.171),name:'',level:matches.length>index?matches[index]:null,
+  const stars=row<4?inferStars(canvas,row,col):{starSteps:null,confidence:0};
+  const positionalLevel=heroLevelFromWords(words,canvas,row,col);
+  const safeSequenceFallback=matches.length===20?matches[index]:null;
+  collected.push({image:cropToThumb(canvas,x,y,.211,.171),name:'',level:positionalLevel??safeSequenceFallback,
     starSteps:stars.starSteps,starConfidence:stars.confidence,partialStar:stars.partiallyFilled,selected:false});
  }
  return collected;
@@ -210,7 +221,7 @@ async function inspect(file){
  let detail=type==='starter'?Core.parseHeroDetail(text,allKnown()):null;
  if(type==='unknown'&&detail)type='starter';
  return {fileName:file.name,file,type,text,grouped,values,detail,canvas,
-  cards:type==='roster'?overviewTiles(canvas,text):[],applied:false};
+  cards:type==='roster'?overviewTiles(canvas,text,result.data.words):[],applied:false};
 }
 function inputChoice(items,current=''){
  const sel=document.createElement('select');
@@ -218,10 +229,15 @@ function inputChoice(items,current=''){
  return sel;
 }
 const heroChoices=()=>[['',say('Nicht zuordnen','Skip')],...allKnown().map(n=>[n,n])];
-function starOptions(){return [['',say('Sterne unbekannt','Stars unknown')],...Array.from({length:30},(_,n)=>{
- const step=n+1,stars=Math.floor(step/6),tier=step%6;
- return [step,stars+'★'+(tier?' T'+tier:'')];
- })];}
+function starOptions(){
+ const options=[['',say('Sterne unbekannt','Stars unknown')]];
+ for(let stars=1;stars<5;stars++){
+  options.push([stars*6,stars+'★']);
+  for(let tier=1;tier<=5;tier++)options.push([stars*6+tier,stars+'★ T'+tier]);
+ }
+ options.push([30,'5★ (MAX)']);
+ return options;
+}
 function renderQueue(){
  const holder=$('intakeQueue');holder.innerHTML='';holder.hidden=queue.length===0;
  $('intakeApplyRow').hidden=queue.length===0;
@@ -230,7 +246,7 @@ function renderQueue(){
   const header=document.createElement('div');header.className='bear-intake-item-head';
   const title=document.createElement('b');title.textContent=item.fileName;
   const type=inputChoice(Object.entries(types).map(([key,name])=>[key,name]),item.type);
-  type.addEventListener('change',()=>{item.type=type.value;item.values=item.type==='troops'?Core.parseTroops(item.text):item.type==='stats'?{...Core.parseStats(item.text),...Core.parseStats(item.grouped||'')}:{};item.detail=item.type==='starter'?Core.parseHeroDetail(item.text,allKnown()):null;item.cards=item.type==='roster'?overviewTiles(item.canvas,item.text):[];renderQueue();});
+  type.addEventListener('change',()=>{item.type=type.value;item.values=item.type==='troops'?Core.parseTroops(item.text):item.type==='stats'?{...Core.parseStats(item.text),...Core.parseStats(item.grouped||'')}:{};item.detail=item.type==='starter'?Core.parseHeroDetail(item.text,allKnown()):null;item.cards=item.type==='roster'?overviewTiles(item.canvas,item.text,[]):[];renderQueue();});
   header.append(title,type);card.appendChild(header);
   const content=document.createElement('div');content.className='bear-intake-values';
   if(item.type==='troops'||item.type==='stats'){
