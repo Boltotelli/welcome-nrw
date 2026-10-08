@@ -93,6 +93,43 @@ function overviewTiles(canvas,text){
  }
  return collected;
 }
+function spatialTroops(words,canvas){
+ // OCR word bounding boxes are more reliable than reading the two top
+ // troop cards left-to-right as one text line.
+ const zones=[
+  {key:'troopsI',x:[.16,.52],y:[.267,.313]},
+  {key:'troopsC',x:[.65,.97],y:[.267,.313]},
+  {key:'troopsA',x:[.16,.56],y:[.347,.394]}
+ ],found={};
+ for(const zone of zones){
+  const hits=[];
+  for(const word of words||[]){
+   if(!word.bbox)continue;
+   const bb=word.bbox,cx=((bb.x0+bb.x1)/2)/canvas.width,cy=((bb.y0+bb.y1)/2)/canvas.height;
+   if(cx<zone.x[0]||cx>zone.x[1]||cy<zone.y[0]||cy>zone.y[1])continue;
+   const value=Core.normalizeNumber(word.text);
+   if(value!==null&&Number.isInteger(value)&&value>1000&&value<200000000)hits.push({value,distance:Math.abs(cy-(zone.y[0]+zone.y[1])/2)});
+  }
+  hits.sort((a,b)=>a.distance-b.distance);
+  if(hits.length)found[zone.key]=hits[0].value;
+ }
+ return found;
+}
+function positionalLines(words,canvas){
+ // Screenshots with two columns may OCR all labels first, then numbers.
+ // Group words by visible text row and sort horizontally.
+ const sorted=(words||[]).filter(w=>w.bbox&&w.text).map(w=>({
+  x:w.bbox.x0,y:(w.bbox.y0+w.bbox.y1)/2,text:w.text
+ })).sort((a,b)=>a.y-b.y||a.x-b.x);
+ const rows=[];
+ const threshold=canvas.height*.014;
+ for(const word of sorted){
+  let row=rows.find(r=>Math.abs(r.y-word.y)<threshold);
+  if(!row){row={y:word.y,words:[]};rows.push(row);}
+  row.words.push(word);
+ }
+ return rows.sort((a,b)=>a.y-b.y).map(r=>r.words.sort((a,b)=>a.x-b.x).map(w=>w.text).join(' ')).join('\n');
+}
 function allKnown(){
  const owned=Object.keys(state().manualHeroes||{});
  return [...new Set([...(cat.heroes||[]).map(h=>h.name),...owned])].sort((a,b)=>a.localeCompare(b));
@@ -102,13 +139,17 @@ async function inspect(file){
  const worker=await loadOCR();
  const result=await worker.recognize(canvas);
  const text=result.data.text||'';
- let type=Core.category(text);
+ const grouped=positionalLines(result.data.words,canvas);
+ let type=Core.category(text+'\n'+grouped);
  // A portrait-only roster can be recognized from its dense 4-column grid;
  // unknown layouts remain unrecognized and manually selectable.
- const values={...Core.parseTroops(type==='troops'?text:''),...Core.parseStats(type==='stats'?text:'')};
+ const values=type==='troops'?
+  {...Core.parseTroops(text),...spatialTroops(result.data.words,canvas)}:
+  type==='stats'?{...Core.parseStats(text),...Core.parseStats(grouped)}:{};
+
  let detail=type==='starter'?Core.parseHeroDetail(text,allKnown()):null;
  if(type==='unknown'&&detail)type='starter';
- return {fileName:file.name,type,text,values,detail,canvas,
+ return {fileName:file.name,file,type,text,grouped,values,detail,canvas,
   cards:type==='roster'?overviewTiles(canvas,text):[],applied:false};
 }
 function inputChoice(items,current=''){
@@ -129,7 +170,7 @@ function renderQueue(){
   const header=document.createElement('div');header.className='bear-intake-item-head';
   const title=document.createElement('b');title.textContent=item.fileName;
   const type=inputChoice(Object.entries(types).map(([key,name])=>[key,name]),item.type);
-  type.addEventListener('change',()=>{item.type=type.value;item.values={...Core.parseTroops(item.type==='troops'?item.text:''),...Core.parseStats(item.type==='stats'?item.text:'')};item.detail=item.type==='starter'?Core.parseHeroDetail(item.text,allKnown()):null;item.cards=item.type==='roster'?overviewTiles(item.canvas,item.text):[];renderQueue();});
+  type.addEventListener('change',()=>{item.type=type.value;item.values=item.type==='troops'?Core.parseTroops(item.text):item.type==='stats'?{...Core.parseStats(item.text),...Core.parseStats(item.grouped||'')}:{};item.detail=item.type==='starter'?Core.parseHeroDetail(item.text,allKnown()):null;item.cards=item.type==='roster'?overviewTiles(item.canvas,item.text):[];renderQueue();});
   header.append(title,type);card.appendChild(header);
   const content=document.createElement('div');content.className='bear-intake-values';
   if(item.type==='troops'||item.type==='stats'){
@@ -235,7 +276,17 @@ function apply(){
     accepted++;
    }
   }else if(item.type==='gear'){
-   status(say('GovGear bitte im gesonderten Importfeld bestätigen.','Confirm GovGear separately.'));
+   // Hand this screenshot to the existing specialized 6-gear/18-charm
+   // browser-local importer. It retains its own separate review/confirm.
+   try{
+    const input=$('bearGearPhoto'),transfer=new DataTransfer();
+    if(!input||!item.file)throw Error('missing file');
+    transfer.items.add(item.file);input.files=transfer.files;
+    input.dispatchEvent(new Event('change',{bubbles:true}));
+    const details=input.closest('details');if(details)details.open=true;
+   }catch(_){const details=$('bearGearPhoto')?.closest('details');if(details)details.open=true;
+    status(say('GovGear-Screenshot bitte im ausklappbaren Import überprüfen.','Review GovGear in the dedicated screenshot importer.'));
+   }
   }
  }
  // Combat report percentages already include governor equipment. The
