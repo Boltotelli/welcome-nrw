@@ -220,7 +220,7 @@ async function inspect(file){
 
  let detail=type==='starter'?Core.parseHeroDetail(text,allKnown()):null;
  if(type==='unknown'&&detail)type='starter';
- return {fileName:file.name,file,type,text,grouped,values,detail,canvas,
+ return {fileName:file.name,file,type,text,grouped,words:result.data.words||[],values,detail,canvas:(type==='roster'||type==='unknown')?canvas:null,
   cards:type==='roster'?overviewTiles(canvas,text,result.data.words):[],applied:false};
 }
 function inputChoice(items,current=''){
@@ -246,7 +246,7 @@ function renderQueue(){
   const header=document.createElement('div');header.className='bear-intake-item-head';
   const title=document.createElement('b');title.textContent=item.fileName;
   const type=inputChoice(Object.entries(types).map(([key,name])=>[key,name]),item.type);
-  type.addEventListener('change',()=>{item.type=type.value;item.values=item.type==='troops'?Core.parseTroops(item.text):item.type==='stats'?{...Core.parseStats(item.text),...Core.parseStats(item.grouped||'')}:{};item.detail=item.type==='starter'?Core.parseHeroDetail(item.text,allKnown()):null;item.cards=item.type==='roster'?overviewTiles(item.canvas,item.text,[]):[];renderQueue();});
+  type.addEventListener('change',()=>{item.type=type.value;item.values=item.type==='troops'?{...Core.parseTroops(item.text),...(item.canvas?spatialTroops(item.words,item.canvas):{})}:item.type==='stats'?{...Core.parseStats(item.text),...Core.parseStats(item.grouped||'')}:{};item.detail=item.type==='starter'?Core.parseHeroDetail(item.text,allKnown()):null;item.cards=item.type==='roster'&&item.canvas?overviewTiles(item.canvas,item.text,item.words):[];renderQueue();});
   header.append(title,type);card.appendChild(header);
   const content=document.createElement('div');content.className='bear-intake-values';
   if(item.type==='troops'||item.type==='stats'){
@@ -378,7 +378,7 @@ function apply(){
 $('intakeApply').addEventListener('click',apply);
 $('intakeClear').addEventListener('click',()=>{queue=[];renderQueue();status(say('Import verworfen.','Import discarded.'));});
 $('intakeFiles').addEventListener('change',async e=>{
- const files=[...e.target.files||[]].filter(f=>f.type.startsWith('image/')).slice(0,24);
+ const files=[...e.target.files||[]].filter(f=>f.type.startsWith('image/')).slice(0,12);
  e.target.value='';if(!files.length||busy)return;busy=true;$('intakeFiles').disabled=true;
  let success=0;
  for(let i=0;i<files.length;i++){
