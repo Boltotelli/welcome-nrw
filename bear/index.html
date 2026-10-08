@@ -151,9 +151,9 @@ details{border-top:1px solid var(--line);margin-top:14px;padding-top:14px}summar
    <div class="editor">
     <div class="editor-header"><strong id="editTitle">Rally leader</strong><span class="micro" data-t="edit">EDIT MARCH</span></div>
     <div class="editor-grid"><div class="field"><label data-t="firstHero">First hero / lineup</label><input type="text" id="heroInput" maxlength="70" placeholder="Hero name"></div><div class="field"><label data-t="preset">Formation preset</label><select id="preset"><option value="1/12/87">1 / 12 / 87</option><option value="1/10/89">1 / 10 / 89</option><option value="5/5/90">5 / 5 / 90</option><option value="5/15/80">5 / 15 / 80</option><option value="1/1/98">1 / 1 / 98</option><option value="10/10/80">10 / 10 / 80</option><option value="2.5/15/82.5">2.5 / 15 / 82.5</option><option value="custom" data-t="custom">Custom</option></select></div></div>
-    <div class="percent"><span data-t="inf">Infantry</span><span id="infLabel">1%</span></div><input id="iSlider" type="range" min="0" max="60" step=".5">
-    <div class="percent"><span data-t="cav">Cavalry</span><span id="cavLabel">12%</span></div><input id="cSlider" type="range" min="0" max="60" step=".5">
-    <div class="percent"><span data-t="arch">Archers</span><span id="archLabel">87%</span></div>
+    <div class="percent"><span data-t="inf">Infantry</span><span id="infLabel">1%</span></div><input id="iSlider" type="range" min="0" max="100" step=".5">
+    <div class="percent"><span data-t="cav">Cavalry</span><span id="cavLabel">12%</span></div><input id="cSlider" type="range" min="0" max="100" step=".5">
+    <div class="percent"><span data-t="arch">Archers</span><span id="archLabel">87%</span></div><input id="archSlider" type="range" min="0" max="100" step=".5" aria-label="Archers percentage">
     <div class="preset"><button type="button" id="copyJoins" data-t="allJoins">Apply selected ratio to all 6 joins</button></div>
     <details id="leaderPanel" hidden><summary data-t="leaderStatsTitle">Kampfwerte des Rallyleaders</summary>
 <p class="hint" data-t="leaderStatsHelp">Für Joins gelten die Stats des Rallyleaders. Ohne seine Werte keine persönliche Schadensprognose.</p>
@@ -276,10 +276,10 @@ function calculate(marches){
  var engine=window.NRW_BEAR_COMBAT,levels=engine.configure(model.v2);
  var fullOwn=engine.ready(model.values,levels);
  var fullJoins=marches.slice(1).every(function(m){return engine.ready(m.leaderStats,levels);});
- var ownScore=fullOwn?engine.damage(start,offensiveStats(model.values,true),levels):null;
+ var ownScore=fullOwn?engine.damage(start,offensiveStats(model.values,true),levels,n('pitfall')):null;
  var totalScore=(fullOwn&&fullJoins)?actual.reduce(function(sum,row,j){
   var stats=j===0?offensiveStats(model.values,true):marches[j].leaderStats;
-  return sum+engine.damage(row,stats,levels);
+  return sum+engine.damage(row,stats,levels,n('pitfall'));
  },0):null;
  // Own score remains available without requiring other rallyleader stats.
  var score=totalScore===null?ownScore:totalScore;
@@ -287,7 +287,7 @@ function calculate(marches){
   score:score,ownScore:ownScore,totalScore:totalScore,fullOwn:fullOwn,fullJoins:fullJoins};
 }
 function save(){if(profile)try{localStorage.setItem('nrw_bear_profile_v1_'+profile.governor_id,JSON.stringify(model));}catch(_){}}
-function read(id){try{var value=JSON.parse(localStorage.getItem('nrw_bear_profile_v1_'+id)||'null');if(value&&typeof value==='object'){model.v2=value.v2||{};['heroCapManual','squadAtk','squadLet'].forEach(function(k){if(value.values&&Object.prototype.hasOwnProperty.call(value.values,k)){var a=Number(value.values[k]);if(Number.isFinite(a)&&a>=0)model.values[k]=a;}});fields.forEach(function(k){if(value.values&&Object.prototype.hasOwnProperty.call(value.values,k)){var v=Number(value.values[k]);if(Number.isFinite(v)&&v>=0)model.values[k]=v;}});model.textValues=value.textValues||{};if(Array.isArray(value.marches)&&value.marches.length===7){value.marches.forEach(function(m,j){var i=Number(m.i),c=Number(m.c);if(Number.isFinite(i)&&Number.isFinite(c)&&i>=0&&c>=0&&i+c<=100){model.marches[j]={hero:String(m.hero||'').slice(0,70),i:i,c:c,leaderStats:(m.leaderStats&&typeof m.leaderStats==='object')?m.leaderStats:{}};}});}}}catch(_){}
+function read(id){try{var value=JSON.parse(localStorage.getItem('nrw_bear_profile_v1_'+id)||'null');if(value&&typeof value==='object'){model.v2=value.v2||{};['heroCapManual','squadAtk','squadLet','pitfall'].forEach(function(k){if(value.values&&Object.prototype.hasOwnProperty.call(value.values,k)){var a=Number(value.values[k]);if(Number.isFinite(a)&&a>=0)model.values[k]=a;}});fields.forEach(function(k){if(value.values&&Object.prototype.hasOwnProperty.call(value.values,k)){var v=Number(value.values[k]);if(Number.isFinite(v)&&v>=0)model.values[k]=v;}});model.textValues=value.textValues||{};if(Array.isArray(value.marches)&&value.marches.length===7){value.marches.forEach(function(m,j){var i=Number(m.i),c=Number(m.c);if(Number.isFinite(i)&&Number.isFinite(c)&&i>=0&&c>=0&&i+c<=100){model.marches[j]={hero:String(m.hero||'').slice(0,70),i:i,c:c,leaderStats:(m.leaderStats&&typeof m.leaderStats==='object')?m.leaderStats:{}};}});}}}catch(_){}
  fields.forEach(function(k){el(k).value=Object.prototype.hasOwnProperty.call(model.values,k)?model.values[k]:'';});textFields.forEach(function(k){el(k).value=String((model.textValues||{})[k]||'');});}
 function message(key,type){var node=el('lookupMessage');node.className='msg show'+(type?' '+type:'');node.textContent=t(key);}
 function language(value){
@@ -338,7 +338,7 @@ function render(){
  var m=model.marches[active];
  el('editTitle').textContent=(active===0?t('lead'):t('join')+' '+active);
  if(document.activeElement!==el('heroInput'))el('heroInput').value=m.hero;
- el('iSlider').value=m.i;el('cSlider').value=m.c;
+ el('iSlider').value=m.i;el('cSlider').value=m.c;el('archSlider').value=100-m.i-m.c;
  el('leaderPanel').hidden=active===0;
  leaderFields.forEach(function(k){var stats=m.leaderStats||{};if(document.activeElement!==el('leader_'+k))el('leader_'+k).value=Object.prototype.hasOwnProperty.call(stats,k)?stats[k]:'';});
  el('infLabel').textContent=m.i+'%';el('cavLabel').textContent=m.c+'%';el('archLabel').textContent=(100-m.i-m.c)+'%';
@@ -402,9 +402,11 @@ el('preset').addEventListener('change',function(){
  if(this.value==='custom')return;var p=this.value.split('/').map(Number);
  model.marches[active].i=p[0];model.marches[active].c=p[1];save();render();
 });
-['iSlider','cSlider'].forEach(function(id){
+['iSlider','cSlider','archSlider'].forEach(function(id){
  el(id).addEventListener('input',function(){var m=model.marches[active];var value=Number(this.value);
-  if(id==='iSlider')m.i=Math.min(value,100-m.c);else m.c=Math.min(value,100-m.i);
+  if(id==='iSlider')m.i=Math.min(value,100-m.c);
+  else if(id==='cSlider')m.c=Math.min(value,100-m.i);
+  else{m.c=Math.min(m.c,100-value);m.i=100-value-m.c;}
   save();render();
  });
 });
