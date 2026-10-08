@@ -18,6 +18,7 @@ en:{optimizeStart:"Calculate best starter formation",optimizeHint:"Searches inte
 fr:{optimizeStart:"Calculer la formation de départ",optimizeHint:"Compare les ratios entiers avec tes stocks et ta capacité. Estimation non validée, pas des dégâts garantis."}
 }[lang]);
 for(const lang of ['de','en','fr'])Object.assign(translations[lang],{de:{pitfall:"Bärenfalle-Forschungsstufe"},en:{pitfall:"Bear Trap level"},fr:{pitfall:"Niveau piège à ours"}}[lang]);
+for(const lang of ['de','en','fr'])Object.assign(translations[lang],{de:{buffEnemyHealth:"Gegnerische Gesundheit ↓"},en:{buffEnemyHealth:"Enemy health ↓"},fr:{buffEnemyHealth:"Santé ennemie ↓"}}[lang]);
 const tx=k=>(translations[document.documentElement.lang]||translations.en)[k]||k;
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const max=(v,a,b)=>Math.max(a,Math.min(b,Math.floor(Number(v)||0)));
@@ -271,7 +272,7 @@ function petEffectText(p,level){
  if(rank===0)return tx('petBelowTier');
  const value=skill.values[rank-1];
  const unit=skill.unit==='percent'?'%':'';
- return '+'+Number(value).toLocaleString(document.documentElement.lang||'de')+unit+' · '+tx('petRank')+' '+rank+'/10';
+ return (skill.id.startsWith('enemy_')?'−':'+')+Number(value).toLocaleString(document.documentElement.lang||'de')+unit+' · '+tx('petRank')+' '+rank+'/'+skill.values.length;
 }
 function renderPets(){
  petPanel.innerHTML='';petPanel.className='bear-art-grid bear-relevant-pets';
@@ -279,9 +280,9 @@ function renderPets(){
  // conditional enemy-defense debuff) appear here.
  const relevant=C.pets.filter(p=>p.bearSkill);
  relevant.sort((a,b)=>({
-  "Mighty Bison":1,"Giant Rhino":2,"Black Panther":3,"Great Moose":4,"War Bear":5
+  "Mighty Bison":1,"Giant Rhino":2,"Black Panther":3,"Moose":4,"Great Moose":5,"War Bear":6
  })[a.name]-({
-  "Mighty Bison":1,"Giant Rhino":2,"Black Panther":3,"Great Moose":4,"War Bear":5
+  "Mighty Bison":1,"Giant Rhino":2,"Black Panther":3,"Moose":4,"Great Moose":5,"War Bear":6
  })[b.name]);
  relevant.forEach(p=>{
    const saved=state();
@@ -314,7 +315,7 @@ function renderPets(){
      const labels={
        attack:tx('buffAttack'),lethality:tx('buffLethality'),
        squad_capacity:tx('buffSquad'),rally_capacity:tx('buffRally'),
-       enemy_defense:tx('buffDefense')
+       enemy_defense:tx('buffDefense'),enemy_health:tx('buffEnemyHealth')
      };
      description.innerHTML='<small>'+esc(labels[skill.id]||skill.id)+'</small><strong>'+esc(petEffectText(p,level))+'</strong>'+
       (skill.category==='conditional'?'<small>'+esc(tx('conditionalBuff'))+'</small>':
