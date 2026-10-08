@@ -416,7 +416,7 @@ function showForProfile(evt){
 }
 makeLayout();
 B.renderV2=()=>renderEditor();
-window.NRW_BEAR_ENHANCE={renderEditor};
+window.NRW_BEAR_ENHANCE={renderEditor,refreshGear:renderGear};
 window.addEventListener('nrw-bear-loaded',showForProfile);
 document.querySelectorAll('button[data-lang]').forEach(b=>b.addEventListener('click',()=>{
  setTimeout(()=>{if(!validModel())return;const heads=container.querySelectorAll('section.panel');
