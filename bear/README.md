@@ -110,3 +110,17 @@ Do not edit the existing live dashboard navigation until the user approves the g
 - **Required before exact auto-import:** map each distinct in-game charm graphic to its actual charm level 1–22, using verified Kingshot icon assets or annotated known-level screenshots. Colour alone does not guarantee unique level and arbitrary thresholds are not acceptable. When confidence is low or templates incomplete, show an editable suggestion or “unknown” instead of inventing a number.
 - Workflow: select ONE screenshot → crop/locate gear and 18 charms → image-template recognition, numeric OCR only where appropriate → preview all 24 fields in a six-card grid → user confirms → update existing `v2.gear` entries in localStorage. No screenshot upload to a server by default; browser-side import preferred.
 - This is a **product specification, not an implemented importer yet**. Retain existing manual inputs until the matcher is tested against multiple source screenshots/resolutions.
+
+## Full governor talisman shape reference FOUND (2026-10-08)
+
+- Primary reference: **https://kingshotoptimizer.com/charms/references/** — complete illustrated Governor Charm progression **Lv1–Lv22**, with visual icon per level. Confirmed direct examples:
+  - Lv1: https://kingshotoptimizer.com/images/charms-cards/infantry_lvl1.webp
+  - Lv3: https://kingshotoptimizer.com/images/charms-cards/infantry_lvl3.webp
+  - Lv4: https://kingshotoptimizer.com/images/charms-cards/infantry_lvl4.webp
+  - Lv8: https://kingshotoptimizer.com/images/charms-cards/infantry_lvl8.webp
+  - Lv15: https://kingshotoptimizer.com/images/charms-cards/infantry_lvl15.webp
+  - Lv22: https://kingshotoptimizer.com/images/charms-cards/infantry_lvl22.webp
+- Reference companion data file: `bear/charm-references.js` lists levels 1–22, linked **infantry icon references** and verified published stat totals (not image files). Third-party art is linked rather than copied. The reference dataset is groundwork; **no automatic screenshot importer has been implemented yet**.
+- User's *in-game Talismanleitfaden* screenshot confirms six labelled examples Lv3–Lv8, with **all three glyph colours** visible on each row; they visually agree with the reference image geometry: Lv3 diamond/octagon, Lv4 square, Lv5 triangle, Lv6 pentagon, Lv7 shield, Lv8 teardrop. The **green shield / cyan horse / yellow bow** represents unit class, not a level code. Different stages also have different geometry/trim.
+- Important reliability limit: online databases list current max **22** (Kingshot Optimizer, Kingshot Guide), while one KingshotData article dated Sep 2026 still lists **21**. Treat the 22-image ladder as source reference, but avoid silently coercing any unreadable image to a level. Use confirmed icon shape, class, and per-icon confidence.
+- Before enabling automatic screenshot-to-level processing: validate image loading/CORS for local browser canvas, reference illustrations vs actual small HUD icons, screenshot coordinates at multiple phone aspect ratios, and false-positive handling. Fallback to an icon-matching visual picker with 22 levels rather than forcing 18 numeric inputs when CORS matching fails. Preserve all user data locally.
