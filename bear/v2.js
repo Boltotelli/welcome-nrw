@@ -9,6 +9,7 @@ de:{marches:'Marschplätze',joins:'Mögliche Join-Märsche',manualTroops:'Die Tr
 en:{marches:'March slots',joins:'Available join marches',manualTroops:'The API does not provide troop counts. Enter them manually in the troop arsenal.',heroDeck:'Your hero cards',heroInfo:'Only five arena-defense heroes come from the API. Add other heroes from the catalog; enter stars and actual skill levels yourself.',hero:'Choose hero',star:'Stars',tier:'Tier',widget:'Widget',skill:'Expedition skill',skillHint:'Four stars unlock a maximum skill level of 5. Enter the levels you actually upgraded.',addHero:'Save hero card',removeHero:'Remove card',pets:'Your pets',petsInfo:'Adjust levels with +/− or type a value. Optional: enter active buff type and value; never double-count in battle stats.',valora:'Valora – Bear Hunter',valoraHint:'Savage Advantage adds 3,000 to Bear march capacity per skill level. Dance of the Hunt increases rally capacity instead.',valoraApply:'Use Savage Advantage as march bonus',gear:'Governor gear & charms',gearInfo:'Six governor gear pieces, each with three charms. Data stays local; no automatic double-counting of battle bonuses.',grade:'Quality',gearTier:'Tier',gearStar:'Stars',charms:'Charms',leadHeroes:'Three heroes for your own rally',joinHero:'First hero of this join',pickEmpty:'Not selected',addFirst:'Add a hero card',petActive:'Active in battle',level:'Level',imported:'API · Arena',manual:'Manual',skillMax:'Skill cap based on stars',notSet:'Not entered',buffValue:'Buff value',buffType:'Buff type',talent:'Hunter Instinct (talent)',talentInfo:'Personal Bear damage-points bonus; not automatically included in the model'},
 fr:{marches:'Emplacements de marche',joins:'Renforts disponibles',manualTroops:"L’API ne fournit pas les quantités de troupes. Saisis-les manuellement.",heroDeck:'Tes cartes de héros',heroInfo:"L’API montre cinq héros d’arène. Ajoute les autres du catalogue, avec étoiles et niveaux de compétence réels.",hero:'Choisir le héros',star:'Étoiles',tier:'Palier',widget:'Équipement',skill:'Compétence expédition',skillHint:'Quatre étoiles permettent le niveau de compétence maximal 5. Indique les niveaux réellement améliorés.',addHero:'Enregistrer le héros',removeHero:'Supprimer le héros',pets:'Tes animaux',petsInfo:'Ajuste les niveaux avec +/− ou saisis-les. Renseigne éventuellement effet et valeur du bonus actif sans le compter deux fois.',valora:'Valora – chasseuse d’ours',valoraHint:"Savage Advantage ajoute 3 000 places par niveau à la marche d’ours. Dance of the Hunt concerne la capacité du rallye.",valoraApply:'Appliquer Savage Advantage à la marche',gear:'Équipements & talismans',gearInfo:'Six équipements de gouverneur avec trois talismans chacun. Tout est sauvegardé localement, sans double comptage.',grade:'Qualité',gearTier:'Palier',gearStar:'Étoiles',charms:'Talismans',leadHeroes:'Trois héros pour ton rallye',joinHero:'Premier héros de ce renfort',pickEmpty:'Non sélectionné',addFirst:'Ajouter une carte',petActive:'Actif en combat',level:'Niveau',imported:'API · Arène',manual:'Manuel',skillMax:'Maximum selon les étoiles',notSet:'Non saisi',buffValue:'Valeur du bonus',buffType:'Type de bonus',talent:'Hunter Instinct (talent)',talentInfo:'Bonus aux points personnels contre l’ours, non pris en compte automatiquement'}
 };
+for(const lang of ['de','en','fr'])Object.assign(translations[lang],{"de":{"petBelowTier":"Ab Level 10 ist der erste dokumentierte Skill-Rang erreicht.","petRank":"Skill-Rang","buffAttack":"Truppenangriff","buffLethality":"Tödlichkeit","buffSquad":"Marschkapazität","buffRally":"Rally-Kapazität","buffDefense":"Gegnerische Verteidigung ↓","conditionalBuff":"Wirkung auf Bären-Boss noch nicht bestätigt","rallyOnly":"Nur beim Starten der eigenen Rally","applyBison":"Aktiven Bison-Bonus übernehmen","petDisclaimer":"Automatisch aus dem Tierlevel und der Skill-Rang-Tabelle berechnet (10 Level pro Rang). Tierlevel stammen nicht aus der API. Buffs nur einmal in den Stats berücksichtigen."},"en":{"petBelowTier":"First documented skill rank at pet level 10.","petRank":"Skill rank","buffAttack":"Squad attack","buffLethality":"Lethality","buffSquad":"March capacity","buffRally":"Rally capacity","buffDefense":"Enemy defense ↓","conditionalBuff":"Bear boss interaction not yet verified","rallyOnly":"Only when starting your own rally","applyBison":"Apply active bison bonus","petDisclaimer":"Automatically derived from pet level and skill tier tables (one rank per ten levels). The API does not supply pet levels. Avoid counting active buffs twice."},"fr":{"petBelowTier":"Premier palier documenté au niveau 10.","petRank":"Rang de compétence","buffAttack":"Attaque","buffLethality":"Létalité","buffSquad":"Capacité de marche","buffRally":"Capacité du rallye","buffDefense":"Défense ennemie ↓","conditionalBuff":"Effet sur le boss ours non confirmé","rallyOnly":"Uniquement en lançant ton propre rallye","applyBison":"Appliquer le bonus bison actif","petDisclaimer":"Calculé automatiquement selon le niveau et les paliers de compétence (10 niveaux par rang). Les niveaux ne viennent pas de l'API. Ne compte pas deux fois les bonus."}}[lang]);
 const tx=k=>(translations[document.documentElement.lang]||translations.en)[k]||k;
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const max=(v,a,b)=>Math.max(a,Math.min(b,Math.floor(Number(v)||0)));
@@ -203,28 +204,89 @@ function makeStepper(parent,{id,name,url,maxLevel,value,callback,note}){
  input.addEventListener('change',()=>update(input.value));tile.appendChild(row);parent.appendChild(tile);
  return tile;
 }
+
+function petLevelToRank(level){
+ // Pet skill ranks are documented at level-10 advancement milestones.
+ return Math.max(0,Math.min(10,Math.floor((Number(level)||0)/10)));
+}
+function petEffectText(p,level){
+ const rank=petLevelToRank(level);
+ const skill=p.bearSkill;
+ if(!skill)return '';
+ if(rank===0)return tx('petBelowTier');
+ const value=skill.values[rank-1];
+ const unit=skill.unit==='percent'?'%':'';
+ return '+'+Number(value).toLocaleString(document.documentElement.lang||'de')+unit+' · '+tx('petRank')+' '+rank+'/10';
+}
 function renderPets(){
- petPanel.innerHTML='';petPanel.className='bear-art-grid';
- C.pets.forEach(p=>{
-   const s=state(),value=s.petLevels[p.name]||0;
-   const tile=makeStepper(petPanel,{name:p.name,url:p.img,maxLevel:p.maxLevel,value,callback:v=>{
-      s.petLevels[p.name]=v;
-      const link={'Black Panther':'pantherLevel','Giant Rhino':'rhinoLevel','Mighty Bison':'bisonLevel','Great Moose':'mooseLevel'}[p.name];
-      if(link&&document.getElementById(link)){const x=document.getElementById(link);x.value=v;x.dispatchEvent(new Event('input'));}
-      B.save();
+ petPanel.innerHTML='';petPanel.className='bear-art-grid bear-relevant-pets';
+ // Only active skills relevant to bear damage or raid size (and one
+ // conditional enemy-defense debuff) appear here.
+ const relevant=C.pets.filter(p=>p.bearSkill);
+ relevant.sort((a,b)=>({
+  "Mighty Bison":1,"Giant Rhino":2,"Black Panther":3,"Great Moose":4,"War Bear":5
+ })[a.name]-({
+  "Mighty Bison":1,"Giant Rhino":2,"Black Panther":3,"Great Moose":4,"War Bear":5
+ })[b.name]);
+ relevant.forEach(p=>{
+   const saved=state();
+   const existingOld={
+     "Black Panther":"pantherLevel",
+     "Giant Rhino":"rhinoLevel",
+     "Mighty Bison":"bisonLevel",
+     "Great Moose":"mooseLevel"
+   }[p.name];
+   if(saved.petLevels[p.name]===undefined&&existingOld&&Number(B.model().values[existingOld])>0){
+     saved.petLevels[p.name]=Number(B.model().values[existingOld]);
+   }
+   const value=saved.petLevels[p.name]||0;
+   const tile=makeStepper(petPanel,{name:p.name,url:p.img,maxLevel:p.maxLevel,value,
+    note:p.bearSkill.skill,callback:v=>{
+     saved.petLevels[p.name]=v;
+     if(existingOld&&document.getElementById(existingOld)){
+       B.model().values[existingOld]=v;
+       const field=document.getElementById(existingOld);field.value=v;
+     }
+     updatePetLabel();
+     B.save();
     }});
-   const label=document.createElement('label');label.className='bear-active';label.innerHTML='<input type="checkbox"> '+esc(tx('petActive'));
-   label.querySelector('input').checked=Boolean(s.petActive[p.name]);label.querySelector('input').addEventListener('change',e=>{state().petActive[p.name]=e.target.checked;B.save();});
+   tile.classList.add('bear-pet-compact');
+   const description=document.createElement('div');description.className='bear-pet-effect';
+   tile.appendChild(description);
+   function updatePetLabel(){
+     const level=saved.petLevels[p.name]||0;
+     const rank=petLevelToRank(level),skill=p.bearSkill;
+     const labels={
+       attack:tx('buffAttack'),lethality:tx('buffLethality'),
+       squad_capacity:tx('buffSquad'),rally_capacity:tx('buffRally'),
+       enemy_defense:tx('buffDefense')
+     };
+     description.innerHTML='<small>'+esc(labels[skill.id]||skill.id)+'</small><strong>'+esc(petEffectText(p,level))+'</strong>'+
+      (skill.category==='conditional'?'<small>'+esc(tx('conditionalBuff'))+'</small>':
+       skill.category==='rally'?'<small>'+esc(tx('rallyOnly'))+'</small>':'');
+     const button=tile.querySelector('.bear-apply-bison');
+     if(button)button.disabled=!(saved.petActive[p.name]&&rank>0);
+   }
+   const label=document.createElement('label');label.className='bear-active';
+   label.innerHTML='<input type="checkbox"> '+esc(tx('petActive'));
+   const checkbox=label.querySelector('input');
+   checkbox.checked=Boolean(saved.petActive[p.name]);
+   checkbox.addEventListener('change',e=>{saved.petActive[p.name]=e.target.checked;B.save();updatePetLabel();});
    tile.appendChild(label);
-   const buff=document.createElement('div');buff.className='bear-pet-buff';
-   buff.innerHTML='<label>'+esc(tx('buffType'))+'<select><option value="none">—</option><option value="attack">Attack %</option><option value="lethality">Lethality %</option><option value="capacity">March +</option><option value="health">Health %</option><option value="defense">Defense %</option><option value="other">Other</option></select></label><label>'+esc(tx('buffValue'))+'<input type="number" min="0" step=".1" inputmode="decimal" placeholder="—"></label>';
-   const effect=buff.querySelector('select'),amount=buff.querySelector('input');
-   effect.value=s.petEffects[p.name]||'none';
-   amount.value=s.petValues[p.name]??'';
-   effect.addEventListener('change',()=>{state().petEffects[p.name]=effect.value;B.save();});
-   amount.addEventListener('input',()=>{state().petValues[p.name]=amount.value===''?'':Math.max(0,Number(amount.value)||0);B.save();});
-   tile.appendChild(buff);
+   if(p.name==='Mighty Bison'){
+     const apply=document.createElement('button');apply.type='button';apply.className='secondary-btn bear-apply-bison';
+     apply.textContent=tx('applyBison');
+     apply.addEventListener('click',()=>{
+       if(!saved.petActive[p.name])return;
+       const rank=petLevelToRank(saved.petLevels[p.name]||0);
+       const v=rank?p.bearSkill.values[rank-1]:0;
+       const input=document.getElementById('pet');input.value=v;input.dispatchEvent(new Event('input'));
+     });
+     tile.appendChild(apply);
+   }
+   updatePetLabel();
  });
+ let footer=petPanel.parentElement.querySelector('.bear-pet-footnote');if(!footer){footer=document.createElement('p');footer.className='hint bear-pet-footnote';petPanel.after(footer);}footer.textContent=tx('petDisclaimer');
 }
 function renderValora(){
  masterPanel.innerHTML='';masterPanel.className='bear-art-grid bear-master-grid';
