@@ -36,3 +36,5 @@
  .bear-import-actions{padding:0 14px 17px}
  .bear-import-actions button{width:100%}
 }
+
+.bear-import-tier-note{display:block;color:var(--muted);font-size:10px;line-height:1.25;min-height:24px;overflow-wrap:anywhere}
