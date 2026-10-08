@@ -24,7 +24,7 @@ for(const kind of ['infantry','cavalry','archer']){
  assert.ok(dif(masks[5],masks[6])>.05);
 }
 const source=fs.readFileSync(__dirname+'/screenshot-importer.js','utf8');
-for(const term of ["id:'helmet'","id:'neck'","id:'coat'","id:'pants'","id:'ring'","id:'staff'","[data-charm]","B.save()","confidence","File","URL.createObjectURL","getRemoteTemplates"]){
+for(const term of ["id:'helmet'","id:'neck'","id:'coat'","id:'pants'","id:'ring'","id:'staff'","[data-charm]","B.save()","confidence","type=\"file\"","URL.createObjectURL","getRemoteTemplates"]){
  assert.ok(source.includes(term),'importer contract '+term);
 }
 const html=fs.readFileSync(__dirname+'/index.html','utf8');
