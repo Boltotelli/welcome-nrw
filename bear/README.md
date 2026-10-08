@@ -100,3 +100,13 @@ Do not edit the existing live dashboard navigation until the user approves the g
 - The detailed hero portraits/skills/gear editor, pets, Valora, governor gear, extra bonus fields and individual march editor are grouped under **one collapsed advanced disclosure**. The starter-hero selectors and optimize button stay visible even when an individual join is selected.
 - The top status distinguishes incomplete required model inputs from ready-to-estimate. Neither missing offensive percentages nor troop-tier values are silently invented. Outputs remain explicitly labeled **unvalidated provisional model recommendations**, not real Kingshot damage points.
 - Files: new `bear/ux.js`, `bear/ux.css`, indexed after existing `v2.js`/CSS. The GitHub Pages test workflow publishes them and syntax-checks `ux.js`. No production merge, Supabase, NAP or Vercel deploy.
+
+
+## Screenshot import decision — single governor gear overview (2026-10-08)
+
+- User-provided Kingshot **Gouverneur-Ausrüstung** screenshot simultaneously shows all SIX governor equipment items and all EIGHTEEN charm badges (three per item). Therefore **do not request separate screenshots for governor gear and charms as default**: one screenshot is enough for the gear/charm overview.
+- Important correction: **charm colour AND glyph/shape change on progression**. A one-shot importer should crop the 18 icon locations and match each icon against a curated per-level icon template library; numeric OCR alone will miss those levels. A badge can differ from its neighbour on the same gear piece, so resolve each charm separately.
+- Also detect gear class/slot, rarity background, T-tier text and visible star count for all six pieces. Do not interpret the top-level selected item’s *upgrade preview* as the player's currently equipped bonus; current-vs-next arrows show different values.
+- **Required before exact auto-import:** map each distinct in-game charm graphic to its actual charm level 1–22, using verified Kingshot icon assets or annotated known-level screenshots. Colour alone does not guarantee unique level and arbitrary thresholds are not acceptable. When confidence is low or templates incomplete, show an editable suggestion or “unknown” instead of inventing a number.
+- Workflow: select ONE screenshot → crop/locate gear and 18 charms → image-template recognition, numeric OCR only where appropriate → preview all 24 fields in a six-card grid → user confirms → update existing `v2.gear` entries in localStorage. No screenshot upload to a server by default; browser-side import preferred.
+- This is a **product specification, not an implemented importer yet**. Retain existing manual inputs until the matcher is tested against multiple source screenshots/resolutions.
