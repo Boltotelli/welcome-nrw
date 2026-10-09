@@ -111,12 +111,13 @@ function starStepsFromRatios(ratios){
  // Six petals per flower, up to five flowers. Example: 4 full + four
  // illuminated petals equals 4★ T4 (28 of 30 advancement steps).
  if(!Array.isArray(ratios)||ratios.length!==5)return null;
- const reference=ratios.slice(0,Math.min(3,ratios.length)).filter(x=>x>.08)
-  .sort((a,b)=>a-b)[0];
+ // The first star is full on a recruited hero. Do not use the MINIMUM
+ // of three as a reference: the third star may be only partly filled.
+ const reference=ratios[0];
  if(!reference||reference<.14||reference>.56)return null;
  let full=0;
  for(const amount of ratios){
-  if(amount/reference>=.80)full++;
+  if(amount/reference>=.91)full++;
   else break;
  }
  if(full===5)return 30;
@@ -147,7 +148,7 @@ function inferStars(canvas,rect){
   ratios.push(bright/(width*height));
  }
  const steps=starStepsFromRatios(ratios);
- const ref=ratios.slice(0,3).sort((a,b)=>a-b)[1]||0;
+ const ref=ratios[0]||0;
  return {starSteps:steps,confidence:steps===null?0:Math.min(1,ref/.3),
   partiallyFilled:steps!==null&&steps%6!==0};
 }
