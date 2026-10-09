@@ -75,3 +75,12 @@ body:has(.bear-intake-wizard) .boss img{width:95px}
  .bear-local-id-row{flex-direction:column;align-items:stretch}
  .bear-local-id-row select{max-width:none;width:100%}
 }
+
+
+.bear-intake-tier-review{grid-column:1/-1;display:grid;gap:7px;padding:11px;border:1px solid rgba(245,186,95,.3);border-radius:12px;background:rgba(225,150,51,.06)}
+.bear-intake-tier-review>b{font-size:12px;color:var(--amber)}
+.bear-intake-tier-row{display:grid;grid-template-columns:minmax(95px,1fr) minmax(90px,110px) minmax(90px,110px) minmax(0,1.3fr);gap:8px;align-items:center}
+.bear-intake-tier-row strong{font-size:12px}
+.bear-intake-tier-row select{width:100%;min-width:0;font-size:12px;padding:7px 5px}
+.bear-intake-tier-row small{font-size:10px;line-height:1.2;color:var(--muted)}
+@media(max-width:600px){.bear-intake-tier-row{grid-template-columns:1fr 1fr}.bear-intake-tier-row strong{grid-column:1/-1}.bear-intake-tier-row small{grid-column:1/-1}}
