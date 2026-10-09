@@ -10,11 +10,12 @@ const tpl={5:['/////+4A4A+A/4/4P+APAPAPAPAP/+/4'],6:['H4H4P/MAMAMA/w/w/48c8cMMOM
 function decode(s){const b=atob(s),bits=new Uint8Array(12*16);for(let i=0;i<bits.length;i++)bits[i]=(b.charCodeAt(i>>3)>>(7-(i%8)))&1;return bits;}
 const patterns={5:tpl[5].map(decode),6:tpl[6].map(decode)};
 function ratio(mask,b){return Math.max(...patterns[b].map(p=>{let both=0,aa=0,bb=0;for(let i=0;i<mask.length;i++){both+=mask[i]&&p[i]?1:0;aa+=mask[i];bb+=p[i];}return 2*both/(aa+bb||1);}));}
-function digitAt(ctx,center){
+function digitAt(ctx,center,scratch){
  const sc=ctx.canvas.width/716;
  const x=Math.round(center[0]*sc),y=Math.round(center[1]*sc);
  const left=Math.round(x-12*sc),top=Math.round(y-13*sc);
- const tmp=document.createElement('canvas');tmp.width=27;tmp.height=26;
+ const tmp=scratch||document.createElement('canvas');
+ if(!scratch){tmp.width=27;tmp.height=26;}
  if(left<0||top<0||left+27*sc>ctx.canvas.width||top+26*sc>ctx.canvas.height)return {tg:null,confidence:0};
  const tmpCtx=tmp.getContext('2d',{willReadFrequently:true});
  tmpCtx.drawImage(ctx.canvas,left,top,27*sc,26*sc,0,0,27,26);
@@ -64,12 +65,17 @@ function recognize(canvas,text,words){
  const normalizedHeight=canvas.height*716/canvas.width;
  const yAdjust=Math.max(-38,Math.min(20,(normalizedHeight-1536)*.115));
  const anchors=[[133,395],[453,395],[133,518]];
+ const sc=canvas.width/716;
+ const scratch=document.createElement('canvas');scratch.width=27;scratch.height=26;
  for(let i=0;i<3;i++){
   let best={tg:null,confidence:0};
-  for(const dx of [-6,-4,-2,0,2,4,6]){
-   for(const dy of [-8,-6,-4,-2,0,2,4,6,8]){
-    const digit=digitAt(ctx,[anchors[i][0]+dx,anchors[i][1]+yAdjust+dy]);
-    if(digit.tg!==null && digit.confidence>best.confidence)best=digit;
+  const cx=anchors[i][0]*sc,cy=(anchors[i][1]+yAdjust)*sc;
+  // Scan in physical pixels: stepping by 2 base units skipped the thin
+  // numeral strokes on high-resolution Android screenshots.
+  for(const dx of [-9,-7,-6,-5,-3,-1,1,3,5,7,9]){
+   for(const dy of [-9,-7,-5,-3,-1,1,3,5,7,9,11]){
+    const digit=digitAt(ctx,[(cx+dx)/sc,(cy+dy)/sc],scratch);
+    if(digit.tg!==null&&digit.confidence>best.confidence)best=digit;
    }
   }
   if(best.tg!==null){result[i].tg=best.tg;result[i].confidence=best.confidence;}
