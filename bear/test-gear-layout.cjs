@@ -42,6 +42,46 @@ assert.equal(modernResult.detected,6,'four purple and two orange frames localize
 assert.equal(modernResult.slots[4].inferred,false,'orange ring must be directly detected');
 assert.equal(modernResult.slots[5].inferred,false,'orange staff must be directly detected');
 assert.ok(modernResult.slots[4].charms.length===3&&modernResult.slots[5].charms.length===3);
+// Exact geometric proportions measured from the player's current
+// 1080x1920 Governor Gear screenshot. These are simple synthetic rectangles,
+// NOT copies of in-game artwork or screenshots.
+function screenshotGeometry(mult=1){
+ const w=Math.round(716*mult),h=Math.round(1273*mult);
+ const pixels=new Uint8ClampedArray(w*h*4);
+ for(let i=0;i<pixels.length;i+=4){pixels[i]=86;pixels[i+1]=158;pixels[i+2]=188;pixels[i+3]=255;}
+ const cards=[
+  [67,173,104,105,'purple'],[545,173,104,105,'purple'],
+  [20,350,104,104,'purple'],[592,350,104,104,'purple'],
+  [67,518,103,103,'gold'],[546,518,103,103,'gold']
+ ];
+ for(const [xx,yy,ww,hh,type] of cards){
+  const [r,g,b]=type==='gold'?[215,110,12]:[121,99,208];
+  for(let y=Math.round(yy*mult);y<Math.round((yy+hh)*mult);y++)
+   for(let x=Math.round(xx*mult);x<Math.round((xx+ww)*mult);x++){
+    const k=(y*w+x)*4;pixels[k]=r;pixels[k+1]=g;pixels[k+2]=b;
+   }
+ }
+ return {pixels,w,h};
+}
+for(const mult of [1,1.5]){
+ const sample=screenshotGeometry(mult),detected=find(sample.pixels,sample.w,sample.h);
+ assert.equal(detected.ok,true,'real screenshot grid at resolution scale '+mult);
+ assert.equal(detected.detected,6,'all six frames are pixel-detected');
+ assert.equal(detected.slots.filter(slot=>slot.inferred).length,0,
+  'neither gold frame is extrapolated');
+ assert.deepEqual(Array.from(detected.slots,slot=>slot.quality),
+  ['purple','purple','purple','purple','gold','gold']);
+ const expected=[
+  [119,296],[597,296],[72,472],[644,472],[118.5,639],[597.5,639]
+ ];
+ detected.slots.forEach((slot,i)=>{
+  assert.equal(slot.charms.length,3);
+  const y=slot.charms[1][1]/mult;
+  assert.ok(Math.abs(y-expected[i][1])<=3,'charm row '+slot.id+' expected y='+expected[i][1]+', got '+y);
+  assert.ok(Math.abs(slot.charms[1][0]/mult-expected[i][0])<=3,'charm column '+slot.id);
+  assert.ok(slot.charms[0][0]<slot.charms[1][0]&&slot.charms[1][0]<slot.charms[2][0]);
+ });
+}
 const blank=image().pixels;blank.fill(0);
 assert.equal(find(blank,716,1536).ok,false);
 console.log('GEAR LAYOUT: six purple/orange frames detected at original and shifted positions, no inferred golden archer equipment.');
