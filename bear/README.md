@@ -242,3 +242,8 @@ The player retested the published preview and reported troop tiers + cavalry sti
 - Base squad capacity is the **original** persisted `#cap` input, now **reparented into its own required field** (`#bearRequiredCapacity`) whenever it is missing or zero. The old combined hero/marches panel no longer controls its visibility. The 6/6 march count is not base squad capacity.
 - Remaining: actual hero portrait/name/level/star OCR requires another Android acceptance test, and the recommendations cannot be claimed optimal before comparing observed Bear damage and skill effects. GitHub Pages deployment status must be checked separately; code commits do not prove it.
 - Test-only branch: `feature/bear-optimizer-nrw-prototype`. No change to `main`, production, NAP or Supabase.
+
+### 2026-10-09 – Dev chat resumed after interrupted verification
+- Fixed a repeat-import bug where star-inferred skills from `manualHeroes` could be promoted to falsely *confirmed* skills on subsequent roster uploads. `skillsAssumedMax` is preserved until truly known skills are entered.
+- The gear-first stage now requires **new confirmed detail uploads for all three selected heroes**, not cached expedition statistics from before reallocating the best Hero Gear. Returning to the hero shortlist and confirming new picks clears the three detail confirmations. An explicit **Skip** still exists for unrecoverable screenshots.
+- Verified static contracts by reading current branch files: nine stages, grouped hero overview uploads, independent original `#cap` field, advisor loaded before wizard, and both tests included in GitHub Pages workflow. Relevant JS is syntactically valid. **No full Android browser run or GitHub Pages deployment outcome is confirmed yet.**
