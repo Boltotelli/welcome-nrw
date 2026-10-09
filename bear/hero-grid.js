@@ -41,7 +41,9 @@ function rowsFromPixels(data,w,h){
    last.bottom=item.bottom;
   else merged.push({...item});
  }
- return merged.filter(x=>x.bottom-x.top>=w*.30&&x.bottom-x.top<=w*.42);
+ // A cropped fourth row can be 0.30-0.33 screen widths high, yet
+ // still be missing the level and star bar. Only process complete cards.
+ return merged.filter(x=>x.bottom-x.top>=w*.35&&x.bottom-x.top<=w*.42);
 }
 function rows(canvas){
  const {width:w,height:h}=canvas,ctx=canvas.getContext('2d',{willReadFrequently:true});
