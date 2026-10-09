@@ -111,14 +111,14 @@ function heroRows(canvas){
  // at least three columns exposes the actual card row independently of scroll.
  const w=canvas.width,h=canvas.height,ctx=canvas.getContext('2d',{willReadFrequently:true});
  const data=ctx.getImageData(0,0,w,h).data;
- const sample=(x,y)=>{const p=(Math.floor(y)*w+Math.floor(x))*4;return [data[p],data[p+1],data[p+2]];};
+ const sample=(x,y)=>{const px=Math.max(0,Math.min(w-1,Math.floor(x*w))),py=Math.max(0,Math.min(h-1,Math.floor(y*h)));const p=(py*w+px)*4;return [data[p],data[p+1],data[p+2]];};
  const bg=sample(.023,.30);
  const xs=[.054,.286,.518,.750],y0=Math.round(h*.064),y1=Math.round(h*.91);
  const present=new Uint8Array(h);
  for(let y=y0;y<y1;y+=2){
   let changed=0;
   for(const x of xs){
-   const c=sample(x,y);
+   const c=sample(x,y/h);
    if(Math.abs(c[0]-bg[0])+Math.abs(c[1]-bg[1])+Math.abs(c[2]-bg[2])>75)changed++;
   }
   if(changed>=3){present[y]=1;present[y+1]=1;}
