@@ -13,7 +13,7 @@ function mock(mask){
   data[p]=on?232:155;data[p+1]=on?226:109;data[p+2]=on?210:18;data[p+3]=255;
  }
  const document={createElement:()=>({width:27,height:26,getContext:()=>({
-  drawImage(){},getImageData:()=>({data})
+  drawImage(){},clearRect(){},getImageData:()=>({data})
  })})};
  const scope={window:{},atob,document};
  vm.runInNewContext(moduleCode,scope);
