@@ -177,6 +177,11 @@ function showRelevantManual(){
  if(capField)capField.hidden=false;
  const capacityNeeded=!(Number(v.cap)>0);
  capacityHost.hidden=!capacityNeeded;
+ capacityHost.dataset.caption=lang()==='de'?'⚠ Schwadronskapazität ohne Helden':
+  lang()==='fr'?'⚠ Capacité d’escadron sans héros':'⚠ Squad capacity without heroes';
+ const capInput=$('cap');
+ if(capInput&&capacityNeeded&&capInput.value==='0')capInput.value='';
+
  const ownReady=(ext.ownHeroes||[]).filter(Boolean).length===3;
  const heroLine=quick?.querySelector('#uxHeroLine');
  if(heroLine)heroLine.hidden=ownReady;
@@ -351,7 +356,10 @@ function render(){
  else message(s.estimated);
  const next=$('bearGuideNext');
  next.disabled=(idx===0&&!hasProfile())||
-  ([1,2,3,4,6].includes(idx)&&(processQueue()||(!imported.has(idx)&&!modelReady(idx))))||
+  ([1,2,3,4].includes(idx)&&(processQueue()||(!imported.has(idx)&&!modelReady(idx))))||
+  (idx===6&&(processQueue()||!(B.model().v2?.ownHeroes||[]).filter(Boolean)
+    .every(n=>detailConfirmed.has(n)||B.model().v2?.manualHeroes?.[n]?.expeditionStats&&
+     Object.keys(B.model().v2.manualHeroes[n].expeditionStats).length>0)))||
   (idx===5&&!recommendationsReady());
  if(idx===7||idx===8)next.disabled=false;
  const bodyClass='bear-wizard-mode';document.body.classList.add(bodyClass);
