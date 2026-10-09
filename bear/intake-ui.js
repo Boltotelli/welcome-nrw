@@ -352,7 +352,7 @@ async function recheckUnreadTroopEntries(entries,canvas,worker){
     r.w*canvas.width,r.h*canvas.height,8,8,c.width-16,c.height-16);
    const ocr=await worker.recognize(c);
    const cleaned=String(ocr.data?.text||'').trim();
-   const candidate=ENTRY.count(cleaned);
+   const candidate=ENTRY.readTextCount(cleaned);
    if(candidate!==null)entry.count=candidate;
   }catch(_){/* Leave unreadable rows reviewable, never fabricate counts. */}
  }
@@ -404,6 +404,7 @@ async function inspect(file){
   troopEntries=ENTRY.detect(result.data.words||[],canvas.width,canvas.height);
   if(troopEntries.length){
    await recheckUnreadTroopEntries(troopEntries,canvas,worker);
+   ENTRY.recoverSingleEntries(troopEntries,values);
    const computed=ENTRY.totals(troopEntries);
    for(const type of new Set(troopEntries.map(e=>e.type))){
     const key=['troopsI','troopsC','troopsA'][type];
@@ -466,7 +467,7 @@ function renderQueue(){
   const header=document.createElement('div');header.className='bear-intake-item-head';
   const title=document.createElement('b');title.textContent=item.fileName;
   const type=inputChoice(Object.entries(types).map(([key,name])=>[key,name]),item.type);
-  type.addEventListener('change',()=>{item.type=type.value;item.values=item.type==='troops'?{...Core.parseTroops(item.text),...(item.canvas?spatialTroops(item.words,item.canvas):{})}:item.type==='stats'?{...Core.parseStats(item.text),...Core.parseStats(item.grouped||'')}:{};item.troopEntries=item.type==='troops'&&item.canvas&&ENTRY?ENTRY.detect(item.words||[],item.canvas.width,item.canvas.height):[];if(item.troopEntries.length)Object.assign(item.values,ENTRY.totals(item.troopEntries));item.detail=item.type==='starter'?Core.parseHeroDetail(item.text,allKnown()):null;item.cards=item.type==='roster'&&item.canvas?overviewTiles(item.canvas,item.text,item.words):[];item.troopTiers=item.type==='troops'&&item.canvas&&TROOP?TROOP.recognize(item.canvas,item.text+'\n'+(item.grouped||''),item.words):null;renderQueue();});
+  type.addEventListener('change',()=>{item.type=type.value;item.values=item.type==='troops'?{...Core.parseTroops(item.text),...(item.canvas?spatialTroops(item.words,item.canvas):{})}:item.type==='stats'?{...Core.parseStats(item.text),...Core.parseStats(item.grouped||'')}:{};item.troopEntries=item.type==='troops'&&item.canvas&&ENTRY?ENTRY.detect(item.words||[],item.canvas.width,item.canvas.height):[];if(item.troopEntries.length){ENTRY.recoverSingleEntries(item.troopEntries,item.values);Object.assign(item.values,ENTRY.totals(item.troopEntries));}item.detail=item.type==='starter'?Core.parseHeroDetail(item.text,allKnown()):null;item.cards=item.type==='roster'&&item.canvas?overviewTiles(item.canvas,item.text,item.words):[];item.troopTiers=item.type==='troops'&&item.canvas&&TROOP?TROOP.recognize(item.canvas,item.text+'\n'+(item.grouped||''),item.words):null;renderQueue();});
   header.append(title,type);card.appendChild(header);
   const content=document.createElement('div');content.className='bear-intake-values';
   if(item.type==='troops'||item.type==='stats'){
