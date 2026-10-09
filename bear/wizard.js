@@ -128,6 +128,7 @@ function missingValues(){
   if(v[id]===undefined||v[id]===''||!Number.isFinite(Number(v[id])))out.push(name);
  }
  if(!Array.isArray(ext.troopTiers)||ext.troopTiers.some(x=>!x?.tier))out.push('T-Stufen');
+ if((ext.ownHeroes||[]).filter(Boolean).length<3)out.push('Starterhelden');
  return out;
 }
 function showRelevantManual(){
@@ -138,7 +139,7 @@ function showRelevantManual(){
  const troopMissing=['troopsI','troopsC','troopsA'].some(k=>v[k]===undefined)
   || !Array.isArray(ext.troopTiers)||ext.troopTiers.some(x=>!x?.tier);
  const statsMissing=['iAtk','iLet','cAtk','cLet','aAtk','aLet'].some(k=>v[k]===undefined);
- const capMissing=v.cap===undefined;
+ const capMissing=v.cap===undefined||(ext.ownHeroes||[]).filter(Boolean).length<3;
  const blocks=quick?.querySelectorAll('.ux-step')||[];
  blocks.forEach((node,index)=>{node.hidden=index===0?!troopMissing:index===1?!capMissing:!statsMissing;});
  const wrapper=$('bearGuideMissingStatus');
@@ -211,6 +212,7 @@ function moveTo(i){
   $('intakeClear')?.click();
  }
  if(i===0&&active!==0)message('');
+ if(i!==6)finished=false;
  active=i;render();
 }
 $('bearGuideBack').addEventListener('click',()=>moveTo(active-1));
