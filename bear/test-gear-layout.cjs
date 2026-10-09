@@ -5,13 +5,13 @@
 const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
 const env={window:{},atob};vm.runInNewContext(fs.readFileSync(__dirname+'/gear-layout.js','utf8'),env);
 const find=env.window.NRW_BEAR_GEAR_LAYOUT.find;
-function image(shiftX=0,shiftY=0){
+function image(shiftX=0,shiftY=0,twoOrange=false){
  const w=716,h=1536,pixels=new Uint8ClampedArray(w*h*4);
  for(let k=0;k<pixels.length;k+=4){pixels[k]=90;pixels[k+1]=145;pixels[k+2]=165;pixels[k+3]=255;}
  function rect(x,y,ww,hh,c){
   for(let j=y;j<y+hh;j++)for(let i=x;i<x+ww;i++){const k=(j*w+i)*4;pixels[k]=c[0];pixels[k+1]=c[1];pixels[k+2]=c[2];}
  }
- for(const [x,y] of [[94,282],[519,283],[54,448],[558,448],[518,613]]){
+ for(const [x,y] of (twoOrange?[[94,282],[519,283],[54,448],[558,448]]:[[94,282],[519,283],[54,448],[558,448],[518,613]])){
   rect(x+shiftX,y+shiftY,108,108,[121,99,208]);
   rect(x+shiftX+26,y+shiftY+26,56,56,[190,140,80]);
  }
@@ -32,6 +32,15 @@ for(const [dx,dy] of [[0,0],[-14,70],[12,-35]]){
   assert.ok(slot.charms.every(c=>c[1]>slot.gear[1]+35),'charms below '+slot.id);
  });
 }
+// The real Android screenshot has FOUR purple and TWO orange equipment.
+const modern=image(0,0,true);
+const modernResult=find(modern.pixels,modern.w,modern.h);
+assert.equal(modernResult.ok,true,'four-purple / two-orange gear grid accepted');
+assert.equal(modernResult.slots.length,6);
+assert.equal(modernResult.detected,4);
+assert.equal(modernResult.slots[4].inferred,true);
+assert.equal(modernResult.slots[5].inferred,true);
+assert.ok(modernResult.slots[4].charms.length===3&&modernResult.slots[5].charms.length===3);
 const blank=image().pixels;blank.fill(0);
 assert.equal(find(blank,716,1536).ok,false);
 console.log('GEAR LAYOUT: five purple gear cards + orange ring found at original and shifted coordinates; unsafe images rejected.');
