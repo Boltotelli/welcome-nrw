@@ -466,12 +466,39 @@ function renderQueue(){
   const header=document.createElement('div');header.className='bear-intake-item-head';
   const title=document.createElement('b');title.textContent=item.fileName;
   const type=inputChoice(Object.entries(types).map(([key,name])=>[key,name]),item.type);
-  type.addEventListener('change',()=>{item.type=type.value;item.values=item.type==='troops'?{...Core.parseTroops(item.text),...(item.canvas?spatialTroops(item.words,item.canvas):{})}:item.type==='stats'?{...Core.parseStats(item.text),...Core.parseStats(item.grouped||'')}:{};item.detail=item.type==='starter'?Core.parseHeroDetail(item.text,allKnown()):null;item.cards=item.type==='roster'&&item.canvas?overviewTiles(item.canvas,item.text,item.words):[];item.troopTiers=item.type==='troops'&&item.canvas&&TROOP?TROOP.recognize(item.canvas,item.text+'\n'+(item.grouped||''),item.words):null;renderQueue();});
+  type.addEventListener('change',()=>{item.type=type.value;item.values=item.type==='troops'?{...Core.parseTroops(item.text),...(item.canvas?spatialTroops(item.words,item.canvas):{})}:item.type==='stats'?{...Core.parseStats(item.text),...Core.parseStats(item.grouped||'')}:{};item.troopEntries=item.type==='troops'&&item.canvas&&ENTRY?ENTRY.detect(item.words||[],item.canvas.width,item.canvas.height):[];if(item.troopEntries.length)Object.assign(item.values,ENTRY.totals(item.troopEntries));item.detail=item.type==='starter'?Core.parseHeroDetail(item.text,allKnown()):null;item.cards=item.type==='roster'&&item.canvas?overviewTiles(item.canvas,item.text,item.words):[];item.troopTiers=item.type==='troops'&&item.canvas&&TROOP?TROOP.recognize(item.canvas,item.text+'\n'+(item.grouped||''),item.words):null;renderQueue();});
   header.append(title,type);card.appendChild(header);
   const content=document.createElement('div');content.className='bear-intake-values';
   if(item.type==='troops'||item.type==='stats'){
    const relevant=item.type==='troops'?['troopsI','troopsC','troopsA']:['squadAtk','squadLet','iAtk','iLet','cAtk','cLet','aAtk','aLet'];
-   relevant.forEach(id=>{
+   const itemized=item.type==='troops'&&Array.isArray(item.troopEntries)&&item.troopEntries.length>0;
+   if(itemized){
+    const intro=document.createElement('p');intro.className='hint';
+    intro.textContent=say('Alle erkannten Truppeneinträge, auch mehrfach vorkommende Gattungen. Jede Anzahl separat prüfen. T-/TG-Stufen folgen später.',
+     'All detected troop entries, including repeated troop classes. Check every quantity separately; tier/TG recognition follows.');
+    content.append(intro);
+    const list=document.createElement('div');list.className='bear-dynamic-troop-list';
+    const refreshTotals=()=>{
+     const groups=new Set(item.troopEntries.map(e=>e.type));
+     for(const type of groups)delete item.values[['troopsI','troopsC','troopsA'][type]];
+     Object.assign(item.values,ENTRY.totals(item.troopEntries));
+    };
+    item.troopEntries.forEach((entry,index)=>{
+     const line=document.createElement('label');line.className='bear-dynamic-troop-line';
+     const heading=document.createElement('span');
+     heading.textContent=(index+1)+'. '+entry.label;
+     const value=document.createElement('input');value.type='number';value.min='0';value.step='1';
+     value.value=entry.count??'';value.placeholder=say('Nicht erkannt','Not recognized');
+     value.addEventListener('input',()=>{
+      const n=value.value.trim()===''?null:Number(value.value);
+      entry.count=Number.isSafeInteger(n)&&n>=0?n:null;
+      refreshTotals();
+     });
+     line.append(heading,value);list.append(line);
+    });
+    content.append(list);
+    refreshTotals();
+   }else relevant.forEach(id=>{
     // A guided review should show only found values. Anything not recognized
     // is collected in the final missing-values step, not a wall of blank inputs.
     if(window.NRW_BEAR_WIZARD&&!Object.prototype.hasOwnProperty.call(item.values,id))return;
@@ -482,7 +509,7 @@ function renderQueue(){
     field.addEventListener('input',()=>{if(field.value!=='')item.values[id]=Number(field.value);else delete item.values[id];});
     label.append(cap,field);content.appendChild(label);
    });
-   if(item.type==='troops'){
+   if(item.type==='troops'&&(!itemized||(item.troopEntries.length===3&&new Set(item.troopEntries.map(e=>e.type)).size===3))){
     const extra=document.createElement('div');extra.className='bear-intake-tier-review';
     const heading=document.createElement('b');heading.textContent='🛡️ '+say('Stufen aus den Truppensymbolen – bitte prüfen','Troop badge tiers – please verify');
     extra.append(heading);
@@ -608,12 +635,25 @@ function apply(){
     m.values[key]=Number(num);const input=$(key);if(input){input.value=num;input.dispatchEvent(new Event('input',{bubbles:true}));}
     accepted++;
    }
+   if(item.type==='troops'&&Array.isArray(item.troopEntries)&&item.troopEntries.length){
+    v.troopEntries=item.troopEntries.map(e=>({type:e.type,label:e.label,count:e.count,
+     icon:e.icon,crop:e.crop}));
+    const totals=ENTRY.totals(item.troopEntries);
+    for(const type of new Set(item.troopEntries.map(e=>e.type))){
+     const key=['troopsI','troopsC','troopsA'][type];
+     if(!Object.prototype.hasOwnProperty.call(totals,key)){
+      delete m.values[key];
+      const input=$(key);if(input)input.value='';
+     }
+    }
+   }
    if(item.type==='troops'&&Number(item.marchSlots)>=1&&Number(item.marchSlots)<=7&&
       (!v.marchCountConfirmed || v.marchCountSource==='screenshot')){
     v.joinCount=Number(item.marchSlots)-1;
     v.marchCountConfirmed=true;v.marchCountSource='screenshot';
    }
-   if(item.type==='troops'&&Array.isArray(item.troopTiers)){
+   if(item.type==='troops'&&Array.isArray(item.troopTiers)&&
+    (!item.troopEntries?.length||(item.troopEntries.length===3&&new Set(item.troopEntries.map(e=>e.type)).size===3))){
     if(!Array.isArray(v.troopTiers)||v.troopTiers.length!==3)v.troopTiers=[{tier:0,tg:null},{tier:0,tg:null},{tier:0,tg:null}];
     item.troopTiers.forEach((suggestion,index)=>{
      const dest=v.troopTiers[index];if(!suggestion)return;
