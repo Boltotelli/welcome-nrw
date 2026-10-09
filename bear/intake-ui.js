@@ -237,6 +237,46 @@ async function readMissingHeroLevels(tiles,canvas,worker){
   });
  }catch(_){/* Level remains unknown and reviewable. */}
 }
+async function recheckUncertainHeroLevels(tiles,canvas,worker){
+ // Pass 2: monochrome mask of ONLY the bright yellow/white "Lv. <num>"
+ // strip. Filtering the coloured portrait eliminates most false text.
+ const missing=tiles.filter(t=>!Number.isInteger(t.level)&&t.rect);
+ if(!missing.length)return;
+ const stride=78,board=document.createElement('canvas');
+ board.width=340;board.height=stride*missing.length;
+ const bc=board.getContext('2d',{willReadFrequently:true});
+ bc.fillStyle='#fff';bc.fillRect(0,0,board.width,board.height);
+ missing.forEach((tile,i)=>{
+  const r=tile.rect,tmp=document.createElement('canvas');
+  tmp.width=320;tmp.height=68;
+  const tc=tmp.getContext('2d',{willReadFrequently:true});
+  tc.drawImage(canvas,r.x+r.w*.055,r.y+r.h*.695,r.w*.70,r.h*.16,
+   0,0,tmp.width,tmp.height);
+  const img=tc.getImageData(0,0,tmp.width,tmp.height);
+  for(let k=0;k<img.data.length;k+=4){
+   const R=img.data[k],G=img.data[k+1],B=img.data[k+2];
+   const bright=(R>155&&G>150&&B>70&&R-B>18)||
+                (R>179&&G>174&&B>164);
+   img.data[k]=img.data[k+1]=img.data[k+2]=bright?0:255;
+   img.data[k+3]=255;
+  }
+  tc.putImageData(img,0,0);bc.drawImage(tmp,10,i*stride+4);
+ });
+ try{
+  const ocr=await worker.recognize(board);
+  const words=ocr.data?.words||[];
+  missing.forEach((tile,i)=>{
+   const line=words.filter(x=>x.bbox&&
+    (x.bbox.y0+x.bbox.y1)/2>=i*stride&&
+    (x.bbox.y0+x.bbox.y1)/2<(i+1)*stride)
+    .sort((a,b)=>a.bbox.x0-b.bbox.x0).map(x=>x.text).join(' ');
+   const normalized=line.replace(/(?<=\d)[oO](?=\b)/g,'0')
+    .replace(/\b[Bb](?=[oO0]\b)/g,'8').replace(/\b([IL])v/gi,'Lv');
+   const m=normalized.match(/\bLv\s*\.?\s*(\d{1,2})\b/i);
+   if(m&&Number(m[1])>=1&&Number(m[1])<=80)tile.level=Number(m[1]);
+  });
+ }catch(_){/* Do not invent an unreadable hero level. */}
+}
 function spatialTroops(words,canvas){
  const zones=[
   {key:'troopsI',x:[.20,.42],y:[.305,.353]},
@@ -469,7 +509,10 @@ async function inspect(file){
  if(window.NRW_BEAR_SCREENSHOT_STAGE===6&&type==='unknown')
   type='starter';
  const allCards=type==='roster'?overviewTiles(canvas,text,result.data.words):[];
- if(type==='roster'&&allCards.length)await readMissingHeroLevels(allCards,canvas,worker);
+ if(type==='roster'&&allCards.length){
+  await readMissingHeroLevels(allCards,canvas,worker);
+  await recheckUncertainHeroLevels(allCards,canvas,worker);
+ }
  const existing=[...queue.filter(q=>q.type==='roster').flatMap(q=>q.cards||[]),...confirmedPortraits];
  const fresh=allCards.filter(tile=>!existing.some(x=>samePortrait(x.signature,tile.signature)));
  if(type==='roster'&&MATCHER)await MATCHER.enrich(fresh);
