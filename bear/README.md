@@ -175,3 +175,22 @@ User test showed the original GovGear importer selecting chunks of items rather 
 - `intake-ui.js` includes a troop-tier and Truegold **review row for each of infantry, cavalry, and archers**; positive T/TG suggestions populate the existing `v2.troopTiers` only on explicit confirmation, leaving unknown values unchanged. The user does not need to reenter the total troop amounts.
 - Regression test scripts `test-gear-layout.cjs` and `test-troop-badges.cjs` use **synthetic images** and tiny bitpacked binary masks derived from the provided screenshot (source images not committed). They check grid offsets, positive TG6/TG5/TG6 and a blank-screen rejection. GitHub Pages Action validates and publishes both modules.
 - Limits: the current gold-number visual templates are calibrated for the supplied screenshot style and only TG5/TG6; not universal for every tier, HUD layout, image crop, or screenshot quality. The formation calculation itself remains provisional.
+
+
+## Guided onboarding replacing the large Bear configuration page — 2026-10-09
+
+The user found the screenshot-first interface still too complicated because all the forms and controls were visible simultaneously. The standard page now runs **`bear/wizard.js` / `bear/wizard.css`** and only shows one setup step at a time, with progress and Back / Continue buttons:
+
+1. Governor ID or existing NRW MightPulse JSON / previously saved local profile. The static GitHub Pages preview **cannot make authenticated live MightPulse calls**: it never embeds a provider key in browser assets; it explains this limitation and disables the unworkable live lookup button. Local profiles are explicitly **not a fresh NRW membership verification**.
+2. A troop overview screenshot, reviewed for three troop totals and separately identified T/TG badges.
+3. One or more scrolling combat-stat screenshots, merged in the same existing OCR review; squad stats are kept separate from class stats to avoid accidental double counting.
+4. One Governor Equipment overview screenshot with six gear pieces and 18 talismans via the existing on-device image matcher and confirmation dialog.
+5. Hero overview and/or details of the three starters, with editable identity, level and star checks.
+6. A *targeted* missing-values screen: sections for troops, march capacity/selected starters or attack/lethality percentages are hidden when complete; the existing full expert UI remains in a secondary expandable area.
+7. A results screen with the starter optimizer's existing **three provisional** model formation alternatives. The model calculation starts on entry if all required data and troop tiers are ready; otherwise a clear instruction to complete missing fields appears.
+
+The underlying DOM input elements and handlers are **moved** into steps rather than duplicated. The existing model/localStorage data remains compatible. The wizard does not create new storage or bypass the per-Governor cache. Unrecognized screenshot fields remain empty, not fabricated. Review is required before saving; moving to another screenshot stage discards an unconfirmed review rather than mixing categories. Skipping optional screenshot steps leaves them incomplete for follow-up. Additional events from existing importers (`nrw-bear-intake-applied`, `nrw-bear-gear-applied`) enable the corresponding Continue button only after the user confirmed reviewed data.
+
+UI supports the three current languages and is mobile-first. In guided mode the previous full dashboard and decorative banner are hidden. Script order matters: `wizard.js` must load **after** `v2.js`, `ux.js`, `screenshot-importer.js` and `intake-ui.js`; `wizard.css` loads last.
+
+Testing: `node bear/test-wizard.cjs` validates ordering, assets, source events, confirmation gates and syntax, in addition to the existing OCR, tier, gear and combat tests. **Automated static checks are not a complete touch/browser test.** Validate with actual Android screenshots and verify multi-image OCR, portrait matching and missing fields on the phone before proposing a production deployment. Only the GitHub Pages feature branch is modified; no Vercel, main, NAP or Supabase work.
