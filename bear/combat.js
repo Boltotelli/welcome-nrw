@@ -50,7 +50,7 @@ const attack = Object.freeze({
 const troopKeys=['infantry','cavalry','archer'];
 const statKeys=[['iAtk','iLet'],['cAtk','cLet'],['aAtk','aLet']];
 const validTier=t=>Number.isInteger(Number(t))&&Number(t)>=1&&Number(t)<=11;
-const validTG=t=>Number.isInteger(Number(t))&&Number(t)>=0&&Number(t)<=8;
+const validTG=t=>t!==null&&t!==undefined&&t!==''&&Number.isInteger(Number(t))&&Number(t)>=0&&Number(t)<=8;
 function troopAttack(className,tier,tg){
  if(!attack[className]||!validTier(tier)||!validTG(tg))return null;
  return attack[className][Number(tier)-1][Number(tg)];
