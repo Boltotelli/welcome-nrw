@@ -44,6 +44,13 @@ function parseTroops(text){
  }
  return values;
 }
+function parseMarchSlots(text){
+ const value=fold(text).replace(/\s+/g,' ');
+ const m=value.match(/(?:marschschlange|march\s*queue|marches)[^\d]{0,24}(\d+)\s*\/\s*(\d+)/i);
+ if(!m)return null;
+ const total=Number(m[2]);
+ return total>=1&&total<=7?total:null;
+}
 function parseStats(text){
  const out={},lines=String(text||'').split(/\n/);
  for(let i=0;i<lines.length;i++){
@@ -128,5 +135,5 @@ function category(text){
  if(/helden|heroes/.test(f))return 'roster';
  return 'unknown';
 }
-root.NRW_BEAR_INTAKE_CORE={fold,normalizeNumber,classFrom,parseTroops,parseStats,parseHeroDetail,maxSkill,advise,category,rankByType};
+root.NRW_BEAR_INTAKE_CORE={fold,normalizeNumber,classFrom,parseTroops,parseMarchSlots,parseStats,parseHeroDetail,maxSkill,advise,category,rankByType};
 })(window);
