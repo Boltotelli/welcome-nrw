@@ -54,7 +54,7 @@ function match(mask,w,h){
  return {tier:best>=0.83?1:null,score:best,position:best>=0.83?[bx,by]:null};
 }
 function recognize(ctx,center){
- const canvas=ctx.canvas,sx=canvas.width/716,sy=canvas.height/1536;
+ const canvas=ctx.canvas,sx=canvas.width/716,sy=sx; // dynamically detected gear centres share the width-normalized coordinate space
  // Badge location relative to each item centre in the in-game overview.
  const x=Math.round((center[0]-54)*sx),y=Math.round((center[1]-49)*sy);
  const w=Math.round(RW*sx),h=Math.round(RH*sy);
