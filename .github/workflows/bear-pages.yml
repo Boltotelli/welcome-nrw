@@ -50,6 +50,7 @@ jobs:
           node bear/test-wizard.cjs
           node bear/test-intake.cjs
           node bear/test-portrait.cjs
+          node bear/test-hud-portraits.cjs
           node bear/test-tier.cjs
           python3 -m py_compile bear/build-charm-shapes.py bear/build-hero-signatures.py
           node bear/test-screenshot.cjs
@@ -84,13 +85,7 @@ jobs:
           else
             echo 'Online charm signatures unavailable; local Lv3–Lv8 examples remain usable.'
           fi
-          # Only 12x12 derived colour fingerprints are published, not artwork.
-          if test -x /tmp/bear-charm-venv/bin/python; then
-            /tmp/bear-charm-venv/bin/python bear/build-hero-signatures.py _site/hero-signatures.json || true
-          else
-            echo 'Hero fingerprints unavailable; portrait selection remains manual.'
-          fi
-          touch _site/.nojekyll
+          # In-game 6x6 signatures are prebuilt and shipped with the test.\n          touch _site/.nojekyll
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site
