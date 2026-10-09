@@ -17,7 +17,7 @@ for(const [name,js] of [['wizard',wizard],['intake',intake],['gear',gear]]){
 for(const filename of ['wizard.js','wizard.css','intake-ui.js','intake-ui.css'])assert.ok(html.includes('./'+filename),'missing html asset '+filename);
 assert.ok(html.indexOf('intake-ui.js')<html.indexOf('wizard.js'),'wizard runs after importer initialization');
 assert.ok(html.indexOf('wizard.css')>html.indexOf('intake-ui.css'),'wizard styles override legacy forms');
-assert.ok(wizard.includes("const labels=['id','troops','stats','gear','heroes','missing','result'];"),'seven steps in intended sequence');
+assert.ok(wizard.includes("labels=['id','troops','stats','gear','heroes','missing','result'];"),'seven steps in intended sequence');
 for(const id of ['lookupForm','intakeFiles','bearGearPhoto','intakeMissingDetails','intakeResultSlot']){
  assert.ok(wizard.includes(id),'wizard reuses real control '+id);
 }
