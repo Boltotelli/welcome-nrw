@@ -123,7 +123,7 @@ function modelReady(kind){
  if(kind===2)return ['iAtk','iLet','cAtk','cLet','aAtk','aLet'].every(has);
  if(kind===3){const g=B.model().v2?.gear||{};return Object.values(g).some(x=>x?.quality&&x.quality!=='none'||x?.charms?.some(n=>Number(n)>0));}
  if(kind===4)return Object.keys(B.model().v2?.manualHeroes||{}).length>=3;
- if(kind===6)return (B.model().v2?.ownHeroes||[]).filter(Boolean).every(n=>!!B.model().v2?.manualHeroes?.[n]?.expeditionStats);
+ if(kind===6)return heroDetailsReady();
  return false;
 }
 function missingValues(){
@@ -242,9 +242,10 @@ function selections(){
 function recommendationsReady(){return selections().length===3&&selections().every(Boolean);}
 function heroDetailsReady(){
  const m=B.model().v2||{},selected=(m.ownHeroes||[]).filter(Boolean);
- return selected.length===3&&selected.every(n=>
-  detailConfirmed.has(n)||
-  (m.manualHeroes?.[n]?.expeditionStats&&Object.keys(m.manualHeroes[n].expeditionStats).length>0));
+ // Detail screenshots are required AFTER the suggested three have been
+ // equipped with their best simultaneous Hero Gear. Do not accept earlier
+ // cached statistics as evidence that this gear-first step was completed.
+ return selected.length===3&&selected.every(n=>detailConfirmed.has(n));
 }
 function renderRecommendations(){
  recommendationPanel.innerHTML='';
@@ -306,6 +307,7 @@ function confirmRecommendedHeroes(){
  if(selectionsNow.length!==3||selectionsNow.some(n=>!n))return;
  const model=B.model();model.v2=model.v2||{};
  model.v2.ownHeroes=selectionsNow;
+ detailConfirmed.clear();
  if(model.marches?.[0])model.marches[0].hero=selectionsNow.join(' / ');
  B.save();B.render();window.NRW_BEAR_ENHANCE?.refreshHeroes?.();
  imported.add(5);moveTo(6);
