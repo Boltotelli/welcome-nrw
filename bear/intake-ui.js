@@ -212,6 +212,10 @@ async function inspect(file){
  const text=result.data.text||'';
  const grouped=positionalLines(result.data.words,canvas);
  let type=Core.category(text+'\n'+grouped);
+ // On a guided step, use its context when text recognition cannot identify
+ // the image. Do not overwrite a confidently recognized different screen.
+ if(type==='unknown'&&window.NRW_BEAR_SCREENSHOT_STAGE===1)type='troops';
+ if(type==='unknown'&&window.NRW_BEAR_SCREENSHOT_STAGE===2)type='stats';
  // A portrait-only roster can be recognized from its dense 4-column grid;
  // unknown layouts remain unrecognized and manually selectable.
  const values=type==='troops'?
@@ -253,6 +257,9 @@ function renderQueue(){
   if(item.type==='troops'||item.type==='stats'){
    const relevant=item.type==='troops'?['troopsI','troopsC','troopsA']:['squadAtk','squadLet','iAtk','iLet','cAtk','cLet','aAtk','aLet'];
    relevant.forEach(id=>{
+    // A guided review should show only found values. Anything not recognized
+    // is collected in the final missing-values step, not a wall of blank inputs.
+    if(window.NRW_BEAR_WIZARD&&!Object.prototype.hasOwnProperty.call(item.values,id))return;
     const label=document.createElement('label');label.className='bear-intake-value';
     const cap=document.createElement('span');cap.textContent=captions[id]||id;
     const field=document.createElement('input');field.type='number';field.step=id.startsWith('troops')?'1':'0.01';field.min='0';
@@ -349,8 +356,10 @@ function updateProgress(){
 function apply(){
  const m=B.model(),v=state();
  let accepted=0;
+ const appliedTypes=[];
  for(const item of queue){
   if(item.type==='troops'||item.type==='stats'){
+   if(Object.keys(item.values).length)appliedTypes.push(item.type);
    for(const [key,num] of Object.entries(item.values)){
     if(!Number.isFinite(Number(num))||Number(num)<0)continue;
     m.values[key]=Number(num);const input=$(key);if(input){input.value=num;input.dispatchEvent(new Event('input',{bubbles:true}));}
@@ -371,6 +380,7 @@ function apply(){
     });
    }
   }else if(item.type==='starter'&&item.detail?.name){
+   appliedTypes.push('starter');
    const h=item.detail;const previous=v.manualHeroes[h.name]||{};
    v.manualHeroes[h.name]={...previous,name:h.name,level:h.level||previous.level||0,
     expeditionStats:{...(previous.expeditionStats||{}),...(h.expeditionStats||{})},source:'screenshot'};
@@ -378,6 +388,7 @@ function apply(){
    if(slot>=0&&!v.ownHeroes[slot])v.ownHeroes[slot]=h.name;
    accepted++;
   }else if(item.type==='roster'){
+   if(item.cards?.some(tile=>tile.name))appliedTypes.push('roster');
    for(const tile of item.cards){
     if(!tile.name)continue;
     const old=v.manualHeroes[tile.name]||{};
@@ -409,6 +420,9 @@ function apply(){
  B.save();B.render();window.NRW_BEAR_ENHANCE?.refreshHeroes?.();
  updateProgress();status(accepted+' '+say('Angaben lokal gespeichert; unbekannte Werte bleiben unverändert.','values saved locally. Unknown values untouched.'));
  queue=[];renderQueue();
+ window.dispatchEvent(new CustomEvent('nrw-bear-intake-applied',{
+  detail:{accepted,types:[...new Set(appliedTypes)]}
+ }));
 }
 $('intakeApply').addEventListener('click',apply);
 $('intakeClear').addEventListener('click',()=>{queue=[];renderQueue();status(say('Import verworfen.','Import discarded.'));});
