@@ -5,7 +5,7 @@
  */
 (function(){
 'use strict';
-const B=window.NRW_BEAR_BRIDGE,Core=window.NRW_BEAR_INTAKE_CORE,cat=window.NRW_BEAR_CATALOG,TROOP=window.NRW_BEAR_TROOP_BADGES,MATCHER=window.NRW_BEAR_PORTRAIT_MATCHER;
+const B=window.NRW_BEAR_BRIDGE,Core=window.NRW_BEAR_INTAKE_CORE,cat=window.NRW_BEAR_CATALOG,TROOP=window.NRW_BEAR_TROOP_BADGES,ENTRY=window.NRW_BEAR_TROOP_ENTRIES,MATCHER=window.NRW_BEAR_PORTRAIT_MATCHER;
 const restricted=document.getElementById('restricted'),quick=document.getElementById('uxQuickStart');
 if(!B||!Core||!cat||!restricted||!quick)return;
 const locale=()=>document.documentElement.lang||'de';
@@ -336,6 +336,27 @@ async function recheckTroopFields(canvas,worker,values){
  }
  return tiersText;
 }
+async function recheckUnreadTroopEntries(entries,canvas,worker){
+ // Each entry supplies its OWN normalized crop; no first/second/third-row
+ // assumptions. Tesseract OCR result is never accepted if not a whole
+ // thousands-formatted troop count.
+ if(!Array.isArray(entries))return;
+ for(const entry of entries){
+  if(entry.count!==null||!entry.crop)continue;
+  const r=entry.crop,c=document.createElement('canvas');
+  c.width=520;c.height=104;
+  const ctx=c.getContext('2d',{willReadFrequently:true});
+  ctx.fillStyle='white';ctx.fillRect(0,0,c.width,c.height);
+  try{
+   ctx.drawImage(canvas,r.x*canvas.width,r.y*canvas.height,
+    r.w*canvas.width,r.h*canvas.height,8,8,c.width-16,c.height-16);
+   const ocr=await worker.recognize(c);
+   const cleaned=String(ocr.data?.text||'').trim();
+   const candidate=ENTRY.count(cleaned);
+   if(candidate!==null)entry.count=candidate;
+  }catch(_){/* Leave unreadable rows reviewable, never fabricate counts. */}
+ }
+}
 function positionalLines(words,canvas){
  // Screenshots with two columns may OCR all labels first, then numbers.
  // Group words by visible text row and sort horizontally.
@@ -378,6 +399,19 @@ async function inspect(file){
   catch(_){/* Keep the reviewable full-screen OCR suggestions. */}
   explicitTierLabels=await recheckTroopFields(canvas,worker,values);
  }
+ let troopEntries=[];
+ if(type==='troops'&&ENTRY){
+  troopEntries=ENTRY.detect(result.data.words||[],canvas.width,canvas.height);
+  if(troopEntries.length){
+   await recheckUnreadTroopEntries(troopEntries,canvas,worker);
+   const computed=ENTRY.totals(troopEntries);
+   for(const type of new Set(troopEntries.map(e=>e.type))){
+    const key=['troopsI','troopsC','troopsA'][type];
+    if(!Object.prototype.hasOwnProperty.call(computed,key))delete values[key];
+   }
+   Object.assign(values,computed);
+  }
+ }
  const troopTiers=type==='troops'&&TROOP?TROOP.recognize(canvas,text+'\n'+grouped+explicitTierLabels,result.data.words||[]):null;
  const marchSlots=type==='troops'?Core.parseMarchSlots(text+'\n'+grouped):null;
 
@@ -406,7 +440,7 @@ async function inspect(file){
  const existing=[...queue.filter(q=>q.type==='roster').flatMap(q=>q.cards||[]),...confirmedPortraits];
  const fresh=allCards.filter(tile=>!existing.some(x=>samePortrait(x.signature,tile.signature)));
  if(type==='roster'&&MATCHER)await MATCHER.enrich(fresh);
- return {fileName:file.name,file,type,text,grouped,words:result.data.words||[],values,detail,troopTiers,marchSlots,canvas:(type==='roster'||type==='unknown'||type==='troops')?canvas:null,
+ return {fileName:file.name,file,type,text,grouped,words:result.data.words||[],values,detail,troopEntries,troopTiers,marchSlots,canvas:(type==='roster'||type==='unknown'||type==='troops')?canvas:null,
   cards:fresh,duplicates:allCards.length-fresh.length,applied:false};
 }
 function inputChoice(items,current=''){
