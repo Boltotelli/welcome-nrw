@@ -113,7 +113,7 @@ function heroRows(canvas){
  const data=ctx.getImageData(0,0,w,h).data;
  const sample=(x,y)=>{const p=(Math.floor(y)*w+Math.floor(x))*4;return [data[p],data[p+1],data[p+2]];};
  const bg=sample(.023,.30);
- const xs=[.054,.286,.518,.750],y0=Math.round(h*.064),y1=Math.round(h*.785);
+ const xs=[.054,.286,.518,.750],y0=Math.round(h*.064),y1=Math.round(h*.91);
  const present=new Uint8Array(h);
  for(let y=y0;y<y1;y+=2){
   let changed=0;
@@ -149,7 +149,7 @@ function heroRows(canvas){
  }
  // The hidden top/bottom row of a scrolling list must not become an
  // invented hero. An overlapping screenshot supplies its complete version.
- return merged.filter(r=>r.bottom-r.top>=h*.16&&r.bottom-r.top<=h*.29);
+ return merged.filter(r=>r.bottom-r.top>=h*.185&&r.bottom-r.top<=h*.255);
 }
 function inferStars(canvas,rect){
  // Measure five flower icons at the actual bottom of a detected hero card.
