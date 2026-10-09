@@ -56,7 +56,7 @@ function recognize(canvas,text,words){
  const all=String(text||'');
  // Only the 'Spitzen' name tied to the Roman X base troop icon.
  const lower=all.toLowerCase();
- const classes=[/spitzen\s*infant/,/spitzen\s*kaval/,/spitzen\s*bogen/];
+ const classes=[/spitzen[^a-zäöü]{0,18}infant/,/spitzen[^a-zäöü]{0,18}kaval/,/spitzen[^a-zäöü]{0,18}bogen/];
  for(let i=0;i<3;i++)if(classes[i].test(lower))result[i].tier=10;
  const ctx=canvas.getContext('2d',{willReadFrequently:true});
  // The game interface moves vertically with phone aspect ratio: old
