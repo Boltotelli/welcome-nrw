@@ -252,7 +252,11 @@ $('bearGuideNext').addEventListener('click',()=>{
 });
 wizard.addEventListener('input',()=>{
  if(active===0){$('bearGuideNext').disabled=!hasProfile();}
- else if(active===5)showRelevantManual();
+ // Never remove an active capacity field while someone is typing a
+ // six-digit squad capacity; its parent refreshes only on committed change.
+});
+wizard.addEventListener('change',()=>{
+ if(active===5)showRelevantManual();
 });
 window.addEventListener('nrw-bear-loaded',()=>{
  if(active===0){message(t().profileGood);$('bearGuideNext').disabled=false;moveTo(1);}
