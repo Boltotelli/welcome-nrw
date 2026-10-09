@@ -113,7 +113,7 @@ function heroRows(canvas){
  const data=ctx.getImageData(0,0,w,h).data;
  const sample=(x,y)=>{const p=(Math.floor(y)*w+Math.floor(x))*4;return [data[p],data[p+1],data[p+2]];};
  const bg=sample(.023,.30);
- const xs=[.051,.249,.447,.645],y0=Math.round(h*.064),y1=Math.round(h*.785);
+ const xs=[.054,.286,.518,.750],y0=Math.round(h*.064),y1=Math.round(h*.785);
  const present=new Uint8Array(h);
  for(let y=y0;y<y1;y+=2){
   let changed=0;
