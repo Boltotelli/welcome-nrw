@@ -106,8 +106,8 @@ function showIntake(i){
  const gearExtra=intake.querySelector('.bear-intake-header>p.hint:last-of-type');
  if(gearExtra)gearExtra.hidden=true;
  const buttonText=$('intakePicker')?.querySelector('span');
- if(buttonText)buttonText.textContent='📸 '+([1,6].includes(i)?t().upload:t().uploads);
- const input=$('intakeFiles');if(input)input.multiple=i===2||i===4;
+ if(buttonText)buttonText.textContent='📸 '+(i===1?t().upload:t().uploads);
+ const input=$('intakeFiles');if(input)input.multiple=[2,4,6].includes(i);
 }
 let active=0,finished=false;
 const imported=new Set(),skipped=new Set();
