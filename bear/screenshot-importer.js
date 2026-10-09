@@ -232,7 +232,40 @@ function review(scans,onlineCount){
    const note=document.createElement('small');note.textContent=ch.level!==null?('✓ '+T().auto+' · '+Math.round((1-ch.score)*100)+'%'):(ch.guess?'? '+T().unknown+' (Lv. '+ch.guess+')':T().unknown);
    cell.append(thumb,choice,note);grid.appendChild(cell);
   });
-  card.appendChild(grid);box.appendChild(card);
+  card.appendChild(grid);
+  // Same-shaped charms on a gear item often generate three identical
+  // tentative matches (e.g. Lv5), although the recognition confidence is
+  // insufficient for automatic saving. One explicit action can accept all.
+  const guessed=g.charms.map(ch=>ch.level??ch.guess);
+  if(guessed.length===3&&guessed.every(v=>Number.isInteger(v)&&v>=1&&v<=22)&&
+     guessed.every(v=>v===guessed[0])&&g.charms.some(ch=>ch.level===null)){
+   const offer=document.createElement('button');offer.type='button';
+   offer.className='secondary-btn';
+   offer.textContent=document.documentElement.lang==='de'
+    ?'Vorschlag Lv. '+guessed[0]+' für alle 3 übernehmen'
+    :'Use suggested Lv. '+guessed[0]+' for all 3';
+   offer.title='Unbestätigter Bildvorschlag – bitte selbst prüfen';
+   offer.addEventListener('click',()=>{
+    grid.querySelectorAll('select[data-charm]').forEach(node=>{
+     node.value=String(guessed[0]);
+     node.dispatchEvent(new Event('change',{bubbles:true}));
+    });
+    offer.disabled=true;
+    offer.textContent=document.documentElement.lang==='de'
+      ?'Vorgeschlagenes Level ausgewählt – bitte prüfen'
+      :'Suggestions selected – please verify';
+   });
+   card.appendChild(offer);
+  }
+  if(g.quality==='gold'&&g.tier?.tier===null){
+   const warning=document.createElement('small');
+   warning.className='hint';
+   warning.textContent=document.documentElement.lang==='de'
+    ?'Bei diesem goldenen Gegenstand ist keine T-Stufe ablesbar. Sie bleibt unbekannt.'
+    :'No gear tier is visible on this gold item. Tier stays unknown.';
+   card.appendChild(warning);
+  }
+  box.appendChild(card);
  });
  $('bearImportConfidence').textContent=definite+'/18 · '+(onlineCount?T().remote:T().offline);
  $('bearImportReview').hidden=false;report(T().status);
