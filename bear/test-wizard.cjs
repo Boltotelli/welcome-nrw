@@ -33,5 +33,8 @@ assert.ok(css.includes('body.bear-wizard-mode .dashboard'),'legacy full dashboar
 assert.ok(!wizard.includes('localStorage.setItem('),'wizard does not create a competing persistence model');
 assert.ok(wizard.includes('capacityHost.append(capField)'),'squad capacity moved outside conditional group');
 assert.ok(wizard.includes('confirmRecommendedHeroes()'),'recommendation confirmation precedes details');
+assert.ok(wizard.includes("input.multiple=[2,4,6].includes(i)"),'full hero overview and detail batches are supported');
+assert.ok(wizard.includes('recommendationsReady()'),'no unowned hero silently recommended');
+assert.ok(wizard.includes('BESTES verfügbares HELDEN-GEAR'),'remind users to equip hero gear before detail screenshots');
 assert.ok(wizard.includes('renderHeroDetails()'),'detail upload after best hero gear prompt');
 console.log('BEAR WIZARD: nine stages, hero shortlist, separate gear-first detail uploads and independent capacity input verified.');
