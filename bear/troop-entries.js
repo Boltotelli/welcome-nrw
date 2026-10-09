@@ -90,10 +90,15 @@ function detect(words,width,height){
  });
 }
 function totals(entries){
- const values={};for(const e of entries||[]){
-  if(e?.count===null||!Number.isInteger(e?.count))continue;
-  values[keys[e.type]]=(values[keys[e.type]]||0)+e.count;
+ const values={},invalid=new Set();
+ for(const e of entries||[]){
+  if(!Number.isInteger(e?.type)||e.type<0||e.type>2)continue;
+  const key=keys[e.type];
+  if(!Number.isInteger(e.count)||e.count<1000){invalid.add(key);continue;}
+  values[key]=(values[key]||0)+e.count;
  }
+ // A group with one unreadable row must not silently become a partial sum.
+ for(const key of invalid)delete values[key];
  return values;
 }
 root.NRW_BEAR_TROOP_ENTRIES={detect,totals,count,kind,norm,version:'ratios-dynamic-20261009'};
