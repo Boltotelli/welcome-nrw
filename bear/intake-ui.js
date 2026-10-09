@@ -178,6 +178,20 @@ function samePortrait(a,b){
  }
  return difference/count<12;
 }
+function isUnrecruitedCard(ctx,rect,stars){
+ // In Kingshot the locked card has a dark, wide "0/20" banner covering
+ // the entire bottom edge instead of five coloured advancement flowers.
+ // Do not rely solely on Tesseract to read a tiny 0/20 glyph.
+ if(stars.starSteps!==null)return false;
+ const x=Math.round(rect.x+rect.w*.10),y=Math.round(rect.y+rect.h*.85),
+  w=Math.round(rect.w*.80),h=Math.round(rect.h*.13);
+ if(w<20||h<10)return false;
+ const data=ctx.getImageData(x,y,w,h).data;
+ let dark=0;
+ for(let p=0;p<data.length;p+=4)
+  if((data[p]+data[p+1]+data[p+2])/3<90)dark++;
+ return dark/(data.length/4)>.74;
+}
 function overviewTiles(canvas,text,words){
  const rows=heroRows(canvas),collected=[];
  // If the player scrolls, take only whole visible cards. Partial top/bottom
@@ -204,6 +218,7 @@ function overviewTiles(canvas,text,words){
      (w.bbox.y0+w.bbox.y1)/2<rect.y+rect.h);
    if(hasUnlockProgress)continue;
    const stars=inferStars(canvas,rect);
+   if(isUnrecruitedCard(cx,rect,stars))continue;
    collected.push({image:cropToThumb(canvas,rect.x/canvas.width,rect.y/canvas.height,
      rect.w/canvas.width,rect.h/canvas.height),name:'',level,
     starSteps:stars.starSteps,starConfidence:stars.confidence,partialStar:stars.partiallyFilled,selected:false,rect,
