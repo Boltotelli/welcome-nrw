@@ -106,29 +106,44 @@ function cropToThumb(src,x,y,w,h){
 // Detect actual four-column hero rows instead of assuming the first card
 // always starts at the top. Scroll screenshots can start/end mid-card.
 function heroRows(canvas){
- const ctx=canvas.getContext('2d',{willReadFrequently:true});
- const w=canvas.width,h=canvas.height;
- const pixels=ctx.getImageData(0,0,w,h).data;
- const colorAt=(x,y)=>{
-  const p=(Math.floor(y)*w+Math.floor(x))*4;
-  return [pixels[p],pixels[p+1],pixels[p+2]];
- };
- const bg=colorAt(w*.025,h*.52),xs=[.060,.292,.525,.757].map(x=>Math.floor(x*w));
- const colored=y=>xs.reduce((n,x)=>{
-  const c=colorAt(x,y),dist=Math.abs(c[0]-bg[0])+Math.abs(c[1]-bg[1])+Math.abs(c[2]-bg[2]);
-  return n+(dist>85?1:0);
- },0)>=3;
- const rows=[];let begin=-1,gap=0;
- for(let y=Math.round(h*.065);y<=Math.round(h*.897);y+=2){
-  if(colored(y)){if(begin<0)begin=y;gap=0;}
-  else if(begin>=0){gap+=2;if(gap>14){
-   const last=y-gap;
-   if(last-begin>h*.18)rows.push({top:begin,bottom:last});
-   begin=-1;gap=0;
-  }}
+ // Sample the narrow left margin INSIDE each of the four portrait tiles.
+ // Beige is the inventory's neutral background, so a colour change at
+ // at least three columns exposes the actual card row independently of scroll.
+ const w=canvas.width,h=canvas.height,ctx=canvas.getContext('2d',{willReadFrequently:true});
+ const data=ctx.getImageData(0,0,w,h).data;
+ const sample=(x,y)=>{const p=(Math.floor(y)*w+Math.floor(x))*4;return [data[p],data[p+1],data[p+2]];};
+ const bg=sample(.023,.30);
+ const xs=[.051,.249,.447,.645],y0=Math.round(h*.064),y1=Math.round(h*.785);
+ const present=new Uint8Array(h);
+ for(let y=y0;y<y1;y+=2){
+  let changed=0;
+  for(const x of xs){
+   const c=sample(x,y);
+   if(Math.abs(c[0]-bg[0])+Math.abs(c[1]-bg[1])+Math.abs(c[2]-bg[2])>75)changed++;
+  }
+  if(changed>=3){present[y]=1;present[y+1]=1;}
  }
- if(begin>=0){const last=Math.round(h*.897);if(last-begin>h*.18)rows.push({top:begin,bottom:last});}
- return rows;
+ // Remove isolated animation/text glitches; merge tiny horizontal overlays.
+ const smooth=new Uint8Array(h);
+ for(let y=y0+6;y<y1-6;y++){
+  let count=0;for(let d=-6;d<=6;d++)count+=present[y+d];
+  if(count>=7)smooth[y]=1;
+ }
+ const raw=[],mergeGap=Math.round(h*.013);
+ let first=-1;
+ for(let y=y0;y<=y1;y++){
+  if(y<y1&&smooth[y]&&first<0)first=y;
+  else if((y===y1||!smooth[y])&&first>=0){raw.push({top:first,bottom:y});first=-1;}
+ }
+ const merged=[];
+ for(const seg of raw){
+  const last=merged[merged.length-1];
+  if(last&&seg.top-last.bottom<=mergeGap)last.bottom=seg.bottom;
+  else merged.push({...seg});
+ }
+ // The hidden top/bottom row of a scrolling list must not become an
+ // invented hero. An overlapping screenshot supplies its complete version.
+ return merged.filter(r=>r.bottom-r.top>=h*.16&&r.bottom-r.top<=h*.29);
 }
 function inferStars(canvas,rect){
  // Measure five flower icons at the actual bottom of a detected hero card.
@@ -187,9 +202,9 @@ function spatialTroops(words,canvas){
  const zones=[
   // Android 1080x1920: actual quantity baselines lie below the labels,
   // not at the previous 716x1536 fixed-crop positions.
-  {key:'troopsI',x:[.16,.52],y:[.305,.355]},
-  {key:'troopsC',x:[.64,.97],y:[.305,.355]},
-  {key:'troopsA',x:[.16,.56],y:[.395,.448]}
+  {key:'troopsI',x:[.17,.48],y:[.258,.300]},
+  {key:'troopsC',x:[.51,.91],y:[.258,.300]},
+  {key:'troopsA',x:[.17,.56],y:[.340,.385]}
  ],found={};
  for(const zone of zones){
   const hits=[];
@@ -235,6 +250,7 @@ async function inspect(file){
  // the image. Do not overwrite a confidently recognized different screen.
  if(type==='unknown'&&window.NRW_BEAR_SCREENSHOT_STAGE===1)type='troops';
  if(type==='unknown'&&window.NRW_BEAR_SCREENSHOT_STAGE===2)type='stats';
+ if(type==='unknown'&&window.NRW_BEAR_SCREENSHOT_STAGE===4&&heroRows(canvas).length>=2)type='roster';
  // A portrait-only roster can be recognized from its dense 4-column grid;
  // unknown layouts remain unrecognized and manually selectable.
  const values=type==='troops'?
