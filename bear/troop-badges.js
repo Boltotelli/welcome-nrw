@@ -63,13 +63,17 @@ function recognize(canvas,text,words){
  // 716x1536 crops were too low on 1080x1920 Android screenshots. Scan only
  // a narrow badge-sized neighborhood after applying the aspect correction.
  const normalizedHeight=canvas.height*716/canvas.width;
- const yAdjust=Math.max(-38,Math.min(20,(normalizedHeight-1536)*.115));
- const anchors=[[133,395],[453,395],[133,518]];
+ // Standard 716x1536 HUD and current 1080x1920 Android HUD place
+ // badges differently, in both X and Y. Interpolate the known anchors.
+ const phoneLayout=Math.max(0,Math.min(1,(1536-normalizedHeight)/264));
+ const oldAnchors=[[133,395],[453,395],[133,518]];
+ const phoneAnchors=[[117,310],[390,310],[116,418]];
+ const anchors=oldAnchors.map((p,i)=>p.map((v,j)=>v+(phoneAnchors[i][j]-v)*phoneLayout));
  const sc=canvas.width/716;
  const scratch=document.createElement('canvas');scratch.width=27;scratch.height=26;
  for(let i=0;i<3;i++){
   let best={tg:null,confidence:0};
-  const cx=anchors[i][0]*sc,cy=(anchors[i][1]+yAdjust)*sc;
+  const cx=anchors[i][0]*sc,cy=anchors[i][1]*sc;
   // Scan in physical pixels: stepping by 2 base units skipped the thin
   // numeral strokes on high-resolution Android screenshots.
   for(const dx of [-9,-7,-6,-5,-3,-1,1,3,5,7,9]){
