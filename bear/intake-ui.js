@@ -576,9 +576,10 @@ function apply(){
     const stars=tile.starSteps===null?Number(old.stars||0):Math.floor(tile.starSteps/6);
     const tier=tile.starSteps===null?Number(old.tier||0):tile.starSteps%6;
     const cap=Core.maxSkill(stars);
+    const actualSkills=Array.isArray(old.skills)&&old.skills.some(Number)&&old.skillsAssumedMax===false;
     v.manualHeroes[tile.name]={...old,name:tile.name,level:tile.level||old.level||0,stars,tier,
-     skills:Array.isArray(old.skills)&&old.skills.some(Number)?old.skills:(cap?[cap,cap,cap]:[0,0,0]),
-     skillsAssumedMax:!(Array.isArray(old.skills)&&old.skills.some(Number)),source:'screenshot'};
+     skills:actualSkills?old.skills:(cap?[cap,cap,cap]:[0,0,0]),
+     skillsAssumedMax:!actualSkills,source:'screenshot'};
     accepted++;
    }
   }else if(item.type==='gear'){
