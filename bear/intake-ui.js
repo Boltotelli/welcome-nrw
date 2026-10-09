@@ -168,12 +168,15 @@ function inferStars(canvas,rect){
   return bright/(w*h);
  }
  const ratios=Array.from({length:5},(_,i)=>lightRatio(rect.x+rect.w*(.18+i*.165)));
- const reference=ratios.slice(0,3).sort((a,b)=>a-b)[1];
+ // In the real Kingshot card a fully lit star becomes slightly dimmer
+ // towards the right. Compensate that baseline before counting empty stars.
+ const corrected=ratios.map((v,i)=>v/(1-i*.065));
+ const reference=corrected.slice(0,3).sort((a,b)=>a-b)[1];
  if(reference<.18)return {starSteps:null,confidence:0};
  let full=0;
- for(const n of ratios){if(n/reference>=.80)full++;else break;}
+ for(const n of corrected){if(n/reference>=.78)full++;else break;}
  if(!full)return {starSteps:null,confidence:0};
- const partial=full<5&&ratios[full]/reference>.35;
+ const partial=full<5&&corrected[full]/reference>.35;
  return {starSteps:full*6,confidence:Math.min(1,reference/.35),partiallyFilled:partial};
 }
 function heroLevelFromWords(words,rect){
