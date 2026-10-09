@@ -68,6 +68,7 @@ if(governorInput&&lookup){
  }
 }
 let ocrWorker=null,queue=[],busy=false;
+const confirmedPortraits=[]; // confirmed across one-by-one screenshots, not persisted
 function state(){const m=B.model();if(!m.v2)m.v2={};if(!m.v2.manualHeroes)m.v2.manualHeroes={};if(!Array.isArray(m.v2.ownHeroes))m.v2.ownHeroes=['','',''];return m.v2;}
 function esc(str){return String(str??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function status(t){$('intakeStatus').textContent=t;}
@@ -176,7 +177,11 @@ function inferStars(canvas,rect){
  let full=0;
  for(const n of corrected){if(n/reference>=.78)full++;else break;}
  if(!full)return {starSteps:null,confidence:0};
- const partial=full<5&&corrected[full]/reference>.35;
+ // Last flower can show only some petals; its bright-pixel count looks
+ // deceptively like a complete fifth star under auto gain correction.
+ const fractionalFifth=full===5&&ratios[4]<ratios[3]*.92;
+ if(fractionalFifth)full=4;
+ const partial=fractionalFifth||(full<5&&corrected[full]/reference>.35);
  return {starSteps:full*6,confidence:Math.min(1,reference/.35),partiallyFilled:partial};
 }
 function heroLevelFromWords(words,rect){
@@ -220,22 +225,21 @@ function overviewTiles(canvas,text,words){
    const middle=cx.getImageData(Math.round(rect.x+rect.w*.1),
      Math.round(rect.y+rect.h*.15),Math.max(1,Math.round(rect.w*.8)),
      Math.max(1,Math.round(rect.h*.50))).data;
-   let difference=0,brightness=0;
+   let difference=0;
    for(let p=0;p<middle.length;p+=4){
     difference+=Math.abs(middle[p]-224)+Math.abs(middle[p+1]-209)+Math.abs(middle[p+2]-185);
-    brightness+=(middle[p]+middle[p+1]+middle[p+2])/3;
-   }
+    }
    const area=middle.length/4;
    if(difference/area<28)continue;
    const hasUnlockProgress=(words||[]).some(w=>w.bbox&&/0\s*\/\s*20/.test(w.text||'')&&
      (w.bbox.x0+w.bbox.x1)/2>rect.x&&(w.bbox.x0+w.bbox.x1)/2<rect.x+rect.w&&
      (w.bbox.y0+w.bbox.y1)/2>rect.y+rect.h*.72&&
      (w.bbox.y0+w.bbox.y1)/2<rect.y+rect.h);
-   if(hasUnlockProgress||(level===null&&brightness/area<111))continue;
+   if(hasUnlockProgress)continue;
    const stars=inferStars(canvas,rect);
    collected.push({image:cropToThumb(canvas,rect.x/canvas.width,rect.y/canvas.height,
      rect.w/canvas.width,rect.h/canvas.height),name:'',level,
-    starSteps:stars.starSteps,starConfidence:stars.confidence,partialStar:stars.partiallyFilled,selected:false,
+    starSteps:stars.starSteps,starConfidence:stars.confidence,partialStar:stars.partiallyFilled,selected:false,rect,
      signature:portraitSignature(canvas,rect),
      portraitCandidates:MATCHER?.candidates(canvas,rect)||[]});
   }
@@ -360,7 +364,7 @@ async function inspect(file){
  }
  if(type==='unknown'&&detail?.name)type='starter';
  const allCards=type==='roster'?overviewTiles(canvas,text,result.data.words):[];
- const existing=queue.filter(q=>q.type==='roster').flatMap(q=>q.cards||[]);
+ const existing=[...queue.filter(q=>q.type==='roster').flatMap(q=>q.cards||[]),...confirmedPortraits];
  const fresh=allCards.filter(tile=>!existing.some(x=>samePortrait(x.signature,tile.signature)));
  if(type==='roster'&&MATCHER)await MATCHER.enrich(fresh);
  return {fileName:file.name,file,type,text,grouped,words:result.data.words||[],values,detail,troopTiers,marchSlots,canvas:(type==='roster'||type==='unknown'||type==='troops')?canvas:null,
@@ -535,7 +539,8 @@ function apply(){
    if(slot>=0&&!v.ownHeroes[slot])v.ownHeroes[slot]=h.name;
    accepted++;
   }else if(item.type==='roster'){
-   if(item.cards?.some(tile=>tile.name))appliedTypes.push('roster');
+   if(item.cards?.length||item.duplicates)appliedTypes.push('roster');
+   for(const tile of item.cards||[])if(tile.signature)confirmedPortraits.push({signature:tile.signature});
    for(const tile of item.cards){
     if(!tile.name)continue;
     const old=v.manualHeroes[tile.name]||{};
