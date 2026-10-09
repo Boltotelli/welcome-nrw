@@ -138,7 +138,13 @@ function heroRows(canvas){
  const merged=[];
  for(const seg of raw){
   const last=merged[merged.length-1];
-  if(last&&seg.top-last.bottom<=mergeGap)last.bottom=seg.bottom;
+  // Merge disruptions *inside* a card, not the narrow beige separator
+  // between adjacent rows. Full rows are ~21% of screen height.
+  const left=last?last.bottom-last.top:0,right=seg.bottom-seg.top;
+  const joined=last?seg.bottom-last.top:0;
+  if(last&&seg.top-last.bottom<=mergeGap &&
+      left<h*.16 && right<h*.16 && joined<=h*.255)
+   last.bottom=seg.bottom;
   else merged.push({...seg});
  }
  // The hidden top/bottom row of a scrolling list must not become an
