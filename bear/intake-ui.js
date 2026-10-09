@@ -620,7 +620,10 @@ $('intakeFiles').addEventListener('change',async e=>{
  status(success+'/'+files.length+' '+say('Bilder gelesen. Bitte alle Vorschläge prüfen und übernehmen.','screenshots read. Review and apply suggestions.'));
  renderQueue();
 });
-window.addEventListener('nrw-bear-loaded',updateProgress);
+window.addEventListener('nrw-bear-loaded',()=>{
+ confirmedPortraits.length=0; // a different governor must start a fresh image inventory
+ updateProgress();
+});
 document.querySelectorAll('button[data-lang]').forEach(b=>b.addEventListener('click',()=>setTimeout(updateProgress,0)));
 document.querySelectorAll('input').forEach(input=>{if(input.id&&required.includes(input.id))input.addEventListener('input',updateProgress);});
 updateProgress();
