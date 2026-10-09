@@ -130,9 +130,11 @@ function readGearStars(ctx,pos){
  const yes=new Uint8Array(w*h),seen=new Uint8Array(w*h);
  for(let i=0;i<w*h;i++){
   const p=i*4,R=d[p],G=d[p+1],Blue=d[p+2];
-  if(R>150&&G>115&&Blue<155&&R>Blue*1.20&&G>Blue*1.09)yes[i]=1;
+  // On gold gear the orange card BACKGROUND is connected and was
+  // incorrectly swallowing the star. Separate bright yellow petals first.
+  if(R>190&&G>175&&Blue<175&&R-G<80&&R>Blue*1.35)yes[i]=1;
  }
- const candidates=[];let ambiguous=false;
+ const candidates=[];
  for(let i=0;i<yes.length;i++){
   if(!yes[i]||seen[i])continue;
   let a=0,sumX=0,sumY=0;const stack=[i];seen[i]=1;
@@ -147,15 +149,16 @@ function readGearStars(ctx,pos){
   const scaled=a/(sx*sy);
   // Gold-coloured equipment artwork can masquerade as an extra star.
   // Off-centre, large blobs render the count ambiguous instead of guessing.
-  if(scaled>=260&&scaled<=420&&nx>=.61&&nx<.85&&ny>.2&&ny<.6)ambiguous=true;
-  if(scaled>=80&&scaled<=420&&nx>.38&&nx<.61&&ny>.12&&ny<.82)candidates.push({x:nx,y:ny});
+  // The legitimate gear stars are small identical yellow components at
+  // x ≈ .45-.50. Artwork blobs are bigger/off-centre, particularly on gold.
+  if(scaled>=90&&scaled<=210&&nx>.32&&nx<.65&&ny>.2&&ny<.84)candidates.push({x:nx,y:ny});
  }
  // Nearby fragments of one star could be counted twice; require distinct
  // vertical centres separated by roughly 12 original screenshot pixels.
  candidates.sort((a,b)=>a.y-b.y);
  const distinct=[];
  for(const c of candidates)if(distinct.every(v=>Math.abs(v.y-c.y)>12/89))distinct.push(c);
- return !ambiguous&&distinct.length>=1&&distinct.length<=3?distinct.length:null;
+ return distinct.length>=1&&distinct.length<=3?distinct.length:null;
 }
 async function getRemoteTemplates(){
  if(cacheImages!==null)return cacheImages;
