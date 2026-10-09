@@ -222,9 +222,9 @@ function overviewTiles(canvas,text,words){
 }
 function spatialTroops(words,canvas){
  const zones=[
-  {key:'troopsI',x:[.16,.48],y:[.258,.306]},
-  {key:'troopsC',x:[.51,.91],y:[.258,.306]},
-  {key:'troopsA',x:[.16,.56],y:[.340,.389]}
+  {key:'troopsI',x:[.19,.48],y:[.306,.350]},
+  {key:'troopsC',x:[.66,.91],y:[.306,.350]},
+  {key:'troopsA',x:[.19,.56],y:[.400,.445]}
  ],found={};
  for(const zone of zones){
   const hits=[];
