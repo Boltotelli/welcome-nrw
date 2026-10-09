@@ -291,10 +291,11 @@ async function analyse(file){
   // Unsafe fallback removed: never silently crop in the wrong positions.
   if(!geometry.ok)throw Error('layout');
   const detected=slots.map((slot,i)=>({...slot,gear:geometry.slots[i].gear,charms:geometry.slots[i].charms,
+   frameQuality:geometry.slots[i].quality,
    inferred:geometry.slots[i].inferred}));
   const remote=await getRemoteTemplates();
   const output=detected.map(slot=>({
-   ...slot,thumb:drawThumb(ctx,slot.gear,47),quality:rarity(ctx,slot.gear),stars:readGearStars(ctx,slot.gear),tier:TIER?.recognize?.(ctx,slot.gear)||{tier:null,score:0},
+   ...slot,thumb:drawThumb(ctx,slot.gear,47),quality:slot.frameQuality||rarity(ctx,slot.gear),stars:readGearStars(ctx,slot.gear),tier:TIER?.recognize?.(ctx,slot.gear)||{tier:null,score:0},
    charms:slot.charms.map(pos=>{
     const input=maskOf(getCrop(ctx,pos,18),slot.type);
     const extra=remote.map(x=>({level:x.level,bits:x.bits,source:'online'}));
