@@ -25,9 +25,24 @@ function norm(words,w,h){
 }
 function count(s){
  const raw=String(s||'').replace(/\s/g,'').replace(/[^0-9.,]/g,'');
- if(!/^(?:\d{4,9}|\d{1,3}(?:[.,]\d{3}){1,3})$/.test(raw))return null;
+ if(!/^(?:\d{1,9}|\d{1,3}(?:[.,]\d{3}){1,3})$/.test(raw))return null;
  const n=Number(raw.replace(/[.,]/g,''));
- return n>=1000&&n<200000000&&Number.isSafeInteger(n)?n:null;
+ return n>=1&&n<200000000&&Number.isSafeInteger(n)?n:null;
+}
+function readTextCount(text){
+ // Individual cropped OCR may contain a title and a separate amount.
+ // Prefer full thousands-grouped numbers and longer complete amounts over
+ // small stray numeral characters from the troop icon.
+ const lines=String(text||'').split(/\n+/).map(t=>t.trim()).filter(Boolean);
+ const candidates=[];
+ for(const line of lines){
+  for(const m of line.matchAll(/\d{1,3}(?:[.,\s]\d{3}){1,3}|\d{1,9}/g)){
+   const n=count(m[0]);
+   if(n!==null)candidates.push({n,digits:String(n).length,grouped:/[.,\s]/.test(m[0])});
+  }
+ }
+ candidates.sort((a,b)=>Number(b.grouped)-Number(a.grouped)||b.digits-a.digits);
+ return candidates[0]?.digits>=3?candidates[0].n:null;
 }
 function numeric(line){
  const sorted=[...line].sort((a,b)=>a.x0-b.x0);
@@ -89,17 +104,31 @@ function detect(words,width,height){
    crop};
  });
 }
+function recoverSingleEntries(entries,fallback){
+ // The focused numeric strip and the roster-label OCR are independent.
+ // Never let a failed label-specific OCR erase a known focused count when
+ // exactly one entry per class was found. For mixed tiers this fallback is
+ // forbidden: a class may contain multiple independent amounts.
+ if(entries.length!==3||new Set(entries.map(e=>e.type)).size!==3)return entries;
+ for(const e of entries){
+  const key=keys[e.type],n=fallback?.[key];
+  if((e.count===null||e.count===undefined)&&Number.isSafeInteger(n)&&n>0){
+   e.count=n;e.amountSource='focused-strip';
+  }
+ }
+ return entries;
+}
 function totals(entries){
  const values={},invalid=new Set();
  for(const e of entries||[]){
   if(!Number.isInteger(e?.type)||e.type<0||e.type>2)continue;
   const key=keys[e.type];
-  if(!Number.isInteger(e.count)||e.count<1000){invalid.add(key);continue;}
+  if(!Number.isInteger(e.count)||e.count<1){invalid.add(key);continue;}
   values[key]=(values[key]||0)+e.count;
  }
  // A group with one unreadable row must not silently become a partial sum.
  for(const key of invalid)delete values[key];
  return values;
 }
-root.NRW_BEAR_TROOP_ENTRIES={detect,totals,count,kind,norm,version:'ratios-dynamic-20261009'};
+root.NRW_BEAR_TROOP_ENTRIES={detect,totals,count,readTextCount,recoverSingleEntries,kind,norm,version:'ratios-dynamic-20261009-2'};
 })(window);
