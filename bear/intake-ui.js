@@ -168,9 +168,11 @@ function spatialTroops(words,canvas){
  // OCR word bounding boxes are more reliable than reading the two top
  // troop cards left-to-right as one text line.
  const zones=[
-  {key:'troopsI',x:[.16,.52],y:[.267,.313]},
-  {key:'troopsC',x:[.65,.97],y:[.267,.313]},
-  {key:'troopsA',x:[.16,.56],y:[.347,.394]}
+  // Android 1080x1920: actual quantity baselines lie below the labels,
+  // not at the previous 716x1536 fixed-crop positions.
+  {key:'troopsI',x:[.16,.52],y:[.305,.355]},
+  {key:'troopsC',x:[.64,.97],y:[.305,.355]},
+  {key:'troopsA',x:[.16,.56],y:[.395,.448]}
  ],found={};
  for(const zone of zones){
   const hits=[];
@@ -366,7 +368,7 @@ function apply(){
     accepted++;
    }
    if(item.type==='troops'&&Array.isArray(item.troopTiers)){
-    if(!Array.isArray(v.troopTiers)||v.troopTiers.length!==3)v.troopTiers=[{tier:0,tg:0},{tier:0,tg:0},{tier:0,tg:0}];
+    if(!Array.isArray(v.troopTiers)||v.troopTiers.length!==3)v.troopTiers=[{tier:0,tg:null},{tier:0,tg:null},{tier:0,tg:null}];
     item.troopTiers.forEach((suggestion,index)=>{
      const dest=v.troopTiers[index];if(!suggestion)return;
      if(suggestion.tier!==null&&Number.isInteger(suggestion.tier)){
