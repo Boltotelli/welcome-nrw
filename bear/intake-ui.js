@@ -276,9 +276,9 @@ async function readMissingHeroLevels(tiles,canvas,worker){
 }
 function spatialTroops(words,canvas){
  const zones=[
-  {key:'troopsI',x:[.17,.41],y:[.257,.294]},
-  {key:'troopsC',x:[.55,.83],y:[.257,.294]},
-  {key:'troopsA',x:[.17,.47],y:[.344,.386]}
+  {key:'troopsI',x:[.20,.42],y:[.305,.353]},
+  {key:'troopsC',x:[.60,.85],y:[.305,.353]},
+  {key:'troopsA',x:[.20,.51],y:[.402,.451]}
  ],found={};
  for(const zone of zones){
   const hits=[];
@@ -308,9 +308,9 @@ async function readTroopNumbers(canvas,worker){
  // Isolate each number strip so icons/golden badges cannot hide a leading
  // digit in the full-screen OCR. Resizing keeps original aspect ratio.
  const crops=[
-  {key:'troopsI',x:.177,y:.261,w:.222,h:.032},
-  {key:'troopsC',x:.556,y:.261,w:.230,h:.032},
-  {key:'troopsA',x:.177,y:.352,w:.247,h:.033}
+  {key:'troopsI',x:.202,y:.307,w:.215,h:.044},
+  {key:'troopsC',x:.605,y:.307,w:.218,h:.044},
+  {key:'troopsA',x:.202,y:.405,w:.270,h:.046}
  ];
  const board=document.createElement('canvas');board.width=460;board.height=420;
  const b=board.getContext('2d',{willReadFrequently:true});
