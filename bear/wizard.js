@@ -222,9 +222,11 @@ capacityHost.id='bearRequiredCapacity';capacityHost.className='bear-required-cap
 sections[7].insertBefore(capacityHost,manual);
 function heroResults(){
  const ext=B.model().v2||{},known=window.NRW_BEAR_IMPORTED_HEROES||[];
+ const owned=new Set(Array.isArray(ext.scannedOwnedHeroes)?ext.scannedOwnedHeroes:[]);
+ const restrict=owned.size>0;
  const roster=new Map();
- for(const h of known)if(h?.name)roster.set(h.name,{...h});
- for(const h of Object.values(ext.manualHeroes||{}))if(h?.name){
+ for(const h of known)if(h?.name&&(!restrict||owned.has(h.name)))roster.set(h.name,{...h});
+ for(const h of Object.values(ext.manualHeroes||{}))if(h?.name&&(!restrict||owned.has(h.name))){
   // A partial screenshot can update a profile without erasing API stars.
   const previous=roster.get(h.name)||{};
   roster.set(h.name,{...previous,...h});
