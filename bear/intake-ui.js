@@ -185,6 +185,23 @@ function heroLevelFromWords(words,rect){
  const match=candidates.match(/(?:Lv|Level)\s*\.?\s*(\d{1,3})\b/i);
  return match&&Number(match[1])<=80?Number(match[1]):null;
 }
+// Local pixel fingerprints deduplicate full hero cards between scroll shots.
+function portraitSignature(canvas,rect){
+ const small=document.createElement('canvas');small.width=24;small.height=32;
+ const cx=small.getContext('2d',{willReadFrequently:true});
+ cx.drawImage(canvas,rect.x+rect.w*.07,rect.y+rect.h*.04,
+   rect.w*.86,rect.h*.67,0,0,24,32);
+ return cx.getImageData(0,0,24,32).data;
+}
+function samePortrait(a,b){
+ if(!a||!b||a.length!==b.length)return false;
+ let difference=0,count=0;
+ for(let p=0;p<a.length;p+=4){
+  difference+=Math.abs(a[p]-b[p])+Math.abs(a[p+1]-b[p+1])+Math.abs(a[p+2]-b[p+2]);
+  count+=3;
+ }
+ return difference/count<12;
+}
 function overviewTiles(canvas,text,words){
  const rows=heroRows(canvas),collected=[];
  // If the player scrolls, take only whole visible cards. Partial top/bottom
@@ -197,7 +214,8 @@ function overviewTiles(canvas,text,words){
    const level=heroLevelFromWords(words,rect);
    collected.push({image:cropToThumb(canvas,rect.x/canvas.width,rect.y/canvas.height,
      rect.w/canvas.width,rect.h/canvas.height),name:'',level,
-    starSteps:stars.starSteps,starConfidence:stars.confidence,partialStar:stars.partiallyFilled,selected:false});
+    starSteps:stars.starSteps,starConfidence:stars.confidence,partialStar:stars.partiallyFilled,selected:false,
+     signature:portraitSignature(canvas,rect)});
   }
  }
  return collected;
@@ -278,8 +296,11 @@ async function inspect(file){
   detail=Core.parseHeroDetail(heading+'\n'+text,allKnown())||detail;
  }
  if(type==='unknown'&&detail?.name)type='starter';
+ const allCards=type==='roster'?overviewTiles(canvas,text,result.data.words):[];
+ const existing=queue.filter(q=>q.type==='roster').flatMap(q=>q.cards||[]);
+ const fresh=allCards.filter(tile=>!existing.some(x=>samePortrait(x.signature,tile.signature)));
  return {fileName:file.name,file,type,text,grouped,words:result.data.words||[],values,detail,troopTiers,canvas:(type==='roster'||type==='unknown'||type==='troops')?canvas:null,
-  cards:type==='roster'?overviewTiles(canvas,text,result.data.words):[],applied:false};
+  cards:fresh,duplicates:allCards.length-fresh.length,applied:false};
 }
 function inputChoice(items,current=''){
  const sel=document.createElement('select');
