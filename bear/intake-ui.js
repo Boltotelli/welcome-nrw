@@ -611,9 +611,14 @@ function apply(){
    accepted++;
   }else if(item.type==='roster'){
    if(item.cards?.length||item.duplicates)appliedTypes.push('roster');
+   // Start one authoritative owned-hero inventory per new screenshot set.
+   // Partial overlapping batches add to it without re-introducing old heroes.
+   if(confirmedPortraits.length===0)v.scannedOwnedHeroes=[];
+   if(!Array.isArray(v.scannedOwnedHeroes))v.scannedOwnedHeroes=[];
    for(const tile of item.cards||[])if(tile.signature)confirmedPortraits.push({signature:tile.signature});
    for(const tile of item.cards){
     if(!tile.name)continue;
+    if(!v.scannedOwnedHeroes.includes(tile.name))v.scannedOwnedHeroes.push(tile.name);
     const old=v.manualHeroes[tile.name]||{};
     const stars=tile.starSteps===null?Number(old.stars||0):Math.floor(tile.starSteps/6);
     const tier=tile.starSteps===null?Number(old.tier||0):tile.starSteps%6;
