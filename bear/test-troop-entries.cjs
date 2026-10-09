@@ -69,4 +69,23 @@ assert.deepEqual(Array.from(withFallback,e=>e.count),[626621,557731,1116468],
 const repeated=mixed.map(e=>({...e}));repeated[0].count=null;
 E.recoverSingleEntries(repeated,{troopsI:23159});
 assert.equal(repeated[0].count,null,'never apply one-class fallback to mixed tiers');
+// Real OCR sometimes breaks a class name into multiple neighboring tokens.
+for(const [w,h] of [[640,1386],[1080,1920]]){
+ const split=fixture(w,h).flatMap(word=>{
+  if(word.text==='Infanterie'){
+   const box=word.bbox,middle=box.x0+(box.x1-box.x0)*.53;
+   return [{text:'Infan',bbox:{...box,x1:middle}},
+    {text:'terie',bbox:{...box,x0:middle}}];
+  }
+  if(word.text==='Kavallerie'){
+   const box=word.bbox,middle=box.x0+(box.x1-box.x0)*.48;
+   return [{text:'Kaval',bbox:{...box,x1:middle}},
+    {text:'lerie',bbox:{...box,x0:middle}}];
+  }
+  return [word];
+ });
+ const entries=E.detect(split,w,h);
+ assert.equal(entries.length,3,'split OCR names still produce 3 cards');
+ assert.deepEqual(Array.from(entries,e=>e.count),[626621,557731,1116468]);
+}
 console.log('TROOP ENTRY OCR: 3+6 separate entries, repeat classes, 3 scaled screens, missing values and separators passed.');
