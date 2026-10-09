@@ -271,3 +271,14 @@ The player retested the published preview and reported troop tiers + cavalry sti
 - Reproducible synthetic regression tests, based on measured geometric bounding boxes **without saving the user's screenshot or artwork**, cover 716px and 1074px image widths, all six detected frames, and all 18 charm centres.
 - **Open limitation:** individual Governor Charm levels cannot be inferred from colour. The reference-silhouette matcher is heuristic and cannot safely auto-confirm exact levels without labelled in-game examples or individually verified reference art. The next dedicated step is to obtain labelled detail screenshots and test the 18 crop descriptors against them.
 - No production, main, NAP, Supabase, troop OCR or hero optimizer modifications in this change.
+
+## 2026-10-10 — Labelled Kingshot Talisman Guide enables visual levels 1–11
+
+The user provided two *in-game* Talisman Guide screenshots: Lv1–6 and Lv6–11. Each row shows infantry (green shield), cavalry (cyan horse), and archer (yellow bow), with the level written alongside the shared **outer shape**. The central class glyph identifies troop class, **not** Talisman level.
+
+- New `charm-guide-silhouettes.js`: eleven compact, 24×24 bit-packed outer-shape templates extracted from the labelled in-game screenshots. No full screenshot or copyrighted artwork ships with GitHub Pages. The same eleven silhouettes were compared offline to all 33 class-specific guide examples; every reference classified as its own labelled level. The repeated Lv6 examples on both guide screenshots also agreed.
+- New `charm-guide-matcher.js`: local class-independent silhouette comparison with separate score and next-best margin. Only a clear reference in Lv1–11 is proposed automatically; ambiguous contours and Lv12–22 remain unknown until validated with more labelled screenshots.
+- `screenshot-importer.js` now checks the verified guide matcher *first* for all 18 charms, with any old guesses failing closed (not auto-committed). It avoids fetching the previous remote image masks while the newer labelled reference is sufficient; the confirmation UI remains in control of saving.
+- Offline evaluation on **all 18** silhouettes derived from the original Governor Gear screenshot found 6 cavalry Lv4, 6 infantry (Lv4,Lv5,Lv5,Lv4,Lv4,Lv4), and 6 archer Lv5. The best-vs-runner-up differences were above .05 for every sample, and best normalized mismatch was below .14. At least seven independent Governor Gear crop signatures and all eleven labelled reference shapes are checked in `test-charm-guide.cjs` during GitHub Actions.
+- The image geometry is still resolution proportional; the working troop screenshot/OCR and the overall onboarding sequence were not changed. **Real mobile browser recognition still needs user confirmation before calling it fully reliable.** No changes to `main`, production, NAP, or Supabase.
+
