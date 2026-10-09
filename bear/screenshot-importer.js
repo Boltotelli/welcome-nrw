@@ -6,7 +6,7 @@
  */
 (function(){
 'use strict';
-const B=window.NRW_BEAR_BRIDGE, GUIDE=window.NRW_BEAR_CHARM_SHAPES, REF=window.NRW_BEAR_CHARM_REFERENCES, TIER=window.NRW_BEAR_TIER_RECOGNIZER;
+const B=window.NRW_BEAR_BRIDGE, GUIDE=window.NRW_BEAR_CHARM_SHAPES, REF=window.NRW_BEAR_CHARM_REFERENCES, TIER=window.NRW_BEAR_TIER_RECOGNIZER, LAYOUT=window.NRW_BEAR_GEAR_LAYOUT;
 const r=document.getElementById('restricted'),quick=document.getElementById('uxQuickStart');
 if(!B||!GUIDE||!r||!quick)return;
 const W=716,H=1536;
@@ -19,9 +19,9 @@ const slots=[
  {id:'staff',type:'archer',caption:'Bogenschützen · Stab',gear:[570,669],charms:[[537,740],[571,740],[605,740]]}
 ];
 const texts={
- de:{detected:'erkannt',tierUnknown:'Nicht erkannt',title:'📸 GovGear + 18 Talismane importieren',intro:'Ein Vollbild-Screenshot der Gouverneur-Ausrüstung reicht. Das Bild wird ausschließlich hier im Browser analysiert.',choose:'Screenshot auswählen',processing:'18 Talismane werden verglichen …',preview:'Erkennung prüfen',confirm:'Geprüfte Werte übernehmen',cancel:'Verwerfen',unknown:'Nicht erkannt – bitte auswählen oder überspringen',auto:'Vorschlag',manual:'Selbst gewählt',noPhoto:'Noch kein Bild ausgewählt.',layout:'Für diese Erkennung bitte die vollständige Gouverneur-Ausrüstung wie in deinem Screenshot verwenden (sechs Ausrüstungsteile sichtbar).',status:'Bild analysiert. Bitte alle Vorschläge vor der Übernahme kontrollieren.',saved:'Bestätigte Werte lokal übernommen. Nicht erkannte Felder wurden nicht überschrieben.',confidence:'Erkennung',gear:'Ausrüstung',quality:'Qualität',tier:'Stufe',stars:'Sterne',skip:'Unverändert lassen',offline:'Der Bildserver erlaubt keinen vollständigen Vergleich. Die bekannten Level 3–8 werden lokal geprüft; andere bleiben offen.',levels:'Level',privacy:'Keine Bildübertragung, kein externer OCR-Dienst.',invalid:'Bild konnte nicht verarbeitet werden.',remote:'Referenzen für Level 1–22 geladen.',partial:'Nur geprüfte Treffer übernehmen.'},
- en:{detected:'detected',tierUnknown:'Not recognized',title:'📸 Import gear + 18 charms',intro:'One full Governor Equipment screenshot is enough. The picture is processed only in this browser.',choose:'Select screenshot',processing:'Comparing 18 charms …',preview:'Review recognition',confirm:'Apply reviewed values',cancel:'Discard',unknown:'Unrecognized – choose a level or skip',auto:'Suggested',manual:'Chosen manually',noPhoto:'No screenshot selected.',layout:'Use the full Governor Equipment screen showing all six pieces.',status:'Analysis ready. Review all guesses before applying.',saved:'Confirmed values saved locally; unknowns were not overwritten.',confidence:'Detection',gear:'Gear',quality:'Quality',tier:'Tier',stars:'Stars',skip:'Leave unchanged',offline:'Online images could not be compared. Lv3–8 local examples used; other levels remain unknown.',levels:'Level',privacy:'No image upload or external OCR service.',invalid:'Cannot process this image.',remote:'All 22 level references loaded.',partial:'Apply only reviewed matches.'},
- fr:{detected:'reconnu',tierUnknown:'Non reconnu',title:'📸 Importer équipements et 18 talismans',intro:'Une capture complète suffit. L’image reste dans le navigateur.',choose:'Choisir une capture',processing:'Analyse des 18 talismans…',preview:'Vérifier',confirm:'Valider les valeurs',cancel:'Annuler',unknown:'Non identifié — corriger ou ignorer',auto:'Suggestion',manual:'Choisi',noPhoto:'Aucune image sélectionnée.',layout:'Utiliser la vue complète des six équipements.',status:'Analyse terminée. Vérifiez les propositions.',saved:'Valeurs confirmées enregistrées localement.',confidence:'Fiabilité',gear:'Équipement',quality:'Qualité',tier:'Niveau',stars:'Étoiles',skip:'Ne pas modifier',offline:'Seuls les exemples locaux niveaux 3–8 disponibles; les autres restent inconnus.',levels:'Niveaux',privacy:'Aucun transfert de votre image.',invalid:'Image non reconnue.',remote:'Références des 22 niveaux disponibles.',partial:'Valider les valeurs vérifiées.'}
+ de:{layoutFail:'Ausrüstungskarten nicht sicher lokalisiert. Bitte die vollständige GovGear-Übersicht mit sechs Gegenständen ohne Popup verwenden; es werden keine falschen Ausschnitte übernommen.',detected:'erkannt',tierUnknown:'Nicht erkannt',title:'📸 GovGear + 18 Talismane importieren',intro:'Ein Vollbild-Screenshot der Gouverneur-Ausrüstung reicht. Das Bild wird ausschließlich hier im Browser analysiert.',choose:'Screenshot auswählen',processing:'18 Talismane werden verglichen …',preview:'Erkennung prüfen',confirm:'Geprüfte Werte übernehmen',cancel:'Verwerfen',unknown:'Nicht erkannt – bitte auswählen oder überspringen',auto:'Vorschlag',manual:'Selbst gewählt',noPhoto:'Noch kein Bild ausgewählt.',layout:'Für diese Erkennung bitte die vollständige Gouverneur-Ausrüstung wie in deinem Screenshot verwenden (sechs Ausrüstungsteile sichtbar).',status:'Bild analysiert. Bitte alle Vorschläge vor der Übernahme kontrollieren.',saved:'Bestätigte Werte lokal übernommen. Nicht erkannte Felder wurden nicht überschrieben.',confidence:'Erkennung',gear:'Ausrüstung',quality:'Qualität',tier:'Stufe',stars:'Sterne',skip:'Unverändert lassen',offline:'Der Bildserver erlaubt keinen vollständigen Vergleich. Die bekannten Level 3–8 werden lokal geprüft; andere bleiben offen.',levels:'Level',privacy:'Keine Bildübertragung, kein externer OCR-Dienst.',invalid:'Bild konnte nicht verarbeitet werden.',remote:'Referenzen für Level 1–22 geladen.',partial:'Nur geprüfte Treffer übernehmen.'},
+ en:{layoutFail:'Could not reliably locate the six gear cards. Upload a full Governor Equipment overview without a popup. No guessed crops were saved.',detected:'detected',tierUnknown:'Not recognized',title:'📸 Import gear + 18 charms',intro:'One full Governor Equipment screenshot is enough. The picture is processed only in this browser.',choose:'Select screenshot',processing:'Comparing 18 charms …',preview:'Review recognition',confirm:'Apply reviewed values',cancel:'Discard',unknown:'Unrecognized – choose a level or skip',auto:'Suggested',manual:'Chosen manually',noPhoto:'No screenshot selected.',layout:'Use the full Governor Equipment screen showing all six pieces.',status:'Analysis ready. Review all guesses before applying.',saved:'Confirmed values saved locally; unknowns were not overwritten.',confidence:'Detection',gear:'Gear',quality:'Quality',tier:'Tier',stars:'Stars',skip:'Leave unchanged',offline:'Online images could not be compared. Lv3–8 local examples used; other levels remain unknown.',levels:'Level',privacy:'No image upload or external OCR service.',invalid:'Cannot process this image.',remote:'All 22 level references loaded.',partial:'Apply only reviewed matches.'},
+ fr:{layoutFail:'Les six cases d’équipement ne sont pas détectées de façon sûre. Utilise une capture complète sans fenêtre superposée; aucun recadrage incertain ne sera enregistré.',detected:'reconnu',tierUnknown:'Non reconnu',title:'📸 Importer équipements et 18 talismans',intro:'Une capture complète suffit. L’image reste dans le navigateur.',choose:'Choisir une capture',processing:'Analyse des 18 talismans…',preview:'Vérifier',confirm:'Valider les valeurs',cancel:'Annuler',unknown:'Non identifié — corriger ou ignorer',auto:'Suggestion',manual:'Choisi',noPhoto:'Aucune image sélectionnée.',layout:'Utiliser la vue complète des six équipements.',status:'Analyse terminée. Vérifiez les propositions.',saved:'Valeurs confirmées enregistrées localement.',confidence:'Fiabilité',gear:'Équipement',quality:'Qualité',tier:'Niveau',stars:'Étoiles',skip:'Ne pas modifier',offline:'Seuls les exemples locaux niveaux 3–8 disponibles; les autres restent inconnus.',levels:'Niveaux',privacy:'Aucun transfert de votre image.',invalid:'Image non reconnue.',remote:'Références des 22 niveaux disponibles.',partial:'Valider les valeurs vérifiées.'}
 };
 const T=()=>texts[document.documentElement.lang]||texts.en;
 const pane=document.createElement('section');pane.className='panel bear-import-card';pane.innerHTML=
@@ -92,7 +92,7 @@ function compare(input,templates){
  return {level:certain?best.level:null,guess:best.level,score:best.score,margin,confidence:certain?'suggested':'unknown'};
 }
 function getCrop(ctx,center,radius){
- const x=center[0]*ctx.canvas.width/W,y=center[1]*ctx.canvas.height/H,scale=ctx.canvas.width/W;
+ const scale=ctx.canvas.width/W,x=center[0]*scale,y=center[1]*scale;
  const q=Math.max(9,radius*scale),left=Math.max(0,Math.round(x-q)),top=Math.max(0,Math.round(y-q));
  const w=Math.min(ctx.canvas.width-left,Math.round(q*2)),h=Math.min(ctx.canvas.height-top,Math.round(q*2));
  return ctx.getImageData(left,top,w,h);
@@ -120,7 +120,7 @@ function rarity(ctx,pos){
 function readGearStars(ctx,pos){
  // Count isolated yellow star components along the LEFT edge of the gear
  // icon. Only return a proposal when their size and position are plausible.
- const sx=ctx.canvas.width/W,sy=ctx.canvas.height/H;
+ const sx=ctx.canvas.width/W,sy=sx;
  const x=Math.max(0,Math.round((pos[0]-58)*sx));
  const y=Math.max(0,Math.round((pos[1]-25)*sy));
  const w=Math.min(ctx.canvas.width-x,Math.round(40*sx));
@@ -246,8 +246,18 @@ async function analyse(file){
   const canvas=document.createElement('canvas');
   canvas.width=image.naturalWidth;canvas.height=image.naturalHeight;
   const ctx=canvas.getContext('2d',{willReadFrequently:true});ctx.drawImage(image,0,0);
+  if(!LAYOUT)throw Error('layout-engine');
+  const locator=document.createElement('canvas');
+  locator.width=W;locator.height=Math.round(ctx.canvas.height*W/ctx.canvas.width);
+  const lx=locator.getContext('2d',{willReadFrequently:true});
+  lx.drawImage(canvas,0,0,locator.width,locator.height);
+  const geometry=LAYOUT.find(lx.getImageData(0,0,locator.width,locator.height).data,locator.width,locator.height);
+  // Unsafe fallback removed: never silently crop in the wrong positions.
+  if(!geometry.ok)throw Error('layout');
+  const detected=slots.map((slot,i)=>({...slot,gear:geometry.slots[i].gear,charms:geometry.slots[i].charms,
+   inferred:geometry.slots[i].inferred}));
   const remote=await getRemoteTemplates();
-  const output=slots.map(slot=>({
+  const output=detected.map(slot=>({
    ...slot,thumb:drawThumb(ctx,slot.gear,47),quality:rarity(ctx,slot.gear),stars:readGearStars(ctx,slot.gear),tier:TIER?.recognize?.(ctx,slot.gear)||{tier:null,score:0},
    charms:slot.charms.map(pos=>{
     const input=maskOf(getCrop(ctx,pos,18),slot.type);
@@ -256,14 +266,14 @@ async function analyse(file){
     return {...matches,thumb:drawThumb(ctx,pos,20)};
    })
   }));
-  return {output,onlineCount:remote.length,dimensions:[canvas.width,canvas.height]};
+  return {output,onlineCount:remote.length,dimensions:[canvas.width,canvas.height],layout:'auto',detected:geometry.detected};
  }finally{URL.revokeObjectURL(url);}
 }
 $('bearGearPhoto').addEventListener('change',async e=>{
  const file=e.target.files?.[0];e.target.value='';if(!file)return;
  $('bearImportReview').hidden=true;report(T().processing);
  try{const result=await analyse(file);pending=result.output;review(result.output,result.onlineCount);}
- catch(error){pending=null;report(T().invalid+' '+(error.message==='layout'?T().layout:''));}
+ catch(error){pending=null;report((error.message==='layout'||error.message==='layout-engine')?T().layoutFail:T().invalid);}
 });
 $('bearImportCancel').addEventListener('click',()=>{
  pending=null;$('bearImportReview').hidden=true;report(T().noPhoto);
