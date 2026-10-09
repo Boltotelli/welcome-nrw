@@ -170,8 +170,13 @@ function showRelevantManual(){
   if(lethal)lethal.hidden=v[names[1]]!==undefined&&v[names[1]]!=='';
   row.hidden=(!atk||atk.hidden)&&(!lethal||lethal.hidden);
  });
- const capField=quick?.querySelector('#uxCapLine .ux-cap-input');
- if(capField)capField.hidden=Number(v.cap)>0;
+ // Keep the original bound #cap input but place it in an independent
+ // required-value section. The older .ux-step can be hidden by other checks.
+ const capField=$('cap')?.closest('.ux-field');
+ if(capField&&!capacityHost.contains(capField))capacityHost.append(capField);
+ if(capField)capField.hidden=false;
+ const capacityNeeded=!(Number(v.cap)>0);
+ capacityHost.hidden=!capacityNeeded;
  const ownReady=(ext.ownHeroes||[]).filter(Boolean).length===3;
  const heroLine=quick?.querySelector('#uxHeroLine');
  if(heroLine)heroLine.hidden=ownReady;
@@ -193,6 +198,117 @@ const processQueue=()=>{
  const review=$('intakeQueue');return Boolean(review&&!review.hidden&&review.children.length);
 };
 function message(content){$('bearGuideMessage').textContent=content||'';}
+const advisor=window.NRW_BEAR_HERO_ADVISOR;
+const atlas='https://ks-atlas.com/tools/atlas-database/bear-rally-heroes';
+const types=['infantry','cavalry','archer'],names={
+ de:['Infanterie','Kavallerie','Bogenschützen'],
+ en:['Infantry','Cavalry','Archers'],
+ fr:['Infanterie','Cavalerie','Archers']
+};
+const chosenRecommendations=['','',''],detailConfirmed=new Set();
+const recommendationPanel=document.createElement('section');
+recommendationPanel.className='bear-recommendation-panel';
+sections[5].append(recommendationPanel);
+const detailPanel=document.createElement('section');
+detailPanel.className='bear-recommendation-panel';
+sections[6].append(detailPanel);
+const capacityHost=document.createElement('section');
+capacityHost.id='bearRequiredCapacity';capacityHost.className='bear-required-capacity';
+sections[7].insertBefore(capacityHost,manual);
+function heroResults(){
+ const ext=B.model().v2||{},known=window.NRW_BEAR_IMPORTED_HEROES||[];
+ const roster=new Map();
+ for(const h of known)if(h?.name)roster.set(h.name,{...h});
+ for(const h of Object.values(ext.manualHeroes||{}))if(h?.name){
+  // A partial screenshot can update a profile without erasing API stars.
+  const previous=roster.get(h.name)||{};
+  roster.set(h.name,{...previous,...h});
+ }
+ return advisor?.recommend([...roster.values()],window.NRW_BEAR_CATALOG?.heroTypes,
+  window.NRW_BEAR_INTAKE_CORE?.rankByType)||[];
+}
+function selections(){
+ const groups=heroResults();
+ return groups.map((group,i)=>
+  group.choices.some(x=>x.name===chosenRecommendations[i])
+   ?chosenRecommendations[i]
+   :group.best?.name||'');
+}
+function recommendationsReady(){return selections().length===3&&selections().every(Boolean);}
+function renderRecommendations(){
+ recommendationPanel.innerHTML='';
+ const l=lang(),groupNames=names[l]||names.en,groups=heroResults();
+ const introduction=document.createElement('p');introduction.className='hint';
+ introduction.textContent=l==='de'?
+ 'Vorläufige Bären-Starter nach KS-Atlas-Rollenpräferenz und deinem erkannten Level, Sternfortschritt und Skillstand. Ohne Skill-Screenshot wird nur das theoretische Maximum aus den Sternen geschätzt.':
+ l==='fr'?'Classement provisoire selon les priorités Ours de KS Atlas et les niveaux, étoiles et compétences détectés. Les compétences non reconnues restent estimées.':
+ 'Provisional Bear leaders using KS Atlas role priorities and your identified levels, stars and skills. Unread skills use only an assumed maximum from stars.';
+ recommendationPanel.append(introduction);
+ const link=document.createElement('a');link.href=atlas;link.target='_blank';link.rel='noopener noreferrer';link.textContent='KS Atlas · Bear Rally Heroes';
+ recommendationPanel.append(link);
+ groups.forEach((group,i)=>{
+  const card=document.createElement('div');card.className='bear-recommendation-card';
+  const heading=document.createElement('strong');heading.textContent=['🛡️ ','🐴 ','🏹 '][i]+groupNames[i];
+  card.append(heading);
+  if(!group.choices.length){
+   const empty=document.createElement('p');empty.className='bear-guide-needed';
+   empty.textContent=l==='de'?'Noch kein identifizierter Held dieser Gattung. Gehe zurück und ordne mindestens einen Helden in der Übersicht zu.':
+    l==='fr'?'Aucun héros identifié pour ce rôle. Retourne à la liste pour confirmer son nom.':
+    'No identified hero for this role. Return to the roster to confirm a hero name.';
+   card.append(empty);
+  }else{
+   const recommended=group.choices.find(x=>x.name===chosenRecommendations[i])||group.best;
+   const text=document.createElement('p');
+   text.className='hint';
+   text.textContent=recommended.name+' · '+(recommended.level?'Lv '+recommended.level:'Lv ?')+
+    ' · '+(recommended.stars?recommended.stars+'★':'★ ?')+
+    ' · '+(recommended.skill?'Skill '+Number(recommended.skill).toFixed(1):'Skill ?')+
+    (recommended.assumedSkill?' ('+(l==='de'?'angenommen':'estimated')+')':'');
+   card.append(text);
+   if(group.choices.length>1){
+    const expand=document.createElement('details');
+    const summary=document.createElement('summary');summary.textContent=l==='de'?'Alternative prüfen':l==='fr'?'Choisir un autre':'Choose another';
+    const select=document.createElement('select');select.setAttribute('aria-label',groupNames[i]);
+    group.choices.forEach(h=>{const option=document.createElement('option');option.value=h.name;option.textContent=h.name+' · '+h.score.toFixed(1);option.selected=h.name===recommended.name;select.append(option);});
+    select.addEventListener('change',()=>{chosenRecommendations[i]=select.value;renderRecommendations();});
+    expand.append(summary,select);card.append(expand);
+   }
+  }
+  recommendationPanel.append(card);
+ });
+ const hint=document.createElement('p');hint.className='hint';
+ hint.textContent=l==='de'?'Diese Auswahl ist noch keine bestätigte Berechnung der Helden-Skills. Die Details werden im nächsten Schritt geprüft.':
+ 'This is not a verified hero damage simulation; the next step checks individual hero details.';
+ recommendationPanel.append(hint);
+ const btn=$('bearGuideNext');
+ if(active===5&&btn)btn.disabled=!recommendationsReady();
+}
+function confirmRecommendedHeroes(){
+ const selectionsNow=selections();
+ if(selectionsNow.length!==3||selectionsNow.some(n=>!n))return;
+ const model=B.model();model.v2=model.v2||{};
+ model.v2.ownHeroes=selectionsNow;
+ if(model.marches?.[0])model.marches[0].hero=selectionsNow.join(' / ');
+ B.save();B.render();window.NRW_BEAR_ENHANCE?.refreshHeroes?.();
+ imported.add(5);moveTo(6);
+}
+function renderHeroDetails(){
+ const l=lang(),chosen=B.model().v2?.ownHeroes||[];
+ detailPanel.innerHTML='';
+ const message=document.createElement('p');message.className='bear-gear-reminder';
+ message.textContent=l==='de'?
+ 'WICHTIG: Lege zuerst dein BESTES HELDEN-GEAR auf den jeweils empfohlenen Helden. Wenn du nur ein gutes Set besitzt, übertrage es nacheinander auf jeden Helden und mache erst danach seinen Screenshot.':
+ l==='fr'?'IMPORTANT : équipe chaque héros recommandé avec ton meilleur équipement de héros AVANT de prendre ses captures. Déplace le même ensemble entre les héros si nécessaire.':
+ 'IMPORTANT: Equip your BEST HERO GEAR to each recommended hero BEFORE taking their screenshots. If necessary, move the same set between heroes one at a time.';
+ detailPanel.append(message);
+ const list=document.createElement('p');list.className='hint';
+ list.textContent=chosen.filter(Boolean).map(n=>(detailConfirmed.has(n)?'✓ ':'◻ ')+n).join(' · ');
+ detailPanel.append(list);
+ const foot=document.createElement('p');foot.className='hint';
+ foot.textContent=l==='de'?'Lade danach die Heldendetails (Werte und bei Bedarf Fertigkeiten) hoch und bestätige jeden Import. Du kannst mehrere Bilder nacheinander ergänzen.':
+ 'Upload each hero’s stats and skills if available, confirming every image before continuing.';
+ detailPanel.append(foot);
+}
 function render(){
  const s=t(),idx=active;
  sections.forEach((n,i)=>n.hidden=i!==idx);
@@ -270,7 +386,7 @@ wizard.addEventListener('change',()=>{
  if(active===7)showRelevantManual();
 });
 window.addEventListener('nrw-bear-loaded',()=>{
- imported.clear();skipped.clear();finished=false;
+ imported.clear();skipped.clear();finished=false;detailConfirmed.clear();chosenRecommendations.fill('');
  if(active===0){message(t().profileGood);$('bearGuideNext').disabled=false;moveTo(1);}
 });
 window.addEventListener('nrw-bear-intake-applied',evt=>{
@@ -285,6 +401,11 @@ window.addEventListener('nrw-bear-intake-applied',evt=>{
   // Keep the player on step 5 after each confirmation; they can upload the
   // next individual image, or choose Continue when finished.
   if(active===4||active===6){
+   if(active===6){
+    const accepted=evt.detail?.names||[];
+    accepted.forEach(n=>detailConfirmed.add(n));
+    renderHeroDetails();
+   }
    $('bearGuideNext').textContent=t().next+' →';
    message(document.documentElement.lang==='de'
     ?'Bild gespeichert. Lade weitere Bilder dieses Schritts hoch oder fahre fort.'
