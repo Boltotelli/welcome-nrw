@@ -111,6 +111,6 @@ body.bear-wizard-mode .dashboard{display:none!important}
 .bear-recommendation-card select{max-width:100%;width:100%;margin:8px 0}
 .bear-gear-reminder{border:1px solid rgba(239,183,92,.55);background:rgba(239,183,92,.10);border-radius:12px;padding:14px;font-weight:750;line-height:1.6}
 .bear-required-capacity{margin:4px 0 14px;border:1px solid rgba(239,183,92,.55);border-radius:14px;padding:16px;background:var(--card)}
-.bear-required-capacity::before{content:"⚠  Schwadronskapazität / Squad capacity";display:block;color:var(--amber);font-size:13px;font-weight:800;margin-bottom:10px}
+.bear-required-capacity::before{content:attr(data-caption);display:block;color:var(--amber);font-size:13px;font-weight:800;margin-bottom:10px}
 .bear-required-capacity .ux-field{display:flex;flex-direction:column;gap:8px}
 .bear-required-capacity input{max-width:300px;width:100%}
