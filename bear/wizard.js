@@ -259,6 +259,7 @@ wizard.addEventListener('change',()=>{
  if(active===5)showRelevantManual();
 });
 window.addEventListener('nrw-bear-loaded',()=>{
+ imported.clear();skipped.clear();finished=false;
  if(active===0){message(t().profileGood);$('bearGuideNext').disabled=false;moveTo(1);}
 });
 window.addEventListener('nrw-bear-intake-applied',evt=>{
