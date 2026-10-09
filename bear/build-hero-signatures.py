@@ -14,7 +14,7 @@ from PIL import Image, ImageOps
 
 ROOT=Path(__file__).resolve().parent
 catalog=ROOT.joinpath('catalog.js').read_text(encoding='utf-8')
-data=json.loads(re.search(r'window\\.NRW_BEAR_CATALOG\\s*=\\s*(\\{.*\\})\\s*;',catalog,re.S).group(1))
+data=json.loads(re.search(r'window\.NRW_BEAR_CATALOG\s*=\s*(\{.*\})\s*;',catalog,re.S).group(1))
 
 def get(hero):
     url=hero['img']
