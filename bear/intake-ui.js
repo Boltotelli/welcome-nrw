@@ -213,8 +213,26 @@ function overviewTiles(canvas,text,words){
   for(let col=0;col<4;col++){
    const rect={x:Math.round(canvas.width*(.038+col*.232)),
     y:row.top+2,w:Math.round(canvas.width*.211),h:row.bottom-row.top-3};
-   const stars=inferStars(canvas,rect);
    const level=heroLevelFromWords(words,rect);
+   const cx=canvas.getContext('2d',{willReadFrequently:true});
+   // The last Kingshot roster row can have fewer than four cards.
+   // Reject a blank beige cell or a dark 0/20 unrecruited portrait.
+   const middle=cx.getImageData(Math.round(rect.x+rect.w*.1),
+     Math.round(rect.y+rect.h*.15),Math.max(1,Math.round(rect.w*.8)),
+     Math.max(1,Math.round(rect.h*.50))).data;
+   let difference=0,brightness=0;
+   for(let p=0;p<middle.length;p+=4){
+    difference+=Math.abs(middle[p]-224)+Math.abs(middle[p+1]-209)+Math.abs(middle[p+2]-185);
+    brightness+=(middle[p]+middle[p+1]+middle[p+2])/3;
+   }
+   const area=middle.length/4;
+   if(difference/area<28)continue;
+   const hasUnlockProgress=(words||[]).some(w=>w.bbox&&/0\s*\/\s*20/.test(w.text||'')&&
+     (w.bbox.x0+w.bbox.x1)/2>rect.x&&(w.bbox.x0+w.bbox.x1)/2<rect.x+rect.w&&
+     (w.bbox.y0+w.bbox.y1)/2>rect.y+rect.h*.72&&
+     (w.bbox.y0+w.bbox.y1)/2<rect.y+rect.h);
+   if(hasUnlockProgress||(level===null&&brightness/area<111))continue;
+   const stars=inferStars(canvas,rect);
    collected.push({image:cropToThumb(canvas,rect.x/canvas.width,rect.y/canvas.height,
      rect.w/canvas.width,rect.h/canvas.height),name:'',level,
     starSteps:stars.starSteps,starConfidence:stars.confidence,partialStar:stars.partiallyFilled,selected:false,
