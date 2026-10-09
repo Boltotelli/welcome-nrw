@@ -5,7 +5,7 @@
  */
 (function(){
 'use strict';
-const B=window.NRW_BEAR_BRIDGE,Core=window.NRW_BEAR_INTAKE_CORE,cat=window.NRW_BEAR_CATALOG,TROOP=window.NRW_BEAR_TROOP_BADGES;
+const B=window.NRW_BEAR_BRIDGE,Core=window.NRW_BEAR_INTAKE_CORE,cat=window.NRW_BEAR_CATALOG,TROOP=window.NRW_BEAR_TROOP_BADGES,MATCHER=window.NRW_BEAR_PORTRAIT_MATCHER;
 const restricted=document.getElementById('restricted'),quick=document.getElementById('uxQuickStart');
 if(!B||!Core||!cat||!restricted||!quick)return;
 const locale=()=>document.documentElement.lang||'de';
@@ -215,7 +215,8 @@ function overviewTiles(canvas,text,words){
    collected.push({image:cropToThumb(canvas,rect.x/canvas.width,rect.y/canvas.height,
      rect.w/canvas.width,rect.h/canvas.height),name:'',level,
     starSteps:stars.starSteps,starConfidence:stars.confidence,partialStar:stars.partiallyFilled,selected:false,
-     signature:portraitSignature(canvas,rect)});
+     signature:portraitSignature(canvas,rect),
+     portraitCandidates:MATCHER?.candidates(canvas,rect)||[]});
   }
  }
  return collected;
@@ -305,6 +306,7 @@ async function inspect(file){
  const allCards=type==='roster'?overviewTiles(canvas,text,result.data.words):[];
  const existing=queue.filter(q=>q.type==='roster').flatMap(q=>q.cards||[]);
  const fresh=allCards.filter(tile=>!existing.some(x=>samePortrait(x.signature,tile.signature)));
+ if(type==='roster'&&MATCHER)await MATCHER.enrich(fresh);
  return {fileName:file.name,file,type,text,grouped,words:result.data.words||[],values,detail,troopTiers,canvas:(type==='roster'||type==='unknown'||type==='troops')?canvas:null,
   cards:fresh,duplicates:allCards.length-fresh.length,applied:false};
 }
@@ -387,7 +389,11 @@ function renderQueue(){
    (item.cards||[]).forEach((tile,index)=>{
     const cell=document.createElement('div');cell.className='bear-intake-roster-tile';
     const image=new Image();image.src=tile.image;image.alt='Hero '+(index+1);cell.append(image);
-    const name=inputChoice(heroChoices(),tile.name);name.setAttribute('aria-label','Hero '+(index+1));
+    const seen=new Set(tile.suggestions||[]);
+    const choices=[['',say('Nicht zuordnen','Skip')],
+      ...(tile.suggestions||[]).map(n=>[n,'✦ '+n]),
+      ...allKnown().filter(n=>!seen.has(n)).map(n=>[n,n])];
+    const name=inputChoice(choices,tile.name);name.setAttribute('aria-label','Hero '+(index+1));
     name.addEventListener('change',()=>{tile.name=name.value;tile.selected=Boolean(tile.name);});
     const level=document.createElement('input');level.type='number';level.min='1';level.max='80';level.value=tile.level??'';level.placeholder='Lv';
     level.addEventListener('change',()=>tile.level=level.value?Number(level.value):null);
