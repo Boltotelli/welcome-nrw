@@ -300,6 +300,42 @@ async function readTroopNumbers(canvas,worker){
  }
  return found;
 }
+async function recheckTroopFields(canvas,worker,values){
+ // Relative to original Kingshot image, not to the viewing phone/browser.
+ // One focused OCR pass per missing quantity or T10 class title.
+ const blocks=[
+  {key:'troopsI',name:'Infanterie',n:[.202,.307,.215,.044],label:[.205,.286,.300,.034]},
+  {key:'troopsC',name:'Kavallerie',n:[.605,.307,.218,.044],label:[.609,.286,.300,.034]},
+  {key:'troopsA',name:'Bogenschützen',n:[.202,.405,.270,.046],label:[.205,.384,.305,.034]}
+ ];
+ let tiersText='';
+ for(const block of blocks){
+  function crop(zone){
+   const c=document.createElement('canvas'),w=620,h=104;
+   c.width=w;c.height=h;
+   const cx=c.getContext('2d',{willReadFrequently:true});cx.fillStyle='white';cx.fillRect(0,0,w,h);
+   cx.drawImage(canvas,zone[0]*canvas.width,zone[1]*canvas.height,zone[2]*canvas.width,zone[3]*canvas.height,
+    8,9,w-16,h-18);
+   return c;
+  }
+  if(!(Number(values[block.key])>0)){
+   try{
+    const res=await worker.recognize(crop(block.n));
+    const t=(res.data?.text||'').replace(/\s/g,'');
+    const possibles=[...t.matchAll(/\d{1,3}[.,]\d{3}|\d{4,9}/g)]
+     .map(m=>Core.normalizeNumber(m[0]))
+     .filter(n=>Number.isInteger(n)&&n>=1000&&n<200000000);
+    if(possibles.length)values[block.key]=Math.max(...possibles);
+   }catch(_){}
+  }
+  try{
+   const res=await worker.recognize(crop(block.label));
+   const label=String(res.data?.text||'').toLowerCase();
+   if(/spitz\w{0,5}n|spitzen/.test(label))tiersText+='\nSpitzen '+block.name;
+  }catch(_){}
+ }
+ return tiersText;
+}
 function positionalLines(words,canvas){
  // Screenshots with two columns may OCR all labels first, then numbers.
  // Group words by visible text row and sort horizontally.
@@ -336,11 +372,13 @@ async function inspect(file){
  const values=type==='troops'?
   {...Core.parseTroops(text),...spatialTroops(result.data.words,canvas)}:
   type==='stats'?{...Core.parseStats(text),...Core.parseStats(grouped)}:{};
+ let explicitTierLabels='';
  if(type==='troops'){
   try{Object.assign(values,await readTroopNumbers(canvas,worker));}
   catch(_){/* Keep the reviewable full-screen OCR suggestions. */}
+  explicitTierLabels=await recheckTroopFields(canvas,worker,values);
  }
- const troopTiers=type==='troops'&&TROOP?TROOP.recognize(canvas,text+'\n'+grouped,result.data.words||[]):null;
+ const troopTiers=type==='troops'&&TROOP?TROOP.recognize(canvas,text+'\n'+grouped+explicitTierLabels,result.data.words||[]):null;
  const marchSlots=type==='troops'?Core.parseMarchSlots(text+'\n'+grouped):null;
 
  let detail=(type==='starter'||type==='unknown')?Core.parseHeroDetail(text,allKnown()):null;
