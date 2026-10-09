@@ -296,6 +296,7 @@ $('bearImportApply').addEventListener('click',()=>{
  });
  B.save();window.NRW_BEAR_ENHANCE?.refreshGear?.();pending=null;
  $('bearImportReview').hidden=true;report(T().saved);
+ window.dispatchEvent(new CustomEvent('nrw-bear-gear-applied'));
 });
 window.NRW_BEAR_SCREEN_IMPORT={analyse,compare,maskOf,slots};
 document.querySelectorAll('button[data-lang]').forEach(b=>b.addEventListener('click',()=>setTimeout(locale,0)));
