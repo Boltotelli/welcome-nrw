@@ -142,6 +142,32 @@ function showRelevantManual(){
  const capMissing=v.cap===undefined||(ext.ownHeroes||[]).filter(Boolean).length<3;
  const blocks=quick?.querySelectorAll('.ux-step')||[];
  blocks.forEach((node,index)=>{node.hidden=index===0?!troopMissing:index===1?!capMissing:!statsMissing;});
+ // The final review must NOT re-ask quantities or other already recognized
+ // inputs simply because the tier or a different field in the row is missing.
+ const ownKeys=['troopsI','troopsC','troopsA'];
+ quick?.querySelectorAll('#uxTroopRows .ux-troop-row').forEach((row,i)=>{
+  const tier=ext.troopTiers?.[i];
+  const amount=row.querySelector('.ux-count');
+  const stage=row.querySelector('.ux-tier');
+  const gold=row.querySelector('.ux-tg');
+  const hasQuantity=Number.isFinite(Number(v[ownKeys[i]]))&&v[ownKeys[i]]!==undefined&&v[ownKeys[i]]!=='';
+  if(amount)amount.hidden=hasQuantity;
+  if(stage)stage.hidden=Number(tier?.tier)>=1;
+  if(gold)gold.hidden=tier?.tg!==null&&tier?.tg!==undefined&&Number(tier.tg)>=0;
+  row.hidden=[amount,stage,gold].every(x=>!x||x.hidden);
+ });
+ quick?.querySelectorAll('#uxStatsRows .ux-stat-row').forEach((row,i)=>{
+  const names=[['iAtk','iLet'],['cAtk','cLet'],['aAtk','aLet']][i];
+  const atk=row.querySelector('.ux-atk'),lethal=row.querySelector('.ux-let');
+  if(atk)atk.hidden=v[names[0]]!==undefined&&v[names[0]]!=='';
+  if(lethal)lethal.hidden=v[names[1]]!==undefined&&v[names[1]]!=='';
+  row.hidden=(!atk||atk.hidden)&&(!lethal||lethal.hidden);
+ });
+ const capField=quick?.querySelector('#uxCapLine .ux-cap-input');
+ if(capField)capField.hidden=Number(v.cap)>0;
+ const ownReady=(ext.ownHeroes||[]).filter(Boolean).length===3;
+ const heroLine=quick?.querySelector('#uxHeroLine');
+ if(heroLine)heroLine.hidden=ownReady;
  const wrapper=$('bearGuideMissingStatus');
  if(wrapper)wrapper.textContent=missing.length?t().missing+': '+missing.join(' · '):t().allGood;
 }
@@ -228,7 +254,7 @@ wizard.addEventListener('input',()=>{
  else if(active===5)showRelevantManual();
 });
 window.addEventListener('nrw-bear-loaded',()=>{
- if(active===0){message(t().profileGood);$('bearGuideNext').disabled=false;}
+ if(active===0){message(t().profileGood);$('bearGuideNext').disabled=false;moveTo(1);}
 });
 window.addEventListener('nrw-bear-intake-applied',evt=>{
  // Only the currently visible category is considered completed.
@@ -238,10 +264,11 @@ window.addEventListener('nrw-bear-intake-applied',evt=>{
   imported.add(active);
   message(t().ready);
   $('bearGuideNext').disabled=false;
+  moveTo(active+1);
  }
 });
 window.addEventListener('nrw-bear-gear-applied',()=>{
- imported.add(3);if(active===3){message(t().ready);$('bearGuideNext').disabled=false;}
+ imported.add(3);if(active===3){message(t().ready);$('bearGuideNext').disabled=false;moveTo(4);}
 });
 document.querySelectorAll('button[data-lang]').forEach(b=>b.addEventListener('click',()=>{render();}));
 render();
