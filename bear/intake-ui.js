@@ -534,6 +534,26 @@ function renderQueue(){
     });
     content.append(list);
     refreshTotals();
+    // Older focused OCR can recognize a class quantity even when the
+    // full-screen text pass missed its class heading. Show that result
+    // explicitly instead of hiding it just because any one row was found.
+    const seen=new Set(item.troopEntries.map(e=>e.type));
+    for(const [type,key] of ['troopsI','troopsC','troopsA'].entries()){
+     if(seen.has(type)||!Number.isInteger(item.values[key])||item.values[key]<=0)continue;
+     const fallback=document.createElement('label');
+     fallback.className='bear-dynamic-troop-line';
+     const label=document.createElement('span');
+     label.textContent=['Infanterie','Kavallerie','Bogenschützen'][type]+
+      say(' · Zahl erkannt, Eintrag prüfen',' · amount recognized, verify entry');
+     const field=document.createElement('input');field.type='number';field.min='1';field.step='1';
+     field.value=item.values[key];
+     field.addEventListener('input',()=>{
+      if(field.value!==''&&Number.isSafeInteger(Number(field.value))&&Number(field.value)>0)
+       item.values[key]=Number(field.value);
+      else delete item.values[key];
+     });
+     fallback.append(label,field);content.append(fallback);
+    }
    }else relevant.forEach(id=>{
     // A guided review should show only found values. Anything not recognized
     // is collected in the final missing-values step, not a wall of blank inputs.
