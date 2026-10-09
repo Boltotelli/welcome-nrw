@@ -67,7 +67,7 @@ function recognize(canvas,text,words){
  // badges differently, in both X and Y. Interpolate the known anchors.
  const phoneLayout=Math.max(0,Math.min(1,(1536-normalizedHeight)/264));
  const oldAnchors=[[133,395],[453,395],[133,518]];
- const phoneAnchors=[[117,310],[390,310],[116,418]];
+ const phoneAnchors=[[133,358],[455,358],[133,489]];
  const anchors=oldAnchors.map((p,i)=>p.map((v,j)=>v+(phoneAnchors[i][j]-v)*phoneLayout));
  const sc=canvas.width/716;
  const scratch=document.createElement('canvas');scratch.width=27;scratch.height=26;
