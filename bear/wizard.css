@@ -1,0 +1,102 @@
+/* Guided onboarding — intentionally only one task is visible at a time. */
+body.bear-wizard-mode header.hero,
+body.bear-wizard-mode .dashboard{display:none!important}
+.bear-guided-wizard{max-width:860px;margin:18px auto 42px;min-width:0;color:var(--text)}
+.bear-guided-wizard [hidden]{display:none!important}
+.bear-guide-head{padding:21px 24px 16px;border:1px solid rgba(239,183,92,.34);background:linear-gradient(135deg,rgba(247,183,80,.1),transparent 58%),var(--panel);border-radius:18px 18px 0 0;border-bottom:0}
+.bear-guide-head>.micro{font-size:10px;color:var(--amber);letter-spacing:.13em;font-weight:900}
+.bear-guide-head h1{font-size:clamp(20px,4vw,27px);font-weight:900;margin:6px 0 4px;letter-spacing:-.025em}
+.bear-guide-head p{font-size:12px;line-height:1.5;margin:0 0 15px}
+.bear-guide-track{display:flex;gap:5px;margin:0 0 13px}
+.bear-guide-track>span{display:block;min-width:12px;height:6px;border-radius:99px;background:var(--line)}
+.bear-guide-track>span.is-done{background:#789e8b}
+.bear-guide-track>span.is-current{background:#f0b54e}
+.bear-guide-progress{display:flex;justify-content:space-between;gap:15px;font-size:12px;font-weight:800}
+.bear-guide-progress span:last-child{color:var(--amber)}
+.bear-guide-prompt{font-size:14px;line-height:1.55;font-weight:650;padding:17px 24px 13px;margin:0;border:1px solid rgba(239,183,92,.34);border-bottom:0;background:var(--panel)}
+#bearGuideContent{border:1px solid rgba(239,183,92,.34);border-top:0;border-bottom:0;background:var(--panel);padding:0 16px 12px;min-width:0}
+.bear-guide-slide{width:100%;min-width:0}
+.bear-guide-slide>section.panel,.bear-guide-slide>.panel{border:1px solid var(--line);box-shadow:none;border-radius:14px;background:var(--card);margin:0}
+.bear-guide-slide .panel-head{padding:12px 13px}
+.bear-guide-slide .panel-body{padding:12px}
+.bear-guide-slide .panel-head h2{font-size:14px}
+.bear-guide-slide[data-guide=id] .sub{display:none}
+.bear-guide-slide[data-guide=id] #lookupForm{display:flex;gap:9px}
+.bear-guide-slide[data-guide=id] #lookupForm>*{min-width:0}
+.bear-guide-slide[data-guide=id] #lookupButton:disabled{opacity:.4}
+.bear-guide-slide[data-guide=id] #offlineMode{display:none}
+.bear-guide-slide[data-guide=id] #jsonText,.bear-guide-slide[data-guide=id] #jsonPasteSubmit{font-size:12px}
+.bear-guide-api-note{font-size:11px;margin:12px 2px 0;line-height:1.5}
+.bear-guide-slide[data-guide=id] .preset{margin:12px 0 6px}
+.bear-guide-slide[data-guide=id] details{margin-top:8px;font-size:11px}
+.bear-guide-slide[data-guide=id] #playerInfo{margin-top:10px}
+.bear-guide-slide[data-guide=id] .bear-local-id-row{margin:10px 0 0}
+.bear-guide-slide[data-guide=troops] .bear-intake-header,
+.bear-guide-slide[data-guide=stats] .bear-intake-header,
+.bear-guide-slide[data-guide=heroes] .bear-intake-header{padding:12px;border-radius:14px}
+.bear-guide-slide[data-guide=troops] .bear-intake-header h2,
+.bear-guide-slide[data-guide=stats] .bear-intake-header h2,
+.bear-guide-slide[data-guide=heroes] .bear-intake-header h2{display:none}
+.bear-guide-slide[data-guide=troops] .bear-intake-progress,
+.bear-guide-slide[data-guide=stats] .bear-intake-progress,
+.bear-guide-slide[data-guide=heroes] .bear-intake-progress,
+.bear-guide-slide[data-guide=troops] .bear-intake-advice,
+.bear-guide-slide[data-guide=stats] .bear-intake-advice{display:none}
+.bear-guide-slide #intakePicker{width:100%;min-height:56px;border-radius:12px;font-size:15px;font-weight:900}
+.bear-guide-slide .bear-intake-pickers{display:block}
+.bear-guide-slide .bear-intake-pickers #intakeGear{display:none}
+.bear-guide-slide .bear-intake-queue{padding:9px 12px 12px}
+.bear-guide-slide .bear-intake-values{grid-template-columns:repeat(2,minmax(0,1fr))}
+.bear-guide-slide .bear-intake-tier-review{grid-column:1/-1}
+.bear-guide-slide .bear-intake-actions{padding:0 12px 12px}
+.bear-guide-slide .bear-intake-actions button.primary{flex:1}
+.bear-guide-slide[data-guide=gear] .bear-import-head{padding:15px}
+.bear-guide-slide[data-guide=gear] .bear-import-picker{min-height:56px;min-width:210px}
+.bear-guide-slide[data-guide=gear] .bear-import-layout{font-size:11px}
+.bear-guide-slide[data-guide=missing] .bear-intake-missing{border:0;background:transparent}
+.bear-guide-slide[data-guide=missing] .bear-intake-missing>summary{display:none}
+.bear-guide-slide[data-guide=missing] .ux-quick-start{box-shadow:none}
+.bear-guide-slide[data-guide=missing] .ux-quick-head,
+.bear-guide-slide[data-guide=missing] .ux-summary,
+.bear-guide-slide[data-guide=missing] #uxActionSlot,
+.bear-guide-slide[data-guide=missing] #uxDisclaimer{display:none}
+.bear-guide-slide[data-guide=missing] .ux-step{padding:14px 0}
+.bear-guide-slide[data-guide=missing] .ux-step-head{margin-bottom:10px}
+.bear-guide-slide[data-guide=missing] .ux-step-head h3{font-size:14px}
+.bear-guide-slide[data-guide=missing] .ux-step>p.hint{display:none}
+.bear-guide-slide[data-guide=missing] .ux-advanced{margin-top:14px!important}
+.bear-guide-slide[data-guide=result] .bear-optimize-box{margin:0!important}
+.bear-guide-slide[data-guide=result] .bear-optimize-box button.primary{min-height:52px}
+.bear-guide-needed{font-size:12px;line-height:1.6;margin:6px 0 12px;color:var(--amber)}
+.bear-guide-message{padding:0 23px 12px;background:var(--panel);color:var(--muted);font-size:12px;line-height:1.5;border:1px solid rgba(239,183,92,.34);border-top:0;border-bottom:0;min-height:22px}
+.bear-guide-nav{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:16px 23px;background:var(--panel);border:1px solid rgba(239,183,92,.34);border-radius:0 0 18px 18px;border-top:1px solid var(--line)}
+.bear-guide-nav button{font-size:13px;font-weight:900;min-height:46px;padding:9px 15px;border-radius:11px;white-space:normal}
+.bear-guide-nav #bearGuideNext{margin-left:auto;min-width:150px}
+.bear-guide-nav #bearGuideNext:disabled{opacity:.48;cursor:not-allowed}
+.bear-guide-nav #bearGuideSkip{border:0;background:transparent;box-shadow:none;color:var(--muted);font-size:11px;font-weight:700}
+.bear-guided-wizard .hint{line-height:1.5}
+@media(max-width:640px){
+ .bear-guided-wizard{margin:7px auto 28px;max-width:100%}
+ .bear-guide-head{padding:15px 14px 12px;border-radius:14px 14px 0 0}
+ .bear-guide-head h1{font-size:23px}
+ .bear-guide-head p{font-size:11px;margin-bottom:12px}
+ .bear-guide-prompt{padding:12px 14px;font-size:13px}
+ #bearGuideContent{padding:0 8px 9px}
+ .bear-guide-slide>.panel{border-radius:11px}
+ .bear-guide-slide[data-guide=id] #lookupForm{flex-direction:column}
+ .bear-guide-slide[data-guide=id] #lookupForm>*{width:100%}
+ .bear-guide-slide[data-guide=troops] .bear-intake-header,
+ .bear-guide-slide[data-guide=stats] .bear-intake-header,
+ .bear-guide-slide[data-guide=heroes] .bear-intake-header{padding:9px}
+ .bear-guide-slide .bear-intake-values{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .bear-guide-slide .bear-intake-queue{padding:7px}
+ .bear-guide-slide .bear-intake-roster{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .bear-guide-slide[data-guide=gear] .bear-import-head{padding:12px}
+ .bear-guide-slide[data-guide=gear] .bear-import-picker{width:100%}
+ .bear-guide-message{padding:0 13px 12px;font-size:11px}
+ .bear-guide-nav{padding:10px;flex-wrap:wrap;gap:7px}
+ .bear-guide-nav button{font-size:12px;min-height:45px;padding:8px 9px}
+ .bear-guide-nav #bearGuideBack{flex:0 0 92px}
+ .bear-guide-nav #bearGuideSkip{order:3;flex:1 1 100%;min-height:32px}
+ .bear-guide-nav #bearGuideNext{flex:1;min-width:130px}
+}
