@@ -88,4 +88,9 @@ for(const [w,h] of [[640,1386],[1080,1920]]){
  assert.equal(entries.length,3,'split OCR names still produce 3 cards');
  assert.deepEqual(Array.from(entries,e=>e.count),[626621,557731,1116468]);
 }
+const base=fixture(1080,1920);
+const doubled=[...base,...base.map(w=>({text:w.text,bbox:{
+ x0:w.bbox.x0+2,x1:w.bbox.x1+2,y0:w.bbox.y0+2,y1:w.bbox.y1+2}}))];
+assert.deepEqual(Array.from(E.detect(doubled,1080,1920),e=>e.count),
+ [626621,557731,1116468], 'overlapping OCR passes must not double any quantity');
 console.log('TROOP ENTRY OCR: 3+6 separate entries, repeat classes, 3 scaled screens, missing values and separators passed.');
