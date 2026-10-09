@@ -291,6 +291,7 @@ async function inspect(file){
   {...Core.parseTroops(text),...spatialTroops(result.data.words,canvas)}:
   type==='stats'?{...Core.parseStats(text),...Core.parseStats(grouped)}:{};
  const troopTiers=type==='troops'&&TROOP?TROOP.recognize(canvas,text+'\n'+grouped,result.data.words||[]):null;
+ const marchSlots=type==='troops'?Core.parseMarchSlots(text+'\n'+grouped):null;
 
  let detail=(type==='starter'||type==='unknown')?Core.parseHeroDetail(text,allKnown()):null;
  if((type==='starter'||type==='unknown')&&!detail?.name){
@@ -310,7 +311,7 @@ async function inspect(file){
  const existing=queue.filter(q=>q.type==='roster').flatMap(q=>q.cards||[]);
  const fresh=allCards.filter(tile=>!existing.some(x=>samePortrait(x.signature,tile.signature)));
  if(type==='roster'&&MATCHER)await MATCHER.enrich(fresh);
- return {fileName:file.name,file,type,text,grouped,words:result.data.words||[],values,detail,troopTiers,canvas:(type==='roster'||type==='unknown'||type==='troops')?canvas:null,
+ return {fileName:file.name,file,type,text,grouped,words:result.data.words||[],values,detail,troopTiers,marchSlots,canvas:(type==='roster'||type==='unknown'||type==='troops')?canvas:null,
   cards:fresh,duplicates:allCards.length-fresh.length,applied:false};
 }
 function inputChoice(items,current=''){
@@ -453,6 +454,11 @@ function apply(){
     if(!Number.isFinite(Number(num))||Number(num)<0)continue;
     m.values[key]=Number(num);const input=$(key);if(input){input.value=num;input.dispatchEvent(new Event('input',{bubbles:true}));}
     accepted++;
+   }
+   if(item.type==='troops'&&Number(item.marchSlots)>=1&&Number(item.marchSlots)<=7&&
+      (!v.marchCountConfirmed || v.marchCountSource==='screenshot')){
+    v.joinCount=Number(item.marchSlots)-1;
+    v.marchCountConfirmed=true;v.marchCountSource='screenshot';
    }
    if(item.type==='troops'&&Array.isArray(item.troopTiers)){
     if(!Array.isArray(v.troopTiers)||v.troopTiers.length!==3)v.troopTiers=[{tier:0,tg:null},{tier:0,tg:null},{tier:0,tg:null}];
