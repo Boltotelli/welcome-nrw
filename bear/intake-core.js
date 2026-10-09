@@ -101,9 +101,9 @@ function maxSkill(stars){
 // KS Atlas "Bear Rally Heroes" / Kingshot World generation-6 guidance.
 // Qualitative preferences; actual stars, widget and skills may reverse them.
 const rankByType={
- infantry:['Amadeus','Helga','Zoe','Alcar','Long Fei','Triton'],
- cavalry:['Petra','Ava','Margot','Hilde','Sophia','Jabel'],
- archer:['Yang','Rosa','Marlin','Thrud','Vivian','Quinn']
+ infantry:['Amadeus','Helga','Zoe','Howard','Charles','Alcar','Long Fei','Triton'],
+ cavalry:['Margot','Petra','Thrud','Ava','Hilde','Jabel','Sophia'],
+ archer:['Yang','Rosa','Marlin','Wee & Woo','Quinn','Vivian']
 };
 const rank=(name,type)=>{const i=(rankByType[type]||[]).indexOf(name);return i<0?100:i;};
 function advise(owned,selected,heroTypes){
