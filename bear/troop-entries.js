@@ -17,11 +17,22 @@ function kind(s){
 }
 function norm(words,w,h){
  if(!(w>0&&h>0))return [];
- return (words||[]).filter(t=>t&&t.bbox&&t.text).map(t=>({
+ const mapped=(words||[]).filter(t=>t&&t.bbox&&t.text).map(t=>({
   text:String(t.text).trim(),
   x0:t.bbox.x0/w,x1:t.bbox.x1/w,y0:t.bbox.y0/h,y1:t.bbox.y1/h
  })).filter(t=>t.text&&[t.x0,t.x1,t.y0,t.y1].every(Number.isFinite)&&
   t.x0>=0&&t.y0>=0&&t.x1<=1.02&&t.y1<=1.02&&t.x1>t.x0&&t.y1>t.y0);
+ // The same word is produced once by whole-screen OCR and again by a
+ // focused column pass. Deduplicate in relative coordinates BEFORE joining
+ // fragments; otherwise 626.621 + 626.621 becomes one invalid token.
+ const result=[];
+ for(const t of mapped){
+  const duplicate=result.some(p=>p.text===t.text&&
+   Math.abs(p.x0-t.x0)<.018&&Math.abs(p.y0-t.y0)<.009&&
+   Math.abs(p.x1-t.x1)<.018);
+  if(!duplicate)result.push(t);
+ }
+ return result;
 }
 function count(s){
  const raw=String(s||'').replace(/\s/g,'').replace(/[^0-9.,]/g,'');
