@@ -44,6 +44,17 @@ function find(data,w,h){
   row.items.push(card);row.cy=row.items.reduce((s,a)=>s+a.cy,0)/row.items.length;
  }
  rows.sort((a,b)=>a.cy-b.cy);
+ // New Kingshot screenshots can have FOUR purple items and TWO orange ones.
+ // Reconstruct the third row only when the first two are complete, aligned
+ // two-column gear rows. Their alternating horizontal offset is preserved.
+ if(rows.length===2 && rows.every(r=>r.items.length===2)){
+  const top=rows[0],mid=rows[1],thirdY=mid.cy+(mid.cy-top.cy);
+  if(thirdY<h*.66 && thirdY>mid.cy+w*.12){
+   const copies=top.items.map(c=>({cx:c.cx,cy:thirdY,w:c.w,h:c.h,
+     x:c.cx-c.w/2,y:thirdY-c.h/2,inferred:true}));
+   rows.push({cy:thirdY,items:copies});
+  }
+ }
  const valid=rows.length===3&&rows.every(row=>row.items.length>=1&&row.items.length<=2)
   &&rows.reduce((n,r)=>n+r.items.length,0)>=5
   &&rows[0].cy<w*.9&&rows[2].cy>rows[0].cy+w*.32;
