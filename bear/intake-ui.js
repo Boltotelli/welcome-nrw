@@ -5,7 +5,7 @@
  */
 (function(){
 'use strict';
-const B=window.NRW_BEAR_BRIDGE,Core=window.NRW_BEAR_INTAKE_CORE,cat=window.NRW_BEAR_CATALOG;
+const B=window.NRW_BEAR_BRIDGE,Core=window.NRW_BEAR_INTAKE_CORE,cat=window.NRW_BEAR_CATALOG,TROOP=window.NRW_BEAR_TROOP_BADGES;
 const restricted=document.getElementById('restricted'),quick=document.getElementById('uxQuickStart');
 if(!B||!Core||!cat||!restricted||!quick)return;
 const locale=()=>document.documentElement.lang||'de';
@@ -217,10 +217,11 @@ async function inspect(file){
  const values=type==='troops'?
   {...Core.parseTroops(text),...spatialTroops(result.data.words,canvas)}:
   type==='stats'?{...Core.parseStats(text),...Core.parseStats(grouped)}:{};
+ const troopTiers=type==='troops'&&TROOP?TROOP.recognize(canvas,text,result.data.words||[]):null;
 
  let detail=type==='starter'?Core.parseHeroDetail(text,allKnown()):null;
  if(type==='unknown'&&detail)type='starter';
- return {fileName:file.name,file,type,text,grouped,words:result.data.words||[],values,detail,canvas:(type==='roster'||type==='unknown')?canvas:null,
+ return {fileName:file.name,file,type,text,grouped,words:result.data.words||[],values,detail,troopTiers,canvas:(type==='roster'||type==='unknown'||type==='troops')?canvas:null,
   cards:type==='roster'?overviewTiles(canvas,text,result.data.words):[],applied:false};
 }
 function inputChoice(items,current=''){
@@ -246,7 +247,7 @@ function renderQueue(){
   const header=document.createElement('div');header.className='bear-intake-item-head';
   const title=document.createElement('b');title.textContent=item.fileName;
   const type=inputChoice(Object.entries(types).map(([key,name])=>[key,name]),item.type);
-  type.addEventListener('change',()=>{item.type=type.value;item.values=item.type==='troops'?{...Core.parseTroops(item.text),...(item.canvas?spatialTroops(item.words,item.canvas):{})}:item.type==='stats'?{...Core.parseStats(item.text),...Core.parseStats(item.grouped||'')}:{};item.detail=item.type==='starter'?Core.parseHeroDetail(item.text,allKnown()):null;item.cards=item.type==='roster'&&item.canvas?overviewTiles(item.canvas,item.text,item.words):[];renderQueue();});
+  type.addEventListener('change',()=>{item.type=type.value;item.values=item.type==='troops'?{...Core.parseTroops(item.text),...(item.canvas?spatialTroops(item.words,item.canvas):{})}:item.type==='stats'?{...Core.parseStats(item.text),...Core.parseStats(item.grouped||'')}:{};item.detail=item.type==='starter'?Core.parseHeroDetail(item.text,allKnown()):null;item.cards=item.type==='roster'&&item.canvas?overviewTiles(item.canvas,item.text,item.words):[];item.troopTiers=item.type==='troops'&&item.canvas&&TROOP?TROOP.recognize(item.canvas,item.text,item.words):null;renderQueue();});
   header.append(title,type);card.appendChild(header);
   const content=document.createElement('div');content.className='bear-intake-values';
   if(item.type==='troops'||item.type==='stats'){
@@ -259,6 +260,26 @@ function renderQueue(){
     field.addEventListener('input',()=>{if(field.value!=='')item.values[id]=Number(field.value);else delete item.values[id];});
     label.append(cap,field);content.appendChild(label);
    });
+   if(item.type==='troops'){
+    const extra=document.createElement('div');extra.className='bear-intake-tier-review';
+    const heading=document.createElement('b');heading.textContent='🛡️ '+say('Stufen aus den Truppensymbolen – bitte prüfen','Troop badge tiers – please verify');
+    extra.append(heading);
+    if(!Array.isArray(item.troopTiers))item.troopTiers=Array.from({length:3},()=>({tier:null,tg:null}));
+    item.troopTiers.forEach((entry,index)=>{
+     const box=document.createElement('div');box.className='bear-intake-tier-row';
+     const name=document.createElement('strong');name.textContent=['Infanterie','Kavallerie','Bogenschützen'][index];
+     const tiers=inputChoice([['',say('T?','T?')],...Array.from({length:11},(_,n)=>[n+1,'T'+(n+1)])],entry.tier??'');
+     const tgs=inputChoice([['',say('TG?','TG?')],...Array.from({length:9},(_,n)=>[n,'TG'+n])],entry.tg??'');
+     tiers.setAttribute('aria-label','Tier '+index);tgs.setAttribute('aria-label','Truegold '+index);
+     tiers.addEventListener('change',()=>entry.tier=tiers.value===''?null:Number(tiers.value));
+     tgs.addEventListener('change',()=>entry.tg=tgs.value===''?null:Number(tgs.value));
+     const note=document.createElement('small');note.textContent=entry.tg!==null?
+      '✓ '+say('Bildvorschlag · prüfen','image guess · review'):
+      say('Goldenes Abzeichen nicht eindeutig','Gold badge unrecognized');
+     box.append(name,tiers,tgs,note);extra.append(box);
+    });
+    content.append(extra);
+   }
   }else if(item.type==='starter'){
    const picker=document.createElement('label');picker.className='bear-intake-value';
    picker.append(say('Heldenname','Hero name'));
@@ -334,6 +355,20 @@ function apply(){
     if(!Number.isFinite(Number(num))||Number(num)<0)continue;
     m.values[key]=Number(num);const input=$(key);if(input){input.value=num;input.dispatchEvent(new Event('input',{bubbles:true}));}
     accepted++;
+   }
+   if(item.type==='troops'&&Array.isArray(item.troopTiers)){
+    if(!Array.isArray(v.troopTiers)||v.troopTiers.length!==3)v.troopTiers=[{tier:0,tg:0},{tier:0,tg:0},{tier:0,tg:0}];
+    item.troopTiers.forEach((suggestion,index)=>{
+     const dest=v.troopTiers[index];if(!suggestion)return;
+     if(suggestion.tier!==null&&Number.isInteger(suggestion.tier)){
+      dest.tier=suggestion.tier;
+      const input=document.querySelector('.bear-troop-tier[data-idx="'+index+'"]');if(input)input.value=dest.tier;accepted++;
+     }
+     if(suggestion.tg!==null&&Number.isInteger(suggestion.tg)){
+      dest.tg=suggestion.tg;
+      const input=document.querySelector('.bear-troop-tg[data-idx="'+index+'"]');if(input)input.value=dest.tg;accepted++;
+     }
+    });
    }
   }else if(item.type==='starter'&&item.detail?.name){
    const h=item.detail;const previous=v.manualHeroes[h.name]||{};
