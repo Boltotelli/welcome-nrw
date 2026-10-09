@@ -102,7 +102,7 @@ function showIntake(i){
  if(gearExtra)gearExtra.hidden=true;
  const buttonText=$('intakePicker')?.querySelector('span');
  if(buttonText)buttonText.textContent='📸 '+((i===1)?t().upload:t().uploads);
- const input=$('intakeFiles');if(input)input.multiple=i!==1;
+ const input=$('intakeFiles');if(input)input.multiple=i===2;
 }
 let active=0,finished=false;
 const imported=new Set(),skipped=new Set();
@@ -123,9 +123,9 @@ function modelReady(kind){
 function missingValues(){
  const m=B.model(),v=m.values||{},ext=m.v2||{};
  const out=[];
- for(const [id,name] of [['troopsI','Infanterie'],['troopsC','Kavallerie'],['troopsA','Bogenschützen'],['cap','Marschkapazität'],
+ for(const [id,name] of [['troopsI','Infanterie'],['troopsC','Kavallerie'],['troopsA','Bogenschützen'],['cap','Schwadronskapazität'],
   ['iAtk','Inf Angriff'],['iLet','Inf Tödlichkeit'],['cAtk','Kav Angriff'],['cLet','Kav Tödlichkeit'],['aAtk','Bogen Angriff'],['aLet','Bogen Tödlichkeit']]){
-  if(v[id]===undefined||v[id]===''||!Number.isFinite(Number(v[id])))out.push(name);
+  if(v[id]===undefined||v[id]===''||!Number.isFinite(Number(v[id]))||(id==='cap'&&Number(v[id])<=0))out.push(name);
  }
  if(!Array.isArray(ext.troopTiers)||ext.troopTiers.some(x=>!x?.tier))out.push('T-Stufen');
  if(!Array.isArray(ext.troopTiers)||ext.troopTiers.some(x=>x?.tg===null||x?.tg===undefined||x?.tg===''))out.push('Truegold');
@@ -137,10 +137,10 @@ function showRelevantManual(){
  if(folds)folds.open=true;
  const m=B.model(),v=m.values||{},ext=m.v2||{};
  const missing=missingValues();
- const troopMissing=['troopsI','troopsC','troopsA'].some(k=>v[k]===undefined)
-  || !Array.isArray(ext.troopTiers)||ext.troopTiers.some(x=>!x?.tier);
+ const troopMissing=['troopsI','troopsC','troopsA'].some(k=>!Number.isFinite(Number(v[k]))||v[k]===undefined)
+  || !Array.isArray(ext.troopTiers)||ext.troopTiers.some(x=>!x?.tier||x?.tg===null||x?.tg===undefined||x?.tg==='');
  const statsMissing=['iAtk','iLet','cAtk','cLet','aAtk','aLet'].some(k=>v[k]===undefined);
- const capMissing=v.cap===undefined||(ext.ownHeroes||[]).filter(Boolean).length<3;
+ const capMissing=!(Number(v.cap)>0)||(ext.ownHeroes||[]).filter(Boolean).length<3;
  const blocks=quick?.querySelectorAll('.ux-step')||[];
  blocks.forEach((node,index)=>{node.hidden=index===0?!troopMissing:index===1?!capMissing:!statsMissing;});
  // The final review must NOT re-ask quantities or other already recognized
@@ -265,6 +265,16 @@ window.addEventListener('nrw-bear-intake-applied',evt=>{
   imported.add(active);
   message(t().ready);
   $('bearGuideNext').disabled=false;
+  // The hero step accepts several overlapping roster and detail screenshots.
+  // Keep the player on step 5 after each confirmation; they can upload the
+  // next individual image, or choose Continue when finished.
+  if(active===4){
+   $('bearGuideNext').textContent=t().next+' →';
+   message(document.documentElement.lang==='de'
+    ?'Bild gespeichert. Lade das nächste Heldenbild hoch oder fahre fort.'
+    :'Screenshot saved. Add the next hero image, or continue.');
+   return;
+  }
   moveTo(active+1);
  }
 });
