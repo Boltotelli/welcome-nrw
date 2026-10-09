@@ -221,26 +221,32 @@ function overviewTiles(canvas,text,words){
  return collected;
 }
 function spatialTroops(words,canvas){
- // OCR word bounding boxes are more reliable than reading the two top
- // troop cards left-to-right as one text line.
  const zones=[
-  // Android 1080x1920: actual quantity baselines lie below the labels,
-  // not at the previous 716x1536 fixed-crop positions.
-  {key:'troopsI',x:[.17,.48],y:[.258,.300]},
-  {key:'troopsC',x:[.51,.91],y:[.258,.300]},
-  {key:'troopsA',x:[.17,.56],y:[.340,.385]}
+  {key:'troopsI',x:[.16,.48],y:[.258,.306]},
+  {key:'troopsC',x:[.51,.91],y:[.258,.306]},
+  {key:'troopsA',x:[.16,.56],y:[.340,.389]}
  ],found={};
  for(const zone of zones){
   const hits=[];
   for(const word of words||[]){
-   if(!word.bbox)continue;
-   const bb=word.bbox,cx=((bb.x0+bb.x1)/2)/canvas.width,cy=((bb.y0+bb.y1)/2)/canvas.height;
+   if(!word.bbox||!word.text)continue;
+   const bb=word.bbox,cx=((bb.x0+bb.x1)/2)/canvas.width,
+     cy=((bb.y0+bb.y1)/2)/canvas.height;
    if(cx<zone.x[0]||cx>zone.x[1]||cy<zone.y[0]||cy>zone.y[1])continue;
-   const value=Core.normalizeNumber(word.text);
-   if(value!==null&&Number.isInteger(value)&&value>1000&&value<200000000)hits.push({value,distance:Math.abs(cy-(zone.y[0]+zone.y[1])/2)});
+   hits.push({x:bb.x0,y:cy,word:String(word.text)});
   }
-  hits.sort((a,b)=>a.distance-b.distance);
-  if(hits.length)found[zone.key]=hits[0].value;
+  hits.sort((a,b)=>a.x-b.x);
+  // Tesseract sometimes reports "557", ".", "731" as three words.
+  const joined=hits.map(x=>x.word).join('');
+  const candidates=[...joined.matchAll(/\d{1,3}(?:[.,]\d{3})+|\d{4,9}/g)]
+    .map(x=>Core.normalizeNumber(x[0]))
+    .filter(n=>Number.isInteger(n)&&n>1000&&n<200000000);
+  if(candidates.length)found[zone.key]=candidates[0];
+  else{
+   const singles=hits.map(x=>Core.normalizeNumber(x.word))
+     .filter(n=>Number.isInteger(n)&&n>1000&&n<200000000);
+   if(singles.length)found[zone.key]=singles[0];
+  }
  }
  return found;
 }
