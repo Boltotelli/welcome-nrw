@@ -223,7 +223,7 @@ async function inspect(file){
   type==='stats'?{...Core.parseStats(text),...Core.parseStats(grouped)}:{};
  const troopTiers=type==='troops'&&TROOP?TROOP.recognize(canvas,text,result.data.words||[]):null;
 
- let detail=type==='starter'?Core.parseHeroDetail(text,allKnown()):null;
+ let detail=(type==='starter'||type==='unknown')?Core.parseHeroDetail(text,allKnown()):null;
  if(type==='unknown'&&detail)type='starter';
  return {fileName:file.name,file,type,text,grouped,words:result.data.words||[],values,detail,troopTiers,canvas:(type==='roster'||type==='unknown'||type==='troops')?canvas:null,
   cards:type==='roster'?overviewTiles(canvas,text,result.data.words):[],applied:false};
