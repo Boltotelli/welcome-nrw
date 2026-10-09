@@ -276,6 +276,13 @@ function renderRecommendations(){
     ' · '+(recommended.skill?'Skill '+Number(recommended.skill).toFixed(1):'Skill ?')+
     (recommended.assumedSkill?' ('+(l==='de'?'angenommen':'estimated')+')':'');
    card.append(text);
+   if(recommended.bearCaution){
+    const note=document.createElement('p');note.className='bear-guide-needed';
+    note.textContent=l==='de'?'Defensiver Held: für Bären-Rallys meist schwächer. Empfehlung vor Verwendung prüfen.':
+     l==='fr'?'Héros défensif : généralement plus faible pour l’Ours. Vérifie cette sélection.':
+     'Defense-oriented hero: usually weaker for Bear Trap. Review this choice.';
+    card.append(note);
+   }
    if(group.choices.length>1){
     const expand=document.createElement('details');
     const summary=document.createElement('summary');summary.textContent=l==='de'?'Alternative prüfen':l==='fr'?'Choisir un autre':'Choose another';
