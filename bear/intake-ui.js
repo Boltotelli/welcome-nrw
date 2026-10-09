@@ -336,6 +336,39 @@ async function recheckTroopFields(canvas,worker,values){
  }
  return tiersText;
 }
+async function readTroopColumnWords(canvas,worker){
+ // Tesseract's full-screen pass often loses the infantry/cavalry labels
+ // beside the illustrated icons. Re-read the two text columns independently.
+ // The source regions are FRACTIONS of original width/height; output word
+ // boxes are mapped back to the full-screen coordinate system.
+ const columns=[
+  {x:.162,y:.215,w:.337,h:.595},
+  {x:.579,y:.215,w:.355,h:.595}
+ ],words=[];
+ for(const zone of columns){
+  const sourceX=zone.x*canvas.width,sourceY=zone.y*canvas.height,
+   sourceW=zone.w*canvas.width,sourceH=zone.h*canvas.height;
+  const scale=Math.min(2.1,1650/sourceH),box=document.createElement('canvas');
+  box.width=Math.max(100,Math.round(sourceW*scale));
+  box.height=Math.max(100,Math.round(sourceH*scale));
+  box.getContext('2d',{willReadFrequently:true}).drawImage(canvas,
+   sourceX,sourceY,sourceW,sourceH,0,0,box.width,box.height);
+  try{
+   const r=await worker.recognize(box);
+   for(const word of r.data?.words||[]){
+    if(!word.bbox||!word.text)continue;
+    const b=word.bbox;
+    words.push({...word,bbox:{
+     x0:sourceX+b.x0/box.width*sourceW,
+     x1:sourceX+b.x1/box.width*sourceW,
+     y0:sourceY+b.y0/box.height*sourceH,
+     y1:sourceY+b.y1/box.height*sourceH
+    }});
+   }
+  }catch(_){/* Never lose the initial full-image recognition. */}
+ }
+ return words;
+}
 async function recheckUnreadTroopEntries(entries,canvas,worker){
  // Each entry supplies its OWN normalized crop; no first/second/third-row
  // assumptions. Tesseract OCR result is never accepted if not a whole
@@ -399,9 +432,11 @@ async function inspect(file){
   catch(_){/* Keep the reviewable full-screen OCR suggestions. */}
   explicitTierLabels=await recheckTroopFields(canvas,worker,values);
  }
- let troopEntries=[];
+ let troopEntries=[],troopWords=result.data.words||[];
  if(type==='troops'&&ENTRY){
-  troopEntries=ENTRY.detect(result.data.words||[],canvas.width,canvas.height);
+  try{troopWords=[...troopWords,...await readTroopColumnWords(canvas,worker)];}
+  catch(_){/* Fall back to existing OCR words. */}
+  troopEntries=ENTRY.detect(troopWords,canvas.width,canvas.height);
   if(troopEntries.length){
    await recheckUnreadTroopEntries(troopEntries,canvas,worker);
    ENTRY.recoverSingleEntries(troopEntries,values);
@@ -441,7 +476,7 @@ async function inspect(file){
  const existing=[...queue.filter(q=>q.type==='roster').flatMap(q=>q.cards||[]),...confirmedPortraits];
  const fresh=allCards.filter(tile=>!existing.some(x=>samePortrait(x.signature,tile.signature)));
  if(type==='roster'&&MATCHER)await MATCHER.enrich(fresh);
- return {fileName:file.name,file,type,text,grouped,words:result.data.words||[],values,detail,troopEntries,troopTiers,marchSlots,canvas:(type==='roster'||type==='unknown'||type==='troops')?canvas:null,
+ return {fileName:file.name,file,type,text,grouped,words:troopWords,values,detail,troopEntries,troopTiers,marchSlots,canvas:(type==='roster'||type==='unknown'||type==='troops')?canvas:null,
   cards:fresh,duplicates:allCards.length-fresh.length,applied:false};
 }
 function inputChoice(items,current=''){
