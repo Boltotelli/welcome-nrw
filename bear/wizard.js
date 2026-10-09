@@ -128,6 +128,7 @@ function missingValues(){
   if(v[id]===undefined||v[id]===''||!Number.isFinite(Number(v[id])))out.push(name);
  }
  if(!Array.isArray(ext.troopTiers)||ext.troopTiers.some(x=>!x?.tier))out.push('T-Stufen');
+ if(!Array.isArray(ext.troopTiers)||ext.troopTiers.some(x=>x?.tg===null||x?.tg===undefined||x?.tg===''))out.push('Truegold');
  if((ext.ownHeroes||[]).filter(Boolean).length<3)out.push('Starterhelden');
  return out;
 }
