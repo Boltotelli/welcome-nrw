@@ -51,6 +51,37 @@ function digitAt(ctx,center,scratch){
  const gap=scores[0].s-scores[1].s;
  return {tg:scores[0].s>=.80&&gap>=.09?scores[0].n:null,confidence:scores[0].s,second:scores[1].s};
 }
+// Small verified Roman X badge mask from the user's real T10 screenshot.
+// OCR frequently misses this because it is drawn over a grey troop crest.
+const ROMAN_X='AAAAAAAAAAAAAAAAAAAAAAMAAAAAAAAAABgEAAHAwAAOHAAA44AABzgAAD8AAAPgAAAeAAAB4AAAPgAAA/AAAHuAAA44AADhwAAcHAABwOAAAAAAAAAAAAAAAAAAAAAAAAA=';
+const romanBytes=atob(ROMAN_X);
+const romanTemplate=Array.from({length:784},(_,i)=>(romanBytes.charCodeAt(i>>3)>>(7-(i&7)))&1);
+function romanXAt(ctx,center){
+ const base=ctx.canvas.width/716,size=ctx.canvas.width/1080;
+ const screen=document.createElement('canvas');screen.width=28;screen.height=28;
+ const xctx=screen.getContext('2d',{willReadFrequently:true});
+ let best=0;
+ for(const dx of [-4,-2,0,2,4])for(const dy of [-4,-2,0,2,4]){
+  const x=(center[0])*base+(dx-14)*size;
+  const y=(center[1])*base+(dy-14)*size;
+  if(x<0||y<0||x+28*size>ctx.canvas.width||y+28*size>ctx.canvas.height)continue;
+  xctx.clearRect(0,0,28,28);
+  xctx.drawImage(ctx.canvas,x,y,28*size,28*size,0,0,28,28);
+  const d=xctx.getImageData(0,0,28,28).data;
+  let hit=0,total=0;
+  for(let i=0;i<784;i++){
+   const xx=i%28,yy=(i/28)|0;
+   if(xx<4||xx>=24||yy<4||yy>=24)continue;
+   const p=i*4,r=d[p],g=d[p+1],b=d[p+2];
+   const on=r>192&&g>182&&b>166&&Math.abs(r-g)<35&&Math.abs(g-b)<53;
+   if(on)total++;
+   if(on&&romanTemplate[i])hit++;
+  }
+  if(total<50||total>140)continue;
+  best=Math.max(best,2*hit/(89+total));
+ }
+ return best>=.72?best:0;
+}
 function recognize(canvas,text,words){
  const result=[{tier:null,tg:null},{tier:null,tg:null},{tier:null,tg:null}];
  const all=String(text||'');
@@ -69,6 +100,10 @@ function recognize(canvas,text,words){
  const oldAnchors=[[133,395],[453,395],[133,518]];
  const phoneAnchors=[[133,358],[455,358],[133,489]];
  const anchors=oldAnchors.map((p,i)=>p.map((v,j)=>v+(phoneAnchors[i][j]-v)*phoneLayout));
+ const romanOld=[[106,472],[426,472],[106,595]];
+ const romanPhone=[[106,421],[424,421],[106,546]];
+ const roman=romanOld.map((p,i)=>p.map((v,j)=>v+(romanPhone[i][j]-v)*phoneLayout));
+ for(let i=0;i<3;i++)if(result[i].tier===null&&romanXAt(ctx,roman[i]))result[i].tier=10;
  const sc=canvas.width/716;
  const scratch=document.createElement('canvas');scratch.width=27;scratch.height=26;
  for(let i=0;i<3;i++){
