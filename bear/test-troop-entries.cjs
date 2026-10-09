@@ -31,7 +31,7 @@ assert.deepEqual(reference.map(x=>x[1]),[626621,557731,1116468]);
 for(const [w,h] of [[720,1280],[1080,1920],[1440,2560]]){
  const entries=E.detect(fixture(w,h,true),w,h);
  assert.equal(entries.length,6,'all cards '+w+'x'+h);
- assert.deepEqual(entries.map(x=>x.count),[626621,557731,1116468,250000,175000,70000],w+'x'+h);
+ assert.deepEqual(Array.from(entries,x=>x.count),[626621,557731,1116468,250000,175000,70000],w+'x'+h);
  assert.deepEqual({...E.totals(entries)},{troopsI:1051621,troopsC:557731,troopsA:1186468});
  const same=E.detect(fixture(w,h),w,h);
  assert.deepEqual(signature(same),reference,'scaled screen '+w+'x'+h);
