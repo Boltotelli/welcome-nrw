@@ -48,7 +48,7 @@ function digitAt(ctx,center){
  }
  const scores=[{n:5,s:ratio(normal,5)},{n:6,s:ratio(normal,6)}].sort((a,b)=>b.s-a.s);
  const gap=scores[0].s-scores[1].s;
- return {tg:scores[0].s>=.78&&gap>=.12?scores[0].n:null,confidence:scores[0].s,second:scores[1].s};
+ return {tg:scores[0].s>=.80&&gap>=.09?scores[0].n:null,confidence:scores[0].s,second:scores[1].s};
 }
 function recognize(canvas,text,words){
  const result=[{tier:null,tg:null},{tier:null,tg:null},{tier:null,tg:null}];
