@@ -58,12 +58,26 @@ function recognize(canvas,text,words){
  const classes=[/spitzen\s*infant/,/spitzen\s*kaval/,/spitzen\s*bogen/];
  for(let i=0;i<3;i++)if(classes[i].test(lower))result[i].tier=10;
  const ctx=canvas.getContext('2d',{willReadFrequently:true});
- const fixed=[[133,395],[453,395],[133,518]];
- // An exact icon-crop match is needed before auto-selecting TG5 or TG6.
+ // The game interface moves vertically with phone aspect ratio: old
+ // 716x1536 crops were too low on 1080x1920 Android screenshots. Scan only
+ // a narrow badge-sized neighborhood after applying the aspect correction.
+ const normalizedHeight=canvas.height*716/canvas.width;
+ const yAdjust=Math.max(-38,Math.min(20,(normalizedHeight-1536)*.115));
+ const anchors=[[133,395],[453,395],[133,518]];
  for(let i=0;i<3;i++){
-  const digit=digitAt(ctx,fixed[i]);
-  if(digit.tg!==null){result[i].tg=digit.tg;result[i].confidence=digit.confidence;}
+  let best={tg:null,confidence:0};
+  for(const dx of [-6,-4,-2,0,2,4,6]){
+   for(const dy of [-8,-6,-4,-2,0,2,4,6,8]){
+    const digit=digitAt(ctx,[anchors[i][0]+dx,anchors[i][1]+yAdjust+dy]);
+    if(digit.tg!==null && digit.confidence>best.confidence)best=digit;
+   }
+  }
+  if(best.tg!==null){result[i].tg=best.tg;result[i].confidence=best.confidence;}
  }
+ // A cropped title may lose troop-type words. Only use the group inference
+ // if OCR saw all three explicit Spitzen headings, not merely one troop.
+ if((lower.match(/spitzen/g)||[]).length>=3)
+  for(const item of result)item.tier=10;
  return result;
 }
 root.NRW_BEAR_TROOP_BADGES={recognize,digitAt,version:'tier-x-tg5tg6'};
