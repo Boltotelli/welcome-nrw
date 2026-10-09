@@ -490,7 +490,13 @@ function renderQueue(){
    content.append(note);
   }else if(item.type==='roster'){
    const note=document.createElement('p');note.className='hint';
-   note.textContent=say('Die Heldennamen stehen nicht auf den Karten. Bitte nur relevante Bear-Helden zuordnen und Sterne bestätigen. Skill-Maximum wird aus Sternen vorgeschlagen.','Hero names are absent from overview cards. Match relevant portraits and confirm stars; skills default to the allowed maximum.');
+   const known=(item.cards||[]).filter(c=>c.name).length,total=(item.cards||[]).length;
+   note.textContent=say(
+    total?known+' von '+total+' vollständigen Heldenkarten erkannt. Namen, Level und Sternfortschritt werden automatisch übernommen. Nur Unsicheres bei Bedarf korrigieren.':
+      'Keine vollständige Heldenkarte erkannt. Bitte die Original-Heldenübersicht verwenden und Bilder einzeln prüfen.',
+    total?known+' of '+total+' complete hero cards identified. Names, levels and star progress are imported; review only uncertain values.':
+      'No complete hero cards detected. Check this is an original in-game hero overview.'
+   )+(item.duplicates?' · '+item.duplicates+' '+say('doppelte Karten ausgelassen','duplicate cards skipped'):'');
    content.append(note);
    const grid=document.createElement('div');grid.className='bear-intake-roster';
    (item.cards||[]).forEach((tile,index)=>{
@@ -506,11 +512,29 @@ function renderQueue(){
     level.addEventListener('change',()=>tile.level=level.value?Number(level.value):null);
     const stars=inputChoice(starOptions(),tile.starSteps??'');
     stars.addEventListener('change',()=>tile.starSteps=stars.value?Number(stars.value):null);
-    const details=document.createElement('small');
-    details.textContent=tile.starSteps!==null?
-      '★ '+say('Bildvorschlag – prüfen','image guess – review')+(tile.partialStar?' · T?':''):
-      say('Level / Sterne prüfen','Check level/stars');
-    cell.append(name,level,details,stars);grid.append(cell);
+    const starLabel=(v)=>v===null||v===undefined?'★ ?':
+     Math.floor(Number(v)/6)+'★'+(Number(v)%6?' T'+Number(v)%6:'');
+    const summaryLine=document.createElement('strong');
+    summaryLine.className='bear-hero-found-name';
+    const refreshLabel=()=>{
+     summaryLine.textContent=(tile.name||say('Held unbekannt','Unknown hero'))+
+      ' · '+(tile.level?'Lv '+tile.level:'Lv ?')+' · '+starLabel(tile.starSteps);
+    };
+    refreshLabel();
+    name.addEventListener('change',refreshLabel);
+    level.addEventListener('change',refreshLabel);
+    stars.addEventListener('change',refreshLabel);
+    const edit=document.createElement('details');edit.className='bear-hero-edit';
+    const editSummary=document.createElement('summary');
+    editSummary.textContent=tile.name&&tile.level&&tile.starSteps!==null?
+     say('Erkennung korrigieren','Correct recognition'):say('Fehlende Daten prüfen','Review missing details');
+    edit.append(editSummary,name,level,stars);
+    edit.open=!(tile.name&&tile.level&&tile.starSteps!==null);
+    const certainty=document.createElement('small');certainty.className='hint';
+    certainty.textContent=tile.nameConfidence==='high'?
+     say('Porträt abgeglichen','Portrait matched'):
+     say('Bildname nicht bestätigt','Portrait unconfirmed');
+    cell.append(summaryLine,certainty,edit);grid.append(cell);
    });
    content.append(grid);
   }else{
