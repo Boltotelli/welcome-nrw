@@ -243,7 +243,19 @@ async function inspect(file){
  const troopTiers=type==='troops'&&TROOP?TROOP.recognize(canvas,text,result.data.words||[]):null;
 
  let detail=(type==='starter'||type==='unknown')?Core.parseHeroDetail(text,allKnown()):null;
- if(type==='unknown'&&detail)type='starter';
+ if((type==='starter'||type==='unknown')&&!detail?.name){
+  // Detail screenshots display the hero name at the TOP, above a huge 3D
+  // character. A full-page OCR scan can miss the tiny outlined heading.
+  const header=document.createElement('canvas');
+  header.width=900;header.height=180;
+  const hc=header.getContext('2d');
+  hc.drawImage(canvas,canvas.width*.20,0,canvas.width*.60,canvas.height*.11,
+    0,0,header.width,header.height);
+  const headerOCR=await worker.recognize(header);
+  const heading=headerOCR.data.text||'';
+  detail=Core.parseHeroDetail(heading+'\\n'+text,allKnown())||detail;
+ }
+ if(type==='unknown'&&detail?.name)type='starter';
  return {fileName:file.name,file,type,text,grouped,words:result.data.words||[],values,detail,troopTiers,canvas:(type==='roster'||type==='unknown'||type==='troops')?canvas:null,
   cards:type==='roster'?overviewTiles(canvas,text,result.data.words):[],applied:false};
 }
