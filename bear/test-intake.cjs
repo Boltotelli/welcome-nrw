@@ -9,7 +9,7 @@ const troops='Schwadronvorschau\nAlle Trupps 2,2M/2,2M\nSpitzen Infanterie 553.2
 const army=C.parseTroops(troops);
 assert.equal(army.troopsI,553225);assert.equal(army.troopsC,555230);assert.equal(army.troopsA,1113108);
 assert.equal(C.category(troops),'troops');
-const android='Schwadronvorschau\\nMarschschlange 6/6\\nSpitzen Infanterie 626.621 Spitzen Kavallerie 557.731\\nSpitzen Bogenschütze 1.116.468';
+const android='Schwadronvorschau\nMarschschlange 6/6\nSpitzen Infanterie 626.621 Spitzen Kavallerie 557.731\nSpitzen Bogenschütze 1.116.468';
 const screenshotArmy=C.parseTroops(android);
 assert.equal(screenshotArmy.troopsI,626621);
 assert.equal(screenshotArmy.troopsC,557731);
