@@ -1,0 +1,8 @@
+/* Genuine Kingshot in-game Talisman Guide, levels 1..11.
+ * 24x24 binary SHAPE masks sampled from player-supplied screenshots.
+ * No artwork or raw player screenshots are shipped. Horse/shield/archer
+ * symbols denote troop type; the outer silhouette denotes the level.
+ * The class-neutral shapes were cross-checked against all three colors.
+ * Higher levels require labelled screenshots before auto-recognition.
+ */
+window.NRW_BEAR_GUIDE_SILHOUETTES={"shape_only":true,"maxVerifiedLevel":11,"size":24,"levels":{"1":"AAAAAAAAAAgAACwAAG4AAM8AAZ+AAx/AAj/AB3/gD//wDP/wHf/4G//4O//8N//8d//+b//+///+///////+D//4AAAAAAAA","2":"B//wB//wAf/4Af/8If/8O//8P//8P//8P//8P//8P//8P//8P//8P//8P//8P//8P//8P//8P//8P//8P//8H//4D//wB//w","3":"AH4AAP4AAf+AA9/ABz/gDn/wHP/4Of/8c//+5///////////////////////P//8H//8D//4B//wA//gA//AAP+AAH8AAD4A","4":"D//wH//4Px3ceAA+4///5///////////////////////////////////////////////////////////f//+P//8H//4D//w","5":"AAAAABgAACwAAE4AAI8AAR+AAj/gBH/wCP/4H//4H//8P//8P//8P//+P//+f//+f//+f///f//////////4D//AADwAAAAA","6":"AAAAACwAAG4AAe+AA8/AD4/wHx/4PH/8AP//gf//5///f//+f//+f//8f//8P//8P//8H//4H//4H//4H//wD//wD//wAAAA","7":"H//wB//8B//8Q//+f//+f//+////////////////////9///n///////////f//+P//8H//wB//gA//AAf+AAP4AAHwAADgA","8":"AAgAAAwAAA4AAA4AAB+AAB+AAD/ACH/wDv/wH//4H//4O//4N//8J//8T//+f//8P//8P//8H//4H//4D8/wD+/gA/8AABwA","9":"ADgAAN4AAx/ADh/gHH/4Hf/4H//4H//4H//4H//4H//4H//4H//4H//4H//4H//4H//4H//4H//4H//4H//wA//AAP8AADwA","10":"AAAAAf+AA//gB4HwHg/4PAf8OAf8PAP+fv/+f///f///////////////f//+f//+f//+P//8P//8H//4D//wA//gAf+AAAAA","11":"AH4AA/+ABv/gDH/wGP/4M//8N//8f//+f//+////////////////////////f///f//+f//+P//8P//4D//wD//gA//AAH4A"}};
