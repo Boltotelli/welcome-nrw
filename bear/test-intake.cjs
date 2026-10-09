@@ -9,6 +9,14 @@ const troops='Schwadronvorschau\nAlle Trupps 2,2M/2,2M\nSpitzen Infanterie 553.2
 const army=C.parseTroops(troops);
 assert.equal(army.troopsI,553225);assert.equal(army.troopsC,555230);assert.equal(army.troopsA,1113108);
 assert.equal(C.category(troops),'troops');
+const android='Schwadronvorschau\\nMarschschlange 6/6\\nSpitzen Infanterie 626.621 Spitzen Kavallerie 557.731\\nSpitzen Bogenschütze 1.116.468';
+const screenshotArmy=C.parseTroops(android);
+assert.equal(screenshotArmy.troopsI,626621);
+assert.equal(screenshotArmy.troopsC,557731);
+assert.equal(screenshotArmy.troopsA,1116468);
+assert.equal(C.parseMarchSlots(android),6);
+assert.equal(C.parseMarchSlots('Marschschlange 6/6'),6);
+assert.equal(C.parseMarchSlots('Marschschlange 9/9'),null);
 const stats1='Bonusübersicht\nSchwadron Angriff 274,8%\nSchwadron Verteidigung 264,3%\nSchwadron Tödlichkeit 60,1%\nSchwadron Gesundheit 53,6%\nInfanterie-Angriff 181,5%\nInfanterie-Verteidigung 196,5%\nInfanterie-Gesundheit 287,8%\nInfanterie-Tödlichkeit 276,5%\nKavallerie-Angriff 169,2%\nKavallerie-Verteidigung 167,2%\nKavallerie-Gesundheit 246,0%\nKavallerie-Tödlichkeit 250,7%';
 const stats2='Bonusübersicht\nInfanterie-Angriff 181,5%\nInfanterie-Verteidigung 196,5%\nInfanterie-Gesundheit 287,8%\nInfanterie-Tödlichkeit 276,5%\nKavallerie-Angriff 169,2%\nKavallerie-Verteidigung 167,2%\nKavallerie-Gesundheit 246,0%\nKavallerie-Tödlichkeit 250,7%\nBogenschützen-Angriff 244,3%\nBogenschützen-Verteidigung 187,3%\nBogenschützen-Gesundheit 294,5%\nBogenschützen-Tödlichkeit 314,0%';
 const both={...C.parseStats(stats1),...C.parseStats(stats2)};
