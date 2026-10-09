@@ -13,7 +13,7 @@ function decode(p){
  }catch(_){return null;}
 }
 async function data(){
- if(!cache)cache=fetch('./hero-hud-fingerprints.json',{cache:'force-cache'})
+ if(!cache)cache=fetch('./hero-hud-fingerprints.json?v=roster-20261010-1',{cache:'no-cache'})
   .then(r=>r.ok?r.json():null).then(j=>{
    if(j?.size!==SIZE||!j.pixels)return [];
    return Object.entries(j.pixels).map(([name,rgb])=>decode({name,rgb})).filter(Boolean);
@@ -61,5 +61,5 @@ async function enrich(tiles){
  }
  return {available:refs.length,matched:tiles.filter(t=>t.name).length};
 }
-root.NRW_BEAR_PORTRAIT_MATCHER={data,candidates,sample,match,enrich,version:'game-hud-normalized-6px-v1'};
+root.NRW_BEAR_PORTRAIT_MATCHER={data,candidates,sample,match,enrich,version:'game-hud-normalized-6px-v2-roster-20261010'};
 })(window);
