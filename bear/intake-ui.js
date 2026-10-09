@@ -253,7 +253,7 @@ async function inspect(file){
     0,0,header.width,header.height);
   const headerOCR=await worker.recognize(header);
   const heading=headerOCR.data.text||'';
-  detail=Core.parseHeroDetail(heading+'\\n'+text,allKnown())||detail;
+  detail=Core.parseHeroDetail(heading+'\n'+text,allKnown())||detail;
  }
  if(type==='unknown'&&detail?.name)type='starter';
  return {fileName:file.name,file,type,text,grouped,words:result.data.words||[],values,detail,troopTiers,canvas:(type==='roster'||type==='unknown'||type==='troops')?canvas:null,
