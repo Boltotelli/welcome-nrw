@@ -17,7 +17,7 @@ for(const [name,js] of [['wizard',wizard],['intake',intake],['gear',gear]]){
 for(const filename of ['wizard.js','wizard.css','intake-ui.js','intake-ui.css'])assert.ok(html.includes('./'+filename),'missing html asset '+filename);
 assert.ok(html.indexOf('intake-ui.js')<html.indexOf('wizard.js'),'wizard runs after importer initialization');
 assert.ok(html.indexOf('wizard.css')>html.indexOf('intake-ui.css'),'wizard styles override legacy forms');
-assert.ok(wizard.includes("labels=['id','troops','stats','gear','heroes','missing','result'];"),'seven steps in intended sequence');
+assert.ok(wizard.includes("labels=['id','troops','stats','gear','heroes','hero-picks','hero-details','missing','result'];"),'nine stages in intended sequence');
 for(const id of ['lookupForm','intakeFiles','bearGearPhoto','intakeMissingDetails','intakeResultSlot']){
  assert.ok(wizard.includes(id),'wizard reuses real control '+id);
 }
@@ -31,4 +31,7 @@ assert.ok(wizard.includes("!hasProfile()"),'cannot proceed without a loaded prof
 assert.ok(wizard.includes("processQueue()"),'do not advance with unconfirmed OCR queue');
 assert.ok(css.includes('body.bear-wizard-mode .dashboard'),'legacy full dashboard hidden in guided mode');
 assert.ok(!wizard.includes('localStorage.setItem('),'wizard does not create a competing persistence model');
-console.log('BEAR WIZARD: seven ordered stages, protected profile gate, review events, mobile-only layout and asset references verified.');
+assert.ok(wizard.includes('capacityHost.append(capField)'),'squad capacity moved outside conditional group');
+assert.ok(wizard.includes('confirmRecommendedHeroes()'),'recommendation confirmation precedes details');
+assert.ok(wizard.includes('renderHeroDetails()'),'detail upload after best hero gear prompt');
+console.log('BEAR WIZARD: nine stages, hero shortlist, separate gear-first detail uploads and independent capacity input verified.');
