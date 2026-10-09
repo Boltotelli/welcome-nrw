@@ -1,0 +1,47 @@
+'use strict';
+const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
+const scope={window:{}};vm.runInNewContext(fs.readFileSync(__dirname+'/troop-entries.js','utf8'),scope);
+const E=scope.window.NRW_BEAR_TROOP_ENTRIES;
+function word(t,x,y,w=.105,h=.013,scaleW=1080,scaleH=1920){
+ return {text:t,bbox:{x0:x*scaleW,y0:y*scaleH,x1:(x+w)*scaleW,y1:(y+h)*scaleH}};
+}
+function fixture(w,h,extra=false){
+ const entries=[
+  ['Infanterie','626.621',.185,.246],['Kavallerie','557.731',.567,.246],
+  ['Bogenschützen','1.116.468',.185,.330]
+ ];
+ if(extra)entries.push(
+  ['Infanterie','250.000',.567,.330],
+  ['Infanterie','175.000',.185,.415],
+  ['Bogenschützen','70.000',.567,.415]);
+ const words=[];
+ for(const [label,amount,x,y] of entries){
+  words.push(word('Spitzen',x-.001,y,.060,.012,w,h),
+   word(label,x+.067,y,.150,.013,w,h),
+   word(amount,x+.067,y+.023,.135,.014,w,h));
+ }
+ words.push(word('Marschschlange',.35,.139,.2,.018,w,h),
+  word('6/6',.39,.160,.05,.017,w,h));
+ return words;
+}
+function signature(result){return Array.from(result.map(e=>[e.type,e.count,e.label]));}
+const reference=signature(E.detect(fixture(1080,1920),1080,1920));
+assert.equal(reference.length,3);
+assert.deepEqual(reference.map(x=>x[1]),[626621,557731,1116468]);
+for(const [w,h] of [[720,1280],[1080,1920],[1440,2560]]){
+ const entries=E.detect(fixture(w,h,true),w,h);
+ assert.equal(entries.length,6,'all cards '+w+'x'+h);
+ assert.deepEqual(entries.map(x=>x.count),[626621,557731,1116468,250000,175000,70000],w+'x'+h);
+ assert.deepEqual({...E.totals(entries)},{troopsI:1051621,troopsC:557731,troopsA:1186468});
+ const same=E.detect(fixture(w,h),w,h);
+ assert.deepEqual(signature(same),reference,'scaled screen '+w+'x'+h);
+}
+// A truly missing number stays unknown; don't accidentally use nearby
+// global troop totals or another class's quantities.
+const missing=fixture(1080,1920).filter(x=>x.text!=='557.731');
+const out=E.detect(missing,1080,1920);
+assert.equal(out.find(e=>e.type===1).count,null);
+assert.equal(E.count('1.116.468'),1116468);
+assert.equal(E.count('1116468'),1116468);
+assert.equal(E.count('188,7 Tsd.'),null);
+console.log('TROOP ENTRY OCR: 3+6 separate entries, repeat classes, 3 scaled screens, missing values and separators passed.');
