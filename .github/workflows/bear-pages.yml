@@ -36,6 +36,10 @@ jobs:
           node --check bear/charm-references.js
           node --check bear/charm-shapes.js
           node --check bear/tier-recognizer.js
+          node --check bear/gear-layout.js
+          node --check bear/troop-badges.js
+          node bear/test-gear-layout.cjs
+          node bear/test-troop-badges.cjs
           node --check bear/screenshot-importer.js
           node --check bear/intake-core.js
           node --check bear/intake-ui.js
@@ -63,7 +67,7 @@ jobs:
         run: |
           mkdir -p _site/assets
           cp bear/index.html _site/index.html
-          cp bear/catalog.js bear/combat.js bear/v2.js bear/v2.css bear/ux.js bear/ux.css bear/charm-references.js bear/charm-shapes.js bear/tier-recognizer.js bear/screenshot-importer.js bear/screenshot-importer.css bear/intake-core.js bear/intake-ui.js bear/intake-ui.css _site/
+          cp bear/catalog.js bear/combat.js bear/v2.js bear/v2.css bear/ux.js bear/ux.css bear/charm-references.js bear/charm-shapes.js bear/tier-recognizer.js bear/gear-layout.js bear/troop-badges.js bear/screenshot-importer.js bear/screenshot-importer.css bear/intake-core.js bear/intake-ui.js bear/intake-ui.css _site/
           cp assets/nrw-banner.svg _site/assets/nrw-banner.svg
           sed -i 's|/assets/nrw-banner.svg|./assets/nrw-banner.svg|g' _site/index.html
           sed -i 's|href="/dashboard/"|href="https://welcome-nrw.vercel.app/dashboard/"|g' _site/index.html
