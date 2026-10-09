@@ -64,8 +64,11 @@ function find(data,w,h){
  const bottom=byRow[2];
  if(!bottom.left&&bottom.right){
   const other=bottom.right;
-  bottom.left={cx:w-other.cx,cy:other.cy,w:other.w,h:other.h,
-    x:w-other.cx-other.w/2,y:other.cy-other.h/2,inferred:true};
+  // Keep any horizontal screenshot offset; mirroring about the image centre
+  // would be wrong when the game UI itself is shifted left/right.
+  const base=byRow[0];const inferredX=base.left.cx+(other.cx-base.right.cx);
+  bottom.left={cx:inferredX,cy:other.cy,w:other.w,h:other.h,
+    x:inferredX-other.w/2,y:other.cy-other.h/2,inferred:true};
  }else if(!bottom.right&&bottom.left){
   return {ok:false,reason:'unknown-bottom-gear',slots:[],count:list.length};
  }
