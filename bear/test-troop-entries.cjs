@@ -44,4 +44,29 @@ assert.equal(out.find(e=>e.type===1).count,null);
 assert.equal(E.count('1.116.468'),1116468);
 assert.equal(E.count('1116468'),1116468);
 assert.equal(E.count('188,7 Tsd.'),null);
+// User's second sample includes three *small* veteran unit groups (560).
+// They must be included in the totals rather than erased as OCR failures.
+assert.equal(E.count('560'),560);
+assert.equal(E.readTextCount('Veteran Cavalry\n560'),560);
+assert.equal(E.readTextCount('Spitzen Infanterie\n626.621'),626621);
+assert.equal(E.readTextCount('1 116 468'),1116468);
+const mixed=[
+ {type:0,count:23159},{type:1,count:18632},{type:2,count:18567},
+ {type:0,count:19380},{type:1,count:26947},{type:2,count:27231},
+ {type:0,count:560},{type:1,count:560},{type:2,count:560}
+];
+assert.deepEqual({...E.totals(mixed)},{troopsI:43099,troopsC:46139,troopsA:46358},
+ 'all tier groups including 560 must be added');
+const partial=mixed.map(x=>({...x}));partial[3].count=null;
+const incomplete=E.totals(partial);
+assert.equal('troopsI' in incomplete,false,'missing one infantry tier must invalidate total');
+assert.equal(incomplete.troopsC,46139);
+const withFallback=E.detect(fixture(1080,1920),1080,1920);
+withFallback[0].count=null;withFallback[1].count=null;
+E.recoverSingleEntries(withFallback,{troopsI:626621,troopsC:557731,troopsA:1116468});
+assert.deepEqual(Array.from(withFallback,e=>e.count),[626621,557731,1116468],
+ 'a failed entry OCR must not delete separately recognized quantities');
+const repeated=mixed.map(e=>({...e}));repeated[0].count=null;
+E.recoverSingleEntries(repeated,{troopsI:23159});
+assert.equal(repeated[0].count,null,'never apply one-class fallback to mixed tiers');
 console.log('TROOP ENTRY OCR: 3+6 separate entries, repeat classes, 3 scaled screens, missing values and separators passed.');
