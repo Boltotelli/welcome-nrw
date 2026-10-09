@@ -20,11 +20,13 @@ function evaluate(hero,type,priorities){
  const stars=asNumber(hero.stars),level=asNumber(hero.level),skill=skillState(hero);
  // Bear-specific priority is the principal input. Hero progression matters:
  // an invested accessible candidate may outrank an unbuilt meta hero.
+ const defensiveOnly=new Set(['Triton','Alcar','Long Fei','Sophia','Eric']);
+ const weakForBear=defensiveOnly.has(hero.name);
  const priority=rank<0?0:Math.max(0,58-rank*7);
  const progress=Math.min(80,level)*.24+Math.min(5,stars)*7.5+
   Math.min(5,asNumber(skill.level))*3+Math.max(0,Math.min(5,asNumber(hero.tier)))*.5+
   Math.min(10,asNumber(hero.widget))*1.2;
- return {name:hero.name,type,score:Math.round((priority+progress)*10)/10,
+ return {name:hero.name,type,score:Math.round((priority+progress-(weakForBear?55:0))*10)/10,bearCaution:weakForBear,
   level:level||null,stars:stars||null,skill:skill.level,assumedSkill:skill.assumed,
   hasConfirmedSkill:skill.confirmed,widget:asNumber(hero.widget),
   confidence:level>0&&stars>0?(skill.confirmed?'higher':'estimated'):'limited'};
