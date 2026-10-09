@@ -47,6 +47,7 @@ jobs:
           node --check bear/wizard.js
           node bear/test-wizard.cjs
           node bear/test-intake.cjs
+          node bear/test-portrait.cjs
           node bear/test-tier.cjs
           python3 -m py_compile bear/build-charm-shapes.py bear/build-hero-signatures.py
           node bear/test-screenshot.cjs
