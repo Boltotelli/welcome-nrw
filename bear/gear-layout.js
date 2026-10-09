@@ -8,35 +8,45 @@
 'use strict';
 const ids=['helmet','neck','coat','pants','ring','staff'];
 function purple(r,g,b){return b>r*1.2&&b>g*1.18&&r>g*.85&&r>60&&b>100;}
+// Orange/gold Governor Gear has a complete frame, not a purple outline.
+// Detect it directly instead of extrapolating the archer row from row 1/2.
+function gold(r,g,b){return r>185&&g>75&&g<r*.85&&b<r*.65;}
 function find(data,w,h){
  if(!data||w<300||h<500)return {ok:false,reason:'too-small',slots:[]};
  const endY=Math.min(h,Math.round(h*.66)),N=w*endY;
- const mask=new Uint8Array(N),list=[];
- for(let y=0;y<endY;y++)for(let x=Math.round(w*.02);x<w*.98;x++){
-  const p=(y*w+x)*4;
-  if(purple(data[p],data[p+1],data[p+2]))mask[y*w+x]=1;
- }
  const minWidth=w*.10,maxWidth=w*.23,minArea=w*w*.003;
- const stack=[];
- for(let k=0;k<N;k++){
-  if(mask[k]!==1)continue;
-  let x0=w,y0=h,x1=0,y1=0,area=0;
-  stack.push(k);mask[k]=0;
-  while(stack.length){
-   const idx=stack.pop(),x=idx%w,y=Math.floor(idx/w);
-   area++;x0=Math.min(x0,x);x1=Math.max(x1,x);y0=Math.min(y0,y);y1=Math.max(y1,y);
-   const neighbours=[x?idx-1:-1,x<w-1?idx+1:-1,y?idx-w:-1,y<endY-1?idx+w:-1];
-   for(const next of neighbours)if(next>=0&&mask[next]===1){mask[next]=0;stack.push(next);}
+ const list=[];
+ for(const [quality,predicate] of [['purple',purple],['gold',gold]]){
+  const mask=new Uint8Array(N),stack=[];
+  for(let y=0;y<endY;y++)for(let x=Math.round(w*.02);x<w*.98;x++){
+   const p=(y*w+x)*4;
+   if(predicate(data[p],data[p+1],data[p+2]))mask[y*w+x]=1;
   }
-  const cw=x1-x0+1,ch=y1-y0+1;
-  if(cw>=minWidth&&cw<=maxWidth&&ch>=minWidth&&ch<=maxWidth&&
-    ch/cw>.68&&ch/cw<1.35&&area>=minArea){
-   list.push({x:x0,y:y0,w:cw,h:ch,area,cx:(x0+x1)/2,cy:(y0+y1)/2});
+  for(let k=0;k<N;k++){
+   if(mask[k]!==1)continue;
+   let x0=w,y0=h,x1=0,y1=0,area=0;
+   stack.push(k);mask[k]=0;
+   while(stack.length){
+    const idx=stack.pop(),x=idx%w,y=Math.floor(idx/w);
+    area++;x0=Math.min(x0,x);x1=Math.max(x1,x);y0=Math.min(y0,y);y1=Math.max(y1,y);
+    const neighbours=[x?idx-1:-1,x<w-1?idx+1:-1,y?idx-w:-1,y<endY-1?idx+w:-1];
+    for(const next of neighbours)if(next>=0&&mask[next]===1){mask[next]=0;stack.push(next);}
+   }
+   const cw=x1-x0+1,ch=y1-y0+1;
+   if(cw>=minWidth&&cw<=maxWidth&&ch>=minWidth&&ch<=maxWidth&&
+     ch/cw>.68&&ch/cw<1.35&&area>=minArea){
+    list.push({x:x0,y:y0,w:cw,h:ch,area,cx:(x0+x1)/2,cy:(y0+y1)/2,quality});
+   }
   }
  }
- // Keep real gear cards rather than bright-purple overlay/menu elements.
+ // Keep real gear cards rather than smaller gold decorations on other cards.
  list.sort((a,b)=>b.area-a.area);
- const cards=list.slice(0,7).sort((a,b)=>a.cy-b.cy||a.cx-b.cx);
+ const cards=[];
+ for(const item of list){
+  if(cards.some(existing=>Math.abs(existing.cx-item.cx)<w*.045&&Math.abs(existing.cy-item.cy)<w*.045))continue;
+  cards.push(item);if(cards.length===7)break;
+ }
+ cards.sort((a,b)=>a.cy-b.cy||a.cx-b.cx);
  const rows=[];
  for(const card of cards){
   let row=rows.find(r=>Math.abs(r.cy-card.cy)<w*.095);
@@ -87,9 +97,9 @@ function find(data,w,h){
  const positions=[byRow[0].left,byRow[0].right,byRow[1].left,byRow[1].right,byRow[2].left,byRow[2].right];
  const output=positions.map((c,i)=>{
   const step=c.w/3,cy=c.y+c.h+(c.h*.17);
-  return {id:ids[i],gear:[c.cx,c.cy],charms:[-1,0,1].map(v=>[c.cx+v*step,cy]),bounds:[c.x,c.y,c.w,c.h],inferred:!!c.inferred};
+  return {id:ids[i],gear:[c.cx,c.cy],charms:[-1,0,1].map(v=>[c.cx+v*step,cy]),bounds:[c.x,c.y,c.w,c.h],quality:c.quality||null,inferred:!!c.inferred};
  });
  return {ok:true,slots:output,detected:cards.length,reason:'frames-detected'};
 }
-root.NRW_BEAR_GEAR_LAYOUT={purple,find};
+root.NRW_BEAR_GEAR_LAYOUT={purple,gold,find};
 })(window);
