@@ -17,12 +17,14 @@ const lang=()=>document.documentElement.lang||'de';
 const messages={
  de:{
   eyebrow:'NRW · BEAR TRAP',start:'Deine Bären-Aufstellung',desc:'Einmal durchgehen. Wir übernehmen alles, was wir aus deiner ID und den Spielscreenshots lesen können.',
-  steps:['Dein Profil','Truppen','Kampfwerte','GovGear','Helden','Fehlende Angaben','Deine Empfehlung'],
+  steps:['Dein Profil','Truppen','Kampfwerte','GovGear','Alle Helden','Top 3 Helden','Heldendetails','Fehlende Angaben','Deine Empfehlung'],
   prompts:['Wähle deine Governor-ID oder lade deine bereits vorhandenen Profildaten.',
    'Lade die Schwadronvorschau hoch. Ein Screenshot reicht. Wir lesen Truppenanzahl und Stufen.',
    'Lade die Bonusübersicht hoch. Bei einer langen Liste einfach mehrere Screenshots nacheinander auswählen.',
    'Ein vollständiges Bild der Gouverneur-Ausrüstung zeigt alle 6 Teile und 18 Talismane.',
-   'Lade die Heldenübersicht und die Details deiner 3 Starterhelden hoch. Mehrere Bilder sind möglich.',
+   'Lade alle Screenshots deiner gesamten Heldenübersicht hoch. Mehrere Bilder gleichzeitig sind möglich; überlappende Helden werden zusammengeführt.',
+   'Auf Basis deiner erfassten Helden schlagen wir dir pro Truppengattung einen Bären-Starter vor. Bitte bestätige die drei Helden.',
+   'Rüste die empfohlenen Helden mit deinem besten Helden-Gear aus – ggf. dasselbe Gear nacheinander wechseln. Lade DANACH ihre Details/Fertigkeiten hoch.',
    'Wir fragen nur Daten nach, die noch fehlen. Fortgeschrittene Einstellungen bleiben optional.',
    'Vergleiche die drei besten Ratios des derzeitigen Rechenmodells.'],
   next:'Weiter',back:'Zurück',skip:'Diesen Screenshot später ergänzen',finish:'Ergebnis anzeigen',
@@ -40,12 +42,14 @@ const messages={
  },
  en:{
   eyebrow:'NRW · BEAR TRAP',start:'Your Bear Trap lineup',desc:'Follow a short guided setup. We reuse your player data and screenshots.',
-  steps:['Your profile','Troops','Combat stats','Governor gear','Heroes','Missing values','Your recommendation'],
+  steps:['Your profile','Troops','Combat stats','Governor gear','All heroes','Top 3 heroes','Hero details','Missing values','Your recommendation'],
   prompts:['Choose your Governor ID or import an existing profile.',
    'Upload your troop overview. One screenshot covers troops and tiers.',
    'Upload the bonuses screen. You can select several screenshots of a long list.',
    'One complete Governor Gear overview contains all 6 items and 18 charms.',
-   'Upload your hero overview and details for your 3 rally starters. Multiple images are supported.',
+   'Upload ALL screenshots of your hero overview. Select several images together; duplicates across scrolling screenshots are merged.',
+   'Based on your roster, review the three proposed Bear Trap rally starters – one per troop class.',
+   'Equip your best HERO GEAR on the suggested heroes (move the set between heroes if needed). THEN upload their detail and skill screenshots.',
    'Only values that are truly missing require manual input. Advanced options stay optional.',
    'Compare the top three formations in the current simulation.'],
   next:'Continue',back:'Back',skip:'Add this screenshot later',finish:'Show recommendation',
@@ -61,8 +65,9 @@ const messages={
  },
  fr:{
   eyebrow:'NRW · BEAR TRAP',start:'Ta formation Ours',desc:'Un assistant simple basé sur ton profil et tes captures.',
-  steps:['Profil','Troupes','Stats','Équipement','Héros','Valeurs manquantes','Résultat'],
-  prompts:['Choisis ton ID ou importe un profil existant.','Ajoute une capture des troupes.','Ajoute une ou plusieurs captures des bonus.','Une capture complète des 6 équipements et 18 talismans.','Ajoute la liste et les détails des trois héros.','Complète seulement les valeurs manquantes.','Compare les trois formations simulées.'],
+  steps:['Profil','Troupes','Stats','Équipement','Tous les héros','Top 3 héros','Détails héros','Valeurs manquantes','Résultat'],
+  prompts:['Choisis ton ID ou importe un profil existant.','Ajoute une capture des troupes.','Ajoute une ou plusieurs captures des bonus.','Une capture complète des 6 équipements et 18 talismans.','Ajoute toutes les captures de la liste des héros, en une seule sélection.','Vérifie les trois héros recommandés pour l’Ours.',
+   'Équipe ces héros avec ton meilleur équipement avant de capturer leurs détails et compétences.','Complète seulement les valeurs manquantes.','Compare les trois formations simulées.'],
   next:'Continuer',back:'Retour',skip:'Ajouter plus tard',finish:'Afficher le résultat',
   upload:'Choisir une capture',uploads:'Choisir des captures',progress:'Étape',
   profileGood:'Profil chargé.',profileMissing:'Charge un profil en premier.',
@@ -75,7 +80,7 @@ const messages={
  }
 };
 const t=()=>messages[lang()]||messages.en;
-const sections=[],labels=['id','troops','stats','gear','heroes','missing','result'];
+const sections=[],labels=['id','troops','stats','gear','heroes','hero-picks','hero-details','missing','result'];
 const wizard=document.createElement('section');wizard.id='bearGuidedWizard';wizard.className='bear-guided-wizard';wizard.setAttribute('aria-label','Bear Trap Setup');
 wizard.innerHTML='<header class="bear-guide-head"><div class="micro" id="bearGuideEyebrow"></div><h1 id="bearGuideTitle"></h1><p class="hint" id="bearGuideDesc"></p><div class="bear-guide-track" id="bearGuideTrack"></div><div class="bear-guide-progress"><span id="bearGuideStep"></span><span id="bearGuideStepTitle"></span></div></header>'+
  '<p class="bear-guide-prompt" id="bearGuidePrompt"></p>'+
@@ -89,8 +94,8 @@ sections[0].append(profile);
 const profileHelp=document.createElement('p');profileHelp.className='hint bear-guide-api-note';profileHelp.id='bearGuideApiHelp';sections[0].append(profileHelp);
 sections[1].append(intake);
 sections[3].append(gear);
-sections[5].append(manual);
-sections[6].append(result);
+sections[7].append(manual);
+sections[8].append(result);
 // Existing intake scanner has exactly one real input and review queue.
 // It moves between steps; all event handlers remain attached.
 function showIntake(i){
@@ -101,8 +106,8 @@ function showIntake(i){
  const gearExtra=intake.querySelector('.bear-intake-header>p.hint:last-of-type');
  if(gearExtra)gearExtra.hidden=true;
  const buttonText=$('intakePicker')?.querySelector('span');
- if(buttonText)buttonText.textContent='📸 '+((i===1)?t().upload:t().uploads);
- const input=$('intakeFiles');if(input)input.multiple=i===2;
+ if(buttonText)buttonText.textContent='📸 '+([1,6].includes(i)?t().upload:t().uploads);
+ const input=$('intakeFiles');if(input)input.multiple=i===2||i===4;
 }
 let active=0,finished=false;
 const imported=new Set(),skipped=new Set();
@@ -117,7 +122,8 @@ function modelReady(kind){
  if(kind===1)return ['troopsI','troopsC','troopsA'].every(has);
  if(kind===2)return ['iAtk','iLet','cAtk','cLet','aAtk','aLet'].every(has);
  if(kind===3){const g=B.model().v2?.gear||{};return Object.values(g).some(x=>x?.quality&&x.quality!=='none'||x?.charms?.some(n=>Number(n)>0));}
- if(kind===4)return (B.model().v2?.ownHeroes||[]).filter(Boolean).length===3;
+ if(kind===4)return Object.keys(B.model().v2?.manualHeroes||{}).length>=3;
+ if(kind===6)return (B.model().v2?.ownHeroes||[]).filter(Boolean).every(n=>!!B.model().v2?.manualHeroes?.[n]?.expeditionStats);
  return false;
 }
 function missingValues(){
@@ -133,7 +139,7 @@ function missingValues(){
  return out;
 }
 function showRelevantManual(){
- const quick=$('uxQuickStart');const folds=sections[5].querySelector('#intakeMissingDetails');
+ const quick=$('uxQuickStart');const folds=sections[7].querySelector('#intakeMissingDetails');
  if(folds)folds.open=true;
  const m=B.model(),v=m.values||{},ext=m.v2||{};
  const missing=missingValues();
@@ -172,7 +178,7 @@ function showRelevantManual(){
  const wrapper=$('bearGuideMissingStatus');
  if(wrapper)wrapper.textContent=missing.length?t().missing+': '+missing.join(' · '):t().allGood;
 }
-const missingStatus=document.createElement('p');missingStatus.id='bearGuideMissingStatus';missingStatus.className='bear-guide-needed';sections[5].prepend(missingStatus);
+const missingStatus=document.createElement('p');missingStatus.id='bearGuideMissingStatus';missingStatus.className='bear-guide-needed';sections[7].prepend(missingStatus);
 // The existing quick setup also contains a prominent duplicate results panel
 // inside a collapsed expert block. The real result button has moved to step 7.
 const adv=$('uxAdvanced');if(adv){adv.open=false;const s=adv.querySelector('summary');if(s)s.title=t().opt;}
@@ -191,10 +197,12 @@ function render(){
  const s=t(),idx=active;
  sections.forEach((n,i)=>n.hidden=i!==idx);
  // Both troop & stat & hero steps use the same importer, never three forms.
- if(idx===1||idx===2||idx===4)showIntake(idx);
- window.NRW_BEAR_SCREENSHOT_STAGE=[1,2,4].includes(idx)?idx:null;
- if(idx===5)showRelevantManual();
- if(idx===6&&!finished){
+ if([1,2,4,6].includes(idx))showIntake(idx);
+ window.NRW_BEAR_SCREENSHOT_STAGE=[1,2,4,6].includes(idx)?idx:null;
+ if(idx===5)renderRecommendations();
+ if(idx===6)renderHeroDetails();
+ if(idx===7)showRelevantManual();
+ if(idx===8&&!finished){
   const engine=window.NRW_BEAR_COMBAT,model=B.model();
   const tiers=engine?.configure(model.v2);
   if(engine?.ready(model.values,tiers)&&Number(B.capacity?.()||0)>0){
@@ -210,45 +218,48 @@ function render(){
  $('bearGuidePrompt').textContent=s.prompts[idx];
  $('bearGuideBack').textContent='← '+s.back;
  $('bearGuideSkip').textContent=s.skip;
- $('bearGuideNext').textContent=idx===5?s.finish:idx===6?s.done:s.next+' →';
+ $('bearGuideNext').textContent=idx===7?s.finish:idx===8?s.done:s.next+' →';
  $('bearGuideBack').hidden=idx===0;
- $('bearGuideSkip').hidden=idx===0||idx>=5;
- $('bearGuideNext').hidden=idx===6;
+ $('bearGuideSkip').hidden=idx===0||idx===5||idx>=7;
+ $('bearGuideNext').hidden=idx===8;
  const progress=$('bearGuideTrack');progress.innerHTML='';
  for(let i=0;i<labels.length;i++){const dot=document.createElement('span');dot.className=i<idx?'is-done':i===idx?'is-current':'';dot.style.flex='1';progress.appendChild(dot);}
  if(idx===0){
   $('bearGuideApiHelp').textContent=location.hostname.endsWith('.github.io')?s.pages:'';
   message(hasProfile()?s.profileGood:s.profileMissing);
- }else if(idx===1||idx===2||idx===4){
+ }else if([1,2,4,6].includes(idx)){
   const matching=processQueue();
   message(matching?s.review:(imported.has(idx)||modelReady(idx)?s.ready:s.waiting));
  }else if(idx===3)message(imported.has(3)||modelReady(3)?s.ready:s.waiting);
- else if(idx===5)message('');
+ else if(idx===5||idx===7)message('');
  else message(s.estimated);
  const next=$('bearGuideNext');
- next.disabled=(idx===0&&!hasProfile())||(idx>=1&&idx<=4&&(processQueue()||(!imported.has(idx)&&!modelReady(idx))));
- if(idx===5||idx===6)next.disabled=false;
+ next.disabled=(idx===0&&!hasProfile())||
+  ([1,2,3,4,6].includes(idx)&&(processQueue()||(!imported.has(idx)&&!modelReady(idx))))||
+  (idx===5&&!recommendationsReady());
+ if(idx===7||idx===8)next.disabled=false;
  const bodyClass='bear-wizard-mode';document.body.classList.add(bodyClass);
  wizard.scrollIntoView({block:'start',behavior:'instant'});
 }
 function moveTo(i){
- if(i<0||i>6)return;
+ if(i<0||i>8)return;
  // Discard an unconfirmed review when navigating to a DIFFERENT screenshot
  // category. Never save unreviewed OCR results implicitly.
- if(i!==active&&[1,2,4].includes(active)&&processQueue()){
+ if(i!==active&&[1,2,4,6].includes(active)&&processQueue()){
   $('intakeClear')?.click();
  }
  if(i===0&&active!==0)message('');
- if(i!==6)finished=false;
+ if(i!==8)finished=false;
  active=i;render();
 }
 $('bearGuideBack').addEventListener('click',()=>moveTo(active-1));
-$('bearGuideSkip').addEventListener('click',()=>{if(active>=1&&active<=4){skipped.add(active);moveTo(active+1);}});
+$('bearGuideSkip').addEventListener('click',()=>{if([1,2,3,4,6].includes(active)){skipped.add(active);moveTo(active+1);}});
 $('bearGuideNext').addEventListener('click',()=>{
  if(active===0&&!hasProfile())return;
  if(processQueue())return;
- if(active===5){showRelevantManual();moveTo(6);return;}
- if(active<=5)moveTo(active+1);
+ if(active===5){confirmRecommendedHeroes();return;}
+ if(active===7){showRelevantManual();moveTo(8);return;}
+ if(active<=7)moveTo(active+1);
 });
 wizard.addEventListener('input',()=>{
  if(active===0){$('bearGuideNext').disabled=!hasProfile();}
@@ -256,7 +267,7 @@ wizard.addEventListener('input',()=>{
  // six-digit squad capacity; its parent refreshes only on committed change.
 });
 wizard.addEventListener('change',()=>{
- if(active===5)showRelevantManual();
+ if(active===7)showRelevantManual();
 });
 window.addEventListener('nrw-bear-loaded',()=>{
  imported.clear();skipped.clear();finished=false;
@@ -266,18 +277,18 @@ window.addEventListener('nrw-bear-intake-applied',evt=>{
  // Only the currently visible category is considered completed.
  const types=evt.detail?.types||[];
  if(active===1&&types.includes('troops')||active===2&&types.includes('stats')||
-   active===4&&(types.includes('starter')||types.includes('roster'))){
+   active===4&&types.includes('roster')||active===6&&types.includes('starter')){
   imported.add(active);
   message(t().ready);
   $('bearGuideNext').disabled=false;
   // The hero step accepts several overlapping roster and detail screenshots.
   // Keep the player on step 5 after each confirmation; they can upload the
   // next individual image, or choose Continue when finished.
-  if(active===4){
+  if(active===4||active===6){
    $('bearGuideNext').textContent=t().next+' →';
    message(document.documentElement.lang==='de'
-    ?'Bild gespeichert. Lade das nächste Heldenbild hoch oder fahre fort.'
-    :'Screenshot saved. Add the next hero image, or continue.');
+    ?'Bild gespeichert. Lade weitere Bilder dieses Schritts hoch oder fahre fort.'
+    :'Screenshot saved. Add more images for this step, or continue.');
    return;
   }
   moveTo(active+1);
