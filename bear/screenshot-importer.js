@@ -6,7 +6,7 @@
  */
 (function(){
 'use strict';
-const B=window.NRW_BEAR_BRIDGE, GUIDE=window.NRW_BEAR_CHARM_SHAPES, REF=window.NRW_BEAR_CHARM_REFERENCES, TIER=window.NRW_BEAR_TIER_RECOGNIZER, LAYOUT=window.NRW_BEAR_GEAR_LAYOUT;
+const B=window.NRW_BEAR_BRIDGE, GUIDE=window.NRW_BEAR_CHARM_SHAPES, REF=window.NRW_BEAR_CHARM_REFERENCES, MATCHER=window.NRW_BEAR_CHARM_MATCHER, TIER=window.NRW_BEAR_TIER_RECOGNIZER, LAYOUT=window.NRW_BEAR_GEAR_LAYOUT;
 const r=document.getElementById('restricted'),quick=document.getElementById('uxQuickStart');
 if(!B||!GUIDE||!r||!quick)return;
 const W=716,H=1536;
@@ -299,8 +299,16 @@ async function analyse(file){
    charms:slot.charms.map(pos=>{
     const input=maskOf(getCrop(ctx,pos,18),slot.type);
     const extra=remote.map(x=>({level:x.level,bits:x.bits,source:'online'}));
-    const matches=compare(input,[...(known[slot.type]||[]),...extra]);
-    return {...matches,thumb:drawThumb(ctx,pos,20)};
+    // First use ONLY verified silhouettes from the player's labelled
+    // Kingshot guide (Lv1-11). Less reliable fan/reference masks can offer
+    // a review suggestion, but must not set an unverified level.
+    const verified=MATCHER?.recognize(input);
+    if(verified?.level!==null&&verified?.level!==undefined)
+     return {...verified,thumb:drawThumb(ctx,pos,20)};
+    const fallback=compare(input,[...(known[slot.type]||[]),...extra]);
+    return {...fallback,level:null,
+     guess:verified?.guess??fallback.guess??null,confidence:'unknown',
+     source:'needs-guide-validation',thumb:drawThumb(ctx,pos,20)};
    })
   }));
   return {output,onlineCount:remote.length,dimensions:[canvas.width,canvas.height],layout:'auto',detected:geometry.detected};
