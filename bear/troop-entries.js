@@ -61,20 +61,42 @@ function numeric(line){
  return null;
 }
 function labelsFound(words){
+ // OCR occasionally splits "Infanterie" into "Infan" + "terie".
+ // Combine adjacent title fragments on the SAME horizontal line, but
+ // never merge the two troop columns or the quantity below the title.
+ const rows=[];
+ for(const w of words.filter(w=>w.y0>=.18&&w.y0<=.88)
+  .sort((a,b)=>(a.y0+a.y1)-(b.y0+b.y1)||a.x0-b.x0)){
+  const mid=(w.y0+w.y1)/2;
+  let row=rows.find(r=>Math.abs(r.y-mid)<.008);
+  if(!row){row={y:mid,words:[]};rows.push(row);}
+  row.words.push(w);
+ }
  const items=[];
- for(const w of words){
-  const type=kind(w.text);
-  if(type<0||w.y0<.18||w.y0>.88)continue;
-  if(items.some(a=>a.type===type&&Math.abs(a.y0-w.y0)<.008&&Math.abs(a.x0-w.x0)<.018))continue;
-  items.push({type,label:labels[type],x0:w.x0,y0:w.y0,x1:w.x1,y1:w.y1});
+ for(const row of rows){
+  const sorted=row.words.sort((a,b)=>a.x0-b.x0),segments=[];
+  for(const w of sorted){
+   const current=segments[segments.length-1];
+   if(!current||w.x0-current[current.length-1].x1>.042)segments.push([w]);
+   else current.push(w);
+  }
+  for(const segment of segments){
+   const phrase=segment.map(w=>w.text).join('');
+   const type=kind(phrase);
+   if(type<0)continue;
+   const x0=Math.min(...segment.map(w=>w.x0)),x1=Math.max(...segment.map(w=>w.x1)),
+    y0=Math.min(...segment.map(w=>w.y0)),y1=Math.max(...segment.map(w=>w.y1));
+   if(items.some(a=>a.type===type&&Math.abs(a.y0-y0)<.012&&Math.abs(a.x0-x0)<.045))continue;
+   items.push({type,label:labels[type],x0,y0,x1,y1});
+  }
  }
  return items.sort((a,b)=>a.y0-b.y0||a.x0-b.x0);
 }
 function readBelow(label,words,w,h){
  // The number is on a distinct text baseline below this troop label.
  // All tolerances are fractions of the screenshot; x/y NEVER pixels.
- const xMin=Math.max(0,label.x0-.018),xMax=Math.min(1,label.x0+.265);
- const yMin=label.y1+.002,yMax=Math.min(1,label.y1+Math.max(.027,Math.min(.052,.063*w/h)));
+ const xMin=Math.max(0,label.x0-.025),xMax=Math.min(1,label.x0+.29);
+ const yMin=label.y0+.006,yMax=Math.min(1,label.y1+Math.max(.038,Math.min(.062,.10*w/h)));
  const nearby=words.filter(a=>{
   const x=(a.x0+a.x1)/2,y=(a.y0+a.y1)/2;
   return x>=xMin&&x<=xMax&&y>=yMin&&y<=yMax&&/[0-9]/.test(a.text);
@@ -96,8 +118,8 @@ function detect(words,width,height){
  const normalized=norm(words,width,height);
  return labelsFound(normalized).map((label,index)=>{
   const quantity=readBelow(label,normalized,width,height);
-  const crop={x:Math.max(0,label.x0-.016),y:Math.min(1,label.y1+.001),
-   w:Math.min(.285,1-label.x0+.016),h:Math.min(.051,.064*width/height)};
+  const crop={x:Math.max(0,label.x0-.024),y:Math.min(1,label.y1+.001),
+   w:Math.min(.32,1-label.x0+.024),h:Math.min(.065,.11*width/height)};
   return {id:index,type:label.type,label:label.label,count:quantity,
    // One icon per entry (no assumption of a single tier per class).
    icon:{x:Math.max(0,label.x0-.13),y:Math.max(0,label.y0-.018),w:.132,h:.082},
