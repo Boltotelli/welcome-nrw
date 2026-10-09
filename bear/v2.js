@@ -26,7 +26,7 @@ const choices=(entries,current)=>entries.map(([value,label])=>'<option value="'+
 const catalogHero=n=>C.heroes.find(h=>h.name===n)||{name:n,img:''};
 const catImg=n=>catalogHero(n).img||'';
 const validModel=()=>B.profile()&&B.model();
-const defaults=()=>({joinCount:0,petLevels:{},petActive:{},petEffects:{},petValues:{},valora:[0,0,0,0],valoraTalent:0,gear:{},manualHeroes:{},ownHeroes:['','',''],troopTiers:[{tier:0,tg:0},{tier:0,tg:0},{tier:0,tg:0}],squadSeparate:false});
+const defaults=()=>({joinCount:0,petLevels:{},petActive:{},petEffects:{},petValues:{},valora:[0,0,0,0],valoraTalent:0,gear:{},manualHeroes:{},ownHeroes:['','',''],troopTiers:[{tier:0,tg:null},{tier:0,tg:null},{tier:0,tg:null}],squadSeparate:false});
 function state(){
  const m=B.model();
  if(!m.v2||typeof m.v2!=='object')m.v2=defaults();
@@ -37,7 +37,7 @@ function state(){
  if(!Array.isArray(s.valora))s.valora=[0,0,0,0];
  if(!s.gear)s.gear={};if(!s.manualHeroes)s.manualHeroes={};
  if(!Array.isArray(s.ownHeroes))s.ownHeroes=['','',''];
- if(!Array.isArray(s.troopTiers)||s.troopTiers.length!==3)s.troopTiers=[{tier:0,tg:0},{tier:0,tg:0},{tier:0,tg:0}];
+ if(!Array.isArray(s.troopTiers)||s.troopTiers.length!==3)s.troopTiers=[{tier:0,tg:null},{tier:0,tg:null},{tier:0,tg:null}];
  return s;
 }
 let sourceHeroes=[];
@@ -107,12 +107,12 @@ function makeLayout(){
  levelPanel.innerHTML='<p class="micro">'+esc(tx('troopTierHeading'))+'</p><div class="bear-troop-tier-grid">'+
  ['🛡️','🐴','🏹'].map((emoji,i)=>'<div class="bear-troop-tier-card"><b>'+emoji+' '+esc([tx('typeInf'),tx('typeCav'),tx('typeArch')][i])+'</b>'+
  '<label>T-Stufe<select class="bear-troop-tier" data-idx="'+i+'">'+choices([['0','—'],...Array.from({length:11},(_,j)=>[j+1,'T'+(j+1)])],0)+'</select></label>'+
- '<label>Truegold<select class="bear-troop-tg" data-idx="'+i+'">'+choices(Array.from({length:9},(_,j)=>[j,'TG'+j]),0)+'</select></label></div>').join('')+'</div><p class="hint">'+esc(tx('troopTierHelp'))+'</p>';
+ '<label>Truegold<select class="bear-troop-tg" data-idx="'+i+'">'+choices([['','?'],...Array.from({length:9},(_,j)=>[j,'TG'+j])],'')+'</select></label></div>').join('')+'</div><p class="hint">'+esc(tx('troopTierHelp'))+'</p>';
  arsenal.querySelector('.buff-row').before(levelPanel);
  levelPanel.querySelectorAll('select').forEach(node=>node.addEventListener('change',()=>{
   const i=Number(node.dataset.idx),obj=state().troopTiers[i];
   if(node.classList.contains('bear-troop-tier'))obj.tier=max(node.value,0,11);
-  else obj.tg=max(node.value,0,8);
+  else obj.tg=node.value===''?null:max(node.value,0,8);
   B.save();B.render();
  }));
  const extra=document.createElement('div');extra.className='bear-cap-extra';
@@ -410,7 +410,7 @@ function showForProfile(evt){
  heroBuilder();renderRoster();renderPets();renderValora();renderGear();renderEditor();
  const v=state();
  document.querySelectorAll('.bear-troop-tier').forEach(x=>x.value=v.troopTiers[Number(x.dataset.idx)].tier);
- document.querySelectorAll('.bear-troop-tg').forEach(x=>x.value=v.troopTiers[Number(x.dataset.idx)].tg);
+ document.querySelectorAll('.bear-troop-tg').forEach(x=>x.value=v.troopTiers[Number(x.dataset.idx)].tg??'');
  const box=document.getElementById('squadSeparate');if(box)box.checked=Boolean(v.squadSeparate);
  ['heroCapManual','squadAtk','squadLet'].forEach(id=>{const x=document.getElementById(id);if(x)x.value=Object.prototype.hasOwnProperty.call(B.model().values,id)?B.model().values[id]:'';});
  const pitfall=document.getElementById('pitfall');if(pitfall)pitfall.value=B.model().values.pitfall??0;
