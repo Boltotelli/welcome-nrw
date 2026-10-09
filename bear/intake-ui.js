@@ -130,7 +130,7 @@ function heroRows(canvas){
   let count=0;for(let d=-6;d<=6;d++)count+=present[y+d];
   if(count>=7)smooth[y]=1;
  }
- const raw=[],mergeGap=Math.round(h*.013);
+ const raw=[],mergeGap=Math.round(w*.022);
  let first=-1;
  for(let y=y0;y<=y1;y++){
   if(y<y1&&smooth[y]&&first<0)first=y;
@@ -144,45 +144,57 @@ function heroRows(canvas){
   const left=last?last.bottom-last.top:0,right=seg.bottom-seg.top;
   const joined=last?seg.bottom-last.top:0;
   if(last&&seg.top-last.bottom<=mergeGap &&
-      left<h*.16 && right<h*.16 && joined<=h*.255)
+      left<w*.30 && right<w*.30 && joined<=w*.40)
    last.bottom=seg.bottom;
   else merged.push({...seg});
  }
  // The hidden top/bottom row of a scrolling list must not become an
  // invented hero. An overlapping screenshot supplies its complete version.
- return merged.filter(r=>r.bottom-r.top>=h*.185&&r.bottom-r.top<=h*.255);
+ return merged.filter(r=>r.bottom-r.top>=w*.30&&r.bottom-r.top<=w*.42);
+}
+function starStepsFromRatios(ratios){
+ // Six petals per flower, up to five flowers. Example: 4 full + four
+ // illuminated petals equals 4★ T4 (28 of 30 advancement steps).
+ if(!Array.isArray(ratios)||ratios.length!==5)return null;
+ const reference=ratios.slice(0,Math.min(3,ratios.length)).filter(x=>x>.08)
+  .sort((a,b)=>a-b)[0];
+ if(!reference||reference<.14||reference>.56)return null;
+ let full=0;
+ for(const amount of ratios){
+  if(amount/reference>=.80)full++;
+  else break;
+ }
+ if(full===5)return 30;
+ if(full===0)return null;
+ const part=ratios[full]/reference;
+ const petals=part<.13?0:Math.min(5,Math.max(1,Math.round(part*6)));
+ return Math.min(30,full*6+petals);
 }
 function inferStars(canvas,rect){
- // Measure five flower icons at the actual bottom of a detected hero card.
- // Partial final flowers remain reviewable rather than inventing T-progress.
+ // The star row's *horizontal* offsets depend on CARD WIDTH, not screen
+ // height. Use bright petal occupancy rather than assuming five white
+ // flowers equal five completely filled stars.
  const ctx=canvas.getContext('2d',{willReadFrequently:true});
- const y=Math.round(rect.y+rect.h*.915),radius=Math.max(5,Math.round(rect.w*.055));
- function lightRatio(x){
-  const left=Math.max(0,Math.round(x-radius)),top=Math.max(0,y-radius);
-  const w=Math.min(canvas.width-left,2*radius+1),h=Math.min(canvas.height-top,2*radius+1);
-  if(w<=0||h<=0)return 0;
-  const d=ctx.getImageData(left,top,w,h).data;let bright=0;
-  for(let p=0;p<d.length;p+=4){
-   const r=d[p],g=d[p+1],b=d[p+2];
-   if(r>185&&g>173&&b>115&&r-g<85&&r>b)bright++;
+ const cy=Math.round(rect.y+rect.h*.915),radius=Math.max(5,Math.round(rect.w*.07));
+ const ratios=[];
+ for(let i=0;i<5;i++){
+  const cx=Math.round(rect.x+rect.w*(.195+i*.178));
+  const left=Math.max(0,cx-radius),top=Math.max(0,cy-radius),
+   width=Math.min(canvas.width-left,radius*2+1),
+   height=Math.min(canvas.height-top,radius*2+1);
+  if(width<=0||height<=0)return {starSteps:null,confidence:0};
+  const data=ctx.getImageData(left,top,width,height).data;
+  let bright=0;
+  for(let p=0;p<data.length;p+=4){
+   const r=data[p],g=data[p+1],b=data[p+2];
+   if(r>185&&g>173&&b>115&&(r-g)<85&&r>b)bright++;
   }
-  return bright/(w*h);
+  ratios.push(bright/(width*height));
  }
- const ratios=Array.from({length:5},(_,i)=>lightRatio(rect.x+rect.w*(.18+i*.165)));
- // In the real Kingshot card a fully lit star becomes slightly dimmer
- // towards the right. Compensate that baseline before counting empty stars.
- const corrected=ratios.map((v,i)=>v/(1-i*.065));
- const reference=corrected.slice(0,3).sort((a,b)=>a-b)[1];
- if(reference<.18)return {starSteps:null,confidence:0};
- let full=0;
- for(const n of corrected){if(n/reference>=.78)full++;else break;}
- if(!full)return {starSteps:null,confidence:0};
- // Last flower can show only some petals; its bright-pixel count looks
- // deceptively like a complete fifth star under auto gain correction.
- const fractionalFifth=full===5&&ratios[4]<ratios[3]*.92;
- if(fractionalFifth)full=4;
- const partial=fractionalFifth||(full<5&&corrected[full]/reference>.35);
- return {starSteps:full*6,confidence:Math.min(1,reference/.35),partiallyFilled:partial};
+ const steps=starStepsFromRatios(ratios);
+ const ref=ratios.slice(0,3).sort((a,b)=>a-b)[1]||0;
+ return {starSteps:steps,confidence:steps===null?0:Math.min(1,ref/.3),
+  partiallyFilled:steps!==null&&steps%6!==0};
 }
 function heroLevelFromWords(words,rect){
  const candidates=(words||[]).filter(w=>w.bbox&&
@@ -391,6 +403,12 @@ async function inspect(file){
   detail=Core.parseHeroDetail(heading+'\n'+text,allKnown())||detail;
  }
  if(type==='unknown'&&detail?.name)type='starter';
+ // A roster is only valid as a complete four-column overview. Detail pages
+ // must not silently be treated as roster images (and vice versa).
+ if(window.NRW_BEAR_SCREENSHOT_STAGE===4&&type==='unknown'&&heroRows(canvas).length)
+  type='roster';
+ if(window.NRW_BEAR_SCREENSHOT_STAGE===6&&type==='unknown')
+  type='starter';
  const allCards=type==='roster'?overviewTiles(canvas,text,result.data.words):[];
  if(type==='roster'&&allCards.length)await readMissingHeroLevels(allCards,canvas,worker);
  const existing=[...queue.filter(q=>q.type==='roster').flatMap(q=>q.cards||[]),...confirmedPortraits];
