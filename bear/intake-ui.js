@@ -272,6 +272,36 @@ function spatialTroops(words,canvas){
  }
  return found;
 }
+async function readTroopNumbers(canvas,worker){
+ // Isolate each number strip so icons/golden badges cannot hide a leading
+ // digit in the full-screen OCR. Resizing keeps original aspect ratio.
+ const crops=[
+  {key:'troopsI',x:.197,y:.309,w:.197,h:.032},
+  {key:'troopsC',x:.647,y:.309,w:.196,h:.032},
+  {key:'troopsA',x:.197,y:.408,w:.215,h:.033}
+ ];
+ const board=document.createElement('canvas');board.width=460;board.height=420;
+ const b=board.getContext('2d',{willReadFrequently:true});
+ b.fillStyle='#fff';b.fillRect(0,0,board.width,board.height);
+ for(let i=0;i<3;i++){
+  const v=crops[i],x=v.x*canvas.width,y=v.y*canvas.height,
+   w=v.w*canvas.width,h=v.h*canvas.height;
+  const ratio=Math.min(2.2,120/h,430/w);
+  b.drawImage(canvas,x,y,w,h,15,14+i*140,w*ratio,h*ratio);
+ }
+ const result=await worker.recognize(board);
+ const found={},words=result.data.words||[];
+ for(let i=0;i<3;i++){
+  const row=words.filter(v=>v.bbox&&
+   (v.bbox.y0+v.bbox.y1)/2>=i*140&&
+   (v.bbox.y0+v.bbox.y1)/2<(i+1)*140)
+   .sort((a,b)=>a.bbox.x0-b.bbox.x0).map(x=>x.text).join('');
+  const number=row.match(/\d{1,3}(?:[.,]\d{3})+|\d{4,9}/)?.[0];
+  const value=number?Core.normalizeNumber(number):null;
+  if(Number.isInteger(value)&&value>1000&&value<200000000)found[crops[i].key]=value;
+ }
+ return found;
+}
 function positionalLines(words,canvas){
  // Screenshots with two columns may OCR all labels first, then numbers.
  // Group words by visible text row and sort horizontally.
@@ -308,6 +338,10 @@ async function inspect(file){
  const values=type==='troops'?
   {...Core.parseTroops(text),...spatialTroops(result.data.words,canvas)}:
   type==='stats'?{...Core.parseStats(text),...Core.parseStats(grouped)}:{};
+ if(type==='troops'){
+  try{Object.assign(values,await readTroopNumbers(canvas,worker));}
+  catch(_){/* Keep the reviewable full-screen OCR suggestions. */}
+ }
  const troopTiers=type==='troops'&&TROOP?TROOP.recognize(canvas,text+'\n'+grouped,result.data.words||[]):null;
  const marchSlots=type==='troops'?Core.parseMarchSlots(text+'\n'+grouped):null;
 
