@@ -531,7 +531,7 @@ function updateProgress(){
 function apply(){
  const m=B.model(),v=state();
  let accepted=0;
- const appliedTypes=[];
+ const appliedTypes=[],appliedNames=[];
  for(const item of queue){
   if(item.type==='troops'||item.type==='stats'){
    if(Object.keys(item.values).length)appliedTypes.push(item.type);
@@ -561,7 +561,7 @@ function apply(){
    }
   }else if(item.type==='starter'&&item.detail?.name){
    appliedTypes.push('starter');
-   const h=item.detail;const previous=v.manualHeroes[h.name]||{};
+   const h=item.detail;appliedNames.push(h.name);const previous=v.manualHeroes[h.name]||{};
    v.manualHeroes[h.name]={...previous,name:h.name,level:h.level||previous.level||0,
     expeditionStats:{...(previous.expeditionStats||{}),...(h.expeditionStats||{})},source:'screenshot'};
    const slot=['infantry','cavalry','archer'].indexOf(cat.heroTypes[h.name]);
@@ -602,7 +602,7 @@ function apply(){
  updateProgress();status(accepted+' '+say('Angaben lokal gespeichert; unbekannte Werte bleiben unverändert.','values saved locally. Unknown values untouched.'));
  queue=[];renderQueue();
  window.dispatchEvent(new CustomEvent('nrw-bear-intake-applied',{
-  detail:{accepted,types:[...new Set(appliedTypes)]}
+  detail:{accepted,types:[...new Set(appliedTypes)],names:[...new Set(appliedNames)]}
  }));
 }
 $('intakeApply').addEventListener('click',apply);
