@@ -24,7 +24,7 @@ const messages={
    'Ein vollständiges Bild der Gouverneur-Ausrüstung zeigt alle 6 Teile und 18 Talismane.',
    'Lade alle Screenshots deiner gesamten Heldenübersicht hoch. Mehrere Bilder gleichzeitig sind möglich; überlappende Helden werden zusammengeführt.',
    'Auf Basis deiner erfassten Helden schlagen wir dir pro Truppengattung einen Bären-Starter vor. Bitte bestätige die drei Helden.',
-   'Rüste die empfohlenen Helden mit deinem besten Helden-Gear aus – ggf. dasselbe Gear nacheinander wechseln. Lade DANACH ihre Details/Fertigkeiten hoch.',
+   'Verteile dein bestes verfügbares Helden-Gear auf die drei empfohlenen Helden und lasse diese Ausstattung für die Bärenfalle angelegt. Lade DANACH die Heldendetails und Fertigkeiten hoch.',
    'Wir fragen nur Daten nach, die noch fehlen. Fortgeschrittene Einstellungen bleiben optional.',
    'Vergleiche die drei besten Ratios des derzeitigen Rechenmodells.'],
   next:'Weiter',back:'Zurück',skip:'Diesen Screenshot später ergänzen',finish:'Ergebnis anzeigen',
@@ -49,7 +49,7 @@ const messages={
    'One complete Governor Gear overview contains all 6 items and 18 charms.',
    'Upload ALL screenshots of your hero overview. Select several images together; duplicates across scrolling screenshots are merged.',
    'Based on your roster, review the three proposed Bear Trap rally starters – one per troop class.',
-   'Equip your best HERO GEAR on the suggested heroes (move the set between heroes if needed). THEN upload their detail and skill screenshots.',
+   'Distribute your best available HERO GEAR across all three suggested heroes as you would use it for Bear Trap. THEN upload their detail and skill screenshots.',
    'Only values that are truly missing require manual input. Advanced options stay optional.',
    'Compare the top three formations in the current simulation.'],
   next:'Continue',back:'Back',skip:'Add this screenshot later',finish:'Show recommendation',
@@ -302,9 +302,9 @@ function renderHeroDetails(){
  detailPanel.innerHTML='';
  const message=document.createElement('p');message.className='bear-gear-reminder';
  message.textContent=l==='de'?
- 'WICHTIG: Lege zuerst dein BESTES HELDEN-GEAR auf den jeweils empfohlenen Helden. Wenn du nur ein gutes Set besitzt, übertrage es nacheinander auf jeden Helden und mache erst danach seinen Screenshot.':
- l==='fr'?'IMPORTANT : équipe chaque héros recommandé avec ton meilleur équipement de héros AVANT de prendre ses captures. Déplace le même ensemble entre les héros si nécessaire.':
- 'IMPORTANT: Equip your BEST HERO GEAR to each recommended hero BEFORE taking their screenshots. If necessary, move the same set between heroes one at a time.';
+ 'WICHTIG: Verteile zuerst dein BESTES verfügbares HELDEN-GEAR auf diese drei Helden. Lass die Ausrüstung so angelegt, wie du sie gleichzeitig bei der Bärenfalle nutzen möchtest. Erst DANACH die Details fotografieren.':
+ l==='fr'?'IMPORTANT : répartis ton meilleur équipement de héros entre les trois héros comme pour le piège à ours, puis capture leurs détails.':
+ 'IMPORTANT: Distribute your BEST available HERO GEAR across all three recommended heroes as you intend to use it simultaneously at Bear Trap. THEN capture their details.';
  detailPanel.append(message);
  const list=document.createElement('p');list.className='hint';
  list.textContent=chosen.filter(Boolean).map(n=>(detailConfirmed.has(n)?'✓ ':'◻ ')+n).join(' · ');
