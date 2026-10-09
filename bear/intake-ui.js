@@ -103,64 +103,81 @@ function cropToThumb(src,x,y,w,h){
  c.getContext('2d').drawImage(src,x*src.width,y*src.height,w*src.width,h*src.height,0,0,c.width,c.height);
  return c.toDataURL('image/jpeg',.74);
 }
-function inferStars(canvas,row,col){
- // The card's bottom edge displays five flower-shaped stars. Full stars
- // are light ivory; unfilled stars are dark orange. Compare relative light
- // pixel counts against the same card, not absolute colour alone.
- // Screenshot calibration: 716×1536, 4-column Kingshot hero inventory.
- const cx=canvas.getContext('2d',{willReadFrequently:true});
- const sx=canvas.width/716,sy=canvas.height/1536;
- const yCenter=(371+row*276)*sy;
- function lights(x,y){
-  const left=Math.max(0,Math.round(x-9*sx)),top=Math.max(0,Math.round(y-11*sy));
-  const w=Math.min(canvas.width-left,Math.max(1,Math.round(19*sx)));
-  const h=Math.min(canvas.height-top,Math.max(1,Math.round(23*sy)));
-  if(w<4||h<4)return 0;
-  const pixels=cx.getImageData(left,top,w,h).data;let bright=0;
-  for(let i=0;i<pixels.length;i+=4){
-   const r=pixels[i],g=pixels[i+1],b=pixels[i+2];
-   if(r>170&&g>160&&b>100&&r-g<90&&r>b)bright++;
+// Detect actual four-column hero rows instead of assuming the first card
+// always starts at the top. Scroll screenshots can start/end mid-card.
+function heroRows(canvas){
+ const ctx=canvas.getContext('2d',{willReadFrequently:true});
+ const w=canvas.width,h=canvas.height;
+ const pixels=ctx.getImageData(0,0,w,h).data;
+ const colorAt=(x,y)=>{
+  const p=(Math.floor(y)*w+Math.floor(x))*4;
+  return [pixels[p],pixels[p+1],pixels[p+2]];
+ };
+ const bg=colorAt(w*.025,h*.52),xs=[.060,.292,.525,.757].map(x=>Math.floor(x*w));
+ const colored=y=>xs.reduce((n,x)=>{
+  const c=colorAt(x,y),dist=Math.abs(c[0]-bg[0])+Math.abs(c[1]-bg[1])+Math.abs(c[2]-bg[2]);
+  return n+(dist>85?1:0);
+ },0)>=3;
+ const rows=[];let begin=-1,gap=0;
+ for(let y=Math.round(h*.065);y<=Math.round(h*.897);y+=2){
+  if(colored(y)){if(begin<0)begin=y;gap=0;}
+  else if(begin>=0){gap+=2;if(gap>14){
+   const last=y-gap;
+   if(last-begin>h*.18)rows.push({top:begin,bottom:last});
+   begin=-1;gap=0;
+  }}
+ }
+ if(begin>=0){const last=Math.round(h*.897);if(last-begin>h*.18)rows.push({top:begin,bottom:last});}
+ return rows;
+}
+function inferStars(canvas,rect){
+ // Measure five flower icons at the actual bottom of a detected hero card.
+ // Partial final flowers remain reviewable rather than inventing T-progress.
+ const ctx=canvas.getContext('2d',{willReadFrequently:true});
+ const y=Math.round(rect.y+rect.h*.915),radius=Math.max(5,Math.round(rect.w*.055));
+ function lightRatio(x){
+  const left=Math.max(0,Math.round(x-radius)),top=Math.max(0,y-radius);
+  const w=Math.min(canvas.width-left,2*radius+1),h=Math.min(canvas.height-top,2*radius+1);
+  if(w<=0||h<=0)return 0;
+  const d=ctx.getImageData(left,top,w,h).data;let bright=0;
+  for(let p=0;p<d.length;p+=4){
+   const r=d[p],g=d[p+1],b=d[p+2];
+   if(r>185&&g>173&&b>115&&r-g<85&&r>b)bright++;
   }
   return bright/(w*h);
  }
- const xs=Array.from({length:5},(_,i)=>(33+col*167+22+i*27)*sx);
- let best=null;
- for(let dy=-24;dy<=24;dy+=3){
-  const yy=yCenter+dy*sy,values=xs.map(x=>lights(x,yy));
-  const score=values[0]+values[1]+values[2];
-  if(!best||score>best.score)best={score,values};
- }
- if(!best)return {starSteps:null,confidence:0};
- const head=Math.max(...best.values.slice(0,3));
- if(head<.17)return {starSteps:null,confidence:0};
+ const ratios=Array.from({length:5},(_,i)=>lightRatio(rect.x+rect.w*(.18+i*.165)));
+ const reference=ratios.slice(0,3).sort((a,b)=>a-b)[1];
+ if(reference<.18)return {starSteps:null,confidence:0};
  let full=0;
- for(const n of best.values){if(n/head>=.77)full++;else break;}
- if(full<1)return {starSteps:null,confidence:0};
- const confidence=Math.min(1,(head/.28));
- return {starSteps:full*6,confidence,partiallyFilled:full<5&&best.values[full]/head>.45};
+ for(const n of ratios){if(n/reference>=.80)full++;else break;}
+ if(!full)return {starSteps:null,confidence:0};
+ const partial=full<5&&ratios[full]/reference>.35;
+ return {starSteps:full*6,confidence:Math.min(1,reference/.35),partiallyFilled:partial};
 }
-function heroLevelFromWords(words,canvas,row,col){
- const x0=(33+col*167)*canvas.width/716,x1=x0+152*canvas.width/716;
- const y0=(124+row*276+190)*canvas.height/1536,y1=(124+row*276+248)*canvas.height/1536;
- const candidates=(words||[]).filter(w=>w.bbox&&((w.bbox.x0+w.bbox.x1)/2)>=x0&&((w.bbox.x0+w.bbox.x1)/2)<=x1&&
-  ((w.bbox.y0+w.bbox.y1)/2)>=y0&&((w.bbox.y0+w.bbox.y1)/2)<=y1)
+function heroLevelFromWords(words,rect){
+ const candidates=(words||[]).filter(w=>w.bbox&&
+  (w.bbox.x0+w.bbox.x1)/2>=rect.x&&(w.bbox.x0+w.bbox.x1)/2<=rect.x+rect.w&&
+  (w.bbox.y0+w.bbox.y1)/2>=rect.y+rect.h*.64&&
+  (w.bbox.y0+w.bbox.y1)/2<=rect.y+rect.h*.88)
   .sort((a,b)=>a.bbox.x0-b.bbox.x0).map(w=>w.text).join(' ');
- const match=candidates.match(/(?:Lv|Level)\s*\.?\s*(\d{1,3})/i);
+ const match=candidates.match(/(?:Lv|Level)\s*\.?\s*(\d{1,3})\b/i);
  return match&&Number(match[1])<=80?Number(match[1]):null;
 }
 function overviewTiles(canvas,text,words){
- // Four-column Kingshot hero overview: names are absent, so the user must
- // confirm portrait identity. Never guess a name from text-only OCR.
- const collected=[],matches=[...String(text).matchAll(/Lv\.?\s*(\d{1,3})/ig)].map(m=>Number(m[1]));
- for(let row=0;row<5;row++)for(let col=0;col<4;col++){
-  const x=.038+col*.232,y=.082+row*.177;
-  if(y+.145>.945)continue;
-  const index=col+row*4;
-  const stars=row<4?inferStars(canvas,row,col):{starSteps:null,confidence:0};
-  const positionalLevel=heroLevelFromWords(words,canvas,row,col);
-  const safeSequenceFallback=matches.length===20?matches[index]:null;
-  collected.push({image:cropToThumb(canvas,x,y,.211,.171),name:'',level:positionalLevel??safeSequenceFallback,
+ const rows=heroRows(canvas),collected=[];
+ // If the player scrolls, take only whole visible cards. Partial top/bottom
+ // rows will be captured by an overlapping screenshot, not assigned falsely.
+ for(const row of rows){
+  for(let col=0;col<4;col++){
+   const rect={x:Math.round(canvas.width*(.038+col*.232)),
+    y:row.top+2,w:Math.round(canvas.width*.211),h:row.bottom-row.top-3};
+   const stars=inferStars(canvas,rect);
+   const level=heroLevelFromWords(words,rect);
+   collected.push({image:cropToThumb(canvas,rect.x/canvas.width,rect.y/canvas.height,
+     rect.w/canvas.width,rect.h/canvas.height),name:'',level,
     starSteps:stars.starSteps,starConfidence:stars.confidence,partialStar:stars.partiallyFilled,selected:false});
+  }
  }
  return collected;
 }
