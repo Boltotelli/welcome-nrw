@@ -106,52 +106,7 @@ function cropToThumb(src,x,y,w,h){
 }
 // Detect actual four-column hero rows instead of assuming the first card
 // always starts at the top. Scroll screenshots can start/end mid-card.
-function heroRows(canvas){
- // Sample the narrow left margin INSIDE each of the four portrait tiles.
- // Beige is the inventory's neutral background, so a colour change at
- // at least three columns exposes the actual card row independently of scroll.
- const w=canvas.width,h=canvas.height,ctx=canvas.getContext('2d',{willReadFrequently:true});
- const data=ctx.getImageData(0,0,w,h).data;
- const sample=(x,y)=>{const px=Math.max(0,Math.min(w-1,Math.floor(x*w))),py=Math.max(0,Math.min(h-1,Math.floor(y*h)));const p=(py*w+px)*4;return [data[p],data[p+1],data[p+2]];};
- const bg=sample(.023,.30);
- const xs=[.054,.286,.518,.750],y0=Math.round(h*.064),y1=Math.round(h*.91);
- const present=new Uint8Array(h);
- for(let y=y0;y<y1;y+=2){
-  let changed=0;
-  for(const x of xs){
-   const c=sample(x,y/h);
-   if(Math.abs(c[0]-bg[0])+Math.abs(c[1]-bg[1])+Math.abs(c[2]-bg[2])>75)changed++;
-  }
-  if(changed>=3){present[y]=1;present[y+1]=1;}
- }
- // Remove isolated animation/text glitches; merge tiny horizontal overlays.
- const smooth=new Uint8Array(h);
- for(let y=y0+6;y<y1-6;y++){
-  let count=0;for(let d=-6;d<=6;d++)count+=present[y+d];
-  if(count>=7)smooth[y]=1;
- }
- const raw=[],mergeGap=Math.round(w*.022);
- let first=-1;
- for(let y=y0;y<=y1;y++){
-  if(y<y1&&smooth[y]&&first<0)first=y;
-  else if((y===y1||!smooth[y])&&first>=0){raw.push({top:first,bottom:y});first=-1;}
- }
- const merged=[];
- for(const seg of raw){
-  const last=merged[merged.length-1];
-  // Merge disruptions *inside* a card, not the narrow beige separator
-  // between adjacent rows. Full rows are ~21% of screen height.
-  const left=last?last.bottom-last.top:0,right=seg.bottom-seg.top;
-  const joined=last?seg.bottom-last.top:0;
-  if(last&&seg.top-last.bottom<=mergeGap &&
-      left<w*.30 && right<w*.30 && joined<=w*.40)
-   last.bottom=seg.bottom;
-  else merged.push({...seg});
- }
- // The hidden top/bottom row of a scrolling list must not become an
- // invented hero. An overlapping screenshot supplies its complete version.
- return merged.filter(r=>r.bottom-r.top>=w*.30&&r.bottom-r.top<=w*.42);
-}
+function heroRows(canvas){return window.NRW_BEAR_HERO_GRID?.rows(canvas)||[];}
 function starStepsFromRatios(ratios){
  // Six petals per flower, up to five flowers. Example: 4 full + four
  // illuminated petals equals 4★ T4 (28 of 30 advancement steps).
@@ -228,8 +183,7 @@ function overviewTiles(canvas,text,words){
  // rows will be captured by an overlapping screenshot, not assigned falsely.
  for(const row of rows){
   for(let col=0;col<4;col++){
-   const rect={x:Math.round(canvas.width*(.038+col*.232)),
-    y:row.top+2,w:Math.round(canvas.width*.211),h:row.bottom-row.top-3};
+   const rect=window.NRW_BEAR_HERO_GRID.tileRect(canvas.width,row,col);
    const level=heroLevelFromWords(words,rect);
    const cx=canvas.getContext('2d',{willReadFrequently:true});
    // The last Kingshot roster row can have fewer than four cards.
