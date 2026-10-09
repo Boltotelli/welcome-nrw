@@ -164,7 +164,16 @@ function render(){
  sections.forEach((n,i)=>n.hidden=i!==idx);
  // Both troop & stat & hero steps use the same importer, never three forms.
  if(idx===1||idx===2||idx===4)showIntake(idx);
+ window.NRW_BEAR_SCREENSHOT_STAGE=[1,2,4].includes(idx)?idx:null;
  if(idx===5)showRelevantManual();
+ if(idx===6&&!finished){
+  const engine=window.NRW_BEAR_COMBAT,model=B.model();
+  const tiers=engine?.configure(model.v2);
+  if(engine?.ready(model.values,tiers)&&Number(B.capacity?.()||0)>0){
+   finished=true;
+   try{B.optimizeStarter();}catch(_){finished=false;}
+  }
+ }
  $('bearGuideEyebrow').textContent=s.eyebrow;
  $('bearGuideTitle').textContent=s.start;
  $('bearGuideDesc').textContent=s.desc;
@@ -196,6 +205,11 @@ function render(){
 }
 function moveTo(i){
  if(i<0||i>6)return;
+ // Discard an unconfirmed review when navigating to a DIFFERENT screenshot
+ // category. Never save unreviewed OCR results implicitly.
+ if(i!==active&&[1,2,4].includes(active)&&processQueue()){
+  $('intakeClear')?.click();
+ }
  if(i===0&&active!==0)message('');
  active=i;render();
 }
