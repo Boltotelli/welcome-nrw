@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "kingdom": 1044,
   "timezone": "UTC",
-  "updatedAt": "2026-10-07T00:11:41Z",
+  "updatedAt": "2026-10-09T00:14:30Z",
   "events": [
     {
       "id": "golden-glaives-prep-2026-09-20",
@@ -776,7 +776,7 @@
       "icon": "⚔️",
       "iconUrl": "https://kingshotdata.com/uploads/2025/05/kingdom-of-power-event-icon.webp",
       "manual": false,
-      "confidence": "predicted",
+      "confidence": "public-timeline",
       "name": {
         "de": "KvK · Matchmaking, Vorbereitung & Schlacht",
         "en": "KvK · Matchmaking, Preparation & Battle",
