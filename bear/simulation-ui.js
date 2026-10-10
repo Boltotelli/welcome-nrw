@@ -121,7 +121,7 @@ function mount(host,B,language){
  }
  function takeInputs(){
   const values=fields.slice(0,2).map(x=>x.input.value);
-  if(values.some(s=>!/^\\d{1,3}$/.test(s)))return output(t().invalid);
+  if(values.some(s=>!/^\d{1,3}$/.test(s)))return output(t().invalid);
   const pair=values.map(Number);if(!sim.ratioValid(pair))return output(t().invalid);
   output('');setRatios(pair);
  }
