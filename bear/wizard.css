@@ -313,3 +313,37 @@ body.bear-wizard-mode .dashboard{display:none!important}
 .bear-stat-origin{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:9px;font-size:11px;font-weight:700;flex-wrap:wrap}
 .bear-stat-origin select{font-size:12px;max-width:100%;min-width:210px;background:var(--panel);border:1px solid var(--line);border-radius:9px;color:var(--text);padding:9px}
 @media(max-width:540px){.bear-stat-origin{display:grid}.bear-stat-origin select{width:100%;min-width:0}}
+
+
+/* Oct 2026 guided UX: one ID field, existing data preview, one result. */
+.bear-github-id-mode .bear-guide-slide[data-guide=id] .preset,
+.bear-github-id-mode .bear-guide-slide[data-guide=id] details,
+.bear-github-id-mode .bear-guide-slide[data-guide=id] .sub,
+.bear-github-id-mode .bear-guide-slide[data-guide=id] .micro,
+.bear-github-id-mode .bear-guide-slide[data-guide=id] #lookupMessage,
+.bear-github-id-mode .bear-guide-slide[data-guide=id] #heroes {display:none!important}
+.bear-guide-stored{padding:14px 16px;margin:6px 0 12px;background:var(--card);border:1px solid var(--line);border-radius:13px;display:grid;gap:6px}
+.bear-guide-stored h3{font-size:14px;margin:0 0 7px}
+.bear-stored-row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:5px 0;border-bottom:1px solid var(--line);font-size:12px;min-width:0}
+.bear-stored-row:last-child{border:0}
+.bear-stored-row span{color:var(--muted);min-width:0;overflow-wrap:anywhere}
+.bear-stored-row strong{font-variant-numeric:tabular-nums;text-align:right;white-space:normal}
+.bear-guide-example{margin:4px 0 16px!important;border:1px solid var(--line);border-radius:12px;background:var(--card);overflow:hidden}
+.bear-guide-example summary{padding:14px 16px;cursor:pointer;font-size:13px;color:var(--amber);font-weight:800}
+.bear-guide-example-preview{padding:16px;background:var(--panel);font-size:13px;line-height:1.65}
+.bear-guide-example-preview hr{border:0;border-top:1px solid var(--line);margin:10px 0}
+.bear-guide-example-preview small{color:var(--muted)}
+.bear-valora-base{display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding:14px 16px;background:var(--card);border:1px solid var(--line);border-radius:12px;font-weight:700;font-size:13px}
+.bear-valora-base input{width:150px;max-width:100%;padding:10px}
+.bear-formation-primary-note{font-size:14px;font-weight:800;line-height:1.6;color:var(--amber);padding:12px 14px;margin:0;background:var(--card);border:1px solid var(--line);border-radius:11px}
+.bear-formation-troops .bear-formation-counts{font-size:clamp(14px,2vw,18px)!important;font-weight:800;color:var(--text)!important;line-height:1.8;display:block}
+.bear-formation-proposal .bear-usage-summary{display:none!important}
+.bear-legacy-result{display:none!important}
+.bear-compare-own{width:100%;min-height:46px;margin-top:14px;border:1px solid var(--line);border-radius:12px;font-weight:750}
+.bear-formation-compare-status{font-size:13px;font-weight:700;color:var(--amber);text-align:center;margin:10px 0 0}
+@media(max-width:600px){
+ .bear-stored-row{align-items:start;flex-direction:column;gap:3px}
+ .bear-stored-row strong{text-align:left}
+ .bear-guide-example summary{font-size:13px}
+ .bear-formation-troops .bear-formation-counts{font-size:15px!important}
+}
