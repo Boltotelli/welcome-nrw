@@ -133,11 +133,30 @@ jobs:
             # A single user-supplied ZIP can carry all nine unmodified assets.
             if [ -f bear/examples/nrw-bear-assets.zip ]; then
               unzip -tq bear/examples/nrw-bear-assets.zip
+              zip_sha="$(sha256sum bear/examples/nrw-bear-assets.zip | cut -d ' ' -f 1)"
+              # This first approved ZIP was packed with four mislabeled JPGs.
+              # Detect the exact uploaded original so later corrected ZIPs
+              # retain conventional filenames and never get swapped again.
+              needs_mapping_fix=false
+              if [ "$zip_sha" = "57bd5246b3e9c21904ef2f11ae4db246c5cd9780d55a333efd0bbadfa41e9418" ]; then
+                needs_mapping_fix=true
+                echo "Applying verified source-to-screen mapping for the uploaded seven examples."
+              fi
               for name in troops.jpg stats.jpg stats-extra.jpg roster.jpg hero-details.jpg pets.jpg valora.jpg; do
-                if [ ! -f "_site/examples/$name" ]; then
-                  unzip -p bear/examples/nrw-bear-assets.zip "$name" > "_site/examples/$name"
+                source="$name"
+                if [ "$needs_mapping_fix" = true ]; then
+                  case "$name" in
+                    troops.jpg) source="roster.jpg" ;;
+                    stats.jpg) source="troops.jpg" ;;
+                    stats-extra.jpg) source="stats.jpg" ;;
+                    roster.jpg) source="stats-extra.jpg" ;;
+                  esac
                 fi
-                test -s "_site/examples/$name" || { echo "Missing example: $name"; exit 1; }
+                if [ ! -f "_site/examples/$name" ]; then
+                  unzip -p bear/examples/nrw-bear-assets.zip "$source" > "_site/examples/$name"
+                fi
+                test -s "_site/examples/$name" || { echo "Missing example: $name (ZIP source: $source)"; exit 1; }
+                echo "Example: $name <= ZIP $source"
               done
             fi
           fi

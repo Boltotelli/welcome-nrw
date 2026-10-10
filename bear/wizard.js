@@ -282,7 +282,7 @@ for(const i of [1,2,4,6,7]){
  let imagesLoaded=0,imagesFailed=0;
  available.forEach(name=>{
   const link=document.createElement('a');link.className='bear-guide-example-link';
-  link.href='./examples/'+name+'.jpg';link.target='_blank';link.rel='noopener noreferrer';
+  link.href='./examples/'+name+'.jpg?v=corrected-examples-20261011-1';link.target='_blank';link.rel='noopener noreferrer';
   link.title='Original-Screenshot vergrößern';
   const img=document.createElement('img');img.loading='eager';img.alt='Kingshot '+name+' Beispielscreenshot';
   link.append(img);

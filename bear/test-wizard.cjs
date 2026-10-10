@@ -99,7 +99,13 @@ assert.ok(css.includes('.bear-guide-stored'),'mobile saved-values cards styled')
 assert.ok(!wizard.includes('kingshot_beartrap_v3_action_transparent.webm'),'formation-stage loading must not reuse the damage video');
 assert.ok(wizard.includes('stageLoader.append(loaderBear,loaderText)'),'formation stage keeps its own animated bear loading indicator');
 assert.ok(simulation.includes("webm.src='./assets/kingshot_beartrap_v3_action_transparent.webm'"),'damage simulation retains the approved video');
-assert.ok(html.includes('./wizard.js?v=bear-examples-visible-20261011-1'),'wizard cache key must refresh for existing visitors');
+assert.ok(html.includes('./wizard.js?v=corrected-examples-20261011-1'),'wizard cache key must refresh for existing visitors');
+assert.ok(wizard.includes("'.jpg?v=corrected-examples-20261011-1'"),'corrected original images bypass stale browser caches');
+const workflow=fs.readFileSync(__dirname+'/../.github/workflows/bear-pages.yml','utf8');
+assert.ok(workflow.includes('57bd5246b3e9c21904ef2f11ae4db246c5cd9780d55a333efd0bbadfa41e9418'),'exact archived ZIP is identified');
+for(const [target,source] of [['troops.jpg','roster.jpg'],['stats.jpg','troops.jpg'],['stats-extra.jpg','stats.jpg'],['roster.jpg','stats-extra.jpg']]){
+ assert.ok(workflow.includes(target+') source="'+source+'"'),'wrongly named ZIP image remapped: '+target);
+}
 assert.ok(wizard.includes("2:['stats','stats-extra']"),'two complementary bonus-overview screenshots appear in combat stats example');
 assert.ok(wizard.includes('const gallery=document.createElement'),'screenshot examples display as compact gallery');
 assert.ok(css.includes('.bear-guide-example-link img'),'mobile-sized authentic example thumbnails are styled');
