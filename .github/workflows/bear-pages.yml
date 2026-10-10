@@ -30,6 +30,8 @@ jobs:
       - name: Verify Bear scripts and combat data
         run: |
           node --check bear/catalog.js
+          node --check bear/hero-reference/test-hero-reference.cjs
+          node bear/hero-reference/test-hero-reference.cjs
           node --check bear/combat.js
           node --check bear/v2.js
           node --check bear/ux.js
