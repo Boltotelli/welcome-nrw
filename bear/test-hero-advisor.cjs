@@ -51,6 +51,21 @@ assert.equal(A.recommend([h('Rosa',4),h('Yang',1),h('Petra',4)],roles,priorities
 assert.equal(A.recommend([h('Yang',1),{name:'Invented',stars:5}],roles,priorities)[2].choices.length,1,
  'unknown non-catalog identity never added');
 
+// Real Android roster / currently displayed bad result:
+ // Howard 5★ and Quinn 5★ were proposed over developed offensive heroes.
+const realRoles={...roles,Howard:'infantry',Quinn:'archer',Chenko:'cavalry'};
+const realPicks=A.recommend([
+ h('Howard',5),h('Zoe',4,80,{tier:2}),h('Long Fei',5),
+ h('Petra',4,80,{tier:2}),h('Chenko',5),
+ h('Quinn',5),h('Rosa',5),h('Yang',4,80,{tier:4})
+],realRoles,priorities);
+assert.deepEqual(Array.from(realPicks.map(r=>r.best.name)),['Zoe','Petra','Rosa'],
+ 'developed offensive heroes beat early rally fillers in the real Gen-6 roster');
+assert.ok(A.evaluate(h('Quinn',5), 'archer',priorities).score<
+ A.evaluate(h('Rosa',4), 'archer',priorities).score,'Quinn 5★ must not trivially displace Rosa 4★');
+assert.ok(A.evaluate(h('Howard',5),'infantry',priorities).score<
+ A.evaluate(h('Zoe',4),'infantry',priorities).score,'Howard 5★ must not trivially displace Zoe 4★');
+
 const guide=String(A.method);
 assert.match(guide,/not Atlas damage/i);
 console.log('BEAR HERO ADVISOR: owned-only, 3 role types, Yang 1★ versus Rosa 4★, development, confidence and fallback passed.');
