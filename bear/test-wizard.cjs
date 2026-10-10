@@ -68,4 +68,12 @@ assert.match(intake,/observed\+'\/4 expedition percentages detected/,
 assert.match(intake,/expeditionStats:\{\.\.\.\(h\.expeditionStats\|\|\{\}\)\}/,
  'newly equipped hero screenshot must not silently reuse pre-gear stats');
 
+assert.match(intake,/readHeroStatPanel\(canvas,worker,detail\.name/,
+ 'all three selected hero pages must run the focused expedition OCR');
+assert.match(intake,/556\*sx,1030\*sy,129\*sx,260\*sy/,
+ 'numeric right-column crop pinned to independently checked 716x1536 hero geometry');
+assert.match(intake,/parseHeroOrderedExpeditionRows\(result\.data\?\.text\|\|'',kind\)/,
+ 'positioned numeric readings use conservative four-row parser');
+assert.match(intake,/\['Atk','Def','Let','Hp'\]\.map\(k=>group\+k\)/,
+ 'hero input rows must mirror actual Kingshot Attack Defense Lethality Health order');
 console.log('BEAR WIZARD: nine stages, hero shortlist, separate gear-first detail uploads and independent capacity input verified.');
