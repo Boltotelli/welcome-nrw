@@ -6,7 +6,7 @@
 'use strict';
 const SIZE=6;
 let cache=null;
-const ASSET='./hero-hud-fingerprints.json?v=roster-20261010-2';
+const ASSET='./hero-hud-fingerprints.json?v=roster-20261010-3';
 // Resolve against this script, not the current page's route/query string.
 const assetURL=typeof document!=='undefined'&&document.currentScript?.src
  ? new URL(ASSET,document.currentScript.src).href:ASSET;
@@ -84,5 +84,5 @@ async function enrich(tiles){
  }
  return {available:refs.length,matched:tiles.filter(t=>t.name).length};
 }
-root.NRW_BEAR_PORTRAIT_MATCHER={data,candidates,sample,match,enrich,diagnostics:()=>({...load}),version:'game-hud-antialiased-6px-v3-roster-20261010'};
+root.NRW_BEAR_PORTRAIT_MATCHER={data,candidates,sample,match,enrich,diagnostics:()=>({...load}),version:'game-hud-antialiased-6px-v4-corrected-labels-20261010'};
 })(window);
