@@ -59,6 +59,19 @@ assert.equal(JSON.stringify(model),snapshot,'pure simulation, no player changes'
 const noWidget={...model,v2:{...model.v2,starterWidgetLevels:{Zoe:0,Petra:0,Yang:0}}};
 const none=B.calculate(noWidget,counts,C,ref);
 assert.ok(Math.abs(none.abilityFactor-1.2)<1e-10);
+// Verified Vivian always-on enemy-damage-taken ability is an own-starter
+// effect; it is NOT a joining-hero effect in this test.
+const vivianModel={...model,v2:{...model.v2,
+ ownHeroes:['Zoe','Petra','Vivian'],
+ manualHeroes:{...model.v2.manualHeroes,Vivian:{stars:4,tier:3}},
+ starterWidgetLevels:{Zoe:0,Petra:0,Vivian:0}}};
+const vivianRef={status:()=> 'ready',get:(name)=>name==='Vivian'?
+ {skillVerified:true,skills:[skill('Crouching Tiger','enemy_damage_taken_up',
+ 'percent',[5,10,15,20,25])]}:ref.get(name)};
+const vivi=B.calculate(vivianModel,counts,C,vivianRef);
+assert.equal(vivi.enemyDamageTakenPct,25);
+assert.ok(Math.abs(vivi.abilityFactor-1.25)<1e-10);
+assert.equal(vivi.includesChanceEffects,false);
 const unknown=B.calculate({...model,v2:{...model.v2,starterWidgetLevels:{}}},counts,C,ref);
 assert.equal(unknown.missing.filter(x=>x.endsWith(':widget')).length,3);
 assert.equal(unknown.withoutAbilitiesIndex,result.withoutAbilitiesIndex);
