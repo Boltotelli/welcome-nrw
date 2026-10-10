@@ -39,7 +39,7 @@ assert.ok(wizard.includes('const restrict=true'),'no unscanned API/manual hero s
 assert.ok(wizard.includes('simultaneously')||wizard.includes('SIMULTANEOUSLY'),
  'three gear sets must be equipped simultaneously');
 assert.ok(wizard.includes('BESTES HELDEN-GEAR'),'remind users to distribute best hero gear before detail screenshots');
-assert.ok(wizard.includes('GLEICHZEITIG'),'best equipment must be fitted to all three heroes simultaneously');
+assert.match(wizard,/gleichzeitig/i,'best equipment must be fitted to all three heroes simultaneously');
 assert.ok(wizard.includes('jeweils EINEN Screenshot'),'exactly one screenshot per selected hero is requested');
 assert.ok(wizard.includes('scannedOwnedHeroes'),'only heroes identified in the screenshots are eligible');
 
