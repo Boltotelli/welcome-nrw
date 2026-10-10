@@ -6,7 +6,9 @@ const sim=read('simulation-core.js'),ui=read('simulation-ui.js'),
  form=read('formation-core.js'),wizard=read('wizard.js'),html=read('index.html');
 for(const [name,source] of [['simulation-core',sim],['simulation-ui',ui],['formation-core',form],['wizard',wizard]])new vm.Script(source,{filename:name+'.js'});
 const context={window:{}};vm.runInNewContext(sim,context);vm.runInNewContext(form,context);
-const S=context.window.NRW_BEAR_SIMULATION,F=context.window.NRW_BEAR_FORMATION;
+vm.runInNewContext(read('combat.js'),context);
+const S=context.window.NRW_BEAR_SIMULATION,F=context.window.NRW_BEAR_FORMATION,
+ realCombat=context.window.NRW_BEAR_COMBAT;
 const model={values:{iAtk:1200,iLet:500,cAtk:1160,cLet:600,aAtk:1400,aLet:740,
  troopsI:12500,troopsC:17500,troopsA:70000,pitfall:3},v2:{troopTiers:[
  {tier:10,tg:5},{tier:10,tg:5},{tier:10,tg:6}],squadSeparate:false}};
@@ -62,10 +64,10 @@ assert.ok(!ui.includes('prefCalFromUrl'), 'no deep-link injection of a historica
 assert.ok(ui.includes('renderSkillScenarios(data)'), 'show join skills as separate scenarios');
 assert.equal(S.JOIN_SCENARIOS.length,4);
 const ownRow=plan.marches[0].troops;
-const pure=S.scenarioOwn(ownRow,model,combat,'no-skill');
-const balanced=S.scenarioOwn(ownRow,model,combat,'balanced-2-2');
-const atk=S.scenarioOwn(ownRow,model,combat,'attack-4');
-const letOnly=S.scenarioOwn(ownRow,model,combat,'lethality-4');
+const pure=S.scenarioOwn(ownRow,model,realCombat,'no-skill');
+const balanced=S.scenarioOwn(ownRow,model,realCombat,'balanced-2-2');
+const atk=S.scenarioOwn(ownRow,model,realCombat,'attack-4');
+const letOnly=S.scenarioOwn(ownRow,model,realCombat,'lethality-4');
 assert.equal(pure.relativePercent,100,'no skill scenario starts at 100 percent');
 for(const scenario of [balanced,atk,letOnly]){
  assert.ok(scenario.relativePercent>100,'beneficial confirmed buffs increase model damage');
