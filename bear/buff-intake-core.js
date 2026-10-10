@@ -20,7 +20,7 @@ function valoraRect(i){
  return {x:.048+i*.235,y:.856,w:.193,h:.061};
 }
 function readSkillLevel(text,max){
- const s=String(text||'').replace(/[Il|]/g,'1');
+ const s=String(text||'').replace(/[I|]/g,'1');
  const m=s.match(/(?:Level|Lvl|Lvv|L.v|Lv)\s*[.:]?\s*([0-9]{1,2})\b/i);
  if(m){const n=Number(m[1]);return n>=1&&n<=max?n:null;}
  const clean=s.trim();
