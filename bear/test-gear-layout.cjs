@@ -83,6 +83,25 @@ for(const mult of [1,1.5]){
  });
 }
 
+ // Regression measured from the ORIGINAL 955x2048 Governor Profile:
+ // normalized gold staff detected x=510..649 (139px) due to overlapping
+ // shoulder reflection; actual card/charms center at x~597, not x~579.
+ // Simulate the extra connected orange component, never store game art.
+ const glare=screenshotGeometry();
+ for(let y=518;y<621;y++)for(let x=510;x<547;x++){
+  const k=(y*glare.w+x)*4;
+  glare.pixels[k]=215;glare.pixels[k+1]=110;glare.pixels[k+2]=12;
+ }
+ const corrected=find(glare.pixels,glare.w,glare.h);
+ assert.equal(corrected.ok,true,'real gold staff glare should keep six gear cards');
+ const staff=corrected.slots.find(s=>s.id==='staff');
+ assert.equal(staff.alignmentCorrected,true,'overwide staff frame corrected using top right anchor');
+ assert.ok(Math.abs(staff.gear[0]-597.5)<=2,'actual gold staff center restored');
+ assert.deepEqual(Array.from(staff.charms,p=>Math.round(p[0])),[563,597,632],
+  'all THREE charm thumbnails centered individually, no two-glyph crops');
+ const ring=corrected.slots.find(s=>s.id==='ring');
+ assert.equal(ring.alignmentCorrected,false,'normal gold ring must not be shifted');
+
  // Mobile Governor profile: real geometry has 4 purple + 2 golden items,
  // plus an orange armor glare of similar size in the CHARACTER center.
  // It must not become a false seventh equipment card.
