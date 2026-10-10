@@ -29,6 +29,16 @@ const yang=C.parseHeroDetail('Yang S6\nGesamteigenschaften des Helden\nMaximales
 assert.equal(yang.name,'Yang');assert.equal(yang.level,80);
 assert.equal(yang.expeditionStats.aAtk,492.17);assert.equal(yang.expeditionStats.aLet,300.70);
 assert.equal('stars' in yang,false,'S6 marks generation, not stars');
+assert.equal(C.parseHeroDetail('Z0e S2\nLevel 80\nExpedition',
+ ['Yang','Petra','Zoe'])?.name,'Zoe',
+ 'Z0e OCR glyph variant resolves narrowly to Zoe');
+assert.equal(C.parseHeroDetail('Zoe\nLv. 80', ['Zoe'])?.name,'Zoe',
+ 'short title at the top can identify Zoe');
+assert.equal(C.parseHeroDetail('Zone status 80', ['Zoe']),null,
+ 'do not hallucinate Zoe from other screen text');
+assert.deepEqual(Object.keys(C.parseHeroDetail('Zoe Lv. 80', ['Zoe']).expeditionStats),[],
+ 'absence of visible percentages cannot invent base or gear stats');
+
 assert.equal(C.maxSkill(4),5);assert.equal(C.maxSkill(3),4);assert.equal(C.maxSkill(5),5);
 const types={Yang:'archer',Rosa:'archer',Petra:'cavalry',Zoe:'infantry'};
 const owned=[{name:'Yang',level:80,stars:4,widget:5},{name:'Rosa',level:80,stars:5,widget:3},{name:'Petra',level:80,stars:5},{name:'Zoe',level:80,stars:5}];
