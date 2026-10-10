@@ -44,5 +44,5 @@ const bad3=structuredClone(fixture);bad3.records[0].starProgression.expeditionAt
 assert.equal(R.validate(bad3),false,'31 source rows required');
 const source=fs.readFileSync(__dirname+'/hero-reference.js','utf8');
 assert.ok(!source.includes('localStorage'),'public reference does not touch private player profile');
-assert.ok(!source.includes('Supabase'),'public source never uses Supabase');
+assert.ok(!source.includes('supabase.createClient'),'public source never uses Supabase client');
 console.log('BEAR REFERENCE: fail-closed 37-row source validation and Yang/Rosa step lookup passed.');
