@@ -174,7 +174,7 @@ function showRelevantManual(){
  // Keep the original bound #cap input but place it in an independent
  // required-value section. The older .ux-step can be hidden by other checks.
  const capField=$('cap')?.closest('.ux-field');
- if(capField&&!capacityHost.contains(capField))capacityHost.append(capField);
+ if(capField&&!capacityHost.contains(capField))capacityHost.insertBefore(capField,capacityHost.firstChild);
  if(capField)capField.hidden=false;
  // Keep a single always-visible squad base input on this same Pet/Valora step.
  capacityHost.hidden=false;
@@ -194,6 +194,17 @@ const missingStatus=document.createElement('p');missingStatus.id='bearGuideMissi
 const buffHost=document.createElement('div');buffHost.id='bearBuffScreenshotHost';
 sections[7].prepend(buffHost);
 window.NRW_BEAR_BUFF_IMPORT?.mount(buffHost,B);
+const formationSetupHost=document.createElement('div');
+formationSetupHost.id='bearFormationSetupHost';
+sections[7].insertBefore(formationSetupHost,manual);
+const formationUI=window.NRW_BEAR_FORMATION_UI?.mount(formationSetupHost,sections[8],B,lang);
+// Keep the old provisional estimator accessible but visually secondary.
+const legacyResult=document.createElement('details');
+legacyResult.className='bear-legacy-result';
+const legacyTitle=document.createElement('summary');
+legacyTitle.textContent='Advanced / existing model (optional)';
+legacyResult.append(legacyTitle);legacyResult.append(result);
+sections[8].append(legacyResult);
 
 // The existing quick setup also contains a prominent duplicate results panel
 // inside a collapsed expert block. The real result button has moved to step 7.
@@ -460,16 +471,8 @@ function render(){
  window.NRW_BEAR_SCREENSHOT_STAGE=[1,2,4,6].includes(idx)?idx:null;
  if(idx===5)renderRecommendations();
  if(idx===6)renderHeroDetails();
- if(idx===7)showRelevantManual();
- if(idx===8&&!finished){
-  const engine=window.NRW_BEAR_COMBAT,model=B.model();
-  const tiers=engine?.configure(model.v2);
-  const capacityKnown=window.NRW_BEAR_CAPACITY?.breakdown(model,window.NRW_BEAR_CATALOG)?.complete;
-   if(engine?.ready(model.values,tiers)&&capacityKnown&&Number(B.capacity?.()||0)>0){
-   finished=true;
-   try{B.optimizeStarter();}catch(_){finished=false;}
-  }
- }
+ if(idx===7){showRelevantManual();formationUI?.refreshSetup();}
+ if(idx===8){formationUI?.show();}
  $('bearGuideEyebrow').textContent=s.eyebrow;
  $('bearGuideTitle').textContent=s.start;
  $('bearGuideDesc').textContent=s.desc;
