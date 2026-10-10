@@ -84,6 +84,10 @@ const messages={
 };
 const t=()=>messages[lang()]||messages.en;
 const sections=[],labels=['id','troops','stats','gear','heroes','hero-picks','hero-details','missing','result','simulation'];
+// GovGear scanner stays in source but is deliberately not connected to wizard.
+const guidedOrder=[0,1,2,4,5,6,7,8,9];
+const guidedNext=i=>guidedOrder[guidedOrder.indexOf(i)+1]??null;
+const guidedPrev=i=>guidedOrder[guidedOrder.indexOf(i)-1]??null;
 const wizard=document.createElement('section');wizard.id='bearGuidedWizard';wizard.className='bear-guided-wizard';wizard.setAttribute('aria-label','Bear Trap Setup');
 wizard.innerHTML='<header class="bear-guide-head"><div class="micro" id="bearGuideEyebrow"></div><h1 id="bearGuideTitle"></h1><p class="hint" id="bearGuideDesc"></p><div class="bear-guide-track" id="bearGuideTrack"></div><div class="bear-guide-progress"><span id="bearGuideStep"></span><span id="bearGuideStepTitle"></span></div></header>'+
  '<p class="bear-guide-prompt" id="bearGuidePrompt"></p>'+
@@ -96,7 +100,7 @@ for(const id of labels){const s=document.createElement('section');s.className='b
 sections[0].append(profile);
 const profileHelp=document.createElement('p');profileHelp.className='hint bear-guide-api-note';profileHelp.id='bearGuideApiHelp';sections[0].append(profileHelp);
 sections[1].append(intake);
-sections[3].append(gear);
+// Governor gear input remains unmounted from the guided workflow.
 sections[7].append(manual);
 sections[8].append(result);
 // Existing intake scanner has exactly one real input and review queue.
@@ -206,7 +210,7 @@ const legacyResult=document.createElement('details');
 legacyResult.className='bear-legacy-result';
 const legacyTitle=document.createElement('summary');
 legacyTitle.textContent='Advanced / existing model (optional)';
-legacyResult.append(legacyTitle);legacyResult.append(result);
+legacyResult.append(legacyTitle);legacyResult.append(result);legacyResult.hidden=true;
 sections[8].append(legacyResult);
 const simulationUI=window.NRW_BEAR_SIMULATION_UI?.mount(sections[9],B,lang);
 
@@ -216,9 +220,8 @@ const adv=$('uxAdvanced');if(adv){adv.open=false;const s=adv.querySelector('summ
 const profilePanel=sections[0].querySelector('section.panel');
 if(profilePanel){
  const extra=profilePanel.querySelector('details');if(extra)extra.open=false;
- if(location.hostname.endsWith('.github.io')){
-  const button=$('lookupButton');if(button){button.disabled=true;button.title=t().pages;}
- }
+ // GitHub Pages now reads public GitHub profile snapshots by ID,
+ // falling back to existing local saved data. Never disable the ID form.
 }
 const processQueue=()=>{
  const review=$('intakeQueue');return Boolean(review&&!review.hidden&&review.children.length);
@@ -308,7 +311,13 @@ function heroDetailsReady(){
  // Detail screenshots are required AFTER the suggested three have been
  // equipped with their best simultaneous Hero Gear. Do not accept earlier
  // cached statistics as evidence that this gear-first step was completed.
- return selected.length===3&&selected.every(n=>detailConfirmed.has(n));
+ return selected.length===3&&selected.every(n=>{
+  if(detailConfirmed.has(n))return true;
+  const st=m.manualHeroes?.[n]?.expeditionStats||{};
+  const cls=(['Zoe','Petra','Yang'].indexOf(n)===-1?'':n); // informational only
+  return ['i','c','a'].some(k=>Number.isFinite(Number(st[k+'Atk']))&&
+   Number.isFinite(Number(st[k+'Let']))&&st[k+'Atk']!==undefined&&st[k+'Let']!==undefined);
+ });
 }
 function renderRecommendations(){
  recommendationPanel.innerHTML='';
@@ -519,19 +528,25 @@ function render(){
  $('bearGuideEyebrow').textContent=s.eyebrow;
  $('bearGuideTitle').textContent=s.start;
  $('bearGuideDesc').textContent=s.desc;
- $('bearGuideStep').textContent=s.progress+' '+(idx+1)+' / '+labels.length;
+ $('bearGuideStep').textContent=s.progress+' '+(guidedOrder.indexOf(idx)+1)+' / '+guidedOrder.length;
  $('bearGuideStepTitle').textContent=s.steps[idx];
  $('bearGuidePrompt').textContent=s.prompts[idx];
  $('bearGuideBack').textContent='← '+s.back;
  $('bearGuideSkip').textContent=s.skip;
- $('bearGuideNext').textContent=idx===7?s.finish:idx===9?s.done:s.next+' →';
+ $('bearGuideNext').textContent=idx===7?
+  (lang()==='de'?'Formationen generieren':lang()==='fr'?'Générer les formations':'Generate formations'):
+  idx===8?(lang()==='de'?'Grundschaden ohne Joiner berechnen':
+   lang()==='fr'?'Calculer sans renforts':'Calculate damage without joiners'):
+  idx===9?s.done:s.next+' →';
  $('bearGuideBack').hidden=idx===0;
  $('bearGuideSkip').hidden=idx===0||idx===5||idx>=7;
  $('bearGuideNext').hidden=idx===9;
  const progress=$('bearGuideTrack');progress.innerHTML='';
- for(let i=0;i<labels.length;i++){const dot=document.createElement('span');dot.className=i<idx?'is-done':i===idx?'is-current':'';dot.style.flex='1';progress.appendChild(dot);}
+ for(const i of guidedOrder){const dot=document.createElement('span');dot.className=i<idx?'is-done':i===idx?'is-current':'';dot.style.flex='1';progress.appendChild(dot);}
  if(idx===0){
-  $('bearGuideApiHelp').textContent=location.hostname.endsWith('.github.io')?s.pages:'';
+  $('bearGuideApiHelp').textContent=lang()==='de'?
+   'ID laden: vorhandene GitHub-Profildatei oder bereits auf diesem Gerät gespeicherte Werte. Keine Spiel-API.':
+   'Load GitHub or saved on-device values by ID. No game API.';
   message(hasProfile()?s.profileGood:s.profileMissing);
  }else if([1,2,4,6].includes(idx)){
   const matching=processQueue();
@@ -541,8 +556,8 @@ function render(){
  else message(s.estimated);
  const next=$('bearGuideNext');
  next.disabled=(idx===0&&!hasProfile())||
-  ([1,2,3,4].includes(idx)&&(processQueue()||(!imported.has(idx)&&!modelReady(idx))))||
-  (idx===6&&(processQueue()||!heroDetailsReady()))||
+  ([1,2,4].includes(idx)&&processQueue())||
+  (idx===6&&processQueue())||
   (idx===5&&!recommendationsReady());
  if(idx>=7)next.disabled=false;
  const bodyClass='bear-wizard-mode';document.body.classList.add(bodyClass);
@@ -559,15 +574,15 @@ function moveTo(i){
  if(i<8)finished=false;
  active=i;render();
 }
-$('bearGuideBack').addEventListener('click',()=>moveTo(active-1));
-$('bearGuideSkip').addEventListener('click',()=>{if([1,2,3,4,6].includes(active)){skipped.add(active);moveTo(active+1);}});
+$('bearGuideBack').addEventListener('click',()=>{const prev=guidedPrev(active);if(prev!==null)moveTo(prev);});
+$('bearGuideSkip').addEventListener('click',()=>{if([1,2,4,6].includes(active)){skipped.add(active);const next=guidedNext(active);if(next!==null)moveTo(next);}});
 $('bearGuideNext').addEventListener('click',()=>{
  if(active===0&&!hasProfile())return;
  if(processQueue())return;
  if(active===5){confirmRecommendedHeroes();return;}
  if(active===7){showRelevantManual();moveTo(8);return;}
  if(active===8){moveTo(9);return;}
- if(active<=7)moveTo(active+1);
+ if(active<=7){const next=guidedNext(active);if(next!==null)moveTo(next);}
 });
 wizard.addEventListener('input',()=>{
  if(active===0){$('bearGuideNext').disabled=!hasProfile();}
@@ -624,7 +639,7 @@ window.addEventListener('nrw-bear-intake-applied',evt=>{
     :'Screenshot saved. Add more images for this step, or continue.');
    return;
   }
-  moveTo(active+1);
+  const next=guidedNext(active);if(next!==null)moveTo(next);
  }
 });
 window.addEventListener('nrw-bear-gear-applied',()=>{
