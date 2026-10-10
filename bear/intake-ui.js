@@ -446,6 +446,32 @@ function allKnown(){
  const owned=Object.keys(state().manualHeroes||{});
  return [...new Set([...(cat.heroes||[]).map(h=>h.name),...owned])].sort((a,b)=>a.localeCompare(b));
 }
+async function readHeroStatPanel(canvas,worker,heroName,originalText){
+ const kind=cat.heroTypes?.[heroName];
+ if(!kind)return {values:{},conflicts:[]};
+ const keys=['Atk','Def','Hp','Let'].map(k=>({infantry:'i',cavalry:'c',archer:'a'}[kind]+k));
+ const output={...Core.parseHeroStats(originalText,kind)},conflicts=new Set();
+ if(keys.filter(k=>output[k]!==undefined).length===4)return {values:output,conflicts:[]};
+ // In the hero-detail UI the tiny four expedition percentages occupy a
+ // small portion of the otherwise large portrait screenshot. A second,
+ // enlarged, CENTERED OCR pass makes the labels and +/- numbers readable.
+ const roi=document.createElement('canvas');
+ roi.width=1200;roi.height=Math.round(canvas.height*.67*1200/(canvas.width*.92));
+ const cx=roi.getContext('2d',{willReadFrequently:true});
+ cx.imageSmoothingEnabled=true;cx.imageSmoothingQuality='high';
+ cx.drawImage(canvas,canvas.width*.04,canvas.height*.29,
+  canvas.width*.92,canvas.height*.67,0,0,roi.width,roi.height);
+ try{
+  const result=await worker.recognize(roi);
+  const extra=Core.parseHeroStats(result.data?.text||'',kind);
+  for(const [key,value] of Object.entries(extra)){
+   if(output[key]!==undefined&&Math.abs(output[key]-value)>.05){
+    delete output[key];conflicts.add(key);
+   }else if(!conflicts.has(key))output[key]=value;
+  }
+ }catch(_){/* Optional crop: retain grounded full-page observations. */}
+ return {values:output,conflicts:[...conflicts]};
+}
 async function inspect(file){
  const canvas=await imageCanvas(file);
  const worker=await loadOCR();
@@ -523,6 +549,15 @@ async function inspect(file){
     detail=Core.parseHeroDetail(heading+'\n'+text,allKnown())||detail;
    }catch(_){/* Unknown name still requires user confirmation. */}
   }
+ }
+ if(detail?.name&&(type==='starter'||type==='unknown')){
+  const focused=await readHeroStatPanel(canvas,worker,detail.name,text+'\n'+grouped);
+  detail.expeditionStats={
+   ...Object.fromEntries(Object.entries(detail.expeditionStats||{})
+    .filter(([key])=>!focused.conflicts.includes(key))),
+   ...focused.values
+  };
+  detail.expeditionConflicts=focused.conflicts;
  }
  if(type==='unknown'&&detail?.name)type='starter';
  // A roster is only valid as a complete four-column overview. Detail pages
