@@ -308,3 +308,8 @@ body.bear-wizard-mode .dashboard{display:none!important}
 .bear-sim-math-type strong{font-size:12px}
 .bear-sim-math-type small{color:var(--muted);font-size:10px}
 @media(max-width:640px){.bear-sim-math-grid{grid-template-columns:1fr}.bear-sim-math-type{font-size:12px}}
+
+/* One clear source-selection control: Bonus Overview vs already combined report. */
+.bear-stat-origin{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:9px;font-size:11px;font-weight:700;flex-wrap:wrap}
+.bear-stat-origin select{font-size:12px;max-width:100%;min-width:210px;background:var(--panel);border:1px solid var(--line);border-radius:9px;color:var(--text);padding:9px}
+@media(max-width:540px){.bear-stat-origin{display:grid}.bear-stat-origin select{width:100%;min-width:0}}
