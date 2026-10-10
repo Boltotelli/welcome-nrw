@@ -81,4 +81,25 @@ const ui=fs.readFileSync(__dirname+'/intake-ui.js','utf8');
 assert.match(ui,/NRW_BEAR_HERO_STARS\?\.merge\(earlier,tile\)/);
 assert.match(ui,/starSteps:stars\.review\?null:stars\.starSteps/,
  'uncertain stars do not silently influence the leader ranking');
+// Full-resolution 955x2048 Android screenshots from the October 10 browser
+// feedback reproduced exact false values under current fixed star centres.
+// No threshold alone can tell a 4★T4 from a visually dim fifth flower.
+const newest=[
+ {name:'Yang',ratios:[.275,.270,.278,.277,0],raw:24,claimed:28},
+ {name:'Sophia',ratios:[.272,.270,.277,.213,0],raw:23,claimed:24},
+ {name:'Rosa',ratios:[.274,.272,.274,.266,.093],raw:26,claimed:30}
+];
+for(const fx of newest){
+ const guessed=S.analyze(fx.ratios);
+ assert.equal(guessed.steps,fx.raw,fx.name+' reproduces the old brightness estimate');
+ assert.equal(guessed.review,true,fx.name+' must NOT have an unverified guess auto-accepted');
+}
+const clearFive=S.analyze([.294,.299,.309,.301,.283]);
+assert.equal(clearFive.steps,30);
+assert.equal(clearFive.review,false,'five clearly lit flowers can still auto import');
+const currentUI=fs.readFileSync(__dirname+'/intake-ui.js','utf8');
+assert.match(currentUI,/starSteps:stars\.review\?null:stars\.starSteps/);
+assert.match(currentUI,/const stars=tile\.starSteps===null\?0:/,
+ 'uncertain new stars must NOT be overwritten by cached screenshot progression');
+
 console.log('HERO STARS: 30 previous plus 28 new Android samples, overlaps, 5★ and ambiguous tiers passed.');
