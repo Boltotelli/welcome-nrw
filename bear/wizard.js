@@ -17,7 +17,7 @@ const lang=()=>document.documentElement.lang||'de';
 const messages={
  de:{
   eyebrow:'NRW · BEAR TRAP',start:'Deine Bären-Aufstellung',desc:'Einmal durchgehen. Wir übernehmen alles, was wir aus deiner ID und den Spielscreenshots lesen können.',
-  steps:['Dein Profil','Truppen','Kampfwerte','GovGear','Alle Helden','Top 3 Helden','Heldendetails','Fehlende Angaben','Deine Empfehlung'],
+  steps:['Dein Profil','Truppen','Kampfwerte','GovGear','Alle Helden','Top 3 Helden','Heldendetails','Pets & Valora · fehlende Angaben','Deine Empfehlung'],
   prompts:['Wähle deine Governor-ID oder lade deine bereits vorhandenen Profildaten.',
    'Lade die Schwadronvorschau hoch. Ein Screenshot reicht. Wir lesen Truppenanzahl und Stufen.',
    'Lade die Bonusübersicht hoch. Bei einer langen Liste einfach mehrere Screenshots nacheinander auswählen.',
@@ -25,7 +25,7 @@ const messages={
    'Lade alle Screenshots deiner gesamten Heldenübersicht hoch. Mehrere Bilder gleichzeitig sind möglich; überlappende Helden werden zusammengeführt.',
    'Auf Basis deiner erfassten Helden schlagen wir dir pro Truppengattung einen Bären-Starter vor. Bitte bestätige die drei Helden.',
    'Verteile dein bestes verfügbares Helden-Gear auf die drei empfohlenen Helden und lasse diese Ausstattung für die Bärenfalle angelegt. Lade DANACH die Heldendetails und Fertigkeiten hoch.',
-   'Wir fragen nur Daten nach, die noch fehlen. Fortgeschrittene Einstellungen bleiben optional.',
+   'Lade jetzt die Pet- und Valora-Skills hoch und trage Hunter Instinct manuell ein. Danach ergänzen wir nur noch wirklich fehlende Angaben.',
    'Vergleiche die drei besten Ratios des derzeitigen Rechenmodells.'],
   next:'Weiter',back:'Zurück',skip:'Diesen Screenshot später ergänzen',finish:'Ergebnis anzeigen',
   upload:'Screenshot auswählen',uploads:'Screenshots auswählen',progress:'Schritt',
@@ -42,7 +42,7 @@ const messages={
  },
  en:{
   eyebrow:'NRW · BEAR TRAP',start:'Your Bear Trap lineup',desc:'Follow a short guided setup. We reuse your player data and screenshots.',
-  steps:['Your profile','Troops','Combat stats','Governor gear','All heroes','Top 3 heroes','Hero details','Missing values','Your recommendation'],
+  steps:['Your profile','Troops','Combat stats','Governor gear','All heroes','Top 3 heroes','Hero details','Pets & Valora · missing values','Your recommendation'],
   prompts:['Choose your Governor ID or import an existing profile.',
    'Upload your troop overview. One screenshot covers troops and tiers.',
    'Upload the bonuses screen. You can select several screenshots of a long list.',
@@ -50,7 +50,7 @@ const messages={
    'Upload ALL screenshots of your hero overview. Select several images together; duplicates across scrolling screenshots are merged.',
    'Based on your roster, review the three proposed Bear Trap rally starters – one per troop class.',
    'Distribute your best available HERO GEAR across all three suggested heroes as you would use it for Bear Trap. THEN upload their detail and skill screenshots.',
-   'Only values that are truly missing require manual input. Advanced options stay optional.',
+   'Upload pet skills and Valora skills; enter Hunter Instinct manually. Then fill only genuinely missing values.',
    'Compare the top three formations in the current simulation.'],
   next:'Continue',back:'Back',skip:'Add this screenshot later',finish:'Show recommendation',
   upload:'Choose screenshot',uploads:'Choose screenshots',progress:'Step',
@@ -65,9 +65,9 @@ const messages={
  },
  fr:{
   eyebrow:'NRW · BEAR TRAP',start:'Ta formation Ours',desc:'Un assistant simple basé sur ton profil et tes captures.',
-  steps:['Profil','Troupes','Stats','Équipement','Tous les héros','Top 3 héros','Détails héros','Valeurs manquantes','Résultat'],
+  steps:['Profil','Troupes','Stats','Équipement','Tous les héros','Top 3 héros','Détails héros','Pets & Valora · valeurs manquantes','Résultat'],
   prompts:['Choisis ton ID ou importe un profil existant.','Ajoute une capture des troupes.','Ajoute une ou plusieurs captures des bonus.','Une capture complète des 6 équipements et 18 talismans.','Ajoute toutes les captures de la liste des héros, en une seule sélection.','Vérifie les trois héros recommandés pour l’Ours.',
-   'Équipe ces héros avec ton meilleur équipement avant de capturer leurs détails et compétences.','Complète seulement les valeurs manquantes.','Compare les trois formations simulées.'],
+   'Équipe ces héros avec ton meilleur équipement avant de capturer leurs détails et compétences.','Ajoute les captures de compétences des animaux et de Valora ; saisis le talent puis complète les valeurs manquantes.','Compare les trois formations simulées.'],
   next:'Continuer',back:'Retour',skip:'Ajouter plus tard',finish:'Afficher le résultat',
   upload:'Choisir une capture',uploads:'Choisir des captures',progress:'Étape',
   profileGood:'Profil chargé.',profileMissing:'Charge un profil en premier.',
@@ -190,6 +190,10 @@ function showRelevantManual(){
  if(wrapper)wrapper.textContent=missing.length?t().missing+': '+missing.join(' · '):t().allGood;
 }
 const missingStatus=document.createElement('p');missingStatus.id='bearGuideMissingStatus';missingStatus.className='bear-guide-needed';sections[7].prepend(missingStatus);
+const buffHost=document.createElement('div');buffHost.id='bearBuffScreenshotHost';
+sections[7].prepend(buffHost);
+window.NRW_BEAR_BUFF_IMPORT?.mount(buffHost,B);
+
 // The existing quick setup also contains a prominent duplicate results panel
 // inside a collapsed expert block. The real result button has moved to step 7.
 const adv=$('uxAdvanced');if(adv){adv.open=false;const s=adv.querySelector('summary');if(s)s.title=t().opt;}
