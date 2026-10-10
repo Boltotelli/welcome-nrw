@@ -160,6 +160,15 @@ function mount(host,B,language){
   targetText.textContent=t().target;presetText.textContent=t().preset;
   [t().i,t().c,t().a].forEach((s,i)=>fields[i].name.textContent=s);
   reset.textContent='↶ '+t().reset;save.textContent='＋ '+t().save;
+  // Guided mobile workflow: keep just the own-start ratio (two editable
+  // fields, Archer auto-filled) and one reset action. No joins, extra scores,
+  // comparison controls, stacked values or audit disclosures in Step 10.
+  desc.textContent=language()==='de'?
+   'Ändere bei Bedarf die Truppenverteilung. Alle Boni fließen automatisch in eine Schadensschätzung ein.':
+   language()==='fr'?'Ajuste la formation. Un seul résultat inclut les bonus actifs.':
+   'Adjust your starter ratio; one result includes all active bonuses.';
+  targetLabel.hidden=true;presetLabel.hidden=true;save.hidden=true;
+  compared.hidden=true;
 
   target.replaceChildren();
   function option(value,name){const o=el('option','',name);o.value=String(value);target.append(o);}
@@ -506,54 +515,81 @@ function mount(host,B,language){
   panel.append(card);
   renderOwnSkillExpectation(data,own);
  }
+ // Step 10's ONLY visible result is the player's own estimated damage.
+ // It includes own starter heroes, their full Expedition effects, widgets,
+ // captured combat stats, Lv5 trap, Valora and user-activated pets, NO joiners.
+ // Older inspection/calibration routines above remain internal but MUST NOT
+ // be rendered in the guided result screen.
  function renderResult(data){
   panel.replaceChildren();
-  if(!data.ready){panel.append(el('p','bear-guide-needed',data.reason==='invalid-percentages'?t().invalid:t().missing));return;}
-  const scores=el('section','bear-sim-score-card');
-  scores.append(el('h3','',t().head));
-  const trio=el('div','bear-sim-metrics');
-  // Relative indices normalised to each role's original formation.
-  // Never mistake raw model values for actual Kingshot Bear damage points.
-  const ownCurrent=calculateOwn(data.rows[0]);
-  const ownOriginal=calculateOwn(base.marches[0].troops);
-  const ownPct=ownCurrent?.ready&&ownOriginal?.ready&&ownOriginal.modelIndex>0?
-   100*ownCurrent.modelIndex/ownOriginal.modelIndex:null;
-  const joinPct=data.score&&data.reference?.joinProxy?
-   100*data.score.joinProxy/data.reference.joinProxy:null;
-  trio.append(metric(t().own,ownPct===null?'—':ownPct.toFixed(2)+' %',
-   ownPct===null?null:ownPct-100),
-   metric(t().joins,joinPct===null?'—':joinPct.toFixed(2)+' %',data.changes?.joinPct));
-  scores.append(trio);panel.append(scores);
-  // Join scores are relative PROXIES from foreign-leader contexts and
-  // cannot be summed meaningfully with personal starter scores.
-  renderOwnBaseline(data);
-  if(!data.score)panel.append(el('p','bear-guide-needed',t().pending));
-  if(data.limited)panel.append(el('p','bear-guide-needed',t().adapted));
-  if(data.missingLeads)panel.append(el('p','hint',t().unassigned));
-  const usage=el('section','bear-sim-usage');usage.append(el('h3','',t().stocks));
-  const names=language()==='de'?['Infanterie','Kavallerie','Bogenschützen']:
-   language()==='fr'?['Infanterie','Cavalerie','Archers']:['Infantry','Cavalry','Archers'];
-  for(let k=0;k<3;k++){
-   const label=el('div','bear-sim-usage-label');label.append(el('span','',names[k]),
-    el('strong','',fmt(data.used[k])+' / '+fmt(data.stock[k])+' · '+fmt(data.left[k])+' '+t().free));
-   const track=el('div','bear-sim-bar');const fill=el('div','bear-sim-fill kind-'+k);
-   fill.style.width=(data.stock[k]?100*data.used[k]/data.stock[k]:0)+'%';track.append(fill);
-   usage.append(label,track);
+  if(!base?.ready||!Array.isArray(ratios[0])){
+   panel.append(el('p','bear-guide-needed',t().missing));return;
   }
-  panel.append(usage);
-  const out=el('section','bear-sim-marches');out.append(el('h3','',t().results));
-  for(const m of data.measures){
-   const item=el('div','bear-sim-march-row');
-   item.append(el('strong','',m.slot===0?t().starter:t().join+' '+m.slot));
-   const details=el('div');
-   const ratio=x=>x.join(' / ');
-   details.append(el('span','',t().desired+': '+ratio(m.desired)+'%'));
-   details.append(el('span','',t().actual+': '+ratio(m.actual)+'%'));
-   details.append(el('small','',fmt(m.filled)+' / '+fmt(m.cap)+' '+t().total));
-   item.append(details);out.append(item);
+  const model=B.model(),combat=root.NRW_BEAR_COMBAT;
+  const formation=root.NRW_BEAR_FORMATION;
+  // Own rally march is evaluated ALONE, using its full capacity and the
+  // player's real troop inventory. No side-join inventory allocation,
+  // external rally captain or joining-hero effect reduces/amplifies it.
+  const desired=Math.min(Math.floor(base.marches[0].capacity),
+   base.stock.reduce((a,b)=>a+b,0));
+  const solo=formation?.allocateStock?.([desired],base.stock,ratios[0],[])?.[0];
+  if(!solo||solo.reduce((a,b)=>a+b,0)<=0){
+   panel.append(el('p','bear-guide-needed',t().missing));return;
   }
-  panel.append(out,el('p','bear-sim-disclaimer',t().uncertain));
-  renderComparisons();
+  const scoreTool=root.NRW_BEAR_SCORE_BONUSES;
+  const estimate=scoreTool?.personalDamage?.(model,solo,combat,
+   root.NRW_BEAR_HERO_REFERENCE,root.NRW_BEAR_CATALOG,
+   root.NRW_BEAR_PROC_EXPECTATION);
+  if(!estimate?.ready){
+   const ref=root.NRW_BEAR_HERO_REFERENCE;
+   if(estimate?.reason==='hero-reference-unavailable'&&
+       ref?.status?.()==='idle'&&typeof ref.load==='function'){
+    ref.load().then(()=>{if(ref.status?.()==='ready'&&base)rerun(400);});
+   }
+   let msg=language()==='de'?
+    'Für deine persönliche Schadensschätzung fehlen noch Angaben.':
+    language()==='fr'?'Des données manquent pour estimer tes dégâts.':
+    'More information is needed to estimate your own damage.';
+   if(estimate?.reason==='hero-reference-unavailable')
+    msg=language()==='de'?'Heldendaten werden geladen. Bitte einen Moment warten.':
+     'Loading verified hero skills. Please wait.';
+   if(estimate?.reason==='missing-active-pet-skill')
+    msg=language()==='de'?'Bei einem aktiven Pet fehlt der Skill-Rang: '+
+     (estimate.missingPets||[]).join(', '):'An active pet is missing its skill rank.';
+   if(estimate?.reason==='missing-valora-level')
+    msg=language()==='de'?'Bitte Valor as Hunter-Instinct-Level im vorherigen Schritt eintragen.'.replace('Valor as','Valoras'):
+     'Enter Valora Hunter Instinct level in the previous step.';
+   if(estimate?.reason==='unmodeled-starter-skills')
+    msg=language()==='de'?'Die Fähigkeiten dieser Starterhelden sind noch nicht vollständig modelliert.':
+     'The selected starter skills are not all modeled yet.';
+   panel.append(el('p','bear-guide-needed',msg));
+   return;
+  }
+  const section=el('section','bear-sim-score-card');
+  section.append(el('h3','',
+   language()==='de'?'Dein erwarteter Bärenschaden':
+   language()==='fr'?'Tes dégâts Ours estimés':'Your estimated Bear damage'));
+  const headline=el('strong','');
+  headline.style.display='block';
+  headline.style.fontSize='clamp(2rem, 7vw, 3.5rem)';
+  headline.style.lineHeight='1.15';
+  headline.style.fontVariantNumeric='tabular-nums';
+  headline.style.margin='10px 0';
+  headline.textContent=scoreText(estimate.expectedScore);
+  section.append(headline);
+  const active=estimate.activePets.length>0;
+  section.append(el('p','hint',
+   language()==='de'?
+    'Deine Starter · Falle Lv. 5 · '+(active?'aktive Pet-Buffs':'keine aktiven Pet-Buffs')+
+    ' · Valora · ohne Joiner':
+    language()==='fr'?'Tes héros · piège niv. 5 · familiers actifs · Valora · sans renforts':
+    'Own starters · Lv5 trap · '+(active?'active pets':'no active pets')+' · Valora · no joiners'));
+  section.append(el('p','bear-sim-disclaimer',
+   language()==='de'?
+    'Schätzwert: Zufallsfähigkeiten können im echten Kampf mehr oder weniger Schaden verursachen.':
+    language()==='fr'?'Estimation : les capacités aléatoires font varier les dégâts réels.':
+    'Estimate: random skill activations can make actual damage higher or lower.'));
+  panel.append(section);
  }
  function renderComparisons(){
   compared.replaceChildren();compared.append(el('h3','',t().comparison));
