@@ -51,6 +51,13 @@ function readWidgetLevel(model,name){
  // Explicit user entry is authoritative, including deliberate Lv0.
  if(value!==undefined&&value!==null&&value!==''&&Number.isInteger(Number(value))&&Number(value)>=0&&Number(value)<=10)
   return Number(value);
+ // Existing manually confirmed hero cards may already contain a widget.
+ // A positive value may prefill/use that fact without a redundant second
+ // click. Lv0 from the older editor is ambiguous and remains unconfirmed
+ // unless explicitly selected in this guided Widget review.
+ const old=model?.v2?.manualHeroes?.[name]?.widget;
+ if(old!==undefined&&old!==null&&old!==''&&Number.isInteger(Number(old))&&Number(old)>0&&Number(old)<=10)
+  return Number(old);
  return null;
 }
 function currentStats(model){
