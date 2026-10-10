@@ -589,6 +589,31 @@ function mount(host,B,language){
     'Schätzwert: Zufallsfähigkeiten können im echten Kampf mehr oder weniger Schaden verursachen.':
     language()==='fr'?'Estimation : les capacités aléatoires font varier les dégâts réels.':
     'Estimate: random skill activations can make actual damage higher or lower.'));
+
+  const compare=document.createElement('button');
+  compare.type='button';compare.className='secondary-btn bear-compare-own';
+  compare.textContent=language()==='de'?'Mit optimierter Formation vergleichen':
+   language()==='fr'?'Comparer à la formation optimisée':'Compare with optimized formation';
+  const comparison=el('p','bear-formation-compare-status');comparison.hidden=true;
+  compare.addEventListener('click',()=>{
+   const original=base?.marches?.[0]?.ratio;
+   if(!Array.isArray(original)||original.length<2)return;
+   const intended=formation.allocateStock([desired],base.stock,
+    [Math.round(original[0]),Math.round(original[1])],[])?.[0];
+   if(!intended)return;
+   const optimal=scoreTool.personalDamage(model,intended,combat,
+    root.NRW_BEAR_HERO_REFERENCE,root.NRW_BEAR_CATALOG,
+    root.NRW_BEAR_PROC_EXPECTATION);
+   if(!optimal?.ready||optimal.expectedScore<=0)return;
+   const change=100*(estimate.expectedScore/optimal.expectedScore-1);
+   comparison.textContent=language()==='de'?
+    (change===0?'Gleicher geschätzter Schaden wie beim Vorschlag.':
+    (change>0?'+':'')+change.toFixed(2)+' % gegenüber der vorgeschlagenen Formation.'):
+    (change===0?'Same estimated damage as the recommendation.':
+    (change>0?'+':'')+change.toFixed(2)+'% vs recommended formation.');
+   comparison.hidden=false;
+  });
+  section.append(compare,comparison);
   panel.append(section);
  }
  function renderComparisons(){
