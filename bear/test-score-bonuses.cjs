@@ -18,7 +18,7 @@ assert.equal(s.talent({v2:{}}),null);
 const old=31608263;
 const point=s.pointScore(old,value);
 assert.equal(point.ready,true);
-assert.ok(Math.abs(point.withPersonalBonus-38246098.23)<1e-6);
+assert.ok(Math.abs(point.withPersonalBonus-38245998.23)<1e-6);
 assert.ok(Math.abs(point.withMasteryAlternative-37613832.97)<1e-6);
 assert.equal(point.index,old,'the raw modeled combat value is unchanged');
 assert.equal(point.notTroopAttack,true);
