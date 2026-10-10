@@ -60,10 +60,10 @@ for(let k=0;k<3;k++)assert.ok(p.used[k]<=p.stock[k],'scarce archers must never g
 const supply=[...p.stock],totals=p.marches.reduce((a,x)=>a+x.filled,0);
 assert.ok(totals<=supply.reduce((a,b)=>a+b,0));
 m.values.troopsA=900000;
-delete m.v2.manualHeroes.Fill9; // fewer owned heroes, requires visible empty slots
+delete m.v2.manualHeroes.Fill9;delete m.v2.manualHeroes.Fill10; // 20 owned < 21 hero slots
 p=plan();assert.equal(p.allHeroesAssigned,false,'missing heroes are not synthesized');
 assert.equal(p.allHeroLevelsKnown,false,'missing join capacity remains provisional');
-m.v2.manualHeroes.Fill9=heroes.Fill9;
+m.v2.manualHeroes.Fill9=heroes.Fill9;m.v2.manualHeroes.Fill10=heroes.Fill10;
 m.v2.scannedOwnedHeroes=starter.concat(filler);p=plan();
 assert.ok(p.marches.some(x=>x.slot>0&&!x.heroes[0]),'unsafe first skills are not auto recommended');
 m.v2.scannedOwnedHeroes=all;
