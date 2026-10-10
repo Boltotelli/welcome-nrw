@@ -456,18 +456,8 @@ el('jsonImport').addEventListener('change',async function(){
 el('jsonPasteSubmit').addEventListener('click',function(){
  try{applyApiJson(JSON.parse(el('jsonText').value));}catch(_){message('offlineError','error');}
 });
-el('lookupForm').addEventListener('submit',async function(e){
- e.preventDefault();var id=el('governorId').value.trim();if(!/^\d{5,20}$/.test(id)){message('badId','error');return;}
- if(location.hostname.endsWith('.github.io')){message('pagesApiPending','error');return;}var button=el('lookupButton');button.disabled=true;message('busy');
- try{
-  var response=await fetch('/api/bear-profile?id='+encodeURIComponent(id),{headers:{Accept:'application/json'}});
-  var data=await response.json().catch(function(){return {error:'provider_unavailable'};});
-  if(!response.ok||!data.ok){
-   var error=data.error==='not_nrw_member'?'notMember':data.error==='bear_api_not_configured'?'missingKey':data.error==='player_not_found'?'notFound':data.error==='provider_rate_limited'?'rate':'failed';message(error,'error');return;
-  }
-  activate(data,true);
- }catch(_){message('failed','error');}finally{button.disabled=false;}
-});
+/* Read-only GitHub/local ID lookup is handled by github-profiles.js.
+ * Old MightPulse API form handler removed completely. */
 el('themeButton').addEventListener('click',function(){
  var theme=document.documentElement.dataset.theme==='dark'?'light':'dark';
  document.documentElement.dataset.theme=theme;try{localStorage.setItem('nrw_theme',theme);}catch(_){}
