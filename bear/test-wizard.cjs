@@ -30,7 +30,7 @@ assert.ok(!wizard.includes('sourceValue*')&&!wizard.includes('verified.bonus*'),
  'reference bonuses are never invented damage multipliers');
 
 assert.ok(html.indexOf('wizard.css')>html.indexOf('intake-ui.css'),'wizard styles override legacy forms');
-assert.ok(wizard.includes("labels=['id','troops','stats','gear','heroes','hero-picks','hero-details','missing','result','simulation'];"),'ten stages: formation recommendations followed by interactive damage laboratory');
+assert.ok(wizard.includes('const guidedOrder=[0,1,2,4,5,6,7,8,9]'),'nine displayed stages without governor gear');
 for(const id of ['lookupForm','intakeFiles','bearGearPhoto','intakeMissingDetails','intakeResultSlot']){
  assert.ok(wizard.includes(id),'wizard reuses real control '+id);
 }
@@ -39,12 +39,13 @@ for(const event of ['nrw-bear-loaded','nrw-bear-intake-applied','nrw-bear-gear-a
 }
 assert.ok(intake.includes("CustomEvent('nrw-bear-intake-applied'"),'intake signals successful review');
 assert.ok(gear.includes("CustomEvent('nrw-bear-gear-applied'"),'gear signals user confirmation');
-assert.ok(wizard.includes("location.hostname.endsWith('.github.io')"),'Pages API limitation explained');
+assert.ok(wizard.includes('const guidedOrder=[0,1,2,4,5,6,7,8,9]'),'GovGear stays disconnected from nine-stage wizard');
+assert.ok(html.includes('github-profiles.js?v='),'numeric ID static GitHub loader included');
 assert.ok(wizard.includes("!hasProfile()"),'cannot proceed without a loaded profile');
 assert.ok(wizard.includes("processQueue()"),'do not advance with unconfirmed OCR queue');
 assert.ok(css.includes('body.bear-wizard-mode .dashboard'),'legacy full dashboard hidden in guided mode');
 assert.ok(!wizard.includes('localStorage.setItem('),'wizard does not create a competing persistence model');
-assert.ok(wizard.includes('capacityHost.insertBefore(capField,capacityHost.firstChild)'),'squad capacity stays above the breakdown on step 8');
+assert.ok(wizard.includes('capacityHost.insertBefore(capField,capacityHost.firstChild)'),'existing capacity input retained on Pet/Valora step');
 assert.ok(wizard.includes('confirmRecommendedHeroes()'),'recommendation confirmation precedes details');
 assert.ok(wizard.includes("input.multiple=[2,4,6].includes(i)"),'full hero overview and detail batches are supported');
 assert.ok(wizard.includes('recommendationsReady()'),'cannot confirm three roles unless all present');
@@ -89,4 +90,9 @@ assert.match(intake,/parseHeroOrderedExpeditionRows\(result\.data\?\.text\|\|'',
  'positioned numeric readings use conservative four-row parser');
 assert.match(intake,/\['Atk','Def','Let','Hp'\]\.map\(k=>group\+k\)/,
  'hero input rows must mirror actual Kingshot Attack Defense Lethality Health order');
+assert.ok(wizard.includes('displayStored(idx)'),'saved values remain visible on screenshot pages');
+assert.ok(wizard.includes('valoraBaseLevel'),'Valora overall level tracked separately from Hunter Instinct');
+assert.ok(wizard.includes('Formationen generieren'),'simple formation generation action');
+assert.ok(wizard.includes('Grundschaden ohne Joiner berechnen'),'simple no-join damage action');
+assert.ok(css.includes('.bear-guide-stored'),'mobile saved-values cards styled');
 console.log('BEAR WIZARD: nine stages, hero shortlist, separate gear-first detail uploads and independent capacity input verified.');
