@@ -36,6 +36,11 @@ assert.equal(A.recommend([h('Margot',1),h('Petra',4)],roles,priorities)[1].best.
 assert.equal(A.recommend([h('Amadeus',1),h('Zoe',4)],roles,priorities)[0].best.name,'Zoe',
  'infantry progression also outweighs name priority');
 
+// User's actual captain comparison, both without widgets:
+assert.equal(A.recommend([h('Yang',4,80,{tier:4}),h('Rosa',5)],roles,priorities)[2].best.name,'Yang',
+ '4-star T4 Gen6 Yang should outrank 5-star Rosa with no widget');
+assert.equal(A.recommend([h('Yang',1),h('Rosa',4)],roles,priorities)[2].best.name,'Rosa',
+ 'Gen6 preference does not override severe under-investment');
 const unknown=A.recommend([{name:'Yang',level:80},h('Rosa',4)],roles,priorities)[2];
 assert.equal(unknown.best.name,'Rosa','unknown stars cannot outrank verified built hero');
 assert.equal(unknown.choices.find(c=>c.name==='Yang').confidence,'limited');
