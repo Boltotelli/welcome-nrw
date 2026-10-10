@@ -289,3 +289,12 @@ body.bear-wizard-mode .dashboard{display:none!important}
 .bear-widget-manual select{width:130px;max-width:100%;border:1px solid var(--line);background:var(--panel);color:var(--text);padding:8px;border-radius:9px;font-size:12px}
 .bear-gear-hero-item{flex-wrap:wrap;row-gap:8px}
 @media(max-width:550px){.bear-widget-manual{width:100%;margin-left:0;justify-content:space-between}.bear-widget-manual select{min-width:110px}}
+
+/* Widgets are gathered AFTER automatic hero detail import, before results. */
+.bear-widget-panel{padding:13px;border:1px solid var(--line);border-radius:13px;margin:12px 0}
+.bear-widget-panel h3{font-size:15px;margin:0 0 5px}
+.bear-widget-panel .hint{font-size:11px;line-height:1.6;margin:0 0 10px}
+.bear-widget-level-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.bear-widget-level-grid .bear-widget-manual{display:grid;align-content:start;gap:5px;margin:0;width:100%}
+.bear-widget-level-grid .bear-widget-manual select{width:100%;max-width:100%;font-size:12px}
+@media(max-width:530px){.bear-widget-level-grid{grid-template-columns:1fr}.bear-widget-level-grid .bear-widget-manual{display:flex;justify-content:space-between;align-items:center}.bear-widget-level-grid .bear-widget-manual select{width:140px}}
