@@ -82,6 +82,22 @@ for(const mult of [1,1.5]){
   assert.ok(slot.charms[0][0]<slot.charms[1][0]&&slot.charms[1][0]<slot.charms[2][0]);
  });
 }
+
+ // Mobile Governor profile: real geometry has 4 purple + 2 golden items,
+ // plus an orange armor glare of similar size in the CHARACTER center.
+ // It must not become a false seventh equipment card.
+ const actualProfile=image(0,0,true);
+ const fakeX=168,fakeY=378,fakeW=126,fakeH=128;
+ for(let y=fakeY;y<fakeY+fakeH;y++)for(let x=fakeX;x<fakeX+fakeW;x++){
+  const p=(y*actualProfile.w+x)*4;
+  actualProfile.pixels[p]=215;actualProfile.pixels[p+1]=110;
+  actualProfile.pixels[p+2]=12;
+ }
+ const detectedReal=find(actualProfile.pixels,actualProfile.w,actualProfile.h);
+ assert.equal(detectedReal.ok,true,'character glare must not confuse six gear card grid');
+ assert.equal(detectedReal.slots.length,6);
+ assert.equal(detectedReal.slots.filter(x=>x.inferred).length,0,'all six slots directly detected');
+
 const blank=image().pixels;blank.fill(0);
 assert.equal(find(blank,716,1536).ok,false);
 console.log('GEAR LAYOUT: six purple/orange frames detected at original and shifted positions, no inferred golden archer equipment.');
