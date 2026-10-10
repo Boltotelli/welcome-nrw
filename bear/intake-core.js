@@ -103,6 +103,26 @@ function parseHeroStats(text,type){
  }
  return out;
 }
+// In the in-game Hero Details popover the right aligned Expedition values
+// always run Attack, Defense, Lethality, Health, regardless of wrapped labels.
+// This parser ONLY accepts a clean set of FOUR visible percent-bearing lines
+// from a narrow crop of that numeric column. With 1–3 or >4 readings we
+// cannot safely infer missing row positions, so fail closed and use labels.
+function parseHeroOrderedExpeditionRows(text,type){
+ const prefix={infantry:'i',cavalry:'c',archer:'a'}[type];
+ if(!prefix)return {};
+ const matches=[];
+ for(const line of String(text||'').split(/\n+/)){
+  const all=[...line.matchAll(/(\d{1,4}(?:[.,]\d{1,3})?)\s*[%％]/g)];
+  if(all.length!==1)continue;
+  const n=normalizeNumber(all[0][1]);
+  if(n===null||n<0||n>5000)return {};
+  matches.push(n);
+ }
+ // Do NOT map an incomplete list by index: later rows would shift up.
+ if(matches.length!==4)return {};
+ return Object.fromEntries(['Atk','Def','Let','Hp'].map((k,i)=>[prefix+k,matches[i]]));
+}
 function heroFromText(text,known){
  // The very short name Zoe is often read as Z0e / Zoé by mobile OCR.
  // Correct only the tightly bounded name token, not arbitrary text digits.
@@ -168,5 +188,5 @@ function category(text){
  if(/helden|heroes/.test(f))return 'roster';
  return 'unknown';
 }
-root.NRW_BEAR_INTAKE_CORE={parseHeroStats,fold,normalizeNumber,classFrom,parseTroops,parseMarchSlots,parseStats,parseHeroDetail,maxSkill,advise,category,rankByType};
+root.NRW_BEAR_INTAKE_CORE={parseHeroStats,parseHeroOrderedExpeditionRows,fold,normalizeNumber,classFrom,parseTroops,parseMarchSlots,parseStats,parseHeroDetail,maxSkill,advise,category,rankByType};
 })(window);
