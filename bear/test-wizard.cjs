@@ -44,7 +44,7 @@ assert.ok(wizard.includes("!hasProfile()"),'cannot proceed without a loaded prof
 assert.ok(wizard.includes("processQueue()"),'do not advance with unconfirmed OCR queue');
 assert.ok(css.includes('body.bear-wizard-mode .dashboard'),'legacy full dashboard hidden in guided mode');
 assert.ok(!wizard.includes('localStorage.setItem('),'wizard does not create a competing persistence model');
-assert.ok(wizard.includes('capacityHost.append(capField)'),'squad capacity moved outside conditional group');
+assert.ok(wizard.includes('capacityHost.insertBefore(capField,capacityHost.firstChild)'),'squad capacity stays above the breakdown on step 8');
 assert.ok(wizard.includes('confirmRecommendedHeroes()'),'recommendation confirmation precedes details');
 assert.ok(wizard.includes("input.multiple=[2,4,6].includes(i)"),'full hero overview and detail batches are supported');
 assert.ok(wizard.includes('recommendationsReady()'),'cannot confirm three roles unless all present');
