@@ -264,10 +264,8 @@ function capacity(){
   Math.max(0,Math.floor(n('cap')+n('master')+n('pet')+heroCapacity()));
 }
 function offensiveStats(stats,own){
- if(!own||!model.v2||!model.v2.squadSeparate)return stats;
- var attack=n('squadAtk'),lethality=n('squadLet');
- return Object.assign({},stats,{iAtk:Number(stats.iAtk)+attack,cAtk:Number(stats.cAtk)+attack,aAtk:Number(stats.aAtk)+attack,
- iLet:Number(stats.iLet)+lethality,cLet:Number(stats.cLet)+lethality,aLet:Number(stats.aLet)+lethality});
+ if(!own)return stats;
+ return window.NRW_BEAR_OWN_BASELINE?.currentStats?.(model)||stats;
 }
 function ratio(m){return [m.i,m.c,100-m.i-m.c];}
 function counts(m,cap){var r=ratio(m),i=Math.floor(cap*r[0]/100),c=Math.floor(cap*r[1]/100);return [i,c,cap-i-c];}
