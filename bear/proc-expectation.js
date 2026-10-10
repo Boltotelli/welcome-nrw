@@ -112,6 +112,9 @@ function evaluate(model,counts,combat,reference){
    const turnFixed=fixedStrikes.reduce((f,s)=>
     turn%s.every===0?f*(1+s.amount):f,1);
    const fixedFactor=turnFixed*fixedStatic;
+   // This is the literal all-procs-off check, not the expected value
+   // conditioned on zero CURRENT procs while Sunder from prior rounds persists.
+   noProc+=basePerClass.reduce((sum,v)=>sum+v,0)*fixedFactor;
    for(let mask=0;mask<states;mask++){
     let p=1;
     const chosen=[];
@@ -145,7 +148,6 @@ function evaluate(model,counts,combat,reference){
     const ambushFactor=ambush?1+(schema[5]?.effectPercent||0)/100:1;
     const result=dmg*sunderFactor*fixedFactor*takenFactor*ambushFactor;
     expected+=p*result;
-    if(mask===0)noProc+=result;
     if(mask===states-1)allProc+=result;
    }
   }
