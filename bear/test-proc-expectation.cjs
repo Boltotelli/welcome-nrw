@@ -10,7 +10,7 @@ for(const f of ['combat.js','own-baseline.js','proc-expectation.js'])
 const C=ctx.window.NRW_BEAR_COMBAT,B=ctx.window.NRW_BEAR_OWN_BASELINE,
  P=ctx.window.NRW_BEAR_PROC_EXPECTATION;
 assert.equal(P.ROUND_COUNT,10);
-assert.equal(P.CONFIG.length,5);
+assert.equal(P.CONFIG.length,6);
 const sk=(name,effect,metric,valuesBySkillLevel,conditions={})=>
  ({name,effect,metric,valuesBySkillLevel,conditions});
 const records={
@@ -57,22 +57,23 @@ assert.ok(Math.abs(original.modelIndex-12705683)<2);
 const x=P.evaluate(model,row,C,ref);
 assert.equal(x.ready,true);
 assert.equal(x.turns,10);
-assert.equal(x.skills.length,5);
+assert.equal(x.skills.length,6);
 assert.equal(x.includesJoiningSkills,false);
-assert.equal(x.includesSunder,false);
+assert.equal(x.includesSunder,true);
 assert.equal(x.partial,true);
 assert.equal(x.stackAssumption,'same-family-enemy-taken-additive');
 assert.deepEqual(Array.from(x.skills.map(s=>s.skill)),
- ['Infinite Arsenal','Evil Eye','The Favor','Ice Zone','Ambush']);
-assert.deepEqual(Array.from(x.skills.map(s=>s.chancePercent)),[50,50,50,40,40]);
-assert.deepEqual(Array.from(x.skills.map(s=>s.effectPercent)),[50,50,50,100,50]);
-assert.equal(x.unmodeled.length,1,'Zoe Sunder duration/basis is unknown, Petra Shield is defensive');
-assert.equal(x.unmodeled[0].skill,'Sundering Wound');
+ ['Sundering Wound','Infinite Arsenal','Evil Eye','The Favor','Ice Zone','Ambush']);
+assert.deepEqual(Array.from(x.skills.map(s=>s.chancePercent)),[20,50,50,50,40,40]);
+assert.deepEqual(Array.from(x.skills.map(s=>s.effectPercent)),[40,50,50,50,100,50]);
+assert.equal(x.unmodeled.length,0,'all sourced offensive starter skills modeled; Petra Shield is defensive');
+assert.equal(x.skills[0].durationTurns,3);
+assert.equal(x.sunderAssumption,'three-turn-single-refresh-immediate-tick-all-squad-basis');
 assert.ok(Math.abs(x.noProcCheckIndex-original.modelIndex)<1e-7,
  'the zero-proc 10-round result must exactly equal existing fixed base and widgets');
-assert.ok(Math.abs(x.expectedIndex-31561593)<3,
+assert.ok(Math.abs(x.expectedIndex-37284762)<3,
  'source-pinned 10-round same-turn independent proc model, NOT a fit to 33m');
-assert.ok(Math.abs(x.alternativeIndex-32876660)<3);
+assert.ok(Math.abs(x.alternativeIndex-38838294)<3);
 assert.ok(x.expectedIndex>x.baselineIndex);
 assert.ok(x.alternativeIndex>x.expectedIndex);
 assert.ok(x.allProcIllustrationIndex>x.alternativeIndex);
@@ -81,7 +82,7 @@ const repeat=P.evaluate(model,row,C,ref);
 assert.equal(repeat.expectedIndex,x.expectedIndex,'exact enumeration, no stochastic sampling');
 assert.equal(repeat.alternativeIndex,x.alternativeIndex);
 assert.equal(P.evaluate(model,row,C,{status:()=> 'error'}).ready,false,
- 'missing remote source cannot invent a five-skill expectation');
+ 'missing remote source cannot invent a six-skill expectation');
 // No-proc source must calculate exactly the original fixed baseline.
 const noChance={status:()=> 'ready',get:(name)=>{
  const xs=records[name].map(s=>({
@@ -122,4 +123,4 @@ assert.ok(ui.includes('renderOwnSkillExpectation(data,own)'));
 assert.ok(ui.includes('effectPercent'));
 assert.ok(html.includes('proc-expectation.js?v='));
 assert.ok(html.indexOf('proc-expectation.js')<html.indexOf('simulation-ui.js'));
-console.log('OWN PROC EXPECTATION: exact 10-turn Bernoulli enumeration, five pinned effects, additive/multiplicative debuffs, correct source skills, no joins, unknown Sunder excluded, 31.56m vs 32.88m assumed scenario passed.');
+console.log('OWN PROC EXPECTATION: six sourced offensive effects including three-turn nonstacked Sunder, exact 10-turn expectation, no joins, no-proc invariant, skill cap, and profile purity passed.');
