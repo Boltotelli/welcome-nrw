@@ -61,28 +61,41 @@ function ready(stats,levels){
  statKeys.flat().every(k=>Object.prototype.hasOwnProperty.call(stats,k)&&
  Number.isFinite(Number(stats[k]))&&Number(stats[k])>=0));
 }
+function breakdown(troops,stats,levels,pitfall=0){
+ if(!ready(stats,levels)||!Array.isArray(troops)||troops.length!==3||
+    troops.some(n=>!Number.isSafeInteger(Number(n))||Number(n)<0))return null;
+ const trapLevel=Math.min(5,Math.max(0,Number(pitfall)||0));
+ const trapBonus=trapLevel*5;
+ const bearTotal=5000,bearDefensePerUnit=83.3333333333*10/100,rounds=10;
+ // Bear total 5000: armyMin = min(all own attackers, 5000).
+ // This keeps the model consistent for sparse (under-5k) test marches.
+ const ownTotal=troops.reduce((s,n)=>s+Number(n),0);
+ const armyMin=Math.min(ownTotal,bearTotal);
+ const types=troops.map((count,i)=>{
+  const quantity=Number(count),baseAttack=troopAttack(troopKeys[i],levels[i].tier,levels[i].tg);
+  const capturedAttackPct=Number(stats[statKeys[i][0]]);
+  const lethalityPct=Number(stats[statKeys[i][1]]);
+  const appliedAttackPct=capturedAttackPct+trapBonus;
+  // Base lethality 10 for every class; source T/TG tables are *raw* attack.
+  const attPerUnit=baseAttack*(1+appliedAttackPct/100)*10*(1+lethalityPct/100)/100;
+  const armyFactor=Math.sqrt(quantity*armyMin);
+  const typeBonus=i===2?1.10:1;
+  const damagePerRound=armyFactor*attPerUnit/bearDefensePerUnit/100*typeBonus;
+  return {type:troopKeys[i],count:quantity,tier:levels[i].tier,tg:levels[i].tg,
+   baseAttack,capturedAttackPct,trapAttackPct:trapBonus,appliedAttackPct,lethalityPct,
+   attackPerUnit:attPerUnit,armyFactor,typeBonus,
+   damagePerRound,damageTenRounds:damagePerRound*rounds};
+ });
+ return {types,rounds,bearTotal,bearDefensePerUnit,armyMin,trapLevel,trapAttackPct:trapBonus,
+  totalTroops:ownTotal,totalTenRounds:types.reduce((n,t)=>n+t.damageTenRounds,0)};
+}
 function damage(troops,stats,levels,pitfall=0){
- if(!ready(stats,levels)||!Array.isArray(troops))return null;
- const trapBonus=Math.min(5,Math.max(0,Number(pitfall)||0))*5;
- // Community model: sqrt(own troops * 5,000 bear units);
- // enemy defense (83.333 HP x 10 defense /100), 10 rounds,
- // archer racial bonus vs infantry bear +10%.
- return troops.reduce((sum,count,i)=>{
-   const qty=Math.max(0,Number(count)||0);
-   if(!qty)return sum;
-   const base=troopAttack(troopKeys[i],levels[i].tier,levels[i].tg);
-   const atk=1+(Number(stats[statKeys[i][0]])+trapBonus)/100;
-   const lethality=10*(1+Number(stats[statKeys[i][1]])/100);
-   const perUnit=base*atk*lethality/100;
-   const rounds=10, enemyDefense=83.3333333333*10/100;
-   const rangedBonus=i===2?1.10:1;
-   return sum+Math.sqrt(qty*5000)*perUnit/enemyDefense/100*rounds*rangedBonus;
- },0);
+ return breakdown(troops,stats,levels,pitfall)?.totalTenRounds??null;
 }
 function configure(v2){
  if(!v2||typeof v2!=='object')return [{tier:0,tg:0},{tier:0,tg:0},{tier:0,tg:0}];
  const levels=Array.isArray(v2.troopTiers)?v2.troopTiers:[];
  return troopKeys.map((_,i)=>({tier:Number(levels[i]?.tier)||0,tg:levels[i]?.tg===undefined?0:Number(levels[i].tg)}));
 }
-root.NRW_BEAR_COMBAT={troopKeys,attack,troopAttack,ready,damage,configure,statKeys};
+root.NRW_BEAR_COMBAT={troopKeys,attack,troopAttack,ready,damage,breakdown,configure,statKeys};
 })(window);
