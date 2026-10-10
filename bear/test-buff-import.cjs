@@ -27,15 +27,18 @@ assert.equal(C.valoraRect(0).y,C.valoraRect(3).y);
 const valBadge=C.valoraBadgeRect(C.valoraRect(0));
 assert.ok(valBadge.x>C.valoraRect(0).x&&valBadge.y>C.valoraRect(0).y,
  'Valora OCR must read centered lower skill-rank badge');
-const square=C.valoraPreviewRect(C.valoraRect(0),955/2048);
-assert.ok(Math.abs(square.w*955-square.h*2048)<.0001,
- 'Valora skill preview must have square pixel proportions');
-assert.ok(square.x>0&&square.x+square.w<1&&square.y>0&&square.y+square.h<1,
- 'Valora square preview must stay inside the screenshot');
-assert.ok(ui.includes("C.valoraBadgeRect(slot.rect)")&&ui.includes("C.valoraPreviewRect(rect,canvas.width/canvas.height)"),
- 'Valora uses independent OCR and square preview geometry');
-assert.ok(ui.includes("paddedBadge(first)")&&ui.includes("tessedit_pageseg_mode:'8'"),
- 'small on-icon rank captions have padded OCR and numeric fallback');
+const fullCard=C.valoraPreviewRect(C.valoraRect(0));
+assert.ok(Math.abs(fullCard.w*955-193)<3&&Math.abs(fullCard.h*2048-250)<3,
+ 'Valora skill preview includes entire 193x250px card including artwork and level');
+assert.ok(fullCard.x>0&&fullCard.x+fullCard.w<1&&fullCard.y>0&&fullCard.y+fullCard.h<1,
+ 'full Valora card preview must stay inside screenshot');
+const actualBadge=C.valoraBadgeRect(C.valoraRect(1));
+assert.ok(Math.abs(actualBadge.y*2048-1814)<4&&Math.abs((actualBadge.y+actualBadge.h)*2048-1858)<6,
+ 'OCR must read the real Valora label at y1814..1858, not the surrounding artwork');
+assert.ok(ui.includes("C.valoraBadgeRect(slot.rect)")&&ui.includes("C.valoraPreviewRect(rect)"),
+ 'Valora must use its own level crop and complete card preview');
+assert.ok(ui.includes("contrastBadge(img)")&&ui.includes("tessedit_pageseg_mode:'8'"),
+ 'small on-icon rank captions get high contrast OCR retries');
 assert.ok(ui.includes("tessedit_pageseg_mode:'3'"),
  'shared OCR must restore ordinary page segmentation after buff import');
 const petBadge=C.petBadgeRect(C.petRect(C.petSlots[0]));
@@ -48,10 +51,16 @@ for(const text of ['Lv.4','Lv 4','L v 4','Ly.4','LV:4','Lvl 4']){
 }
 assert.equal(C.readSkillLevel('Lv.5 / Lv.6',10),null,'contradictory OCR must not be accepted');
 assert.equal(C.readSkillLevel('11:19:53',10),null,'cooldown is never a skill');
+for(const [ocr,expected] of [
+ ['‘Lv. 4)',4],['V\\Lvs5y',5],['Lv.6J',6],['Lv: 5)',5],['“=lv?7,)',7],
+ ['Lv. 10 ¥',10],['“Lv. 4°',4],['“Lv. 5 ¥',5],['“Lv. 9}',9]
+])assert.equal(C.readSkillLevel(ocr,10),expected,'OCR text from original screenshot: '+ocr);
+assert.equal(C.readSkillLevel('2',10),null,'unsafe isolated digit is never accepted');
+assert.equal(C.readSkillLevel('Lv. 80',10),null,'unrelated master Lv80 must not be accepted');
 assert.equal(C.readSkillLevel('Skill 4, cooldown 00:07:12',10),null,'artwork/clock digits are not a skill');
 assert.match(ui,/roi\.width=Math\.round\(w\*scale\);roi\.height=Math\.round\(h\*scale\)/,
  'cropped preview must preserve the original pixel aspect ratio');
-assert.ok(ui.includes("C.petBadgeRect(slot.rect)")&&ui.includes("contrastBadge(first)"),
+assert.ok(ui.includes("C.petBadgeRect(slot.rect)")&&ui.includes("contrastBadge(img)"),
  'pet rank OCR must read the badge with a focused contrast retry');
 assert.ok(ui.includes("recognizeSlots(canvas,slots,'pet',"),
  'pet import must use pet-specific level recognition');
