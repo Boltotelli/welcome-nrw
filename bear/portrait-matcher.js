@@ -6,6 +6,11 @@
 'use strict';
 const SIZE=6;
 let cache=null;
+const ASSET='./hero-hud-fingerprints.json?v=roster-20261010-2';
+// Resolve against this script, not the current page's route/query string.
+const assetURL=typeof document!=='undefined'&&document.currentScript?.src
+ ? new URL(ASSET,document.currentScript.src).href:ASSET;
+const load={status:'idle',count:0,error:'',url:assetURL};
 function decode(p){
  try{
   const bytes=atob(p.rgb),size=SIZE*SIZE*3;
@@ -13,11 +18,25 @@ function decode(p){
  }catch(_){return null;}
 }
 async function data(){
- if(!cache)cache=fetch('./hero-hud-fingerprints.json?v=roster-20261010-1',{cache:'no-cache'})
-  .then(r=>r.ok?r.json():null).then(j=>{
-   if(j?.size!==SIZE||!j.pixels)return [];
-   return Object.entries(j.pixels).map(([name,rgb])=>decode({name,rgb})).filter(Boolean);
-  }).catch(()=>[]);
+ if(!cache){
+  load.status='loading';load.error='';
+  cache=fetch(assetURL,{cache:'no-cache'})
+   .then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+   .then(j=>{
+    if(j?.size!==SIZE||!j.pixels||typeof j.pixels!=='object')
+     throw new Error('Invalid hero fingerprint file');
+    const entries=Object.entries(j.pixels);
+    const refs=entries.map(([name,rgb])=>decode({name,rgb})).filter(Boolean);
+    if(refs.length!==entries.length||refs.length<30)
+     throw new Error('Incomplete hero fingerprint file ('+refs.length+'/'+entries.length+')');
+    load.status='ready';load.count=refs.length;
+    return refs;
+   }).catch(e=>{
+    load.status='error';load.count=0;load.error=String(e?.message||e);
+    cache=null; // Retry on the next screenshot rather than caching failure.
+    return [];
+   });
+ }
  return cache;
 }
 function sample(canvas,rect){
@@ -25,6 +44,10 @@ function sample(canvas,rect){
  // Cropping is based on actual card geometry and scales with resolution.
  const c=document.createElement('canvas');c.width=SIZE;c.height=SIZE;
  const ctx=c.getContext('2d',{willReadFrequently:true});
+ // Chromium's default 'low' aliases a 130px portrait down to 6px:
+ // real Yang/Petra screenshot samples exceeded the strict match threshold.
+ ctx.imageSmoothingEnabled=true;
+ ctx.imageSmoothingQuality='medium';
  ctx.drawImage(canvas,rect.x+rect.w*.07,rect.y+rect.h*.04,
   rect.w*.86,rect.h*.67,0,0,SIZE,SIZE);
  const rgba=ctx.getImageData(0,0,SIZE,SIZE).data,arr=new Uint8Array(SIZE*SIZE*3);
@@ -61,5 +84,5 @@ async function enrich(tiles){
  }
  return {available:refs.length,matched:tiles.filter(t=>t.name).length};
 }
-root.NRW_BEAR_PORTRAIT_MATCHER={data,candidates,sample,match,enrich,version:'game-hud-normalized-6px-v2-roster-20261010'};
+root.NRW_BEAR_PORTRAIT_MATCHER={data,candidates,sample,match,enrich,diagnostics:()=>({...load}),version:'game-hud-antialiased-6px-v3-roster-20261010'};
 })(window);
