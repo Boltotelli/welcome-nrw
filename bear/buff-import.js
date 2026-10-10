@@ -192,7 +192,7 @@ function mount(host,B){
   draftValora.forEach((item,i)=>{
    const record=cat.valora[i];
    const row=el('label','bear-buff-valora-row');
-   const img=el('img','bear-buff-thumbnail bear-buff-valora-thumbnail');
+   const img=el('img','bear-buff-thumbnail bear-buff-valora-thumbnail');img.alt='';img.src=item.preview;
    const name=el('span','',record?.name||'Skill '+(i+1));
    const input=el('input');input.type='number';input.inputMode='numeric';input.min='1';input.max=String(C.valoraSkillMax[i]);
    input.value=item.level??'';input.placeholder='Lv ?';
