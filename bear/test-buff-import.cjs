@@ -117,8 +117,8 @@ assert.ok(!ui.includes("ext.petLevels[pet.name]=Number(pet.level)"),
 assert.ok(!ui.includes("B.model().values.master=")&&!ui.includes("B.model().values.pet="),
  'do not add mastered buffs into capacity unasked');
 assert.ok(wizard.includes("NRW_BEAR_BUFF_IMPORT?.mount(buffHost,B)"),'integrated in step 8');
-assert.ok(wizard.includes("labels=['id','troops','stats','gear','heroes','hero-picks','hero-details','missing','result'];"),
- 'existing nine-step results behavior stays intact');
+assert.ok(wizard.includes("labels=['id','troops','stats','gear','heroes','hero-picks','hero-details','missing','result','simulation'];"),
+ 'existing results stay at step nine, followed by the new optional simulation stage');
 assert.ok(html.indexOf('buff-intake-core.js')<html.indexOf('buff-import.js'));
 assert.ok(html.indexOf('buff-import.js')<html.indexOf('wizard.js'));
 for(const asset of ['buff-import.css','buff-intake-core.js','buff-import.js'])
