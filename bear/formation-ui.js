@@ -47,10 +47,10 @@ function mount(step,results,B,language){
   const plan=F?.plan(m,root.NRW_BEAR_CATALOG,root.NRW_BEAR_COMBAT,root.NRW_BEAR_CAPACITY);
   if(!plan)return;
   card.append(create('h3','',tr('Dein Bären-Formationsvorschlag','Your Bear formation proposal','Formation conseillée pour l’ours')));
-  const caption=create('p','hint',tr('Ein Truppenbestand für ALLE Märsche. Der Starter wird mit dem vorhandenen Kampfmodell gewichtet; Joiner werden nach ihren linken Helden und verfügbaren Truppen zusammengestellt.',
-   'One shared troop stock for ALL marches. Starter favors the available combat model; joins use suitable left-slot heroes and your real inventory.',
-   "Une réserve commune pour TOUTES les marches. Le départ utilise le modèle de combat; les renforts sont répartis selon les héros de gauche et les troupes."));
-  card.append(caption);
+  card.append(create('p','bear-formation-primary-note',tr(
+   'Nur der erste Expeditionsskill von Held 1 (links) kann beim Joinen zählen.',
+   'Only the first Expedition skill of Hero 1 (left) can count when joining.',
+   'Seule la première compétence d’expédition du héros 1 (à gauche) compte en renfort.')));
   if(!plan.ready){
    const missing=create('p','bear-guide-needed',tr('Für die Formation fehlen bestätigte Angaben: ','Missing confirmed inputs for the formation: ','Données manquantes : ')+plan.missing.join(', '));
    card.append(missing);return;
@@ -67,7 +67,7 @@ function mount(step,results,B,language){
   const allNamesEn=['Infantry','Cavalry','Archers'];
   const allNamesFr=['Infanterie','Cavalerie','Archers'];
   const classNames=language()==='de'?allNames:language()==='fr'?allNamesFr:allNamesEn;
-  const table=create('div','bear-usage-summary');
+  const table=create('div','bear-usage-summary');table.hidden=true;
   table.append(create('h4','',tr('Truppen-Auslastung gesamt','Total troop utilization','Utilisation totale des troupes')));
   for(let k=0;k<3;k++){
    const row=create('div','bear-usage-row');
@@ -81,7 +81,7 @@ function mount(step,results,B,language){
   const summary=create('p','hint',tr('Gesendet: ','Assigned: ','Envoyés : ')+fmt(plan.used.reduce((a,b)=>a+b,0))+
    ' / '+fmt(plan.stock.reduce((a,b)=>a+b,0))+' · '+
    tr('Übrig: ','Remaining: ','Restantes : ')+fmt(plan.leftover.reduce((a,b)=>a+b,0)));
-  card.append(summary);
+  // Shared inventory bookkeeping remains internal; no clutter in result.
   for(const march of plan.marches){
    const section=create('section','bear-formation-march');
    section.append(create('h4','',march.slot===0?
@@ -100,16 +100,7 @@ function mount(step,results,B,language){
     item.append(details);heroList.append(item);
    });
    section.append(heroList);
-   if(march.slot>0){
-    section.append(create('p','hint',tr(
-     'Nur der erste Expeditionsskill von Held 1 (links) kann zählen. Helden 2 und 3 geben KEINE zusätzlichen Join-Skills, erhöhen aber die Marschkapazität. Je Marsch maximal 1× Infanterie, 1× Kavallerie, 1× Bogenschütze.',
-     'Only Hero 1 (left)\'s FIRST expedition skill may contribute. Heroes 2 and 3 add NO join skill, but their levels increase capacity. Each march has at most one Infantry, Cavalry and Archer hero.',
-     "Seule la première compétence du héros 1 (gauche) compte en renfort. Les héros 2 et 3 n'ajoutent pas de compétences, mais augmentent la capacité.")));
-    if(march.guideOnly||!march.heroes[0])section.append(create('p','hint',
-      tr('Erster Skill nicht als tatsächliches Level bestätigt bzw. kein geeigneter Join-Leader vorhanden.',
-       'First skill level unconfirmed or no suitable join lead available.',
-       'Premier niveau de compétence non confirmé ou héros adapté absent.')));
-   }
+   // Help is displayed exactly once, above the whole formation.
    const rows=create('div','bear-formation-troops');
    if(march.eligible===false){
     rows.append(create('strong','',tr('Kein Join-Leader – keine Truppen eingeplant',
@@ -122,14 +113,12 @@ function mount(step,results,B,language){
    }else{
     rows.append(create('strong','',fmt(march.filled)+' / '+fmt(march.capacity)+
      tr(' Truppen',' troops',' troupes')+(march.capacityKnown?'':tr(' (mindestens)',' (lower bound)',' (minimum)'))));
-    rows.append(create('span','',classNames.map((name,k)=>name+': '+fmt(march.troops[k])+' ('+march.ratio[k]+'%)').join(' · ')));
+    rows.append(create('span','bear-formation-counts',classNames.map((name,k)=>
+     name+': '+fmt(march.troops[k])+' ('+march.ratio[k]+'%)').join(' · ')));
    }
    section.append(rows);card.append(section);
   }
-  card.append(create('p','hint',tr(
-   'Gemeinsame, vorläufige Optimierung: Starter mit eigenen Kampfwerten, Joins nur mit deinen Klassenwerten als Stellvertreter statt der unbekannten fremden Rally-Leader-Stats. Keine garantierten Punkte. Jeder Marsch hat höchstens einen Helden pro Truppengattung und nutzt nur vorhandene Truppen.',
-   'Provisional optimization: the starter uses your troop tier/stats and joins use your class stats as proxies, NOT external rally-leader stats. No guaranteed Bear points. All march types and inventory are constrained.',
-   "Modèle provisoire, pas de score garanti. Les statistiques des chefs de rallye externes sont inconnues. Les stocks sont respectés.")));
+  // Detailed damage-model caveats remain internal, not in the hero lineup.
  }
  refreshSetup();
  return {refreshSetup,show};
