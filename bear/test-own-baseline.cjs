@@ -88,12 +88,43 @@ assert.equal(unavailable.heroSourceReady,false);
 assert.equal(unavailable.included.length,0,'no invented hero skill if source unavailable');
 assert.equal(unavailable.missing.length,3);
 assert.equal(B.calculate(model,[0,0,0],C,ref).ready,false,'zero counts fail closed');
+const auditModel={...model,v2:{...model.v2,
+ manualHeroes:{...model.v2.manualHeroes,
+  Zoe:{...model.v2.manualHeroes.Zoe,expeditionStats:{iAtk:120,iLet:80}},
+  Petra:{...model.v2.manualHeroes.Petra,expeditionStats:{cAtk:130,cLet:100}},
+  Yang:{...model.v2.manualHeroes.Yang,expeditionStats:{aAtk:180,aLet:120}}}}};
+const auditSnapshot=JSON.stringify(auditModel);
+const audit=B.inspectUnusedBonuses(auditModel,counts,C);
+assert.equal(audit.squadAlreadyApplied,false);
+assert.equal(audit.squadAttackPct,275.2);
+assert.equal(audit.squadLethalityPct,60.1);
+assert.equal(audit.heroes[2].attackPct,180);
+assert.ok(audit.hypotheticals.withSquad>audit.hypotheticals.current,
+ 'stored positive squad bonuses currently not applied in legacy profile');
+assert.ok(audit.hypotheticals.withHeroes>audit.hypotheticals.current,
+ 'separate positive expedition stats could increase individual class scores');
+assert.ok(audit.hypotheticals.withBoth>audit.hypotheticals.withSquad);
+assert.ok(audit.hypotheticals.withBoth>audit.hypotheticals.withHeroes);
+assert.equal(JSON.stringify(auditModel),auditSnapshot,
+ 'forensic audit must NEVER rewrite saved combat stats');
+const explicit={...auditModel,v2:{...auditModel.v2,squadSeparate:true}};
+const explicitAudit=B.inspectUnusedBonuses(explicit,counts,C);
+assert.equal(explicitAudit.squadAlreadyApplied,true);
+assert.equal(explicitAudit.hypotheticals.withSquad,explicitAudit.hypotheticals.current,
+ 'never add squad bonuses twice if explicitly marked as already separate');
+const missingHeroes={...model,v2:{...model.v2,manualHeroes:{}}};
+const sparseAudit=B.inspectUnusedBonuses(missingHeroes,counts,C);
+assert.equal(sparseAudit.heroes[0].attackPct,null,
+ 'unknown hero detail stat must remain absent, never guessed');
+assert.equal(sparseAudit.notAutomaticallyApplied,true);
+
 const wizard=read('wizard.js'),simulation=read('simulation-ui.js'),html=read('index.html');
 new vm.Script(wizard);new vm.Script(simulation);
 assert.ok(wizard.includes("model.v2.starterWidgetLevels[n]=Number(wSelect.value)"),'only a manual UI dropdown saves independent widget level');
 assert.ok(wizard.includes("B.save()"),'one existing profile store');
 assert.ok(simulation.includes('renderOwnBaseline(data)'), 'own baseline results integrated');
 assert.ok(simulation.includes('bear-sim-math-audit'),'exact captured stats trace must be inspectable');
+assert.ok(simulation.includes('inspectUnusedBonuses'),'unused squad/hero stat sources must be inspectable');
 assert.ok(!simulation.includes('renderSkillScenarios(data)'),'joiner hypotheticals replaced in main baseline');
 assert.ok(html.includes('own-baseline.js?v='),'new engine included');
 assert.ok(html.indexOf('own-baseline.js')<html.indexOf('simulation-ui.js'),'baseline loads before simulation UI');
