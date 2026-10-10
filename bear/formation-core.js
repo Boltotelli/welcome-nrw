@@ -147,9 +147,14 @@ function plan(model,catalog,combat,capacityCore){
  const marches=teams.map((team,i)=>{
   const lv=team.heroes.map(h=>h?capacityCore.levelCapacity(h.level):null);
   const known=lv.every(n=>n!==null);
-  const size=base+master+pet+lv.reduce((a,b)=>a+(b||0),0);
+  // If the left-most join hero is missing, do not pretend this is a
+  // recommended complete formation and allocate troops to an empty squad.
+  // The player can still manually join without a hero in game, but that
+  // is NOT a valid offensive-leader recommendation.
+  const eligible=i===0||Boolean(team.heroes[0]);
+  const size=eligible?base+master+pet+lv.reduce((a,b)=>a+(b||0),0):0;
   return {...team,slot:i,capacity:size,capacityKnown:known,
-   missingHeroSlots:team.heroes.filter(h=>!h).length};
+   eligible,missingHeroSlots:team.heroes.filter(h=>!h).length};
  });
  if(missing.length)return {ready:false,missing,stock,marches,selected};
  const caps=marches.map(m=>Math.max(0,int(m.capacity)));
