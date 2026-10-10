@@ -53,7 +53,7 @@ assert.match(ui,/roi\.width=Math\.round\(w\*scale\);roi\.height=Math\.round\(h\*
  'cropped preview must preserve the original pixel aspect ratio');
 assert.ok(ui.includes("C.petBadgeRect(slot.rect)")&&ui.includes("contrastBadge(first)"),
  'pet rank OCR must read the badge with a focused contrast retry');
-assert.ok(ui.includes("recognizeSlots(canvas,slots,'pet')"),
+assert.ok(ui.includes("recognizeSlots(canvas,slots,'pet',"),
  'pet import must use pet-specific level recognition');
 
 const catContext={window:{}};
