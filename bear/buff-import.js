@@ -66,6 +66,28 @@ function contrastBadge(canvas){
  cx.putImageData(pixels,0,0);
  return roi;
 }
+// Valora-only: the original Lv badge uses neutral white lettering over a
+// brown fill. Convert that *inner text strip* to dark glyphs on pure white,
+// without stretching its aspect ratio or allowing the bright badge rim in.
+function valoraLevelMask(src){
+ const padding=16;
+ const roi=document.createElement('canvas');
+ roi.width=src.width+padding*2;roi.height=src.height+padding*2;
+ const ctx=roi.getContext('2d',{willReadFrequently:true});
+ ctx.fillStyle='#fff';ctx.fillRect(0,0,roi.width,roi.height);
+ const inCtx=src.getContext('2d',{willReadFrequently:true});
+ const input=inCtx.getImageData(0,0,src.width,src.height);
+ const pixels=ctx.createImageData(src.width,src.height);
+ for(let i=0;i<input.data.length;i+=4){
+  const r=input.data[i],g=input.data[i+1],b=input.data[i+2];
+  const whiteText=Math.min(r,g,b)>184&&Math.max(r,g,b)-Math.min(r,g,b)<72;
+  const v=whiteText?0:255;
+  pixels.data[i]=pixels.data[i+1]=pixels.data[i+2]=v;
+  pixels.data[i+3]=255;
+ }
+ ctx.putImageData(pixels,padding,padding);
+ return roi;
+}
 async function reader(){
  // The main screenshot scanner already loaded and initialized Tesseract;
  // reuse its worker instead of launching a second browser OCR engine.
@@ -93,19 +115,38 @@ async function recognizeSlotsNow(canvas,slots,kind,progress){
    const slot=slots[i];let level=null;
    progress?.(i+1,slots.length);
    try{
-    const badge=kind==='pet'?C.petBadgeRect(slot.rect):C.valoraBadgeRect(slot.rect);
-    const img=crop(canvas,badge,'badge');
-    const raw=await worker.recognize(img);
-    level=C.readSkillLevel(raw?.data?.text||'',slot.max);
-    if(level===null){
-     const highContrast=await worker.recognize(contrastBadge(img));
-     level=C.readSkillLevel(highContrast?.data?.text||'',slot.max);
-    }
-    if(level===null){
-     await configure({tessedit_pageseg_mode:'8'});
-     const extra=await worker.recognize(contrastBadge(img));
-     level=C.readSkillLevel(extra?.data?.text||'',slot.max);
-     await configure({tessedit_pageseg_mode:'7'});
+    if(kind==='valora'){
+     const img=crop(canvas,C.valoraTextRect(slot.rect),'badge');
+     const clean=valoraLevelMask(img);
+     const result=await worker.recognize(clean);
+     level=C.readValoraLevel(result?.data?.text||'',slot.max);
+     if(level===null){
+      await configure({tessedit_pageseg_mode:'8'});
+      try{
+       const again=await worker.recognize(clean);
+       level=C.readValoraLevel(again?.data?.text||'',slot.max);
+      }finally{await configure({tessedit_pageseg_mode:'7'});}
+     }
+     if(level===null){
+      // A strict prefixed-label fallback, never a standalone number.
+      const original=await worker.recognize(img);
+      level=C.readValoraLevel(original?.data?.text||'',slot.max);
+     }
+    }else{
+     const img=crop(canvas,C.petBadgeRect(slot.rect),'badge');
+     const raw=await worker.recognize(img);
+     level=C.readSkillLevel(raw?.data?.text||'',slot.max);
+     if(level===null){
+      const highContrast=await worker.recognize(contrastBadge(img));
+      level=C.readSkillLevel(highContrast?.data?.text||'',slot.max);
+     }
+     if(level===null){
+      await configure({tessedit_pageseg_mode:'8'});
+      try{
+       const extra=await worker.recognize(contrastBadge(img));
+       level=C.readSkillLevel(extra?.data?.text||'',slot.max);
+      }finally{await configure({tessedit_pageseg_mode:'7'});}
+     }
     }
    }catch(_){/* Uncertain labels are left blank, never guessed. */}
    out.push({...slot,level});
