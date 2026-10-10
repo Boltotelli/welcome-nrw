@@ -38,7 +38,8 @@ function crop(src,region,mode='preview'){
  let h=Math.min(src.height-y,Math.round(src.height*region.h));
  if(w<10||h<10)throw Error('Screenshot geometry not supported');
  if(mode==='footer'){const top=Math.floor(h*.48);y+=top;h-=top;}
- const scale=mode==='preview'?1:Math.min(8,Math.max(2.5,560/w,260/h));
+ // Original screenshot OCR was verified at ~420px wide and 140px high.
+ const scale=mode==='preview'?1:Math.min(5,Math.max(2,420/w,140/h));
  const roi=document.createElement('canvas');
  roi.width=Math.round(w*scale);roi.height=Math.round(h*scale);
  const cx=roi.getContext('2d',{willReadFrequently:true});
@@ -48,16 +49,18 @@ function crop(src,region,mode='preview'){
 }
 // Alternate OCR view for outlined white Lv digits over a colorful icon.
 // Only the small, bottom-right badge is processed (never cooldown timers).
+// Kingshot paints bright/white Lv lettering on colored skill cards.
+// Retain white glyphs on black; the previous near-neutral threshold missed
+// the cyan Panther and Rhino artwork on the supplied original screenshots.
 function contrastBadge(canvas){
- const roi=document.createElement('canvas');roi.width=canvas.width;roi.height=canvas.height;
+ const roi=document.createElement('canvas');
+ roi.width=canvas.width;roi.height=canvas.height;
  const cx=roi.getContext('2d',{willReadFrequently:true});
  cx.drawImage(canvas,0,0);
  const pixels=cx.getImageData(0,0,roi.width,roi.height);
  for(let i=0;i<pixels.data.length;i+=4){
-  const r=pixels.data[i],g=pixels.data[i+1],b=pixels.data[i+2];
-  const light=.2126*r+.7152*g+.0722*b;
-  const neutral=Math.max(r,g,b)-Math.min(r,g,b)<78;
-  const value=(light>202||(light>151&&neutral))?0:255;
+  const light=Math.min(pixels.data[i],pixels.data[i+1],pixels.data[i+2])>175;
+  const value=light?255:0;
   pixels.data[i]=pixels.data[i+1]=pixels.data[i+2]=value;
  }
  cx.putImageData(pixels,0,0);
@@ -70,18 +73,8 @@ async function reader(){
  if(!root.Tesseract)throw Error('OCR not loaded. Import a game screenshot first.');
  return root.Tesseract.createWorker('eng',1);
 }
-// Small white-outlined labels need clear margins and single-line OCR.
-function paddedBadge(src,background='#26364b'){
- const pad=Math.max(22,Math.round(src.height*.16));
- const out=document.createElement('canvas');
- out.width=src.width+2*pad;out.height=src.height+2*pad;
- const ctx=out.getContext('2d');
- ctx.fillStyle=background;ctx.fillRect(0,0,out.width,out.height);
- ctx.drawImage(src,pad,pad);
- return out;
-}
-// Pet and Valora uploads must not reconfigure the SAME Tesseract worker
-// simultaneously, even when users select the second picture immediately.
+// OCR access is serialized between the two upload buttons because both
+// scans reuse the existing Tesseract worker (also used for hero screenshots).
 let scanQueue=Promise.resolve();
 function recognizeSlots(canvas,slots,kind,progress){
  const task=scanQueue.then(()=>recognizeSlotsNow(canvas,slots,kind,progress));
@@ -92,7 +85,7 @@ async function recognizeSlotsNow(canvas,slots,kind,progress){
  const worker=await reader(),out=[];
  const configure=async(params)=>{
   try{if(typeof worker.setParameters==='function')await worker.setParameters(params);}
-  catch(_){/* Use ordinary OCR if parameters are unsupported. */}
+  catch(_){/* Browser worker may not support optional parameters. */}
  };
  await configure({tessedit_pageseg_mode:'7',tessedit_char_whitelist:''});
  try{
@@ -100,34 +93,25 @@ async function recognizeSlotsNow(canvas,slots,kind,progress){
    const slot=slots[i];let level=null;
    progress?.(i+1,slots.length);
    try{
-    const isPet=kind==='pet';
-    const badge=isPet?C.petBadgeRect(slot.rect):C.valoraBadgeRect(slot.rect);
-    const first=crop(canvas,badge,'badge');
-    // First read the actual outlined Lv. label with dark surrounding padding.
-    const raw=await worker.recognize(paddedBadge(first));
+    const badge=kind==='pet'?C.petBadgeRect(slot.rect):C.valoraBadgeRect(slot.rect);
+    const img=crop(canvas,badge,'badge');
+    const raw=await worker.recognize(img);
     level=C.readSkillLevel(raw?.data?.text||'',slot.max);
     if(level===null){
-     // Some icon colors hide the original white letters from Tesseract.
-     const mask=contrastBadge(first);
-     const second=await worker.recognize(paddedBadge(mask,'#fff'));
-     level=C.readSkillLevel(second?.data?.text||'',slot.max);
+     const highContrast=await worker.recognize(contrastBadge(img));
+     level=C.readSkillLevel(highContrast?.data?.text||'',slot.max);
     }
     if(level===null){
-     // Strictly bounded numeric-only fallback: the badge never includes
-     // cooldown timers or the unrelated Lv80 master progression.
-     await configure({tessedit_pageseg_mode:'8',tessedit_char_whitelist:'0123456789'});
-     try{
-      const numeric=await worker.recognize(paddedBadge(contrastBadge(first),'#fff'));
-      level=C.readSkillLevel(numeric?.data?.text||'',slot.max);
-     }finally{
-      await configure({tessedit_pageseg_mode:'7',tessedit_char_whitelist:''});
-     }
+     await configure({tessedit_pageseg_mode:'8'});
+     const extra=await worker.recognize(contrastBadge(img));
+     level=C.readSkillLevel(extra?.data?.text||'',slot.max);
+     await configure({tessedit_pageseg_mode:'7'});
     }
-   }catch(_){/* Unreadable stays empty; do not assume screenshot sample values. */}
+   }catch(_){/* Uncertain labels are left blank, never guessed. */}
    out.push({...slot,level});
   }
  }finally{
-  // This OCR worker is shared with troop/hero intake; restore its defaults.
+  // Restore the shared worker for the unrelated hero/troop OCR steps.
   await configure({tessedit_pageseg_mode:'3',tessedit_char_whitelist:''});
  }
  return out;
@@ -250,7 +234,7 @@ function mount(host,B){
     status.textContent=de('Valora-Skill '+done+'/'+total+' wird gelesen …','Reading Valora skill '+done+'/'+total+' …');
    });
    draftValora=recognized.map(({rect,...item},i)=>({
-    ...item,preview:crop(canvas,C.valoraPreviewRect(rect,canvas.width/canvas.height),'preview').toDataURL('image/jpeg',.87)
+    ...item,preview:crop(canvas,C.valoraPreviewRect(rect),'preview').toDataURL('image/jpeg',.87)
    }));
    renderVal();
    const found=recognized.filter(x=>x.level!==null).length;
