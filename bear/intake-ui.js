@@ -1032,6 +1032,8 @@ $('intakeFiles').addEventListener('change',async e=>{
  status(success+'/'+files.length+' '+say('Bilder gelesen. Bitte alle Vorschläge prüfen und übernehmen.','screenshots read. Review and apply suggestions.'));
  renderQueue();
 });
+// Other guided screenshot steps reuse the same local OCR worker.
+window.NRW_BEAR_GET_OCR=loadOCR;
 window.addEventListener('nrw-bear-loaded',()=>{
  confirmedPortraits.length=0; // a different governor must start a fresh image inventory
  updateProgress();
