@@ -55,5 +55,74 @@ function petAudit(model,catalog){
    offensivePotential:entry.id!=='enemy_health'};
  }).filter(Boolean);
 }
-root.NRW_BEAR_SCORE_BONUSES={talent,pointScore,petAudit,HUNTER_POINTS,MASTERY_HUNTER_POINTS,PET_CANDIDATES};
+
+/* The only USER-FACING Bear number: personal expected score when starting a
+ * rally with own three heroes. NO joining-hero contributions. Exact per-turn
+ * game mechanics are not public, so this is an estimated model index.
+ *
+ * Pets apply when explicitly marked ACTIVE. Offensive ATK/LET bonuses are
+ * added to the combined stats once; the cloned model then opts into
+ * combined-report to prevent hero/squad bonus duplication. The current
+ * guided intake collects Bonus Overview before pet activation and users can
+ * take those screenshots without temporary buffs. If that was not so, the
+ * caller must set v2.petBuffCapturedInStats = true; then these bonuses are
+ * skipped. Defensive War Bear assumes standard damage/defense relation,
+ * which needs validation against live Bear.
+ */
+function personalDamage(model,counts,combat,reference,catalog,proc){
+ if(!model||!Array.isArray(counts)||!proc?.evaluate||!root.NRW_BEAR_OWN_BASELINE)
+  return {ready:false,reason:'missing-input'};
+ const own=root.NRW_BEAR_OWN_BASELINE;
+ const composed=own.composeCombatStats?.(model);
+ const stats=composed?.stats;
+ if(!stats||!combat?.ready?.(stats,combat.configure?.(model.v2)))
+  return {ready:false,reason:'missing-combat-stats'};
+ const selected=petAudit(model,catalog).filter(p=>p.active);
+ const incomplete=selected.filter(p=>p.percentage===null);
+ if(incomplete.length)return {ready:false,reason:'missing-active-pet-skill',
+  missingPets:incomplete.map(x=>x.name)};
+ const hasPetStats=model.v2?.petBuffCapturedInStats===true;
+ const attackBonus=hasPetStats?0:selected.filter(p=>p.id==='attack')
+  .reduce((n,p)=>n+p.percentage,0);
+ const lethalityBonus=hasPetStats?0:selected.filter(p=>p.id==='lethality')
+  .reduce((n,p)=>n+p.percentage,0);
+ // Enemy-targeting effect is separate from captured OWN troops and bonuses.
+ // The Bear target may be immune; this is explicitly a modeling assumption.
+ const defenderReduction=selected.filter(p=>p.id==='enemy_defense')
+  .reduce((n,p)=>n+p.percentage,0);
+ const defenseFactor=1/(1-Math.min(defenderReduction,90)/100);
+ const adjustedValues={...model.values,...stats};
+ for(const k of ['i','c','a']){
+  adjustedValues[k+'Atk']=Number(stats[k+'Atk'])+attackBonus;
+  adjustedValues[k+'Let']=Number(stats[k+'Let'])+lethalityBonus;
+ }
+ // All mandatory source-combined attack/lethality input is now stored as
+ // combined class values. The original model and screenshot data stay intact.
+ const adjusted={...model,values:adjustedValues,
+  v2:{...model.v2,combatStatOrigin:'combined-report'}};
+ const expectation=proc.evaluate(adjusted,counts,combat,reference);
+ if(!expectation.ready)return {ready:false,reason:expectation.reason,
+  missingPets:[]};
+ if(expectation.unmodeled.length||!expectation.includesSunder)
+  return {ready:false,reason:'unmodeled-starter-skills',
+   unmodeled:expectation.unmodeled};
+ const hunter=talent(model);
+ if(!hunter)return {ready:false,reason:'missing-valora-level'};
+ const personalFactor=1+hunter.personalPointPercent/100;
+ const expectedScore=expectation.expectedIndex*defenseFactor*personalFactor;
+ return {ready:true,expectedScore,modelIndex:true,
+  noJoiningHeroSkills:true,pitfallLevel:5,
+  modeledStarterSkills:expectation.skills.length,
+  activePets:selected.map(x=>x.name),petAttackPct:attackBonus,
+  petLethalityPct:lethalityBonus,enemyDefenseReductionPct:defenderReduction,
+  warBearModelAssumption:defenderReduction>0,
+  petBonusIncludedInScreenshot:hasPetStats,
+  valoraLevel:hunter.level,valoraPct:hunter.personalPointPercent,
+  includesChanceSkills:true,
+  includesAllSourcedOffensiveStarterSkills:true,
+  usesSingleEstimate:true,estimateNotGuaranteed:true,
+  warning:'One estimated score based on not fully validated Bear round, Sunder and pet defense mechanics.'};
+}
+
+root.NRW_BEAR_SCORE_BONUSES={talent,pointScore,petAudit,personalDamage,HUNTER_POINTS,MASTERY_HUNTER_POINTS,PET_CANDIDATES};
 })(window);
