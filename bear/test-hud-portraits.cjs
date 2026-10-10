@@ -5,6 +5,17 @@
 const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
 const refs=JSON.parse(fs.readFileSync(__dirname+'/hero-hud-fingerprints.json','utf8'));
 assert.equal(refs.size,6);
+// Identity-checked against real Kingshot art. A self-similarity test would not
+// detect a perfectly matching portrait assigned to the wrong hero name.
+// Long Fei: https://wizardstower.com/guides/kingshot/heroes/long-fei
+// Triton:   https://kingshotdata.com/heroes/generation-6-heroes/
+assert.equal(Object.keys(refs.pixels).length,30,'30 distinct recruited source portraits');
+assert.equal(refs.pixels['Long Fei']?.slice(0,32),'oI90pYxoa1tJWVFOYlZGq4VF2pQqqnw7',
+ 'gourd-holding Long Fei may not be mislabeled Triton again');
+assert.equal(refs.pixels.Triton?.slice(0,32),'nZqVrqef3rN/5LBr3KdbyppLtJyKvqSM',
+ 'white-bearded gold-armored Triton may not be mislabeled Charles again');
+assert.equal(Object.prototype.hasOwnProperty.call(refs.pixels,'Charles'),false,
+ 'the source roster does not contain Charles, do not invent an entry');
 const data=Object.entries(refs.pixels).map(([name,b64])=>({name,rgb:new Uint8Array(Buffer.from(b64,'base64'))}));
 assert.ok(data.length>=30,'at least 30 verified distinct gallery portraits');
 data.forEach(x=>assert.equal(x.rgb.length,6*6*3));
