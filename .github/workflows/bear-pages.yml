@@ -126,6 +126,11 @@ jobs:
           console.log('Verified external 37-hero source and Marlin correction');
           NODE
           cp bear/catalog.js bear/combat.js bear/v2.js bear/v2.css bear/ux.js bear/ux.css bear/charm-references.js bear/charm-shapes.js bear/charm-guide-silhouettes.js bear/charm-guide-matcher.js bear/tier-recognizer.js bear/gear-layout.js bear/troop-badges.js bear/troop-entries.js bear/hero-grid.js bear/hero-stars.js bear/hero-level.js bear/portrait-matcher.js bear/hero-reference.js bear/hero-advisor.js bear/buff-intake-core.js bear/buff-import.js bear/buff-import.css bear/capacity-core.js bear/capacity-ui.js bear/formation-core.js bear/formation-ui.js bear/simulation-core.js bear/simulation-ui.js bear/own-baseline.js bear/proc-expectation.js bear/score-bonuses.js bear/screenshot-importer.js bear/screenshot-importer.css bear/intake-core.js bear/intake-ui.js bear/intake-ui.css bear/github-profiles.js bear/wizard.js bear/wizard.css _site/
+          # Real game screenshots, only when the user provides unmodified originals.
+          if [ -d bear/examples ]; then
+            mkdir -p _site/examples
+            find bear/examples -maxdepth 1 -type f -name '*.jpg' -exec cp '{}' _site/examples/ \;
+          fi
           # Optional opt-in player snapshots. Never expose local browser data
           # or fetch a secure API key during the static build.
           if [ -d bear/profiles ]; then
