@@ -76,7 +76,10 @@ function calculate(model,counts,combat,heroReference){
    counts.length!==3||counts.some(x=>!Number.isInteger(x)||x<0)||
    !combat?.ready?.(stats,levels)||typeof combat?.damage!=='function')
   return {ready:false,reason:'missing-combat-input'};
- const original=combat.damage(counts,stats,levels,Number(model.values?.pitfall)||0);
+ // NRW Pitfall has permanently reached Lv5. This is +25 percentage points
+ // of troop ATTACK, not a universal 1.25x final-damage multiplier.
+ const trace=combat.breakdown?.(counts,stats,levels,5);
+ const original=trace?.totalTenRounds;
  if(!Number.isFinite(original)||original<=0)return {ready:false,reason:'missing-combat-input'};
  const fixed=[],excluded=[],skipped=[],widgets=[],missing=[];
  let bonusExtra=0,enemyTakenPct=0,widgetAttack=1,widgetLethality=1;
@@ -128,6 +131,7 @@ function calculate(model,counts,combat,heroReference){
  const strikeFactor=1+bonusExtra/100;
  const abilityFactor=strikeFactor*(1+enemyTakenPct/100)*widgetAttack*widgetLethality;
  return {ready:true,modelIndex:original*abilityFactor,withoutAbilitiesIndex:original,
+  troopBreakdown:trace,pitfallLevel:5,
   abilityFactor,extraStrikePct:bonusExtra,enemyDamageTakenPct:enemyTakenPct,widgetAttackFactor:widgetAttack,
   widgetLethalityFactor:widgetLethality,
   included:fixed,widgets,excluded,unmodeled:skipped,missing,
