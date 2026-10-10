@@ -17,7 +17,7 @@ const lang=()=>document.documentElement.lang||'de';
 const messages={
  de:{
   eyebrow:'NRW · BEAR TRAP',start:'Deine Bären-Aufstellung',desc:'Einmal durchgehen. Wir übernehmen alles, was wir aus deiner ID und den Spielscreenshots lesen können.',
-  steps:['Dein Profil','Truppen','Kampfwerte','GovGear','Alle Helden','Top 3 Helden','Heldendetails','Pets & Valora · fehlende Angaben','Deine Empfehlung'],
+  steps:['Dein Profil','Truppen','Kampfwerte','GovGear','Alle Helden','Top 3 Helden','Heldendetails','Pets & Valora · fehlende Angaben','Deine Empfehlung','Schadenssimulation'],
   prompts:['Wähle deine Governor-ID oder lade deine bereits vorhandenen Profildaten.',
    'Lade die Schwadronvorschau hoch. Ein Screenshot reicht. Wir lesen Truppenanzahl und Stufen.',
    'Lade die Bonusübersicht hoch. Bei einer langen Liste einfach mehrere Screenshots nacheinander auswählen.',
@@ -26,7 +26,8 @@ const messages={
    'Auf Basis deiner erfassten Helden schlagen wir dir pro Truppengattung einen Bären-Starter vor. Bitte bestätige die drei Helden.',
    'Verteile dein bestes verfügbares Helden-Gear auf die drei empfohlenen Helden und lasse diese Ausstattung für die Bärenfalle angelegt. Lade DANACH die Heldendetails und Fertigkeiten hoch.',
    'Lade jetzt die Pet- und Valora-Skills hoch und trage Hunter Instinct manuell ein. Danach ergänzen wir nur noch wirklich fehlende Angaben.',
-   'Vergleiche die drei besten Ratios des derzeitigen Rechenmodells.'],
+   'Prüfe die vorgeschlagenen Starter- und Join-Formationen mit der gemeinsamen Truppenauslastung.',
+   'Teste unterschiedliche Starter- und Join-Verteilungen und vergleiche ihre relative Schadensprognose.'],
   next:'Weiter',back:'Zurück',skip:'Diesen Screenshot später ergänzen',finish:'Ergebnis anzeigen',
   upload:'Screenshot auswählen',uploads:'Screenshots auswählen',progress:'Schritt',
   profileGood:'Profil geladen – weiter zu den Truppen.',profileMissing:'Bitte erst eine ID oder ein NRW-Profil laden.',
@@ -42,7 +43,7 @@ const messages={
  },
  en:{
   eyebrow:'NRW · BEAR TRAP',start:'Your Bear Trap lineup',desc:'Follow a short guided setup. We reuse your player data and screenshots.',
-  steps:['Your profile','Troops','Combat stats','Governor gear','All heroes','Top 3 heroes','Hero details','Pets & Valora · missing values','Your recommendation'],
+  steps:['Your profile','Troops','Combat stats','Governor gear','All heroes','Top 3 heroes','Hero details','Pets & Valora · missing values','Your recommendation','Damage simulation'],
   prompts:['Choose your Governor ID or import an existing profile.',
    'Upload your troop overview. One screenshot covers troops and tiers.',
    'Upload the bonuses screen. You can select several screenshots of a long list.',
@@ -51,7 +52,8 @@ const messages={
    'Based on your roster, review the three proposed Bear Trap rally starters – one per troop class.',
    'Distribute your best available HERO GEAR across all three suggested heroes as you would use it for Bear Trap. THEN upload their detail and skill screenshots.',
    'Upload pet skills and Valora skills; enter Hunter Instinct manually. Then fill only genuinely missing values.',
-   'Compare the top three formations in the current simulation.'],
+   'Review the proposed starter and joins with their shared troop inventory.',
+   'Experiment with starter and join formations and compare the relative damage forecast.'],
   next:'Continue',back:'Back',skip:'Add this screenshot later',finish:'Show recommendation',
   upload:'Choose screenshot',uploads:'Choose screenshots',progress:'Step',
   profileGood:'Profile loaded. Continue to troops.',profileMissing:'Load a Governor ID or NRW profile first.',
@@ -65,9 +67,10 @@ const messages={
  },
  fr:{
   eyebrow:'NRW · BEAR TRAP',start:'Ta formation Ours',desc:'Un assistant simple basé sur ton profil et tes captures.',
-  steps:['Profil','Troupes','Stats','Équipement','Tous les héros','Top 3 héros','Détails héros','Pets & Valora · valeurs manquantes','Résultat'],
+  steps:['Profil','Troupes','Stats','Équipement','Tous les héros','Top 3 héros','Détails héros','Pets & Valora · valeurs manquantes','Résultat','Simulation des dégâts'],
   prompts:['Choisis ton ID ou importe un profil existant.','Ajoute une capture des troupes.','Ajoute une ou plusieurs captures des bonus.','Une capture complète des 6 équipements et 18 talismans.','Ajoute toutes les captures de la liste des héros, en une seule sélection.','Vérifie les trois héros recommandés pour l’Ours.',
-   'Équipe ces héros avec ton meilleur équipement avant de capturer leurs détails et compétences.','Ajoute les captures de compétences des animaux et de Valora ; saisis le talent puis complète les valeurs manquantes.','Compare les trois formations simulées.'],
+   'Équipe ces héros avec ton meilleur équipement avant de capturer leurs détails et compétences.','Ajoute les captures de compétences des animaux et de Valora ; saisis le talent puis complète les valeurs manquantes.','Vérifie les formations de départ et les renforts avec les stocks communs.',
+   'Teste plusieurs formations et compare leurs dégâts relatifs.'],
   next:'Continuer',back:'Retour',skip:'Ajouter plus tard',finish:'Afficher le résultat',
   upload:'Choisir une capture',uploads:'Choisir des captures',progress:'Étape',
   profileGood:'Profil chargé.',profileMissing:'Charge un profil en premier.',
@@ -80,7 +83,7 @@ const messages={
  }
 };
 const t=()=>messages[lang()]||messages.en;
-const sections=[],labels=['id','troops','stats','gear','heroes','hero-picks','hero-details','missing','result'];
+const sections=[],labels=['id','troops','stats','gear','heroes','hero-picks','hero-details','missing','result','simulation'];
 const wizard=document.createElement('section');wizard.id='bearGuidedWizard';wizard.className='bear-guided-wizard';wizard.setAttribute('aria-label','Bear Trap Setup');
 wizard.innerHTML='<header class="bear-guide-head"><div class="micro" id="bearGuideEyebrow"></div><h1 id="bearGuideTitle"></h1><p class="hint" id="bearGuideDesc"></p><div class="bear-guide-track" id="bearGuideTrack"></div><div class="bear-guide-progress"><span id="bearGuideStep"></span><span id="bearGuideStepTitle"></span></div></header>'+
  '<p class="bear-guide-prompt" id="bearGuidePrompt"></p>'+
@@ -205,6 +208,7 @@ const legacyTitle=document.createElement('summary');
 legacyTitle.textContent='Advanced / existing model (optional)';
 legacyResult.append(legacyTitle);legacyResult.append(result);
 sections[8].append(legacyResult);
+const simulationUI=window.NRW_BEAR_SIMULATION_UI?.mount(sections[9],B,lang);
 
 // The existing quick setup also contains a prominent duplicate results panel
 // inside a collapsed expert block. The real result button has moved to step 7.
@@ -473,6 +477,7 @@ function render(){
  if(idx===6)renderHeroDetails();
  if(idx===7){showRelevantManual();formationUI?.refreshSetup();}
  if(idx===8){formationUI?.show();}
+ if(idx===9){simulationUI?.enter();}
  $('bearGuideEyebrow').textContent=s.eyebrow;
  $('bearGuideTitle').textContent=s.start;
  $('bearGuideDesc').textContent=s.desc;
@@ -481,10 +486,10 @@ function render(){
  $('bearGuidePrompt').textContent=s.prompts[idx];
  $('bearGuideBack').textContent='← '+s.back;
  $('bearGuideSkip').textContent=s.skip;
- $('bearGuideNext').textContent=idx===7?s.finish:idx===8?s.done:s.next+' →';
+ $('bearGuideNext').textContent=idx===7?s.finish:idx===9?s.done:s.next+' →';
  $('bearGuideBack').hidden=idx===0;
  $('bearGuideSkip').hidden=idx===0||idx===5||idx>=7;
- $('bearGuideNext').hidden=idx===8;
+ $('bearGuideNext').hidden=idx===9;
  const progress=$('bearGuideTrack');progress.innerHTML='';
  for(let i=0;i<labels.length;i++){const dot=document.createElement('span');dot.className=i<idx?'is-done':i===idx?'is-current':'';dot.style.flex='1';progress.appendChild(dot);}
  if(idx===0){
@@ -501,19 +506,19 @@ function render(){
   ([1,2,3,4].includes(idx)&&(processQueue()||(!imported.has(idx)&&!modelReady(idx))))||
   (idx===6&&(processQueue()||!heroDetailsReady()))||
   (idx===5&&!recommendationsReady());
- if(idx===7||idx===8)next.disabled=false;
+ if(idx>=7)next.disabled=false;
  const bodyClass='bear-wizard-mode';document.body.classList.add(bodyClass);
  wizard.scrollIntoView({block:'start',behavior:'instant'});
 }
 function moveTo(i){
- if(i<0||i>8)return;
+ if(i<0||i>9)return;
  // Discard an unconfirmed review when navigating to a DIFFERENT screenshot
  // category. Never save unreviewed OCR results implicitly.
  if(i!==active&&[1,2,4,6].includes(active)&&processQueue()){
   $('intakeClear')?.click();
  }
  if(i===0&&active!==0)message('');
- if(i!==8)finished=false;
+ if(i<8)finished=false;
  active=i;render();
 }
 $('bearGuideBack').addEventListener('click',()=>moveTo(active-1));
@@ -523,6 +528,7 @@ $('bearGuideNext').addEventListener('click',()=>{
  if(processQueue())return;
  if(active===5){confirmRecommendedHeroes();return;}
  if(active===7){showRelevantManual();moveTo(8);return;}
+ if(active===8){moveTo(9);return;}
  if(active<=7)moveTo(active+1);
 });
 wizard.addEventListener('input',()=>{
