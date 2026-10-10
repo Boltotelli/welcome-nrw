@@ -111,9 +111,19 @@ function mount(step,results,B,language){
        'Premier niveau de compétence non confirmé ou héros adapté absent.')));
    }
    const rows=create('div','bear-formation-troops');
-   rows.append(create('strong','',fmt(march.filled)+' / '+fmt(march.capacity)+
-    tr(' Truppen',' troops',' troupes')+(march.capacityKnown?'':tr(' (mindestens)',' (lower bound)',' (minimum)'))));
-   rows.append(create('span','',classNames.map((name,k)=>name+': '+fmt(march.troops[k])+' ('+march.ratio[k]+'%)').join(' · ')));
+   if(march.eligible===false){
+    rows.append(create('strong','',tr('Kein Join-Leader – keine Truppen eingeplant',
+     'No suitable join leader – no troops assigned',
+     'Aucun héros adapté – aucune troupe planifiée')));
+    rows.append(create('span','',tr(
+     'Vivian und andere offensive Joiner werden berücksichtigt, sobald sie in der gescannten Heldenübersicht vorhanden sind.',
+     'Vivian and other offensive joiners are considered if present in your scanned hero roster.',
+     'Vivian et les autres héros offensifs doivent figurer dans les captures reconnues.')));
+   }else{
+    rows.append(create('strong','',fmt(march.filled)+' / '+fmt(march.capacity)+
+     tr(' Truppen',' troops',' troupes')+(march.capacityKnown?'':tr(' (mindestens)',' (lower bound)',' (minimum)'))));
+    rows.append(create('span','',classNames.map((name,k)=>name+': '+fmt(march.troops[k])+' ('+march.ratio[k]+'%)').join(' · ')));
+   }
    section.append(rows);card.append(section);
   }
   card.append(create('p','hint',tr(
