@@ -14,7 +14,12 @@
 const JOIN_PRIORITIES=[
  ['Chenko','lethality',120],['Yeonwoo','lethality',120],
  ['Amadeus','lethality',120],['Amane','attack',116],
- ['Margot','attack',115],['Wee & Woo','dual-offense',112],
+ ['Margot','attack',115],
+ // Vivian's FIRST Expedition skill Crouching Tiger increases enemy damage
+ // taken by 5/10/15/20/25%; offensive Bear joiner, not a defensive filler.
+ // https://kingshotdata.com/heroes/vivian/
+ // https://www.kingshotcommand.com/heroes/vivian (S-ranked Bear Joiner)
+ ['Vivian','damage-taken',118],['Wee & Woo','dual-offense',112],
  ['Hilde','attack/defense',85]
 ];
 const joinMap=new Map(JOIN_PRIORITIES.map(([name,kind,score])=>[name,{kind,score}]));
