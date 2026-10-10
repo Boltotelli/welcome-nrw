@@ -70,28 +70,57 @@ async function reader(){
  if(!root.Tesseract)throw Error('OCR not loaded. Import a game screenshot first.');
  return root.Tesseract.createWorker('eng',1);
 }
-async function recognizeSlots(canvas,slots,kind){
+// Small white-outlined labels need clear margins and single-line OCR.
+function paddedBadge(src,background='#26364b'){
+ const pad=Math.max(22,Math.round(src.height*.16));
+ const out=document.createElement('canvas');
+ out.width=src.width+2*pad;out.height=src.height+2*pad;
+ const ctx=out.getContext('2d');
+ ctx.fillStyle=background;ctx.fillRect(0,0,out.width,out.height);
+ ctx.drawImage(src,pad,pad);
+ return out;
+}
+async function recognizeSlots(canvas,slots,kind,progress){
  const worker=await reader(),out=[];
- for(const slot of slots){
-  let level=null;
-  try{
-   const isPet=kind==='pet';
-   const badge=isPet?C.petBadgeRect(slot.rect):slot.rect;
-   const first=crop(canvas,badge,isPet?'badge':'footer');
-   const ocr=await worker.recognize(first);
-   level=C.readSkillLevel(ocr?.data?.text||'',slot.max);
-   if(level===null&&isPet){
-    // Recover tiny outlined "Lv. N" glyphs which plain Tesseract can omit.
-    const second=await worker.recognize(contrastBadge(first));
-    level=C.readSkillLevel(second?.data?.text||'',slot.max);
-   }
-   if(level===null&&isPet){
-    // Some game themes have an unusually wide level badge.
-    const fallback=await worker.recognize(crop(canvas,slot.rect,'footer'));
-    level=C.readSkillLevel(fallback?.data?.text||'',slot.max);
-   }
-  }catch(_){/* Never invent a level if local OCR fails. */}
-  out.push({...slot,level});
+ const configure=async(params)=>{
+  try{if(typeof worker.setParameters==='function')await worker.setParameters(params);}
+  catch(_){/* Use ordinary OCR if parameters are unsupported. */}
+ };
+ await configure({tessedit_pageseg_mode:'7',tessedit_char_whitelist:''});
+ try{
+  for(let i=0;i<slots.length;i++){
+   const slot=slots[i];let level=null;
+   progress?.(i+1,slots.length);
+   try{
+    const isPet=kind==='pet';
+    const badge=isPet?C.petBadgeRect(slot.rect):C.valoraBadgeRect(slot.rect);
+    const first=crop(canvas,badge,'badge');
+    // First read the actual outlined Lv. label with dark surrounding padding.
+    const raw=await worker.recognize(paddedBadge(first));
+    level=C.readSkillLevel(raw?.data?.text||'',slot.max);
+    if(level===null){
+     // Some icon colors hide the original white letters from Tesseract.
+     const mask=contrastBadge(first);
+     const second=await worker.recognize(paddedBadge(mask,'#fff'));
+     level=C.readSkillLevel(second?.data?.text||'',slot.max);
+    }
+    if(level===null){
+     // Strictly bounded numeric-only fallback: the badge never includes
+     // cooldown timers or the unrelated Lv80 master progression.
+     await configure({tessedit_pageseg_mode:'8',tessedit_char_whitelist:'0123456789'});
+     try{
+      const numeric=await worker.recognize(paddedBadge(contrastBadge(first),'#fff'));
+      level=C.readSkillLevel(numeric?.data?.text||'',slot.max);
+     }finally{
+      await configure({tessedit_pageseg_mode:'7',tessedit_char_whitelist:''});
+     }
+    }
+   }catch(_){/* Unreadable stays empty; do not assume screenshot sample values. */}
+   out.push({...slot,level});
+  }
+ }finally{
+  // This OCR worker is shared with troop/hero intake; restore its defaults.
+  await configure({tessedit_pageseg_mode:'3',tessedit_char_whitelist:''});
  }
  return out;
 }
@@ -189,7 +218,9 @@ function mount(host,B){
   try{
    const canvas=await photoCanvas(file);
    const slots=C.petSlots.map(s=>({...s,rect:C.petRect(s)}));
-   const recognized=await recognizeSlots(canvas,slots,'pet');
+   const recognized=await recognizeSlots(canvas,slots,'pet',(done,total)=>{
+    status.textContent=de('Pet-Skill '+done+'/'+total+' wird gelesen …','Reading pet skill '+done+'/'+total+' …');
+   });
    petPhoto=canvas;
    const ext=v2();
    draftPet=recognized.map(({rect,...item})=>({
@@ -207,12 +238,15 @@ function mount(host,B){
   try{
    const canvas=await photoCanvas(file);
    const slots=C.valoraSkillMax.map((max,i)=>({max,rect:C.valoraRect(i)}));
-   const recognized=await recognizeSlots(canvas,slots,'valora');
-   draftValora=recognized.map(({rect,...item})=>({
-    ...item,preview:crop(canvas,rect,'preview').toDataURL('image/jpeg',.78)
+   const recognized=await recognizeSlots(canvas,slots,'valora',(done,total)=>{
+    status.textContent=de('Valora-Skill '+done+'/'+total+' wird gelesen …','Reading Valora skill '+done+'/'+total+' …');
+   });
+   draftValora=recognized.map(({rect,...item},i)=>({
+    ...item,preview:crop(canvas,C.valoraPreviewRect(rect,canvas.width/canvas.height),'preview').toDataURL('image/jpeg',.87)
    }));
    renderVal();
-   status.textContent=de('Vier Skillwerte prüfen und anschließend gemeinsam übernehmen.','Review all four skill values, then apply together.');
+   const found=recognized.filter(x=>x.level!==null).length;
+   status.textContent=de('Valora-Skill-Level erkannt: '+found+'/4. Fehlende Werte bitte prüfen.','Valora skill ranks recognized: '+found+'/4. Review any blanks.');
   }catch(e){status.textContent=de('Valora-Erkennung fehlgeschlagen: ','Valora recognition failed: ')+String(e?.message||e);}
   valoraBusy=false;valInput.disabled=false;
  }
