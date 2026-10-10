@@ -53,6 +53,33 @@ const z=S.evaluate(missing,model,combat,F,original);
 assert.equal(z.ready,true);
 assert.deepEqual(Array.from(z.rows[2]),[0,0,0],'empty join never gets fictional troops');
 assert.equal(z.missingLeads,1);
+// The user's observed personal 144 million damage only calibrates the
+// own-hosted rally, never join damage from foreign rally leaders.
+const reference={damage:144000000,troops:181820,ratio:[1,12],
+ tiers:[{tier:10,tg:6},{tier:10,tg:5},{tier:10,tg:6}]};
+assert.equal(S.validateCalibration(reference),true);
+assert.deepEqual(Array.from(S.calibrationCounts(reference)),[1818,21818,158184],
+ 'historic 1/12/87 counts are integers summing exactly 181820');
+assert.equal(S.calibrationCounts(reference).reduce((a,b)=>a+b,0),181820);
+const sameTiers={...model,v2:{...model.v2,troopTiers:reference.tiers}};
+const exact=S.calibrateOwn(S.calibrationCounts(reference),sameTiers,combat,reference);
+assert.equal(exact.estimated,144000000,'a reference battle forecasts its own observed damage');
+assert.equal(exact.measuredDamage,144000000);
+assert.equal(exact.provisional,true,'no one-battle calibration is guaranteed');
+const other=S.calibrateOwn([1818,20000,160002],sameTiers,combat,reference);
+assert.ok(other.estimated!==exact.estimated,'changed army composition recalibrates absolute starter estimate');
+assert.equal(S.calibrateOwn([1818,21818,158184],{values:{},v2:{}},combat,reference),null,
+ 'missing combat inputs must never yield a made-up damage forecast');
+assert.equal(S.calibrateOwn([1818,21818,158184],sameTiers,combat,
+ {...reference,ratio:[1,12.5]}),null,'invalid historic ratio must fail closed');
+assert.equal(S.validateCalibration({...reference,troops:0}),false);
+assert.equal(S.validateCalibration({...reference,tiers:reference.tiers.map(x=>({...x,tg:9}))}),false);
+assert.ok(ui.includes('m.v2.bearCalibration=value'),'reference must live in this one player profile');
+assert.ok(ui.includes('prefCalFromUrl'),'deep link may only PREFILL a reference without applying it');
+assert.ok(ui.includes('const own=measured?sim.calibrateOwn('),
+ 'the only calibrated forecast must be the own starter');
+assert.ok(ui.includes('Never add calibrated personal damage to a join PROXY index'),
+ 'do not pretend join proxy indices are real damage');
 assert.match(html,/simulation-core\.js\?v=/);
 assert.match(html,/simulation-ui\.js\?v=/);
 assert.ok(html.indexOf('simulation-core.js')<html.indexOf('simulation-ui.js'));
