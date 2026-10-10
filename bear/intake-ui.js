@@ -922,6 +922,20 @@ function apply(){
  for(const item of queue){
   if(item.type==='troops'||item.type==='stats'){
    if(Object.keys(item.values).length)appliedTypes.push(item.type);
+   if(item.type==='stats'&&Object.keys(item.values).length){
+    // Screenshot classification: bonus overview shows independent CLASS and
+    // SQUAD values. A battle report may already contain their combined total.
+    // Keep a manual override authoritative, but record the import's origin
+    // when there is positive evidence for separate components.
+    const stats=item.values,combined=String(item.text||'')+' '+String(item.grouped||'');
+    const hasClass=['iAtk','iLet','cAtk','cLet','aAtk','aLet']
+      .some(key=>Object.prototype.hasOwnProperty.call(stats,key));
+    const hasSquad=['squadAtk','squadLet'].some(key=>
+      Object.prototype.hasOwnProperty.call(stats,key));
+    const bonusOverview=/bonus[\s\-]*(?:\u00fc|u|ue)bersicht|bonus\s+overview|bonus\s+details/i.test(combined);
+    if((hasClass&&hasSquad)||(hasClass&&bonusOverview))
+      v.combatStatDetectedOrigin='separate-overview';
+   }
    for(const [key,num] of Object.entries(item.values)){
     if(!Number.isFinite(Number(num))||Number(num)<0)continue;
     m.values[key]=Number(num);const input=$(key);if(input){input.value=num;input.dispatchEvent(new Event('input',{bubbles:true}));}
@@ -1007,8 +1021,11 @@ function apply(){
    }
   }
  }
- // Combat report percentages already include governor equipment. The
- // squad percentages are tracked but NOT silently added twice.
+ // Governor Gear remains included in the screenshot class bonuses. The
+ // scorer composes independently captured squad and hero details exactly
+ // once when provenance confirms a separated Bonus Overview.
+ // Clear only legacy checkbox state. The independent source-origin marker
+ // is preserved for the new audited combat-stat composer.
  v.squadSeparate=false;const toggle=$('squadSeparate');if(toggle)toggle.checked=false;
  B.save();B.render();window.NRW_BEAR_ENHANCE?.refreshHeroes?.();
  updateProgress();status(accepted+' '+say('Angaben lokal gespeichert; unbekannte Werte bleiben unverändert.','values saved locally. Unknown values untouched.'));
