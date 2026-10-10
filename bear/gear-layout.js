@@ -35,7 +35,13 @@ function find(data,w,h){
    const cw=x1-x0+1,ch=y1-y0+1;
    if(cw>=minWidth&&cw<=maxWidth&&ch>=minWidth&&ch<=maxWidth&&
      ch/cw>.68&&ch/cw<1.35&&area>=minArea){
-    list.push({x:x0,y:y0,w:cw,h:ch,area,cx:(x0+x1)/2,cy:(y0+y1)/2,quality});
+    const cx=(x0+x1)/2,cy=(y0+y1)/2;
+    // Governor Gear icons are in two edge columns. In the real 955x2048
+    // governor-profile screenshot a golden character-armour reflection at
+    // x~231/716 passes colour + size checks and becomes a bogus seventh
+    // "gear card". Exclude the center character before grouping rows.
+    if(cx<w*.285||cx>w*.715)
+     list.push({x:x0,y:y0,w:cw,h:ch,area,cx,cy,quality});
    }
   }
  }
