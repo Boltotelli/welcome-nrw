@@ -5,14 +5,22 @@
  */
 (function(root){
 'use strict';
+// Conservative Bear joiners sourced from Kingshot Atlas' Bear Rally Heroes
+// guide (https://ks-atlas.com/tools/atlas-database/bear-rally-heroes),
+// its maintainer's May 2026 /r/KingShot guidance and cross-checked with
+// https://strategicnoodle.com/kingshot/database/heroes.
+// Thrud is deliberately NOT a recommended automatic first-slot joiner;
+// Hilde is allowed by NRW, lower-priority as partly defensive.
 const JOIN_PRIORITIES=[
  ['Chenko','lethality',120],['Yeonwoo','lethality',120],
  ['Amadeus','lethality',120],['Amane','attack',116],
- ['Margot','attack',115],['Wee & Woo','lethality',118],
- ['Hilde','attack',78],['Thrud','attack',78]
+ ['Margot','attack',115],['Wee & Woo','dual-offense',112],
+ ['Hilde','attack/defense',85]
 ];
 const joinMap=new Map(JOIN_PRIORITIES.map(([name,kind,score])=>[name,{kind,score}]));
+const CLASSES=['infantry','cavalry','archer'];
 function int(v){const n=Number(v);return Number.isFinite(n)&&n>0?Math.floor(n):0;}
+function classOf(name,catalog){const type=catalog?.heroTypes?.[name];return CLASSES.includes(type)?type:null;}
 function roster(model){
  const v=model?.v2||{},scanned=Array.isArray(v.scannedOwnedHeroes)?v.scannedOwnedHeroes:[];
  const seen=new Set();
@@ -21,7 +29,7 @@ function roster(model){
   seen.add(name);return true;
  }).map(name=>({...v.manualHeroes[name],name}));
 }
-function chooseHeroes(model){
+function chooseHeroes(model,catalog){
  const v=model?.v2||{},owned=roster(model),byName=new Map(owned.map(h=>[h.name,h]));
  const taken=new Set();
  const starter=(v.ownHeroes||[]).slice(0,3).map(n=>{
@@ -29,33 +37,41 @@ function chooseHeroes(model){
   taken.add(n);return byName.get(n);
  });
  const rank=h=>{
-  const join=joinMap.get(h.name);
-  if(!join)return -1;
+  const join=joinMap.get(h.name);if(!join)return -1;
   const first=Array.isArray(h.skills)?Number(h.skills[0]):0;
   const confirmed=h.skillsAssumedMax===false&&Number.isInteger(first)&&first>=1&&first<=5;
-  // Known invested first skill ahead of theoretical max. Never report assumed
-  // screenshot star-based skill caps as verified invested levels.
   return join.score+(confirmed?first*12:0)+(confirmed?35:0);
  };
  const joinCount=Math.max(0,Math.min(6,Math.floor(Number(v.joinCount)||0)));
- // Reserve every good left-slot leader BEFORE distributing Lv80 filler
- // heroes. Otherwise Join 1 would consume future Join 2/3 leaders.
- const reserved=owned.filter(h=>!taken.has(h.name)&&joinMap.has(h.name))
+ const reserved=owned.filter(h=>!taken.has(h.name)&&joinMap.has(h.name)&&classOf(h.name,catalog))
   .sort((a,b)=>rank(b)-rank(a)||a.name.localeCompare(b.name)).slice(0,joinCount);
  reserved.forEach(h=>taken.add(h.name));
- const joins=[];
- for(let i=0;i<joinCount;i++){
-  // No unsuitable skill is automatically placed in the important left slot.
+ const joins=Array.from({length:joinCount},(_,i)=>{
   const first=reserved[i]||null;
-  const supporters=owned.filter(h=>!taken.has(h.name))
-   .sort((a,b)=>int(b.level)-int(a.level)||a.name.localeCompare(b.name)).slice(0,2);
-  supporters.forEach(h=>taken.add(h.name));
   const firstSkill=first&&Array.isArray(first.skills)?Number(first.skills[0]):null;
-  joins.push({heroes:[first,...supporters,...Array(Math.max(0,2-supporters.length)).fill(null)],
+  return {heroes:[first,null,null],
    firstRole:first?joinMap.get(first.name).kind:null,
    skillLevel:first?.skillsAssumedMax===false&&Number.isInteger(firstSkill)&&firstSkill>=1&&firstSkill<=5?firstSkill:null,
-   guideOnly:first?first.skillsAssumedMax!==false:true});
+   guideOnly:first?first.skillsAssumedMax!==false:true};
+ });
+ // Fill one of EACH troop type per march. Reserve join leaders beforehand,
+ // then use highest real hero level in each remaining class, one hero once.
+ // An unsafe/unknown left joiner is not replaced with a defensive filler:
+ // join WITHOUT heroes rather than displacing an ally's attack/lethality skill.
+ for(const type of CLASSES){
+  const fillers=owned.filter(h=>!taken.has(h.name)&&classOf(h.name,catalog)===type)
+   .sort((a,b)=>int(b.level)-int(a.level)||a.name.localeCompare(b.name));
+  let index=0;
+  for(const join of joins){
+   if(!join.heroes[0]||classOf(join.heroes[0].name,catalog)===type)continue;
+   const free=join.heroes.findIndex((h,j)=>j>0&&h===null);
+   if(free>=0&&index<fillers.length){
+    const fill=fillers[index++];join.heroes[free]=fill;taken.add(fill.name);
+   }
+  }
  }
+ for(const j of joins)j.validTypes=j.heroes.filter(Boolean).every((h,i,arr)=>
+  arr.findIndex(x=>classOf(x.name,catalog)===classOf(h.name,catalog))===i);
  return {starter,joins,ownedCount:owned.length,unused:owned.filter(h=>!taken.has(h.name)).length};
 }
 function splitShares(total,caps){
@@ -89,11 +105,13 @@ function fillRows(typeCounts,targets,starter){
 function plan(model,catalog,combat,capacityCore){
  const v=model?.values||{},cap=capacityCore?.breakdown(model,catalog);
  const stock=[int(v.troopsI),int(v.troopsC),int(v.troopsA)];
- const selected=chooseHeroes(model);
+ const selected=chooseHeroes(model,catalog);
  const missing=[];
  if(!cap?.hasBase||!cap.complete)missing.push('capacity');
  if(stock.reduce((a,b)=>a+b,0)<=0)missing.push('troops');
  if(selected.starter.some(h=>!h))missing.push('starter');
+ if(new Set(selected.starter.map(h=>h&&classOf(h.name,catalog))).size!==3||
+    selected.starter.some(h=>!h||!classOf(h.name,catalog)))missing.push('starter-classes');
  const base=cap?.base||0,master=cap?.master||0,pet=cap?.pet||0;
  const teams=[{kind:'starter',heroes:selected.starter},...selected.joins.map(j=>({kind:'join',...j}))];
  // Add capacity of the actual three heroes on EACH march. Unknown hero levels
