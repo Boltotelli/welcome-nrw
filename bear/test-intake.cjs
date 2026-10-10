@@ -39,6 +39,20 @@ assert.equal(C.parseHeroDetail('Zone status 80', ['Zoe']),null,
 assert.deepEqual(Object.keys(C.parseHeroDetail('Zoe Lv. 80', ['Zoe']).expeditionStats),[],
  'absence of visible percentages cannot invent base or gear stats');
 
+// Four labelled hero-detail values can omit troop class inside the
+// Expedition panel. Never invent missing/obscured fields.
+const details=C.parseHeroStats('Expedition\nAttack +492,17%\nDefense 253,57%\nHealth 219%\nLethality 300,70%','archer');
+for(const [key,num] of Object.entries({aAtk:492.17,aDef:253.57,aHp:219,aLet:300.70}))
+ assert.equal(details[key],num,key+' correctly read as visible hero %');
+const partial=C.parseHeroStats('Expedition\nAttack 492,17%\nHealth unreadable','archer');
+assert.equal(partial.aAtk,492.17);
+assert.equal(partial.aHp,undefined,'not visible means unknown, not a fabricated base stat');
+assert.deepEqual(Object.keys(C.parseHeroStats('Hero Power 12,345\nWidget 5\nSkills +200','archer')),[],
+ 'power, widgets and skills cannot be mistaken for expedition percentages');
+const wrongClass=C.parseHeroStats('Infanterie-Gesundheit 285,70%\nArcher Attack 244,30%','archer');
+assert.equal(wrongClass.aHp,undefined,'hero type must not be confused with other class labels');
+assert.equal(wrongClass.aAtk,244.30);
+
 assert.equal(C.maxSkill(4),5);assert.equal(C.maxSkill(3),4);assert.equal(C.maxSkill(5),5);
 const types={Yang:'archer',Rosa:'archer',Petra:'cavalry',Zoe:'infantry'};
 const owned=[{name:'Yang',level:80,stars:4,widget:5},{name:'Rosa',level:80,stars:5,widget:3},{name:'Petra',level:80,stars:5},{name:'Zoe',level:80,stars:5}];
