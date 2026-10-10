@@ -30,12 +30,7 @@ function scoreRows(rows,model,combat){
  const levels=combat?.configure?.(model?.v2);
  const v=model?.values;
  if(!combat?.ready?.(v,levels)||typeof combat?.damage!=='function')return null;
- const own={...v};
- if(model.v2?.squadSeparate){
-  const a=Number(v.squadAtk)||0,l=Number(v.squadLet)||0;
-  for(const x of ['iAtk','cAtk','aAtk'])own[x]=(Number(own[x])||0)+a;
-  for(const x of ['iLet','cLet','aLet'])own[x]=(Number(own[x])||0)+l;
- }
+ const own=root.NRW_BEAR_OWN_BASELINE?.currentStats?.(model)||{...v};
  const pitfall=5; // NRW alliance trap is always Lv5: +25 attack points
  const scores=rows.map((row,i)=>{
   // The join score intentionally does not use the own starter's extra
