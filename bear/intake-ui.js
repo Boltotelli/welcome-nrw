@@ -196,6 +196,11 @@ function overviewTiles(canvas,text,words,scanTag){
      signature:portraitSignature(canvas,rect),
      portraitCandidates:MATCHER?.candidates(canvas,rect)||[]};
    HERO_LEVEL?.record(tile,HERO_LEVEL.lineInRect(words,rect),scanTag+':screen');
+   // Pixel geometry verifies the shape of Lv.1 or Lv.80 independently of
+   // the OCR text, which previously hallucinated 19 and 20.
+   const visual=HERO_LEVEL?.visual(canvas,rect);
+   if(visual!==null&&visual!==undefined)
+    HERO_LEVEL.record(tile,visual,scanTag+':glyph','visual');
    collected.push(tile);
   }
  }
@@ -262,34 +267,6 @@ async function readHeroLevelsMasked(tiles,canvas,worker,scanTag){
    HERO_LEVEL?.record(tile,line,scanTag+':masked');
   });
  }catch(_){/* Do not invent an unreadable hero level. */}
-}
-async function readHeroLevelDigits(tiles,canvas,worker,scanTag){
- // Optional OCR fallback: isolate ONLY the two digits after the fixed Lv.
- // position, not random numbers in the portrait or star row.
- const pending=tiles.filter(t=>t.rect&&t.levelConfidence!=='verified');
- if(!pending.length||typeof worker.setParameters!=='function')return;
- try{
-  await worker.setParameters({tessedit_pageseg_mode:'7',
-   tessedit_char_whitelist:'0123456789'});
-  for(const tile of pending){
-   const r=tile.rect,c=document.createElement('canvas');
-   c.width=220;c.height=76;
-   const cx=c.getContext('2d',{willReadFrequently:true});
-   cx.imageSmoothingEnabled=true;cx.imageSmoothingQuality='high';
-   cx.fillStyle='#fff';cx.fillRect(0,0,c.width,c.height);
-   cx.drawImage(canvas,r.x+r.w*.29,r.y+r.h*.765,
-    r.w*.29,r.h*.09,0,0,c.width,c.height);
-   try{
-    const data=await worker.recognize(c);
-    HERO_LEVEL?.record(tile,data.data?.text||'',scanTag+':digits','digits');
-   }catch(_){/* Leave unreadable levels for user review. */}
-  }
- }catch(_){/* Preserve the existing labelled Lv. readings. */}
- finally{
-  // Tesseract.js v5 defaults to PSM.SINGLE_BLOCK; never affect future OCR.
-  try{await worker.setParameters({tessedit_pageseg_mode:'6',
-   tessedit_char_whitelist:''});}catch(_){}
- }
 }
 function spatialTroops(words,canvas){
  const zones=[
@@ -527,7 +504,6 @@ async function inspect(file){
  if(type==='roster'&&allCards.length){
   await readHeroLevelsRaw(allCards,canvas,worker,scanTag);
   await readHeroLevelsMasked(allCards,canvas,worker,scanTag);
-  await readHeroLevelDigits(allCards,canvas,worker,scanTag);
  }
  const existing=[...queue.filter(q=>q.type==='roster').flatMap(q=>q.cards||[])];
  const fresh=[];let duplicates=0;
@@ -576,7 +552,6 @@ function renderQueue(){
      const worker=await loadOCR();
      await readHeroLevelsRaw(item.cards,item.canvas,worker,scanTag);
      await readHeroLevelsMasked(item.cards,item.canvas,worker,scanTag);
-     await readHeroLevelDigits(item.cards,item.canvas,worker,scanTag);
     }
     if(item.type==='roster'&&MATCHER){
      // Changing the screenshot category manually must follow the same
