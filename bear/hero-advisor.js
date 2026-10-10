@@ -46,7 +46,14 @@ function evaluate(hero,type,priorities){
  // Only explicitly known offensive widgets influence the shortlist.
  const widgetFactor=widget!==null&&offensiveWidget.has(hero.name)?
   (1+Math.min(8,widget)*.012):1;
- const roleFactor=legacyFillers.has(hero.name)?.46:defenseFirst.has(hero.name)?.62:1;
+ // Gen-6 archer leader Yang has stronger native rally/bear offensive
+ // abilities than Gen-4 Rosa at similar development, even without widgets.
+ // Give the well-built 4★ T3+ Yang a *bounded guide preference*; this is
+ // NOT an asserted damage multiplier or a substitute for actual skills.
+ const yangReady=type==='archer'&&hero.name==='Yang'&&
+  (stars>=5||(stars>=4&&(tier||0)>=3));
+ const roleFactor=legacyFillers.has(hero.name)?.46:defenseFirst.has(hero.name)?.62:
+  yangReady?1.10:1;
  const score=Math.round(100*progress*levelFactor*skillFactor*guideFactor*widgetFactor*roleFactor*10)/10;
  const confidence=stars===null?'limited':skills.confirmed&&level!==null?'higher':'estimated';
  return {
