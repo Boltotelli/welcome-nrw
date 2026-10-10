@@ -301,6 +301,8 @@ function renderPets(){
    const tile=makeStepper(petPanel,{name:p.name,url:p.img,maxLevel:p.maxLevel,value,
     note:p.bearSkill.skill,callback:v=>{
      saved.petLevels[p.name]=v;
+     // An explicit pet-level edit supersedes any older screenshot skill rank.
+     delete saved.petSkillRanks[p.name];
      if(existingOld&&document.getElementById(existingOld)){
        B.model().values[existingOld]=v;
        const field=document.getElementById(existingOld);field.value=v;
