@@ -35,6 +35,8 @@ assert.ok(fullCard.x>0&&fullCard.x+fullCard.w<1&&fullCard.y>0&&fullCard.y+fullCa
 const actualBadge=C.valoraBadgeRect(C.valoraRect(1));
 assert.ok(Math.abs(actualBadge.y*2048-1814)<4&&Math.abs((actualBadge.y+actualBadge.h)*2048-1858)<6,
  'OCR must read the real Valora label at y1814..1858, not the surrounding artwork');
+assert.match(ui,/const img=el\('img','bear-buff-thumbnail bear-buff-valora-thumbnail'\);img\.alt='';img\.src=item\.preview;/,
+ 'Valora review must assign image.src (empty image boxes regression)');
 assert.ok(ui.includes("C.valoraBadgeRect(slot.rect)")&&ui.includes("C.valoraPreviewRect(rect)"),
  'Valora must use its own level crop and complete card preview');
 assert.ok(ui.includes("contrastBadge(img)")&&ui.includes("tessedit_pageseg_mode:'8'"),
