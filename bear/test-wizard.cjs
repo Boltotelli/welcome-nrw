@@ -30,7 +30,7 @@ assert.ok(!wizard.includes('sourceValue*')&&!wizard.includes('verified.bonus*'),
  'reference bonuses are never invented damage multipliers');
 
 assert.ok(html.indexOf('wizard.css')>html.indexOf('intake-ui.css'),'wizard styles override legacy forms');
-assert.ok(wizard.includes("labels=['id','troops','stats','gear','heroes','hero-picks','hero-details','missing','result'];"),'nine stages in intended sequence');
+assert.ok(wizard.includes("labels=['id','troops','stats','gear','heroes','hero-picks','hero-details','missing','result','simulation'];"),'ten stages: formation recommendations followed by interactive damage laboratory');
 for(const id of ['lookupForm','intakeFiles','bearGearPhoto','intakeMissingDetails','intakeResultSlot']){
  assert.ok(wizard.includes(id),'wizard reuses real control '+id);
 }
