@@ -61,7 +61,7 @@ assert.equal(z.missingLeads,1);
 assert.ok(!ui.includes('bearCalibration'), 'no manual 144m scaling in UI');
 assert.ok(!sim.includes('calibrateOwn('), 'drop one-battle extrapolation');
 assert.ok(!ui.includes('prefCalFromUrl'), 'no deep-link injection of a historical damage scale');
-assert.ok(ui.includes('renderSkillScenarios(data)'), 'show join skills as separate scenarios');
+assert.ok(ui.includes('renderOwnBaseline(data)'), 'show own starter baseline without any joining heroes');
 assert.equal(S.JOIN_SCENARIOS.length,4);
 const ownRow=plan.marches[0].troops;
 const pure=S.scenarioOwn(ownRow,model,realCombat,'no-skill');
