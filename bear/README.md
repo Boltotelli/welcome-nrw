@@ -428,3 +428,9 @@ New original real 955×2048 Kingshot screenshots:
 - Pet rank OCR first scans the **bottom-right skill badge**, then retries an outlined-text contrast version and the full tile footer if needed. Only 1–10 (or the specific catalog cap) is accepted; cooldowns, pet training levels and unresolved readings stay blank for review.
 - The review status shows how many pet ranks were recognized; no new wizard step, pet activity auto-selection, or automatic stat/capacity additions. Valora's Hunter Instinct remains manual. Source-reference samples remain Moose 4, Rhino 5, Bison 6, Great Moose 5, Panther 7.
 - Unit tests now cover badge position, stable crop proportions and guarded OCR variants. **Browser confirmation with the actual user pet screenshot is still required** before calling OCR accuracy verified.
+
+### Pet and Valora follow-up (2/9 detected in browser, October 10)
+- Actual mobile browser screenshot after first hotfix showed only **Moose Lv4** and **Mighty Bison Lv6** detected; Rhino/Great Moose/Panther and all four Valora skills were blank. The Valora images appeared squashed in review. This is a recorded observed regression, not a claim of OCR success.
+- Separate Pet bottom-right rank badge from Valora bottom-center rank badge; process both using Tesseract single-line mode, padded label crops, monochrome retry and a bounded numeric-only fallback. Restore the shared worker settings and serialize pet/Valora imports when both screenshots are selected quickly.
+- Valora review thumbnail uses a central **square source crop** with a square CSS thumbnail. No source image is geometrically stretched, and Pet review stays untouched.
+- After CI deployment, **real screenshot retest is required**: target 5/5 Pet and 4/4 Valora, with manual Hunter Instinct Lv8 still separate. Unknowns never filled from the reference user's ranks, and the original 9-step wizard and production remain unchanged.
