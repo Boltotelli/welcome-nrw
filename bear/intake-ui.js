@@ -696,7 +696,7 @@ function renderQueue(){
     edit.open=!(tile.name&&tile.level&&tile.starSteps!==null);
     const certainty=document.createElement('small');certainty.className='hint';
     certainty.textContent=tile.nameConfidence==='high'?
-     say('Porträt abgeglichen','Portrait matched'):
+     say('Bild mit Referenz abgeglichen – Namen bitte prüfen','Image matched to reference – check the name'):
      say('Bildname nicht bestätigt','Portrait unconfirmed');
     cell.append(summaryLine,certainty,edit);grid.append(cell);
    });
