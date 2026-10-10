@@ -247,15 +247,22 @@ function n(id){return Math.max(0,Number(model.values[id])||0);}
 function activeMarchCount(){return 1+Math.max(0,Math.min(6,Math.floor(Number(model.v2&&model.v2.joinCount)||0)));}
 function available(){return [Math.floor(n('troopsI')),Math.floor(n('troopsC')),Math.floor(n('troopsA'))];}
 function heroCapacity(){
+ var calc=window.NRW_BEAR_CAPACITY?.breakdown(model,window.NRW_BEAR_CATALOG);
+ if(calc)return calc.heroes;
+ // External capacity module is loaded after this inline script. This is
+ // only an initial-load fallback, never used after the page finishes.
  var v=model.v2||{},chosen=Array.isArray(v.ownHeroes)?v.ownHeroes:[];
- var bonusFromHero=chosen.length===3&&chosen.every(function(name){
+ var all80=chosen.length===3&&chosen.every(function(name){
   var h=(v.manualHeroes||{})[name]||(v.heroesLevelCache||{})[name];
   return name&&h&&Number(h.level)===80;
- })?40410:0;
- // Manual value is an OVERRIDE, not an extra additive bonus.
- return Object.prototype.hasOwnProperty.call(model.values,'heroCapManual')?n('heroCapManual'):bonusFromHero;
+ });
+ return Object.prototype.hasOwnProperty.call(model.values,'heroCapManual')?n('heroCapManual'):all80?40410:0;
 }
-function capacity(){return Math.max(0,Math.floor(n('cap')+n('master')+n('pet')+heroCapacity()));}
+function capacity(){
+ var calc=window.NRW_BEAR_CAPACITY?.breakdown(model,window.NRW_BEAR_CATALOG);
+ return calc?Math.max(0,Math.floor(calc.total||0)):
+  Math.max(0,Math.floor(n('cap')+n('master')+n('pet')+heroCapacity()));
+}
 function offensiveStats(stats,own){
  if(!own||!model.v2||!model.v2.squadSeparate)return stats;
  var attack=n('squadAtk'),lethality=n('squadLet');
@@ -472,6 +479,6 @@ window.NRW_BEAR_BRIDGE={model:function(){return model;},save:save,render:render,
 try{document.documentElement.dataset.theme=localStorage.getItem('nrw_theme')||'dark';language(localStorage.getItem('nrw_page_lang')||'en');}catch(_){language('en');}
 })();
 </script>
-<script src="./catalog.js"></script><script src="./v2.js?v=pet-valora-20261010-1"></script><script src="./ux.js"></script><script src="./charm-references.js"></script><script src="./charm-shapes.js"></script><script src="./charm-guide-silhouettes.js?v=charms-11-1"></script><script src="./charm-guide-matcher.js?v=charms-11-1"></script><script src="./tier-recognizer.js"></script><script src="./gear-layout.js?v=hero-details-20261010-3"></script><script src="./screenshot-importer.js?v=hero-details-20261010-3"></script><script src="./intake-core.js?v=hero-expedition-20261010-4"></script><script src="./troop-badges.js?v=bear-review-20261010-2"></script><script src="./troop-entries.js?v=troop-count-4"></script><script src="./hero-grid.js?v=roster-20261010-1"></script><script src="./hero-stars.js?v=phone-diagnostics-20261010-1"></script><script src="./hero-level.js?v=level-glyph-20261010-3"></script><script src="./portrait-matcher.js?v=roster-20261010-3"></script><script src="./intake-ui.js?v=pet-valora-20261010-1"></script><script src="./hero-reference.js?v=ref-github-20261010-1"></script><script src="./hero-advisor.js?v=bear-review-20261010-2"></script><script src="./buff-intake-core.js?v=valora-full-badge-20261010-7"></script><script src="./buff-import.js?v=valora-full-badge-20261010-7"></script><script src="./wizard.js?v=pet-valora-20261010-1"></script>
+<script src="./catalog.js"></script><script src="./v2.js?v=pet-valora-20261010-1"></script><script src="./ux.js"></script><script src="./charm-references.js"></script><script src="./charm-shapes.js"></script><script src="./charm-guide-silhouettes.js?v=charms-11-1"></script><script src="./charm-guide-matcher.js?v=charms-11-1"></script><script src="./tier-recognizer.js"></script><script src="./gear-layout.js?v=hero-details-20261010-3"></script><script src="./screenshot-importer.js?v=hero-details-20261010-3"></script><script src="./intake-core.js?v=hero-expedition-20261010-4"></script><script src="./troop-badges.js?v=bear-review-20261010-2"></script><script src="./troop-entries.js?v=troop-count-4"></script><script src="./hero-grid.js?v=roster-20261010-1"></script><script src="./hero-stars.js?v=phone-diagnostics-20261010-1"></script><script src="./hero-level.js?v=level-glyph-20261010-3"></script><script src="./portrait-matcher.js?v=roster-20261010-3"></script><script src="./intake-ui.js?v=pet-valora-20261010-1"></script><script src="./hero-reference.js?v=ref-github-20261010-1"></script><script src="./hero-advisor.js?v=bear-review-20261010-2"></script><script src="./capacity-core.js?v=capacity-20261010-1"></script><script src="./buff-intake-core.js?v=valora-full-badge-20261010-7"></script><script src="./buff-import.js?v=valora-full-badge-20261010-7"></script><script src="./wizard.js?v=pet-valora-20261010-1"></script>
 </body>
 </html>
