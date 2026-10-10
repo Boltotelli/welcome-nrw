@@ -211,7 +211,9 @@ function mount(host,B,language){
   }
   for(const fx of own.included)card.append(el('p','hint',
    fx.hero+' · '+fx.skill+' Lv'+fx.level+': +'+fx.effectiveBonusPct.toFixed(1)+'% '+
-    (l==='de'?'fester Zusatzschlag-Anteil':'fixed extra-strike contribution')));
+    (fx.kind==='fixed-enemy-damage-taken'?
+     (l==='de'?'feste Erhöhung des erlittenen Schadens':'fixed enemy damage taken'):
+     (l==='de'?'fester Zusatzschlag-Anteil':'fixed extra-strike contribution'))));
   for(const w of own.widgets)card.append(el('p','hint',
    w.name+' · '+w.skillName+' (Widget '+w.widgetLevel+'): '+
    (w.type==='defense-only'?'0%':w.bonusPct+'% '+
