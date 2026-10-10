@@ -33,7 +33,7 @@ function state(){
  const s=m.v2;
  if(!Number.isInteger(Number(s.joinCount)))s.joinCount=0;
  s.joinCount=max(s.joinCount,0,6);
- if(!s.petLevels)s.petLevels={};if(!s.petActive)s.petActive={};if(!s.petEffects)s.petEffects={};if(!s.petValues)s.petValues={};
+ if(!s.petLevels)s.petLevels={};if(!s.petSkillRanks)s.petSkillRanks={};if(!s.petActive)s.petActive={};if(!s.petEffects)s.petEffects={};if(!s.petValues)s.petValues={};
  if(!Array.isArray(s.valora))s.valora=[0,0,0,0];
  if(!s.gear)s.gear={};if(!s.manualHeroes)s.manualHeroes={};
  if(!Array.isArray(s.ownHeroes))s.ownHeroes=['','',''];
@@ -266,7 +266,9 @@ function petLevelToRank(level){
  return Math.max(0,Math.min(10,Math.floor((Number(level)||0)/10)));
 }
 function petEffectText(p,level){
- const rank=petLevelToRank(level);
+ const storedRank=state().petSkillRanks?.[p.name];
+ const rank=storedRank!==undefined&&Number.isInteger(Number(storedRank))&&Number(storedRank)>0?
+  Math.min(p.bearSkill.values.length,Number(storedRank)):petLevelToRank(level);
  const skill=p.bearSkill;
  if(!skill)return '';
  if(rank===0)return tx('petBelowTier');
@@ -311,7 +313,9 @@ function renderPets(){
    tile.appendChild(description);
    function updatePetLabel(){
      const level=saved.petLevels[p.name]||0;
-     const rank=petLevelToRank(level),skill=p.bearSkill;
+     const recognized=saved.petSkillRanks?.[p.name];
+     const rank=recognized!==undefined&&Number.isInteger(Number(recognized))&&Number(recognized)>0?
+      Math.min(p.bearSkill.values.length,Number(recognized)):petLevelToRank(level),skill=p.bearSkill;
      const labels={
        attack:tx('buffAttack'),lethality:tx('buffLethality'),
        squad_capacity:tx('buffSquad'),rally_capacity:tx('buffRally'),
@@ -334,7 +338,10 @@ function renderPets(){
      apply.textContent=tx('applyBison');
      apply.addEventListener('click',()=>{
        if(!saved.petActive[p.name])return;
-       const rank=petLevelToRank(saved.petLevels[p.name]||0);
+       const observed=saved.petSkillRanks?.[p.name];
+       const rank=observed!==undefined&&Number.isInteger(Number(observed))&&Number(observed)>0?
+        Math.min(p.bearSkill.values.length,Number(observed)):
+        petLevelToRank(saved.petLevels[p.name]||0);
        const v=rank?p.bearSkill.values[rank-1]:0;
        const input=document.getElementById('pet');input.value=v;input.dispatchEvent(new Event('input'));
      });
@@ -417,7 +424,7 @@ function showForProfile(evt){
 }
 makeLayout();
 B.renderV2=()=>renderEditor();
-window.NRW_BEAR_ENHANCE={renderEditor,refreshGear:renderGear,refreshHeroes:()=>{heroBuilder();renderRoster();renderEditor();}};
+window.NRW_BEAR_ENHANCE={renderEditor,refreshGear:renderGear,refreshBuffs:()=>{renderPets();renderValora();},refreshHeroes:()=>{heroBuilder();renderRoster();renderEditor();}};
 window.addEventListener('nrw-bear-loaded',showForProfile);
 document.querySelectorAll('button[data-lang]').forEach(b=>b.addEventListener('click',()=>{
  setTimeout(()=>{if(!validModel())return;const heads=container.querySelectorAll('section.panel');
