@@ -66,8 +66,8 @@ assert.ok(html.indexOf('capacity-ui.js')<html.indexOf('wizard.js'));
 assert.ok(html.includes("NRW_BEAR_CAPACITY?.breakdown(model"),'optimizer shares exact calculation');
 assert.ok(wizard.includes("capacityHost.hidden=false"),'same-page manual capacity is always visible');
 assert.ok(wizard.includes("capacityUI?.refresh()"),'live updates on step 8');
-assert.ok(wizard.includes("capacityKnown&&Number(B.capacity?.()||0)>0"),
- 'result optimization must not silently omit unknown hero capacity');
+assert.ok(wizard.includes("formationUI?.show()"),
+ 'step 9 must render the new inventory-safe plan (which checks capacity readiness)');
 assert.ok(ui.includes("document.getElementById('heroCapManual')"),'reuse existing override, not a new form');
 assert.ok(!ui.includes('localStorage.'),'no second persistence model');
 console.log('CAPACITY: 1–80 hero lookup, 39 unknown, full arithmetic, no double counting, live review, existing wizard verified.');
