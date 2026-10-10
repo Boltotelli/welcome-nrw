@@ -122,7 +122,8 @@ function modelReady(kind){
  if(kind===1)return ['troopsI','troopsC','troopsA'].every(has);
  if(kind===2)return ['iAtk','iLet','cAtk','cLet','aAtk','aLet'].every(has);
  if(kind===3){const g=B.model().v2?.gear||{};return Object.values(g).some(x=>x?.quality&&x.quality!=='none'||x?.charms?.some(n=>Number(n)>0));}
- if(kind===4)return Object.keys(B.model().v2?.manualHeroes||{}).length>=3;
+ if(kind===4){const v=B.model().v2||{};return Array.isArray(v.scannedOwnedHeroes)&&
+  v.scannedOwnedHeroes.filter(n=>v.manualHeroes?.[n]).length>=3;}
  if(kind===6)return heroDetailsReady();
  return false;
 }
@@ -222,8 +223,9 @@ capacityHost.id='bearRequiredCapacity';capacityHost.className='bear-required-cap
 sections[7].insertBefore(capacityHost,manual);
 function heroResults(){
  const ext=B.model().v2||{},known=window.NRW_BEAR_IMPORTED_HEROES||[];
+ // Never treat old API or manual hero cards as verified by this roster scan.
  const owned=new Set(Array.isArray(ext.scannedOwnedHeroes)?ext.scannedOwnedHeroes:[]);
- const restrict=owned.size>0;
+ const restrict=true;
  const roster=new Map();
  for(const h of known)if(h?.name&&(!restrict||owned.has(h.name)))roster.set(h.name,{...h});
  for(const h of Object.values(ext.manualHeroes||{}))if(h?.name&&(!restrict||owned.has(h.name))){
@@ -251,55 +253,88 @@ function heroDetailsReady(){
 }
 function renderRecommendations(){
  recommendationPanel.innerHTML='';
- const l=lang(),groupNames=names[l]||names.en,groups=heroResults();
- const introduction=document.createElement('p');introduction.className='hint';
- introduction.textContent=l==='de'?
- 'Vorläufige Bären-Starter nach KS-Atlas-Rollenpräferenz und deinem erkannten Level, Sternfortschritt und Skillstand. Ohne Skill-Screenshot wird nur das theoretische Maximum aus den Sternen geschätzt.':
- l==='fr'?'Classement provisoire selon les priorités Ours de KS Atlas et les niveaux, étoiles et compétences détectés. Les compétences non reconnues restent estimées.':
- 'Provisional Bear leaders using KS Atlas role priorities and your identified levels, stars and skills. Unread skills use only an assumed maximum from stars.';
- recommendationPanel.append(introduction);
- const link=document.createElement('a');link.href=atlas;link.target='_blank';link.rel='noopener noreferrer';link.textContent='KS Atlas · Bear Rally Heroes';
- recommendationPanel.append(link);
+ const l=lang(),groups=heroResults(),groupNames=names[l]||names.en;
+ const intro=document.createElement('p');intro.className='hint';
+ intro.textContent=l==='de'?
+  'Nur deine erkannten, besessenen Helden: je ein Rally-Starter pro Truppengattung. Sterne, Level und freigeschaltete Skills wiegen stärker als die Bear-Meta-Reihenfolge. Atlas-orientierter Vergleich, KEINE offizielle Schadenssimulation.':
+  l==='fr'?'Un héros possédé par classe. Étoiles, niveaux et compétences priment sur la popularité du guide. Estimation indicative, PAS une simulation KS Atlas.':
+  'Your scanned owned heroes only: one rally leader per class. Stars, level and skills outweigh name popularity. Atlas-inspired shortlist, NOT an official damage simulation.';
+ recommendationPanel.append(intro);
+ const refs=document.createElement('p');refs.className='bear-guide-sources';
+ const atlasLink=document.createElement('a');atlasLink.href=atlas;atlasLink.target='_blank';atlasLink.rel='noopener noreferrer';atlasLink.textContent='KS Atlas · Bear Rally Heroes';
+ const guideLink=document.createElement('a');guideLink.href=advisor?.supportingGuide||'https://kingshotguides.com/guide/bear-hunt-expert-guide/';
+ guideLink.target='_blank';guideLink.rel='noopener noreferrer';guideLink.textContent=l==='de'?'Ergänzender Guide':l==='fr'?'Guide complémentaire':'Supporting guide';
+ refs.append(atlasLink,guideLink);recommendationPanel.append(refs);
  groups.forEach((group,i)=>{
   const card=document.createElement('div');card.className='bear-recommendation-card';
   const heading=document.createElement('strong');heading.textContent=['🛡️ ','🐴 ','🏹 '][i]+groupNames[i];
   card.append(heading);
   if(!group.choices.length){
    const empty=document.createElement('p');empty.className='bear-guide-needed';
-   empty.textContent=l==='de'?'Noch kein identifizierter Held dieser Gattung. Gehe zurück und ordne mindestens einen Helden in der Übersicht zu.':
-    l==='fr'?'Aucun héros identifié pour ce rôle. Retourne à la liste pour confirmer son nom.':
-    'No identified hero for this role. Return to the roster to confirm a hero name.';
+   empty.textContent=l==='de'?'Kein eingescannter und zugeordneter Held dieser Gattung. Gehe zurück zur Heldenübersicht.':
+    l==='fr'?'Aucun héros identifié de cette classe. Reviens à la liste des héros.':
+    'No recognized scanned hero for this class. Return to the hero overview.';
    card.append(empty);
   }else{
-   const recommended=group.choices.find(x=>x.name===chosenRecommendations[i])||group.best;
-   const text=document.createElement('p');
-   text.className='hint';
-   text.textContent=recommended.name+' · '+(recommended.level?'Lv '+recommended.level:'Lv ?')+
-    ' · '+(recommended.stars?recommended.stars+'★':'★ ?')+
-    ' · '+(recommended.skill?'Skill '+Number(recommended.skill).toFixed(1):'Skill ?')+
-    (recommended.assumedSkill?' ('+(l==='de'?'angenommen':'estimated')+')':'');
-   card.append(text);
-   if(recommended.bearCaution){
+   const chosen=group.choices.find(x=>x.name===chosenRecommendations[i])||group.best;
+   const portrait=window.NRW_BEAR_CATALOG?.heroes?.find(h=>h.name===chosen.name)?.img;
+   const summary=document.createElement('div');summary.className='bear-leader-summary';
+   if(portrait){
+    const img=document.createElement('img');img.src=portrait;img.alt='';img.loading='lazy';
+    img.className='bear-recommendation-portrait';summary.append(img);
+   }
+   const info=document.createElement('div');
+   const name=document.createElement('b');name.textContent=chosen.name;
+   const data=document.createElement('p');data.className='hint';
+   data.textContent=(chosen.level?'Lv '+chosen.level:'Lv ?')+' · '+
+    (chosen.stars?chosen.stars+'★'+(chosen.tier?' T'+chosen.tier:''):'★ ?')+
+    ' · '+(chosen.skillCap?'Skill-Max '+chosen.skillCap:'Skill ?')+
+    (chosen.assumedSkill?' ('+(l==='de'?'nur maximal möglich':l==='fr'?'non confirmé':'not verified')+')':'');
+   info.append(name,data);summary.append(info);card.append(summary);
+   const second=group.choices.find(x=>x.name!==chosen.name);
+   if(second){
+    const reason=document.createElement('p');reason.className='hint bear-recommendation-reason';
+    if(chosen.stars!==null&&second.stars!==null&&chosen.stars>=second.stars+2){
+     reason.textContent=l==='de'?
+      chosen.stars+'★ statt '+second.stars+'★ bei '+second.name+
+      ': Ein schwach entwickelter Meta-Held verdrängt keinen gut ausgebauten Starter.':
+      l==='fr'?'Meilleure progression : '+chosen.stars+'★ contre '+second.stars+'★ ('+second.name+').':
+      'More developed: '+chosen.stars+'★ vs '+second.stars+'★ ('+second.name+'). A low-star meta hero does not automatically win.';
+    }else{
+     reason.textContent=l==='de'?
+      'Im Vergleich zu '+second.name+' werden Sterne, Level, Skill-Potenzial und Rollenempfehlung berücksichtigt.':
+      l==='fr'?'Comparé à '+second.name+' : étoiles, niveau, compétences et rôle.':
+      'Compared to '+second.name+': stars, level, skills and Bear role preference.';
+    }
+    card.append(reason);
+   }
+   if(chosen.bearCaution){
     const note=document.createElement('p');note.className='bear-guide-needed';
-    note.textContent=l==='de'?'Defensiver Held: für Bären-Rallys meist schwächer. Empfehlung vor Verwendung prüfen.':
-     l==='fr'?'Héros défensif : généralement plus faible pour l’Ours. Vérifie cette sélection.':
-     'Defense-oriented hero: usually weaker for Bear Trap. Review this choice.';
+    note.textContent=l==='de'?'Defensiver Held: im Bärenkampf oft nur Ersatzlösung.':
+     l==='fr'?'Héros défensif : choix de secours pour l’Ours.':
+     'Defense-oriented hero: usually only a Bear Trap fallback.';
     card.append(note);
    }
    if(group.choices.length>1){
-    const expand=document.createElement('details');
-    const summary=document.createElement('summary');summary.textContent=l==='de'?'Alternative prüfen':l==='fr'?'Choisir un autre':'Choose another';
+    const more=document.createElement('details');
+    const caption=document.createElement('summary');caption.textContent=l==='de'?'Alternative auswählen':l==='fr'?'Choisir une alternative':'Choose another hero';
     const select=document.createElement('select');select.setAttribute('aria-label',groupNames[i]);
-    group.choices.forEach(h=>{const option=document.createElement('option');option.value=h.name;option.textContent=h.name+' · '+h.score.toFixed(1);option.selected=h.name===recommended.name;select.append(option);});
+    group.choices.forEach(h=>{
+     const opt=document.createElement('option');opt.value=h.name;
+     opt.textContent=h.name+' · '+(h.stars?h.stars+'★':'★ ?')+' · '+(h.level?'Lv '+h.level:'Lv ?');
+     opt.selected=h.name===chosen.name;select.append(opt);
+    });
     select.addEventListener('change',()=>{chosenRecommendations[i]=select.value;renderRecommendations();});
-    expand.append(summary,select);card.append(expand);
+    more.append(caption,select);card.append(more);
    }
   }
   recommendationPanel.append(card);
  });
  const hint=document.createElement('p');hint.className='hint';
- hint.textContent=l==='de'?'Diese Auswahl ist noch keine bestätigte Berechnung der Helden-Skills. Die Details werden im nächsten Schritt geprüft.':
- 'This is not a verified hero damage simulation; the next step checks individual hero details.';
+ hint.textContent=l==='de'?
+  'Die Sterne zeigen nur das Skill-Maximum, nicht den tatsächlichen Ausbau. Bestätige die drei Helden mit „Weiter“. Im nächsten Schritt verteilst du das beste Hero-Gear auf alle drei und fotografierst danach ihre Detailseiten.':
+ l==='fr'?'Les étoiles donnent le niveau maximum de compétence, pas les améliorations réellement effectuées. Confirme tes trois héros, puis équipe-les avant de faire les captures.':
+ 'Stars indicate possible skill caps, not verified upgrades. Confirm the three heroes; equip all three before taking their detail screenshots in the next step.';
  recommendationPanel.append(hint);
  const btn=$('bearGuideNext');
  if(active===5&&btn)btn.disabled=!recommendationsReady();
@@ -317,18 +352,30 @@ function confirmRecommendedHeroes(){
 function renderHeroDetails(){
  const l=lang(),chosen=B.model().v2?.ownHeroes||[];
  detailPanel.innerHTML='';
- const message=document.createElement('p');message.className='bear-gear-reminder';
- message.textContent=l==='de'?
- 'WICHTIG: Verteile zuerst dein BESTES verfügbares HELDEN-GEAR auf diese drei Helden. Lass die Ausrüstung so angelegt, wie du sie gleichzeitig bei der Bärenfalle nutzen möchtest. Erst DANACH die Details fotografieren.':
- l==='fr'?'IMPORTANT : répartis ton meilleur équipement de héros entre les trois héros comme pour le piège à ours, puis capture leurs détails.':
- 'IMPORTANT: Distribute your BEST available HERO GEAR across all three recommended heroes as you intend to use it simultaneously at Bear Trap. THEN capture their details.';
- detailPanel.append(message);
- const list=document.createElement('p');list.className='hint';
- list.textContent=chosen.filter(Boolean).map(n=>(detailConfirmed.has(n)?'✓ ':'◻ ')+n).join(' · ');
+ const reminder=document.createElement('p');reminder.className='bear-gear-reminder';
+ reminder.textContent=l==='de'?
+  'WICHTIG: Verteile zuerst dein BESTES HELDEN-GEAR gleichzeitig auf ALLE DREI ausgewählten Helden, wie du sie zusammen bei der Bärenfalle einsetzt. Ausrüstung zwischen den drei Screenshots NICHT umziehen!':
+ l==='fr'?
+  'IMPORTANT : répartis ton MEILLEUR équipement simultanément sur les TROIS héros. Ne change pas l’équipement entre les captures.':
+  'IMPORTANT: Distribute your BEST HERO GEAR across ALL THREE heroes SIMULTANEOUSLY, as they will fight together in Bear Trap. Do NOT move gear between screenshots.';
+ detailPanel.append(reminder);
+ const list=document.createElement('div');list.className='bear-gear-hero-list';
+ const catalog=window.NRW_BEAR_CATALOG?.heroes||[];
+ chosen.forEach((n,i)=>{
+  if(!n)return;
+  const item=document.createElement('div');item.className='bear-gear-hero-item';
+  const art=catalog.find(h=>h.name===n)?.img;
+  if(art){const img=document.createElement('img');img.src=art;img.alt='';img.loading='lazy';item.append(img);}
+  const line=document.createElement('span');line.textContent=(detailConfirmed.has(n)?'✓ ':'📸 ')+(names[l]||names.en)[i]+' · '+n;
+  item.append(line);list.append(item);
+ });
  detailPanel.append(list);
- const foot=document.createElement('p');foot.className='hint';
- foot.textContent=l==='de'?'Lade danach die Heldendetails (Werte und bei Bedarf Fertigkeiten) hoch und bestätige jeden Import. Du kannst mehrere Bilder nacheinander ergänzen.':
- 'Upload each hero’s stats and skills if available, confirming every image before continuing.';
+ const foot=document.createElement('p');foot.className='hint bear-gear-shot-note';
+ foot.textContent=l==='de'?
+  'ERST DANACH: Öffne die drei Heldendetailseiten und mache jeweils EINEN Screenshot. Lade diese drei Bilder zusammen hoch, überprüfe die Zuordnung und tippe auf „Übernehmen“.':
+ l==='fr'?
+  'ENSUITE : ouvre les trois pages de détails et prends UNE capture par héros. Charge les trois images ensemble et confirme.':
+  'ONLY THEN: open each hero’s detail page and take ONE screenshot per hero. Upload all THREE screenshots together, review and tap Apply.';
  detailPanel.append(foot);
 }
 function render(){
