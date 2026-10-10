@@ -66,6 +66,12 @@ function install(){
     // Expected public file source is a complete, explicitly user-approved
     // snapshot. Never merge untrusted fields into DOM/HTML via innerHTML.
     m.v2=JSON.parse(JSON.stringify(saved.v2));
+    // Existing form fields are still bound to the original in-memory model;
+    // refresh displayed inputs only after the approved snapshot was loaded.
+    for(const [key,value] of Object.entries(m.values)){
+     const field=root.document.getElementById(key);
+     if(field&&'value' in field&&typeof value==='number')field.value=String(value);
+    }
     bridge.save();bridge.render();
     root.NRW_BEAR_ENHANCE?.refreshHeroes?.();
     root.dispatchEvent(new CustomEvent('nrw-bear-github-profile-loaded',{detail:{id}}));
