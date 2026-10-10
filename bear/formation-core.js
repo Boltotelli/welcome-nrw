@@ -38,19 +38,17 @@ function chooseHeroes(model){
   return join.score+(confirmed?first*12:0)+(confirmed?35:0);
  };
  const joinCount=Math.max(0,Math.min(6,Math.floor(Number(v.joinCount)||0)));
+ // Reserve every good left-slot leader BEFORE distributing Lv80 filler
+ // heroes. Otherwise Join 1 would consume future Join 2/3 leaders.
+ const reserved=owned.filter(h=>!taken.has(h.name)&&joinMap.has(h.name))
+  .sort((a,b)=>rank(b)-rank(a)||a.name.localeCompare(b.name)).slice(0,joinCount);
+ reserved.forEach(h=>taken.add(h.name));
  const joins=[];
  for(let i=0;i<joinCount;i++){
-  const candidates=owned.filter(h=>!taken.has(h.name));
-  const offensive=candidates.filter(h=>joinMap.has(h.name))
-    .sort((a,b)=>rank(b)-rank(a)||a.name.localeCompare(b.name));
-  // Unknown/defensive first expedition skills can block a better ally skill.
-  // If no verified offensive-role hero remains, reserve slot #1 empty.
-  const first=offensive[0]||null;
-  if(first)taken.add(first.name);
-  const supporters=owned.filter(h=>!taken.has(h.name)).sort((a,b)=>{
-   const la=int(a.level),lb=int(b.level);
-   return lb-la||a.name.localeCompare(b.name);
-  }).slice(0,2);
+  // No unsuitable skill is automatically placed in the important left slot.
+  const first=reserved[i]||null;
+  const supporters=owned.filter(h=>!taken.has(h.name))
+   .sort((a,b)=>int(b.level)-int(a.level)||a.name.localeCompare(b.name)).slice(0,2);
   supporters.forEach(h=>taken.add(h.name));
   const firstSkill=first&&Array.isArray(first.skills)?Number(first.skills[0]):null;
   joins.push({heroes:[first,...supporters,...Array(Math.max(0,2-supporters.length)).fill(null)],
