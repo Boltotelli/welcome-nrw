@@ -80,7 +80,15 @@ function paddedBadge(src,background='#26364b'){
  ctx.drawImage(src,pad,pad);
  return out;
 }
-async function recognizeSlots(canvas,slots,kind,progress){
+// Pet and Valora uploads must not reconfigure the SAME Tesseract worker
+// simultaneously, even when users select the second picture immediately.
+let scanQueue=Promise.resolve();
+function recognizeSlots(canvas,slots,kind,progress){
+ const task=scanQueue.then(()=>recognizeSlotsNow(canvas,slots,kind,progress));
+ scanQueue=task.catch(()=>{});
+ return task;
+}
+async function recognizeSlotsNow(canvas,slots,kind,progress){
  const worker=await reader(),out=[];
  const configure=async(params)=>{
   try{if(typeof worker.setParameters==='function')await worker.setParameters(params);}
