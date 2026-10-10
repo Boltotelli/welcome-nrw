@@ -14,8 +14,10 @@
  * - Yang Ice Zone bonus hit is applied only to the Archer class share.
  * - Yang Ambush uses its CHANCE per skill rank and its separate +50% damage
  *   effect from reference.conditions.effectDamageDealtPercent.
- * - Zoe Sundering Wound persists three turns, but how it stacks, its base
- *   hit ownership and precisely when it ticks are not recorded. Excluded.
+ * - Zoe Sundering Wound: proc chance 20%, 40% damage per turn over 3 turns.
+ *   Model assumes immediate tick on proc, at most one Sunder active at a
+ *   time (refreshes rather than stacks), all-squad round damage as the
+ *   tick basis. Exact tick basis and overlap are NOT verified in-game.
  * - Fixed skills (e.g. Yang Avalanche turns 4 and 8), verified Widget
  *   rally abilities and previously captured class/squad/hero base stats
  *   come unchanged from own-baseline.js and are not applied again.
@@ -27,6 +29,8 @@
 'use strict';
 const ROUND_COUNT=10;
 const CONFIG=[
+ {hero:'Zoe',skill:'Sundering Wound',effect:'damage_over_time',kind:'three-turn-sunder',
+  metric:'damage_percent',chanceField:'procChancePercent',durationField:'durationTurns'},
  {hero:'Zoe',skill:'Infinite Arsenal',effect:'enemy_damage_taken_debuff',kind:'damage-taken',
   metric:'amplification_percent',chanceField:'procChancePercent'},
  {hero:'Petra',skill:'Evil Eye',effect:'enemy_damage_taken_debuff',kind:'damage-taken',
@@ -72,12 +76,15 @@ function readEligibleSkills(model,reference,baseline){
    const value=Number(s.valuesBySkillLevel[cap-1]),cond=s.conditions||{};
    const chance=cfg.chanceField==='skillValue'?value:Number(cond[cfg.chanceField]);
    const amount=cfg.amountField?Number(cond[cfg.amountField]):value;
+   const duration=cfg.durationField?Number(cond[cfg.durationField]):1;
    if(!Number.isFinite(chance)||chance<0||chance>100||
-      !Number.isFinite(amount)||amount<0||amount>1000){
+      !Number.isFinite(amount)||amount<0||amount>1000||
+      !Number.isInteger(duration)||duration<1||duration>ROUND_COUNT){
     unmodeled.push({hero:name,skill:s.name,reason:'invalid-skill-parameters'});continue;
    }
    skills.push({hero:name,skill:s.name,kind:cfg.kind,
     chancePercent:chance,effectPercent:amount,skillLevel:cap,
+    durationTurns:duration,excludesOverlappingSunder:cfg.kind==='three-turn-sunder',
     chancePerTurnAssumed:true});
   }
  }
@@ -115,18 +122,28 @@ function evaluate(model,counts,combat,reference){
      chosen.push(on);
     }
     if(p===0&&mask!==0)continue;
-    const [zoe,evil,favor,ice,ambush]=chosen;
+    const [sunder,zoe,evil,favor,ice,ambush]=chosen;
+    // Expected chance of a previously active Sunder from the preceding
+    // duration-1 rounds. Current proc always refreshes. We integrate the
+    // prior independent Bernoulli rolls analytically rather than maintaining
+    // an unbounded random state history. Nonstacking is an explicit assumption.
+    const sunderSkill=schema[0],prevTurns=sunderSkill?
+     Math.min(turn-1,Math.max(0,sunderSkill.durationTurns-1)):0;
+    const priorActive=sunderSkill?
+     1-Math.pow(1-sunderSkill.chancePercent/100,prevTurns):0;
+    const sunderFactor=1+(sunderSkill?.effectPercent||0)/100*
+     (sunder?1:priorActive);
     const dmg=basePerClass.reduce((sum,base,i)=>{
-     const extraAtk=favor?(schema[2]?.effectPercent||0):0;
+     const extraAtk=favor?(schema[3]?.effectPercent||0):0;
      const attackFactor=(100+effectiveAttacks[i]+extraAtk)/(100+effectiveAttacks[i]);
-     const iceFactor=i===2&&ice?1+(schema[3]?.effectPercent||0)/100:1;
+     const iceFactor=i===2&&ice?1+(schema[4]?.effectPercent||0)/100:1;
      return sum+base*attackFactor*iceFactor;
     },0);
-    const z=zoe?(schema[0]?.effectPercent||0)/100:0;
-    const e=evil?(schema[1]?.effectPercent||0)/100:0;
+    const z=zoe?(schema[1]?.effectPercent||0)/100:0;
+    const e=evil?(schema[2]?.effectPercent||0)/100:0;
     const takenFactor=mode==='independent-groups'?(1+z)*(1+e):1+z+e;
-    const ambushFactor=ambush?1+(schema[4]?.effectPercent||0)/100:1;
-    const result=dmg*fixedFactor*takenFactor*ambushFactor;
+    const ambushFactor=ambush?1+(schema[5]?.effectPercent||0)/100:1;
+    const result=dmg*sunderFactor*fixedFactor*takenFactor*ambushFactor;
     expected+=p*result;
     if(mask===0)noProc+=result;
     if(mask===states-1)allProc+=result;
@@ -145,10 +162,11 @@ function evaluate(model,counts,combat,reference){
   noProcCheckIndex:additive.noProcIndex,
   allProcIllustrationIndex:additive.allProcIndex,
   skills:observed.skills,unmodeled:observed.unmodeled,
-  includesJoiningSkills:false,includesSunder:false,
+  includesJoiningSkills:false,includesSunder:true,
   turns:ROUND_COUNT,procTimingAssumption:'one-independent-roll-per-turn-immediate',
   stackAssumption:'same-family-enemy-taken-additive',
   attackSkillAssumption:'add-percentage-points-to-effective-attack',
+  sunderAssumption:'three-turn-single-refresh-immediate-tick-all-squad-basis',
   partial:true,unit:'relative-model-index'};
 }
 root.NRW_BEAR_PROC_EXPECTATION={evaluate,readEligibleSkills,CONFIG,ROUND_COUNT};
