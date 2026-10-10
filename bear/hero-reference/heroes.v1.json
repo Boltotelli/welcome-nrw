@@ -17,7 +17,7 @@
       "generation": null,
       "status": "metadata-only",
       "source": {
-        "catalog": "bear/catalog.js",
+        "catalog": "catalog.v1.json",
         "stats": null,
         "verifiedOn": null
       },
@@ -32,7 +32,7 @@
       "generation": null,
       "status": "metadata-only",
       "source": {
-        "catalog": "bear/catalog.js",
+        "catalog": "catalog.v1.json",
         "stats": null,
         "verifiedOn": null
       },
@@ -47,7 +47,7 @@
       "generation": null,
       "status": "metadata-only",
       "source": {
-        "catalog": "bear/catalog.js",
+        "catalog": "catalog.v1.json",
         "stats": null,
         "verifiedOn": null
       },
@@ -62,7 +62,7 @@
       "generation": null,
       "status": "metadata-only",
       "source": {
-        "catalog": "bear/catalog.js",
+        "catalog": "catalog.v1.json",
         "stats": null,
         "verifiedOn": null
       },
@@ -77,7 +77,7 @@
       "generation": null,
       "status": "metadata-only",
       "source": {
-        "catalog": "bear/catalog.js",
+        "catalog": "catalog.v1.json",
         "stats": null,
         "verifiedOn": null
       },
@@ -92,7 +92,7 @@
       "generation": null,
       "status": "metadata-only",
       "source": {
-        "catalog": "bear/catalog.js",
+        "catalog": "catalog.v1.json",
         "stats": null,
         "verifiedOn": null
       },
@@ -107,7 +107,7 @@
       "generation": null,
       "status": "metadata-only",
       "source": {
-        "catalog": "bear/catalog.js",
+        "catalog": "catalog.v1.json",
         "stats": null,
         "verifiedOn": null
       },
@@ -122,7 +122,7 @@
       "generation": null,
       "status": "metadata-only",
       "source": {
-        "catalog": "bear/catalog.js",
+        "catalog": "catalog.v1.json",
         "stats": null,
         "verifiedOn": null
       },
@@ -137,7 +137,7 @@
       "generation": null,
       "status": "metadata-only",
       "source": {
-        "catalog": "bear/catalog.js",
+        "catalog": "catalog.v1.json",
         "stats": null,
         "verifiedOn": null
       },
@@ -152,7 +152,7 @@
       "generation": null,
       "status": "metadata-only",
       "source": {
-        "catalog": "bear/catalog.js",
+        "catalog": "catalog.v1.json",
         "stats": null,
         "verifiedOn": null
       },
@@ -167,7 +167,7 @@
       "generation": null,
       "status": "metadata-only",
       "source": {
-        "catalog": "bear/catalog.js",
+        "catalog": "catalog.v1.json",
         "stats": null,
         "verifiedOn": null
       },
@@ -182,7 +182,7 @@
       "generation": null,
       "status": "metadata-only",
       "source": {
-        "catalog": "bear/catalog.js",
+        "catalog": "catalog.v1.json",
         "stats": null,
         "verifiedOn": null
       },
@@ -197,7 +197,7 @@
       "generation": null,
       "status": "metadata-only",
       "source": {
-        "catalog": "bear/catalog.js",
+        "catalog": "catalog.v1.json",
         "stats": null,
         "verifiedOn": null
       },
@@ -212,7 +212,7 @@
       "generation": null,
       "status": "metadata-only",
       "source": {
-        "catalog": "bear/catalog.js",
+        "catalog": "catalog.v1.json",
         "stats": null,
         "verifiedOn": null
       },
@@ -227,7 +227,7 @@
       "generation": null,
       "status": "metadata-only",
       "source": {
-        "catalog": "bear/catalog.js",
+        "catalog": "catalog.v1.json",
         "stats": null,
         "verifiedOn": null
       },
@@ -242,7 +242,7 @@
       "generation": null,
       "status": "metadata-only",
       "source": {
-        "catalog": "bear/catalog.js",
+        "catalog": "catalog.v1.json",
         "stats": null,
         "verifiedOn": null
       },
@@ -257,7 +257,7 @@
       "generation": null,
       "status": "metadata-only",
       "source": {
-        "catalog": "bear/catalog.js",
+        "catalog": "catalog.v1.json",
         "stats": null,
         "verifiedOn": null
       },
@@ -272,7 +272,7 @@
       "generation": null,
       "status": "metadata-only",
       "source": {
-        "catalog": "bear/catalog.js",
+        "catalog": "catalog.v1.json",
         "stats": null,
         "verifiedOn": null
       },
@@ -287,7 +287,7 @@
       "generation": 2,
       "status": "partial-sourced",
       "source": {
-        "catalog": "bear/catalog.js",
+        "catalog": "catalog.v1.json",
         "stats": "https://kingshotdata.com/heroes/zoe/",
         "verifiedOn": "2026-10-10"
       },
@@ -449,7 +449,7 @@
       "generation": null,
       "status": "metadata-only",
       "source": {
-        "catalog": "bear/catalog.js",
+        "catalog": "catalog.v1.json",
         "stats": null,
         "verifiedOn": null
       },
@@ -464,7 +464,7 @@
       "generation": 3,
       "status": "partial-sourced",
       "source": {
-        "catalog": "bear/catalog.js",
+        "catalog": "catalog.v1.json",
         "stats": "https://kingshotdata.com/heroes/petra/",
         "verifiedOn": "2026-10-10"
       },
@@ -627,7 +627,7 @@
       "generation": null,
       "status": "metadata-only",
       "source": {
-        "catalog": "bear/catalog.js",
+        "catalog": "catalog.v1.json",
         "stats": null,
         "verifiedOn": null
       },
@@ -642,7 +642,7 @@
       "generation": 4,
       "status": "partial-sourced",
       "source": {
-        "catalog": "bear/catalog.js",
+        "catalog": "catalog.v1.json",
         "stats": "https://kingshotdata.com/heroes/rosa/",
         "verifiedOn": "2026-10-10"
       },
@@ -801,7 +801,7 @@
       "generation": null,
       "status": "metadata-only",
       "source": {
-        "catalog": "bear/catalog.js",
+        "catalog": "catalog.v1.json",
         "stats": null,
         "verifiedOn": null
       },
@@ -816,7 +816,7 @@
       "generation": null,
       "status": "metadata-only",
       "source": {
-        "catalog": "bear/catalog.js",
+        "catalog": "catalog.v1.json",
         "stats": null,
         "verifiedOn": null
       },
@@ -831,7 +831,7 @@
       "generation": null,
       "status": "metadata-only",
       "source": {
-        "catalog": "bear/catalog.js",
+        "catalog": "catalog.v1.json",
         "stats": null,
         "verifiedOn": null
       },
@@ -846,7 +846,7 @@
       "generation": null,
       "status": "metadata-only",
       "source": {
-        "catalog": "bear/catalog.js",
+        "catalog": "catalog.v1.json",
         "stats": null,
         "verifiedOn": null
       },
@@ -861,7 +861,7 @@
       "generation": null,
       "status": "metadata-only",
       "source": {
-        "catalog": "bear/catalog.js",
+        "catalog": "catalog.v1.json",
         "stats": null,
         "verifiedOn": null
       },
@@ -876,7 +876,7 @@
       "generation": 6,
       "status": "partial-sourced",
       "source": {
-        "catalog": "bear/catalog.js",
+        "catalog": "catalog.v1.json",
         "stats": "https://kingshotdata.com/heroes/yang/",
         "verifiedOn": "2026-10-10"
       },
@@ -1039,7 +1039,7 @@
       "generation": null,
       "status": "metadata-only",
       "source": {
-        "catalog": "bear/catalog.js",
+        "catalog": "catalog.v1.json",
         "stats": null,
         "verifiedOn": null
       },
@@ -1054,7 +1054,7 @@
       "generation": null,
       "status": "metadata-only",
       "source": {
-        "catalog": "bear/catalog.js",
+        "catalog": "catalog.v1.json",
         "stats": null,
         "verifiedOn": null
       },
@@ -1069,7 +1069,7 @@
       "generation": null,
       "status": "metadata-only",
       "source": {
-        "catalog": "bear/catalog.js",
+        "catalog": "catalog.v1.json",
         "stats": null,
         "verifiedOn": null
       },
@@ -1084,7 +1084,7 @@
       "generation": null,
       "status": "metadata-only",
       "source": {
-        "catalog": "bear/catalog.js",
+        "catalog": "catalog.v1.json",
         "stats": null,
         "verifiedOn": null
       },
@@ -1099,7 +1099,7 @@
       "generation": null,
       "status": "metadata-only",
       "source": {
-        "catalog": "bear/catalog.js",
+        "catalog": "catalog.v1.json",
         "stats": null,
         "verifiedOn": null
       },
@@ -1114,7 +1114,7 @@
       "generation": null,
       "status": "metadata-only",
       "source": {
-        "catalog": "bear/catalog.js",
+        "catalog": "catalog.v1.json",
         "stats": null,
         "verifiedOn": null
       },
@@ -1129,7 +1129,7 @@
       "generation": null,
       "status": "metadata-only",
       "source": {
-        "catalog": "bear/catalog.js",
+        "catalog": "catalog.v1.json",
         "stats": null,
         "verifiedOn": null
       },
@@ -1144,7 +1144,7 @@
       "generation": null,
       "status": "metadata-only",
       "source": {
-        "catalog": "bear/catalog.js",
+        "catalog": "catalog.v1.json",
         "stats": null,
         "verifiedOn": null
       },
