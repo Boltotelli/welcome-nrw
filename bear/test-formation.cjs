@@ -101,6 +101,8 @@ assert.equal(p.allHeroLevelsKnown,false,'missing join capacity remains provision
 for(const name of ['Inf4','Inf5','Arch2'])m.v2.manualHeroes[name]=heroes[name];
 m.v2.scannedOwnedHeroes=starter.concat(filler,'Thrud');p=plan();
 assert.ok(p.marches.some(x=>x.slot>0&&!x.heroes[0]),'unsafe first skills are not auto recommended');
+assert.ok(p.marches.filter(x=>x.slot>0&&!x.heroes[0]).every(x=>x.capacity===0&&x.filled===0),
+ 'an entirely empty Join 6 must not misleadingly show a full troop deployment');
 m.v2.scannedOwnedHeroes=all;
 m.values.cap=0;p=plan();assert.equal(p.ready,false);
 assert.match(html,/formation-core\.js\?v=/);
