@@ -24,6 +24,24 @@ for(const sample of [['Lv. 4',7,4],['Lv.5',10,5],['Lv. 6',10,6],
 }
 assert.ok(C.petRect(C.petSlots[0]).y>C.petRect({row:0,column:0}).y);
 assert.equal(C.valoraRect(0).y,C.valoraRect(3).y);
+const petBadge=C.petBadgeRect(C.petRect(C.petSlots[0]));
+assert.ok(petBadge.x>C.petRect(C.petSlots[0]).x&&petBadge.y>C.petRect(C.petSlots[0]).y,
+ 'pet OCR targets the level badge at the bottom right');
+assert.ok(petBadge.x+petBadge.w<=C.petRect(C.petSlots[0]).x+C.petRect(C.petSlots[0]).w+1e-9,
+ 'pet badge must stay within the original tile');
+for(const text of ['Lv.4','Lv 4','L v 4','Ly.4','LV:4','Lvl 4']){
+ assert.equal(C.readSkillLevel(text,7),4,'OCR variant '+text);
+}
+assert.equal(C.readSkillLevel('Lv.5 / Lv.6',10),null,'contradictory OCR must not be accepted');
+assert.equal(C.readSkillLevel('11:19:53',10),null,'cooldown is never a skill');
+assert.equal(C.readSkillLevel('Skill 4, cooldown 00:07:12',10),null,'artwork/clock digits are not a skill');
+assert.match(ui,/roi\.width=Math\.round\(w\*scale\);roi\.height=Math\.round\(h\*scale\)/,
+ 'cropped preview must preserve the original pixel aspect ratio');
+assert.ok(ui.includes("C.petBadgeRect(slot.rect)")&&ui.includes("contrastBadge(first)"),
+ 'pet rank OCR must read the badge with a focused contrast retry');
+assert.ok(ui.includes("recognizeSlots(canvas,slots,'pet')"),
+ 'pet import must use pet-specific level recognition');
+
 const catContext={window:{}};
 vm.runInNewContext(fs.readFileSync(dir+'/catalog.js','utf8'),catContext);
 const cats=Array.from(catContext.window.NRW_BEAR_CATALOG.pets,
