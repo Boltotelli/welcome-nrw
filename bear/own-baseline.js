@@ -69,6 +69,62 @@ function currentStats(model){
  }
  return own;
 }
+/* Forensic audit ONLY. This does not apply or save hidden bonuses.
+ * The Bonus Overview displays separate all-squad bonuses and separate class
+ * stats, and starter Hero Details may provide extra Expedition percentages.
+ * A battle-report combined number can already include both; hence this
+ * audit exposes alternative hypotheses, NOT automatic stat stacking.
+ */
+function inspectUnusedBonuses(model,counts,combat){
+ const v=model?.values||{},meta=model?.v2||{},levels=combat?.configure?.(meta);
+ const current=currentStats(model);
+ if(!combat?.ready?.(current,levels)||typeof combat?.damage!=='function')return null;
+ const basic=combat.damage(counts,current,levels,5);
+ if(!Number.isFinite(basic)||basic<=0)return null;
+ const squadAtk=Number.isFinite(Number(v.squadAtk))&&Number(v.squadAtk)>=0?Number(v.squadAtk):null;
+ const squadLet=Number.isFinite(Number(v.squadLet))&&Number(v.squadLet)>=0?Number(v.squadLet):null;
+ const squadAlreadyApplied=Boolean(meta.squadSeparate);
+ const heroNames=Array.isArray(meta.ownHeroes)?meta.ownHeroes.slice(0,3):[];
+ const classes=['i','c','a'];
+ const heroes=classes.map((cl,i)=>{
+  const name=heroNames[i]||'',h=meta.manualHeroes?.[name];
+  const e=h?.expeditionStats||{};
+  function field(key){
+   const val=e[key];
+   return val!==null&&val!==undefined&&val!==''&&Number.isFinite(Number(val))&&Number(val)>=0?
+    Number(val):null;
+  }
+  return {name,attackPct:field(cl+'Atk'),lethalityPct:field(cl+'Let'),classKey:cl,
+   hasDetail:!!h&&Object.keys(e).length>0};
+ });
+ const applySquad=(stats)=>{
+  const result={...stats};
+  if(!squadAlreadyApplied){
+   for(const cl of classes){
+    if(squadAtk!==null)result[cl+'Atk']=Number(result[cl+'Atk'])+squadAtk;
+    if(squadLet!==null)result[cl+'Let']=Number(result[cl+'Let'])+squadLet;
+   }
+  }
+  return result;
+ };
+ const applyHeroes=(stats)=>{
+  const result={...stats};
+  for(const h of heroes){
+   if(h.attackPct!==null)result[h.classKey+'Atk']=Number(result[h.classKey+'Atk'])+h.attackPct;
+   if(h.lethalityPct!==null)result[h.classKey+'Let']=Number(result[h.classKey+'Let'])+h.lethalityPct;
+  }
+  return result;
+ };
+ const hypotheticals={
+  current:basic,
+  withSquad:combat.damage(counts,applySquad(current),levels,5),
+  withHeroes:combat.damage(counts,applyHeroes(current),levels,5),
+  withBoth:combat.damage(counts,applyHeroes(applySquad(current)),levels,5)
+ };
+ return {squadAttackPct:squadAtk,squadLethalityPct:squadLet,squadAlreadyApplied,
+  heroes,hypotheticals,notAutomaticallyApplied:true,
+  note:'Hypothetical scores. Class + squad + hero stats may already overlap in consolidated battle report. Confirm screenshot provenance before enabling.'};
+}
 function calculate(model,counts,combat,heroReference){
  const v=model?.v2||{},heroNames=v.ownHeroes||[];
  const levels=combat?.configure?.(v),stats=currentStats(model);
@@ -139,5 +195,5 @@ function calculate(model,counts,combat,heroReference){
   noJoinerSkills:true,includesChanceEffects:false,
   isGuaranteedDamage:false};
 }
-root.NRW_BEAR_OWN_BASELINE={calculate,skillCap,widgetValue,readWidgetLevel,currentStats,EXPEDITION_WIDGETS};
+root.NRW_BEAR_OWN_BASELINE={calculate,inspectUnusedBonuses,skillCap,widgetValue,readWidgetLevel,currentStats,EXPEDITION_WIDGETS};
 })(window);
