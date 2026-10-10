@@ -8,9 +8,16 @@ const path=require('node:path');
 const base=__dirname;
 const data=JSON.parse(fs.readFileSync(path.join(base,'heroes.v1.json'),'utf8'));
 const schema=JSON.parse(fs.readFileSync(path.join(base,'schema.v1.json'),'utf8'));
+const index=JSON.parse(fs.readFileSync(path.join(base,'catalog.v1.json'),'utf8'));
 const context={window:{}};
-vm.runInNewContext(fs.readFileSync(path.join(base,'../catalog.js'),'utf8'),context);
-const catalog=context.window.NRW_BEAR_CATALOG;
+const originalCatalogPath=path.join(base,'../catalog.js');
+if(fs.existsSync(originalCatalogPath)){
+ vm.runInNewContext(fs.readFileSync(originalCatalogPath,'utf8'),context);
+ assert.deepEqual(index.heroes.map(x=>x.name).sort(),
+  context.window.NRW_BEAR_CATALOG.heroes.map(x=>x.name).sort(),
+  'source catalog snapshot matches host app when checked inside welcome-nrw');
+}
+const catalog={heroes:index.heroes,heroTypes:Object.fromEntries(index.heroes.map(x=>[x.name,x.type]))};
 function validate(d){
  assert.equal(d.schemaVersion,1);
  assert.equal(d.publicDataOnly,true);
@@ -29,7 +36,7 @@ function validate(d){
  for(const row of d.records){
   assert.equal(row.troopType,catalog.heroTypes[row.name],'hero troop type consistent with catalog');
   assert.match(row.id,/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
-  assert.equal(row.source.catalog,'bear/catalog.js');
+  assert.equal(row.source.catalog,'catalog.v1.json');
   assert.equal(row.conquestBaseByHeroLevel,null,'never guess level 1–80 base stats');
   assert.equal(Object.prototype.hasOwnProperty.call(row,'playerId'),false,'no private player data');
   if(row.status==='metadata-only'){
