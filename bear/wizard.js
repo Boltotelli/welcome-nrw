@@ -116,6 +116,27 @@ function showIntake(i){
  if(buttonText)buttonText.textContent='📸 '+(i===1?t().upload:t().uploads);
  const input=$('intakeFiles');if(input)input.multiple=[2,4,6].includes(i);
 }
+const stageLoader=document.createElement('div');
+stageLoader.className='bear-guide-stage-loader';stageLoader.hidden=true;
+stageLoader.setAttribute('role','status');stageLoader.setAttribute('aria-live','polite');
+const video=document.createElement('video');video.muted=true;video.loop=true;video.autoplay=true;
+video.playsInline=true;video.preload='metadata';video.src='./assets/kingshot_beartrap_v3_action_transparent.webm';
+video.hidden=true;
+video.addEventListener('canplay',()=>{if(!stageLoader.hidden){video.hidden=false;video.play().catch(()=>{});}});
+video.addEventListener('error',()=>{video.hidden=true;});
+const loaderBear=document.createElement('span');loaderBear.className='bear-guide-loading-bear';loaderBear.textContent='🐻';
+const loaderText=document.createElement('p');loaderText.textContent='Formationen werden generiert …';
+stageLoader.append(video,loaderBear,loaderText);wizard.append(stageLoader);
+let stageBusy=false;
+function beginStageLoading(next){
+ if(stageBusy)return;
+ stageBusy=true;stageLoader.hidden=false;
+ const l=lang();loaderText.textContent=l==='de'?'Formationen werden generiert …':
+  l==='fr'?'Création des formations …':'Generating formations …';
+ video.play().catch(()=>{});
+ setTimeout(()=>{video.pause();stageLoader.hidden=true;stageBusy=false;moveTo(next);},1700);
+}
+
 let active=0,finished=false;
 const imported=new Set(),skipped=new Set();
 const hasProfile=()=>Boolean(B.profile()?.governor_id)&&!$('restricted').hidden;
@@ -658,7 +679,7 @@ $('bearGuideNext').addEventListener('click',()=>{
  if(active===0&&!hasProfile())return;
  if(processQueue())return;
  if(active===5){confirmRecommendedHeroes();return;}
- if(active===7){showRelevantManual();moveTo(8);return;}
+ if(active===7){showRelevantManual();beginStageLoading(8);return;}
  if(active===8){moveTo(9);return;}
  if(active<=7){const next=guidedNext(active);if(next!==null)moveTo(next);}
 });
