@@ -320,7 +320,6 @@ body.bear-wizard-mode .dashboard{display:none!important}
 .bear-github-id-mode .bear-guide-slide[data-guide=id] details,
 .bear-github-id-mode .bear-guide-slide[data-guide=id] .sub,
 .bear-github-id-mode .bear-guide-slide[data-guide=id] .micro,
-.bear-github-id-mode .bear-guide-slide[data-guide=id] #lookupMessage,
 .bear-github-id-mode .bear-guide-slide[data-guide=id] #heroes {display:none!important}
 .bear-guide-stored{padding:14px 16px;margin:6px 0 12px;background:var(--card);border:1px solid var(--line);border-radius:13px;display:grid;gap:6px}
 .bear-guide-stored h3{font-size:14px;margin:0 0 7px}
@@ -347,3 +346,15 @@ body.bear-wizard-mode .dashboard{display:none!important}
  .bear-guide-example summary{font-size:13px}
  .bear-formation-troops .bear-formation-counts{font-size:15px!important}
 }
+
+/* First generation transition; transparent original video is optional,
+ * a restrained Bear spinner remains when the original binary is missing. */
+.bear-guided-wizard{position:relative}
+.bear-guide-stage-loader{position:absolute;inset:0;z-index:20;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:15px;background:rgba(15,24,39,.96);border-radius:16px;color:#fff;text-align:center;padding:22px}
+.bear-guide-stage-loader[hidden]{display:none!important}
+.bear-guide-stage-loader video{max-height:290px;max-width:min(92vw,460px);object-fit:contain}
+.bear-guide-stage-loader .bear-guide-loading-bear{font-size:74px;animation:bear-guide-bounce .85s ease-in-out infinite alternate}
+.bear-guide-stage-loader video:not([hidden])+.bear-guide-loading-bear{display:none}
+.bear-guide-stage-loader p{font-weight:800;font-size:16px}
+@keyframes bear-guide-bounce{from{transform:translateY(2px) scale(.96)}to{transform:translateY(-10px) scale(1.04)}}
+@media(prefers-reduced-motion:reduce){.bear-guide-stage-loader .bear-guide-loading-bear{animation:none}}
