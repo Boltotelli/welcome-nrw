@@ -250,6 +250,60 @@ function mount(host,B,language){
     'If these ATK/Lethality values differ from the comparison calculator, inspect the original screenshot import. No data is changed here.'));
    card.append(details);
   }
+  const extra=root.NRW_BEAR_OWN_BASELINE?.inspectUnusedBonuses?.(
+   B.model(),data.rows[0],root.NRW_BEAR_COMBAT);
+  if(extra){
+   const notes=el('details','bear-sim-math-audit');
+   const title=l==='de'?'Fehlende Boni prüfen · Schwadron & 3 Starterhelden':
+    l==='fr'?'Vérifier les bonus d’escouade et de héros non utilisés':
+    'Audit unused squad and leader bonuses';
+   notes.append(el('summary','',title));
+   const explain=l==='de'?
+    'In deinem Profil können weitere Kampfwerte gespeichert sein, die bisher NICHT in die Truppenformel gelangen. Der Vergleich unten ist rein hypothetisch: Wenn die Werte bereits in der Basisübersicht enthalten sind, würden wir sie durch Addition doppelt zählen. Es wird nichts verändert.':
+    l==='fr'?
+    'Les bonus enregistrés pourraient ne pas entrer dans le calcul. Les alternatives sont hypothétiques : ne pas compter deux fois les valeurs.':
+    'Some saved bonuses may not be in the soldier formula. Alternatives below are hypothetical; do not double count already-combined battle-report stats. Nothing is changed.';
+   notes.append(el('p','hint',explain));
+   const num=x=>x===null?'—':Number(x).toFixed(1)+'%';
+   const squadLine=(l==='de'?'Schwadron – Angriff: ':'Squad ATK: ')+
+    num(extra.squadAttackPct)+' · '+(l==='de'?'Tödlichkeit: ':'Lethality: ')+
+    num(extra.squadLethalityPct)+' · '+
+    (extra.squadAlreadyApplied?
+     (l==='de'?'bereits berücksichtigt':'already applied'):
+     (l==='de'?'aktuell NICHT berücksichtigt':'currently NOT applied'));
+   notes.append(el('p','hint',squadLine));
+   const classes=l==='de'?['Infanterie','Kavallerie','Bogenschützen']:
+    l==='fr'?['Infanterie','Cavalerie','Archers']:['Infantry','Cavalry','Archers'];
+   for(const [i,h] of extra.heroes.entries()){
+    notes.append(el('p','hint',(h.name||classes[i])+' · '+classes[i]+
+     ' · '+(l==='de'?'Expedition-ATK ':'Expedition ATK ')+num(h.attackPct)+
+     ' · '+(l==='de'?'Tödlichkeit ':'Lethality ')+num(h.lethalityPct)));
+   }
+   const hasSquad=!extra.squadAlreadyApplied&&
+    (extra.squadAttackPct!==null&&extra.squadAttackPct>0||
+     extra.squadLethalityPct!==null&&extra.squadLethalityPct>0);
+   const hasHeroes=extra.heroes.some(h=>h.attackPct!==null||h.lethalityPct!==null);
+   if(hasSquad||hasHeroes){
+    const group=el('div','bear-sim-scenario-grid');
+    const score=extra.hypotheticals;
+    const scenarios=[
+     [l==='de'?'Aktuell verwendete Stats':'Currently used',score.current],
+     [l==='de'?'Zusätzlich: Schwadron':'Plus squad (hypothetical)',score.withSquad],
+     [l==='de'?'Zusätzlich: Heldendetails':'Plus hero details (hypothetical)',score.withHeroes],
+     [l==='de'?'Zusätzlich: beide (unbestätigt)':'Plus both (unconfirmed)',score.withBoth]
+    ];
+    for(const [label,value] of scenarios){
+     const x=el('div','bear-sim-scenario');
+     x.append(el('span','',label),el('strong','',scoreText(value)));
+     group.append(x);
+    }
+    notes.append(group);
+   }
+   notes.append(el('p','bear-sim-disclaimer',l==='de'?
+    'Diese vier Zahlen sind KEINE Vorhersagen des Spiels und keine automatische Korrektur. Sie zeigen, wie stark sich die Rechnung bei unterschiedlichen Interpretationen deiner bereits gespeicherten Werte verändern würde. Joiner- und Zufallsskills bleiben ausgeschlossen.':
+    'These alternatives are not game damage predictions or automatically applied corrections. They show how source interpretation changes the model.'));
+   card.append(notes);
+  }
   if(previous?.ready&&previous.modelIndex>0){
    const delta=100*(own.modelIndex/previous.modelIndex-1);
    card.append(el('p','hint',(delta>=0?'+':'')+delta.toFixed(2)+'% '+
