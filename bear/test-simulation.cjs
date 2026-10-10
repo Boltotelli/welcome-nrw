@@ -76,7 +76,8 @@ for(const scenario of [balanced,atk,letOnly]){
 assert.equal(S.scenarioOwn(ownRow,model,combat,'missing-skill'),null);
 assert.equal(S.scenarioOwn(ownRow,{values:{},v2:{}},combat,'balanced-2-2'),null);
 assert.equal(JSON.stringify(model),snapshot,'scenario must never change player stats/profile');
-assert.ok(!ui.includes('scoreText(data.score?.overall)'), 'cannot add unknown-leader join indices to calibrated actual own score');
+assert.ok(!ui.includes('scoreText(data.score?.overall)')&&!ui.includes('scoreText(measure?.score?.overall)'),
+ 'cannot sum starter and unknown-leader join indices anywhere in the simulation');
 assert.match(html,/simulation-core\.js\?v=/);
 assert.match(html,/simulation-ui\.js\?v=/);
 assert.ok(html.indexOf('simulation-core.js')<html.indexOf('simulation-ui.js'));
