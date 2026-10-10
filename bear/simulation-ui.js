@@ -187,6 +187,11 @@ function mount(host,B,language){
    B.model(),data.rows[0],root.NRW_BEAR_COMBAT,root.NRW_BEAR_HERO_REFERENCE);
   const l=language();
   if(!estimate?.ready){
+   const hr=root.NRW_BEAR_HERO_REFERENCE;
+   if(estimate?.reason==='hero-reference-unavailable'&&
+      hr?.status?.()==='idle'&&typeof hr.load==='function'){
+    hr.load().then(()=>{if(hr.status?.()==='ready'&&base)rerun(400);});
+   }
    if(estimate?.reason==='hero-reference-unavailable'){
     const warning=el('p','hint',l==='de'?
      'Der Skill-Erwartungswert ist noch nicht verfügbar: Die geprüften Heldendaten konnten nicht geladen werden.':
@@ -218,7 +223,7 @@ function mount(host,B,language){
     scoreText(estimate.alternativeIndex)+' (+'+estimate.alternateUpliftPercent.toFixed(1)+'%).';
   card.append(el('p','hint',text));
   const disclosure=el('details','bear-sim-math-audit');
-  disclosure.append(el('summary','',l==='de'?'5 Fähigkeiten & Modellannahmen ansehen':
+  disclosure.append(el('summary','',l==='de'?estimate.skills.length+' Fähigkeiten & Modellannahmen ansehen':
    l==='fr'?'Voir les compétences et hypothèses':'Inspect skills and assumptions'));
   const labels={
    'damage-taken':l==='de'?'mehr erlittener Schaden':'enemy damage taken',
