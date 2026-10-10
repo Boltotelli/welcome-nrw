@@ -24,6 +24,20 @@ for(const sample of [['Lv. 4',7,4],['Lv.5',10,5],['Lv. 6',10,6],
 }
 assert.ok(C.petRect(C.petSlots[0]).y>C.petRect({row:0,column:0}).y);
 assert.equal(C.valoraRect(0).y,C.valoraRect(3).y);
+const valBadge=C.valoraBadgeRect(C.valoraRect(0));
+assert.ok(valBadge.x>C.valoraRect(0).x&&valBadge.y>C.valoraRect(0).y,
+ 'Valora OCR must read centered lower skill-rank badge');
+const square=C.valoraPreviewRect(C.valoraRect(0),955/2048);
+assert.ok(Math.abs(square.w*955-square.h*2048)<.0001,
+ 'Valora skill preview must have square pixel proportions');
+assert.ok(square.x>0&&square.x+square.w<1&&square.y>0&&square.y+square.h<1,
+ 'Valora square preview must stay inside the screenshot');
+assert.ok(ui.includes("C.valoraBadgeRect(slot.rect)")&&ui.includes("C.valoraPreviewRect(rect,canvas.width/canvas.height)"),
+ 'Valora uses independent OCR and square preview geometry');
+assert.ok(ui.includes("paddedBadge(first)")&&ui.includes("tessedit_pageseg_mode:'8'"),
+ 'small on-icon rank captions have padded OCR and numeric fallback');
+assert.ok(ui.includes("tessedit_pageseg_mode:'3'"),
+ 'shared OCR must restore ordinary page segmentation after buff import');
 const petBadge=C.petBadgeRect(C.petRect(C.petSlots[0]));
 assert.ok(petBadge.x>C.petRect(C.petSlots[0]).x&&petBadge.y>C.petRect(C.petSlots[0]).y,
  'pet OCR targets the level badge at the bottom right');
