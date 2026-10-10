@@ -64,8 +64,8 @@ const realPicks=A.recommend([
  h('Petra',4,80,{tier:2}),h('Chenko',5),
  h('Quinn',5),h('Rosa',5),h('Yang',4,80,{tier:4})
 ],realRoles,priorities);
-assert.deepEqual(Array.from(realPicks.map(r=>r.best.name)),['Zoe','Petra','Rosa'],
- 'developed offensive heroes beat early rally fillers in the real Gen-6 roster');
+assert.deepEqual(Array.from(realPicks.map(r=>r.best.name)),['Zoe','Petra','Yang'],
+ 'the real Gen-6 roster prefers built Yang over Rosa while rejecting early filler heroes');
 assert.ok(A.evaluate(h('Quinn',5), 'archer',priorities).score<
  A.evaluate(h('Rosa',4), 'archer',priorities).score,'Quinn 5★ must not trivially displace Rosa 4★');
 assert.ok(A.evaluate(h('Howard',5),'infantry',priorities).score<
