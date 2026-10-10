@@ -28,18 +28,38 @@ function photoCanvas(file){
   img.src=url;
  });
 }
-function crop(src,region,numeric=true){
+// Copy source pixels without changing the icon's aspect ratio. Previous
+// previews stretched a near-square game tile to 520x340 (and distorted Lv).
+function crop(src,region,mode='preview'){
  const x=Math.max(0,Math.round(src.width*region.x));
+ let y=Math.max(0,Math.round(src.height*region.y));
  const w=Math.min(src.width-x,Math.round(src.width*region.w));
- const h=Math.min(src.height-Math.round(src.height*region.y),Math.round(src.height*region.h));
- const y=Math.round(src.height*region.y);
+ let h=Math.min(src.height-y,Math.round(src.height*region.h));
  if(w<10||h<10)throw Error('Screenshot geometry not supported');
+ if(mode==='footer'){const top=Math.floor(h*.48);y+=top;h-=top;}
+ const scale=mode==='preview'?1:Math.min(8,Math.max(2.5,560/w,260/h));
  const roi=document.createElement('canvas');
- roi.width=520;roi.height=numeric?220:340;
+ roi.width=Math.round(w*scale);roi.height=Math.round(h*scale);
  const cx=roi.getContext('2d',{willReadFrequently:true});
  cx.imageSmoothingEnabled=true;cx.imageSmoothingQuality='high';
- const top=numeric?Math.floor(h*.50):0;
- cx.drawImage(src,x,y+top,w,h-top,0,0,roi.width,roi.height);
+ cx.drawImage(src,x,y,w,h,0,0,roi.width,roi.height);
+ return roi;
+}
+// Alternate OCR view for outlined white Lv digits over a colorful icon.
+// Only the small, bottom-right badge is processed (never cooldown timers).
+function contrastBadge(canvas){
+ const roi=document.createElement('canvas');roi.width=canvas.width;roi.height=canvas.height;
+ const cx=roi.getContext('2d',{willReadFrequently:true});
+ cx.drawImage(canvas,0,0);
+ const pixels=cx.getImageData(0,0,roi.width,roi.height);
+ for(let i=0;i<pixels.data.length;i+=4){
+  const r=pixels.data[i],g=pixels.data[i+1],b=pixels.data[i+2];
+  const light=.2126*r+.7152*g+.0722*b;
+  const neutral=Math.max(r,g,b)-Math.min(r,g,b)<78;
+  const value=(light>202||(light>151&&neutral))?0:255;
+  pixels.data[i]=pixels.data[i+1]=pixels.data[i+2]=value;
+ }
+ cx.putImageData(pixels,0,0);
  return roi;
 }
 async function reader(){
@@ -49,14 +69,27 @@ async function reader(){
  if(!root.Tesseract)throw Error('OCR not loaded. Import a game screenshot first.');
  return root.Tesseract.createWorker('eng',1);
 }
-async function recognizeSlots(canvas,slots){
+async function recognizeSlots(canvas,slots,kind){
  const worker=await reader(),out=[];
  for(const slot of slots){
-  const rect=slot.rect;let level=null;
+  let level=null;
   try{
-   const ocr=await worker.recognize(crop(canvas,rect,true));
+   const isPet=kind==='pet';
+   const badge=isPet?C.petBadgeRect(slot.rect):slot.rect;
+   const first=crop(canvas,badge,isPet?'badge':'footer');
+   const ocr=await worker.recognize(first);
    level=C.readSkillLevel(ocr?.data?.text||'',slot.max);
-  }catch(_){/* No inference from a bad reading. */}
+   if(level===null&&isPet){
+    // Recover tiny outlined "Lv. N" glyphs which plain Tesseract can omit.
+    const second=await worker.recognize(contrastBadge(first));
+    level=C.readSkillLevel(second?.data?.text||'',slot.max);
+   }
+   if(level===null&&isPet){
+    // Some game themes have an unusually wide level badge.
+    const fallback=await worker.recognize(crop(canvas,slot.rect,'footer'));
+    level=C.readSkillLevel(fallback?.data?.text||'',slot.max);
+   }
+  }catch(_){/* Never invent a level if local OCR fails. */}
   out.push({...slot,level});
  }
  return out;
@@ -155,14 +188,15 @@ function mount(host,B){
   try{
    const canvas=await photoCanvas(file);
    const slots=C.petSlots.map(s=>({...s,rect:C.petRect(s)}));
-   const recognized=await recognizeSlots(canvas,slots);
+   const recognized=await recognizeSlots(canvas,slots,'pet');
    petPhoto=canvas;
    const ext=v2();
    draftPet=recognized.map(({rect,...item})=>({
-    ...item,active:Boolean(ext.petActive[item.name]),preview:crop(canvas,rect,false).toDataURL('image/jpeg',.78)
+    ...item,active:Boolean(ext.petActive[item.name]),preview:crop(canvas,rect,'preview').toDataURL('image/jpeg',.78)
    }));
    renderPet();
-   status.textContent=de('Pet-Vorschläge prüfen und anschließend gemeinsam übernehmen.','Review pet suggestions, then apply together.');
+   const read=recognized.filter(x=>x.level!==null).length;
+   status.textContent=de('Pet-Skill-Level erkannt: '+read+'/'+recognized.length+'. Fehlende Werte bitte prüfen.','Pet skill ranks recognized: '+read+'/'+recognized.length+'. Review any blanks.');
   }catch(e){status.textContent=de('Pet-Erkennung fehlgeschlagen: ','Pet recognition failed: ')+String(e?.message||e);}
   petBusy=false;petInput.disabled=false;
  }
@@ -172,9 +206,9 @@ function mount(host,B){
   try{
    const canvas=await photoCanvas(file);
    const slots=C.valoraSkillMax.map((max,i)=>({max,rect:C.valoraRect(i)}));
-   const recognized=await recognizeSlots(canvas,slots);
+   const recognized=await recognizeSlots(canvas,slots,'valora');
    draftValora=recognized.map(({rect,...item})=>({
-    ...item,preview:crop(canvas,rect,false).toDataURL('image/jpeg',.78)
+    ...item,preview:crop(canvas,rect,'preview').toDataURL('image/jpeg',.78)
    }));
    renderVal();
    status.textContent=de('Vier Skillwerte prüfen und anschließend gemeinsam übernehmen.','Review all four skill values, then apply together.');
