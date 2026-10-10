@@ -21,12 +21,32 @@ function mock(mask){
 }
 // Real third-class TG6 badge was rejected at confidence .806 with margin .078;
 // this fourth compact 12x16 glyph is from that *actual* screenshot.
-fixtures.push('H4f/f/YJ4A4Azg/4/44c4M4MYcf4f4Pw');
 for(let i=0;i<fixtures.length;i++){
  const m=mock(fixtures[i]),result=m.digitAt({canvas:{width:716,height:1536}},[133,395]);
- assert.equal(result.tg,[6,5,6,6][i],i+' expected Truegold badge');
+ assert.equal(result.tg,[6,5,6][i],i+' expected Truegold badge');
  assert.ok(result.confidence>.8);
 }
+// Real Archer TG6 selected white glyph pixels in a 27x26 crop. Unlike
+// the normalized 12x16 template this reproduces the full digitAt pipeline.
+const archerSource='AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA AfAAAP/AABhIAAcAAADMAAAf4AADjgAAcMAABjgAAP4AAA+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=='.replace(/ /g,'');
+function mockActual(mask){
+ const bits=Buffer.from(mask,'base64');
+ const data=new Uint8ClampedArray(27*26*4);
+ for(let i=0;i<702;i++){
+  const on=Boolean((bits[i>>3]>>(7-(i%8)))&1),p=i*4;
+  data[p]=on?232:155;data[p+1]=on?226:109;data[p+2]=on?210:18;data[p+3]=255;
+ }
+ const scope={window:{},atob,document:{createElement:()=>({width:27,height:26,getContext:()=>({
+  drawImage(){},getImageData:()=>({data})
+ })})}};
+ vm.runInNewContext(moduleCode,scope);
+ return scope.window.NRW_BEAR_TROOP_BADGES;
+}
+const archer=mockActual(archerSource);
+const detectedArcher=archer.digitAt({canvas:{width:716,height:1536}},[133,518]);
+assert.equal(detectedArcher.tg,6,'real archer TG6 pixel silhouette recognized end-to-end');
+assert.ok(detectedArcher.confidence>=.8);
+
 const test=mock(fixtures[0]);
 const canvas={width:716,height:1536,getContext:()=>({canvas:{width:716,height:1536}})};
 const levels=test.recognize(canvas,'Spitzen Infanterie / Spitzen Kavallerie / Spitzen Bogenschützen',[]);
