@@ -167,7 +167,7 @@ function mount(host,B){
   const grid=el('div','bear-buff-pet-grid');
   for(const item of draftPet){
    const row=el('div','bear-buff-pet-row');
-   const img=el('img','bear-buff-thumbnail');img.alt='';img.src=item.preview;
+   const img=el('img','bear-buff-thumbnail');img.alt='';img.src=item.preview;img.alt='';img.src=item.preview;
    const fields=el('div','bear-buff-fields');
    const name=el('select');name.setAttribute('aria-label',de('Begleiter auswählen','Choose pet'));
    for(const p of choices){
@@ -200,7 +200,7 @@ function mount(host,B){
   draftValora.forEach((item,i)=>{
    const record=cat.valora[i];
    const row=el('label','bear-buff-valora-row');
-   const img=el('img','bear-buff-thumbnail');img.alt='';img.src=item.preview;
+   const img=el('img','bear-buff-thumbnail bear-buff-valora-thumbnail');
    const name=el('span','',record?.name||'Skill '+(i+1));
    const input=el('input');input.type='number';input.inputMode='numeric';input.min='1';input.max=String(C.valoraSkillMax[i]);
    input.value=item.level??'';input.placeholder='Lv ?';
