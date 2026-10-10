@@ -203,6 +203,53 @@ function mount(host,B,language){
   group.append(make(l==='de'?'Mit belegten festen Starter- und Widget-Fähigkeiten':
     l==='fr'?'Avec les capacités fixes documentées':'With verified fixed starter and widget abilities',own.modelIndex));
   card.append(group);
+  // Expose every value that actually reaches the soldier formula. No hidden
+  // calibration, guessed profile stats or total rally damage.
+  const trace=own.troopBreakdown;
+  if(trace){
+   const details=el('details','bear-sim-math-audit');
+   const summary=el('summary','',
+    l==='de'?'Rechenweg prüfen · Truppen / Angriff / Tödlichkeit':
+    l==='fr'?'Contrôler le calcul et les statistiques utilisées':
+    'Inspect exact troop / attack / lethality values used');
+   details.append(summary);
+   const trapLabel=l==='de'?'Bärenfalle fix: Lv 5 = +25 Prozentpunkte Angriff':
+    l==='fr'?'Piège fixé au niveau 5 = +25 points d’attaque':
+    'Pitfall fixed at Lv5 = +25 ATTACK percentage points';
+   details.append(el('p','hint',trapLabel));
+   const pre=el('div','bear-sim-math-grid');
+   const names=l==='de'?['Infanterie','Kavallerie','Bogenschützen']:
+    l==='fr'?['Infanterie','Cavalerie','Archers']:['Infantry','Cavalry','Archers'];
+   trace.types.forEach((type,i)=>{
+    const p=el('div','bear-sim-math-type');
+    p.append(el('strong','',names[i]+' · T'+type.tier+' TG'+type.tg));
+    const num=n=>fmt(n);
+    p.append(el('span','',num(type.count)+' '+
+     (l==='de'?'Soldaten · Grundangriff':'troops · base ATK')+' '+num(type.baseAttack)));
+    p.append(el('span','',
+     (l==='de'?'Aus Screenshot: ATK ':'Captured ATK ')+
+     type.capturedAttackPct.toFixed(1)+' % · '+
+     (l==='de'?'Tödlichkeit ':'Lethality ')+type.lethalityPct.toFixed(1)+' %'));
+    p.append(el('span','',
+     (l==='de'?'Effektiver ATK-Wert inkl. Bärenfalle: ':
+      'Effective ATK including Pitfall: ')+type.appliedAttackPct.toFixed(1)+' %'));
+    p.append(el('small','',
+     (l==='de'?'10-Runden-Anteil (Index): ':'10-round share (index): ')+
+     num(type.damageTenRounds)));
+    pre.append(p);
+   });
+   details.append(pre);
+   details.append(el('p','hint',
+    (l==='de'?'Starter-Soldaten gesamt: ':'Starter troops total: ')+
+     fmt(trace.totalTroops)+' · '+
+     (l==='de'?'Truppenschaden vor festen Fähigkeiten: ':
+      'Base before fixed abilities: ')+
+     scoreText(trace.totalTenRounds)));
+   details.append(el('p','hint',l==='de'?
+    'Wenn diese ATK-/Tödlichkeitswerte niedriger als im anderen Rechner sind, ist die Eingabe/Erkennung der Kampfwerte die Ursache. Die Werte werden hier nur angezeigt, nicht verändert.':
+    'If these ATK/Lethality values differ from the comparison calculator, inspect the original screenshot import. No data is changed here.'));
+   card.append(details);
+  }
   if(previous?.ready&&previous.modelIndex>0){
    const delta=100*(own.modelIndex/previous.modelIndex-1);
    card.append(el('p','hint',(delta>=0?'+':'')+delta.toFixed(2)+'% '+
