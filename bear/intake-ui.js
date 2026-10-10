@@ -836,11 +836,15 @@ function apply(){
     if(!tile.name)continue;
     if(!v.scannedOwnedHeroes.includes(tile.name))v.scannedOwnedHeroes.push(tile.name);
     const old=v.manualHeroes[tile.name]||{};
-    const stars=tile.starSteps===null?Number(old.stars||0):Math.floor(tile.starSteps/6);
-    const tier=tile.starSteps===null?Number(old.tier||0):tile.starSteps%6;
+    // A freshly scanned but ambiguous star bar must not inherit an
+    // older, possibly false screenshot estimate and distort the Bear picks.
+    // Explicitly unknown progress remains 0 until manually confirmed.
+    const stars=tile.starSteps===null?0:Math.floor(tile.starSteps/6);
+    const tier=tile.starSteps===null?0:tile.starSteps%6;
     const cap=Core.maxSkill(stars);
     const actualSkills=Array.isArray(old.skills)&&old.skills.some(Number)&&old.skillsAssumedMax===false;
     v.manualHeroes[tile.name]={...old,name:tile.name,level:tile.level||old.level||0,stars,tier,
+     starPendingReview:tile.starSteps===null,
      skills:actualSkills?old.skills:(cap?[cap,cap,cap]:[0,0,0]),
      skillsAssumedMax:!actualSkills,source:'screenshot'};
     accepted++;
