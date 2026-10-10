@@ -167,12 +167,9 @@ function plan(model,catalog,combat,capacityCore){
  const engineReady=Boolean(combat?.ready&&combat?.configure&&combat?.damage);
  const tiers=engineReady?combat.configure(model.v2):null;
  const useDamage=engineReady&&combat.ready(v,tiers);
- const ownStats={...v};
- if(model.v2?.squadSeparate){
-  const atk=Number(v.squadAtk)||0,letv=Number(v.squadLet)||0;
-  for(const key of ['iAtk','cAtk','aAtk'])ownStats[key]=(Number(ownStats[key])||0)+atk;
-  for(const key of ['iLet','cLet','aLet'])ownStats[key]=(Number(ownStats[key])||0)+letv;
- }
+ // ONE authoritative stat-composition path: class Bonus Overview +
+ // separately recorded squad and three own Starter Expedition details.
+ const ownStats=root.NRW_BEAR_OWN_BASELINE?.currentStats?.(model)||{...v};
  // Join-leader stats are unavailable. Use the user's class stats as a
  // relative PROXY (as in the previous analysis), not an actual join score.
  // Hero expedition proc/widget effects are not independently simulated.
