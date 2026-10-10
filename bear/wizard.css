@@ -139,3 +139,15 @@ body.bear-wizard-mode .dashboard{display:none!important}
  .bear-gear-hero-item img{width:46px;height:46px;margin:0}
  .bear-recommendation-portrait{width:58px;height:58px}
 }
+
+/* Primary-source references: informational, never a simulated damage score. */
+.bear-reference-status{font-size:12px;color:var(--muted);margin:2px 0 4px}
+.bear-reference-fact{font-weight:800;line-height:1.5;font-size:13px;
+ margin:12px 0 7px!important;padding:10px 12px;
+ border:1px solid rgba(239,183,92,.3);border-radius:10px;
+ background:rgba(239,183,92,.08)}
+.bear-reference-skill-panel{font-size:12px;margin-top:7px!important;line-height:1.55}
+.bear-reference-skill-panel>summary{font-weight:750;cursor:pointer;color:var(--amber)}
+.bear-reference-skill-panel ul{padding-left:20px;margin:7px 0 8px}
+.bear-reference-skill-panel li{margin:4px 0}
+.bear-reference-skill-panel>a{color:var(--amber)}
