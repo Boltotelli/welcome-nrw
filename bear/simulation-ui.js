@@ -227,7 +227,7 @@ function mount(host,B,language){
     p.append(el('span','',num(type.count)+' '+
      (l==='de'?'Soldaten · Grundangriff':'troops · base ATK')+' '+num(type.baseAttack)));
     p.append(el('span','',
-     (l==='de'?'Aus Screenshot: ATK ':'Captured ATK ')+
+     (l==='de'?'Erfasster Wert: ATK ':'Recorded ATK ')+
      type.capturedAttackPct.toFixed(1)+' % · '+
      (l==='de'?'Tödlichkeit ':'Lethality ')+type.lethalityPct.toFixed(1)+' %'));
     p.append(el('span','',
