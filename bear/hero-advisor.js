@@ -25,7 +25,7 @@ function skillState(hero){
  const avg=confirmed?actual.reduce((a,b)=>a+b,0)/3:cap;
  return {level:avg,cap,assumed:!confirmed,confirmed};
 }
-function evaluate(hero,type,priorities){
+function evaluate(hero,type,priorities,referenceGet){
  const list=priorities?.[type]||[];
  const rank=list.indexOf(hero.name);
  const stars=value(hero.stars,1,5);
@@ -33,6 +33,11 @@ function evaluate(hero,type,priorities){
  const level=value(hero.level,1,80);
  const widget=value(hero.widget,1,10);
  const skills=skillState(hero);
+ // Sourced native Expedition ATK is a useful ranking signal, but
+ // it is NOT actual Bear damage or player equipment-enhanced stats.
+ const source=typeof referenceGet==='function'&&stars!==null?
+  referenceGet(hero.name,stars,tier??0):null;
+ const nativeAtk=value(source?.bonus,0,2000);
  const caution=defenseFirst.has(hero.name)||legacyFillers.has(hero.name);
  // Star investment governs available skills and base hero progression.
  // The smaller role preference can only decide comparably upgraded heroes.
@@ -61,11 +66,12 @@ function evaluate(hero,type,priorities){
   bearCaution:caution,level,stars,tier:tier||0,widget,
   skill:skills.level,skillCap:skills.cap,assumedSkill:skills.assumed,
   hasConfirmedSkill:skills.confirmed,confidence,
-  progression:fractionalStars,
+  progression:fractionalStars,nativeExpeditionAtk:nativeAtk,
+  attackWeight:1,usesAttackReference:false,
   note:stars===null?'stars-unknown':legacyFillers.has(hero.name)?'legacy-fallback':caution?'defensive':'progression'
  };
 }
-function recommend(owned,types,priorities){
+function recommend(owned,types,priorities,referenceGet){
  const roster=new Map();
  for(const hero of owned||[]){
   if(!hero?.name||!types||!classes.includes(types[hero.name]))continue;
@@ -73,9 +79,23 @@ function recommend(owned,types,priorities){
  }
  return classes.map(type=>{
   const choices=[...roster.values()].filter(h=>types[h.name]===type)
-   .map(h=>evaluate(h,type,priorities))
-   .sort((a,b)=>b.score-a.score||
-    (a.guideRank??99)-(b.guideRank??99)||a.name.localeCompare(b.name));
+   .map(h=>evaluate(h,type,priorities,referenceGet));
+  const sourced=choices.map(h=>h.nativeExpeditionAtk).filter(Number.isFinite).sort((a,b)=>a-b);
+  // Normalize against this troop class, so unavailable reference data never
+  // becomes an invented 0%. A sublinear exponent prevents this one value
+  // from replacing the skill, role, widget and progression criteria.
+  if(sourced.length>=2){
+   const mid=Math.floor(sourced.length/2);
+   const median=sourced.length%2?sourced[mid]:(sourced[mid-1]+sourced[mid])/2;
+   for(const h of choices){
+    if(h.nativeExpeditionAtk===null)continue;
+    h.attackWeight=Math.pow((100+h.nativeExpeditionAtk)/(100+median),.55);
+    h.usesAttackReference=true;
+    h.score=Math.round(h.score*h.attackWeight*10)/10;
+   }
+  }
+  choices.sort((a,b)=>b.score-a.score||
+   (a.guideRank??99)-(b.guideRank??99)||a.name.localeCompare(b.name));
   return {type,choices,best:choices[0]||null};
  });
 }
@@ -83,6 +103,6 @@ root.NRW_BEAR_HERO_ADVISOR={
  recommend,evaluate,skillState,classes,
  source:'https://ks-atlas.com/tools/atlas-database/bear-rally-heroes',
  supportingGuide:'https://kingshotguides.com/guide/bear-hunt-expert-guide/',
- method:'provisional owned-only role and progression heuristic, not Atlas damage model'
+ method:'provisional owned-only role, progression and checked Expedition ATK heuristic when comparable; NOT actual Bear damage'
 };
 })(window);

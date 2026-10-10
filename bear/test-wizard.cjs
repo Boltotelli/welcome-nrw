@@ -99,7 +99,9 @@ assert.ok(css.includes('.bear-guide-stored'),'mobile saved-values cards styled')
 assert.ok(!wizard.includes('kingshot_beartrap_v3_action_transparent.webm'),'formation-stage loading must not reuse the damage video');
 assert.ok(wizard.includes('stageLoader.append(loaderBear,loaderText)'),'formation stage keeps its own animated bear loading indicator');
 assert.ok(simulation.includes("webm.src='./assets/kingshot_beartrap_v3_action_transparent.webm'"),'damage simulation retains the approved video');
-assert.ok(html.includes('./wizard.js?v=corrected-examples-20261011-1'),'wizard cache key must refresh for existing visitors');
+assert.ok(html.includes('./wizard.js?v=verified-atk-20261011-1'),'wizard cache key must refresh for existing visitors');
+assert.ok(html.includes('./hero-advisor.js?v=verified-atk-20261011-1'),'new ranking engine must bypass cache');
+assert.ok(wizard.includes('window.NRW_BEAR_HERO_REFERENCE?.get?.(name,stars,tier)'),'verified attack is passed to the ranking engine');
 assert.ok(wizard.includes("'.jpg?v=corrected-examples-20261011-1'"),'corrected original images bypass stale browser caches');
 const workflow=fs.readFileSync(__dirname+'/../.github/workflows/bear-pages.yml','utf8');
 assert.ok(workflow.includes('57bd5246b3e9c21904ef2f11ae4db246c5cd9780d55a333efd0bbadfa41e9418'),'exact archived ZIP is identified');

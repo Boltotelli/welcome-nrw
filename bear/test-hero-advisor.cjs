@@ -36,6 +36,25 @@ assert.equal(A.recommend([h('Margot',1),h('Petra',4)],roles,priorities)[1].best.
 assert.equal(A.recommend([h('Amadeus',1),h('Zoe',4)],roles,priorities)[0].best.name,'Zoe',
  'infantry progression also outweighs name priority');
 
+// The reported 4★ T4 Yang vs 5★ Rosa case: source percentages displayed
+// in the dropdown must also be a real input to the recommendation.
+const verifiedAtk=(name,stars,tier)=>({bonus:
+ name==='Yang'&&stars===4&&tier===4?472.18:
+ name==='Rosa'&&stars===5?370.30:null});
+const sourcePicks=A.recommend([
+ h('Yang',4,80,{tier:4,widget:2}),h('Rosa',5,80,{widget:7})
+],roles,priorities,verifiedAtk)[2];
+assert.equal(sourcePicks.best.name,'Yang',
+ 'sourced 472.18% Yang should beat 370.30% Rosa with comparable skills');
+assert.ok(sourcePicks.best.usesAttackReference,'source attack is actually included');
+assert.equal(sourcePicks.choices.find(h=>h.name==='Yang').nativeExpeditionAtk,472.18);
+const lowSkills=A.recommend([
+ h('Yang',4,80,{tier:4,widget:2,skills:[1,1,1],skillsAssumedMax:false}),
+ h('Rosa',5,80,{widget:7})
+],roles,priorities,verifiedAtk)[2];
+assert.equal(lowSkills.best.name,'Rosa',
+ 'confirmed low actual skill levels still outweigh a native attack advantage');
+
 // User's actual captain comparison, both without widgets:
 assert.equal(A.recommend([h('Yang',4,80,{tier:4}),h('Rosa',5)],roles,priorities)[2].best.name,'Yang',
  '4-star T4 Gen6 Yang should outrank 5-star Rosa with no widget');

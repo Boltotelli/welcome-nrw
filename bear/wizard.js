@@ -406,7 +406,8 @@ function heroResults(){
   roster.set(h.name,{...previous,...h});
  }
  return advisor?.recommend([...roster.values()],window.NRW_BEAR_CATALOG?.heroTypes,
-  window.NRW_BEAR_INTAKE_CORE?.rankByType)||[];
+  window.NRW_BEAR_INTAKE_CORE?.rankByType,
+  (name,stars,tier)=>window.NRW_BEAR_HERO_REFERENCE?.get?.(name,stars,tier))||[];
 }
 function selections(){
  const groups=heroResults();
@@ -434,9 +435,9 @@ function renderRecommendations(){
  const l=lang(),groups=heroResults(),groupNames=names[l]||names.en;
  const intro=document.createElement('p');intro.className='hint';
  intro.textContent=l==='de'?
-  'Nur deine erkannten, besessenen Helden: je ein Rally-Starter pro Truppengattung. Sterne, Level und freigeschaltete Skills wiegen stärker als die Bear-Meta-Reihenfolge. Atlas-orientierter Vergleich, KEINE offizielle Schadenssimulation.':
-  l==='fr'?'Un héros possédé par classe. Étoiles, niveaux et compétences priment sur la popularité du guide. Estimation indicative, PAS une simulation KS Atlas.':
-  'Your scanned owned heroes only: one provisional leader per class. Heuristic ranking; verified GitHub data below is shown independently, NOT as calculated Bear damage.';
+  'Nur eingelesene Helden: Sterne, Skills, offensive Widgets, Bear-Rolle und geprüfter Expeditionsangriff (wenn mehrere Vergleichswerte vorliegen) fließen in die Rangfolge ein. Keine garantierte Schadensprognose.':
+  l==='fr'?"Héros détectés : étoiles, compétences, widgets, rôle et attaque d'expédition vérifiée lorsqu'elle est comparable. Ce classement n'est PAS un calcul de dégâts réels.":
+  'Only scanned owned heroes: development, skills, offensive widgets, Bear role and comparable verified Expedition ATK influence this provisional ranking. NOT calculated Bear damage.';
  recommendationPanel.append(intro);
  const reference=window.NRW_BEAR_HERO_REFERENCE;
  const refState=reference?.status?.()||'unavailable';
@@ -537,7 +538,14 @@ function renderRecommendations(){
    const second=group.choices.find(x=>x.name!==chosen.name);
    if(second){
     const reason=document.createElement('p');reason.className='hint bear-recommendation-reason';
-    if(chosen.stars!==null&&second.stars!==null&&chosen.stars>=second.stars+2){
+    if(chosen.usesAttackReference&&second.usesAttackReference&&
+       Number.isFinite(chosen.nativeExpeditionAtk)&&Number.isFinite(second.nativeExpeditionAtk)){
+     const fmt=n=>n.toLocaleString(l==='de'?'de-DE':l==='fr'?'fr-FR':'en-US',{maximumFractionDigits:2});
+     reason.textContent=l==='de'?
+      'Expeditionsangriff: '+fmt(chosen.nativeExpeditionAtk)+' % gegenüber '+fmt(second.nativeExpeditionAtk)+' % ('+second.name+'). Die geprüften Werte werden nun gewichtet. Skill-, Widget- und Kampfbedingungen bleiben relevant.':
+      l==='fr'?"Attaque d'expédition : "+fmt(chosen.nativeExpeditionAtk)+' % contre '+fmt(second.nativeExpeditionAtk)+' % ('+second.name+"). Valeurs pondérées, dégâts réels non garantis.":
+      'Expedition ATK: '+fmt(chosen.nativeExpeditionAtk)+' % vs '+fmt(second.nativeExpeditionAtk)+' % ('+second.name+'). Verified values are weighted; actual damage also depends on skills, widgets and battle conditions.';
+    }else if(chosen.stars!==null&&second.stars!==null&&chosen.stars>=second.stars+2){
      reason.textContent=l==='de'?
       chosen.stars+'★ statt '+second.stars+'★ bei '+second.name+
       ': Ein schwach entwickelter Meta-Held verdrängt keinen gut ausgebauten Starter.':
