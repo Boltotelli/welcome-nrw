@@ -287,10 +287,10 @@ function calculate(marches){
  var engine=window.NRW_BEAR_COMBAT,levels=engine.configure(model.v2);
  var fullOwn=engine.ready(model.values,levels);
  var fullJoins=marches.slice(1).every(function(m){return engine.ready(m.leaderStats,levels);});
- var ownScore=fullOwn?engine.damage(start,offensiveStats(model.values,true),levels,n('pitfall')):null;
+ var ownScore=fullOwn?engine.damage(start,offensiveStats(model.values,true),levels,5 /* NRW Pitfall Lv5 */):null;
  var totalScore=(fullOwn&&fullJoins)?actual.reduce(function(sum,row,j){
   var stats=j===0?offensiveStats(model.values,true):marches[j].leaderStats;
-  return sum+engine.damage(row,stats,levels,n('pitfall'));
+  return sum+engine.damage(row,stats,levels,5 /* NRW Pitfall Lv5 */);
  },0):null;
  // Own score remains available without requiring other rallyleader stats.
  var score=totalScore===null?ownScore:totalScore;
