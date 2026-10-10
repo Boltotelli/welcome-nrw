@@ -111,7 +111,7 @@ function composition(target,inf,cav){
 // out, redistribute its exact integer stock fairly across ALL marches,
 // then backfill the unfilled slots with other classes that actually exist.
 function allocate(targets,stock,starterRatio,joinRatio){
- const rows=targets.map((t,i)=>composition(t,...(i===0?starterRatio:joinRatio)));
+ const rows=targets.map((t,i)=>composition(t,...(i===0?starterRatio:(Array.isArray(joinRatio[0])?(joinRatio[i-1]||joinRatio[0]):joinRatio))));
  for(let k=0;k<3;k++){
   const requests=rows.map(row=>row[k]);
   const want=requests.reduce((a,b)=>a+b,0);
@@ -210,5 +210,5 @@ function plan(model,catalog,combat,capacityCore){
   allHeroesAssigned:marches.every(m=>m.missingHeroSlots===0),
   joinCount:selected.joins.length,selected};
 }
-root.NRW_BEAR_FORMATION={plan,chooseHeroes,JOIN_PRIORITIES};
+root.NRW_BEAR_FORMATION={plan,chooseHeroes,JOIN_PRIORITIES,allocateStock:allocate,integerPercentages};
 })(window);
