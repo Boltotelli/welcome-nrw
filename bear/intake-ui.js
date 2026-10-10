@@ -713,26 +713,49 @@ function renderQueue(){
    const picker=document.createElement('label');picker.className='bear-intake-value';
    picker.append(say('Heldenname','Hero name'));
    const name=inputChoice(heroChoices(),item.detail?.name||'');picker.append(name);content.appendChild(picker);
-   name.addEventListener('change',()=>{item.detail=item.detail||{};item.detail.name=name.value;});
+   name.addEventListener('change',()=>{
+    item.detail=item.detail||{};
+    const prev=cat.heroTypes?.[item.detail.name],next=cat.heroTypes?.[name.value];
+    item.detail.name=name.value;
+    if(prev!==next){item.detail.expeditionStats={};item.detail.expeditionConflicts=[];}
+    renderQueue();
+   });
    const lvl=document.createElement('label');lvl.className='bear-intake-value';lvl.textContent='Level';
    const val=document.createElement('input');val.type='number';val.min='0';val.max='80';val.value=item.detail?.level??'';
    val.addEventListener('input',()=>{item.detail=item.detail||{};item.detail.level=val.value===''?null:Number(val.value);});
    lvl.append(val);content.append(lvl);
    const note=document.createElement('p');note.className='hint';
-   const availableStats=Object.entries(item.detail?.expeditionStats||{});
-   note.textContent=availableStats.length?
-    say(availableStats.length+' numerische Heldenwerte wurden im Bild gelesen. Bitte prüfen. Diese sind sichtbare Gesamtwerte, keine berechneten Basiswerte. GovGear wird NICHT noch einmal addiert.',
-        availableStats.length+' numeric hero values were read from this screenshot. Review them: these are observed values, NOT calculated base stats. Governor gear is NOT added again.'):
-    say('Nur Name/Level im Bild erkannt. Keine verlässlichen Expeditions-Prozentwerte gelesen; Basiswerte nach Stern/Level werden hier NICHT erfunden und Ausrüstung NICHT doppelt addiert.',
-        'Only name/level found. No reliable expedition percentages read; base stats are NOT invented from stars/level, and gear is NOT added twice.');
+   const hType=cat.heroTypes?.[item.detail?.name];
+   const group={infantry:'i',cavalry:'c',archer:'a'}[hType];
+   const values=item.detail?.expeditionStats||{};
+   const keys=group?['Atk','Def','Hp','Let'].map(k=>group+k):[];
+   const observed=keys.filter(k=>Number.isFinite(Number(values[k]))&&values[k]!==undefined).length;
+   const conflicts=item.detail?.expeditionConflicts||[];
+   note.textContent=keys.length?
+    say(observed+'/4 Expeditionswerte erkannt. Fehlende oder widersprüchliche Werte bleiben leer. Nur Werte aus dem Bild prüfen/eintragen. GovGear wird NICHT noch einmal addiert.',
+        observed+'/4 expedition percentages detected. Missing or contradictory readings remain blank. Confirm only visible screenshot values. Governor gear is NOT added again.'):
+    say('Bitte Helden zuordnen, um seine vier Expeditionswerte zu prüfen.',
+        'Select a hero to review its four expedition percentage fields.');
    content.append(note);
-   if(availableStats.length){
+   if(keys.length){
     const statsBox=document.createElement('div');statsBox.className='bear-detail-observed-stats';
-    for(const [key,value] of availableStats){
+    const names={Atk:say('Angriff','Attack'),Def:say('Verteidigung','Defense'),
+     Hp:say('Gesundheit','Health'),Let:say('Tödlichkeit','Lethality')};
+    for(const key of keys){
      const field=document.createElement('label');field.className='bear-intake-value';
-     field.textContent=key+' (%)';
+     field.textContent=names[key.slice(1)]+' (%)';
      const input=document.createElement('input');input.type='number';
-     input.step='.01';input.min='0';input.max='5000';input.value=String(value);
+     input.step='.01';input.min='0';input.max='5000';
+     input.value=values[key]??'';
+     if(values[key]===undefined){
+      input.placeholder=say('Nicht erkannt','Not recognized');
+      field.classList.add('bear-detail-stat-missing');
+     }
+     if(conflicts.includes(key)){
+      const marker=document.createElement('small');marker.className='hint';
+      marker.textContent=say('OCR widersprüchlich – bitte ablesen','Conflicting OCR – check screenshot');
+      field.append(marker);
+     }
      input.addEventListener('input',()=>{
       item.detail.expeditionStats=item.detail.expeditionStats||{};
       const parsed=Number(input.value);
@@ -920,7 +943,9 @@ function apply(){
    appliedTypes.push('starter');
    const h=item.detail;appliedNames.push(h.name);const previous=v.manualHeroes[h.name]||{};
    v.manualHeroes[h.name]={...previous,name:h.name,level:h.level||previous.level||0,
-    expeditionStats:{...(previous.expeditionStats||{}),...(h.expeditionStats||{})},source:'screenshot'};
+    // Detail photos are taken AFTER fitting best simultaneous gear; do
+    // not back-fill missing new numbers from an older pre-gear screenshot.
+    expeditionStats:{...(h.expeditionStats||{})},source:'screenshot'};
    const slot=['infantry','cavalry','archer'].indexOf(cat.heroTypes[h.name]);
    if(slot>=0&&!v.ownHeroes[slot])v.ownHeroes[slot]=h.name;
    accepted++;
