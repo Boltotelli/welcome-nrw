@@ -13,7 +13,7 @@ const F=ctx.window.NRW_BEAR_FORMATION,C=ctx.window.NRW_BEAR_CAPACITY;
 const heroTypes={
  Zoe:'infantry',Petra:'cavalry',Yang:'archer',
  Chenko:'cavalry',Yeonwoo:'archer',Amane:'archer',Margot:'cavalry',
- Hilde:'cavalry','Wee & Woo':'archer',Thrud:'cavalry',
+ Hilde:'cavalry','Wee & Woo':'archer',Vivian:'archer',Thrud:'cavalry',
  Marlin:'archer',Rosa:'archer',
  ...Object.fromEntries(Array.from({length:6},(_,i)=>['Inf'+i,'infantry'])),
  ...Object.fromEntries(Array.from({length:3},(_,i)=>['Cav'+i,'cavalry'])),
@@ -22,7 +22,7 @@ const heroTypes={
 const catalog={heroTypes,pets:[{name:'Mighty Bison',bearSkill:{id:'squad_capacity',values:
  [1500,3000,4500,6000,7500,9000,10500,12000,13500,15000]}}]};
 const starter=['Zoe','Petra','Yang'];
-const leaders=['Chenko','Yeonwoo','Amane','Margot','Hilde','Wee & Woo'];
+const leaders=['Chenko','Yeonwoo','Amane','Margot','Hilde','Vivian'];
 const filler=[...Array.from({length:6},(_,i)=>'Inf'+i),
  ...Array.from({length:3},(_,i)=>'Cav'+i),
  ...Array.from({length:3},(_,i)=>'Arch'+i)];
@@ -49,6 +49,12 @@ assert.ok(!p.marches.some(x=>x.slot>0&&x.heroes[0]?.name==='Thrud'),
  'Thrud is NOT an auto-selected offensive first-slot joiner');
 assert.ok(p.marches.slice(1).some(x=>x.heroes[0]?.name==='Hilde'),
  'Hilde remains an allowed lower-priority join lead');
+assert.ok(p.marches.slice(1).some(x=>x.heroes[0]?.name==='Vivian'),
+ 'Vivian must be reserved as an offensive left-slot leader, never ignored');
+assert.ok(p.marches.slice(1).every(x=>x.heroes[0]!==null),
+ 'six available suitable offensive leaders must fill all six joins');
+assert.ok(p.marches.slice(1).some(x=>x.heroes[0]?.name==='Vivian'&&x.firstRole==='damage-taken'),
+ 'Vivian Crouching Tiger must be classified as enemy-damage-taken, not defense');
 for(const march of p.marches){
  const actualClasses=march.heroes.filter(Boolean).map(h=>catalog.heroTypes[h.name]);
  assert.equal(new Set(actualClasses).size,actualClasses.length,
