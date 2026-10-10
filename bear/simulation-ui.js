@@ -90,13 +90,13 @@ function mount(host,B,language){
  const webm=el('source');webm.src='./assets/kingshot_beartrap_v3_action_transparent.webm';webm.type='video/webm';video.append(webm);
  video.addEventListener('canplay',()=>{video.style.display='block';ring.hidden=true;video.play().catch(()=>{});});
  video.addEventListener('error',()=>{video.style.display='none';ring.hidden=false;});
- webm.addEventListener('error',()=>{video.style.display='none';ring.hidden=false;});
+ webm.addEventListener('error',()=>{video.style.display='none';ring.hidden=!image.hidden;});
  // The previously produced WebP is a fallback for browsers without WebM.
  const image=el('img','bear-sim-webp');
  image.src='./assets/kingshot_beartrap_v3_action_transparent.webp';
  image.alt='';image.hidden=true;
  image.addEventListener('load',()=>{if(video.style.display==='none'){image.hidden=false;ring.hidden=true;}});
- image.addEventListener('error',()=>{image.hidden=true;ring.hidden=false;});
+ image.addEventListener('error',()=>{image.hidden=true;ring.hidden=video.style.display!=='none';});
  loader.append(video,image,ring,el('p','',t().loader));container.append(loader);
  const panel=el('div','bear-sim-results');container.append(panel);
  const compared=el('section','bear-sim-comparisons');container.append(compared);
@@ -123,7 +123,15 @@ function mount(host,B,language){
   const values=fields.slice(0,2).map(x=>x.input.value);
   if(values.some(s=>!/^\d{1,3}$/.test(s)))return output(t().invalid);
   const pair=values.map(Number);if(!sim.ratioValid(pair))return output(t().invalid);
-  output('');setRatios(pair);
+  output('');
+  const choice=target.value;
+  if(choice==='all'){for(let i=1;i<ratios.length;i++)ratios[i]=pair.slice();}
+  else ratios[Number(choice)||0]=pair.slice();
+  // Preserve the active input/caret while the user types two digits.
+  fields[2].input.value=100-pair[0]-pair[1];
+  const known=sim.PRESETS.find(p=>p.ratios&&p.ratios[0]===pair[0]&&p.ratios[1]===pair[1]);
+  preset.value=known?.id||'custom';
+  schedule(600);
  }
  let debounce;
  function schedule(wait=400){
@@ -237,8 +245,14 @@ function mount(host,B,language){
  target.addEventListener('change',fillInputs);
  preset.addEventListener('change',()=>{
   const value=sim.PRESETS.find(p=>p.id===preset.value);
-  if(!value?.ratios)return;
-  setRatios(value.ratios);
+  if(!value)return;
+  if(value.id==='optimized'){
+   const original=sim.presetFromPlan(base);
+   if(target.value==='all'){for(let i=1;i<ratios.length;i++)ratios[i]=original[i].slice();}
+   else ratios[Number(target.value)||0]=original[Number(target.value)||0].slice();
+   fillInputs();schedule(500);return;
+  }
+  if(value.ratios)setRatios(value.ratios);
  });
  fields.slice(0,2).forEach(x=>x.input.addEventListener('input',takeInputs));
  reset.addEventListener('click',()=>{
