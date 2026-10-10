@@ -30,6 +30,11 @@ function valoraBadgeRect(rect){
  // Level is centered on a brown badge, approx y=1814..1858 at 2048px.
  return {x:rect.x+rect.w*.17,y:rect.y+rect.h*.49,w:rect.w*.72,h:rect.h*.35};
 }
+// Text-only OCR window, verified against the original 955x2048 screenshot.
+// Excludes the top/bottom white badge rim that confused Tesseract on Lv4/5.
+function valoraTextRect(rect){
+ return {x:rect.x+rect.w*.18,y:rect.y+rect.h*.54,w:rect.w*.68,h:rect.h*.19};
+}
 function valoraPreviewRect(rect){
  // Entire 193x250 card, including the portrait AND its rank. The old
  // 125x125 slice missed most of the card and looked empty.
@@ -45,10 +50,19 @@ function readSkillLevel(text,max){
  const unique=[...new Set(candidates)];
  return unique.length===1?unique[0]:null;
 }
+// Restrict the common "S" versus "5" OCR confusion to the isolated
+// Valora rank label. An unlabelled digit, "MAX", or a cooldown is never valid.
+function readValoraLevel(text,max){
+ const normal=readSkillLevel(text,max);
+ if(normal!==null)return normal;
+ const s=String(text||'').replace(/[\r\n]+/g,' ');
+ const hits=[...s.matchAll(/(?:level|lvl|lv)\s*[.:;=\-\/ ?]*([sS])(?=$|[^a-z0-9]|[pP](?![a-z0-9]))/gi)];
+ return hits.length===1&&max>=5?5:null;
+}
 function checkPet(name,rank,petCatalog){
  const record=(petCatalog||[]).find(p=>p.name===name&&p.bearSkill);
  return Boolean(record&&Number.isInteger(Number(rank))&&Number(rank)>=1&&
   Number(rank)<=record.bearSkill.values.length);
 }
-root.NRW_BEAR_BUFF_CORE={petSlots,valoraSkillMax,petRect,valoraRect,petBadgeRect,valoraBadgeRect,valoraPreviewRect,readSkillLevel,checkPet};
+root.NRW_BEAR_BUFF_CORE={petSlots,valoraSkillMax,petRect,valoraRect,petBadgeRect,valoraBadgeRect,valoraTextRect,valoraPreviewRect,readSkillLevel,readValoraLevel,checkPet};
 })(window);
