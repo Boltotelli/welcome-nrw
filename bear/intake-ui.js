@@ -100,8 +100,12 @@ async function imageCanvas(file){
  }finally{URL.revokeObjectURL(url);}
 }
 function cropToThumb(src,x,y,w,h){
- const c=document.createElement('canvas');c.width=130;c.height=170;
- c.getContext('2d').drawImage(src,x*src.width,y*src.height,w*src.width,h*src.height,0,0,c.width,c.height);
+ // Preserve the ENTIRE hero card including star flowers. The old 130x170
+ // stretched screenshot plus object-fit:cover hid the bottom of the card.
+ const pixelW=w*src.width,pixelH=h*src.height;
+ const c=document.createElement('canvas');c.width=170;
+ c.height=Math.max(180,Math.round(170*pixelH/pixelW));
+ c.getContext('2d').drawImage(src,x*src.width,y*src.height,pixelW,pixelH,0,0,c.width,c.height);
  return c.toDataURL('image/jpeg',.74);
 }
 // Detect actual four-column hero rows instead of assuming the first card
@@ -690,7 +694,7 @@ function renderQueue(){
     name.addEventListener('change',()=>{tile.name=name.value;tile.selected=Boolean(tile.name);});
     const level=document.createElement('input');level.type='number';level.min='1';level.max='80';level.value=tile.level??'';level.placeholder='Lv';
     level.addEventListener('change',()=>{tile.level=level.value?Number(level.value):null;tile.levelManual=true;});
-    const stars=inputChoice(starOptions(),tile.starSteps??'');
+    const stars=inputChoice(starOptions(),tile.starSteps??tile.starSuggestion??'');
     stars.addEventListener('change',()=>{
      tile.starSteps=stars.value?Number(stars.value):null;
      tile.starManual=Boolean(tile.starSteps);
@@ -701,8 +705,10 @@ function renderQueue(){
     const summaryLine=document.createElement('strong');
     summaryLine.className='bear-hero-found-name';
     const refreshLabel=()=>{
+     const proposed=tile.starSteps===null&&tile.starSuggestion!==null&&tile.starSuggestion!==undefined?
+      '~'+starLabel(tile.starSuggestion):starLabel(tile.starSteps);
      summaryLine.textContent=(tile.name||say('Held unbekannt','Unknown hero'))+
-      ' · '+(tile.level?'Lv '+tile.level:'Lv ?')+' · '+starLabel(tile.starSteps);
+      ' · '+(tile.level?'Lv '+tile.level:'Lv ?')+' · '+proposed;
     };
     refreshLabel();
     name.addEventListener('change',refreshLabel);
@@ -736,6 +742,18 @@ function renderQueue(){
       say('Sternfortschritt unklar – bitte auswählen',
        'Uncertain stars – please select');
      cell.append(starNote);
+    }
+    if(tile.starReview&&tile.starSuggestion!==null&&tile.starSuggestion!==undefined){
+     const accept=document.createElement('button');accept.type='button';
+     accept.className='secondary-btn bear-star-accept';
+     accept.textContent=say('Sternvorschlag bestätigen','Confirm suggested stars');
+     accept.addEventListener('click',()=>{
+      tile.starSteps=tile.starSuggestion;tile.starReview=false;tile.starManual=true;
+      stars.value=String(tile.starSteps);refreshLabel();
+      accept.remove();
+      edit.open=tile.levelConfidence!=='verified'&&!tile.levelManual;
+     });
+     cell.append(accept);
     }
     cell.append(summaryLine,certainty,edit);grid.append(cell);
    });
