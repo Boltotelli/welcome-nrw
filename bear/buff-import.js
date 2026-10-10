@@ -330,6 +330,7 @@ function mount(host,B){
   if(!count){status.textContent=de('Noch keine Werte zum Übernehmen.','No values to apply yet.');return;}
   B.save();
   root.NRW_BEAR_ENHANCE?.refreshBuffs?.();
+  root.dispatchEvent(new Event('nrw-bear-buffs-applied'));
   // Do not alter the base march capacity, hero equipment, total combat stats
   // or the existing manually confirmed master/pet bonus fields.
   status.textContent=de('✓ '+count+' geprüfte Skillwerte lokal gespeichert. Keine Buffs automatisch addiert.',
