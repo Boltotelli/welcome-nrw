@@ -61,7 +61,7 @@ function romanXAt(ctx,center){
  const screen=document.createElement('canvas');screen.width=28;screen.height=28;
  const xctx=screen.getContext('2d',{willReadFrequently:true});
  let best=0;
- for(const dx of [-6,-3,0,3,6])for(const dy of [-27,-23,-19,-15,-11,-7,-3,1,5,9,13]){
+ for(const dx of [-6,-4,-2,0,2,4,6])for(const dy of [-24,-22,-20,-18,-16,-14,-12,-10,-8,-6,-4,-2,0,2,4,6,8,10,12,14,16,18,20,22,24]){
   const x=(center[0])*base+(dx-14)*size;
   const y=(center[1])*base+(dy-14)*size;
   if(x<0||y<0||x+28*size>ctx.canvas.width||y+28*size>ctx.canvas.height)continue;
@@ -100,7 +100,10 @@ function recognize(canvas,text,words){
  const oldAnchors=[[133,395],[453,395],[133,518]];
  const phoneAnchors=[[133,358],[455,358],[133,489]];
  const anchors=oldAnchors.map((p,i)=>p.map((v,j)=>v+(phoneAnchors[i][j]-v)*phoneLayout));
- const romanOld=[[106,472],[426,472],[106,595]];
+ // Two HUD variants: actual 955x2048 overview has Roman X at
+ // [106,451], [424,451], [106,575] in normalized 716px coordinates.
+ // The bounded matcher also covers earlier layouts shifted downward.
+ const romanOld=[[106,451],[424,451],[106,575]];
  const romanPhone=[[106,421],[424,421],[106,546]];
  const roman=romanOld.map((p,i)=>p.map((v,j)=>v+(romanPhone[i][j]-v)*phoneLayout));
  for(let i=0;i<3;i++)if(result[i].tier===null&&romanXAt(ctx,roman[i]))result[i].tier=10;
