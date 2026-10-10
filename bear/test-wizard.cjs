@@ -57,4 +57,15 @@ assert.ok(intake.includes('availableStats.length'), 'actual visible expedition v
 assert.ok(intake.includes('GovGear wird NICHT noch einmal addiert'),
  'screenshots must not double count equipment or invent hero base stats');
 assert.ok(wizard.includes('renderHeroDetails()'),'detail upload after best hero gear prompt');
+// Three confirmed hero screenshots now open Step 8 immediately. This
+// must not be gated by a still-disabled Continue button on Step 7.
+assert.match(wizard,/accepted\.forEach\(n=>detailConfirmed\.add\(n\)\);\s*if\(heroDetailsReady\(\)\)\{moveTo\(7\);return;\}/,
+ 'all three confirmed hero details trigger automatic Step 8');
+assert.match(intake,/readHeroStatPanel\(canvas,worker,detail\.name/,
+ 'focus scan needed when small hero percentages are missed');
+assert.match(intake,/observed\+'\/4 expedition percentages detected/,
+ 'all four hero-detail stat inputs remain available to review');
+assert.match(intake,/expeditionStats:\{\.\.\.\(h\.expeditionStats\|\|\{\}\)\}/,
+ 'newly equipped hero screenshot must not silently reuse pre-gear stats');
+
 console.log('BEAR WIZARD: nine stages, hero shortlist, separate gear-first detail uploads and independent capacity input verified.');
