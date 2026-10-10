@@ -684,8 +684,31 @@ function renderQueue(){
    val.addEventListener('input',()=>{item.detail=item.detail||{};item.detail.level=val.value===''?null:Number(val.value);});
    lvl.append(val);content.append(lvl);
    const note=document.createElement('p');note.className='hint';
-   note.textContent=say('Expeditionswerte werden separat zur Heldendokumentation gespeichert – NICHT zu den Kampfstats addiert.','Expedition values are saved separately and not added twice to battle stats.');
+   const availableStats=Object.entries(item.detail?.expeditionStats||{});
+   note.textContent=availableStats.length?
+    say(availableStats.length+' numerische Heldenwerte wurden im Bild gelesen. Bitte prüfen. Diese sind sichtbare Gesamtwerte, keine berechneten Basiswerte. GovGear wird NICHT noch einmal addiert.',
+        availableStats.length+' numeric hero values were read from this screenshot. Review them: these are observed values, NOT calculated base stats. Governor gear is NOT added again.'):
+    say('Nur Name/Level im Bild erkannt. Keine verlässlichen Expeditions-Prozentwerte gelesen; Basiswerte nach Stern/Level werden hier NICHT erfunden und Ausrüstung NICHT doppelt addiert.',
+        'Only name/level found. No reliable expedition percentages read; base stats are NOT invented from stars/level, and gear is NOT added twice.');
    content.append(note);
+   if(availableStats.length){
+    const statsBox=document.createElement('div');statsBox.className='bear-detail-observed-stats';
+    for(const [key,value] of availableStats){
+     const field=document.createElement('label');field.className='bear-intake-value';
+     field.textContent=key+' (%)';
+     const input=document.createElement('input');input.type='number';
+     input.step='.01';input.min='0';input.max='5000';input.value=String(value);
+     input.addEventListener('input',()=>{
+      item.detail.expeditionStats=item.detail.expeditionStats||{};
+      const parsed=Number(input.value);
+      if(input.value!==''&&Number.isFinite(parsed)&&parsed>=0&&parsed<=5000)
+       item.detail.expeditionStats[key]=parsed;
+      else delete item.detail.expeditionStats[key];
+     });
+     field.append(input);statsBox.append(field);
+    }
+    content.append(statsBox);
+   }
   }else if(item.type==='roster'){
    const note=document.createElement('p');note.className='hint';
    const known=(item.cards||[]).filter(c=>c.name).length,total=(item.cards||[]).length;
