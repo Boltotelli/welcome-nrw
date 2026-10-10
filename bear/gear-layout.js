@@ -100,10 +100,27 @@ function find(data,w,h){
   return {ok:false,reason:'unknown-bottom-gear',slots:[],count:list.length};
  }
  if(byRow.some(r=>!r.left||!r.right))return {ok:false,reason:'incomplete-gear-grid',slots:[],count:list.length};
+ // The gold staff frame on a real 955x2048 screenshot merges with the
+ // character's orange shoulder glow. The resulting detected rectangle
+ // spans x=510..649 (139px at W=716), but the actual gear card is
+ // x~546..649 (104px). This displaced all three charm centers LEFT,
+ // even when their thumbnails had a safe non-overlapping radius.
+ // Only correct this specific over-wide GOLD rectangle when the upper
+ // right card gives an independent column anchor. Never shift a normal
+ // or ambiguous frame without evidence.
+ const staff=byRow[2].right,topRight=byRow[0].right;
+ if(staff.quality==='gold'&&topRight&&
+    staff.w>topRight.w*1.22&&staff.w<topRight.w*1.55&&
+    staff.cx<topRight.cx-w*.012&&staff.cx>topRight.cx-w*.055){
+   staff.cx=topRight.cx;
+   staff.w=topRight.w;
+   staff.x=staff.cx-staff.w/2;
+   staff.alignmentCorrected=true;
+ }
  const positions=[byRow[0].left,byRow[0].right,byRow[1].left,byRow[1].right,byRow[2].left,byRow[2].right];
  const output=positions.map((c,i)=>{
   const step=c.w/3,cy=c.y+c.h+(c.h*.17);
-  return {id:ids[i],gear:[c.cx,c.cy],charms:[-1,0,1].map(v=>[c.cx+v*step,cy]),bounds:[c.x,c.y,c.w,c.h],quality:c.quality||null,inferred:!!c.inferred};
+  return {id:ids[i],gear:[c.cx,c.cy],charms:[-1,0,1].map(v=>[c.cx+v*step,cy]),bounds:[c.x,c.y,c.w,c.h],quality:c.quality||null,inferred:!!c.inferred,alignmentCorrected:!!c.alignmentCorrected};
  });
  return {ok:true,slots:output,detected:cards.length,reason:'frames-detected'};
 }
