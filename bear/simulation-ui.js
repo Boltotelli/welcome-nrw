@@ -20,7 +20,7 @@ function mount(host,B,language){
   preset:'Vorlage',i:'Infanterie %',c:'Kavallerie %',a:'Bogenschützen %',
   custom:'Manuell',reset:'Optimierte Formation wiederherstellen',save:'Variante vergleichen',
   baseline:'Empfehlung',comparison:'Gespeicherte Varianten',load:'Übernehmen',
-  head:'Relative Schadensprognose',own:'Starter · Modellindex',joins:'Joins · Stellvertreter',overall:'Summe · relativer Modellindex',
+  head:'Relativer Formationsvergleich',own:'Starter · relativ zur Empfehlung',joins:'Joins · relativer Stellvertreter',overall:'Keine vergleichbare Schadenssumme',
   stocks:'Truppenverbrauch',free:'übrig',assigned:'eingesetzt',total:'Truppen',
   results:'Auswirkungen je Marsch',desired:'Gewünscht',actual:'Tatsächlich',
   adapted:'Wegen des gemeinsamen Truppenbestands musste mindestens eine Wunschverteilung angepasst werden.',
@@ -35,7 +35,7 @@ function mount(host,B,language){
   preset:'Preset',i:'Infantry %',c:'Cavalry %',a:'Archers %',
   custom:'Custom',reset:'Restore optimized formation',save:'Save comparison',
   baseline:'Recommendation',comparison:'Saved comparisons',load:'Restore',
-  head:'Relative damage forecast',own:'Starter · model index',joins:'Joins · proxy',overall:'Total · relative model index',
+  head:'Relative formation comparison',own:'Starter · vs recommended',joins:'Joins · relative proxy',overall:'No comparable absolute total',
   stocks:'Troop usage',free:'remaining',assigned:'assigned',total:'troops',
   results:'Effects by march',desired:'Requested',actual:'Actual',
   adapted:'At least one requested formation was adjusted to fit the shared troop inventory.',
@@ -50,7 +50,7 @@ function mount(host,B,language){
   preset:'Préréglage',i:'Infanterie %',c:'Cavalerie %',a:'Archers %',
   custom:'Personnalisé',reset:'Rétablir la formation optimisée',save:'Mémoriser',
   baseline:'Recommandation',comparison:'Variantes comparées',load:'Appliquer',
-  head:'Dégâts relatifs prévus',own:'Départ · indice',joins:'Renforts · estimation',overall:'Total · indice relatif',
+  head:'Comparaison relative des formations',own:'Départ · relatif à la recommandation',joins:'Renforts · indice relatif',overall:'Aucun total de dégâts absolus',
   stocks:'Troupes utilisées',free:'restantes',assigned:'affectées',total:'troupes',
   results:'Détails par marche',desired:'Demandé',actual:'Réel',
   adapted:'Certaines répartitions ont été adaptées au stock commun.',
@@ -179,6 +179,38 @@ function mount(host,B,language){
   return item;
  }
  function scoreText(v){return v===null||v===undefined?'—':fmt(Math.round(v));}
+ function renderSkillScenarios(data){
+  const content=el('section','bear-sim-scenarios');
+  const lang=language();
+  const heading=lang==='de'?'Vier Join-Skill-Szenarien (eigene Rally)':
+   lang==='fr'?'Scénarios de quatre compétences de renfort':'Four join-skill scenarios (own rally)';
+  content.append(el('h3','',heading));
+  const note=lang==='de'?
+   'Gedankliche Szenarien mit Lv.5-Skills. Nur bei Kampfwerten OHNE diese zusätzlichen Boni gültig. Tatsächliche vier Skills, Aktivierungswahrscheinlichkeiten, Widgets und frühere Rally-Bedingungen sind unbekannt. Keine Ingame-Punkteprognose.':
+   lang==='fr'?
+   'Hypothèses avec compétences de niveau 5. Les stats doivent exclure ces bonus. Compétences réelles et probabilités inconnues ; pas de score réel prédit.':
+   'Hypothetical Lv5 skills, valid ONLY if entered combat stats exclude these bonuses. Actual four join skills, proc rates and widgets are unknown. Not predicted game points.';
+  content.append(el('p','hint',note));
+  const row=el('div','bear-sim-scenario-grid');
+  for(const choice of sim.JOIN_SCENARIOS){
+   const score=sim.scenarioOwn(data.rows[0],B.model(),root.NRW_BEAR_COMBAT,choice.id);
+   const card=el('div','bear-sim-scenario');
+   const label={
+    'no-skill':lang==='de'?'Ohne Join-Skill':lang==='fr'?'Sans compétence':'No join skills',
+    'balanced-2-2':'2× Amane + 2× Chenko',
+    'attack-4':'4× Amane',
+    'lethality-4':'4× Chenko'
+   }[choice.id]||choice.description;
+   card.append(el('span','',label));
+   card.append(el('strong','',score?score.relativePercent.toFixed(1)+' %':'—'));
+   if(score&&choice.id!=='no-skill')card.append(el('small','',
+    '+'+score.changePercent.toFixed(1)+' % '+
+     (lang==='de'?'gegenüber Grundmodell':lang==='fr'?'par rapport à la base':'vs no-skill baseline')));
+   row.append(card);
+  }
+  content.append(row);
+  panel.append(content);
+ }
  function renderResult(data){
   panel.replaceChildren();
   if(!data.ready){panel.append(el('p','bear-guide-needed',data.reason==='invalid-percentages'?t().invalid:t().missing));return;}
