@@ -242,6 +242,44 @@ const capacityHost=document.createElement('section');
 capacityHost.id='bearRequiredCapacity';capacityHost.className='bear-required-capacity';
 sections[7].insertBefore(capacityHost,manual);
 const capacityUI=window.NRW_BEAR_CAPACITY_UI?.mount(capacityHost,B,lang);
+const widgetHost=document.createElement('section');widgetHost.className='bear-widget-panel bear-recommendation-panel';
+sections[7].insertBefore(widgetHost,manual);
+function renderWidgetLevels(){
+ const l=lang(),m=B.model(),v=m.v2||{};
+ widgetHost.innerHTML='';
+ const head=document.createElement('h3');
+ head.textContent=l==='de'?'Widget-Fähigkeiten der 3 Starter':
+  l==='fr'?'Compétences Widget des trois héros':'Three starter Widget abilities';
+ widgetHost.append(head);
+ const note=document.createElement('p');note.className='hint';
+ note.textContent=l==='de'?
+  'Bitte für jeden Starter das Widget-Level wählen. 0 = kein Widget. Wir rechnen nur offensive Expedition-Widget-Fähigkeiten, nicht die bereits in den Stats enthaltenen Werte.':
+ l==='fr'?
+  'Choisis le niveau du Widget (0 = aucun). On compte uniquement la compétence offensive, pas les statistiques déjà intégrées.':
+  'Enter each Widget level (0 = none). Only offensive Expedition abilities count, not already-captured widget gear stats.';
+ widgetHost.append(note);
+ const grid=document.createElement('div');grid.className='bear-widget-level-grid';widgetHost.append(grid);
+ for(const n of v.ownHeroes||[]){
+  if(!n)continue;
+  const wLabel=document.createElement('label');wLabel.className='bear-widget-manual';
+  const wText=document.createElement('span');wText.textContent=n;
+  const wSelect=document.createElement('select');wSelect.setAttribute('aria-label',n+' Widget');
+  const empty=document.createElement('option');empty.value='';empty.textContent='—';wSelect.append(empty);
+  for(let lv=0;lv<=10;lv++){const opt=document.createElement('option');opt.value=String(lv);opt.textContent=lv===0?'0 · kein Widget':'Lv '+lv;wSelect.append(opt);}
+  const saved=v.starterWidgetLevels?.[n],scanned=v.manualHeroes?.[n]?.widget;
+  wSelect.value=saved!==undefined&&saved!==null?String(saved):
+   Number(scanned)>0?String(scanned):'';
+  wSelect.addEventListener('change',()=>{
+   const model=B.model();model.v2=model.v2||{};
+   model.v2.starterWidgetLevels=model.v2.starterWidgetLevels||{};
+   if(wSelect.value==='')delete model.v2.starterWidgetLevels[n];
+   else model.v2.starterWidgetLevels[n]=Number(wSelect.value);
+   B.save();
+  });
+  wLabel.append(wText,wSelect);grid.append(wLabel);
+ }
+}
+
 function heroResults(){
  const ext=B.model().v2||{},known=window.NRW_BEAR_IMPORTED_HEROES||[];
  // Never treat old API or manual hero cards as verified by this roster scan.
@@ -456,27 +494,7 @@ function renderHeroDetails(){
   const art=catalog.find(h=>h.name===n)?.img;
   if(art){const img=document.createElement('img');img.src=art;img.alt='';img.loading='lazy';item.append(img);}
   const line=document.createElement('span');line.textContent=(detailConfirmed.has(n)?'✓ ':'📸 ')+(names[l]||names.en)[i]+' · '+n;
-  item.append(line);
-  // Dedicated expedition WIDGET level, not an extra hero-stat input.
-  // Manual values are stored independently of the screenshot OCR hero object.
-  const wLabel=document.createElement('label');wLabel.className='bear-widget-manual';
-  const wText=document.createElement('span');
-  wText.textContent=l==='de'?'Widget-Level (Fähigkeit)':l==='fr'?'Widget niveau (compétence)':'Widget level (skill only)';
-  const wSelect=document.createElement('select');wSelect.setAttribute('aria-label',n+' Widget');
-  const empty=document.createElement('option');empty.value='';empty.textContent='—';wSelect.append(empty);
-  for(let lv=0;lv<=10;lv++){const opt=document.createElement('option');opt.value=String(lv);opt.textContent=lv===0?'0 · kein Widget':'Lv '+lv;wSelect.append(opt);}
-  const v2=B.model().v2||{},saved=v2.starterWidgetLevels?.[n];
-  const scanned=v2.manualHeroes?.[n]?.widget;
-  wSelect.value=saved!==undefined&&saved!==null?String(saved):
-    Number(scanned)>0?String(scanned):'';
-  wSelect.addEventListener('change',()=>{
-   const model=B.model();model.v2=model.v2||{};
-   model.v2.starterWidgetLevels=model.v2.starterWidgetLevels||{};
-   if(wSelect.value==='')delete model.v2.starterWidgetLevels[n];
-   else model.v2.starterWidgetLevels[n]=Number(wSelect.value);
-   B.save();
-  });
-  wLabel.append(wText,wSelect);item.append(wLabel);list.append(item);
+  item.append(line);list.append(item);
  });
  detailPanel.append(list);
  const foot=document.createElement('p');foot.className='hint bear-gear-shot-note';
@@ -486,13 +504,6 @@ function renderHeroDetails(){
   'ENSUITE : ouvre les trois pages de détails et prends UNE capture par héros. Charge les trois images ensemble et confirme.':
   'ONLY THEN: open each hero’s detail page and take ONE screenshot per hero. Upload all THREE screenshots together, review and tap Apply.';
  detailPanel.append(foot);
- const widgetFoot=document.createElement('p');widgetFoot.className='hint';
- widgetFoot.textContent=l==='de'?
-  'Widget-Level bei jedem Starter bitte manuell wählen (0 = keines). Wir berücksichtigen ausschließlich belegte offensiv wirksame Expedition-Widget-Fähigkeiten, keine zusätzlichen Gear-Stats. Unbekannte Effekte werden nicht geschätzt.':
- l==='fr'?
-  'Saisis le niveau du Widget (0 = aucun). Seules les compétences d’expédition offensives vérifiées comptent, sans ajouter les statistiques déjà présentes.':
-  'Enter each starter Widget level (0 = none). Only verified offensive expedition widget abilities are counted, not widget gear stats already in your combat stats.';
- detailPanel.append(widgetFoot);
 }
 function render(){
  const s=t(),idx=active;
@@ -502,7 +513,7 @@ function render(){
  window.NRW_BEAR_SCREENSHOT_STAGE=[1,2,4,6].includes(idx)?idx:null;
  if(idx===5)renderRecommendations();
  if(idx===6)renderHeroDetails();
- if(idx===7){showRelevantManual();formationUI?.refreshSetup();}
+ if(idx===7){renderWidgetLevels();showRelevantManual();formationUI?.refreshSetup();}
  if(idx===8){formationUI?.show();}
  if(idx===9){simulationUI?.enter();}
  $('bearGuideEyebrow').textContent=s.eyebrow;
