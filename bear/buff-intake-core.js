@@ -52,12 +52,28 @@ function readSkillLevel(text,max){
 }
 // Restrict the common "S" versus "5" OCR confusion to the isolated
 // Valora rank label. An unlabelled digit, "MAX", or a cooldown is never valid.
+// The real deu+eng OCR of the 955x2048 original often appends one digit
+// from the bright badge rim: "Lv. 109", "Lv. 47", "Lv57", "Lv. 9".
+// ONLY use this recovery on Valora's known isolated rank badge.
 function readValoraLevel(text,max){
- const normal=readSkillLevel(text,max);
- if(normal!==null)return normal;
+ const strict=readSkillLevel(text,max);
+ if(strict!==null)return strict;
  const s=String(text||'').replace(/[\r\n]+/g,' ');
- const hits=[...s.matchAll(/(?:level|lvl|lv)\s*[.:;=\-\/ ?]*([sS])(?=$|[^a-z0-9]|[pP](?![a-z0-9]))/gi)];
- return hits.length===1&&max>=5?5:null;
+ const matches=[...s.matchAll(/(?:^|[^a-z0-9])(?:level|lvl|[l1i|]\s*[vuwy])\s*[.:;=\-\/ ?]*([0-9oOsiIl|]{1,3})(?![0-9])/gi)];
+ if(!matches.length)return null;
+ const candidates=[];
+ for(const m of matches){
+  const digits=m[1].replace(/[oO]/g,'0').replace(/[iIl|]/g,'1').replace(/[sS]/g,'5');
+  let rank=null;
+  if(digits==='10'||/^10[0-9]$/.test(digits))rank=10;
+  else if(/^[1-9]$/.test(digits))rank=Number(digits);
+  else if(/^[1-9][1-9]$/.test(digits))rank=Number(digits[0]);
+  // Do NOT reinterpret an unrelated "Lv.80" as skill rank 8,
+  // and never accept an arbitrary 3-digit code as a rank.
+  if(rank!==null&&rank>=1&&rank<=max)candidates.push(rank);
+ }
+ const unique=[...new Set(candidates)];
+ return unique.length===1?unique[0]:null;
 }
 function checkPet(name,rank,petCatalog){
  const record=(petCatalog||[]).find(p=>p.name===name&&p.bearSkill);
