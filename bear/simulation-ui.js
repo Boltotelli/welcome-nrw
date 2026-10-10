@@ -247,6 +247,60 @@ function mount(host,B,language){
   card.append(el('p','bear-sim-disclaimer',l==='de'?
    'MODELLERWARTUNG, keine garantierten Kingshot-Schadenspunkte. Alle vier Joiner-Fähigkeiten sind ausgeschlossen. Auslösehäufigkeit, Dauer und Effektgruppen sind nicht vollständig bestätigt; deshalb ist die Nähe zum Vergleichswert von 33 Mio. noch kein Beweis.':
    'MODEL EXPECTATION only; not guaranteed in-game damage. No joining-hero skills. Proc frequency, duration and effect stacking are not fully verified; agreement with another calculator is not proof.'));
+  // Hunter Instinct is a PERSONAL score multiplier, not another troop ATK.
+  // Keep the original combat-index value visible independently.
+  const scoreTool=root.NRW_BEAR_SCORE_BONUSES;
+  const points=scoreTool?.pointScore?.(estimate.expectedIndex,B.model());
+  if(points?.ready){
+   const section=el('div','bear-sim-scenario');
+   section.append(el('span','',
+    (l==='de'?'Valora · Hunter Instinct Lv. ': 'Valora · Hunter Instinct Lv. ')+
+    points.level+' · +'+points.personalPointPercent+' % '+
+    (l==='de'?'persönliche Bärenpunkte':'personal Bear score')));
+   section.append(el('strong','',scoreText(points.withPersonalBonus)));
+   section.append(el('small','',l==='de'?
+    'NUR Punktebonus nach der Schadensberechnung – kein zusätzlicher Soldatenangriff.':
+    'Personal points multiplier AFTER combat; not troop ATK.'));
+   card.append(section);
+   if(points.masteryPointPercent!==points.personalPointPercent){
+    card.append(el('p','hint',l==='de'?
+     'Quellenabweichung: Kingshot Mastery nennt für Lv. '+points.level+
+     ' einen Bonus von '+points.masteryPointPercent+' % ('+
+     scoreText(points.withMasteryAlternative)+'). Kingshot Wiki und KingshotDB nennen '+
+     points.personalPointPercent+' %.':
+     'Source conflict: Kingshot Mastery lists '+points.masteryPointPercent+
+     '% ('+scoreText(points.withMasteryAlternative)+
+     '), while Kingshot Wiki and KingshotDB list '+points.personalPointPercent+'%.'));
+   }
+  }else if(scoreTool){
+   card.append(el('p','hint',l==='de'?
+    'Valoras Hunter-Instinct-Level fehlt noch. Kein Punktebonus wird angenommen.':
+    'Hunter Instinct level not confirmed, so no personal points bonus is assumed.'));
+  }
+  // Pet skills are recorded, but their activation at the EXACT moment the
+  // screenshot was made is unknown. Never quietly re-add them.
+  const pets=scoreTool?.petAudit?.(B.model(),root.NRW_BEAR_CATALOG)||[];
+  const candidates=pets.filter(x=>x.rank>0||x.active);
+  if(candidates.length){
+   const petDetails=el('details','bear-sim-math-audit');
+   petDetails.append(el('summary','',
+    l==='de'?'Pet-Boni prüfen · mögliche Doppelzählung':
+    'Review pet buffs · avoid double counting'));
+   for(const pet of candidates){
+    petDetails.append(el('p','hint',pet.name+' · '+
+     (pet.active?(l==='de'?'als aktiv markiert':'marked active'):
+      (l==='de'?'nicht als aktiv markiert':'not marked active'))+
+     ' · '+(pet.percentage===null?'?':pet.percentage+' %')+
+     (pet.id==='attack'?(l==='de'?' Angriff':' attack'):
+      pet.id==='lethality'?(l==='de'?' Tödlichkeit':' lethality'):
+      pet.id==='enemy_defense'?(l==='de'?' weniger Feindverteidigung':' enemy defense reduction'):
+      (l==='de'?' weniger Feindgesundheit':' enemy health reduction'))));
+   }
+   petDetails.append(el('p','bear-sim-disclaimer',l==='de'?
+    'Pet-Aktiv bedeutet nur die gespeicherte Markierung, nicht eine bestätigte Aktivierung während des Bärenkampfs. Rhino-ATK und Panther-LET könnten bereits in der Bonusübersicht enthalten sein. Deshalb derzeit NICHT nochmals addiert. War-Bear-Verteidigungswirkung am Bären ungeprüft; Moose-HP-Reduktion ohne bestätigte Wirkung.':
+    'Pet active flags are saved choices, not actual game activation proof. Rhino ATK and Panther Lethality may already be in the captured Bonus Overview and are not added again. War Bear defense applicability is unverified; Moose HP effect is not confirmed.'));
+   card.append(petDetails);
+  }
   panel.append(card);
  }
  function renderOwnBaseline(data){
