@@ -217,6 +217,38 @@ function mount(host,B,language){
     l==='fr'?'Piège fixé au niveau 5 = +25 points d’attaque':
     'Pitfall fixed at Lv5 = +25 ATTACK percentage points';
    details.append(el('p','hint',trapLabel));
+   const statSource=own.assembledStats?.origin||{mode:'combined-report',reason:'unknown'};
+   const provenance=el('label','bear-stat-origin');
+   const sourceText=el('span','',
+    l==='de'?'Herkunft der sechs Klassenwerte:':
+    l==='fr'?'Provenance des six statistiques de classe :':'Source of six class stats:');
+   const source=el('select');
+   const modes=[
+    ['',l==='de'?'Automatisch erkennen':l==='fr'?'Détection automatique':'Auto detect'],
+    ['separate-overview',l==='de'?'Bonusübersicht · Werte getrennt':
+     l==='fr'?'Bonus séparés':'Bonus overview · separate components'],
+    ['combined-report',l==='de'?'Kampfbericht · bereits zusammengefasst':
+     l==='fr'?'Rapport · valeurs combinées':'Battle report · already combined']
+   ];
+   for(const [value,label] of modes){const opt=el('option','',label);opt.value=value;source.append(opt);}
+   source.value=B.model().v2?.combatStatOrigin||'';
+   source.addEventListener('change',()=>{
+    const model=B.model();model.v2=model.v2||{};
+    if(source.value)model.v2.combatStatOrigin=source.value;
+    else delete model.v2.combatStatOrigin;
+    B.save();
+    rerun(400);
+   });
+   provenance.append(sourceText,source);details.append(provenance);
+   details.append(el('p','hint',
+    (l==='de'?'Aktuell berechnet: ':l==='fr'?'Mode actif : ':'Using: ')+
+    (statSource.mode==='separate-overview'?
+     (l==='de'?'Klassenbonus + Schwadron + Starterheld':
+      'Class + squad + own starter'):
+     (l==='de'?'Bereits zusammengefasste Klassenwerte':'Combined class stats'))+
+    (statSource.reason==='component-exceeds-class-total'?
+     (l==='de'?' (aus deinen gespeicherten Einzelwerten erkannt)':' (inferred from saved components)'):'')
+   ));
    const pre=el('div','bear-sim-math-grid');
    const names=l==='de'?['Infanterie','Kavallerie','Bogenschützen']:
     l==='fr'?['Infanterie','Cavalerie','Archers']:['Infantry','Cavalry','Archers'];
@@ -226,8 +258,20 @@ function mount(host,B,language){
     const num=n=>fmt(n);
     p.append(el('span','',num(type.count)+' '+
      (l==='de'?'Soldaten · Grundangriff':'troops · base ATK')+' '+num(type.baseAttack)));
+    const components=own.assembledStats?.totals?.[i];
+    if(components){
+     const value=x=>x===null||x===undefined?'—':Number(x).toFixed(1)+'%';
+     p.append(el('span','',
+      (l==='de'?'ATK: Klasse ':'ATK: class ')+value(components.Atk.classPct)+
+      ' + '+(l==='de'?'Schwadron ':'squad ')+value(components.Atk.squadPct)+
+      ' + '+(l==='de'?'Held ':'hero ')+value(components.Atk.heroPct)));
+     p.append(el('span','',
+      (l==='de'?'LET: Klasse ':'LET: class ')+value(components.Let.classPct)+
+      ' + '+(l==='de'?'Schwadron ':'squad ')+value(components.Let.squadPct)+
+      ' + '+(l==='de'?'Held ':'hero ')+value(components.Let.heroPct)));
+    }
     p.append(el('span','',
-     (l==='de'?'Erfasster Wert: ATK ':'Recorded ATK ')+
+     (l==='de'?'Verwendeter Gesamtwert: ATK ':'Effective combined ATK ')+
      type.capturedAttackPct.toFixed(1)+' % · '+
      (l==='de'?'Tödlichkeit ':'Lethality ')+type.lethalityPct.toFixed(1)+' %'));
     p.append(el('span','',
@@ -254,23 +298,23 @@ function mount(host,B,language){
    B.model(),data.rows[0],root.NRW_BEAR_COMBAT);
   if(extra){
    const notes=el('details','bear-sim-math-audit');
-   const title=l==='de'?'Fehlende Boni prüfen · Schwadron & 3 Starterhelden':
-    l==='fr'?'Vérifier les bonus d’escouade et de héros non utilisés':
-    'Audit unused squad and leader bonuses';
+   const title=l==='de'?'Kampfwerte vergleichen · Schwadron & 3 Starterhelden':
+    l==='fr'?'Comparer les valeurs de classe, escouade et héros':
+    'Compare component stats for squad and starters';
    notes.append(el('summary','',title));
    const explain=l==='de'?
-    'In deinem Profil können weitere Kampfwerte gespeichert sein, die bisher NICHT in die Truppenformel gelangen. Der Vergleich unten ist rein hypothetisch: Wenn die Werte bereits in der Basisübersicht enthalten sind, würden wir sie durch Addition doppelt zählen. Es wird nichts verändert.':
+    'Der Rechner verwendet jetzt die durch die Quelle bestätigte Zusammenführung. Die vier Varianten darunter zeigen den Unterschied zu anderen Interpretationen; sie verändern dein Profil nicht.':
     l==='fr'?
-    'Les bonus enregistrés pourraient ne pas entrer dans le calcul. Les alternatives sont hypothétiques : ne pas compter deux fois les valeurs.':
-    'Some saved bonuses may not be in the soldier formula. Alternatives below are hypothetical; do not double count already-combined battle-report stats. Nothing is changed.';
+    'Le calcul actif compose les bonus selon la provenance. Les variantes sont des comparaisons sans modification.':
+    'The active calculation uses the source-appropriate composition. The four variants only compare alternative interpretations, without changing your profile.';
    notes.append(el('p','hint',explain));
    const num=x=>x===null?'—':Number(x).toFixed(1)+'%';
    const squadLine=(l==='de'?'Schwadron – Angriff: ':'Squad ATK: ')+
     num(extra.squadAttackPct)+' · '+(l==='de'?'Tödlichkeit: ':'Lethality: ')+
     num(extra.squadLethalityPct)+' · '+
-    (extra.squadAlreadyApplied?
-     (l==='de'?'bereits berücksichtigt':'already applied'):
-     (l==='de'?'aktuell NICHT berücksichtigt':'currently NOT applied'));
+    (extra.origin.mode==='separate-overview'?
+     (l==='de'?'wird zusammengeführt':'added once'):
+     (l==='de'?'Klassenwerte bereits kombiniert':'class totals already include bonuses'));
    notes.append(el('p','hint',squadLine));
    const classes=l==='de'?['Infanterie','Kavallerie','Bogenschützen']:
     l==='fr'?['Infanterie','Cavalerie','Archers']:['Infantry','Cavalry','Archers'];
@@ -287,10 +331,10 @@ function mount(host,B,language){
     const group=el('div','bear-sim-scenario-grid');
     const score=extra.hypotheticals;
     const scenarios=[
-     [l==='de'?'Aktuell verwendete Stats':'Currently used',score.current],
-     [l==='de'?'Zusätzlich: Schwadron':'Plus squad (hypothetical)',score.withSquad],
-     [l==='de'?'Zusätzlich: Heldendetails':'Plus hero details (hypothetical)',score.withHeroes],
-     [l==='de'?'Zusätzlich: beide (unbestätigt)':'Plus both (unconfirmed)',score.withBoth]
+     [l==='de'?'Nur Klassenwerte':'Class values only',score.current],
+     [l==='de'?'Klasse + Schwadron':'Class + squad',score.withSquad],
+     [l==='de'?'Klasse + Helden':'Class + starter heroes',score.withHeroes],
+     [l==='de'?'Klasse + beide':'Class + both',score.withBoth]
     ];
     for(const [label,value] of scenarios){
      const x=el('div','bear-sim-scenario');
@@ -299,9 +343,12 @@ function mount(host,B,language){
     }
     notes.append(group);
    }
+   notes.append(el('p','hint',
+    (l==='de'?'Für deine Quelle angewendeter Truppenschaden (vor Spezialfähigkeiten): ':
+     'Source-selected base damage (before special abilities): ')+scoreText(extra.hypotheticals.applied)));
    notes.append(el('p','bear-sim-disclaimer',l==='de'?
-    'Diese vier Zahlen sind KEINE Vorhersagen des Spiels und keine automatische Korrektur. Sie zeigen, wie stark sich die Rechnung bei unterschiedlichen Interpretationen deiner bereits gespeicherten Werte verändern würde. Joiner- und Zufallsskills bleiben ausgeschlossen.':
-    'These alternatives are not game damage predictions or automatically applied corrections. They show how source interpretation changes the model.'));
+    'Die Vergleichswerte sind Modellindizes, keine garantierten Kingshot-Schadenspunkte. Entscheidend ist nur die anhand der Quelle ausgewählte Berechnung, damit Boni nicht doppelt zählen.':
+    'These are model indices, not guaranteed game points. Only the source-selected composition is applied to prevent double counting.'));
    card.append(notes);
   }
   if(previous?.ready&&previous.modelIndex>0){
