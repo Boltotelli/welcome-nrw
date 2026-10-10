@@ -19,9 +19,12 @@ function mock(mask){
  vm.runInNewContext(moduleCode,scope);
  return scope.window.NRW_BEAR_TROOP_BADGES;
 }
-for(let i=0;i<3;i++){
+// Real third-class TG6 badge was rejected at confidence .806 with margin .078;
+// this fourth compact 12x16 glyph is from that *actual* screenshot.
+fixtures.push('H4f/f/YJ4A4Azg/4/44c4M4MYcf4f4Pw');
+for(let i=0;i<fixtures.length;i++){
  const m=mock(fixtures[i]),result=m.digitAt({canvas:{width:716,height:1536}},[133,395]);
- assert.equal(result.tg,[6,5,6][i],i+' expected Truegold badge');
+ assert.equal(result.tg,[6,5,6,6][i],i+' expected Truegold badge');
  assert.ok(result.confidence>.8);
 }
 const test=mock(fixtures[0]);
@@ -29,4 +32,4 @@ const canvas={width:716,height:1536,getContext:()=>({canvas:{width:716,height:15
 const levels=test.recognize(canvas,'Spitzen Infanterie / Spitzen Kavallerie / Spitzen Bogenschützen',[]);
 assert.deepEqual(Array.from(levels.map(x=>x.tier)),[10,10,10]);
 assert.equal(test.recognize(canvas,'Anfänger Infanterie',[])[0].tier,null);
-console.log('TROOP BADGES: truegold 6/5/6 digit fixtures and tier-X text guard passed.');
+console.log('TROOP BADGES: truegold 6/5/6 including real archer badge glyph and tier-X text guard passed.');
