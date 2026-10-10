@@ -31,9 +31,14 @@ function analyze(ratios){
  // Flower fill is not linearly proportional to a precise petal count.
  // Show close rounding-boundary proposals as requiring review.
  const nearPetalBoundary=portion>=.13&&Math.abs((exact-Math.floor(exact))-.5)<.13;
- const review=nearBoundary||nearPetalBoundary;
- return {steps:full*6+partial,confidence:review?.5:1,
-  review,reason:nearBoundary?'flower-boundary':nearPetalBoundary?'petal-boundary':'measured'};
+ // The 955x2048 phone uploads prove that an apparently unlit fifth
+ // flower can still belong to a higher T-stage, and a ~0.78-filled flower
+ // may visually be full. Do not pretend linear bright-pixel occupancy is
+ // an exact six-petal counter. Until a per-petal classifier is validated,
+ // only unequivocal five-full-flower bars may be auto-accepted.
+ const review=true;
+ return {steps:full*6+partial,confidence:nearBoundary||nearPetalBoundary?.25:.5,
+  review,reason:nearBoundary?'flower-boundary':nearPetalBoundary?'petal-boundary':'partial-unverified'};
 }
 function stepsFromRatios(ratios){return analyze(ratios).steps;}
 // Reconcile overlapping cards without silently choosing a conflicting
