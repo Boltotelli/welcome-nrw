@@ -53,6 +53,10 @@ function readEligibleSkills(model,reference,baseline){
   for(const s of record.skills){
    const cfg=CONFIG.find(x=>x.hero===name&&x.skill===s.name);
    if(!cfg){
+    // Defensive procs do not contribute offense against Bear.
+    if(s.effect==='damage_taken_reduction'||
+       s.effect==='damage_taken_down'||s.effect==='damage_taken_chance_down')
+      continue;
     if(s.conditions?.procChancePercent||
        s.effect==='damage_over_time'||
        s.effect==='squad_damage_dealt_buff'){
