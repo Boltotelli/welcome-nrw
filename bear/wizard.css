@@ -283,3 +283,9 @@ body.bear-wizard-mode .dashboard{display:none!important}
 .bear-sim-scenario strong{font-size:18px;color:var(--amber);font-variant-numeric:tabular-nums}
 .bear-sim-scenario small{font-size:10px;color:var(--muted)}
 @media(max-width:560px){.bear-sim-scenario-grid{grid-template-columns:1fr 1fr}.bear-sim-scenario strong{font-size:16px}}
+
+/* Manual own-host widget expedition ability levels; never duplicate gear stats. */
+.bear-widget-manual{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-left:auto;font-size:11px;font-weight:700}
+.bear-widget-manual select{width:130px;max-width:100%;border:1px solid var(--line);background:var(--panel);color:var(--text);padding:8px;border-radius:9px;font-size:12px}
+.bear-gear-hero-item{flex-wrap:wrap;row-gap:8px}
+@media(max-width:550px){.bear-widget-manual{width:100%;margin-left:0;justify-content:space-between}.bear-widget-manual select{min-width:110px}}
