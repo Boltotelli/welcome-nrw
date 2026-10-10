@@ -299,13 +299,15 @@ async function analyse(file){
   const output=detected.map(slot=>({
    ...slot,thumb:drawThumb(ctx,slot.gear,47),quality:slot.frameQuality||rarity(ctx,slot.gear),stars:readGearStars(ctx,slot.gear),tier:TIER?.recognize?.(ctx,slot.gear)||{tier:null,score:0},
    charms:slot.charms.map(pos=>{
-    // Actual phone screenshot: gold-charm centers are separated by ~45px,
-    // but the old +/-20 base-pixel thumbnails covered ~53 physical pixels,
-    // taking TWO adjacent glyphs at once. Use the measured center spacing.
+    // Use detected gear geometry and measured glyph spacing. On the
+    // ORIGINAL 955x2048 screenshot, center-corrected gold staff badges
+    // are at normalized x=563/597/632. Radius 15 shows complete yellow
+    // triangles while leaving a ~4px gap between adjacent thumbnails.
+    // The old over-wide frame displaced their centers ~18px left.
     const separation=Math.min(
      Math.abs(slot.charms[1][0]-slot.charms[0][0]),
      Math.abs(slot.charms[2][0]-slot.charms[1][0]));
-    const cropRadius=Math.max(9,Math.min(13,Math.floor(separation*.38)));
+    const cropRadius=Math.max(9,Math.min(16,Math.floor(separation*.46)));
     const input=maskOf(getCrop(ctx,pos,cropRadius),slot.type);
     const extra=remote.map(x=>({level:x.level,bits:x.bits,source:'online'}));
     // First use ONLY verified silhouettes from the player's labelled
