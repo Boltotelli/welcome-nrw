@@ -310,9 +310,9 @@ function renderRecommendations(){
    }
    if(chosen.bearCaution){
     const note=document.createElement('p');note.className='bear-guide-needed';
-    note.textContent=l==='de'?'Defensiver Held: im Bärenkampf oft nur Ersatzlösung.':
-     l==='fr'?'Héros défensif : choix de secours pour l’Ours.':
-     'Defense-oriented hero: usually only a Bear Trap fallback.';
+    note.textContent=l==='de'?'Für Bären-Rallys eher ein Ersatzheld als eine offensive Empfehlung.':
+     l==='fr'?'Pour l’Ours, c’est plutôt un héros de remplacement qu’un choix offensif.':
+     'Usually a fallback for Bear rallies rather than an offensive specialist.';
     card.append(note);
    }
    if(group.choices.length>1){
@@ -467,10 +467,20 @@ window.addEventListener('nrw-bear-intake-applied',evt=>{
   imported.add(active);
   message(t().ready);
   $('bearGuideNext').disabled=false;
-  // The hero step accepts several overlapping roster and detail screenshots.
-  // Keep the player on step 5 after each confirmation; they can upload the
-  // next individual image, or choose Continue when finished.
+  // The hero overview can contain several files in one confirmed batch.
+  // Once all three classes are represented, switch to Top 3 immediately.
+  // Hero DETAIL imports remain on the same step until all three are ready.
   if(active===4||active===6){
+   if(active===4){
+    // The user just confirmed ALL screenshots in the current batch.
+    // Once each class has a scanned hero, show their TOP 3 now rather
+    // than presenting the same "upload all heroes" screen again.
+    if(recommendationsReady()){moveTo(5);return;}
+    message(document.documentElement.lang==='de'
+     ?'Noch nicht alle drei Truppengattungen erkannt. Ergänze die fehlenden Helden oder korrigiere die Namen.'
+     :'Not all three troop classes were recognized. Add missing heroes or correct their names.');
+    return;
+   }
    if(active===6){
     const accepted=evt.detail?.names||[];
     accepted.forEach(n=>detailConfirmed.add(n));
