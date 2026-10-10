@@ -174,7 +174,7 @@ assert.equal(B.currentStats(reportNoComponents).iAtk,model.values.iAtk,
 
 const wizard=read('wizard.js'),simulation=read('simulation-ui.js'),html=read('index.html');
 new vm.Script(wizard);new vm.Script(simulation);
-assert.ok(wizard.includes("model.v2.starterWidgetLevels[n]=Number(wSelect.value)"),'only a manual UI dropdown saves independent widget level');
+assert.ok(wizard.includes("model.v2.starterWidgetLevels[n]=Number(select.value)"),'only a manual UI dropdown saves independent widget level');
 assert.ok(wizard.includes("B.save()"),'one existing profile store');
 assert.ok(simulation.includes('renderOwnBaseline(data)'), 'own baseline results integrated');
 assert.ok(simulation.includes('bear-sim-math-audit'),'exact captured stats trace must be inspectable');
