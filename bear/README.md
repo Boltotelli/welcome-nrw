@@ -420,3 +420,11 @@ New original real 955×2048 Kingshot screenshots:
 - Existing nine-step Wizard remains intact. Step 8 is now labeled Pets & Valora + missing values; its previous residual-fields panel, Step 9 results, user identity checks and auto-transition from 3 hero screenshots are untouched.
 - Local OCR reuses the existing `Tesseract` worker from the main importer. Uploaded screenshot pixels never leave the browser; only the user-reviewed resulting numbers are saved to the current local model. The original user image files are not added to any GitHub repo.
 - Regression tests `bear/test-buff-import.cjs` validate positional models, Lv label parsing, no false "Lv80" as a skill, no cooldown values, class/source-level caps, rank-versus-pet-level separation, preserving old Wizard flow and no automatic buff multiplication. **Real on-device OCR after full user upload still requires browser acceptance.**
+
+
+### Pet skill OCR hotfix: October 10, 2026 (test branch only)
+- Fix screenshot review distortion: pet tile previews are native-aspect-ratio crops, never forcibly resized into a 520×340 rectangle. This also preserves the Valora skill previews.
+- Retain the original 955×2048 screenshot resolution (up to 2800px high), rather than downscaling away the tiny `Lv` glyphs at 1600px.
+- Pet rank OCR first scans the **bottom-right skill badge**, then retries an outlined-text contrast version and the full tile footer if needed. Only 1–10 (or the specific catalog cap) is accepted; cooldowns, pet training levels and unresolved readings stay blank for review.
+- The review status shows how many pet ranks were recognized; no new wizard step, pet activity auto-selection, or automatic stat/capacity additions. Valora's Hunter Instinct remains manual. Source-reference samples remain Moose 4, Rhino 5, Bison 6, Great Moose 5, Panther 7.
+- Unit tests now cover badge position, stable crop proportions and guarded OCR variants. **Browser confirmation with the actual user pet screenshot is still required** before calling OCR accuracy verified.
