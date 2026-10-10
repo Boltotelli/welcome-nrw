@@ -48,6 +48,7 @@ function get(name,stars,tier){
   bonus:Number.isFinite(bonus)?bonus:null,sourceRow:step===null?null:step+1,
   skills:record.expeditionSkills.map(s=>({name:s.name,effect:s.effect,metric:s.metric,
    min:s.valuesBySkillLevel[0],max:s.valuesBySkillLevel[4],
+   valuesBySkillLevel:s.valuesBySkillLevel.slice(),
    additionalEffects:s.additionalEffects||[],conditions:s.conditions||{}})),
   source:record.source.stats,skillVerified:record.source.skillVerification==='primary-checked'};
 }
