@@ -78,5 +78,39 @@ function evaluate(plan,model,combat,formation,ratios){
   limited:measures.some(x=>x.adjusted),
   missingLeads:plan.marches.filter(m=>m.slot>0&&m.eligible===false).length};
 }
-root.NRW_BEAR_SIMULATION={PRESETS,ratioValid,ratio3,presetFromPlan,scoreRows,evaluate};
+/* One observed OWN-STARTER rally calibrates only the own starter forecast.
+ * The historic attack/lethality/4 join skills are NOT available. Current
+ * class stats are used as a proxy in both sides of the model ratio.
+ * Never project a join or sum projected own damage with join indices.
+ */
+function validateCalibration(ref){
+ if(!ref||!Number.isSafeInteger(Number(ref.damage))||Number(ref.damage)<=0||
+    Number(ref.damage)>1e13||!Number.isInteger(Number(ref.troops))||
+    Number(ref.troops)<100||Number(ref.troops)>5e6||!ratioValid(ref.ratio))return false;
+ return Array.isArray(ref.tiers)&&ref.tiers.length===3&&ref.tiers.every(t=>
+  t&&Number.isInteger(t.tier)&&t.tier>=1&&t.tier<=11&&
+  Number.isInteger(t.tg)&&t.tg>=0&&t.tg<=8);
+}
+function calibrationCounts(ref){
+ if(!validateCalibration(ref))return null;
+ const i=Math.floor(ref.troops*ref.ratio[0]/100);
+ const c=Math.floor(ref.troops*ref.ratio[1]/100);
+ return [i,c,ref.troops-i-c];
+}
+function calibrateOwn(starterTroops,model,combat,ref){
+ if(!validateCalibration(ref)||!Array.isArray(starterTroops)||starterTroops.length!==3||
+  starterTroops.some(x=>!Number.isSafeInteger(x)||x<0))return null;
+ const oldModel={values:model?.values,v2:{...(model?.v2||{}),troopTiers:ref.tiers}};
+ const reference=scoreRows([calibrationCounts(ref)],oldModel,combat)?.starter;
+ const candidate=scoreRows([starterTroops],model,combat)?.starter;
+ if(!reference||!Number.isFinite(reference)||candidate===null||!Number.isFinite(candidate))return null;
+ return {estimated:Math.round(Number(ref.damage)*candidate/reference),
+  measuredDamage:Number(ref.damage),referenceTroops:Number(ref.troops),
+  referenceRatio:ratio3(ref.ratio),
+  relativeChangePercent:100*(candidate/reference-1),indexReference:reference,
+  indexCandidate:candidate,provisional:true,
+  caveat:'Historical join skill effects and battle buffs are unknown. Current class stats are used as a proxy; this is not a verified damage prediction.'};
+}
+
+root.NRW_BEAR_SIMULATION={PRESETS,ratioValid,ratio3,presetFromPlan,scoreRows,evaluate,validateCalibration,calibrationCounts,calibrateOwn};
 })(window);
