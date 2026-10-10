@@ -24,6 +24,7 @@ const EXPEDITION_WIDGETS=Object.freeze({
  'Thrud':{type:'rally-lethality',name:'Wolf-Kissed',source:'https://www.kingshotcommand.com/hero-widgets/thrud'},
  'Ava':{type:'rally-lethality',name:'Color Storm',source:'https://www.kingshotcommand.com/hero-widgets/ava'},
  'Zoe':{type:'defense-only',name:'Dark Lady',source:'https://www.kingshotcommand.com/hero-widgets/zoe'},
+ 'Vivian':{type:'defense-only',name:'Money Driven',source:'https://www.kingshotcommand.com/heroes/vivian'},
  'Hilde':{type:'defense-only',name:'Fortitude',source:'https://www.kingshotcommand.com/heroes/hilde'},
  'Margot':{type:'defense-only',name:'Pugilist',source:'https://www.kingshotcommand.com/heroes/margot'}
 });
@@ -78,7 +79,7 @@ function calculate(model,counts,combat,heroReference){
  const original=combat.damage(counts,stats,levels,Number(model.values?.pitfall)||0);
  if(!Number.isFinite(original)||original<=0)return {ready:false,reason:'missing-combat-input'};
  const fixed=[],excluded=[],skipped=[],widgets=[],missing=[];
- let bonusExtra=0,widgetAttack=1,widgetLethality=1;
+ let bonusExtra=0,enemyTakenPct=0,widgetAttack=1,widgetLethality=1;
  const sourceLoaded=heroReference?.status?.()==='ready';
  for(const name of heroNames){
   const h=v.manualHeroes?.[name]||{},cap=skillCap(h.stars,h.tier);
@@ -94,6 +95,9 @@ function calculate(model,counts,combat,heroReference){
     const hitCount=Math.floor(TRAP_ROUNDS/4);
     const pct=skillValue*hitCount/TRAP_ROUNDS;
     bonusExtra+=pct;fixed.push({...meta,kind:'fixed-extra-strike',effectiveBonusPct:pct});
+   }else if(effect==='enemy_damage_taken_up'&&!cond.procChancePercent&&
+    !cond.everyTurns&&skill.metric==='percent'){
+    enemyTakenPct+=skillValue;fixed.push({...meta,kind:'fixed-enemy-damage-taken',effectiveBonusPct:skillValue});
    }else if(cond.procChancePercent||effect.includes('chance')||effect==='squad_damage_dealt_buff'||
     effect==='damage_over_time'||effect==='archer_extra_hit'){
     excluded.push({...meta,kind:'random',reason:'chance-based'});
@@ -122,9 +126,9 @@ function calculate(model,counts,combat,heroReference){
   if(widget.type==='rally-lethality')widgetLethality*=1+widget.bonusPct/100;
  }
  const strikeFactor=1+bonusExtra/100;
- const abilityFactor=strikeFactor*widgetAttack*widgetLethality;
+ const abilityFactor=strikeFactor*(1+enemyTakenPct/100)*widgetAttack*widgetLethality;
  return {ready:true,modelIndex:original*abilityFactor,withoutAbilitiesIndex:original,
-  abilityFactor,extraStrikePct:bonusExtra,widgetAttackFactor:widgetAttack,
+  abilityFactor,extraStrikePct:bonusExtra,enemyDamageTakenPct:enemyTakenPct,widgetAttackFactor:widgetAttack,
   widgetLethalityFactor:widgetLethality,
   included:fixed,widgets,excluded,unmodeled:skipped,missing,
   heroSourceReady:sourceLoaded,source:'partial-community-bear-model',
