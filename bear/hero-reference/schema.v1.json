@@ -100,7 +100,7 @@
           ],
           "properties": {
             "catalog": {
-              "const": "bear/catalog.js"
+              "const": "catalog.v1.json"
             },
             "stats": {
               "type": [
