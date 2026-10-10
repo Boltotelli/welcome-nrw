@@ -464,7 +464,8 @@ function render(){
  if(idx===8&&!finished){
   const engine=window.NRW_BEAR_COMBAT,model=B.model();
   const tiers=engine?.configure(model.v2);
-  if(engine?.ready(model.values,tiers)&&Number(B.capacity?.()||0)>0){
+  const capacityKnown=window.NRW_BEAR_CAPACITY?.breakdown(model,window.NRW_BEAR_CATALOG)?.complete;
+   if(engine?.ready(model.values,tiers)&&capacityKnown&&Number(B.capacity?.()||0)>0){
    finished=true;
    try{B.optimizeStarter();}catch(_){finished=false;}
   }
