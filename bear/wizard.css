@@ -115,6 +115,18 @@ body.bear-wizard-mode .dashboard{display:none!important}
 .bear-required-capacity .ux-field{display:flex;flex-direction:column;gap:8px}
 .bear-required-capacity input{max-width:300px;width:100%}
 
+.bear-capacity-review{margin-top:13px;padding-top:12px;border-top:1px solid var(--line);display:grid;gap:8px;min-width:0}
+.bear-capacity-review>.hint{margin:4px 0;font-size:11px;line-height:1.55}
+.bear-capacity-line{display:flex;align-items:baseline;justify-content:space-between;gap:12px;min-width:0;font-size:12px}
+.bear-capacity-line span{min-width:0;overflow-wrap:anywhere}
+.bear-capacity-line strong{white-space:nowrap;font-variant-numeric:tabular-nums}
+.bear-capacity-line.muted{color:var(--muted);padding-left:9px}
+.bear-capacity-total{margin-top:4px;padding-top:12px;border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:14px;font-weight:900}
+.bear-capacity-total strong{font-size:18px;color:var(--amber);font-variant-numeric:tabular-nums}
+.bear-required-capacity .field[hidden]{display:none}
+@media(max-width:560px){.bear-capacity-total{align-items:flex-start;flex-direction:column;gap:3px}.bear-capacity-total strong{font-size:20px}}
+
+
 /* Role suggestions appear only in the dedicated, post-roster hero step. */
 .bear-guide-slide[data-guide=heroes] .bear-intake-advice,.bear-guide-slide[data-guide=hero-details] .bear-intake-advice{display:none}
 
