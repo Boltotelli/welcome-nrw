@@ -179,37 +179,53 @@ function mount(host,B,language){
   return item;
  }
  function scoreText(v){return v===null||v===undefined?'—':fmt(Math.round(v));}
- function renderSkillScenarios(data){
-  const content=el('section','bear-sim-scenarios');
-  const lang=language();
-  const heading=lang==='de'?'Vier Join-Skill-Szenarien (eigene Rally)':
-   lang==='fr'?'Scénarios de quatre compétences de renfort':'Four join-skill scenarios (own rally)';
-  content.append(el('h3','',heading));
-  const note=lang==='de'?
-   'Gedankliche Szenarien mit Lv.5-Skills. Nur bei Kampfwerten OHNE diese zusätzlichen Boni gültig. Tatsächliche vier Skills, Aktivierungswahrscheinlichkeiten, Widgets und frühere Rally-Bedingungen sind unbekannt. Keine Ingame-Punkteprognose.':
-   lang==='fr'?
-   'Hypothèses avec compétences de niveau 5. Les stats doivent exclure ces bonus. Compétences réelles et probabilités inconnues ; pas de score réel prédit.':
-   'Hypothetical Lv5 skills, valid ONLY if entered combat stats exclude these bonuses. Actual four join skills, proc rates and widgets are unknown. Not predicted game points.';
-  content.append(el('p','hint',note));
-  const row=el('div','bear-sim-scenario-grid');
-  for(const choice of sim.JOIN_SCENARIOS){
-   const score=sim.scenarioOwn(data.rows[0],B.model(),root.NRW_BEAR_COMBAT,choice.id);
-   const card=el('div','bear-sim-scenario');
-   const label={
-    'no-skill':lang==='de'?'Ohne Join-Skill':lang==='fr'?'Sans compétence':'No join skills',
-    'balanced-2-2':'2× Amane + 2× Chenko',
-    'attack-4':'4× Amane',
-    'lethality-4':'4× Chenko'
-   }[choice.id]||choice.description;
-   card.append(el('span','',label));
-   card.append(el('strong','',score?score.relativePercent.toFixed(1)+' %':'—'));
-   if(score&&choice.id!=='no-skill')card.append(el('small','',
-    '+'+score.changePercent.toFixed(1)+' % '+
-     (lang==='de'?'gegenüber Grundmodell':lang==='fr'?'par rapport à la base':'vs no-skill baseline')));
-   row.append(card);
+ function calculateOwn(row){
+  return root.NRW_BEAR_OWN_BASELINE?.calculate(B.model(),row,root.NRW_BEAR_COMBAT,root.NRW_BEAR_HERO_REFERENCE);
+ }
+ function renderOwnBaseline(data){
+  const own=calculateOwn(data.rows[0]);
+  const previous=calculateOwn(base.marches[0].troops);
+  const l=language();
+  const title=l==='de'?'Grundschaden – eigene Rally (ohne Joiner)':
+   l==='fr'?'Dégâts de base – mon rallye sans renforts':'Own-rally base damage – no joining skills';
+  const card=el('section','bear-sim-scenarios');
+  card.append(el('h3','',title));
+  if(!own?.ready){
+   card.append(el('p','hint',l==='de'?'Für das Grundmodell fehlen Truppenstufen oder Kampfwerte.':
+    l==='fr'?'Données de combat incomplètes.':'Troop tiers or combat stats are incomplete.'));
+   panel.append(card);return;
   }
-  content.append(row);
-  panel.append(content);
+  const make=(label,value)=>{const child=el('div','bear-sim-scenario');
+   child.append(el('span','',label),el('strong','',scoreText(value)));return child;};
+  const group=el('div','bear-sim-scenario-grid');
+  group.append(make(l==='de'?'Nur Truppen + erfasste Stats':
+    l==='fr'?'Troupes et stats relevées':'Troops and captured stats',own.withoutAbilitiesIndex));
+  group.append(make(l==='de'?'Mit belegten festen Starter- und Widget-Fähigkeiten':
+    l==='fr'?'Avec les capacités fixes documentées':'With verified fixed starter and widget abilities',own.modelIndex));
+  card.append(group);
+  if(previous?.ready&&previous.modelIndex>0){
+   const delta=100*(own.modelIndex/previous.modelIndex-1);
+   card.append(el('p','hint',(delta>=0?'+':'')+delta.toFixed(2)+'% '+
+    (l==='de'?'gegenüber der vorgeschlagenen Starter-Formation':
+     l==='fr'?'par rapport à la formation de départ recommandée':'vs recommended starter lineup')));
+  }
+  for(const fx of own.included)card.append(el('p','hint',
+   fx.hero+' · '+fx.skill+' Lv'+fx.level+': +'+fx.effectiveBonusPct.toFixed(1)+'% '+
+    (l==='de'?'fester Zusatzschlag-Anteil':'fixed extra-strike contribution')));
+  for(const w of own.widgets)card.append(el('p','hint',
+   w.name+' · '+w.skillName+' (Widget '+w.widgetLevel+'): '+
+   (w.type==='defense-only'?'0%':w.bonusPct+'% '+
+    (w.type==='rally-attack'?'Rally-Angriff':'Rally-Tödlichkeit'))));
+  if(own.missing.length||own.unmodeled.length){
+   card.append(el('p','bear-guide-needed',
+    (l==='de'?'Nicht vollständig modelliert: ':l==='fr'?'Effets incomplets : ':'Not fully modeled: ')+
+    [...own.missing,...own.unmodeled].join(' · ')));
+  }
+  card.append(el('p','bear-sim-disclaimer',l==='de'?
+   'Die Werte sind Modellindizes, KEINE garantierten oder in Millionen prognostizierten Bärenpunkte. Zufällige Helden-Procs und alle Joiner-Skills sind ausgeschlossen; passive Helden-/Widget-Stats werden nicht nochmals addiert. Der angezeigte Schaden kann vom Spiel abweichen.':
+   l==='fr'?'Indices de modèle seulement, pas de dégâts garantis. Aucun effet aléatoire, renfort ou statistique de héros doublée.':
+   'MODEL INDICES only, not guaranteed in-game damage or predicted millions. Chance skills and all joining skills excluded; passive hero and widget stats not added twice.'));
+  panel.append(card);
  }
  function renderResult(data){
   panel.replaceChildren();
@@ -219,16 +235,19 @@ function mount(host,B,language){
   const trio=el('div','bear-sim-metrics');
   // Relative indices normalised to each role's original formation.
   // Never mistake raw model values for actual Kingshot Bear damage points.
-  const ownPct=data.score&&data.reference?.starter?
-   100*data.score.starter/data.reference.starter:null;
+  const ownCurrent=calculateOwn(data.rows[0]);
+  const ownOriginal=calculateOwn(base.marches[0].troops);
+  const ownPct=ownCurrent?.ready&&ownOriginal?.ready&&ownOriginal.modelIndex>0?
+   100*ownCurrent.modelIndex/ownOriginal.modelIndex:null;
   const joinPct=data.score&&data.reference?.joinProxy?
    100*data.score.joinProxy/data.reference.joinProxy:null;
-  trio.append(metric(t().own,ownPct===null?'—':ownPct.toFixed(2)+' %',data.changes?.starterPct),
+  trio.append(metric(t().own,ownPct===null?'—':ownPct.toFixed(2)+' %',
+   ownPct===null?null:ownPct-100),
    metric(t().joins,joinPct===null?'—':joinPct.toFixed(2)+' %',data.changes?.joinPct));
   scores.append(trio);panel.append(scores);
   // Join scores are relative PROXIES from foreign-leader contexts and
   // cannot be summed meaningfully with personal starter scores.
-  renderSkillScenarios(data);
+  renderOwnBaseline(data);
   if(!data.score)panel.append(el('p','bear-guide-needed',t().pending));
   if(data.limited)panel.append(el('p','bear-guide-needed',t().adapted));
   if(data.missingLeads)panel.append(el('p','hint',t().unassigned));
@@ -261,8 +280,10 @@ function mount(host,B,language){
   compared.replaceChildren();compared.append(el('h3','',t().comparison));
   function line(name,measure,onRestore){
    const box=el('div','bear-sim-comparison');
-   const own=measure?.score?.starter&&measure?.reference?.starter?
-    (100*measure.score.starter/measure.reference.starter).toFixed(2)+' %':'—';
+   const ownCalc=measure?.ready?calculateOwn(measure.rows[0]):null;
+   const original=base?calculateOwn(base.marches[0].troops):null;
+   const own=ownCalc?.ready&&original?.ready&&original.modelIndex>0?
+    (100*ownCalc.modelIndex/original.modelIndex).toFixed(2)+' %':'—';
    const joins=measure?.score?.joinProxy&&measure?.reference?.joinProxy?
     (100*measure.score.joinProxy/measure.reference.joinProxy).toFixed(2)+' %':'—';
    box.append(el('strong','',name),el('span','',t().starter+': '+own+' · '+t().joins+': '+joins));
