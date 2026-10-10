@@ -43,5 +43,7 @@ assert.match(wizard,/gleichzeitig/i,'best equipment must be fitted to all three 
 assert.ok(wizard.includes('jeweils EINEN Screenshot'),'exactly one screenshot per selected hero is requested');
 assert.ok(wizard.includes('scannedOwnedHeroes'),'only heroes identified in the screenshots are eligible');
 
+assert.match(wizard,/if\(active===4\)\{[\s\S]*?if\(recommendationsReady\(\)\)\{moveTo\(5\);return;\}/,
+ 'confirmed multi-image hero upload must automatically open Top 3, not ask for the same upload again');
 assert.ok(wizard.includes('renderHeroDetails()'),'detail upload after best hero gear prompt');
 console.log('BEAR WIZARD: nine stages, hero shortlist, separate gear-first detail uploads and independent capacity input verified.');
