@@ -14,7 +14,7 @@ const originalCatalogPath=path.join(base,'../catalog.js');
 if(fs.existsSync(originalCatalogPath)){
  vm.runInNewContext(fs.readFileSync(originalCatalogPath,'utf8'),context);
  assert.deepEqual(index.heroes.map(x=>x.name).sort(),
-  context.window.NRW_BEAR_CATALOG.heroes.map(x=>x.name).sort(),
+  Array.from(context.window.NRW_BEAR_CATALOG.heroes,x=>x.name).sort(),
   'source catalog snapshot matches host app when checked inside welcome-nrw');
 }
 const catalog={heroes:index.heroes,heroTypes:Object.fromEntries(index.heroes.map(x=>[x.name,x.type]))};
