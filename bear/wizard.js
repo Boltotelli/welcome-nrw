@@ -282,6 +282,17 @@ for(const i of [1,2,4,6,7]){
  note.textContent=text;
  const warning=document.createElement('small');warning.textContent=
   'Original-Kingshot-Beispielbild noch nicht hinterlegt. Ein echtes, unverändertes Bild wird benötigt.';
+ const available={1:['troops'],2:['stats'],4:['roster'],6:['hero-details'],7:['pets','valora']}[i]||[];
+ available.forEach(name=>{
+  const link=document.createElement('a');link.className='bear-guide-example-link';
+  link.href='./examples/'+name+'.jpg';link.target='_blank';link.rel='noopener noreferrer';
+  link.title='Original-Screenshot vergrößern';
+  const img=document.createElement('img');img.loading='lazy';img.alt='Kingshot '+name+' Beispielscreenshot';
+  img.src=link.href;link.append(img);link.hidden=true;
+  img.addEventListener('load',()=>{link.hidden=false;warning.hidden=true;});
+  img.addEventListener('error',()=>{link.remove();});
+  note.append(link);
+ });
  note.append(document.createElement('hr'),warning);
  help.append(head,note);sections[i].insertBefore(help,s.nextSibling);
 }
