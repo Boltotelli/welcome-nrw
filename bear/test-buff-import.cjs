@@ -37,21 +37,31 @@ assert.ok(Math.abs(actualBadge.y*2048-1814)<4&&Math.abs((actualBadge.y+actualBad
  'OCR must read the real Valora label at y1814..1858, not the surrounding artwork');
 assert.match(ui,/const img=el\('img','bear-buff-thumbnail bear-buff-valora-thumbnail'\);img\.alt='';img\.src=item\.preview;/,
  'Valora review must assign image.src (empty image boxes regression)');
-assert.ok(ui.includes("C.valoraTextRect(slot.rect)")&&ui.includes("C.valoraPreviewRect(rect)"),
- 'Valora must use its own tight label crop and complete card preview');
-assert.ok(ui.includes("valoraLevelMask(img)")&&ui.includes("readValoraLevel("),
- 'Valora must binarize only the label before OCR');
-assert.ok(!ui.includes("const original=await worker.recognize(img)"),
- 'Valora must not fall back to a known false-reading raw badge (Lv4 -> Lv2)');
-const inner=C.valoraTextRect(C.valoraRect(1));
-assert.ok(Math.abs(inner.y*2048-1821)<4&&Math.abs((inner.y+inner.h)*2048-1845)<4,
- 'text crop must exclude bright rim and include original level text');
+assert.ok(ui.includes("C.valoraBadgeRect(slot.rect)")&&ui.includes("C.valoraPreviewRect(rect)"),
+ 'Valora OCR must use full, natural-color level badges and complete previews');
+assert.ok(ui.includes("crop(canvas,C.valoraBadgeRect(slot.rect),'valora-original')"),
+ 'Valora full-badge OCR must use the validated original image geometry');
+assert.ok(ui.includes("mode==='valora-original'?4"),
+ 'Valora badge is 4x enlarged without destructive masking');
+assert.ok(ui.includes("for(const psm of ['7','8'])")&&ui.includes("count>=2"),
+ 'require two agreeing OCR segmentations to reject known Lv4 -> Lv2 false read');
+assert.ok(ui.includes("C.readValoraLevel(reading?.data?.text||'',slot.max)"),
+ 'all Valora observations must use the guarded parser');
 for(const [label,expected] of [
  ['Lv. 10',10],['Lv. 4',4],['Lv. 5',5],['Lv. 9',9],
  ['“MLv. SP',5],['Lv. S',5],['11:19:53',null],['2',null],['',null],
  ['MAX',null],['Lv. 80',null]
 ])assert.equal(C.readValoraLevel(label,10),expected,'Valora label '+label);
 assert.equal(C.readValoraLevel('Lv. S',4),null,'nonexistent rank must remain blank');
+for(const [ocr,max,expected] of [
+ ['Lv. 109',10,10],['Lv. 107°',10,10],
+ ['NLv.47',5,4],['“Lv. 4¥',5,4],['“Lv. 47°',5,4],
+ ['N\\Lv5Y',5,5],['Lv57',5,5],['Lv. 55',5,5],
+ ['“Lv. 9}',10,9],['Lv. 80',10,null],
+ ['Lv. 99',10,9],['Lv. 777',10,null],
+ ['11:19:53',10,null],['2',5,null],['MAX',10,null]
+])assert.equal(C.readValoraLevel(ocr,max),expected,'real German+English Valora screenshot OCR: '+ocr);
+
 assert.ok(ui.includes("contrastBadge(img)")&&ui.includes("tessedit_pageseg_mode:'8'"),
  'small on-icon rank captions get high contrast OCR retries');
 assert.ok(ui.includes("tessedit_pageseg_mode:'3'"),
