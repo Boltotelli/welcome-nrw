@@ -241,6 +241,83 @@ sections[5].append(recommendationPanel);
 const detailPanel=document.createElement('section');
 detailPanel.className='bear-recommendation-panel';
 sections[6].append(detailPanel);
+
+/* Existing profile values shown before each screenshot import. */
+const storedPanels={};
+for(const i of [1,2,4,6,7]){
+ const s=document.createElement('section');s.className='bear-guide-stored';
+ sections[i].prepend(s);storedPanels[i]=s;
+ const help=document.createElement('details');help.className='bear-guide-example';
+ const head=document.createElement('summary');
+ head.textContent=lang()==='de'?'🔍 Beispiel für diesen Screenshot ansehen':'🔍 Show screenshot instructions';
+ const note=document.createElement('div');note.className='bear-guide-example-preview';
+ const text={
+ 1:'Schwadron: Infanterie, Kavallerie, Bogenschützen · Anzahl · T/TG',
+ 2:'Bonusübersicht: Klassen-ATK, Klassen-Tödlichkeit, Schwadron-ATK/LET',
+ 4:'Heldenübersicht: mehrere überlappende Screenshots · Namen · Sterne · Level',
+ 6:'Heldendetails: Screenshot eines einzelnen ausgewählten Helden · Expedition',
+ 7:'Pets: Skill-Level · Valora: Skills und Grund-Level'
+ }[i];
+ note.textContent=text;
+ const warning=document.createElement('small');warning.textContent=
+  'Original-Kingshot-Beispielbild noch nicht hinterlegt. Ein echtes, unverändertes Bild wird benötigt.';
+ note.append(document.createElement('hr'),warning);
+ help.append(head,note);sections[i].insertBefore(help,s.nextSibling);
+}
+const baseLevel=document.createElement('label');baseLevel.className='bear-valora-base';
+baseLevel.textContent='Valora · Grundlevel ';
+const baseLevelInput=document.createElement('input');baseLevelInput.type='number';
+baseLevelInput.min='0';baseLevelInput.max='100';baseLevelInput.placeholder='z. B. 80';
+baseLevel.append(baseLevelInput);sections[7].append(baseLevel);
+baseLevelInput.addEventListener('change',()=>{
+ const v=B.model().v2||(B.model().v2={});
+ if(baseLevelInput.value==='')delete v.valoraBaseLevel;
+ else if(Number.isInteger(Number(baseLevelInput.value))&&Number(baseLevelInput.value)>=0&&Number(baseLevelInput.value)<=100)
+  v.valoraBaseLevel=Number(baseLevelInput.value);
+ B.save();displayStored(7);
+});
+function displayStored(i){
+ const panel=storedPanels[i];if(!panel)return;
+ const m=B.model(),v=m.values||{},x=m.v2||{};
+ panel.replaceChildren();
+ const header=document.createElement('h3');header.textContent=lang()==='de'?
+  'Bereits gespeicherte Werte':'Saved values';panel.append(header);
+ const num=n=>n==null||n===''?'—':Number(n).toLocaleString('de-DE');
+ const add=(key,value)=>{
+  const row=document.createElement('div');row.className='bear-stored-row';
+  const k=document.createElement('span');k.textContent=key;
+  const val=document.createElement('strong');val.textContent=value;row.append(k,val);panel.append(row);
+ };
+ if(i===1){
+  ['Infanterie','Kavallerie','Bogenschützen'].forEach((label,j)=>{
+   const keys=['troopsI','troopsC','troopsA'],tier=x.troopTiers?.[j];
+   add(label,num(v[keys[j]])+' · '+(tier?.tier?'T'+tier.tier:'T?')+' / '+
+    (tier?.tg==null?'TG?':'TG'+tier.tg));
+  });
+ }else if(i===2){
+  [['Infanterie','i'],['Kavallerie','c'],['Bogenschützen','a'],['Schwadron','squad']].forEach(([label,k])=>
+   add(label,'ATK '+num(v[k+'Atk'])+' % · LET '+num(v[k+'Let'])+' %'));
+ }else if(i===4){
+  const owned=x.scannedOwnedHeroes||[];
+  add('Helden',String(owned.length));
+  owned.slice(0,20).forEach(n=>{
+   const h=x.manualHeroes?.[n]||{};
+   add(n,'Lv '+num(h.level)+' · '+num(h.stars)+'★');
+  });
+ }else if(i===6){
+  (x.ownHeroes||[]).filter(Boolean).forEach(n=>{
+   const h=x.manualHeroes?.[n]||{};
+   add(n,'Lv '+num(h.level)+' · '+num(h.stars)+'★ · Widget '+num(h.widget));
+  });
+ }else if(i===7){
+  Object.entries(x.petSkillRanks||{}).forEach(([n,lv])=>add(n,'Skill Lv '+num(lv)+(x.petActive?.[n]?' · aktiv':'')));
+  Object.entries(x.petLevels||{}).filter(([n])=>!(n in (x.petSkillRanks||{}))).forEach(([n,lv])=>add(n,'Lv '+num(lv)+(x.petActive?.[n]?' · aktiv':'')));
+  add('Valora Hunter Instinct','Lv '+num(x.valoraTalent));
+  (x.valora||[]).forEach((lv,j)=>add('Valora Skill '+(j+1),'Lv '+num(lv)));
+  baseLevelInput.value=x.valoraBaseLevel??'';
+ }
+}
+
 const capacityHost=document.createElement('section');
 capacityHost.id='bearRequiredCapacity';capacityHost.className='bear-required-capacity';
 sections[7].insertBefore(capacityHost,manual);
@@ -525,6 +602,7 @@ function render(){
  if(idx===7){renderWidgetLevels();showRelevantManual();formationUI?.refreshSetup();}
  if(idx===8){formationUI?.show();}
  if(idx===9){simulationUI?.enter();}
+ if(storedPanels[idx])displayStored(idx);
  $('bearGuideEyebrow').textContent=s.eyebrow;
  $('bearGuideTitle').textContent=s.start;
  $('bearGuideDesc').textContent=s.desc;
