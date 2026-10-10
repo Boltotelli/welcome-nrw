@@ -53,6 +53,34 @@ const wrongClass=C.parseHeroStats('Infanterie-Gesundheit 285,70%\nArcher Attack 
 assert.equal(wrongClass.aHp,undefined,'hero type must not be confused with other class labels');
 assert.equal(wrongClass.aAtk,244.30);
 
+// Real 716x1536 screenshot right-column OCR fixtures (from the three
+// ACTUAL October 8 hero detail JPEGs, 556..685 x 1030..1290):
+// Label wrapping must not change the four EXPEDITION row identities.
+// Order in Kingshot is Attack, Defense, Lethality, Health (not UI old
+// Attack, Defense, Health, Lethality).
+const orderedCases=[
+ {name:'Yang',type:'archer',ocr:'‘492,17%\n+492,17%\n-300,70%\n154,42%',want:[492.17,492.17,300.70,154.42]},
+ {name:'Petra',type:'cavalry',ocr:'15.095\n253,57%\n253,57%\n-178,00%\n+166,17%',want:[253.57,253.57,178,166.17]},
+ {name:'Zoe',type:'infantry',ocr:'19.361\n+188,18%\n+188,18%\n155,40%\n219,00%',want:[188.18,188.18,155.40,219]}
+];
+for(const {name,type,ocr,want} of orderedCases){
+ const got=C.parseHeroOrderedExpeditionRows(ocr,type);
+ const prefix={archer:'a',cavalry:'c',infantry:'i'}[type];
+ for(const [idx,suffix] of ['Atk','Def','Let','Hp'].entries())
+  assert.equal(got[prefix+suffix],want[idx],
+   name+' expedition '+suffix+' read from original right-column geometry');
+ assert.equal(Object.keys(got).length,4,'exactly four values for '+name);
+}
+assert.deepEqual(Object.keys(C.parseHeroOrderedExpeditionRows(
+ 'Attack 492,17%\nDefense 492,17%\nLethality 300,70%','archer')),[],
+ 'three observations must NOT be shifted into four presumed positions');
+assert.deepEqual(Object.keys(C.parseHeroOrderedExpeditionRows(
+ '+492,17%\n+492,17%\n+300,70%\n+154,42%\n+999,99%','archer')),[],
+ 'more than four readings can be the wrong section; reject entire group');
+assert.deepEqual(Object.keys(C.parseHeroOrderedExpeditionRows(
+ '4.580\n4.476\n45.286\n1.526','cavalry')),[],
+ 'conquest/base flat numbers are NOT expedition percentage stats');
+
 assert.equal(C.maxSkill(4),5);assert.equal(C.maxSkill(3),4);assert.equal(C.maxSkill(5),5);
 const types={Yang:'archer',Rosa:'archer',Petra:'cavalry',Zoe:'infantry'};
 const owned=[{name:'Yang',level:80,stars:4,widget:5},{name:'Rosa',level:80,stars:5,widget:3},{name:'Petra',level:80,stars:5},{name:'Zoe',level:80,stars:5}];
