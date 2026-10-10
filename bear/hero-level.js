@@ -25,8 +25,8 @@ function lineInRect(words,rect){
 function parseDigits(text){
  // Used ONLY for the cropped digit-only box, never for a screenshot or HUD.
  const clean=String(text||'').trim();
- if(!/^\\s*[.,:|\\s-]*(?:[1-9]|[1-7]\\d|80)[.,:|\\s-]*$/.test(clean))return null;
- const match=clean.match(/\\d{1,2}/);
+ if(!/^\s*[.,:|\s-]*(?:[1-9]|[1-7]\d|80)[.,:|\s-]*$/.test(clean))return null;
+ const match=clean.match(/\d{1,2}/);
  return match?Number(match[0]):null;
 }
 function best(evidence){
