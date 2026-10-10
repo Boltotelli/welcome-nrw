@@ -449,27 +449,47 @@ function allKnown(){
 async function readHeroStatPanel(canvas,worker,heroName,originalText){
  const kind=cat.heroTypes?.[heroName];
  if(!kind)return {values:{},conflicts:[]};
- const keys=['Atk','Def','Hp','Let'].map(k=>({infantry:'i',cavalry:'c',archer:'a'}[kind]+k));
+ const prefix={infantry:'i',cavalry:'c',archer:'a'}[kind];
+ const keys=['Atk','Def','Let','Hp'].map(k=>prefix+k);
  const output={...Core.parseHeroStats(originalText,kind)},conflicts=new Set();
- if(keys.filter(k=>output[k]!==undefined).length===4)return {values:output,conflicts:[]};
- // In the hero-detail UI the tiny four expedition percentages occupy a
- // small portion of the otherwise large portrait screenshot. A second,
- // enlarged, CENTERED OCR pass makes the labels and +/- numbers readable.
- const roi=document.createElement('canvas');
- roi.width=1200;roi.height=Math.round(canvas.height*.67*1200/(canvas.width*.92));
- const cx=roi.getContext('2d',{willReadFrequently:true});
- cx.imageSmoothingEnabled=true;cx.imageSmoothingQuality='high';
- cx.drawImage(canvas,canvas.width*.04,canvas.height*.29,
-  canvas.width*.92,canvas.height*.67,0,0,roi.width,roi.height);
- try{
-  const result=await worker.recognize(roi);
-  const extra=Core.parseHeroStats(result.data?.text||'',kind);
-  for(const [key,value] of Object.entries(extra)){
+ function reconcile(extra){
+  for(const [key,value] of Object.entries(extra||{})){
    if(output[key]!==undefined&&Math.abs(output[key]-value)>.05){
     delete output[key];conflicts.add(key);
    }else if(!conflicts.has(key))output[key]=value;
   }
- }catch(_){/* Optional crop: retain grounded full-page observations. */}
+ }
+ // The three ORIGINAL 716x1536 hero photos from this user prove that the
+ // four right-aligned Expedition values stay in the SAME ORDER:
+ // Attack / Defense / Lethality / Health. Label OCR may miss a wrapped
+ // word such as Yang's "Gesundheit". Read only the numeric column:
+ // x=556..685, y=1030..1290 normalized to the source screen.
+ // Other screen geometries safely fall back to labelled text OCR.
+ try{
+  const sx=canvas.width/716,sy=canvas.height/1536;
+  const roi=document.createElement('canvas');
+  roi.width=516;roi.height=1040;
+  const cx=roi.getContext('2d',{willReadFrequently:true});
+  cx.imageSmoothingEnabled=true;cx.imageSmoothingQuality='high';
+  cx.drawImage(canvas,556*sx,1030*sy,129*sx,260*sy,0,0,roi.width,roi.height);
+  const result=await worker.recognize(roi);
+  reconcile(Core.parseHeroOrderedExpeditionRows(result.data?.text||'',kind));
+ }catch(_){/* Never infer a positional stat from an unreadable crop. */}
+ // If one of the four values remains missing, also try the original
+ // enlarged labelled panel. It can recover names/numbers when screenshots
+ // have different safe-area placements. Contradictions remain unfilled.
+ if(keys.some(key=>output[key]===undefined)){
+  const roi=document.createElement('canvas');
+  roi.width=1200;roi.height=Math.round(canvas.height*.67*1200/(canvas.width*.92));
+  const cx=roi.getContext('2d',{willReadFrequently:true});
+  cx.imageSmoothingEnabled=true;cx.imageSmoothingQuality='high';
+  cx.drawImage(canvas,canvas.width*.04,canvas.height*.29,
+   canvas.width*.92,canvas.height*.67,0,0,roi.width,roi.height);
+  try{
+   const result=await worker.recognize(roi);
+   reconcile(Core.parseHeroStats(result.data?.text||'',kind));
+  }catch(_){/* Unknown remains an editable blank. */}
+ }
  return {values:output,conflicts:[...conflicts]};
 }
 async function inspect(file){
@@ -728,7 +748,7 @@ function renderQueue(){
    const hType=cat.heroTypes?.[item.detail?.name];
    const group={infantry:'i',cavalry:'c',archer:'a'}[hType];
    const values=item.detail?.expeditionStats||{};
-   const keys=group?['Atk','Def','Hp','Let'].map(k=>group+k):[];
+   const keys=group?['Atk','Def','Let','Hp'].map(k=>group+k):[]; // match Kingshot's row order
    const observed=keys.filter(k=>Number.isFinite(Number(values[k]))&&values[k]!==undefined).length;
    const conflicts=item.detail?.expeditionConflicts||[];
    note.textContent=keys.length?
