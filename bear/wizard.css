@@ -200,3 +200,65 @@ body.bear-wizard-mode .dashboard{display:none!important}
 .bear-legacy-result{border:1px solid var(--line);padding:12px;border-radius:12px;margin-bottom:20px}
 .bear-legacy-result summary{cursor:pointer;color:var(--muted);font-size:12px}
 @media(max-width:560px){.bear-march-queue-controls{grid-template-columns:1fr}.bear-queue-total{grid-column:auto!important}.bear-formation-hero img{width:39px;height:39px}}
+
+/* Bear relative-damage simulation lab · guided step 10 */
+.bear-sim-page{display:grid;gap:14px}
+.bear-sim-page h2{font-size:20px;margin:0}
+.bear-sim-page h3{font-size:15px;margin:0 0 10px}
+.bear-sim-page>.hint{margin:0 0 3px}
+.bear-sim-controls,.bear-sim-score-card,.bear-sim-usage,.bear-sim-marches,.bear-sim-comparisons{padding:15px;border:1px solid var(--line);border-radius:14px;background:var(--card)}
+.bear-sim-controls{display:grid;gap:12px}
+.bear-sim-controls-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.bear-sim-controls label{display:grid;gap:5px;font-size:12px;font-weight:750;min-width:0}
+.bear-sim-controls select,.bear-sim-controls input{width:100%;min-width:0;border:1px solid var(--line);border-radius:9px;color:var(--text);background:var(--panel);padding:10px;font-size:15px}
+.bear-sim-numbers{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.bear-sim-numbers label{font-size:11px;line-height:1.5}
+.bear-sim-numbers input{text-align:center;font-weight:800;font-variant-numeric:tabular-nums}
+.bear-sim-numbers input[readonly]{opacity:.65;cursor:default}
+.bear-sim-actions{display:flex;flex-wrap:wrap;gap:8px}
+.bear-sim-actions button{padding:10px 12px}
+.bear-sim-error{color:#ffbda9;font-size:12px;margin:0}
+.bear-sim-loader{min-height:245px;border:1px solid var(--line);border-radius:14px;display:grid;align-content:center;justify-items:center;gap:12px;background:var(--card);padding:20px;text-align:center}
+.bear-sim-loader[hidden],.bear-sim-results[hidden],.bear-sim-webp[hidden]{display:none!important}
+.bear-sim-loader p{font-weight:850;font-size:13px;color:var(--amber);margin:0}
+.bear-sim-video,.bear-sim-webp{width:210px;height:210px;max-width:100%;object-fit:contain;background:transparent}
+.bear-sim-fallback{width:92px;height:92px;border-radius:50%;border:3px dashed var(--amber);display:grid;place-items:center;font-size:42px;animation:bearSimSpin 1.8s linear infinite}
+.bear-sim-fallback[hidden]{display:none}
+@keyframes bearSimSpin{0%{transform:rotate(-8deg)}50%{transform:rotate(12deg)}100%{transform:rotate(-8deg)}}
+@media(prefers-reduced-motion:reduce){.bear-sim-fallback{animation:none}}
+.bear-sim-results{display:grid;gap:12px}
+.bear-sim-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.bear-sim-metric{display:grid;gap:5px;padding:11px;border-radius:11px;background:var(--panel);min-width:0}
+.bear-sim-metric small{font-size:11px;color:var(--muted)}
+.bear-sim-metric strong{font-size:16px;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.bear-sim-delta{font-size:11px;color:var(--muted)}
+.bear-sim-delta.positive{color:#72d4a1}
+.bear-sim-delta.negative{color:#ffab90}
+.bear-sim-usage{display:grid;gap:7px}
+.bear-sim-usage-label{display:flex;justify-content:space-between;gap:9px;font-size:12px}
+.bear-sim-usage-label strong{white-space:normal;text-align:right;font-variant-numeric:tabular-nums}
+.bear-sim-bar{height:10px;border-radius:999px;overflow:hidden;background:var(--panel);border:1px solid var(--line);margin-bottom:7px}
+.bear-sim-fill{height:100%;background:#cdad57}
+.bear-sim-fill.kind-1{background:#77bc9d}
+.bear-sim-fill.kind-2{background:#7daee1}
+.bear-sim-marches{display:grid;gap:9px}
+.bear-sim-march-row{display:flex;justify-content:space-between;gap:14px;padding:10px 0;border-bottom:1px solid var(--line);font-size:12px}
+.bear-sim-march-row:last-child{border-bottom:0}
+.bear-sim-march-row>strong{flex:0 0 108px}
+.bear-sim-march-row>div{display:grid;gap:3px;text-align:right}
+.bear-sim-march-row small{font-size:11px;color:var(--muted)}
+.bear-sim-disclaimer{font-size:12px;line-height:1.6;color:var(--muted);margin:0}
+.bear-sim-comparisons{display:grid;gap:9px}
+.bear-sim-comparison{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px;border-bottom:1px solid var(--line);padding-bottom:8px}
+.bear-sim-comparison:last-child{border:0}
+.bear-sim-comparison span{font-variant-numeric:tabular-nums}
+.bear-sim-comparison button{font-size:11px;padding:6px 9px}
+@media(max-width:550px){
+ .bear-sim-controls-row{grid-template-columns:1fr}
+ .bear-sim-metrics{grid-template-columns:1fr}
+ .bear-sim-metric{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between}
+ .bear-sim-metric small{width:100%}
+ .bear-sim-march-row>strong{flex-basis:80px}
+ .bear-sim-numbers{gap:5px}
+ .bear-sim-numbers input{font-size:13px;padding:8px 4px}
+}
