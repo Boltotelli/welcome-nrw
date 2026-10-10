@@ -128,9 +128,10 @@ function inferStars(canvas,rect){
   }
   ratios.push(bright/(width*height));
  }
- const steps=window.NRW_BEAR_HERO_STARS?.stepsFromRatios(ratios)??null;
- const ref=ratios[0]||0;
- return {starSteps:steps,confidence:steps===null?0:Math.min(1,ref/.3),
+ const reading=window.NRW_BEAR_HERO_STARS?.analyze(ratios);
+ const steps=reading?.steps??null;
+ return {starSteps:steps,confidence:reading?.confidence??0,
+  review:reading?.review??true,
   partiallyFilled:steps!==null&&steps%6!==0};
 }
 // Local pixel fingerprints deduplicate full hero cards between scroll shots.
@@ -192,7 +193,11 @@ function overviewTiles(canvas,text,words,scanTag){
    if(isUnrecruitedCard(cx,rect,stars))continue;
    const tile={image:cropToThumb(canvas,rect.x/canvas.width,rect.y/canvas.height,
      rect.w/canvas.width,rect.h/canvas.height),name:'',level:null,levelEvidence:[],
-     starSteps:stars.starSteps,starConfidence:stars.confidence,partialStar:stars.partiallyFilled,selected:false,rect,
+     // Borderline fills must be reviewed before they influence Bear ranking.
+     starSteps:stars.review?null:stars.starSteps,
+     starSuggestion:stars.review?stars.starSteps:null,
+     starReview:stars.review,starConfidence:stars.confidence,
+     partialStar:stars.partiallyFilled,selected:false,rect,
      signature:portraitSignature(canvas,rect),
      portraitCandidates:MATCHER?.candidates(canvas,rect)||[]};
    HERO_LEVEL?.record(tile,HERO_LEVEL.lineInRect(words,rect),scanTag+':screen');
@@ -513,6 +518,7 @@ async function inspect(file){
    // Overlapping screenshots describe the SAME hero. Retain the card and
    // combine independent OCR evidence; manual edits are never overwritten.
    HERO_LEVEL?.combine(earlier,tile);
+   window.NRW_BEAR_HERO_STARS?.merge(earlier,tile);
    duplicates++;
   }else if(confirmedPortraits.some(x=>samePortrait(x.signature,tile.signature))){
    // A previously applied batch remains saved; do not silently change it.
@@ -685,7 +691,11 @@ function renderQueue(){
     const level=document.createElement('input');level.type='number';level.min='1';level.max='80';level.value=tile.level??'';level.placeholder='Lv';
     level.addEventListener('change',()=>{tile.level=level.value?Number(level.value):null;tile.levelManual=true;});
     const stars=inputChoice(starOptions(),tile.starSteps??'');
-    stars.addEventListener('change',()=>tile.starSteps=stars.value?Number(stars.value):null);
+    stars.addEventListener('change',()=>{
+     tile.starSteps=stars.value?Number(stars.value):null;
+     tile.starManual=Boolean(tile.starSteps);
+     tile.starReview=false;
+    });
     const starLabel=(v)=>v===null||v===undefined?'★ ?':
      Math.floor(Number(v)/6)+'★'+(Number(v)%6?' T'+Number(v)%6:'');
     const summaryLine=document.createElement('strong');
@@ -700,12 +710,12 @@ function renderQueue(){
     stars.addEventListener('change',refreshLabel);
     const edit=document.createElement('details');edit.className='bear-hero-edit';
     const editSummary=document.createElement('summary');
-    editSummary.textContent=tile.name&&tile.level&&tile.starSteps!==null&&
+    editSummary.textContent=tile.name&&tile.level&&tile.starSteps!==null&&!tile.starReview&&
      (tile.levelConfidence==='verified'||tile.levelManual)?
      say('Erkennung korrigieren','Correct recognition'):say('Level / fehlende Daten prüfen','Review level / missing details');
     edit.append(editSummary,name,level,stars);
     // A single OCR result is a proposal, not an independently proven level.
-    edit.open=!(tile.name&&tile.level&&tile.starSteps!==null&&
+    edit.open=!(tile.name&&tile.level&&tile.starSteps!==null&&!tile.starReview&&
      (tile.levelConfidence==='verified'||tile.levelManual));
     const certainty=document.createElement('small');certainty.className='hint';
     certainty.textContent=tile.nameConfidence==='high'?
@@ -715,6 +725,17 @@ function renderQueue(){
      const lvNote=document.createElement('small');lvNote.className='hint';
      lvNote.textContent=say('Levelvorschlag – bitte prüfen','Suggested level – please verify');
      cell.append(lvNote);
+    }
+    if(tile.starReview){
+     const starNote=document.createElement('small');starNote.className='hint';
+     const proposed=tile.starSuggestion!==null&&tile.starSuggestion!==undefined?
+      starLabel(tile.starSuggestion):null;
+     starNote.textContent=proposed?
+      say('Stern-Vorschlag '+proposed+' – bitte auswählen und bestätigen',
+       'Suggested stars '+proposed+' – please select to confirm'):
+      say('Sternfortschritt unklar – bitte auswählen',
+       'Uncertain stars – please select');
+     cell.append(starNote);
     }
     cell.append(summaryLine,certainty,edit);grid.append(cell);
    });
