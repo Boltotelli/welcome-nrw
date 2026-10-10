@@ -121,7 +121,7 @@ function makeLayout(){
  '<div class="bear-squad-buffs"><label class="field">'+esc(tx('squadAttack'))+'<input id="squadAtk" min="0" step="0.1" type="number" placeholder="275.2"></label>'+
  '<label class="field">'+esc(tx('squadLethality'))+'<input id="squadLet" min="0" step="0.1" type="number" placeholder="60.1"></label>'+
  '<label class="bear-active"><input type="checkbox" id="squadSeparate"> '+esc(tx('squadSeparate'))+'</label></div>'+ 
- '<label class="bear-pitfall">🐻 '+esc(tx('pitfall'))+'<select id="pitfall">'+choices(Array.from({length:6},(_,i)=>[i,'Lv. '+i+' ('+(i*5)+'% ATK)']),0)+'</select></label>';
+ '<label class="bear-pitfall">🐻 '+esc(tx('pitfall'))+'<select id="pitfall" disabled title="NRW: always level 5">'+choices([[5,'Lv. 5 (+25% ATK) · NRW']],5)+'</select></label>';
  levelPanel.after(extra);
  ['heroCapManual','squadAtk','squadLet'].forEach(id=>{
   const field=extra.querySelector('#'+id);
@@ -422,7 +422,7 @@ function showForProfile(evt){
  document.querySelectorAll('.bear-troop-tg').forEach(x=>x.value=v.troopTiers[Number(x.dataset.idx)].tg??'');
  const box=document.getElementById('squadSeparate');if(box)box.checked=Boolean(v.squadSeparate);
  ['heroCapManual','squadAtk','squadLet'].forEach(id=>{const x=document.getElementById(id);if(x)x.value=Object.prototype.hasOwnProperty.call(B.model().values,id)?B.model().values[id]:'';});
- const pitfall=document.getElementById('pitfall');if(pitfall)pitfall.value=B.model().values.pitfall??0;
+ const pitfall=document.getElementById('pitfall');if(pitfall)pitfall.value='5';
 }
 makeLayout();
 B.renderV2=()=>renderEditor();
