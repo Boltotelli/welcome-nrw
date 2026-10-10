@@ -182,6 +182,68 @@ function mount(host,B,language){
  function calculateOwn(row){
   return root.NRW_BEAR_OWN_BASELINE?.calculate(B.model(),row,root.NRW_BEAR_COMBAT,root.NRW_BEAR_HERO_REFERENCE);
  }
+ function renderOwnSkillExpectation(data,baseline){
+  const estimate=root.NRW_BEAR_PROC_EXPECTATION?.evaluate?.(
+   B.model(),data.rows[0],root.NRW_BEAR_COMBAT,root.NRW_BEAR_HERO_REFERENCE);
+  const l=language();
+  if(!estimate?.ready){
+   if(estimate?.reason==='hero-reference-unavailable'){
+    const warning=el('p','hint',l==='de'?
+     'Der Skill-Erwartungswert ist noch nicht verfügbar: Die geprüften Heldendaten konnten nicht geladen werden.':
+     'The skill expectation is unavailable until the verified hero reference loads.');
+    panel.append(warning);
+   }
+   return;
+  }
+  const title=l==='de'?'Erwarteter Starter-Schaden · mit Zufallsskills':
+   l==='fr'?'Dégâts moyens de départ avec compétences aléatoires':
+   'Expected own-rally damage · including chance skills';
+  const card=el('section','bear-sim-scenarios');
+  card.append(el('h3','',title));
+  const grid=el('div','bear-sim-scenario-grid');
+  const make=(name,value)=>{
+   const p=el('div','bear-sim-scenario');
+   p.append(el('span','',name),el('strong','',scoreText(value)));
+   return p;
+  };
+  grid.append(make(l==='de'?'Grundmodell ohne Zufall':
+    l==='fr'?'Base sans effets aléatoires':'No-proc model',estimate.baselineIndex));
+  grid.append(make(l==='de'?'Erwartungswert · Debuffs addiert':
+    l==='fr'?'Moyenne · debuffs additionnés':'Expected · debuffs added',estimate.expectedIndex));
+  card.append(grid);
+  const text=l==='de'?
+   '≈ +'+estimate.upliftPercent.toFixed(1)+' % zum Grundmodell. Alternative Stapelung beider Schadens-Debuffs: '+
+    scoreText(estimate.alternativeIndex)+' (+'+estimate.alternateUpliftPercent.toFixed(1)+' %).':
+   '≈ +'+estimate.upliftPercent.toFixed(1)+'% vs no-proc. Alternative debuff stacking: '+
+    scoreText(estimate.alternativeIndex)+' (+'+estimate.alternateUpliftPercent.toFixed(1)+'%).';
+  card.append(el('p','hint',text));
+  const disclosure=el('details','bear-sim-math-audit');
+  disclosure.append(el('summary','',l==='de'?'5 Fähigkeiten & Modellannahmen ansehen':
+   l==='fr'?'Voir les compétences et hypothèses':'Inspect skills and assumptions'));
+  const labels={
+   'damage-taken':l==='de'?'mehr erlittener Schaden':'enemy damage taken',
+   'attack-points':l==='de'?'Angriffsprozentpunkte':'attack percentage points',
+   'archer-hit':l==='de'?'zusätzlicher Bogenschützenschaden':'extra Archer hit',
+   'squad-damage':l==='de'?'zusätzlicher Truppenschaden':'extra squad damage'
+  };
+  for(const skill of estimate.skills){
+   disclosure.append(el('p','hint',skill.hero+' · '+skill.skill+
+    ' Lv'+skill.skillLevel+' · '+skill.chancePercent+' % → +'+
+    skill.effectPercent+' % '+(labels[skill.kind]||skill.kind)));
+  }
+  if(estimate.unmodeled.length){
+   disclosure.append(el('p','hint',(l==='de'?'Noch nicht simuliert: ':
+    'Not yet simulated: ')+estimate.unmodeled.map(s=>s.hero+' '+s.skill).join(', ')));
+  }
+  disclosure.append(el('p','hint',l==='de'?
+   'Annahmen: genau eine unabhängige Auslöseprüfung je Fähigkeit und Kampfrunde, Wirkung nur in dieser Runde. Zoe/Petra-Schadens-Debuffs werden zunächst addiert; die alternative Variante multipliziert sie. Petras Angriffsskill erhöht den effektiven Angriff um Prozentpunkte, nicht unmittelbar den Schaden. Zoes 3-Runden-Sunder bleibt außen vor, solange Grundlage und Stapelung nicht verifiziert sind.':
+   'Assumptions: one independent chance roll per skill per round; effects last one round. Enemy-damage-taken buffs add in the main scenario, multiply in the alternative. Petra increases attack percentage points, not raw final damage. Zoe’s 3-turn Sunder is excluded until its ticks/stacking can be verified.'));
+  card.append(disclosure);
+  card.append(el('p','bear-sim-disclaimer',l==='de'?
+   'MODELLERWARTUNG, keine garantierten Kingshot-Schadenspunkte. Alle vier Joiner-Fähigkeiten sind ausgeschlossen. Auslösehäufigkeit, Dauer und Effektgruppen sind nicht vollständig bestätigt; deshalb ist die Nähe zum Vergleichswert von 33 Mio. noch kein Beweis.':
+   'MODEL EXPECTATION only; not guaranteed in-game damage. No joining-hero skills. Proc frequency, duration and effect stacking are not fully verified; agreement with another calculator is not proof.'));
+  panel.append(card);
+ }
  function renderOwnBaseline(data){
   const own=calculateOwn(data.rows[0]);
   const previous=calculateOwn(base.marches[0].troops);
@@ -383,6 +445,7 @@ function mount(host,B,language){
    l==='fr'?'Indices de modèle seulement, pas de dégâts garantis. Aucun effet aléatoire, renfort ou statistique de héros doublée.':
    'MODEL INDICES only, not guaranteed in-game damage or predicted millions. Chance skills and all joining skills excluded; passive hero and widget stats not added twice.'));
   panel.append(card);
+  renderOwnSkillExpectation(data,own);
  }
  function renderResult(data){
   panel.replaceChildren();
