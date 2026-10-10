@@ -73,6 +73,36 @@ function parseStats(text){
  }
  return out;
 }
+// Read the four expedition percentage rows on an individual hero detail.
+// Heroes often show only "Attack" / "Defense" without a troop-class prefix.
+// Resolve that class ONLY from the independently identified hero name.
+// Every observation still requires a visible labelled value; never
+// synthesize base stats from stars, hero level, gear or other heroes.
+function parseHeroStats(text,type){
+ const prefix={infantry:'i',cavalry:'c',archer:'a'}[type];
+ if(!prefix)return {};
+ const out={},lines=String(text||'').split(/\n+/);
+ for(let i=0;i<lines.length;i++){
+  const line=lines[i],f=fold(line);
+  const seenType=classFrom(f);
+  if(seenType>=0&&['i','c','a'][seenType]!==prefix)continue;
+  let key=null;
+  if(/angriff|attack|atk|angrif/.test(f))key='Atk';
+  else if(/todlich|lethal|letali/.test(f))key='Let';
+  else if(/verteid|defen/.test(f))key='Def';
+  else if(/gesund|health|hp\b/.test(f))key='Hp';
+  if(!key)continue;
+  // Require a percentage or a visibly signed decimal, not any digit on
+  // the hero's power, widget or skill badges.
+  const inline=[...line.matchAll(/([+−-]?\s*\d{1,4}(?:[.,]\d{1,3})?)\s*%/g)];
+  const next=(lines[i+1]||'').match(/^\s*([+−-]?\s*\d{1,4}(?:[.,]\d{1,3})?)\s*%\s*$/);
+  const fallback=line.match(/[+−-]\s*\d{1,4}[.,]\d{1,3}\s*$/);
+  const raw=inline.at(-1)?.[1]||next?.[1]||fallback?.[0];
+  const n=raw?normalizeNumber(raw):null;
+  if(n!==null&&n>=0&&n<=5000)out[prefix+key]=n;
+ }
+ return out;
+}
 function heroFromText(text,known){
  // The very short name Zoe is often read as Z0e / Zoé by mobile OCR.
  // Correct only the tightly bounded name token, not arbitrary text digits.
@@ -138,5 +168,5 @@ function category(text){
  if(/helden|heroes/.test(f))return 'roster';
  return 'unknown';
 }
-root.NRW_BEAR_INTAKE_CORE={fold,normalizeNumber,classFrom,parseTroops,parseMarchSlots,parseStats,parseHeroDetail,maxSkill,advise,category,rankByType};
+root.NRW_BEAR_INTAKE_CORE={parseHeroStats,fold,normalizeNumber,classFrom,parseTroops,parseMarchSlots,parseStats,parseHeroDetail,maxSkill,advise,category,rankByType};
 })(window);
