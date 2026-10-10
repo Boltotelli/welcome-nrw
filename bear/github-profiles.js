@@ -77,6 +77,13 @@ function install(){
     root.dispatchEvent(new CustomEvent('nrw-bear-github-profile-loaded',{detail:{id}}));
    }
    root.NRW_BEAR_PROFILE_SOURCE=result.source;
+   const playerName=root.document.getElementById('playerName');
+   if(playerName)playerName.textContent=name;
+   const playerMeta=root.document.getElementById('playerMeta');
+   if(playerMeta)playerMeta.textContent=result.source==='github'?
+    tr('GitHub-Profil geladen','GitHub profile loaded','Profil GitHub chargé'):
+    tr('Auf diesem Gerät gespeichertes Profil / neue Eingabe',
+     'Saved on this device / new profile','Profil local / nouveau');
    // The original activateSavedId intentionally dispatches the existing
    // nrw-bear-loaded event, so the wizard continues automatically.
   }catch(_){
