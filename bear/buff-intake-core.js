@@ -21,36 +21,29 @@ function valoraRect(i){
 }
 // Level text is at the LOWER RIGHT of a pet skill icon, not in the
 // artwork, cooldown mark or the pet training-level UI.
+// Verified from the original 955x2048 screenshots, not from a browser thumbnail.
+// Capture the complete horizontal label, but exclude the artwork and cooldown.
 function petBadgeRect(rect){
- // Pet labels occupy the bottom-right of each square icon.
- return {x:rect.x+rect.w*.40,y:rect.y+rect.h*.61,w:rect.w*.60,h:rect.h*.39};
+ return {x:rect.x+rect.w*.26,y:rect.y+rect.h*.72,w:rect.w*.74,h:rect.h*.27};
 }
 function valoraBadgeRect(rect){
- // The master skill rank is centered across the BOTTOM of its icon.
- return {x:rect.x+rect.w*.17,y:rect.y+rect.h*.47,w:rect.w*.66,h:rect.h*.53};
+ // Level is centered on a brown badge, approx y=1814..1858 at 2048px.
+ return {x:rect.x+rect.w*.17,y:rect.y+rect.h*.49,w:rect.w*.72,h:rect.h*.35};
 }
-function valoraPreviewRect(rect,ratio=955/2048){
- // Keep the existing verified tile CENTER but display an actual square crop,
- // not the overly-wide OCR rectangle (width & height are relative to screen).
- const tileWidth=rect.h/ratio;
- const cx=rect.x+rect.w/2,cy=rect.y+rect.h/2;
- return {x:cx-tileWidth/2,y:cy-rect.h/2,w:tileWidth,h:rect.h};
+function valoraPreviewRect(rect){
+ // Entire 193x250 card, including the portrait AND its rank. The old
+ // 125x125 slice missed most of the card and looked empty.
+ return {x:rect.x-.017,y:rect.y-.050,w:rect.w+.009,h:rect.h+.061};
 }
 function readSkillLevel(text,max){
  const s=String(text||'').replace(/[\r\n]+/g,' ').trim();
- const candidates=[...s.matchAll(/(?:^|[^a-z0-9])(?:level|lvl|l\s*[vuwy]|[1i|]\s*v)\s*[. :;=\-]*([0-9oOil|]{1,2})(?![0-9])/gi)]
+ // Outlined game letters can be OCRed as Lvs5, Lv?7 or Ly.9.
+ // Require a recognizable "Lv" prefix: stray cooldown digits never qualify.
+ const candidates=[...s.matchAll(/(?:^|[^a-z0-9])(?:level|lvl|[l1i|]\s*[vuwy])\s*[. :;=\-\/s?]*([0-9oOil|]{1,2})(?![0-9])/gi)]
   .map(m=>Number(m[1].replace(/[oO]/g,'0').replace(/[iIl|]/g,'1')))
-  .filter(n=>Number.isInteger(n));
- // Do not accept contradictory OCR readings or timestamps/cooldowns.
- if(candidates.length){
-  const unique=[...new Set(candidates)];
-  return unique.length===1&&unique[0]>=1&&unique[0]<=max?unique[0]:null;
- }
- // A number alone is only valid when OCR was limited to the level badge.
- if(/^[0-9]{1,2}$/.test(s)){
-  const n=Number(s);return n>=1&&n<=max?n:null;
- }
- return null;
+  .filter(n=>Number.isInteger(n)&&n>=1&&n<=max);
+ const unique=[...new Set(candidates)];
+ return unique.length===1?unique[0]:null;
 }
 function checkPet(name,rank,petCatalog){
  const record=(petCatalog||[]).find(p=>p.name===name&&p.bearSkill);
