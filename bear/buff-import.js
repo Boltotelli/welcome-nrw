@@ -39,7 +39,7 @@ function crop(src,region,mode='preview'){
  if(w<10||h<10)throw Error('Screenshot geometry not supported');
  if(mode==='footer'){const top=Math.floor(h*.48);y+=top;h-=top;}
  // Original screenshot OCR was verified at ~420px wide and 140px high.
- const scale=mode==='preview'?1:Math.min(5,Math.max(2,420/w,140/h));
+ const scale=mode==='preview'?1:mode==='valora-original'?4:Math.min(5,Math.max(2,420/w,140/h));
  const roi=document.createElement('canvas');
  roi.width=Math.round(w*scale);roi.height=Math.round(h*scale);
  const cx=roi.getContext('2d',{willReadFrequently:true});
@@ -116,21 +116,31 @@ async function recognizeSlotsNow(canvas,slots,kind,progress){
    progress?.(i+1,slots.length);
    try{
     if(kind==='valora'){
-     const img=crop(canvas,C.valoraTextRect(slot.rect),'badge');
-     const clean=valoraLevelMask(img);
-     const result=await worker.recognize(clean);
-     level=C.readValoraLevel(result?.data?.text||'',slot.max);
-     if(level===null){
-      await configure({tessedit_pageseg_mode:'8'});
-      try{
-       const again=await worker.recognize(clean);
-       level=C.readValoraLevel(again?.data?.text||'',slot.max);
-      }finally{await configure({tessedit_pageseg_mode:'7'});}
+     // Keep the entire original badge, including the natural antialiasing:
+     // removing its border and binarizing caused the real 4 / 5 / 9 to
+     // disappear in the user's browser. 4x is the tested source resolution.
+     const img=crop(canvas,C.valoraBadgeRect(slot.rect),'valora-original');
+     const votes=[];
+     for(const psm of ['7','8']){
+      await configure({tessedit_pageseg_mode:psm,tessedit_char_whitelist:''});
+      const reading=await worker.recognize(img);
+      const rank=C.readValoraLevel(reading?.data?.text||'',slot.max);
+      if(rank!==null)votes.push(rank);
      }
-     // Intentionally no raw colored-badge fallback: on the original
-     // Valora screenshot that previously produced a false Lv2 for Lv4.
-     // If neither cleaned OCR pass is trustworthy, leave the editable
-     // field empty rather than silently saving a wrong rank.
+     if(votes.length<2||votes[0]!==votes[1]){
+      // Raw-line third opinion only if the two OCR modes disagree.
+      await configure({tessedit_pageseg_mode:'13'});
+      const reading=await worker.recognize(img);
+      const rank=C.readValoraLevel(reading?.data?.text||'',slot.max);
+      if(rank!==null)votes.push(rank);
+     }
+     const counts=new Map();
+     for(const rank of votes)counts.set(rank,(counts.get(rank)||0)+1);
+     const confident=[...counts].filter(([,count])=>count>=2);
+     level=confident.length===1?confident[0][0]:null;
+     await configure({tessedit_pageseg_mode:'7'});
+     // Require two agreeing reads. Wrong "Lv2" and ambiguous cases remain
+     // explicitly editable, never silently stored as confirmed ranks.
     }else{
      const img=crop(canvas,C.petBadgeRect(slot.rect),'badge');
      const raw=await worker.recognize(img);
