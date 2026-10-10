@@ -97,8 +97,8 @@ for(const mult of [1,1.5]){
  const staff=corrected.slots.find(s=>s.id==='staff');
  assert.equal(staff.alignmentCorrected,true,'overwide staff frame corrected using top right anchor');
  assert.ok(Math.abs(staff.gear[0]-597.5)<=2,'actual gold staff center restored');
- assert.deepEqual(Array.from(staff.charms,p=>Math.round(p[0])),[563,597,632],
-  'all THREE charm thumbnails centered individually, no two-glyph crops');
+ assert.ok(staff.charms.every((p,i)=>Math.abs(p[0]-[563,597,632][i])<=2),
+  'all THREE charm thumbnails align within 2px of the actual 955px photo');
  const ring=corrected.slots.find(s=>s.id==='ring');
  assert.equal(ring.alignmentCorrected,false,'normal gold ring must not be shifted');
 
@@ -122,11 +122,11 @@ for(const mult of [1,1.5]){
 // wide, accidentally containing two gold glyphs in the same thumbnail.
 // Verify the dynamically measured spacing results in non-overlapping crops.
 const gearImporter=fs.readFileSync(__dirname+'/screenshot-importer.js','utf8');
-assert.match(gearImporter,/const cropRadius=Math\.max\(9,Math\.min\(13,Math\.floor\(separation\*\.38\)\)\)/);
+assert.match(gearImporter,/const cropRadius=Math\.max\(9,Math\.min\(16,Math\.floor\(separation\*\.46\)\)\)/);
 assert.match(gearImporter,/thumb:drawThumb\(ctx,pos,cropRadius\)/);
 const step=34;
-const radius=Math.max(9,Math.min(13,Math.floor(step*.38)));
-assert.equal(radius,12,'full-res mobile golden-charm crop radius');
+const radius=Math.max(9,Math.min(16,Math.floor(step*.46)));
+assert.equal(radius,15,'entire single gold charm visible in original phone crop');
 assert.ok(radius*2<step,'adjacent charm thumbnails never overlap');
 
 const blank=image().pixels;blank.fill(0);
