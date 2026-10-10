@@ -178,7 +178,7 @@ function plan(model,catalog,combat,capacityCore){
  // Hero expedition proc/widget effects are not independently simulated.
  const relative=(row,isOwn)=>{
   if(useDamage){
-   const score=combat.damage(row,isOwn?ownStats:v,tiers,Number(v.pitfall)||0);
+   const score=combat.damage(row,isOwn?ownStats:v,tiers,5 /* NRW trap Lv5 */);
    return Number.isFinite(score)?score:0;
   }
   return row[0]*.76+row[1]*1.02+row[2]*1.18;
