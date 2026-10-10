@@ -5,7 +5,7 @@
  */
 (function(){
 'use strict';
-const B=window.NRW_BEAR_BRIDGE,Core=window.NRW_BEAR_INTAKE_CORE,cat=window.NRW_BEAR_CATALOG,TROOP=window.NRW_BEAR_TROOP_BADGES,ENTRY=window.NRW_BEAR_TROOP_ENTRIES,MATCHER=window.NRW_BEAR_PORTRAIT_MATCHER;
+const B=window.NRW_BEAR_BRIDGE,Core=window.NRW_BEAR_INTAKE_CORE,cat=window.NRW_BEAR_CATALOG,TROOP=window.NRW_BEAR_TROOP_BADGES,ENTRY=window.NRW_BEAR_TROOP_ENTRIES,MATCHER=window.NRW_BEAR_PORTRAIT_MATCHER,HERO_LEVEL=window.NRW_BEAR_HERO_LEVEL;
 const restricted=document.getElementById('restricted'),quick=document.getElementById('uxQuickStart');
 if(!B||!Core||!cat||!restricted||!quick)return;
 const locale=()=>document.documentElement.lang||'de';
@@ -67,7 +67,7 @@ if(governorInput&&lookup){
   localRow.after(note);
  }
 }
-let ocrWorker=null,queue=[],busy=false;
+let ocrWorker=null,queue=[],busy=false,heroScanSequence=0;
 const confirmedPortraits=[]; // confirmed across one-by-one screenshots, not persisted
 function state(){const m=B.model();if(!m.v2)m.v2={};if(!m.v2.manualHeroes)m.v2.manualHeroes={};if(!Array.isArray(m.v2.ownHeroes))m.v2.ownHeroes=['','',''];return m.v2;}
 function esc(str){return String(str??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
@@ -133,15 +133,6 @@ function inferStars(canvas,rect){
  return {starSteps:steps,confidence:steps===null?0:Math.min(1,ref/.3),
   partiallyFilled:steps!==null&&steps%6!==0};
 }
-function heroLevelFromWords(words,rect){
- const candidates=(words||[]).filter(w=>w.bbox&&
-  (w.bbox.x0+w.bbox.x1)/2>=rect.x&&(w.bbox.x0+w.bbox.x1)/2<=rect.x+rect.w&&
-  (w.bbox.y0+w.bbox.y1)/2>=rect.y+rect.h*.64&&
-  (w.bbox.y0+w.bbox.y1)/2<=rect.y+rect.h*.88)
-  .sort((a,b)=>a.bbox.x0-b.bbox.x0).map(w=>w.text).join(' ');
- const match=candidates.match(/(?:Lv|Level)\s*\.?\s*(\d{1,3})\b/i);
- return match&&Number(match[1])<=80?Number(match[1]):null;
-}
 // Local pixel fingerprints deduplicate full hero cards between scroll shots.
 function portraitSignature(canvas,rect){
  const small=document.createElement('canvas');small.width=24;small.height=32;
@@ -173,14 +164,13 @@ function isUnrecruitedCard(ctx,rect,stars){
   if((data[p]+data[p+1]+data[p+2])/3<90)dark++;
  return dark/(data.length/4)>.74;
 }
-function overviewTiles(canvas,text,words){
+function overviewTiles(canvas,text,words,scanTag){
  const rows=heroRows(canvas),collected=[];
  // If the player scrolls, take only whole visible cards. Partial top/bottom
  // rows will be captured by an overlapping screenshot, not assigned falsely.
  for(const row of rows){
   for(let col=0;col<4;col++){
    const rect=window.NRW_BEAR_HERO_GRID.tileRect(canvas.width,row,col);
-   const level=heroLevelFromWords(words,rect);
    const cx=canvas.getContext('2d',{willReadFrequently:true});
    // The last Kingshot roster row can have fewer than four cards.
    // Reject a blank beige cell or a dark 0/20 unrecruited portrait.
@@ -200,53 +190,52 @@ function overviewTiles(canvas,text,words){
    if(hasUnlockProgress)continue;
    const stars=inferStars(canvas,rect);
    if(isUnrecruitedCard(cx,rect,stars))continue;
-   collected.push({image:cropToThumb(canvas,rect.x/canvas.width,rect.y/canvas.height,
-     rect.w/canvas.width,rect.h/canvas.height),name:'',level,
-    starSteps:stars.starSteps,starConfidence:stars.confidence,partialStar:stars.partiallyFilled,selected:false,rect,
+   const tile={image:cropToThumb(canvas,rect.x/canvas.width,rect.y/canvas.height,
+     rect.w/canvas.width,rect.h/canvas.height),name:'',level:null,levelEvidence:[],
+     starSteps:stars.starSteps,starConfidence:stars.confidence,partialStar:stars.partiallyFilled,selected:false,rect,
      signature:portraitSignature(canvas,rect),
-     portraitCandidates:MATCHER?.candidates(canvas,rect)||[]});
+     portraitCandidates:MATCHER?.candidates(canvas,rect)||[]};
+   HERO_LEVEL?.record(tile,HERO_LEVEL.lineInRect(words,rect),scanTag+':screen');
+   collected.push(tile);
   }
  }
  return collected;
 }
-async function readMissingHeroLevels(tiles,canvas,worker){
- // One additional on-device OCR pass for the small Lv. labels. Large
- // character portraits and star graphics overwhelm full-screen Tesseract.
- const missing=tiles.filter(t=>!Number.isInteger(t.level)&&t.rect);
- if(!missing.length)return;
- const w=300,rowHeight=70;
- const board=document.createElement('canvas');board.width=w;
- board.height=Math.max(rowHeight,missing.length*rowHeight);
+async function readHeroLevelsRaw(tiles,canvas,worker,scanTag){
+ // Independently read the small Lv. strip for EVERY card, to corroborate
+ // rather than blindly accepting a number from full-screen Tesseract.
+ const cards=tiles.filter(t=>t.rect);
+ if(!cards.length)return;
+ const rowHeight=70,board=document.createElement('canvas');
+ board.width=300;board.height=cards.length*rowHeight;
  const cx=board.getContext('2d',{willReadFrequently:true});
- cx.fillStyle='#fff';cx.fillRect(0,0,w,board.height);
- missing.forEach((tile,i)=>{
+ cx.fillStyle='#fff';cx.fillRect(0,0,board.width,board.height);
+ cards.forEach((tile,i)=>{
   const r=tile.rect;
-  // The level label is in the lower quarter of the card but above flowers.
   cx.drawImage(canvas,r.x+r.w*.06,r.y+r.h*.67,r.w*.70,r.h*.21,
    10,i*rowHeight+8,270,52);
  });
  try{
   const result=await worker.recognize(board);
-  const words=result.data.words||[];
-  missing.forEach((tile,i)=>{
+  const words=result.data?.words||[];
+  cards.forEach((tile,i)=>{
    const line=words.filter(v=>v.bbox&&(v.bbox.y0+v.bbox.y1)/2>=i*rowHeight&&
     (v.bbox.y0+v.bbox.y1)/2<(i+1)*rowHeight)
     .sort((a,b)=>a.bbox.x0-b.bbox.x0).map(v=>v.text).join(' ');
-   const m=line.match(/(?:Lv\.?\s*|Level\s*)(\d{1,2})\b/i)||line.match(/\b(80|[1-9]|[1-7]\d)\b/);
-   if(m&&Number(m[1])>=1&&Number(m[1])<=80)tile.level=Number(m[1]);
+   // No standalone digits: only explicit Lv. <number>.
+   HERO_LEVEL?.record(tile,line,scanTag+':raw');
   });
- }catch(_){/* Level remains unknown and reviewable. */}
+ }catch(_){/* Unknown is safer than an unverified number. */}
 }
-async function recheckUncertainHeroLevels(tiles,canvas,worker){
- // Pass 2: monochrome mask of ONLY the bright yellow/white "Lv. <num>"
- // strip. Filtering the coloured portrait eliminates most false text.
- const missing=tiles.filter(t=>!Number.isInteger(t.level)&&t.rect);
- if(!missing.length)return;
+async function readHeroLevelsMasked(tiles,canvas,worker,scanTag){
+ // Second independent contrast-masked pass over the same level strip.
+ const cards=tiles.filter(t=>t.rect);
+ if(!cards.length)return;
  const stride=78,board=document.createElement('canvas');
- board.width=340;board.height=stride*missing.length;
+ board.width=340;board.height=stride*cards.length;
  const bc=board.getContext('2d',{willReadFrequently:true});
  bc.fillStyle='#fff';bc.fillRect(0,0,board.width,board.height);
- missing.forEach((tile,i)=>{
+ cards.forEach((tile,i)=>{
   const r=tile.rect,tmp=document.createElement('canvas');
   tmp.width=320;tmp.height=68;
   const tc=tmp.getContext('2d',{willReadFrequently:true});
@@ -265,15 +254,12 @@ async function recheckUncertainHeroLevels(tiles,canvas,worker){
  try{
   const ocr=await worker.recognize(board);
   const words=ocr.data?.words||[];
-  missing.forEach((tile,i)=>{
+  cards.forEach((tile,i)=>{
    const line=words.filter(x=>x.bbox&&
     (x.bbox.y0+x.bbox.y1)/2>=i*stride&&
     (x.bbox.y0+x.bbox.y1)/2<(i+1)*stride)
     .sort((a,b)=>a.bbox.x0-b.bbox.x0).map(x=>x.text).join(' ');
-   const normalized=line.replace(/(?<=\d)[oO](?=\b)/g,'0')
-    .replace(/\b[Bb](?=[oO0]\b)/g,'8').replace(/\b([IL])v/gi,'Lv');
-   const m=normalized.match(/\bLv\s*\.?\s*(\d{1,2})\b/i);
-   if(m&&Number(m[1])>=1&&Number(m[1])<=80)tile.level=Number(m[1]);
+   HERO_LEVEL?.record(tile,line,scanTag+':masked');
   });
  }catch(_){/* Do not invent an unreadable hero level. */}
 }
@@ -508,16 +494,29 @@ async function inspect(file){
   type='roster';
  if(window.NRW_BEAR_SCREENSHOT_STAGE===6&&type==='unknown')
   type='starter';
- const allCards=type==='roster'?overviewTiles(canvas,text,result.data.words):[];
+ const scanTag='overview-'+(++heroScanSequence);
+ const allCards=type==='roster'?overviewTiles(canvas,text,result.data.words,scanTag):[];
  if(type==='roster'&&allCards.length){
-  await readMissingHeroLevels(allCards,canvas,worker);
-  await recheckUncertainHeroLevels(allCards,canvas,worker);
+  await readHeroLevelsRaw(allCards,canvas,worker,scanTag);
+  await readHeroLevelsMasked(allCards,canvas,worker,scanTag);
  }
- const existing=[...queue.filter(q=>q.type==='roster').flatMap(q=>q.cards||[]),...confirmedPortraits];
- const fresh=allCards.filter(tile=>!existing.some(x=>samePortrait(x.signature,tile.signature)));
+ const existing=[...queue.filter(q=>q.type==='roster').flatMap(q=>q.cards||[])];
+ const fresh=[];let duplicates=0;
+ for(const tile of allCards){
+  const earlier=[...existing,...fresh].find(x=>samePortrait(x.signature,tile.signature));
+  if(earlier){
+   // Overlapping screenshots describe the SAME hero. Retain the card and
+   // combine independent OCR evidence; manual edits are never overwritten.
+   HERO_LEVEL?.combine(earlier,tile);
+   duplicates++;
+  }else if(confirmedPortraits.some(x=>samePortrait(x.signature,tile.signature))){
+   // A previously applied batch remains saved; do not silently change it.
+   duplicates++;
+  }else fresh.push(tile);
+ }
  const matcherInfo=type==='roster'&&MATCHER?await MATCHER.enrich(fresh):null;
  return {fileName:file.name,file,type,text,grouped,words:troopWords,values,detail,troopEntries,troopTiers,marchSlots,canvas:(type==='roster'||type==='unknown'||type==='troops')?canvas:null,
-  cards:fresh,duplicates:allCards.length-fresh.length,matcherInfo,applied:false};
+  cards:fresh,duplicates,matcherInfo,applied:false};
 }
 function inputChoice(items,current=''){
  const sel=document.createElement('select');
@@ -542,7 +541,13 @@ function renderQueue(){
   const header=document.createElement('div');header.className='bear-intake-item-head';
   const title=document.createElement('b');title.textContent=item.fileName;
   const type=inputChoice(Object.entries(types).map(([key,name])=>[key,name]),item.type);
-  type.addEventListener('change',async ()=>{item.type=type.value;item.values=item.type==='troops'?{...Core.parseTroops(item.text),...(item.canvas?spatialTroops(item.words,item.canvas):{})}:item.type==='stats'?{...Core.parseStats(item.text),...Core.parseStats(item.grouped||'')}:{};item.troopEntries=item.type==='troops'&&item.canvas&&ENTRY?ENTRY.detect(item.words||[],item.canvas.width,item.canvas.height):[];if(item.troopEntries.length){ENTRY.recoverSingleEntries(item.troopEntries,item.values);Object.assign(item.values,ENTRY.totals(item.troopEntries));}item.detail=item.type==='starter'?Core.parseHeroDetail(item.text,allKnown()):null;item.cards=item.type==='roster'&&item.canvas?overviewTiles(item.canvas,item.text,item.words):[];
+  type.addEventListener('change',async ()=>{item.type=type.value;item.values=item.type==='troops'?{...Core.parseTroops(item.text),...(item.canvas?spatialTroops(item.words,item.canvas):{})}:item.type==='stats'?{...Core.parseStats(item.text),...Core.parseStats(item.grouped||'')}:{};item.troopEntries=item.type==='troops'&&item.canvas&&ENTRY?ENTRY.detect(item.words||[],item.canvas.width,item.canvas.height):[];if(item.troopEntries.length){ENTRY.recoverSingleEntries(item.troopEntries,item.values);Object.assign(item.values,ENTRY.totals(item.troopEntries));}item.detail=item.type==='starter'?Core.parseHeroDetail(item.text,allKnown()):null;const scanTag='manual-'+(++heroScanSequence);
+    item.cards=item.type==='roster'&&item.canvas?overviewTiles(item.canvas,item.text,item.words,scanTag):[];
+    if(item.type==='roster'&&item.cards.length){
+     const worker=await loadOCR();
+     await readHeroLevelsRaw(item.cards,item.canvas,worker,scanTag);
+     await readHeroLevelsMasked(item.cards,item.canvas,worker,scanTag);
+    }
     if(item.type==='roster'&&MATCHER){
      // Changing the screenshot category manually must follow the same
      // portrait recognition path as automatic overview detection.
@@ -651,7 +656,7 @@ function renderQueue(){
       'Keine vollständige Heldenkarte erkannt. Bitte die Original-Heldenübersicht verwenden und Bilder einzeln prüfen.',
     total?known+' of '+total+' complete hero cards identified. Names, levels and star progress are imported; review only uncertain values.':
       'No complete hero cards detected. Check this is an original in-game hero overview.'
-   )+(item.duplicates?' · '+item.duplicates+' '+say('doppelte Karten ausgelassen','duplicate cards skipped'):'');
+   )+(item.duplicates?' · '+item.duplicates+' '+say('überlappende Karten abgeglichen','overlapping cards cross-checked'):'');
    if(item.matcherInfo){
     const diagnostics=MATCHER?.diagnostics?.();
     if(!item.matcherInfo.available){
@@ -673,7 +678,7 @@ function renderQueue(){
     const name=inputChoice(choices,tile.name);name.setAttribute('aria-label','Hero '+(index+1));
     name.addEventListener('change',()=>{tile.name=name.value;tile.selected=Boolean(tile.name);});
     const level=document.createElement('input');level.type='number';level.min='1';level.max='80';level.value=tile.level??'';level.placeholder='Lv';
-    level.addEventListener('change',()=>tile.level=level.value?Number(level.value):null);
+    level.addEventListener('change',()=>{tile.level=level.value?Number(level.value):null;tile.levelManual=true;});
     const stars=inputChoice(starOptions(),tile.starSteps??'');
     stars.addEventListener('change',()=>tile.starSteps=stars.value?Number(stars.value):null);
     const starLabel=(v)=>v===null||v===undefined?'★ ?':
