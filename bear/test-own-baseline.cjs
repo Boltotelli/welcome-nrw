@@ -109,14 +109,66 @@ assert.equal(JSON.stringify(auditModel),auditSnapshot,
  'forensic audit must NEVER rewrite saved combat stats');
 const explicit={...auditModel,v2:{...auditModel.v2,squadSeparate:true}};
 const explicitAudit=B.inspectUnusedBonuses(explicit,counts,C);
-assert.equal(explicitAudit.squadAlreadyApplied,true);
-assert.equal(explicitAudit.hypotheticals.withSquad,explicitAudit.hypotheticals.current,
- 'never add squad bonuses twice if explicitly marked as already separate');
+assert.equal(explicitAudit.origin.mode,'separate-overview');
+assert.equal(explicitAudit.squadAlreadyApplied,false);
+assert.equal(explicitAudit.hypotheticals.applied,explicitAudit.hypotheticals.withBoth,
+ 'legacy squadSeparate true means the class and hero components are separate and must be assembled once');
 const missingHeroes={...model,v2:{...model.v2,manualHeroes:{}}};
 const sparseAudit=B.inspectUnusedBonuses(missingHeroes,counts,C);
 assert.equal(sparseAudit.heroes[0].attackPct,null,
  'unknown hero detail stat must remain absent, never guessed');
 assert.equal(sparseAudit.notAutomaticallyApplied,true);
+
+// Real image values supplied by the player; only verified original source
+// fields are used. A class attack below its own independently measured squad
+// component CANNOT be a pre-combined report total.
+const screenshot={...model,values:{
+ iAtk:181.5,iLet:276.5,cAtk:169.2,cLet:250.7,aAtk:244.3,aLet:314,
+ squadAtk:274.8,squadLet:60.1,pitfall:5},v2:{...model.v2,
+ squadSeparate:false,
+ manualHeroes:{
+  Zoe:{...model.v2.manualHeroes.Zoe,expeditionStats:{iAtk:188.2,iLet:155.4}},
+  Petra:{...model.v2.manualHeroes.Petra,expeditionStats:{cAtk:253.6,cLet:178}},
+  Yang:{...model.v2.manualHeroes.Yang,expeditionStats:{aAtk:492.2,aLet:300.7}}
+ }}};
+const oldProfile=JSON.stringify(screenshot);
+const detected=B.statOrigin(screenshot);
+assert.equal(detected.mode,'separate-overview','legacy local profile detected without reupload');
+assert.equal(detected.reason,'component-exceeds-class-total');
+const effective=B.composeCombatStats(screenshot);
+assert.equal(effective.origin.mode,'separate-overview');
+assert.equal(effective.stats.iAtk,644.5);
+assert.equal(effective.stats.iLet,492);
+assert.equal(effective.stats.cAtk,697.6);
+assert.ok(Math.abs(effective.stats.cLet-488.8)<1e-8);
+assert.equal(effective.stats.aAtk,1011.3);
+assert.equal(effective.stats.aLet,674.8);
+const historicScreenshotCounts=[3636,29091,149093];
+const corrected=B.calculate(screenshot,historicScreenshotCounts,C,ref);
+assert.equal(corrected.ready,true);
+assert.ok(corrected.withoutAbilitiesIndex>9e6&&corrected.withoutAbilitiesIndex<10e6,
+ 'corrected non-join soldier damage at the image ratio is about 9.35 million model units');
+assert.equal(corrected.assembledStats.origin.mode,'separate-overview');
+assert.equal(corrected.troopBreakdown.types[0].capturedAttackPct,644.5);
+const forensic=B.inspectUnusedBonuses(screenshot,historicScreenshotCounts,C);
+assert.ok(Math.abs(corrected.withoutAbilitiesIndex-forensic.hypotheticals.applied)<1e-7,
+ 'forensic applied result and actual damage core must be exactly identical');
+assert.ok(Math.abs(forensic.hypotheticals.withBoth-forensic.hypotheticals.applied)<1e-7,
+ 'separate bonus overview must add squad and own hero once');
+assert.equal(JSON.stringify(screenshot),oldProfile,'no mutation to original saved values');
+
+const combined={...screenshot,v2:{...screenshot.v2,combatStatOrigin:'combined-report'}};
+const combinedCalc=B.calculate(combined,historicScreenshotCounts,C,ref);
+assert.ok(combinedCalc.withoutAbilitiesIndex<2e6,'pre-combined reports must never be inflated');
+assert.equal(combinedCalc.assembledStats.origin.reason,'manual');
+assert.equal(B.inspectUnusedBonuses(combined,historicScreenshotCounts,C).hypotheticals.applied,
+ B.inspectUnusedBonuses(combined,historicScreenshotCounts,C).hypotheticals.current);
+const forceSeparate={...model,v2:{...model.v2,combatStatOrigin:'separate-overview'}};
+assert.ok(B.currentStats(forceSeparate).aAtk>model.values.aAtk,
+ 'explicit separate mode applies positive squad component even when auto detection is uncertain');
+const reportNoComponents={...model,v2:{...model.v2,combatStatOrigin:'combined-report'}};
+assert.equal(B.currentStats(reportNoComponents).iAtk,model.values.iAtk,
+ 'explicit combat report classes always remain unchanged');
 
 const wizard=read('wizard.js'),simulation=read('simulation-ui.js'),html=read('index.html');
 new vm.Script(wizard);new vm.Script(simulation);
