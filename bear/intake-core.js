@@ -74,7 +74,10 @@ function parseStats(text){
  return out;
 }
 function heroFromText(text,known){
- const short=fold(String(text||'').slice(0,420));
+ // The very short name Zoe is often read as Z0e / Zoé by mobile OCR.
+ // Correct only the tightly bounded name token, not arbitrary text digits.
+ const short=fold(String(text||'').slice(0,420))
+  .replace(/\bz[0o][e3]\b/g,'zoe');
  const candidates=(known||[]).map(x=>typeof x==='string'?x:x.name).filter(Boolean).sort((a,b)=>b.length-a.length);
  return candidates.find(name=>{
   const simple=fold(name);
