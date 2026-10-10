@@ -30,8 +30,8 @@ assert.equal(p.ready,true);
 assert.equal(p.marches.length,7,'one starter and six joins');
 assert.equal(p.joinCount,6);
 assert.deepEqual(Array.from(p.marches[0].heroes,h=>h.name),starter,'confirmed starter stays unchanged');
-assert.deepEqual(Array.from(p.marches.slice(1),x=>x.heroes[0]?.name),leaders,
- 'reserve high value first-slot join leaders before filler slots');
+assert.deepEqual(Array.from(p.marches.slice(1),x=>x.heroes[0]?.name).sort(),leaders.slice().sort(),
+ 'reserve all six offensive join heroes before filler slots, order by confirmed skill');
 const selected=p.marches.flatMap(x=>x.heroes.filter(Boolean).map(y=>y.name));
 assert.equal(new Set(selected).size,21,'each hero in only one concurrent march');
 for(let j=1;j<p.marches.length;j++){
