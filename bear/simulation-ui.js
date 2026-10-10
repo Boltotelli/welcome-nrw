@@ -84,19 +84,43 @@ function mount(host,B,language){
  const actions=el('div','bear-sim-actions');controls.append(actions);
  const reset=el('button','secondary-btn'),save=el('button','secondary-btn');reset.type=save.type='button';actions.append(reset,save);
  const loader=el('div','bear-sim-loader');loader.setAttribute('role','status');loader.setAttribute('aria-live','polite');
+ // Exactly one medium: WebM when it plays, WebP only if WebM is unsupported
+ // or fails, and the plain emoji only if BOTH files cannot be displayed.
  const ring=el('div','bear-sim-fallback');ring.textContent='🐻';
  const video=el('video','bear-sim-video');video.autoplay=true;video.muted=true;video.loop=true;video.playsInline=true;video.preload='metadata';
- video.style.display='none';
- const webm=el('source');webm.src='./assets/kingshot_beartrap_v3_action_transparent.webm';webm.type='video/webm';video.append(webm);
- video.addEventListener('canplay',()=>{video.style.display='block';ring.hidden=true;video.play().catch(()=>{});});
- video.addEventListener('error',()=>{video.style.display='none';ring.hidden=false;});
- webm.addEventListener('error',()=>{video.style.display='none';ring.hidden=!image.hidden;});
- // The previously produced WebP is a fallback for browsers without WebM.
- const image=el('img','bear-sim-webp');
+ const webm=el('source');webm.type='video/webm';video.append(webm);
+ const image=el('img','bear-sim-webp');image.alt='';
+ let videoFailed=!Boolean(video.canPlayType('video/webm'));
+ let imageReady=false,imageFailed=false,mediaMode='pending';
+ function setMedia(mode){
+  mediaMode=mode;
+  video.hidden=mode!=='video';video.style.display=mode==='video'?'block':'none';
+  image.hidden=mode!=='image';image.style.display=mode==='image'?'block':'none';
+  ring.hidden=mode!=='unavailable';
+ }
+ function showFallback(){
+  if(videoFailed)setMedia(imageReady?'image':imageFailed?'unavailable':'pending');
+ }
+ function failVideo(){
+  videoFailed=true;
+  video.pause();
+  showFallback();
+ }
+ video.addEventListener('canplay',()=>{
+  if(videoFailed)return;
+  const playback=video.play();
+  if(playback&&typeof playback.catch==='function')playback.catch(failVideo);
+ });
+ video.addEventListener('playing',()=>{if(!videoFailed)setMedia('video');});
+ video.addEventListener('error',failVideo);
+ webm.addEventListener('error',failVideo);
+ image.addEventListener('load',()=>{imageReady=true;showFallback();});
+ image.addEventListener('error',()=>{imageFailed=true;showFallback();});
+ setMedia('pending');
+ // Register the media listeners before setting either source.
  image.src='./assets/kingshot_beartrap_v3_action_transparent.webp';
- image.alt='';image.hidden=true;
- image.addEventListener('load',()=>{if(video.style.display==='none'){image.hidden=false;ring.hidden=true;}});
- image.addEventListener('error',()=>{image.hidden=true;ring.hidden=video.style.display!=='none';});
+ if(!videoFailed)webm.src='./assets/kingshot_beartrap_v3_action_transparent.webm';
+ else showFallback();
  loader.append(video,image,ring,el('p','',t().loader));container.append(loader);
  const panel=el('div','bear-sim-results');container.append(panel);
  const compared=el('section','bear-sim-comparisons');container.append(compared);
@@ -138,7 +162,7 @@ function mount(host,B,language){
   clearTimeout(debounce);debounce=setTimeout(()=>rerun(wait),260);
  }
  function showLoader(){
-  loader.hidden=false;panel.hidden=true;ring.hidden=video.style.display!=='none'||!image.hidden;
+  loader.hidden=false;panel.hidden=true;setMedia(mediaMode);
   const p=loader.querySelector('p');if(p)p.textContent=t().loader;
  }
  function rerun(wait){

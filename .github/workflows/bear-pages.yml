@@ -137,6 +137,7 @@ jobs:
                 if [ ! -f "_site/examples/$name" ]; then
                   unzip -p bear/examples/nrw-bear-assets.zip "$name" > "_site/examples/$name"
                 fi
+                test -s "_site/examples/$name" || { echo "Missing example: $name"; exit 1; }
               done
             fi
           fi
@@ -157,6 +158,9 @@ jobs:
               cp "bear/assets/$name" "_site/assets/$name"
             elif [ -f bear/examples/nrw-bear-assets.zip ]; then
               unzip -p bear/examples/nrw-bear-assets.zip "$name" > "_site/assets/$name"
+            fi
+            if [ -f bear/examples/nrw-bear-assets.zip ]; then
+              test -s "_site/assets/$name" || { echo "Missing combat media: $name"; exit 1; }
             fi
           done
           cp assets/nrw-banner.svg _site/assets/nrw-banner.svg

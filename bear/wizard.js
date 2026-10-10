@@ -262,9 +262,9 @@ const storedPanels={};
 for(const i of [1,2,4,6,7]){
  const s=document.createElement('section');s.className='bear-guide-stored';
  sections[i].prepend(s);storedPanels[i]=s;
- const help=document.createElement('details');help.className='bear-guide-example';
+ const help=document.createElement('details');help.className='bear-guide-example';help.open=true;
  const head=document.createElement('summary');
- head.textContent=lang()==='de'?'🔍 Beispiel für diesen Screenshot ansehen':'🔍 Show screenshot instructions';
+ head.textContent=lang()==='de'?'📷 Beispielbilder aus Kingshot':'📷 Kingshot screenshot examples';
  const note=document.createElement('div');note.className='bear-guide-example-preview';
  const text={
  1:'Schwadron: Infanterie, Kavallerie, Bogenschützen · Anzahl · T/TG',
@@ -275,20 +275,24 @@ for(const i of [1,2,4,6,7]){
  }[i];
  note.textContent=text;
  const warning=document.createElement('small');warning.textContent=
-  'Original-Kingshot-Beispielbild noch nicht hinterlegt. Ein echtes, unverändertes Bild wird benötigt.';
+  'Beispielbilder nicht verfügbar. Bitte die Originaldateien prüfen.';warning.hidden=true;
  const available={1:['troops'],2:['stats','stats-extra'],4:['roster'],6:['hero-details'],7:['pets','valora']}[i]||[];
  const captions={troops:'Schwadronvorschau',stats:'Bonusübersicht · Klassen', 'stats-extra':'Bonusübersicht · Schwadron',roster:'Heldenübersicht', 'hero-details':'Heldendetails · Expedition',pets:'Begleittierfertigkeiten',valora:'Valora-Fähigkeiten'};
  const gallery=document.createElement('div');gallery.className='bear-guide-example-gallery';
+ let imagesLoaded=0,imagesFailed=0;
  available.forEach(name=>{
   const link=document.createElement('a');link.className='bear-guide-example-link';
   link.href='./examples/'+name+'.jpg';link.target='_blank';link.rel='noopener noreferrer';
   link.title='Original-Screenshot vergrößern';
-  const img=document.createElement('img');img.loading='lazy';img.alt='Kingshot '+name+' Beispielscreenshot';
-  img.src=link.href;link.append(img);link.hidden=true;
+  const img=document.createElement('img');img.loading='eager';img.alt='Kingshot '+name+' Beispielscreenshot';
+  link.append(img);
   const label=document.createElement('span');label.textContent=captions[name]||name;link.append(label);
-  img.addEventListener('load',()=>{link.hidden=false;warning.hidden=true;});
-  img.addEventListener('error',()=>{link.remove();});
+  img.addEventListener('load',()=>{imagesLoaded++;warning.hidden=true;});
+  img.addEventListener('error',()=>{imagesFailed++;link.remove();warning.hidden=imagesLoaded>0||imagesFailed<available.length;});
   gallery.append(link);
+  // Set src after the error/load listeners; the preview must not depend on
+  // lazy-loading within a collapsed details element or a hidden parent link.
+  img.src=link.href;
  });
  note.append(gallery,document.createElement('hr'),warning);
  help.append(head,note);sections[i].insertBefore(help,s.nextSibling);

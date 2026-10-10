@@ -99,8 +99,16 @@ assert.ok(css.includes('.bear-guide-stored'),'mobile saved-values cards styled')
 assert.ok(!wizard.includes('kingshot_beartrap_v3_action_transparent.webm'),'formation-stage loading must not reuse the damage video');
 assert.ok(wizard.includes('stageLoader.append(loaderBear,loaderText)'),'formation stage keeps its own animated bear loading indicator');
 assert.ok(simulation.includes("webm.src='./assets/kingshot_beartrap_v3_action_transparent.webm'"),'damage simulation retains the approved video');
-assert.ok(html.includes('./wizard.js?v=guided-nrw-20261011-2'),'wizard cache key must refresh for existing visitors');
+assert.ok(html.includes('./wizard.js?v=bear-examples-visible-20261011-1'),'wizard cache key must refresh for existing visitors');
 assert.ok(wizard.includes("2:['stats','stats-extra']"),'two complementary bonus-overview screenshots appear in combat stats example');
 assert.ok(wizard.includes('const gallery=document.createElement'),'screenshot examples display as compact gallery');
 assert.ok(css.includes('.bear-guide-example-link img'),'mobile-sized authentic example thumbnails are styled');
+assert.ok(wizard.includes("help.open=true"),'real screenshot gallery is initially visible');
+assert.ok(wizard.includes("img.loading='eager'"),'gallery loads images even when slides start hidden');
+assert.ok(!wizard.includes("link.hidden=true"),'gallery links do not block their own image loads');
+assert.ok(simulation.includes("video.hidden=mode!=='video'"),'video and WebP are mutually exclusive');
+assert.ok(simulation.includes("image.hidden=mode!=='image'"),'image cannot remain visible under video');
+assert.ok(simulation.includes("video.addEventListener('playing'"),'WebM is displayed only while playable');
+assert.ok(css.includes('.bear-sim-video[hidden]'),'hidden attribute takes priority over media CSS');
+assert.ok(html.includes('./simulation-ui.js?v=bear-media-exclusive-20261011-1'),'simulation media fix invalidates browser cache');
 console.log('BEAR WIZARD: nine stages, hero shortlist, separate gear-first detail uploads and independent capacity input verified.');
