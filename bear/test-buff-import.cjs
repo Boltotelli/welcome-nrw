@@ -41,6 +41,8 @@ assert.ok(ui.includes("C.valoraTextRect(slot.rect)")&&ui.includes("C.valoraPrevi
  'Valora must use its own tight label crop and complete card preview');
 assert.ok(ui.includes("valoraLevelMask(img)")&&ui.includes("readValoraLevel("),
  'Valora must binarize only the label before OCR');
+assert.ok(!ui.includes("const original=await worker.recognize(img)"),
+ 'Valora must not fall back to a known false-reading raw badge (Lv4 -> Lv2)');
 const inner=C.valoraTextRect(C.valoraRect(1));
 assert.ok(Math.abs(inner.y*2048-1821)<4&&Math.abs((inner.y+inner.h)*2048-1845)<4,
  'text crop must exclude bright rim and include original level text');
