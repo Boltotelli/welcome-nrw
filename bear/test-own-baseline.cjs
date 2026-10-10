@@ -95,7 +95,9 @@ const auditModel={...model,v2:{...model.v2,
   Yang:{...model.v2.manualHeroes.Yang,expeditionStats:{aAtk:180,aLet:120}}}}};
 const auditSnapshot=JSON.stringify(auditModel);
 const audit=B.inspectUnusedBonuses(auditModel,counts,C);
-assert.equal(audit.squadAlreadyApplied,false);
+assert.equal(audit.origin.mode,'combined-report',
+ 'without evidence of separate capture, default to combined to avoid double counting');
+assert.equal(audit.squadAlreadyApplied,true);
 assert.equal(audit.squadAttackPct,275.2);
 assert.equal(audit.squadLethalityPct,60.1);
 assert.equal(audit.heroes[2].attackPct,180);
