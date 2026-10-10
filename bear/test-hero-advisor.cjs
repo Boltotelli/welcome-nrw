@@ -40,7 +40,6 @@ const unknown=A.recommend([{name:'Yang',level:80},h('Rosa',4)],roles,priorities)
 assert.equal(unknown.best.name,'Rosa','unknown stars cannot outrank verified built hero');
 assert.equal(unknown.choices.find(c=>c.name==='Yang').confidence,'limited');
 
-const details=A.recommend([h('Zoe',4,{skills:[3,3,3]})],roles,priorities);
 const actually=A.evaluate(h('Petra',4,80,{skills:[3,3,3],skillsAssumedMax:false}), 'cavalry',priorities);
 const assumed=A.evaluate(h('Petra',4), 'cavalry',priorities);
 assert.equal(actually.hasConfirmedSkill,true);
