@@ -261,7 +261,11 @@ function mount(host,B,language){
   compared.replaceChildren();compared.append(el('h3','',t().comparison));
   function line(name,measure,onRestore){
    const box=el('div','bear-sim-comparison');
-   box.append(el('strong','',name),el('span','',scoreText(measure?.score?.overall)));
+   const own=measure?.score?.starter&&measure?.reference?.starter?
+    (100*measure.score.starter/measure.reference.starter).toFixed(2)+' %':'—';
+   const joins=measure?.score?.joinProxy&&measure?.reference?.joinProxy?
+    (100*measure.score.joinProxy/measure.reference.joinProxy).toFixed(2)+' %':'—';
+   box.append(el('strong','',name),el('span','',t().starter+': '+own+' · '+t().joins+': '+joins));
    if(onRestore){const b=el('button','secondary-btn',t().load);b.type='button';
     b.addEventListener('click',onRestore);box.append(b);}
    compared.append(box);
