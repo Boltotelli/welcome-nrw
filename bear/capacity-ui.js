@@ -42,7 +42,10 @@ function mount(host,B,language){
   const caption=document.createElement('span');caption.textContent=tr('Gesamte Schwadronskapazität','Total squad capacity',"Capacité totale d’escadron");
   const value=document.createElement('strong');value.textContent=!calc.hasBase?'—':
    calc.heroesPending?tr('Heldenbonus fehlt','Hero bonus missing','Bonus des héros manquant'):fmt(calc.total);
-  total.append(caption,value);panel.append(total);
+  total.append(caption,value);
+  // Show TOTAL immediately above the detailed ingredient breakdown.
+  const first=panel.querySelector('.bear-capacity-line');
+  if(first)panel.insertBefore(total,first);else panel.append(total);
   const hint=document.createElement('p');hint.className='hint';
   hint.textContent=calc.heroesPending?
    tr('Für unbekannte Heldenlevel und Level 39 bitte den exakten Heldenbonus unten eintragen.',
