@@ -176,12 +176,13 @@ function showRelevantManual(){
  const capField=$('cap')?.closest('.ux-field');
  if(capField&&!capacityHost.contains(capField))capacityHost.append(capField);
  if(capField)capField.hidden=false;
- const capacityNeeded=!(Number(v.cap)>0);
- capacityHost.hidden=!capacityNeeded;
- capacityHost.dataset.caption=lang()==='de'?'⚠ Schwadronskapazität ohne Helden':
-  lang()==='fr'?'⚠ Capacité d’escadron sans héros':'⚠ Squad capacity without heroes';
+ // Keep a single always-visible squad base input on this same Pet/Valora step.
+ capacityHost.hidden=false;
+ capacityHost.dataset.caption=lang()==='de'?'Schwadronskapazität berechnen':
+  lang()==='fr'?"Calculer la capacité d’escadron":'Calculate squad capacity';
  const capInput=$('cap');
- if(capInput&&capacityNeeded&&capInput.value==='0')capInput.value='';
+ if(capInput&&!(Number(v.cap)>0)&&capInput.value==='0')capInput.value='';
+ capacityUI?.refresh();
 
  const ownReady=(ext.ownHeroes||[]).filter(Boolean).length===3;
  const heroLine=quick?.querySelector('#uxHeroLine');
@@ -225,6 +226,7 @@ sections[6].append(detailPanel);
 const capacityHost=document.createElement('section');
 capacityHost.id='bearRequiredCapacity';capacityHost.className='bear-required-capacity';
 sections[7].insertBefore(capacityHost,manual);
+const capacityUI=window.NRW_BEAR_CAPACITY_UI?.mount(capacityHost,B,lang);
 function heroResults(){
  const ext=B.model().v2||{},known=window.NRW_BEAR_IMPORTED_HEROES||[];
  // Never treat old API or manual hero cards as verified by this roster scan.
@@ -521,8 +523,11 @@ $('bearGuideNext').addEventListener('click',()=>{
 });
 wizard.addEventListener('input',()=>{
  if(active===0){$('bearGuideNext').disabled=!hasProfile();}
- // Never remove an active capacity field while someone is typing a
- // six-digit squad capacity; its parent refreshes only on committed change.
+ if(active===7)capacityUI?.refresh();
+ // Do not move or detach the bound capacity input while typing.
+});
+window.addEventListener('nrw-bear-buffs-applied',()=>{
+ if(active===7)capacityUI?.refresh();
 });
 wizard.addEventListener('change',()=>{
  if(active===7)showRelevantManual();
