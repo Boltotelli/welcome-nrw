@@ -61,7 +61,7 @@ function romanXAt(ctx,center){
  const screen=document.createElement('canvas');screen.width=28;screen.height=28;
  const xctx=screen.getContext('2d',{willReadFrequently:true});
  let best=0;
- for(const dx of [-4,-2,0,2,4])for(const dy of [-4,-2,0,2,4]){
+ for(const dx of [-6,-3,0,3,6])for(const dy of [-27,-23,-19,-15,-11,-7,-3,1,5,9,13]){
   const x=(center[0])*base+(dx-14)*size;
   const y=(center[1])*base+(dy-14)*size;
   if(x<0||y<0||x+28*size>ctx.canvas.width||y+28*size>ctx.canvas.height)continue;
@@ -96,7 +96,7 @@ function recognize(canvas,text,words){
  const normalizedHeight=canvas.height*716/canvas.width;
  // Standard 716x1536 HUD and current 1080x1920 Android HUD place
  // badges differently, in both X and Y. Interpolate the known anchors.
- const phoneLayout=Math.max(0,Math.min(1,(1536-normalizedHeight)/264));
+ const phoneLayout=Math.max(0,Math.min(1,(1536-normalizedHeight)/264)); // still allow HUD overlay position shift
  const oldAnchors=[[133,395],[453,395],[133,518]];
  const phoneAnchors=[[133,358],[455,358],[133,489]];
  const anchors=oldAnchors.map((p,i)=>p.map((v,j)=>v+(phoneAnchors[i][j]-v)*phoneLayout));
@@ -111,8 +111,8 @@ function recognize(canvas,text,words){
   const cx=anchors[i][0]*sc,cy=anchors[i][1]*sc;
   // Scan in physical pixels: stepping by 2 base units skipped the thin
   // numeral strokes on high-resolution Android screenshots.
-  for(const dx of [-9,-7,-6,-5,-3,-1,1,3,5,7,9]){
-   for(const dy of [-9,-7,-5,-3,-1,1,3,5,7,9,11]){
+  for(const dx of [-18,-15,-12,-9,-6,-3,0,3,6,9,12,15,18]){
+   for(const dy of [-20,-17,-14,-11,-8,-5,-2,1,4,7,10,13,16]){
     const digit=digitAt(ctx,[(cx+dx)/sc,(cy+dy)/sc],scratch);
     if(digit.tg!==null&&digit.confidence>best.confidence)best=digit;
    }
