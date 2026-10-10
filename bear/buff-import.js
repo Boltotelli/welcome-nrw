@@ -17,7 +17,8 @@ function photoCanvas(file){
   const url=URL.createObjectURL(file),img=new Image();
   img.onload=()=>{
    try{
-    const scale=Math.min(1,1600/img.naturalHeight);
+    // Keep native 955x2048 labels sharp; shrinking to 1600px lost tiny Lv glyphs.
+    const scale=Math.min(1,2800/img.naturalHeight);
     const canvas=document.createElement('canvas');
     canvas.width=Math.round(img.naturalWidth*scale);canvas.height=Math.round(img.naturalHeight*scale);
     canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);
