@@ -61,14 +61,78 @@ function readWidgetLevel(model,name){
   return Number(old);
  return null;
 }
-function currentStats(model){
- const v=model?.values||{},own={...v};
- if(model?.v2?.squadSeparate){
-  for(const name of ['iAtk','cAtk','aAtk'])own[name]=Number(own[name])+Number(v.squadAtk||0);
-  for(const name of ['iLet','cLet','aLet'])own[name]=Number(own[name])+Number(v.squadLet||0);
- }
- return own;
+const CLASS_CODES=['i','c','a'];
+const METRICS=['Atk','Let'];
+function validBonus(value){
+ if(value===null||value===undefined||value==='')return null;
+ const n=Number(value);
+ return Number.isFinite(n)&&n>=0&&n<=5000?n:null;
 }
+function heroBonuses(model){
+ const v=model?.v2||{},names=Array.isArray(v.ownHeroes)?v.ownHeroes:[];
+ return CLASS_CODES.map((cl,index)=>{
+  const name=names[index]||'',saved=v.manualHeroes?.[name]?.expeditionStats||{};
+  return {classKey:cl,name,
+   attackPct:validBonus(saved[cl+'Atk']),
+   lethalityPct:validBonus(saved[cl+'Let'])};
+ });
+}
+function statOrigin(model){
+ const meta=model?.v2||{},v=model?.values||{};
+ const explicit=meta.combatStatOrigin;
+ if(explicit==='separate-overview'||explicit==='combined-report')
+  return {mode:explicit,reason:'manual'};
+ if(meta.combatStatDetectedOrigin==='separate-overview')
+  return {mode:'separate-overview',reason:'verified-bonus-overview'};
+ if(meta.combatStatDetectedOrigin==='combined-report')
+  return {mode:'combined-report',reason:'verified-combat-report'};
+ if(meta.squadSeparate===true)
+  return {mode:'separate-overview',reason:'legacy-squad-separate'};
+ // Backward-compatible evidence from previously approved screenshot batches:
+ // a TOTAL attack/lethality value cannot be smaller than one of its nonnegative
+ // components. The 1044 example class ATK (181.5 / 169.2 / 244.3) is smaller
+ // than the separately saved squad +274.8. That disproves combined-report
+ // interpretation, and can be safely inferred without a new screenshot.
+ const heroes=heroBonuses(model);
+ const components=[...CLASS_CODES.flatMap((cl,i)=>
+  [['Atk','squadAtk'],['Let','squadLet']].map(([metric,squadKey])=>({
+   combined:validBonus(v[cl+metric]),component:validBonus(v[squadKey])}))),
+  ...heroes.flatMap(h=>[
+   {combined:validBonus(v[h.classKey+'Atk']),component:h.attackPct},
+   {combined:validBonus(v[h.classKey+'Let']),component:h.lethalityPct}
+  ])];
+ if(components.some(({combined,component})=>combined!==null&&
+   component!==null&&component>combined+0.01))
+  return {mode:'separate-overview',reason:'component-exceeds-class-total'};
+ return {mode:'combined-report',reason:'unknown-legacy-conservative'};
+}
+function composeCombatStats(model){
+ const v=model?.values||{},stats={...v},origin=statOrigin(model),heroes=heroBonuses(model);
+ const totals=[],missing=[];
+ for(const [index,cl] of CLASS_CODES.entries()){
+  const hero=heroes[index],data={classKey:cl,name:hero.name};
+  for(const metric of METRICS){
+   const raw=validBonus(v[cl+metric]);
+   const squad=origin.mode==='separate-overview'?validBonus(v['squad'+metric]):null;
+   const heroValue=origin.mode==='separate-overview'?
+    metric==='Atk'?hero.attackPct:hero.lethalityPct:null;
+   if(raw===null)missing.push(cl+metric+':class');
+   if(origin.mode==='separate-overview'){
+    if(squad===null)missing.push(cl+metric+':squad');
+    if(heroValue===null)missing.push((hero.name||cl)+':hero-'+metric);
+   }
+   const effective=(raw??0)+(squad??0)+(heroValue??0);
+   // Do not repair missing raw values by fabricating them. The combat
+   // engine will refuse incomplete data as before.
+   if(raw!==null)stats[cl+metric]=effective;
+   data[metric]={classPct:raw,squadPct:squad,heroPct:heroValue,
+    appliedPct:raw===null?null:effective};
+  }
+  totals.push(data);
+ }
+ return {stats,origin,heroes,totals,missing};
+}
+function currentStats(model){return composeCombatStats(model).stats;}
 /* Forensic audit ONLY. This does not apply or save hidden bonuses.
  * The Bonus Overview displays separate all-squad bonuses and separate class
  * stats, and starter Hero Details may provide extra Expedition percentages.
@@ -127,7 +191,7 @@ function inspectUnusedBonuses(model,counts,combat){
 }
 function calculate(model,counts,combat,heroReference){
  const v=model?.v2||{},heroNames=v.ownHeroes||[];
- const levels=combat?.configure?.(v),stats=currentStats(model);
+ const levels=combat?.configure?.(v),assembled=composeCombatStats(model),stats=assembled.stats;
  if(heroNames.filter(Boolean).length!==3||!Array.isArray(counts)||
    counts.length!==3||counts.some(x=>!Number.isInteger(x)||x<0)||
    !combat?.ready?.(stats,levels)||typeof combat?.damage!=='function')
@@ -188,6 +252,7 @@ function calculate(model,counts,combat,heroReference){
  const abilityFactor=strikeFactor*(1+enemyTakenPct/100)*widgetAttack*widgetLethality;
  return {ready:true,modelIndex:original*abilityFactor,withoutAbilitiesIndex:original,
   troopBreakdown:trace,pitfallLevel:5,
+  assembledStats:assembled,
   abilityFactor,extraStrikePct:bonusExtra,enemyDamageTakenPct:enemyTakenPct,widgetAttackFactor:widgetAttack,
   widgetLethalityFactor:widgetLethality,
   included:fixed,widgets,excluded,unmodeled:skipped,missing,
@@ -195,5 +260,5 @@ function calculate(model,counts,combat,heroReference){
   noJoinerSkills:true,includesChanceEffects:false,
   isGuaranteedDamage:false};
 }
-root.NRW_BEAR_OWN_BASELINE={calculate,inspectUnusedBonuses,skillCap,widgetValue,readWidgetLevel,currentStats,EXPEDITION_WIDGETS};
+root.NRW_BEAR_OWN_BASELINE={calculate,inspectUnusedBonuses,skillCap,widgetValue,readWidgetLevel,currentStats,composeCombatStats,statOrigin,heroBonuses,EXPEDITION_WIDGETS};
 })(window);
