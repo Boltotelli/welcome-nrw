@@ -19,4 +19,66 @@ assert.equal(S.stepsFromRatios([1,1,1,1,1]),null,'beige empty cell must not be a
 assert.equal(S.stepsFromRatios([.28,.10,.0,0,0]),8,'partial flower must not become a whole star');
 assert.equal(S.stepsFromRatios([.28,.28,.24,0,0]),17,'a 0.86-filled third flower is not full');
 assert.equal(S.stepsFromRatios([.28,.28,.28,.28,.265]),30,'full five flowers are still recognized');
-console.log('HERO STARS: 30 real-screen ratio fixtures, cropped 0/20/empty, partial petals passed.');
+// Additional fixtures captured from the two new *real Android* 716x1536
+// scroll screenshots (2026-10-10). These are five bright-petal ratios per
+// complete hero card from the EXACT canvas scaling used by intake-ui,
+// NOT cloned/generated star graphics. Screenshots themselves are not shipped.
+const mobileA=[
+ [[.277,.278,.286,.291,0],24],
+ [[.285,.275,.291,.277,.269],30],
+ [[.278,.280,.290,.222,0],23],
+ [[.285,.282,.283,.259,.090],26], // 4★T2, formerly false 3★T5
+ [[.270,.264,.272,.171,0],22],
+ [[.275,.264,.288,.270,.093],26],
+ [[.286,.288,.291,.288,.280],30],
+ [[.296,.299,.296,.267,.275],30], // Quinn 5★, formerly false 3★T5
+ [[.317,.320,.320,.320,.320],30],
+ [[.318,.314,.320,.314,.304],30],
+ [[.278,.294,.288,.294,.053],25],
+ [[.301,.291,.291,.224,0],22],
+ [[.323,.306,.323,.320,.182],27],
+ [[.322,.314,.333,.320,.157],27],
+ [[.288,.288,.302,0,0],18],
+ [[.302,.280,.294,.128,0],21]
+];
+const mobileB=[
+ [[.307,.296,.318,.318,.160],27],
+ [[.290,.282,0,0,0],12],
+ [[.272,.275,.280,.058,0],19],
+ [[.293,.299,.294,.282,.280],30],
+ [[.299,.309,.307,.306,.309],30],
+ [[.306,.301,.315,.304,.296],30],
+ [[.299,.307,.315,.294,.299],30],
+ [[.318,.315,.318,.301,.059],25],
+ [[.264,.261,.269,.056,0],19],
+ [[.272,0,0,0,0],6],
+ [[.261,.219,0,0,0],11], // partial second flower, not 2 full
+ [[0,0,0,0,0],null] // 0/20 (unrecruited)
+];
+for(const [image,fixtures] of [['photo1',mobileA],['photo2',mobileB]]){
+ for(const [index,[ratios,expected]] of fixtures.entries()){
+  assert.equal(S.stepsFromRatios(ratios),expected,
+   image+' hero '+(index+1)+' matches visually inspected mobile flowers');
+ }
+}
+assert.equal(mobileA.length+mobileB.length,28,'28 cards/slots exercised');
+assert.equal(S.analyze([.296,.299,.296,.267,.275]).review,false,
+ 'full fourth flower 90% bright is still confidently full');
+assert.equal(S.analyze([.261,.219,0,0,0]).steps,11,
+ 'five-petal partial remains below full flower cutoff');
+const edge=S.analyze([.28,.28,.28,.28,.118]);
+assert.equal(edge.review,true,'borderline tier is exposed for confirmation');
+const existing={starSteps:null,starReview:true,starConfidence:0};
+S.merge(existing,{starSteps:30,starReview:false,starConfidence:1});
+assert.equal(existing.starSteps,30,'overlap fills unknown stars with clearer scan');
+S.merge(existing,{starSteps:24,starReview:false,starConfidence:1});
+assert.equal(existing.starSteps,null,'conflicting overlapping star scans require review');
+assert.equal(existing.starReview,true);
+const manuallyFixed={starSteps:30,starManual:true};
+S.merge(manuallyFixed,{starSteps:24,starReview:false});
+assert.equal(manuallyFixed.starSteps,30,'manual star correction cannot be overwritten');
+const ui=fs.readFileSync(__dirname+'/intake-ui.js','utf8');
+assert.match(ui,/NRW_BEAR_HERO_STARS\?\.merge\(earlier,tile\)/);
+assert.match(ui,/starSteps:stars\.review\?null:stars\.starSteps/,
+ 'uncertain stars do not silently influence the leader ranking');
+console.log('HERO STARS: 30 previous plus 28 new Android samples, overlaps, 5★ and ambiguous tiers passed.');
