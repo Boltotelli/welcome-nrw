@@ -21,7 +21,7 @@ function valoraRect(i){
 }
 function readSkillLevel(text,max){
  const s=String(text||'').replace(/[Il|]/g,'1');
- const m=s.match(/(?:Lv|Lvv|L.v|Lvl|Level)\s*[.:]?\s*([0-9]{1,2})\b/i);
+ const m=s.match(/(?:Level|Lvl|Lvv|L.v|Lv)\s*[.:]?\s*([0-9]{1,2})\b/i);
  if(m){const n=Number(m[1]);return n>=1&&n<=max?n:null;}
  const clean=s.trim();
  if(/^\d{1,2}$/.test(clean)){const n=Number(clean);return n>=1&&n<=max?n:null;}
