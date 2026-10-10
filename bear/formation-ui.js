@@ -102,8 +102,8 @@ function mount(step,results,B,language){
    section.append(heroList);
    if(march.slot>0){
     section.append(create('p','hint',tr(
-     'Nur die ERSTE Expeditionsfähigkeit von Held 1 (links) kann für diese Join-Rally zählen. Helden 2 und 3: keine Join-Skills, aber ihre Level erhöhen die Marschkapazität.',
-     'Only the FIRST expedition skill of Hero 1 (left) may contribute to this join rally. Heroes 2/3 add no join skills; their levels still add march capacity.',
+     'Nur der erste Expeditionsskill von Held 1 (links) kann zählen. Helden 2 und 3 geben KEINE zusätzlichen Join-Skills, erhöhen aber die Marschkapazität. Je Marsch maximal 1× Infanterie, 1× Kavallerie, 1× Bogenschütze.',
+     'Only Hero 1 (left)\'s FIRST expedition skill may contribute. Heroes 2 and 3 add NO join skill, but their levels increase capacity. Each march has at most one Infantry, Cavalry and Archer hero.',
      "Seule la première compétence du héros 1 (gauche) compte en renfort. Les héros 2 et 3 n'ajoutent pas de compétences, mais augmentent la capacité.")));
     if(march.guideOnly||!march.heroes[0])section.append(create('p','hint',
       tr('Erster Skill nicht als tatsächliches Level bestätigt bzw. kein geeigneter Join-Leader vorhanden.',
@@ -113,12 +113,12 @@ function mount(step,results,B,language){
    const rows=create('div','bear-formation-troops');
    rows.append(create('strong','',fmt(march.filled)+' / '+fmt(march.capacity)+
     tr(' Truppen',' troops',' troupes')+(march.capacityKnown?'':tr(' (mindestens)',' (lower bound)',' (minimum)'))));
-   rows.append(create('span','',classNames.map((name,k)=>name+': '+fmt(march.troops[k])+' ('+march.ratio[k].toFixed(1)+'%)').join(' · ')));
+   rows.append(create('span','',classNames.map((name,k)=>name+': '+fmt(march.troops[k])+' ('+march.ratio[k]+'%)').join(' · ')));
    section.append(rows);card.append(section);
   }
   card.append(create('p','hint',tr(
-   'Modell-Empfehlung, keine garantierten Bärenpunkte. Ohne die tatsächlichen Stats fremder Rally-Leader ist ein exakter Schadensvergleich aller Joins unmöglich. Die Planung überschreitet weder den Truppenbestand noch die berechneten Kapazitätsgrenzen.',
-   'Provisional model, not guaranteed Bear points. Other rally leaders’ combat stats are unknown. No troop stock or computed march capacity is exceeded.',
+   'Gemeinsame, vorläufige Optimierung: Starter mit eigenen Kampfwerten, Joins nur mit deinen Klassenwerten als Stellvertreter statt der unbekannten fremden Rally-Leader-Stats. Keine garantierten Punkte. Jeder Marsch hat höchstens einen Helden pro Truppengattung und nutzt nur vorhandene Truppen.',
+   'Provisional optimization: the starter uses your troop tier/stats and joins use your class stats as proxies, NOT external rally-leader stats. No guaranteed Bear points. All march types and inventory are constrained.',
    "Modèle provisoire, pas de score garanti. Les statistiques des chefs de rallye externes sont inconnues. Les stocks sont respectés.")));
  }
  refreshSetup();
