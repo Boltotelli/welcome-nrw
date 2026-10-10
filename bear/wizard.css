@@ -298,3 +298,13 @@ body.bear-wizard-mode .dashboard{display:none!important}
 .bear-widget-level-grid .bear-widget-manual{display:grid;align-content:start;gap:5px;margin:0;width:100%}
 .bear-widget-level-grid .bear-widget-manual select{width:100%;max-width:100%;font-size:12px}
 @media(max-width:530px){.bear-widget-level-grid{grid-template-columns:1fr}.bear-widget-level-grid .bear-widget-manual{display:flex;justify-content:space-between;align-items:center}.bear-widget-level-grid .bear-widget-manual select{width:140px}}
+
+/* Soldier math audit: display exact input from the 3 classes; never alter data. */
+.bear-sim-math-audit{margin-top:10px;padding:11px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+.bear-sim-math-audit summary{cursor:pointer;font-size:12px;font-weight:700}
+.bear-sim-math-audit .hint{font-size:11px;line-height:1.55;margin:10px 0 0}
+.bear-sim-math-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}
+.bear-sim-math-type{border:1px solid var(--line);border-radius:9px;padding:8px;display:flex;flex-direction:column;gap:4px;font-size:11px;overflow-wrap:anywhere}
+.bear-sim-math-type strong{font-size:12px}
+.bear-sim-math-type small{color:var(--muted);font-size:10px}
+@media(max-width:640px){.bear-sim-math-grid{grid-template-columns:1fr}.bear-sim-math-type{font-size:12px}}
