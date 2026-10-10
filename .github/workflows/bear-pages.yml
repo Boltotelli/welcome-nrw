@@ -80,6 +80,7 @@ jobs:
           node bear/test-proc-expectation.cjs
           node --check bear/score-bonuses.js
           node bear/test-score-bonuses.cjs
+          node bear/test-personal-damage.cjs
           node bear/test-intake.cjs
           node bear/test-portrait.cjs
           node bear/test-hud-portraits.cjs
