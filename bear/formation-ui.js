@@ -72,7 +72,7 @@ function mount(step,results,B,language){
   for(let k=0;k<3;k++){
    const row=create('div','bear-usage-row');
    const legend=create('div','bear-usage-label');
-   legend.append(create('span','',classNames[k]),create('strong','',fmt(plan.used[k])+' / '+fmt(plan.stock[k])+' · '+fmt(plan.leftover[k])+tr(' frei',' left',' restantes'));
+   legend.append(create('span','',classNames[k]),create('strong','',fmt(plan.used[k])+' / '+fmt(plan.stock[k])+' · '+fmt(plan.leftover[k])+tr(' frei',' left',' restantes')));
    const track=create('div','bear-usage-track');
    const fill=create('div','bear-usage-fill type-'+k);fill.style.width=(plan.stock[k]?100*plan.used[k]/plan.stock[k]:0)+'%';
    track.append(fill);row.append(legend,track);table.append(row);
