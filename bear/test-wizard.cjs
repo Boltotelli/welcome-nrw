@@ -8,6 +8,7 @@ const fs=require('node:fs');
 const vm=require('node:vm');
 const wizard=fs.readFileSync(__dirname+'/wizard.js','utf8');
 const css=fs.readFileSync(__dirname+'/wizard.css','utf8');
+const simulation=fs.readFileSync(__dirname+'/simulation-ui.js','utf8');
 const intake=fs.readFileSync(__dirname+'/intake-ui.js','utf8');
 const gear=fs.readFileSync(__dirname+'/screenshot-importer.js','utf8');
 const html=fs.readFileSync(__dirname+'/index.html','utf8');
@@ -95,4 +96,8 @@ assert.ok(wizard.includes('valoraBaseLevel'),'Valora overall level tracked separ
 assert.ok(wizard.includes('Formationen generieren'),'simple formation generation action');
 assert.ok(wizard.includes('Grundschaden ohne Joiner berechnen'),'simple no-join damage action');
 assert.ok(css.includes('.bear-guide-stored'),'mobile saved-values cards styled');
+assert.ok(!wizard.includes('kingshot_beartrap_v3_action_transparent.webm'),'formation-stage loading must not reuse the damage video');
+assert.ok(wizard.includes('stageLoader.append(loaderBear,loaderText)'),'formation stage keeps its own animated bear loading indicator');
+assert.ok(simulation.includes("webm.src='./assets/kingshot_beartrap_v3_action_transparent.webm'"),'damage simulation retains the approved video');
+assert.ok(html.includes('./wizard.js?v=guided-nrw-20261011-1'),'wizard cache key must refresh for existing visitors');
 console.log('BEAR WIZARD: nine stages, hero shortlist, separate gear-first detail uploads and independent capacity input verified.');
