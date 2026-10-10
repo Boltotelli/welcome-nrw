@@ -299,18 +299,25 @@ async function analyse(file){
   const output=detected.map(slot=>({
    ...slot,thumb:drawThumb(ctx,slot.gear,47),quality:slot.frameQuality||rarity(ctx,slot.gear),stars:readGearStars(ctx,slot.gear),tier:TIER?.recognize?.(ctx,slot.gear)||{tier:null,score:0},
    charms:slot.charms.map(pos=>{
-    const input=maskOf(getCrop(ctx,pos,18),slot.type);
+    // Actual phone screenshot: gold-charm centers are separated by ~45px,
+    // but the old +/-20 base-pixel thumbnails covered ~53 physical pixels,
+    // taking TWO adjacent glyphs at once. Use the measured center spacing.
+    const separation=Math.min(
+     Math.abs(slot.charms[1][0]-slot.charms[0][0]),
+     Math.abs(slot.charms[2][0]-slot.charms[1][0]));
+    const cropRadius=Math.max(9,Math.min(13,Math.floor(separation*.38)));
+    const input=maskOf(getCrop(ctx,pos,cropRadius),slot.type);
     const extra=remote.map(x=>({level:x.level,bits:x.bits,source:'online'}));
     // First use ONLY verified silhouettes from the player's labelled
     // Kingshot guide (Lv1-11). Less reliable fan/reference masks can offer
     // a review suggestion, but must not set an unverified level.
     const verified=MATCHER?.recognize(input);
     if(verified?.level!==null&&verified?.level!==undefined)
-     return {...verified,thumb:drawThumb(ctx,pos,20)};
+     return {...verified,thumb:drawThumb(ctx,pos,cropRadius)};
     const fallback=compare(input,[...(known[slot.type]||[]),...extra]);
     return {...fallback,level:null,
      guess:verified?.guess??fallback.guess??null,confidence:'unknown',
-     source:'needs-guide-validation',thumb:drawThumb(ctx,pos,20)};
+     source:'needs-guide-validation',thumb:drawThumb(ctx,pos,cropRadius)};
    })
   }));
   return {output,onlineCount:remote.length,dimensions:[canvas.width,canvas.height],layout:'auto',detected:geometry.detected};
