@@ -36,7 +36,7 @@ function scoreRows(rows,model,combat){
   for(const x of ['iAtk','cAtk','aAtk'])own[x]=(Number(own[x])||0)+a;
   for(const x of ['iLet','cLet','aLet'])own[x]=(Number(own[x])||0)+l;
  }
- const pitfall=Number(v.pitfall)||0;
+ const pitfall=5; // NRW alliance trap is always Lv5: +25 attack points
  const scores=rows.map((row,i)=>{
   // The join score intentionally does not use the own starter's extra
   // expedition bonuses or fictional external captain stats.
