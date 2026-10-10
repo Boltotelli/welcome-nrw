@@ -10,12 +10,23 @@ for(const [name,code] of [['formation-core',core],['formation-ui',ui],['wizard',
  new vm.Script(code,{filename:name+'.js'});
 const ctx={window:{}};vm.runInNewContext(core,ctx);vm.runInNewContext(capSource,ctx);
 const F=ctx.window.NRW_BEAR_FORMATION,C=ctx.window.NRW_BEAR_CAPACITY;
-const catalog={pets:[{name:'Mighty Bison',bearSkill:{id:'squad_capacity',values:
+const heroTypes={
+ Zoe:'infantry',Petra:'cavalry',Yang:'archer',
+ Chenko:'cavalry',Yeonwoo:'archer',Amane:'archer',Margot:'cavalry',
+ Hilde:'cavalry','Wee & Woo':'archer',Thrud:'cavalry',
+ Marlin:'archer',Rosa:'archer',
+ ...Object.fromEntries(Array.from({length:6},(_,i)=>['Inf'+i,'infantry'])),
+ ...Object.fromEntries(Array.from({length:3},(_,i)=>['Cav'+i,'cavalry'])),
+ ...Object.fromEntries(Array.from({length:3},(_,i)=>['Arch'+i,'archer']))
+};
+const catalog={heroTypes,pets:[{name:'Mighty Bison',bearSkill:{id:'squad_capacity',values:
  [1500,3000,4500,6000,7500,9000,10500,12000,13500,15000]}}]};
-const starter=['Rosa','Amadeus','Yang'];
-const leaders=['Chenko','Yeonwoo','Amane','Margot','Hilde','Thrud'];
-const filler=Array.from({length:13},(_,i)=>'Fill'+i);
-const all=[...starter,...leaders,...filler];
+const starter=['Zoe','Petra','Yang'];
+const leaders=['Chenko','Yeonwoo','Amane','Margot','Hilde','Wee & Woo'];
+const filler=[...Array.from({length:6},(_,i)=>'Inf'+i),
+ ...Array.from({length:3},(_,i)=>'Cav'+i),
+ ...Array.from({length:3},(_,i)=>'Arch'+i)];
+const all=[...starter,...leaders,...filler,'Thrud','Marlin','Rosa'];
 const heroes=Object.fromEntries(all.map((name,i)=>[name,{name,level:80,
  skills:[5,5,5],skillsAssumedMax:i%2===0?false:true}]));
 const m={values:{cap:100000,troopsI:100000,troopsC:100000,troopsA:900000,
@@ -34,6 +45,21 @@ assert.deepEqual(Array.from(p.marches.slice(1),x=>x.heroes[0]?.name).sort(),lead
  'reserve all six offensive join heroes before filler slots, order by confirmed skill');
 const selected=p.marches.flatMap(x=>x.heroes.filter(Boolean).map(y=>y.name));
 assert.equal(new Set(selected).size,21,'each hero in only one concurrent march');
+assert.ok(!p.marches.some(x=>x.slot>0&&x.heroes[0]?.name==='Thrud'),
+ 'Thrud is NOT an auto-selected offensive first-slot joiner');
+assert.ok(p.marches.slice(1).some(x=>x.heroes[0]?.name==='Hilde'),
+ 'Hilde remains an allowed lower-priority join lead');
+for(const march of p.marches){
+ const actualClasses=march.heroes.filter(Boolean).map(h=>catalog.heroTypes[h.name]);
+ assert.equal(new Set(actualClasses).size,actualClasses.length,
+  'no two heroes from the same class in one march: '+actualClasses);
+ assert.ok(actualClasses.every(x=>['infantry','cavalry','archer'].includes(x)));
+ assert.ok(!march.heroes.some(h=>h?.name==='Marlin')||!march.heroes.some(h=>h?.name==='Rosa'),
+  'Marlin and Rosa are BOTH archers and cannot appear together');
+ assert.equal(march.ratio.reduce((a,b)=>a+b,0),100,
+  'game-selectable ratios must sum to 100');
+ assert.ok(march.ratio.every(Number.isInteger),'no decimal percentages');
+}
 for(let j=1;j<p.marches.length;j++){
  assert.ok(p.marches[j].heroes[1].level===80&&p.marches[j].heroes[2].level===80,
   'slot 2 and 3 prefer high-level support heroes');
@@ -48,6 +74,9 @@ for(let k=0;k<3;k++)assert.ok(p.used[k]<=p.stock[k],'no stock over-allocation');
 assert.equal(p.allHeroesAssigned,true);
 assert.equal(p.allHeroLevelsKnown,true);
 assert.equal(p.starterScore!==null,true,'starter model still available, no invented join damage');
+assert.equal(p.scoreType,'starter-plus-join-proxy',
+ 'results distinguish provisional join proxies from real rally-leader damage');
+assert.ok(!ui.includes('.ratio[k].toFixed(1)'),'game formation ratios cannot use decimals');
 const pAgain=plan();
 assert.equal(JSON.stringify(pAgain.marches.map(x=>x.troops)),JSON.stringify(p.marches.map(x=>x.troops)),
  'same inputs yield reproducible allocations');
@@ -60,11 +89,11 @@ for(let k=0;k<3;k++)assert.ok(p.used[k]<=p.stock[k],'scarce archers must never g
 const supply=[...p.stock],totals=p.marches.reduce((a,x)=>a+x.filled,0);
 assert.ok(totals<=supply.reduce((a,b)=>a+b,0));
 m.values.troopsA=900000;
-delete m.v2.manualHeroes.Fill9;delete m.v2.manualHeroes.Fill10; // 20 owned < 21 hero slots
+for(const name of ['Inf4','Inf5','Arch2'])delete m.v2.manualHeroes[name]; // not enough to fill all joins
 p=plan();assert.equal(p.allHeroesAssigned,false,'missing heroes are not synthesized');
 assert.equal(p.allHeroLevelsKnown,false,'missing join capacity remains provisional');
-m.v2.manualHeroes.Fill9=heroes.Fill9;m.v2.manualHeroes.Fill10=heroes.Fill10;
-m.v2.scannedOwnedHeroes=starter.concat(filler);p=plan();
+for(const name of ['Inf4','Inf5','Arch2'])m.v2.manualHeroes[name]=heroes[name];
+m.v2.scannedOwnedHeroes=starter.concat(filler,'Thrud');p=plan();
 assert.ok(p.marches.some(x=>x.slot>0&&!x.heroes[0]),'unsafe first skills are not auto recommended');
 m.v2.scannedOwnedHeroes=all;
 m.values.cap=0;p=plan();assert.equal(p.ready,false);
