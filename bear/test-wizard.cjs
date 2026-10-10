@@ -16,6 +16,19 @@ for(const [name,js] of [['wizard',wizard],['intake',intake],['gear',gear]]){
 }
 for(const filename of ['wizard.js','wizard.css','intake-ui.js','intake-ui.css'])assert.ok(html.includes('./'+filename),'missing html asset '+filename);
 assert.ok(html.indexOf('intake-ui.js')<html.indexOf('wizard.js'),'wizard runs after importer initialization');
+assert.ok(html.indexOf('hero-reference.js')<html.indexOf('wizard.js'),
+ 'hero source loader must run before recommendation display');
+assert.ok(wizard.includes('NRW_BEAR_HERO_REFERENCE'),
+ 'leader review is connected to independent GitHub hero reference');
+assert.ok(wizard.includes('Quellenwert Expedition ATK/DEF'),
+ 'visible numeric expedition progression from checked source');
+assert.ok(wizard.includes('Skillwerte von Stufe 1 bis 5'),
+ 'normal skill source progression explained without guessing current skill levels');
+assert.ok(wizard.includes('reference?.get?.(h.name,h.stars,h.tier)'),
+ 'alternative choices also show source-backed values');
+assert.ok(!wizard.includes('sourceValue*')&&!wizard.includes('verified.bonus*'),
+ 'reference bonuses are never invented damage multipliers');
+
 assert.ok(html.indexOf('wizard.css')>html.indexOf('intake-ui.css'),'wizard styles override legacy forms');
 assert.ok(wizard.includes("labels=['id','troops','stats','gear','heroes','hero-picks','hero-details','missing','result'];"),'nine stages in intended sequence');
 for(const id of ['lookupForm','intakeFiles','bearGearPhoto','intakeMissingDetails','intakeResultSlot']){
