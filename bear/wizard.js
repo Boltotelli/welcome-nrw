@@ -17,7 +17,7 @@ const lang=()=>document.documentElement.lang||'de';
 const messages={
  de:{
   eyebrow:'NRW · BEAR TRAP',start:'Deine Bären-Aufstellung',desc:'Einmal durchgehen. Wir übernehmen alles, was wir aus deiner ID und den Spielscreenshots lesen können.',
-  steps:['Dein Profil','Truppen','Kampfwerte','GovGear','Alle Helden','Top 3 Helden','Heldendetails','Pets & Valora · fehlende Angaben','Deine Empfehlung','Schadenssimulation'],
+  steps:['Dein Profil','Truppen','Kampfwerte','GovGear','Alle Helden','Top 3 Helden','Heldendetails','Pets & Valora · fehlende Angaben','Deine Empfehlung','Dein Bärenschaden'],
   prompts:['Wähle deine Governor-ID oder lade deine bereits vorhandenen Profildaten.',
    'Lade die Schwadronvorschau hoch. Ein Screenshot reicht. Wir lesen Truppenanzahl und Stufen.',
    'Lade die Bonusübersicht hoch. Bei einer langen Liste einfach mehrere Screenshots nacheinander auswählen.',
@@ -27,7 +27,7 @@ const messages={
    'Verteile dein bestes verfügbares Helden-Gear auf die drei empfohlenen Helden und lasse diese Ausstattung für die Bärenfalle angelegt. Lade DANACH die Heldendetails und Fertigkeiten hoch.',
    'Lade jetzt die Pet- und Valora-Skills hoch und trage Hunter Instinct manuell ein. Danach ergänzen wir nur noch wirklich fehlende Angaben.',
    'Prüfe die vorgeschlagenen Starter- und Join-Formationen mit der gemeinsamen Truppenauslastung.',
-   'Teste unterschiedliche Starter- und Join-Verteilungen und vergleiche ihre relative Schadensprognose.'],
+   'Passe bei Bedarf nur deine Starter-Formation an. Wir zeigen dir eine einzige Schätzung mit allen aktiven Boni – ohne Joiner.'],
   next:'Weiter',back:'Zurück',skip:'Diesen Screenshot später ergänzen',finish:'Ergebnis anzeigen',
   upload:'Screenshot auswählen',uploads:'Screenshots auswählen',progress:'Schritt',
   profileGood:'Profil geladen – weiter zu den Truppen.',profileMissing:'Bitte erst eine ID oder ein NRW-Profil laden.',
@@ -37,13 +37,13 @@ const messages={
   ready:'Angaben übernommen. Du kannst fortfahren.',
   done:'Einrichtung abgeschlossen.',missing:'Noch erforderlich',allGood:'Keine Pflichtangaben fehlen.',
   opt:'Optionale Experteneinstellungen',advanced:'Alle Felder anzeigen',api:'Gespeichertes Profil oder API-JSON',
-  skipped:'Diesen Schritt kannst du später ergänzen.',estimated:'Die Berechnung ist eine vorläufige Simulation; Heldenprocs und Widgets sind nicht vollständig modelliert.',
+  skipped:'Diesen Schritt kannst du später ergänzen.',estimated:'Eine Schätzung, keine garantierten Spielpunkte: Zufallsskills können den tatsächlichen Schaden verändern.',
   hero:'Heldenauswahl und Sterne werden nur übernommen, wenn du die Erkennung bestätigst.',
   privacy:'Die Bilder bleiben auf deinem Gerät. Die OCR-Software wird beim ersten Import heruntergeladen.'
  },
  en:{
   eyebrow:'NRW · BEAR TRAP',start:'Your Bear Trap lineup',desc:'Follow a short guided setup. We reuse your player data and screenshots.',
-  steps:['Your profile','Troops','Combat stats','Governor gear','All heroes','Top 3 heroes','Hero details','Pets & Valora · missing values','Your recommendation','Damage simulation'],
+  steps:['Your profile','Troops','Combat stats','Governor gear','All heroes','Top 3 heroes','Hero details','Pets & Valora · missing values','Your recommendation','Your Bear damage'],
   prompts:['Choose your Governor ID or import an existing profile.',
    'Upload your troop overview. One screenshot covers troops and tiers.',
    'Upload the bonuses screen. You can select several screenshots of a long list.',
@@ -53,7 +53,7 @@ const messages={
    'Distribute your best available HERO GEAR across all three suggested heroes as you would use it for Bear Trap. THEN upload their detail and skill screenshots.',
    'Upload pet skills and Valora skills; enter Hunter Instinct manually. Then fill only genuinely missing values.',
    'Review the proposed starter and joins with their shared troop inventory.',
-   'Experiment with starter and join formations and compare the relative damage forecast.'],
+   'Adjust your starter formation if needed. See one expected personal damage result with all active bonuses and no joining heroes.'],
   next:'Continue',back:'Back',skip:'Add this screenshot later',finish:'Show recommendation',
   upload:'Choose screenshot',uploads:'Choose screenshots',progress:'Step',
   profileGood:'Profile loaded. Continue to troops.',profileMissing:'Load a Governor ID or NRW profile first.',
@@ -61,13 +61,13 @@ const messages={
   review:'Review recognized fields and press Apply, then continue.',waiting:'Upload and confirm a screenshot, or skip this step.',
   ready:'Values saved. You can continue.',done:'Setup finished.',missing:'Still needed',allGood:'All required values are present.',
   opt:'Optional expert settings',advanced:'Show all fields',api:'Saved profile or API JSON',
-  skipped:'You can add this step later.',estimated:'Results are provisional estimates. Hero procs and widgets are not fully modeled.',
+  skipped:'You can add this step later.',estimated:'This is an estimate, not guaranteed game points. Random skill activations affect actual damage.',
   hero:'Hero names and stars are saved only after your confirmation.',
   privacy:'Screenshots stay on your device. OCR components download on the first import.'
  },
  fr:{
   eyebrow:'NRW · BEAR TRAP',start:'Ta formation Ours',desc:'Un assistant simple basé sur ton profil et tes captures.',
-  steps:['Profil','Troupes','Stats','Équipement','Tous les héros','Top 3 héros','Détails héros','Pets & Valora · valeurs manquantes','Résultat','Simulation des dégâts'],
+  steps:['Profil','Troupes','Stats','Équipement','Tous les héros','Top 3 héros','Détails héros','Pets & Valora · valeurs manquantes','Résultat','Tes dégâts Ours'],
   prompts:['Choisis ton ID ou importe un profil existant.','Ajoute une capture des troupes.','Ajoute une ou plusieurs captures des bonus.','Une capture complète des 6 équipements et 18 talismans.','Ajoute toutes les captures de la liste des héros, en une seule sélection.','Vérifie les trois héros recommandés pour l’Ours.',
    'Équipe ces héros avec ton meilleur équipement avant de capturer leurs détails et compétences.','Ajoute les captures de compétences des animaux et de Valora ; saisis le talent puis complète les valeurs manquantes.','Vérifie les formations de départ et les renforts avec les stocks communs.',
    'Teste plusieurs formations et compare leurs dégâts relatifs.'],
