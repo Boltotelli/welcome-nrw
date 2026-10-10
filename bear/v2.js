@@ -120,7 +120,7 @@ function makeLayout(){
  '<p class="hint">'+esc(tx('heroCapacityNote'))+'</p>'+
  '<div class="bear-squad-buffs"><label class="field">'+esc(tx('squadAttack'))+'<input id="squadAtk" min="0" step="0.1" type="number" placeholder="275.2"></label>'+
  '<label class="field">'+esc(tx('squadLethality'))+'<input id="squadLet" min="0" step="0.1" type="number" placeholder="60.1"></label>'+
- '<label class="bear-active"><input type="checkbox" id="squadSeparate"> '+esc(tx('squadSeparate'))+'</label></div>'+ 
+ '<label class="bear-active" style="display:none"><input type="checkbox" id="squadSeparate"> '+esc(tx('squadSeparate'))+'</label></div>'+ 
  '<label class="bear-pitfall">🐻 '+esc(tx('pitfall'))+'<select id="pitfall" disabled title="NRW: always level 5">'+choices([[5,'Lv. 5 (+25% ATK) · NRW']],5)+'</select></label>';
  levelPanel.after(extra);
  ['heroCapManual','squadAtk','squadLet'].forEach(id=>{
