@@ -260,6 +260,18 @@ function renderRecommendations(){
   l==='fr'?'Un héros possédé par classe. Étoiles, niveaux et compétences priment sur la popularité du guide. Estimation indicative, PAS une simulation KS Atlas.':
   'Your scanned owned heroes only: one rally leader per class. Stars, level and skills outweigh name popularity. Atlas-inspired shortlist, NOT an official damage simulation.';
  recommendationPanel.append(intro);
+ const ext=B.model().v2||{},scanned=new Set(ext.scannedOwnedHeroes||[]);
+ const unresolved=Object.values(ext.manualHeroes||{})
+  .filter(h=>h?.name&&scanned.has(h.name)&&h.starPendingReview).length;
+ if(unresolved){
+  const warning=document.createElement('p');warning.className='bear-guide-needed';
+  warning.textContent=l==='de'?
+   'Noch '+unresolved+' Held(en) mit ungeprüften Sternen. Diese Helden werden im Ranking vorsichtig behandelt. Gehe zurück, wenn du die Sternstufen bestätigen möchtest.':
+   l==='fr'?
+   'Étoiles non vérifiées pour '+unresolved+' héros. Ils sont évalués prudemment ; reviens les confirmer.':
+   unresolved+' heroes have unverified stars. They are conservatively ranked. Go back to confirm their stars before relying on this shortlist.';
+  recommendationPanel.append(warning);
+ }
  const refs=document.createElement('p');refs.className='bear-guide-sources';
  const atlasLink=document.createElement('a');atlasLink.href=atlas;atlasLink.target='_blank';atlasLink.rel='noopener noreferrer';atlasLink.textContent='KS Atlas · Bear Rally Heroes';
  const guideLink=document.createElement('a');guideLink.href=advisor?.supportingGuide||'https://kingshotguides.com/guide/bear-hunt-expert-guide/';
