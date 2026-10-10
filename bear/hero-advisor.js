@@ -100,7 +100,7 @@ function recommend(owned,types,priorities,referenceGet){
  });
 }
 root.NRW_BEAR_HERO_ADVISOR={
- recommend,evaluate,skillState,classes,
+ recommend,evaluate,skillState,classes,offensiveWidgetHeroes:[...offensiveWidget],
  source:'https://ks-atlas.com/tools/atlas-database/bear-rally-heroes',
  supportingGuide:'https://kingshotguides.com/guide/bear-hunt-expert-guide/',
  method:'provisional role, progression and checked Expedition ATK heuristic when comparable; not Atlas damage or actual Kingshot Bear damage'

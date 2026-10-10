@@ -22,7 +22,7 @@ const messages={
    'Lade die Schwadronvorschau hoch. Ein Screenshot reicht. Wir lesen Truppenanzahl und Stufen.',
    'Lade die Bonusübersicht hoch. Bei einer langen Liste einfach mehrere Screenshots nacheinander auswählen.',
    'Ein vollständiges Bild der Gouverneur-Ausrüstung zeigt alle 6 Teile und 18 Talismane.',
-   'Lade alle Screenshots deiner gesamten Heldenübersicht hoch. Mehrere Bilder gleichzeitig sind möglich; überlappende Helden werden zusammengeführt.',
+   'Lade deine Heldenübersicht hoch, bestätige die Erkennung und prüfe danach die Widgets, bevor du die Top 3 wählst.',
    'Auf Basis deiner erfassten Helden schlagen wir dir pro Truppengattung einen Bären-Starter vor. Bitte bestätige die drei Helden.',
    'Verteile dein bestes verfügbares Helden-Gear auf die drei empfohlenen Helden und lasse diese Ausstattung für die Bärenfalle angelegt. Lade DANACH die Heldendetails und Fertigkeiten hoch.',
    'Lade jetzt die Pet- und Valora-Skills hoch und trage Hunter Instinct manuell ein. Danach ergänzen wir nur noch wirklich fehlende Angaben.',
@@ -48,7 +48,7 @@ const messages={
    'Upload your troop overview. One screenshot covers troops and tiers.',
    'Upload the bonuses screen. You can select several screenshots of a long list.',
    'One complete Governor Gear overview contains all 6 items and 18 charms.',
-   'Upload ALL screenshots of your hero overview. Select several images together; duplicates across scrolling screenshots are merged.',
+   'Upload hero screenshots and review Widget levels before selecting your top three.',
    'Based on your roster, review the three proposed Bear Trap rally starters – one per troop class.',
    'Distribute your best available HERO GEAR across all three suggested heroes as you would use it for Bear Trap. THEN upload their detail and skill screenshots.',
    'Upload pet skills and Valora skills; enter Hunter Instinct manually. Then fill only genuinely missing values.',
@@ -68,7 +68,7 @@ const messages={
  fr:{
   eyebrow:'NRW · BEAR TRAP',start:'Ta formation Ours',desc:'Un assistant simple basé sur ton profil et tes captures.',
   steps:['Profil','Troupes','Stats','Équipement','Tous les héros','Top 3 héros','Détails héros','Pets & Valora · valeurs manquantes','Résultat','Tes dégâts Ours'],
-  prompts:['Choisis ton ID ou importe un profil existant.','Ajoute une capture des troupes.','Ajoute une ou plusieurs captures des bonus.','Une capture complète des 6 équipements et 18 talismans.','Ajoute toutes les captures de la liste des héros, en une seule sélection.','Vérifie les trois héros recommandés pour l’Ours.',
+  prompts:['Choisis ton ID ou importe un profil existant.','Ajoute une capture des troupes.','Ajoute une ou plusieurs captures des bonus.','Une capture complète des 6 équipements et 18 talismans.','Ajoute les captures de tes héros puis vérifie leurs Widgets avant de choisir les trois meilleurs.','Vérifie les trois héros recommandés pour l’Ours.',
    'Équipe ces héros avec ton meilleur équipement avant de capturer leurs détails et compétences.','Ajoute les captures de compétences des animaux et de Valora ; saisis le talent puis complète les valeurs manquantes.','Vérifie les formations de départ et les renforts avec les stocks communs.',
    'Teste plusieurs formations et compare leurs dégâts relatifs.'],
   next:'Continuer',back:'Retour',skip:'Ajouter plus tard',finish:'Afficher le résultat',
@@ -297,18 +297,7 @@ for(const i of [1,2,4,6,7]){
  note.append(gallery,document.createElement('hr'),warning);
  help.append(head,note);sections[i].insertBefore(help,s.nextSibling);
 }
-const baseLevel=document.createElement('label');baseLevel.className='bear-valora-base';
-baseLevel.textContent='Valora · Grundlevel ';
-const baseLevelInput=document.createElement('input');baseLevelInput.type='number';
-baseLevelInput.min='0';baseLevelInput.max='100';baseLevelInput.placeholder='z. B. 80';
-baseLevel.append(baseLevelInput);sections[7].append(baseLevel);
-baseLevelInput.addEventListener('change',()=>{
- const v=B.model().v2||(B.model().v2={});
- if(baseLevelInput.value==='')delete v.valoraBaseLevel;
- else if(Number.isInteger(Number(baseLevelInput.value))&&Number(baseLevelInput.value)>=0&&Number(baseLevelInput.value)<=100)
-  v.valoraBaseLevel=Number(baseLevelInput.value);
- B.save();displayStored(7);
-});
+// Duplicate Valora base-level input omitted; existing v2.valoraBaseLevel stays saved.
 function displayStored(i){
  const panel=storedPanels[i];if(!panel)return;
  const m=B.model(),v=m.values||{},x=m.v2||{};
@@ -335,7 +324,9 @@ function displayStored(i){
   add('Helden',String(owned.length));
   owned.slice(0,20).forEach(n=>{
    const h=x.manualHeroes?.[n]||{};
-   add(n,'Lv '+num(h.level)+' · '+num(h.stars)+'★');
+   const explicit=Object.prototype.hasOwnProperty.call(x.starterWidgetLevels||{},n);
+   const widget=explicit?x.starterWidgetLevels[n]:(Number(h.widget)>0?h.widget:null);
+   add(n,'Lv '+num(h.level)+' · '+num(h.stars)+'★'+(widget!==null&&widget!==undefined?' · Widget '+num(widget):''));
   });
  }else if(i===6){
   (x.ownHeroes||[]).filter(Boolean).forEach(n=>{
@@ -347,7 +338,6 @@ function displayStored(i){
   Object.entries(x.petLevels||{}).filter(([n])=>!(n in (x.petSkillRanks||{}))).forEach(([n,lv])=>add(n,'Lv '+num(lv)+(x.petActive?.[n]?' · aktiv':'')));
   add('Valora Hunter Instinct','Lv '+num(x.valoraTalent));
   (x.valora||[]).forEach((lv,j)=>add('Valora Skill '+(j+1),'Lv '+num(lv)));
-  baseLevelInput.value=x.valoraBaseLevel??'';
  }
 }
 
@@ -356,40 +346,56 @@ capacityHost.id='bearRequiredCapacity';capacityHost.className='bear-required-cap
 sections[7].insertBefore(capacityHost,manual);
 const capacityUI=window.NRW_BEAR_CAPACITY_UI?.mount(capacityHost,B,lang);
 const widgetHost=document.createElement('section');widgetHost.className='bear-widget-panel bear-recommendation-panel';
-sections[7].insertBefore(widgetHost,manual);
+sections[4].append(widgetHost);
 function renderWidgetLevels(){
- const l=lang(),m=B.model(),v=m.v2||{};
- widgetHost.innerHTML='';
- const head=document.createElement('h3');
- head.textContent=l==='de'?'Widget-Fähigkeiten der 3 Starter':
-  l==='fr'?'Compétences Widget des trois héros':'Three starter Widget abilities';
- widgetHost.append(head);
+ const v=B.model().v2||{},l=lang();
+ const scanned=Array.isArray(v.scannedOwnedHeroes)?[...new Set(v.scannedOwnedHeroes.filter(Boolean))]:[];
+ widgetHost.replaceChildren();widgetHost.hidden=!scanned.length;
+ if(!scanned.length)return;
+ const h=document.createElement('h3');
+ h.textContent=l==='de'?'Widgets vor der Top-3-Auswahl':l==='fr'?'Widgets avant le top 3':'Widgets before top 3';
+ widgetHost.append(h);
  const note=document.createElement('p');note.className='hint';
- note.textContent=l==='de'?
-  'Bitte für jeden Starter das Widget-Level wählen. 0 = kein Widget. Wir rechnen nur offensive Expedition-Widget-Fähigkeiten, nicht die bereits in den Stats enthaltenen Werte.':
- l==='fr'?
-  'Choisis le niveau du Widget (0 = aucun). On compte uniquement la compétence offensive, pas les statistiques déjà intégrées.':
-  'Enter each Widget level (0 = none). Only offensive Expedition abilities count, not already-captured widget gear stats.';
+ note.textContent=l==='de'?'Die Widget-Level beeinflussen die Auswahl. „—“ = unbekannt, 0 = kein Widget.':
+  l==='fr'?'Les Widgets influencent le classement. « — » = inconnu, 0 = aucun Widget.':
+  'Widget levels affect the ranking. “—” = unknown, 0 = no Widget.';
  widgetHost.append(note);
- const grid=document.createElement('div');grid.className='bear-widget-level-grid';widgetHost.append(grid);
- for(const n of v.ownHeroes||[]){
-  if(!n)continue;
-  const wLabel=document.createElement('label');wLabel.className='bear-widget-manual';
-  const wText=document.createElement('span');wText.textContent=n;
-  const wSelect=document.createElement('select');wSelect.setAttribute('aria-label',n+' Widget');
-  const empty=document.createElement('option');empty.value='';empty.textContent='—';wSelect.append(empty);
-  for(let lv=0;lv<=10;lv++){const opt=document.createElement('option');opt.value=String(lv);opt.textContent=lv===0?'0 · kein Widget':'Lv '+lv;wSelect.append(opt);}
-  const saved=v.starterWidgetLevels?.[n],scanned=v.manualHeroes?.[n]?.widget;
-  wSelect.value=saved!==undefined&&saved!==null?String(saved):
-   Number(scanned)>0?String(scanned):'';
-  wSelect.addEventListener('change',()=>{
-   const model=B.model();model.v2=model.v2||{};
-   model.v2.starterWidgetLevels=model.v2.starterWidgetLevels||{};
-   if(wSelect.value==='')delete model.v2.starterWidgetLevels[n];
-   else model.v2.starterWidgetLevels[n]=Number(wSelect.value);
-   B.save();
-  });
-  wLabel.append(wText,wSelect);grid.append(wLabel);
+ const important=new Set(advisor?.offensiveWidgetHeroes||[]);
+ const primary=scanned.filter(n=>important.has(n)),others=scanned.filter(n=>!important.has(n));
+ function draw(names,target){
+  const grid=document.createElement('div');grid.className='bear-widget-level-grid';
+  for(const n of names){
+   const label=document.createElement('label');label.className='bear-widget-manual';
+   const text=document.createElement('span');text.textContent=n;
+   const select=document.createElement('select');select.setAttribute('aria-label',n+' Widget');
+   const unknown=document.createElement('option');unknown.value='';unknown.textContent='—';select.append(unknown);
+   for(let lv=0;lv<=10;lv++){
+    const opt=document.createElement('option');opt.value=String(lv);
+    opt.textContent=lv===0?(l==='de'?'0 · kein Widget':'0 · no Widget'):'Lv '+lv;select.append(opt);
+   }
+   const explicit=Object.prototype.hasOwnProperty.call(v.starterWidgetLevels||{},n);
+   const value=explicit?v.starterWidgetLevels[n]:v.manualHeroes?.[n]?.widget;
+   select.value=value!==null&&value!==undefined&&value!==''&&
+    Number.isInteger(Number(value))&&Number(value)>=(explicit?0:1)&&Number(value)<=10?String(value):'';
+   select.addEventListener('change',()=>{
+    const model=B.model();model.v2=model.v2||{};
+    model.v2.starterWidgetLevels=model.v2.starterWidgetLevels||{};
+    if(select.value==='')delete model.v2.starterWidgetLevels[n];
+    else model.v2.starterWidgetLevels[n]=Number(select.value);
+    B.save();displayStored(4);
+   });
+   label.append(text,select);grid.append(label);
+  }
+  target.append(grid);
+ }
+ if(primary.length){draw(primary,widgetHost);}
+ if(others.length){
+  const more=document.createElement('details');more.className='bear-widget-more';
+  if(!primary.length)more.open=true;
+  const head=document.createElement('summary');
+  head.textContent=l==='de'?'Weitere Helden ('+others.length+')':
+   l==='fr'?'Autres héros ('+others.length+')':'Other heroes ('+others.length+')';
+  more.append(head);draw(others,more);widgetHost.append(more);
  }
 }
 
@@ -404,6 +410,12 @@ function heroResults(){
   // A partial screenshot can update a profile without erasing API stars.
   const previous=roster.get(h.name)||{};
   roster.set(h.name,{...previous,...h});
+ }
+ const widgetLevels=ext.starterWidgetLevels||{};
+ for(const [name,hero] of roster){
+  if(Object.prototype.hasOwnProperty.call(widgetLevels,name)&&Number.isInteger(Number(widgetLevels[name]))&&
+   Number(widgetLevels[name])>=0&&Number(widgetLevels[name])<=10)
+   roster.set(name,{...hero,widget:Number(widgetLevels[name])});
  }
  return advisor?.recommend([...roster.values()],window.NRW_BEAR_CATALOG?.heroTypes,
   window.NRW_BEAR_INTAKE_CORE?.rankByType,
@@ -638,9 +650,10 @@ function render(){
  // Both troop & stat & hero steps use the same importer, never three forms.
  if([1,2,4,6].includes(idx))showIntake(idx);
  window.NRW_BEAR_SCREENSHOT_STAGE=[1,2,4,6].includes(idx)?idx:null;
+ if(idx===4){sections[4].append(widgetHost);renderWidgetLevels();}
  if(idx===5)renderRecommendations();
  if(idx===6)renderHeroDetails();
- if(idx===7){renderWidgetLevels();showRelevantManual();formationUI?.refreshSetup();}
+ if(idx===7){showRelevantManual();formationUI?.refreshSetup();}
  if(idx===8){formationUI?.show();}
  if(idx===9){simulationUI?.enter();}
  if(storedPanels[idx])displayStored(idx);
@@ -731,13 +744,17 @@ window.addEventListener('nrw-bear-intake-applied',evt=>{
   // Hero DETAIL imports remain on the same step until all three are ready.
   if(active===4||active===6){
    if(active===4){
-    // The user just confirmed ALL screenshots in the current batch.
-    // Once each class has a scanned hero, show their TOP 3 now rather
-    // than presenting the same "upload all heroes" screen again.
-    if(recommendationsReady()){moveTo(5);return;}
-    message(document.documentElement.lang==='de'
-     ?'Noch nicht alle drei Truppengattungen erkannt. Ergänze die fehlenden Helden oder korrigiere die Namen.'
-     :'Not all three troop classes were recognized. Add missing heroes or correct their names.');
+    renderWidgetLevels();displayStored(4);
+    if(recommendationsReady()){
+     message(document.documentElement.lang==='de'?
+      'Helden gespeichert. Bitte die Widgets prüfen und danach auf „Weiter“ zu den Top 3 tippen.':
+      'Heroes saved. Review Widgets, then continue to the top 3.');
+     widgetHost.scrollIntoView({block:'center',behavior:'smooth'});
+    }else{
+     message(document.documentElement.lang==='de'?
+      'Noch nicht alle Truppengattungen erkannt. Ergänze die Bilder und prüfe die Widgets.':
+      'Some troop classes are missing; add the screenshots and review Widgets.');
+    }
     return;
    }
    if(active===6){

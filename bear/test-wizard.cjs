@@ -58,8 +58,14 @@ assert.match(wizard,/gleichzeitig/i,'best equipment must be fitted to all three 
 assert.ok(wizard.includes('jeweils EINEN Screenshot'),'exactly one screenshot per selected hero is requested');
 assert.ok(wizard.includes('scannedOwnedHeroes'),'only heroes identified in the screenshots are eligible');
 
-assert.match(wizard,/if\(active===4\)\{[\s\S]*?if\(recommendationsReady\(\)\)\{moveTo\(5\);return;\}/,
- 'confirmed multi-image hero upload must automatically open Top 3, not ask for the same upload again');
+assert.ok(wizard.includes('if(idx===4){sections[4].append(widgetHost);renderWidgetLevels();}'),
+ 'Widget review is on the hero-overview step');
+assert.ok(wizard.includes('renderWidgetLevels();displayStored(4);'),
+ 'confirmed OCR refreshes widget inputs');
+assert.ok(!wizard.includes('if(recommendationsReady()){moveTo(5);return;}'),
+ 'OCR must not skip the Widget review');
+assert.ok(wizard.includes('roster.set(name,{...hero,widget:Number(widgetLevels[name])})'),
+ 'explicit widget levels are passed into hero rankings');
 assert.ok(intake.includes('starSuggestion??'), 'uncertain stars are prefilled as reviewable suggestions');
 assert.ok(intake.includes('Sternvorschlag bestätigen'), 'single tap verifies an uncertain star estimate');
 assert.ok(intake.includes('c.height=Math.max(180,Math.round(170*pixelH/pixelW))'),
@@ -92,15 +98,18 @@ assert.match(intake,/parseHeroOrderedExpeditionRows\(result\.data\?\.text\|\|'',
 assert.match(intake,/\['Atk','Def','Let','Hp'\]\.map\(k=>group\+k\)/,
  'hero input rows must mirror actual Kingshot Attack Defense Lethality Health order');
 assert.ok(wizard.includes('displayStored(idx)'),'saved values remain visible on screenshot pages');
-assert.ok(wizard.includes('valoraBaseLevel'),'Valora overall level tracked separately from Hunter Instinct');
+assert.ok(!wizard.includes('baseLevelInput'),'duplicate Valora input removed without deleting its saved value');
+assert.ok(wizard.includes('v2.valoraBaseLevel'),'saved Valora values preserved');
 assert.ok(wizard.includes('Formationen generieren'),'simple formation generation action');
 assert.ok(wizard.includes('Grundschaden ohne Joiner berechnen'),'simple no-join damage action');
 assert.ok(css.includes('.bear-guide-stored'),'mobile saved-values cards styled');
 assert.ok(!wizard.includes('kingshot_beartrap_v3_action_transparent.webm'),'formation-stage loading must not reuse the damage video');
 assert.ok(wizard.includes('stageLoader.append(loaderBear,loaderText)'),'formation stage keeps its own animated bear loading indicator');
 assert.ok(simulation.includes("webm.src='./assets/kingshot_beartrap_v3_action_transparent.webm'"),'damage simulation retains the approved video');
-assert.ok(html.includes('./wizard.js?v=verified-atk-20261011-1'),'wizard cache key must refresh for existing visitors');
-assert.ok(html.includes('./hero-advisor.js?v=verified-atk-20261011-1'),'new ranking engine must bypass cache');
+assert.ok(html.includes('./wizard.js?v=roster-widgets-20261011-1'),'wizard cache version changed');
+assert.ok(html.includes('./wizard.css?v=roster-widgets-20261011-1'),'CSS cache version changed');
+assert.ok(html.includes('./hero-advisor.js?v=roster-widgets-20261011-1'),'advisor cache version changed');
+assert.ok(wizard.includes('new Set(advisor?.offensiveWidgetHeroes||[])'),'offensive heroes shown first');
 assert.ok(wizard.includes('window.NRW_BEAR_HERO_REFERENCE?.get?.(name,stars,tier)'),'verified attack is passed to the ranking engine');
 assert.ok(wizard.includes("'.jpg?v=corrected-examples-20261011-1'"),'corrected original images bypass stale browser caches');
 const workflow=fs.readFileSync(__dirname+'/../.github/workflows/bear-pages.yml','utf8');
