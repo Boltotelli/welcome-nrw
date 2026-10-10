@@ -130,6 +130,15 @@ jobs:
           if [ -d bear/examples ]; then
             mkdir -p _site/examples
             find bear/examples -maxdepth 1 -type f -name '*.jpg' -exec cp '{}' _site/examples/ \;
+            # A single user-supplied ZIP can carry all nine unmodified assets.
+            if [ -f bear/examples/nrw-bear-assets.zip ]; then
+              unzip -tq bear/examples/nrw-bear-assets.zip
+              for name in troops.jpg stats.jpg stats-extra.jpg roster.jpg hero-details.jpg pets.jpg valora.jpg; do
+                if [ ! -f "_site/examples/$name" ]; then
+                  unzip -p bear/examples/nrw-bear-assets.zip "$name" > "_site/examples/$name"
+                fi
+              done
+            fi
           fi
           # Optional opt-in player snapshots. Never expose local browser data
           # or fetch a secure API key during the static build.
@@ -146,6 +155,8 @@ jobs:
               cp "bear/examples/$name" "_site/assets/$name"
             elif [ -f "bear/assets/$name" ]; then
               cp "bear/assets/$name" "_site/assets/$name"
+            elif [ -f bear/examples/nrw-bear-assets.zip ]; then
+              unzip -p bear/examples/nrw-bear-assets.zip "$name" > "_site/assets/$name"
             fi
           done
           cp assets/nrw-banner.svg _site/assets/nrw-banner.svg
