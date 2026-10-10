@@ -53,7 +53,7 @@ const intakeCss=fs.readFileSync(__dirname+'/intake-ui.css','utf8');
 assert.ok(!intakeCss.includes('object-fit:cover'), 'no cropped hero stars in review UI');
 assert.ok(intake.includes('high-contrast')||intake.includes('thresholded high-contrast'),
  'unknown hero detail names receive extra bounded OCR');
-assert.ok(intake.includes('availableStats.length'), 'actual visible expedition values are reviewable');
+assert.ok(intake.includes('const observed=keys.filter('), 'observed and absent percentages are reviewable separately');
 assert.ok(intake.includes('GovGear wird NICHT noch einmal addiert'),
  'screenshots must not double count equipment or invent hero base stats');
 assert.ok(wizard.includes('renderHeroDetails()'),'detail upload after best hero gear prompt');
