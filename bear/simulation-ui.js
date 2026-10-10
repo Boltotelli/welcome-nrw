@@ -357,6 +357,13 @@ function mount(host,B,language){
     (l==='de'?'gegenüber der vorgeschlagenen Starter-Formation':
      l==='fr'?'par rapport à la formation de départ recommandée':'vs recommended starter lineup')));
   }
+  if(own.assembledStats?.origin.mode==='separate-overview'&&
+     own.assembledStats?.missing?.length){
+   card.append(el('p','bear-guide-needed',
+    (l==='de'?'In den getrennten Bonuswerten fehlen noch: ':
+     l==='fr'?'Bonus séparés manquants : ':'Missing separately captured bonuses: ')+
+    own.assembledStats.missing.join(' · ')));
+  }
   for(const fx of own.included)card.append(el('p','hint',
    fx.hero+' · '+fx.skill+' Lv'+fx.level+': +'+fx.effectiveBonusPct.toFixed(1)+'% '+
     (fx.kind==='fixed-enemy-damage-taken'?
