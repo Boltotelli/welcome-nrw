@@ -34,7 +34,14 @@ assert.ok(!wizard.includes('localStorage.setItem('),'wizard does not create a co
 assert.ok(wizard.includes('capacityHost.append(capField)'),'squad capacity moved outside conditional group');
 assert.ok(wizard.includes('confirmRecommendedHeroes()'),'recommendation confirmation precedes details');
 assert.ok(wizard.includes("input.multiple=[2,4,6].includes(i)"),'full hero overview and detail batches are supported');
-assert.ok(wizard.includes('recommendationsReady()'),'no unowned hero silently recommended');
-assert.ok(wizard.includes('BESTES verfügbares HELDEN-GEAR'),'remind users to equip hero gear before detail screenshots');
+assert.ok(wizard.includes('recommendationsReady()'),'cannot confirm three roles unless all present');
+assert.ok(wizard.includes('const restrict=true'),'no unscanned API/manual hero slips into shortlist');
+assert.ok(wizard.includes('simultaneously')||wizard.includes('SIMULTANEOUSLY'),
+ 'three gear sets must be equipped simultaneously');
+assert.ok(wizard.includes('BESTES HELDEN-GEAR'),'remind users to distribute best hero gear before detail screenshots');
+assert.ok(wizard.includes('GLEICHZEITIG'),'best equipment must be fitted to all three heroes simultaneously');
+assert.ok(wizard.includes('jeweils EINEN Screenshot'),'exactly one screenshot per selected hero is requested');
+assert.ok(wizard.includes('scannedOwnedHeroes'),'only heroes identified in the screenshots are eligible');
+
 assert.ok(wizard.includes('renderHeroDetails()'),'detail upload after best hero gear prompt');
 console.log('BEAR WIZARD: nine stages, hero shortlist, separate gear-first detail uploads and independent capacity input verified.');
