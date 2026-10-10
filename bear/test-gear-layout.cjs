@@ -98,6 +98,18 @@ for(const mult of [1,1.5]){
  assert.equal(detectedReal.slots.length,6);
  assert.equal(detectedReal.slots.filter(x=>x.inferred).length,0,'all six slots directly detected');
 
+// Screenshot_20261009_132332: gold-staff charms are spaced ~45px in
+// a 955px-wide picture, while the previous +/-20 basepx thumbs were ~53px
+// wide, accidentally containing two gold glyphs in the same thumbnail.
+// Verify the dynamically measured spacing results in non-overlapping crops.
+const gearImporter=fs.readFileSync(__dirname+'/screenshot-importer.js','utf8');
+assert.match(gearImporter,/const cropRadius=Math\.max\(9,Math\.min\(13,Math\.floor\(separation\*\.38\)\)\)/);
+assert.match(gearImporter,/thumb:drawThumb\(ctx,pos,cropRadius\)/);
+const step=34;
+const radius=Math.max(9,Math.min(13,Math.floor(step*.38)));
+assert.equal(radius,12,'full-res mobile golden-charm crop radius');
+assert.ok(radius*2<step,'adjacent charm thumbnails never overlap');
+
 const blank=image().pixels;blank.fill(0);
 assert.equal(find(blank,716,1536).ok,false);
 console.log('GEAR LAYOUT: six purple/orange frames detected at original and shifted positions, no inferred golden archer equipment.');
