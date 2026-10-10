@@ -498,8 +498,31 @@ async function inspect(file){
   hc.drawImage(canvas,canvas.width*.20,0,canvas.width*.60,canvas.height*.11,
     0,0,header.width,header.height);
   const headerOCR=await worker.recognize(header);
-  const heading=headerOCR.data.text||'';
+  let heading=headerOCR.data.text||'';
   detail=Core.parseHeroDetail(heading+'\n'+text,allKnown())||detail;
+  if(!detail?.name){
+   // Short names such as "Zoe" can vanish in the white-on-dark outlined
+   // title. Make a second pass across a wider upper heading band with
+   // thresholded high-contrast text. Do NOT infer name from ownership or
+   // from the other two detail screenshots.
+   const upper=document.createElement('canvas');upper.width=1120;upper.height=220;
+   const uc=upper.getContext('2d',{willReadFrequently:true});
+   uc.drawImage(canvas,canvas.width*.06,canvas.height*.012,
+    canvas.width*.88,canvas.height*.165,0,0,upper.width,upper.height);
+   const im=uc.getImageData(0,0,upper.width,upper.height);
+   for(let k=0;k<im.data.length;k+=4){
+    const r=im.data[k],g=im.data[k+1],b=im.data[k+2];
+    const bright=r>150&&g>146&&b>135;
+    im.data[k]=im.data[k+1]=im.data[k+2]=bright?0:255;
+    im.data[k+3]=255;
+   }
+   uc.putImageData(im,0,0);
+   try{
+    const focused=await worker.recognize(upper);
+    heading+='\n'+(focused.data?.text||'');
+    detail=Core.parseHeroDetail(heading+'\n'+text,allKnown())||detail;
+   }catch(_){/* Unknown name still requires user confirmation. */}
+  }
  }
  if(type==='unknown'&&detail?.name)type='starter';
  // A roster is only valid as a complete four-column overview. Detail pages
