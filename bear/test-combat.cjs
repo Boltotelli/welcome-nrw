@@ -30,4 +30,32 @@ const simulated=B.damage([6000,6000,6000],stats,tiers,5);
 assert.ok(Math.abs(simulated-16796.47)<1,'T6 published illustrative benchmark');
 assert.ok(B.damage([0,0,12000],stats,tiers,5)>B.damage([0,0,12000],stats,tiers,0));
 assert.ok(B.damage([0,0,12000],{...stats,aAtk:100},tiers,5)>B.damage([0,0,12000],stats,tiers,5));
-console.log('BEAR COMBAT: 16 checks passed, T6 baseline '+simulated.toFixed(2));
+// Every displayed diagnostic MUST be derived from the same computation
+// that drives the damage engine; avoid an unrelated UI approximation.
+const trace=B.breakdown([6000,6000,6000],stats,tiers,5);
+assert.ok(trace&&trace.totalTroops===18000);
+assert.equal(trace.trapLevel,5);
+assert.equal(trace.trapAttackPct,25);
+assert.ok(Math.abs(trace.totalTenRounds-simulated)<1e-8);
+assert.equal(trace.types[0].baseAttack,243);
+assert.equal(trace.types[0].appliedAttackPct,25);
+assert.equal(trace.types[0].lethalityPct,0);
+assert.ok(Math.abs(trace.types[2].typeBonus-1.1)<1e-9);
+// When fewer than 5000 own troops are present, the army factor must
+// use the smaller army, not blindly multiply by all 5000 Bear troops.
+const sparse=B.breakdown([300,300,400],stats,tiers,5);
+assert.equal(sparse.armyMin,1000);
+assert.ok(sparse.types.every(t=>Math.abs(t.armyFactor-Math.sqrt(t.count*1000))<1e-8));
+// Demonstrate a 21-fold model spread is possible from attack/lethality
+// inputs alone, without inventing a hidden conversion constant.
+const historical=[1818,21818,158184],t10=[
+ {tier:10,tg:6},{tier:10,tg:5},{tier:10,tg:6}];
+const all=(atkLet)=>({iAtk:atkLet,iLet:atkLet,cAtk:atkLet,cLet:atkLet,aAtk:atkLet,aLet:atkLet});
+const low=B.breakdown(historical,all(250),t10,5);
+const high=B.breakdown(historical,all(1550),t10,5);
+assert.ok(low.totalTenRounds>1.50e6&&low.totalTenRounds<1.60e6);
+assert.ok(high.totalTenRounds>32e6&&high.totalTenRounds<33e6);
+assert.ok(high.totalTenRounds/low.totalTenRounds>20);
+assert.ok(high.types[2].count===158184);
+
+console.log('BEAR COMBAT: shared input trace, fixed pitfall, low-troop armyMin and T10 1.55m/32.5m diagnostic examples passed.');
