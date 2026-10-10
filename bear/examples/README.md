@@ -14,7 +14,7 @@ Die geführten Eingabeseiten erwarten die folgenden originalen, **bytegenau unve
 
 Keine Bildgenerierung, Zuschnitte oder Retuschen. Vorschaubilder werden ausschließlich per CSS skaliert, per Klick öffnet sich das Original. Fehlt ein Bild, werden echte Hinweise statt erfundener Screenshots angezeigt.
 
-**Videodateien** gehören getrennt in `bear/assets`:
+**Videodateien:** Alle neun Nutzerdateien können gemeinsam in `bear/examples` hochgeladen werden. Der GitHub-Pages-Workflow kopiert dann die beiden Medien unverändert nach `_site/assets`. Alternativ funktionieren weiterhin Quellen in `bear/assets`.
 - `kingshot_beartrap_v3_action_transparent.webm` = Nutzer-WebM als Schleife ausschließlich beim Berechnen des Schadens
 - `kingshot_beartrap_v3_action_transparent.webp` = Nutzer-WebP als Fallback
 

@@ -140,7 +140,13 @@ jobs:
           # The approved V3 transparent animation is intentionally NOT rebuilt:
           # when the user supplies the original binary assets, ship them unchanged.
           for name in kingshot_beartrap_v3_action_transparent.webm kingshot_beartrap_v3_action_transparent.webp; do
-            if [ -f "bear/assets/$name" ]; then cp "bear/assets/$name" "_site/assets/$name"; fi
+            # One-folder manual upload: keep the nine approved files together
+            # in bear/examples. Do not recompress or alter original media.
+            if [ -f "bear/examples/$name" ]; then
+              cp "bear/examples/$name" "_site/assets/$name"
+            elif [ -f "bear/assets/$name" ]; then
+              cp "bear/assets/$name" "_site/assets/$name"
+            fi
           done
           cp assets/nrw-banner.svg _site/assets/nrw-banner.svg
           sed -i 's|/assets/nrw-banner.svg|./assets/nrw-banner.svg|g' _site/index.html
