@@ -127,11 +127,10 @@ async function recognizeSlotsNow(canvas,slots,kind,progress){
        level=C.readValoraLevel(again?.data?.text||'',slot.max);
       }finally{await configure({tessedit_pageseg_mode:'7'});}
      }
-     if(level===null){
-      // A strict prefixed-label fallback, never a standalone number.
-      const original=await worker.recognize(img);
-      level=C.readValoraLevel(original?.data?.text||'',slot.max);
-     }
+     // Intentionally no raw colored-badge fallback: on the original
+     // Valora screenshot that previously produced a false Lv2 for Lv4.
+     // If neither cleaned OCR pass is trustworthy, leave the editable
+     // field empty rather than silently saving a wrong rank.
     }else{
      const img=crop(canvas,C.petBadgeRect(slot.rect),'badge');
      const raw=await worker.recognize(img);
