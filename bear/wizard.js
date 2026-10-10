@@ -495,9 +495,15 @@ window.addEventListener('nrw-bear-intake-applied',evt=>{
    }
    if(active===6){
     const accepted=evt.detail?.names||[];
+    // An import batch is confirmed AFTER intake clears its queue. Once
+    // every selected hero has a confirmed detail shot, automatically move
+    // to Missing Values (Step 8), just like roster -> Top 3.
+    // Previously three green checks were visible while Continue remained
+    // disabled, stranding the user on Step 7.
     accepted.forEach(n=>detailConfirmed.add(n));
+    if(heroDetailsReady()){moveTo(7);return;}
     renderHeroDetails();
-    $('bearGuideNext').disabled=!heroDetailsReady();
+    $('bearGuideNext').disabled=true;
    }
    $('bearGuideNext').textContent=t().next+' →';
    message(document.documentElement.lang==='de'
