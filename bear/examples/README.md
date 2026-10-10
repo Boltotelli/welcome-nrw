@@ -1,12 +1,20 @@
-# Authentic user-provided Kingshot screenshot examples
+# Authentische Kingshot-Beispielscreenshots (unverändert)
 
-The guided screenshot preview uses these optional exact filenames, if supplied:
+Die geführten Eingabeseiten erwarten die folgenden originalen, **bytegenau unveränderten** Screenshots in diesem Ordner:
 
-- `troops.jpg`: 3 troop types, quantities and T/TG levels
-- `stats.jpg`: combat Bonus Overview with class attack/lethality and squad values
-- `roster.jpg`: hero overview showing names, stars and levels
-- `hero-details.jpg`: a single starter hero detail with Expedition stats
-- `pets.jpg`: Pet buffs screenshot
-- `valora.jpg`: Valora skills screenshot
+| Datei | Erkennungsseite | Ursprünglicher Upload |
+|---|---|---|
+| `troops.jpg` | Schwadronvorschau, Truppen und T/TG | Screenshot_20261008_145410_Kingshot(2).jpg |
+| `stats.jpg` | Klassenboni aller Truppentypen | Screenshot_20261008_145402_Kingshot(2).jpg |
+| `stats-extra.jpg` | Schwadronboni und erste Klassenwerte | Screenshot_20261010_031533_Kingshot(1).jpg |
+| `roster.jpg` | Heldenübersicht mit Sternen und Leveln | Screenshot_20261009_132347_Kingshot(2).jpg |
+| `hero-details.jpg` | Yang mit Expeditionseigenschaften | Screenshot_20261008_145418_Kingshot(1).jpg |
+| `pets.jpg` | Begleittierfertigkeiten und Level | Screenshot_20261010_150047_Kingshot(3).jpg |
+| `valora.jpg` | Valora und ihre vier Skills | Screenshot_20261010_150135_Kingshot(3).jpg |
 
-**Do not generate, retouch, sharpen or recreate game images.** Only publish original screenshots with user permission after considering whether to redact game IDs or other private data. Until original screenshots are approved and added, the UI shows accurate text instructions instead of misleading mock game screenshots. Each thumbnail opens the full original in a new tab to zoom.
+Keine Bildgenerierung, Zuschnitte oder Retuschen. Vorschaubilder werden ausschließlich per CSS skaliert, per Klick öffnet sich das Original. Fehlt ein Bild, werden echte Hinweise statt erfundener Screenshots angezeigt.
+
+**Videodateien** gehören getrennt in `bear/assets`:
+- `kingshot_beartrap_v3_action_transparent.webm` = Nutzer-WebM als Schleife ausschließlich beim Berechnen des Schadens
+- `kingshot_beartrap_v3_action_transparent.webp` = Nutzer-WebP als Fallback
+

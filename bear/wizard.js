@@ -276,18 +276,21 @@ for(const i of [1,2,4,6,7]){
  note.textContent=text;
  const warning=document.createElement('small');warning.textContent=
   'Original-Kingshot-Beispielbild noch nicht hinterlegt. Ein echtes, unverändertes Bild wird benötigt.';
- const available={1:['troops'],2:['stats'],4:['roster'],6:['hero-details'],7:['pets','valora']}[i]||[];
+ const available={1:['troops'],2:['stats','stats-extra'],4:['roster'],6:['hero-details'],7:['pets','valora']}[i]||[];
+ const captions={troops:'Schwadronvorschau',stats:'Bonusübersicht · Klassen', 'stats-extra':'Bonusübersicht · Schwadron',roster:'Heldenübersicht', 'hero-details':'Heldendetails · Expedition',pets:'Begleittierfertigkeiten',valora:'Valora-Fähigkeiten'};
+ const gallery=document.createElement('div');gallery.className='bear-guide-example-gallery';
  available.forEach(name=>{
   const link=document.createElement('a');link.className='bear-guide-example-link';
   link.href='./examples/'+name+'.jpg';link.target='_blank';link.rel='noopener noreferrer';
   link.title='Original-Screenshot vergrößern';
   const img=document.createElement('img');img.loading='lazy';img.alt='Kingshot '+name+' Beispielscreenshot';
   img.src=link.href;link.append(img);link.hidden=true;
+  const label=document.createElement('span');label.textContent=captions[name]||name;link.append(label);
   img.addEventListener('load',()=>{link.hidden=false;warning.hidden=true;});
   img.addEventListener('error',()=>{link.remove();});
-  note.append(link);
+  gallery.append(link);
  });
- note.append(document.createElement('hr'),warning);
+ note.append(gallery,document.createElement('hr'),warning);
  help.append(head,note);sections[i].insertBefore(help,s.nextSibling);
 }
 const baseLevel=document.createElement('label');baseLevel.className='bear-valora-base';
