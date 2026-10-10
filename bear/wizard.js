@@ -258,8 +258,24 @@ function renderRecommendations(){
  intro.textContent=l==='de'?
   'Nur deine erkannten, besessenen Helden: je ein Rally-Starter pro Truppengattung. Sterne, Level und freigeschaltete Skills wiegen stärker als die Bear-Meta-Reihenfolge. Atlas-orientierter Vergleich, KEINE offizielle Schadenssimulation.':
   l==='fr'?'Un héros possédé par classe. Étoiles, niveaux et compétences priment sur la popularité du guide. Estimation indicative, PAS une simulation KS Atlas.':
-  'Your scanned owned heroes only: one rally leader per class. Stars, level and skills outweigh name popularity. Atlas-inspired shortlist, NOT an official damage simulation.';
+  'Your scanned owned heroes only: one provisional leader per class. Heuristic ranking; verified GitHub data below is shown independently, NOT as calculated Bear damage.';
  recommendationPanel.append(intro);
+ const reference=window.NRW_BEAR_HERO_REFERENCE;
+ const refState=reference?.status?.()||'unavailable';
+ if(refState==='idle')reference.load().then(()=>{
+  if(active===5)renderRecommendations();
+ });
+ const sourceNotice=document.createElement('p');sourceNotice.className='hint bear-reference-status';
+ sourceNotice.textContent=refState==='ready'?
+  (l==='de'?'✓ 37 quellengeprüfte Helden aus dem separaten GitHub-Repository. Die Rangfolge ist weiterhin eine vorläufige Heuristik.':
+   l==='fr'?'✓ 37 références de héros vérifiées depuis GitHub. Classement indicatif.':
+   '✓ 37 source-checked heroes from separate GitHub. Shortlist remains heuristic.'):
+  refState==='loading'||refState==='idle'?
+  (l==='de'?'Heldenreferenzen werden geladen …':l==='fr'?'Chargement des données héros …':'Loading hero references …'):
+  (l==='de'?'Referenzdaten nicht verfügbar. Vorläufige Rangfolge bleibt bestehen.':
+   l==='fr'?'Données indisponibles : classement provisoire conservé.':
+   'Source unavailable; provisional shortlist remains.');
+ recommendationPanel.append(sourceNotice);
  const ext=B.model().v2||{},scanned=new Set(ext.scannedOwnedHeroes||[]);
  const unresolved=Object.values(ext.manualHeroes||{})
   .filter(h=>h?.name&&scanned.has(h.name)&&h.starPendingReview).length;
@@ -303,6 +319,43 @@ function renderRecommendations(){
     ' · '+(chosen.skillCap?'Skill-Max '+chosen.skillCap:'Skill ?')+
     (chosen.assumedSkill?' ('+(l==='de'?'nur maximal möglich':l==='fr'?'non confirmé':'not verified')+')':'');
    info.append(name,data);summary.append(info);card.append(summary);
+   // Independent DATA, not another fabricated damage score.
+   const verified=reference?.get?.(chosen.name,chosen.stars,chosen.tier);
+   if(verified){
+    const fact=document.createElement('p');fact.className='bear-reference-fact';
+    const pct=verified.bonus===null?'—':verified.bonus.toLocaleString(
+     l==='de'?'de-DE':l==='fr'?'fr-FR':'en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+' %';
+    fact.textContent=l==='de'?
+     'Quellenwert Expedition ATK/DEF: '+pct+
+      (verified.sourceRow?' · Tabellenzeile '+verified.sourceRow:' · Sternwert unbestätigt'):
+     l==='fr'?'Bonus ATQ/DEF expédition (source) : '+pct:
+     'Source expedition ATK/DEF: '+pct+
+      (verified.sourceRow?' · row '+verified.sourceRow:' · stars not verified');
+    card.append(fact);
+    const detail=document.createElement('details');detail.className='bear-reference-skill-panel';
+    const summary=document.createElement('summary');
+    summary.textContent=l==='de'?'Geprüfte Expedition-Skills ansehen':
+     l==='fr'?'Voir les compétences vérifiées':'Inspect verified expedition skills';
+    detail.append(summary);
+    const explanation=document.createElement('p');explanation.className='hint';
+    explanation.textContent=l==='de'?
+     'Skillwerte von Stufe 1 bis 5 aus der Quelle – NICHT dein tatsächliches Skilllevel. Keine berechnete Bärenschadenswirkung.':
+     l==='fr'?'Valeurs source des niveaux 1–5, non vos niveaux investis ; dégâts non calculés.':
+     'Source skill values levels 1–5, NOT actual invested levels. No Bear damage formula.';
+    detail.append(explanation);
+    const list=document.createElement('ul');
+    for(const skill of verified.skills){
+     const line=document.createElement('li');
+     line.textContent=skill.name+' · '+skill.min+' → '+skill.max+
+      (skill.metric==='percent'?' %':'')+' ('+skill.effect.replaceAll('_',' ')+')';
+     list.append(line);
+    }
+    detail.append(list);
+    const href=document.createElement('a');href.href=verified.source;
+    href.target='_blank';href.rel='noopener noreferrer';
+    href.textContent=l==='de'?'Originalquelle aufrufen':l==='fr'?'Source primaire':'Open original source';
+    detail.append(href);card.append(detail);
+   }
    const second=group.choices.find(x=>x.name!==chosen.name);
    if(second){
     const reason=document.createElement('p');reason.className='hint bear-recommendation-reason';
@@ -333,7 +386,10 @@ function renderRecommendations(){
     const select=document.createElement('select');select.setAttribute('aria-label',groupNames[i]);
     group.choices.forEach(h=>{
      const opt=document.createElement('option');opt.value=h.name;
-     opt.textContent=h.name+' · '+(h.stars?h.stars+'★':'★ ?')+' · '+(h.level?'Lv '+h.level:'Lv ?');
+     const sourceValue=reference?.get?.(h.name,h.stars,h.tier)?.bonus;
+     opt.textContent=h.name+' · '+(h.stars?h.stars+'★':'★ ?')+
+      (h.tier?' T'+h.tier:'')+' · '+(h.level?'Lv '+h.level:'Lv ?')+
+      (Number.isFinite(sourceValue)?' · Exp ATK '+sourceValue.toFixed(2)+' %':'');
      opt.selected=h.name===chosen.name;select.append(opt);
     });
     select.addEventListener('change',()=>{chosenRecommendations[i]=select.value;renderRecommendations();});
