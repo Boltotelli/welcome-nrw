@@ -515,9 +515,9 @@ async function inspect(file){
  }
  const existing=[...queue.filter(q=>q.type==='roster').flatMap(q=>q.cards||[]),...confirmedPortraits];
  const fresh=allCards.filter(tile=>!existing.some(x=>samePortrait(x.signature,tile.signature)));
- if(type==='roster'&&MATCHER)await MATCHER.enrich(fresh);
+ const matcherInfo=type==='roster'&&MATCHER?await MATCHER.enrich(fresh):null;
  return {fileName:file.name,file,type,text,grouped,words:troopWords,values,detail,troopEntries,troopTiers,marchSlots,canvas:(type==='roster'||type==='unknown'||type==='troops')?canvas:null,
-  cards:fresh,duplicates:allCards.length-fresh.length,applied:false};
+  cards:fresh,duplicates:allCards.length-fresh.length,matcherInfo,applied:false};
 }
 function inputChoice(items,current=''){
  const sel=document.createElement('select');
@@ -542,7 +542,13 @@ function renderQueue(){
   const header=document.createElement('div');header.className='bear-intake-item-head';
   const title=document.createElement('b');title.textContent=item.fileName;
   const type=inputChoice(Object.entries(types).map(([key,name])=>[key,name]),item.type);
-  type.addEventListener('change',()=>{item.type=type.value;item.values=item.type==='troops'?{...Core.parseTroops(item.text),...(item.canvas?spatialTroops(item.words,item.canvas):{})}:item.type==='stats'?{...Core.parseStats(item.text),...Core.parseStats(item.grouped||'')}:{};item.troopEntries=item.type==='troops'&&item.canvas&&ENTRY?ENTRY.detect(item.words||[],item.canvas.width,item.canvas.height):[];if(item.troopEntries.length){ENTRY.recoverSingleEntries(item.troopEntries,item.values);Object.assign(item.values,ENTRY.totals(item.troopEntries));}item.detail=item.type==='starter'?Core.parseHeroDetail(item.text,allKnown()):null;item.cards=item.type==='roster'&&item.canvas?overviewTiles(item.canvas,item.text,item.words):[];item.troopTiers=item.type==='troops'&&item.canvas&&TROOP?TROOP.recognize(item.canvas,item.text+'\n'+(item.grouped||''),item.words):null;renderQueue();});
+  type.addEventListener('change',async ()=>{item.type=type.value;item.values=item.type==='troops'?{...Core.parseTroops(item.text),...(item.canvas?spatialTroops(item.words,item.canvas):{})}:item.type==='stats'?{...Core.parseStats(item.text),...Core.parseStats(item.grouped||'')}:{};item.troopEntries=item.type==='troops'&&item.canvas&&ENTRY?ENTRY.detect(item.words||[],item.canvas.width,item.canvas.height):[];if(item.troopEntries.length){ENTRY.recoverSingleEntries(item.troopEntries,item.values);Object.assign(item.values,ENTRY.totals(item.troopEntries));}item.detail=item.type==='starter'?Core.parseHeroDetail(item.text,allKnown()):null;item.cards=item.type==='roster'&&item.canvas?overviewTiles(item.canvas,item.text,item.words):[];
+    if(item.type==='roster'&&MATCHER){
+     // Changing the screenshot category manually must follow the same
+     // portrait recognition path as automatic overview detection.
+     item.matcherInfo=await MATCHER.enrich(item.cards);
+    }else item.matcherInfo=null;
+    item.troopTiers=item.type==='troops'&&item.canvas&&TROOP?TROOP.recognize(item.canvas,item.text+'\n'+(item.grouped||''),item.words):null;renderQueue();});
   header.append(title,type);card.appendChild(header);
   const content=document.createElement('div');content.className='bear-intake-values';
   if(item.type==='troops'||item.type==='stats'){
@@ -646,6 +652,15 @@ function renderQueue(){
     total?known+' of '+total+' complete hero cards identified. Names, levels and star progress are imported; review only uncertain values.':
       'No complete hero cards detected. Check this is an original in-game hero overview.'
    )+(item.duplicates?' · '+item.duplicates+' '+say('doppelte Karten ausgelassen','duplicate cards skipped'):'');
+   if(item.matcherInfo){
+    const diagnostics=MATCHER?.diagnostics?.();
+    if(!item.matcherInfo.available){
+     note.textContent+=' · '+say('Porträtreferenzen nicht geladen','Portrait references not loaded')+
+      (diagnostics?.error?' ('+diagnostics.error+')':'');
+    }else{
+     note.textContent+=' · '+item.matcherInfo.available+' '+say('Porträtreferenzen geladen','portrait references loaded');
+    }
+   }
    content.append(note);
    const grid=document.createElement('div');grid.className='bear-intake-roster';
    (item.cards||[]).forEach((tile,index)=>{
