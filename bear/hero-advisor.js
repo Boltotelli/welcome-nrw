@@ -6,7 +6,11 @@
 (function(root){
 'use strict';
 const classes=['infantry','cavalry','archer'];
+// Early Gen-1 substitutes (Howard/Quinn) are technically usable when
+// no offensive option exists, but not equivalent to current Bear leaders.
+// A 5-star filler should not automatically beat a developed Rosa/Zoe.
 const defenseFirst=new Set(['Triton','Alcar','Long Fei','Sophia','Eric','Vivian','Charles']);
+const legacyFillers=new Set(['Howard','Quinn','Gordon','Forrest','Seth','Edwin','Olive','Fahd']);
 const offensiveWidget=new Set(['Yang','Rosa','Amadeus','Helga','Marlin','Margot']);
 function value(v,min=0,max=100){
  if(v===null||v===undefined||v==='')return null;
@@ -29,7 +33,7 @@ function evaluate(hero,type,priorities){
  const level=value(hero.level,1,80);
  const widget=value(hero.widget,1,10);
  const skills=skillState(hero);
- const caution=defenseFirst.has(hero.name);
+ const caution=defenseFirst.has(hero.name)||legacyFillers.has(hero.name);
  // Star investment governs available skills and base hero progression.
  // The smaller role preference can only decide comparably upgraded heroes.
  // A 1-star meta hero must not beat a developed 4-star alternative.
@@ -42,7 +46,7 @@ function evaluate(hero,type,priorities){
  // Only explicitly known offensive widgets influence the shortlist.
  const widgetFactor=widget!==null&&offensiveWidget.has(hero.name)?
   (1+Math.min(8,widget)*.012):1;
- const roleFactor=caution?.62:1;
+ const roleFactor=legacyFillers.has(hero.name)?.46:defenseFirst.has(hero.name)?.62:1;
  const score=Math.round(100*progress*levelFactor*skillFactor*guideFactor*widgetFactor*roleFactor*10)/10;
  const confidence=stars===null?'limited':skills.confirmed&&level!==null?'higher':'estimated';
  return {
@@ -51,7 +55,7 @@ function evaluate(hero,type,priorities){
   skill:skills.level,skillCap:skills.cap,assumedSkill:skills.assumed,
   hasConfirmedSkill:skills.confirmed,confidence,
   progression:fractionalStars,
-  note:stars===null?'stars-unknown':caution?'defensive':'progression'
+  note:stars===null?'stars-unknown':legacyFillers.has(hero.name)?'legacy-fallback':caution?'defensive':'progression'
  };
 }
 function recommend(owned,types,priorities){
