@@ -177,6 +177,18 @@ assert.ok(wizard.includes("B.save()"),'one existing profile store');
 assert.ok(simulation.includes('renderOwnBaseline(data)'), 'own baseline results integrated');
 assert.ok(simulation.includes('bear-sim-math-audit'),'exact captured stats trace must be inspectable');
 assert.ok(simulation.includes('inspectUnusedBonuses'),'unused squad/hero stat sources must be inspectable');
+assert.ok(simulation.includes("model.v2.combatStatOrigin=source.value"),
+ 'one audited UI source-mode selection must be saved explicitly');
+assert.ok(simulation.includes('own.assembledStats.missing.join'),
+ 'incomplete independent sources must warn, not silently pretend full data');
+const intake=read('intake-ui.js'),formationCore=read('formation-core.js'),simulationCore=read('simulation-core.js');
+new vm.Script(intake);new vm.Script(formationCore);new vm.Script(simulationCore);
+assert.ok(intake.includes("v.combatStatDetectedOrigin='separate-overview'"),
+ 'the approved Bonus Overview screenshot marks independent stats provenance');
+assert.ok(formationCore.includes("root.NRW_BEAR_OWN_BASELINE?.currentStats?.(model)"),
+ 'the starter optimizer must consume identical composed stats');
+assert.ok(simulationCore.includes("root.NRW_BEAR_OWN_BASELINE?.currentStats?.(model)"),
+ 'scenario scores must consume identical composed starter stats');
 assert.ok(!simulation.includes('renderSkillScenarios(data)'),'joiner hypotheticals replaced in main baseline');
 assert.ok(html.includes('own-baseline.js?v='),'new engine included');
 assert.ok(html.indexOf('own-baseline.js')<html.indexOf('simulation-ui.js'),'baseline loads before simulation UI');
