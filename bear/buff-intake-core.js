@@ -59,7 +59,7 @@ function readValoraLevel(text,max){
  const strict=readSkillLevel(text,max);
  if(strict!==null)return strict;
  const s=String(text||'').replace(/[\r\n]+/g,' ');
- const matches=[...s.matchAll(/(?:^|[^a-z0-9])(?:level|lvl|[l1i|]\s*[vuwy])\s*[.:;=\-\/ ?]*([0-9oOsiIl|]{1,3})(?![0-9])/gi)];
+ const matches=[...s.matchAll(/(?:level|lvl|[l1i|]\s*[vuwy])\s*[.:;=\-\/ ?]*([0-9oOsiIl|]{1,3})(?![0-9])/gi)];
  if(!matches.length)return null;
  const candidates=[];
  for(const m of matches){
