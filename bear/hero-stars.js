@@ -36,9 +36,28 @@ function analyze(ratios){
   review,reason:nearBoundary?'flower-boundary':nearPetalBoundary?'petal-boundary':'measured'};
 }
 function stepsFromRatios(ratios){return analyze(ratios).steps;}
+// Reconcile overlapping cards without silently choosing a conflicting
+// estimate. A manual correction always wins.
+function merge(existing,incoming){
+ if(!existing||!incoming||existing.starManual)return;
+ const n=incoming.starSteps,o=existing.starSteps;
+ if(o===null&&n!==null){
+  existing.starSteps=n;
+  existing.starConfidence=incoming.starConfidence;
+  existing.starReview=Boolean(incoming.starReview);
+  return;
+ }
+ if(o!==null&&n!==null&&o!==n){
+  existing.starSuggestion=o;
+  existing.starSteps=null;
+  existing.starConfidence=0;
+  existing.starReview=true;
+ }
+}
+
 function parts(steps){
  if(!Number.isInteger(steps)||steps<0||steps>30)return null;
  return {stars:Math.floor(steps/6),tier:steps%6,complete:steps===30};
 }
-root.NRW_BEAR_HERO_STARS={stepsFromRatios,analyze,parts,version:'phone-flowers-20261010-2'};
+root.NRW_BEAR_HERO_STARS={stepsFromRatios,analyze,merge,parts,version:'phone-flowers-20261010-2'};
 })(window);
