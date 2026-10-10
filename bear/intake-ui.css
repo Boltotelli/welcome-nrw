@@ -35,7 +35,7 @@
 .bear-intake-gear-details>.bear-import-card{border:0;box-shadow:none;border-radius:0}
 .bear-intake-roster{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;grid-column:1/-1}
 .bear-intake-roster-tile{display:grid;gap:6px;background:var(--panel);border:1px solid var(--line);padding:7px;border-radius:12px;min-width:0}
-.bear-intake-roster-tile img{width:100%;height:150px;object-fit:cover;border-radius:8px}
+.bear-intake-roster-tile>img{width:100%;height:auto;max-height:none;object-fit:contain;border-radius:8px}
 .bear-intake-roster-tile select,.bear-intake-roster-tile input{width:100%;padding:7px 5px;font-size:12px}
 .bear-intake-roster-tile small{color:var(--muted);font-size:10px}
 @media(max-width:800px){
@@ -51,7 +51,7 @@
  .bear-intake-item-head select{max-width:none}
  .bear-intake-values{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
  .bear-intake-roster{grid-template-columns:repeat(2,minmax(0,1fr))}
- .bear-intake-roster-tile img{height:140px}
+ .bear-intake-roster-tile>img{height:auto;max-height:none}
  .bear-intake-actions{padding:0 12px 12px}
  .bear-intake-actions button{width:100%}
  .bear-intake-progress{padding:12px 13px}
@@ -127,3 +127,5 @@ body:has(.bear-intake-wizard) .boss img{width:95px}
  padding:9px 11px;
  font-variant-numeric:tabular-nums;
 }
+
+.bear-star-accept{font-size:11px;min-height:34px;padding:7px 5px;width:100%;border-color:var(--amber)}
