@@ -83,100 +83,6 @@ function mount(host,B,language){
  const error=el('p','bear-sim-error');error.setAttribute('role','alert');controls.append(error);
  const actions=el('div','bear-sim-actions');controls.append(actions);
  const reset=el('button','secondary-btn'),save=el('button','secondary-btn');reset.type=save.type='button';actions.append(reset,save);
- // Calibration belongs to the player's EXISTING local profile, never to
- // all visitors of the public tool. "bearRef" in a shared link ONLY prefills
- // the form; it is not applied until the player explicitly confirms it.
- const calLabels={
-  de:{title:'Eigener Referenzkampf (optional)',help:'Hier kannst du echten persönlichen Schaden aus einer selbst gestarteten Rally eingeben. Nur DEIN Starter wird damit näherungsweise kalibriert; fremde Joins bleiben Modellindizes.',
-   damage:'Persönlicher Schaden',troops:'Gesendete Truppen',ratio:'Formation (I/K/B)',tiers:'Truppenstufen (T:TG je I/K/B)',
-   apply:'Referenz übernehmen',clear:'Referenz löschen',saved:'Referenz aktiv · persönliche Starter-Prognose',
-   invalid:'Bitte gültigen Schaden, Truppenzahl, eine 100%-Formation und drei T:TG-Stufen eingeben.',
-   uncertain:'Kalibrierte Schätzung, keine garantierten Bärenpunkte. Join-Skills und damalige Kampfboni fehlen; aktuelle Klassenwerte dienen als Näherung.',
-   projected:'Eigene Rally · kalibrierte Schätzung'},
-  en:{title:'Your measured rally (optional)',help:'Enter actual PERSONAL damage from your own hosted rally. Only your starter is approximately calibrated; external joins remain relative model indices.',
-   damage:'Personal damage',troops:'Deployed troops',ratio:'Formation (I/C/A)',tiers:'Troop tiers (T:TG for I/C/A)',
-   apply:'Use this reference',clear:'Clear reference',saved:'Reference active · own starter estimate',
-   invalid:'Enter valid damage, troop size, a 100% ratio and three T:TG values.',
-   uncertain:'Calibrated approximation, not guaranteed Bear points. Prior join skills and battle buffs are unknown; current class stats are proxies.',
-   projected:'Own rally · calibrated estimate'},
-  fr:{title:'Combat mesuré (facultatif)',help:'Saisis les dégâts PERSONNELS d’un rallye que tu as lancé. Seul ton départ sera approximativement calibré.',
-   damage:'Dégâts personnels',troops:'Troupes envoyées',ratio:'Formation (I/C/A)',tiers:'Niveaux des troupes (T:TG pour I/C/A)',
-   apply:'Utiliser cette référence',clear:'Effacer la référence',saved:'Référence active · estimation personnelle',
-   invalid:'Saisis dégâts, taille, ratio 100 % et trois niveaux T:TG valides.',
-   uncertain:'Estimation calibrée, non garantie. Compétences des renforts et bonus du combat passé inconnus.',
-   projected:'Mon rallye · estimation calibrée'}
- };
- const ct=()=>calLabels[language()]||calLabels.en;
- const calibration=el('details','bear-sim-calibration');const calTitle=el('summary');
- calibration.append(calTitle);
- const calHelp=el('p','hint');calibration.append(calHelp);
- const calInputs=el('div','bear-sim-cal-fields');calibration.append(calInputs);
- function field(key,type,placeholder){
-  const label=el('label'),caption=el('span'),input=el('input');
-  input.id='bearCal'+key;input.type=type;input.placeholder=placeholder;input.autocomplete='off';
-  if(type==='number'){input.min='1';input.step='1';input.inputMode='numeric';}
-  label.append(caption,input);calInputs.append(label);return {input,caption};
- }
- const cDamage=field('Damage','number','144000000');
- const cTroops=field('Troops','number','181820');
- const cRatio=field('Ratio','text','1/12/87');
- const cTiers=field('Tiers','text','10:6 / 10:5 / 10:6');
- const calActions=el('div','bear-sim-actions');
- const applyCal=el('button','secondary-btn'),clearCal=el('button','secondary-btn');
- applyCal.type=clearCal.type='button';calActions.append(applyCal,clearCal);calibration.append(calActions);
- const calFeedback=el('p','hint');calibration.append(calFeedback);
- container.append(calibration);
- function normalizeCal(x){
-  const numeric=s=>Number.isSafeInteger(Number(s))?Number(s):NaN;
-  if(!x||!Array.isArray(x.ratio)||!Array.isArray(x.tiers))return null;
-  const out={damage:numeric(x.damage),troops:numeric(x.troops),
-   ratio:x.ratio.map(numeric),tiers:x.tiers.map(t=>({tier:numeric(t.tier),tg:numeric(t.tg)}))};
-  return sim.validateCalibration(out)?out:null;
- }
- function parseCalInputs(){
-  const ratio=cRatio.input.value.trim().split(/\s*[/;|,]\s*/).map(Number);
-  const tierParts=cTiers.input.value.trim().split(/\s*[/;|,]\s*/);
-  const tiers=tierParts.map(part=>{
-   const m=part.trim().match(/^(\d{1,2})\s*[:TGg\-]\s*(\d)$/);
-   return m?{tier:Number(m[1]),tg:Number(m[2])}:null;
-  });
-  // Explicitly require ALL THREE ratio values to total 100.
-  const valid=ratio.length===3&&ratio.every(Number.isInteger)&&ratio[2]===100-ratio[0]-ratio[1];
-  return valid?normalizeCal({damage:Number(cDamage.input.value),troops:Number(cTroops.input.value),
-   ratio:ratio.slice(0,2),tiers}):null;
- }
- function showCal(x){
-  if(!x)return;
-  cDamage.input.value=x.damage;cTroops.input.value=x.troops;
-  cRatio.input.value=sim.ratio3(x.ratio).join('/');
-  cTiers.input.value=x.tiers.map(t=>t.tier+':'+t.tg).join(' / ');
- }
- function prefCalFromUrl(){
-  try{
-   const raw=new URLSearchParams(location.search).get('bearRef');
-   if(!raw||!/^\d+(,\d+){9}$/.test(raw))return null;
-   const parts=raw.split(',').map(Number);
-   return normalizeCal({damage:parts[0],troops:parts[1],ratio:[parts[2],parts[3]],
-    tiers:[{tier:parts[4],tg:parts[5]},{tier:parts[6],tg:parts[7]},{tier:parts[8],tg:parts[9]}]});
-  }catch(_){return null;}
- }
- function refreshCal(){
-  const x=normalizeCal(B.model().v2?.bearCalibration);
-  calFeedback.textContent=x?ct().saved:'';
-  return x;
- }
- applyCal.addEventListener('click',()=>{
-  const value=parseCalInputs();
-  if(!value){calFeedback.textContent=ct().invalid;return;}
-  const m=B.model();m.v2=m.v2||{};m.v2.bearCalibration=value;
-  B.save();calFeedback.textContent=ct().saved;
-  if(base)rerun(400);
- });
- clearCal.addEventListener('click',()=>{
-  const m=B.model();if(m.v2)delete m.v2.bearCalibration;
-  B.save();calFeedback.textContent='';
-  if(base)rerun(400);
- });
  const loader=el('div','bear-sim-loader');loader.setAttribute('role','status');loader.setAttribute('aria-live','polite');
  const ring=el('div','bear-sim-fallback');ring.textContent='🐻';
  const video=el('video','bear-sim-video');video.autoplay=true;video.muted=true;video.loop=true;video.playsInline=true;video.preload='metadata';
@@ -254,11 +160,7 @@ function mount(host,B,language){
   targetText.textContent=t().target;presetText.textContent=t().preset;
   [t().i,t().c,t().a].forEach((s,i)=>fields[i].name.textContent=s);
   reset.textContent='↶ '+t().reset;save.textContent='＋ '+t().save;
-  calTitle.textContent=ct().title;calHelp.textContent=ct().help;
-  [cDamage,cTroops,cRatio,cTiers].forEach((field,i)=>field.caption.textContent=
-   [ct().damage,ct().troops,ct().ratio,ct().tiers][i]);
-  applyCal.textContent=ct().apply;clearCal.textContent=ct().clear;
-  refreshCal();
+
   target.replaceChildren();
   function option(value,name){const o=el('option','',name);o.value=String(value);target.append(o);}
   option('0',t().starter);
@@ -283,16 +185,18 @@ function mount(host,B,language){
   const scores=el('section','bear-sim-score-card');
   scores.append(el('h3','',t().head));
   const trio=el('div','bear-sim-metrics');
-  const measured=refreshCal();
-  const own=measured?sim.calibrateOwn(data.rows[0],B.model(),root.NRW_BEAR_COMBAT,measured):null;
-  trio.append(metric(own?ct().projected:t().own,
-    scoreText(own?.estimated??data.score?.starter),own?own.relativeChangePercent:data.changes?.starterPct),
-   metric(t().joins,scoreText(data.score?.joinProxy),data.changes?.joinPct),
-   metric(t().overall,scoreText(data.score?.overall),data.changes?.totalPct));
+  // Relative indices normalised to each role's original formation.
+  // Never mistake raw model values for actual Kingshot Bear damage points.
+  const ownPct=data.score&&data.reference?.starter?
+   100*data.score.starter/data.reference.starter:null;
+  const joinPct=data.score&&data.reference?.joinProxy?
+   100*data.score.joinProxy/data.reference.joinProxy:null;
+  trio.append(metric(t().own,ownPct===null?'—':ownPct.toFixed(2)+' %',data.changes?.starterPct),
+   metric(t().joins,joinPct===null?'—':joinPct.toFixed(2)+' %',data.changes?.joinPct));
   scores.append(trio);panel.append(scores);
-  if(own)panel.append(el('p','bear-sim-disclaimer',ct().uncertain));
-  // Never add calibrated personal damage to a join PROXY index.
-  // The combined row intentionally stays a relative MODEL INDEX.
+  // Join scores are relative PROXIES from foreign-leader contexts and
+  // cannot be summed meaningfully with personal starter scores.
+  renderSkillScenarios(data);
   if(!data.score)panel.append(el('p','bear-guide-needed',t().pending));
   if(data.limited)panel.append(el('p','bear-guide-needed',t().adapted));
   if(data.missingLeads)panel.append(el('p','hint',t().unassigned));
@@ -343,10 +247,6 @@ function mount(host,B,language){
   if(!plan){container.append(el('p','bear-guide-needed',t().missing));return;}
   base=plan;ratios=plan.marches.map(m=>[m.ratio?.[0]||0,m.ratio?.[1]||0]);
   comparisons=[];translate();target.value='0';fillInputs();output('');
-  // URL parameters only prefill an opt-in form, never overwrite saved data.
-  const stored=refreshCal();
-  if(stored)showCal(stored);
-  else showCal(prefCalFromUrl());
   // The approved animation is ~5s. Keep the FIRST calculation on screen long
   // enough to perceive it, but subsequent recalculations remain responsive.
   rerun(1900);
