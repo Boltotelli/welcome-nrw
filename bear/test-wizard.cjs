@@ -135,7 +135,7 @@ assert.ok(fs.existsSync(__dirname+'/hero-reference.json'),'Vercel must ship sour
 assert.ok(intake.includes('const guidedDetails=window.NRW_BEAR_SCREENSHOT_STAGE===6'),'details only assigned from confirmed hero selection');
 assert.ok(intake.includes('assignedByOrder:true'),'unreadable hero heading has guarded review workflow');
 assert.ok(intake.includes('entry.countWarning=\'conflicting-line-reads\''),'troop OCR disagreement fails closed');
-assert.ok(html.includes('intake-ui.js?v=observed-troops-20261011-2'),'updated OCR script bypasses old browser cache');
+assert.ok(html.includes('intake-ui.js?v=verified-row-20261011-1'),'updated OCR script bypasses old browser cache');
 assert.ok(html.includes('score-bonuses.js?v=partial-damage-hotfix-20261011-1'),'updated damage logic bypasses old browser cache');
 
 assert.ok(wizard.includes('window.NRW_BEAR_OWN_BASELINE?.widgetValue?.(name,level)'),
@@ -150,9 +150,14 @@ assert.ok(!intake.includes('function spatialTroops('),'fixed count zones must be
 assert.ok(intake.includes('async function verifyTroopEntryCounts('),'per-entry focused OCR must be active');
 assert.ok(intake.includes('TROOP.recognizeEntries(canvas,troopEntries,worker)'),'badges must track detected troop labels');
 assert.ok(html.includes('troop-badges.js?v=observed-troops-20261011-2'),'TG recognition cache invalidated');
-assert.ok(html.includes('troop-entries.js?v=observed-troops-20261011-2'),'troop detection cache invalidated');
+assert.ok(html.includes('troop-entries.js?v=verified-row-20261011-1'),'troop detection cache invalidated');
 
 assert.ok(intake.includes('tessedit_pageseg_mode:6'),
  'class-labelled quantity strips use the correct single-block OCR mode');
 assert.ok(intake.includes('tessedit_pageseg_mode:3'),
  'OCR mode must be restored for subsequent hero and buff images');
+
+assert.ok(intake.includes("entry.amountSource='isolated-heading-strip'"),
+ 'focused OCR is chosen for each correctly detected troop heading');
+assert.ok(html.includes('troop-entries.js?v=verified-row-20261011-1'),
+ 'browser cannot reuse old count geometry');
