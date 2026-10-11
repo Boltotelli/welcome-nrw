@@ -56,7 +56,10 @@ function readTextCount(text){
   }
  }
  candidates.sort((a,b)=>Number(b.grouped)-Number(a.grouped)||b.digits-a.digits);
- return candidates[0]?.digits>=3?candidates[0].n:null;
+ // Small troop quantities (e.g. 3 or 27) are legitimate if this
+ // isolated crop contains exactly one numeric candidate. Disallow a
+ // small numeral when several unrelated OCR digit fragments compete.
+ return candidates.length===1||candidates[0]?.digits>=3?candidates[0]?.n??null:null;
 }
 function numeric(line){
  const sorted=[...line].sort((a,b)=>a.x0-b.x0);
