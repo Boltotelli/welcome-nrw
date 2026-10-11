@@ -229,6 +229,17 @@ const standardGoldSearch=[
  {x0:439,x1:470,y0:358,y1:411}, // cavalry
  {x0:122,x1:151,y0:480,y1:541}  // archer
 ];
+// The gold badge shifts upward on 1080x1920 Android screenshots.
+// The old coordinates are verified for 716x1536 / 955x2048.
+// Only vertical coordinates vary; the image digit templates are unchanged.
+function standardGoldRegions(canvas){
+ const h=canvas.height*716/canvas.width;
+ const phone=Math.max(0,Math.min(1,(1536-h)/264));
+ const shifts=[-37,-37,-29];
+ return standardGoldSearch.map((r,i)=>({
+  x0:r.x0,x1:r.x1,y0:r.y0+shifts[i]*phone,y1:r.y1+shifts[i]*phone
+ }));
+}
 function standardMedal(ctx,region,scratch){
  let best={tg:null,confidence:0,point:null};
  for(let x=region.x0;x<region.x1;x+=4){
@@ -244,12 +255,13 @@ async function recognizeStandard(canvas,text,worker){
  const output=Array.from({length:3},()=>({tier:null,tg:null,confidence:0}));
  const ctx=canvas.getContext('2d',{willReadFrequently:true});
  const scratch=document.createElement('canvas');scratch.width=27;scratch.height=26;
+ const regions=standardGoldRegions(canvas);
  const normalized=String(text||'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
  // In languages with a recognizable 'elite' troop prefix, that is an
  // additional check only. Text NEVER determines the gold TG numeral.
  const titleT10=(normalized.match(/spitzen|\belite\b|\bapex\b|\bsupreme\b/g)||[]).length>=3;
  for(let type=0;type<3;type++){
-  const medal=standardMedal(ctx,standardGoldSearch[type],scratch);
+  const medal=standardMedal(ctx,regions[type],scratch);
   output[type].tg=medal.tg;
   output[type].confidence=medal.confidence;
   // X is on the lower shield, not on the gold badge. Offset is relative
@@ -272,5 +284,5 @@ async function recognizeStandard(canvas,text,worker){
  return output;
 }
 
-root.NRW_BEAR_TROOP_BADGES={recognize,recognizeEntries,recognizeStandard,standardMedal,standardGoldSearch,locateBadge,digitAt,version:'standard-medal-image-20261011-1'};
+root.NRW_BEAR_TROOP_BADGES={recognize,recognizeEntries,recognizeStandard,standardMedal,standardGoldSearch,standardGoldRegions,locateBadge,digitAt,version:'standard-medal-responsive-20261011-2'};
 })(window);
