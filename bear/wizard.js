@@ -208,8 +208,10 @@ function missingValues(){
   ['iAtk','Inf Angriff'],['iLet','Inf Tödlichkeit'],['cAtk','Kav Angriff'],['cLet','Kav Tödlichkeit'],['aAtk','Bogen Angriff'],['aLet','Bogen Tödlichkeit']]){
   if(v[id]===undefined||v[id]===''||!Number.isFinite(Number(v[id]))||(id==='cap'&&Number(v[id])<=0))out.push(name);
  }
- if(!Array.isArray(ext.troopTiers)||ext.troopTiers.some(x=>!x?.tier))out.push('T-Stufen');
- if(!Array.isArray(ext.troopTiers)||ext.troopTiers.some(x=>x?.tg===null||x?.tg===undefined||x?.tg===''))out.push('Truegold');
+ const groupsComplete=Array.isArray(ext.troopGroups)&&ext.troopGroups.length>0&&
+  ext.troopGroups.every(g=>window.NRW_BEAR_MANUAL?.validGroup(g));
+ if(!groupsComplete&&(!Array.isArray(ext.troopTiers)||ext.troopTiers.some(x=>!x?.tier)))out.push('T-Stufen');
+ if(!groupsComplete&&(!Array.isArray(ext.troopTiers)||ext.troopTiers.some(x=>x?.tg===null||x?.tg===undefined||x?.tg==='')))out.push('Truegold');
  if((ext.ownHeroes||[]).filter(Boolean).length<3)out.push('Starterhelden');
  return out;
 }
@@ -218,8 +220,10 @@ function showRelevantManual(){
  if(folds)folds.open=true;
  const m=B.model(),v=m.values||{},ext=m.v2||{};
  const missing=missingValues();
+ const completeGroups=Array.isArray(ext.troopGroups)&&ext.troopGroups.length>0&&
+  ext.troopGroups.every(g=>window.NRW_BEAR_MANUAL?.validGroup(g));
  const troopMissing=['troopsI','troopsC','troopsA'].some(k=>!Number.isFinite(Number(v[k]))||v[k]===undefined)
-  || !Array.isArray(ext.troopTiers)||ext.troopTiers.some(x=>!x?.tier||x?.tg===null||x?.tg===undefined||x?.tg==='');
+  || (!completeGroups&&(!Array.isArray(ext.troopTiers)||ext.troopTiers.some(x=>!x?.tier||x?.tg===null||x?.tg===undefined||x?.tg==='')));
  const statsMissing=['iAtk','iLet','cAtk','cLet','aAtk','aLet'].some(k=>v[k]===undefined);
  const capMissing=!(Number(v.cap)>0)||(ext.ownHeroes||[]).filter(Boolean).length<3;
  const blocks=quick?.querySelectorAll('.ux-step')||[];
@@ -228,7 +232,7 @@ function showRelevantManual(){
  // inputs simply because the tier or a different field in the row is missing.
  const ownKeys=['troopsI','troopsC','troopsA'];
  quick?.querySelectorAll('#uxTroopRows .ux-troop-row').forEach((row,i)=>{
-  const tier=ext.troopTiers?.[i];
+  const tier=completeGroups?{tier:1,tg:0}:ext.troopTiers?.[i];
   const amount=row.querySelector('.ux-count');
   const stage=row.querySelector('.ux-tier');
   const gold=row.querySelector('.ux-tg');
@@ -291,6 +295,7 @@ if(profilePanel){
  // falling back to existing local saved data. Never disable the ID form.
 }
 const processQueue=()=>{
+ if(manualEntry?.isManual(active))return false;
  const review=$('intakeQueue');return Boolean(review&&!review.hidden&&review.children.length);
 };
 function message(content){$('bearGuideMessage').textContent=content||'';}
@@ -379,6 +384,12 @@ function displayStored(i){
   const val=document.createElement('strong');val.textContent=value;row.append(k,val);panel.append(row);
  };
  if(i===1){
+  if(Array.isArray(x.troopGroups)){
+   x.troopGroups.forEach((g,j)=>add('#'+(j+1)+' '+({infantry:'Infanterie',cavalry:'Kavallerie',archer:'Bogenschützen'}[g.type]||'?'),
+    'T'+(g.tier??'?')+' · TG'+(g.tg??'?')+' · '+num(g.count)));
+   add('Gesamt',num(v.troopsI)+' / '+num(v.troopsC)+' / '+num(v.troopsA));
+   return;
+  }
   ['Infanterie','Kavallerie','Bogenschützen'].forEach((label,j)=>{
    const keys=['troopsI','troopsC','troopsA'],tier=x.troopTiers?.[j];
    add(label,num(v[keys[j]])+' · '+(tier?.tier?'T'+tier.tier:'T?')+' / '+
@@ -415,9 +426,15 @@ sections[7].insertBefore(capacityHost,manual);
 const capacityUI=window.NRW_BEAR_CAPACITY_UI?.mount(capacityHost,B,lang);
 const widgetHost=document.createElement('section');widgetHost.className='bear-widget-panel bear-recommendation-panel';
 sections[4].append(widgetHost);
+const manualEntry=window.NRW_BEAR_MANUAL?.mount(sections,B,lang,()=>{
+ if(storedPanels[active])displayStored(active);
+});
 function renderWidgetLevels(){
  const v=B.model().v2||{},l=lang();
- const scanned=Array.isArray(v.scannedOwnedHeroes)?[...new Set(v.scannedOwnedHeroes.filter(Boolean))]:[];
+ // Widgets are equipment exclusive to legendary/gold heroes.
+ // Purple and blue heroes never receive a Widget input, even in OCR mode.
+ const scanned=Array.isArray(v.scannedOwnedHeroes)?
+  [...new Set(v.scannedOwnedHeroes.filter(n=>n&&window.NRW_BEAR_MANUAL?.rarity(n)==='legendary'))]:[];
  widgetHost.replaceChildren();widgetHost.hidden=!scanned.length;
  if(!scanned.length)return;
  const h=document.createElement('h3');
@@ -767,10 +784,14 @@ function renderHeroDetails(){
  detailPanel.append(list);
  const foot=document.createElement('p');foot.className='hint bear-gear-shot-note';
  foot.textContent=l==='de'?
-  'ERST DANACH: Öffne die drei Heldendetailseiten und mache jeweils EINEN Screenshot. Lade diese drei Bilder zusammen hoch, überprüfe die Zuordnung und tippe auf „Übernehmen“.':
+  (manualEntry?.isManual(6)?
+    'Trage nach dem Anlegen deiner besten gleichzeitig getragenen Helden-Ausrüstung die vier Expeditionswerte direkt unten ein.':
+    'ERST DANACH: Öffne die drei Heldendetailseiten und mache jeweils EINEN Screenshot. Lade diese drei Bilder zusammen hoch, überprüfe die Zuordnung und tippe auf „Übernehmen“.'):
  l==='fr'?
   'ENSUITE : ouvre les trois pages de détails et prends UNE capture par héros. Charge les trois images ensemble et confirme.':
-  'ONLY THEN: open each hero’s detail page and take ONE screenshot per hero. Upload all THREE screenshots together, review and tap Apply.';
+  (manualEntry?.isManual(6)?
+    'After equipping all three heroes at the same time, enter their Expedition values below.':
+    'ONLY THEN: open each hero’s detail page and take ONE screenshot per hero. Upload all THREE screenshots together, review and tap Apply.');
  detailPanel.append(foot);
 }
 function render(){
@@ -786,12 +807,17 @@ function render(){
  if(idx===8){formationUI?.show();}
  if(idx===9){simulationUI?.enter();}
  if(storedPanels[idx])displayStored(idx);
+ manualEntry?.render(idx);
  $('bearGuideEyebrow').textContent=s.eyebrow;
  $('bearGuideTitle').textContent=s.start;
  $('bearGuideDesc').textContent=s.desc;
  $('bearGuideStep').textContent=s.progress+' '+(guidedOrder.indexOf(idx)+1)+' / '+guidedOrder.length;
  $('bearGuideStepTitle').textContent=s.steps[idx];
- $('bearGuidePrompt').textContent=s.prompts[idx];
+ $('bearGuidePrompt').textContent=manualEntry?.isManual(idx)?
+  (lang()==='de'?'Trage die Werte direkt unten ein. Mit einem Klick kannst du zur Screenshot-Erkennung wechseln.':
+   lang()==='fr'?'Saisis les valeurs ci-dessous ou utilise les captures.':
+   lang()==='es'?'Introduce los valores abajo o utiliza capturas.':
+   'Enter values below or switch to screenshot recognition.'):s.prompts[idx];
  $('bearGuideBack').textContent='← '+s.back;
  $('bearGuideSkip').textContent=s.skip;
  $('bearGuideNext').textContent=idx===7?
@@ -855,6 +881,9 @@ window.addEventListener('nrw-bear-buffs-applied',()=>{
 });
 wizard.addEventListener('change',()=>{
  if(active===7)showRelevantManual();
+});
+window.addEventListener('nrw-bear-manual-mode',evt=>{
+ if(evt.detail?.stage===active)render();
 });
 window.addEventListener('nrw-bear-loaded',()=>{
  imported.clear();skipped.clear();finished=false;detailConfirmed.clear();chosenRecommendations.fill('');

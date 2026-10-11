@@ -41,6 +41,48 @@ details{border-top:1px solid var(--line);margin-top:14px;padding-top:14px}summar
 [hidden]{display:none!important}
 @media(max-width:940px){.dashboard{grid-template-columns:1fr}.hero{grid-template-columns:1fr 220px}.right{grid-template-columns:repeat(2,minmax(0,1fr))}.right .panel:last-child{grid-column:1 / -1}}
 @media(max-width:650px){.shell{width:min(100% - 22px,1220px)}.top{gap:6px}.back{display:none}.brand{font-size:13px}.brand img{width:40px}.top-actions{gap:4px}.lang button{font-size:10px;padding:7px}.hero{grid-template-columns:1fr!important;min-height:unset!important;padding:24px!important;gap:5px}.hero h1{font-size:39px}.hero p{font-size:13px}.boss{min-height:150px}.boss img{width:112px}.boss:before{width:145px}.boss:after{width:120px}.boss-label{bottom:-4px}.panel-head{padding:16px 15px 0}.panel-body{padding:15px}.inputs{gap:8px}.buff-row{gap:8px}.right{display:grid;grid-template-columns:1fr}.right .panel:last-child{grid-column:auto}.march{grid-template-columns:43px 1fr auto;gap:7px;padding:9px}.march-id{width:39px;height:43px;font-size:10px}.march-info b{font-size:12px}.march-info small{font-size:9px}.march-name b{font-size:12px}.editor-grid{grid-template-columns:1fr}.comparison-item{grid-template-columns:76px 1fr 45px}}
+
+/* Screenshot-free Bear intake */
+.bear-manual-entry{min-width:0;margin:10px 0 20px}
+.bear-manual-modebar{display:flex;gap:8px;flex-wrap:wrap;padding:12px 0}
+.bear-manual-modebar button{flex:1 1 140px;min-height:45px;font-size:14px}
+.bear-manual-modebar button.is-active{background:var(--amber);color:#1c2632;border-color:var(--amber)}
+.bear-manual-body{padding:12px 0 18px}
+.bear-manual-body h3{font-size:17px;margin:8px 0 6px}
+.bear-manual-body h4{font-size:14px;margin:8px 0}
+.bear-manual-troops{display:grid;gap:12px;margin-top:16px}
+.bear-manual-troop-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr)) auto;gap:8px;align-items:end;padding:14px;border:1px solid var(--line);border-radius:16px;background:var(--card);min-width:0}
+.bear-manual-field{display:grid;gap:6px;font-size:12px;font-weight:800;color:var(--muted);min-width:0}
+.bear-manual-field input,.bear-manual-field select{width:100%;min-width:0;font-size:15px;padding:11px 10px;min-height:46px}
+.bear-manual-add{margin-top:12px;width:100%;border-style:dashed;min-height:48px}
+.bear-manual-remove{font-size:12px;min-height:46px;align-self:end;color:var(--red)}
+.bear-manual-stat-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:12px 0}
+.bear-manual-hero-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:9px}
+.bear-manual-season{margin:20px 0;padding:12px;border:1px solid var(--line);border-radius:16px;background:var(--card)}
+.bear-manual-hero-card{width:100%;min-height:126px;min-width:0;display:flex;flex-direction:column;align-items:center;gap:4px;justify-content:flex-start;border:2px solid var(--line);border-radius:13px;color:var(--muted);background:var(--panel);padding:7px 4px;overflow:hidden}
+.bear-manual-hero-card img{height:65px;width:65px;object-fit:contain;filter:grayscale(1);opacity:.44;transition:filter .2s,opacity .2s}
+.bear-manual-hero-card.is-owned{color:var(--text);border-color:var(--amber);background:color-mix(in srgb,var(--amber) 9%,var(--panel))}
+.bear-manual-hero-card.is-owned img{filter:none;opacity:1}
+.bear-manual-hero-card b{font-size:12px;line-height:1.1;text-align:center;overflow-wrap:anywhere}
+.bear-manual-hero-card small{font-size:10px;text-align:center}
+.bear-manual-hero-edit{font-size:15px;line-height:1;padding:3px 12px;border:1px solid var(--line);border-radius:10px;margin-top:auto;cursor:pointer;color:var(--amber)}
+.bear-manual-hero-edit[hidden]{display:none}
+.bear-manual-hero-card[data-rarity="legendary"].is-owned{box-shadow:inset 0 0 0 1px rgba(246,188,100,.3)}
+.bear-manual-hero-card[data-rarity="epic"].is-owned{border-color:#b08ee4}
+.bear-manual-hero-card[data-rarity="rare"].is-owned{border-color:#78b6ed}
+.bear-manual-hero-editor,.bear-manual-detail-card,.bear-manual-pet-card{margin:14px 0;padding:14px;border:1px solid var(--line);border-radius:16px;background:var(--card)}
+.bear-manual-hero-edit-head{display:flex;gap:12px;align-items:center;margin-bottom:10px}
+.bear-manual-hero-edit-head img{width:55px;height:55px;object-fit:contain;border-radius:12px}
+.bear-manual-hero-edit-head h3,.bear-manual-hero-edit-head h4{margin:0}
+.bear-manual-check{display:flex;align-items:center;gap:8px;font-size:13px;align-self:center;min-height:46px}
+.bear-manual-check input{width:20px;height:20px}
+@media(max-width:650px){
+ .bear-manual-troop-row{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .bear-manual-remove{grid-column:1 / -1}
+ .bear-manual-hero-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .bear-manual-season{padding:9px}
+ .bear-manual-field input,.bear-manual-field select{font-size:16px}
+}
 </style>
 <link rel="stylesheet" href="./v2.css">
 <link rel="stylesheet" href="./ux.css">
@@ -201,7 +243,7 @@ details{border-top:1px solid var(--line);margin-top:14px;padding-top:14px}summar
 </main>
 <footer class="footer">[NRW]United · Kingdom 1044 · Unofficial fan-made tool · Kingshot game art © Century Games · <span data-t="footerNote">No account login, no central saving. Personal settings stay in this browser.</span></footer>
 </div>
-<script src="./combat.js?v=math-audit-20261010-4"></script>
+<script src="./combat.js?v=mixed-tiers-20261011-1"></script>
 <script>
 (function(){
 'use strict';
@@ -363,12 +405,13 @@ function calculate(marches){
  // Only the captain's stats may be used for the starter and those of the
  // respective external captain for each join. Troop tier is our own troops.
  var engine=window.NRW_BEAR_COMBAT,levels=engine.configure(model.v2);
+ var allocatedTiers=engine.allocateLevels?engine.allocateLevels(actual,levels):null;
  var fullOwn=engine.ready(model.values,levels);
  var fullJoins=marches.slice(1).every(function(m){return engine.ready(m.leaderStats,levels);});
- var ownScore=fullOwn?engine.damage(start,offensiveStats(model.values,true),levels,5 /* NRW Pitfall Lv5 */):null;
+ var ownScore=fullOwn?engine.damage(start,offensiveStats(model.values,true),allocatedTiers?allocatedTiers[0]:levels,5 /* NRW Pitfall Lv5 */):null;
  var totalScore=(fullOwn&&fullJoins)?actual.reduce(function(sum,row,j){
   var stats=j===0?offensiveStats(model.values,true):marches[j].leaderStats;
-  return sum+engine.damage(row,stats,levels,5 /* NRW Pitfall Lv5 */);
+  return sum+engine.damage(row,stats,allocatedTiers?allocatedTiers[j]:levels,5 /* NRW Pitfall Lv5 */);
  },0):null;
  // Own score remains available without requiring other rallyleader stats.
  var score=totalScore===null?ownScore:totalScore;
@@ -559,6 +602,6 @@ window.NRW_BEAR_BRIDGE={model:function(){return model;},save:save,render:render,
 try{document.documentElement.dataset.theme=localStorage.getItem('nrw_theme')||'dark';language(localStorage.getItem('nrw_page_lang')||'en');}catch(_){language('en');}
 })();
 </script>
-<script src="./catalog.js"></script><script src="./v2.js?v=bear-i18n-20261011-1"></script><script src="./ux.js?v=bear-i18n-20261011-1"></script><script src="./charm-references.js"></script><script src="./charm-shapes.js"></script><script src="./charm-guide-silhouettes.js?v=charms-11-1"></script><script src="./charm-guide-matcher.js?v=charms-11-1"></script><script src="./tier-recognizer.js"></script><script src="./gear-layout.js?v=hero-details-20261010-3"></script><script src="./screenshot-importer.js?v=hero-details-20261010-3"></script><script src="./intake-core.js?v=multilang-ocr-20261011-1"></script><script src="./troop-badges.js?v=standard-responsive-20261011-2"></script><script src="./troop-entries.js?v=verified-row-20261011-1"></script><script src="./hero-grid.js?v=roster-20261010-1"></script><script src="./hero-stars.js?v=phone-diagnostics-20261010-1"></script><script src="./hero-level.js?v=level-glyph-20261010-3"></script><script src="./portrait-matcher.js?v=roster-20261010-3"></script><script src="./intake-ui.js?v=mini-hero-stats-20261011-1"></script><script src="./hero-reference.js?v=source-loader-20261011-2"></script><script src="./hero-advisor.js?v=mini-hero-stats-20261011-1"></script><script src="./capacity-core.js?v=capacity-20261010-1"></script><script src="./capacity-ui.js?v=bear-i18n-20261011-1"></script><script src="./formation-core.js?v=additive-base-20261010-7"></script><script src="./formation-ui.js?v=bear-i18n-20261011-1"></script><script src="./simulation-core.js?v=additive-base-20261010-7"></script><script src="./own-baseline.js?v=mini-hero-stats-20261011-1"></script><script src="./proc-expectation.js?v=single-bear-damage-20261010-1"></script><script src="./score-bonuses.js?v=partial-damage-hotfix-20261011-1"></script><script src="./simulation-ui.js?v=partial-damage-hotfix-20261011-1"></script><script src="./buff-intake-core.js?v=valora-full-badge-20261010-7"></script><script src="./buff-import.js?v=bear-i18n-20261011-1"></script><script src="./github-profiles.js?v=player-names-20261011-1"></script><script src="./wizard.js?v=source-loader-20261011-2"></script>
+<script src="./catalog.js"></script><script src="./v2.js?v=bear-i18n-20261011-1"></script><script src="./ux.js?v=bear-i18n-20261011-1"></script><script src="./charm-references.js"></script><script src="./charm-shapes.js"></script><script src="./charm-guide-silhouettes.js?v=charms-11-1"></script><script src="./charm-guide-matcher.js?v=charms-11-1"></script><script src="./tier-recognizer.js"></script><script src="./gear-layout.js?v=hero-details-20261010-3"></script><script src="./screenshot-importer.js?v=hero-details-20261010-3"></script><script src="./intake-core.js?v=multilang-ocr-20261011-1"></script><script src="./troop-badges.js?v=standard-responsive-20261011-2"></script><script src="./troop-entries.js?v=verified-row-20261011-1"></script><script src="./hero-grid.js?v=roster-20261010-1"></script><script src="./hero-stars.js?v=phone-diagnostics-20261010-1"></script><script src="./hero-level.js?v=level-glyph-20261010-3"></script><script src="./portrait-matcher.js?v=roster-20261010-3"></script><script src="./intake-ui.js?v=manual-intake-20261011-1"></script><script src="./hero-reference.js?v=source-loader-20261011-2"></script><script src="./hero-advisor.js?v=mini-hero-stats-20261011-1"></script><script src="./capacity-core.js?v=capacity-20261010-1"></script><script src="./capacity-ui.js?v=bear-i18n-20261011-1"></script><script src="./formation-core.js?v=additive-base-20261010-7"></script><script src="./formation-ui.js?v=bear-i18n-20261011-1"></script><script src="./simulation-core.js?v=mixed-tiers-20261011-1"></script><script src="./own-baseline.js?v=mini-hero-stats-20261011-1"></script><script src="./proc-expectation.js?v=single-bear-damage-20261010-1"></script><script src="./score-bonuses.js?v=partial-damage-hotfix-20261011-1"></script><script src="./simulation-ui.js?v=partial-damage-hotfix-20261011-1"></script><script src="./buff-intake-core.js?v=valora-full-badge-20261010-7"></script><script src="./buff-import.js?v=bear-i18n-20261011-1"></script><script src="./github-profiles.js?v=player-names-20261011-1"></script><script src="./manual-entry.js?v=manual-intake-20261011-1"></script><script src="./wizard.js?v=manual-intake-20261011-1"></script>
 </body>
 </html>

@@ -55,9 +55,28 @@ function troopAttack(className,tier,tg){
  if(!attack[className]||!validTier(tier)||!validTG(tg))return null;
  return attack[className][Number(tier)-1][Number(tg)];
 }
+function validLevel(x){
+ if(Array.isArray(x?.groups))return x.groups.every(g=>validTier(g.tier)&&validTG(g.tg)&&
+  Number.isSafeInteger(Number(g.count))&&Number(g.count)>0);
+ return Boolean(x&&validTier(x.tier)&&validTG(x.tg));
+}
+function attackForGroup(level,type,requested){
+ if(requested===0)return 0;
+ if(!Array.isArray(level?.groups))return troopAttack(type,level?.tier,level?.tg);
+ let remaining=requested,total=0;
+ const available=level.groups.slice().sort((a,b)=>
+  troopAttack(type,b.tier,b.tg)-troopAttack(type,a.tier,a.tg));
+ for(const group of available){
+  if(remaining<=0)break;
+  const count=Math.min(remaining,Number(group.count));
+  total+=count*troopAttack(type,group.tier,group.tg);
+  remaining-=count;
+ }
+ return remaining>0?null:total/requested;
+}
 function ready(stats,levels){
  return Boolean(stats&&Array.isArray(levels)&&levels.length===3&&
- levels.every(x=>x&&validTier(x.tier)&&validTG(x.tg))&&
+ levels.every(validLevel)&&
  statKeys.flat().every(k=>Object.prototype.hasOwnProperty.call(stats,k)&&
  Number.isFinite(Number(stats[k]))&&Number(stats[k])>=0));
 }
@@ -72,7 +91,8 @@ function breakdown(troops,stats,levels,pitfall=0){
  const ownTotal=troops.reduce((s,n)=>s+Number(n),0);
  const armyMin=Math.min(ownTotal,bearTotal);
  const types=troops.map((count,i)=>{
-  const quantity=Number(count),baseAttack=troopAttack(troopKeys[i],levels[i].tier,levels[i].tg);
+  const quantity=Number(count),baseAttack=attackForGroup(levels[i],troopKeys[i],quantity);
+  if(baseAttack===null)return null;
   const capturedAttackPct=Number(stats[statKeys[i][0]]);
   const lethalityPct=Number(stats[statKeys[i][1]]);
   const appliedAttackPct=capturedAttackPct+trapBonus;
@@ -86,6 +106,7 @@ function breakdown(troops,stats,levels,pitfall=0){
    attackPerUnit:attPerUnit,armyFactor,typeBonus,
    damagePerRound,damageTenRounds:damagePerRound*rounds};
  });
+ if(types.some(t=>t===null))return null;
  return {types,rounds,bearTotal,bearDefensePerUnit,armyMin,trapLevel,trapAttackPct:trapBonus,
   totalTroops:ownTotal,totalTenRounds:types.reduce((n,t)=>n+t.damageTenRounds,0)};
 }
@@ -95,7 +116,38 @@ function damage(troops,stats,levels,pitfall=0){
 function configure(v2){
  if(!v2||typeof v2!=='object')return [{tier:0,tg:0},{tier:0,tg:0},{tier:0,tg:0}];
  const levels=Array.isArray(v2.troopTiers)?v2.troopTiers:[];
- return troopKeys.map((_,i)=>({tier:Number(levels[i]?.tier)||0,tg:levels[i]?.tg===undefined?0:Number(levels[i].tg)}));
+ const groups=Array.isArray(v2.troopGroups)?v2.troopGroups:null;
+ if(groups&&groups.length){
+  return troopKeys.map((type,i)=>{
+   const rows=groups.filter(g=>g.type===type).map(g=>({tier:Number(g.tier),tg:Number(g.tg),count:Number(g.count)}));
+   // An incomplete troop row must never become a silently guessed level.
+   if(rows.some(g=>!validTier(g.tier)||!validTG(g.tg)||!Number.isSafeInteger(g.count)||g.count<=0))
+    return {tier:0,tg:null};
+   if(rows.length===0)return {tier:0,tg:null};
+   return {tier:rows.length===1?rows[0].tier:null,tg:rows.length===1?rows[0].tg:null,groups:rows};
+  });
+ }
+ return troopKeys.map((_,i)=>({tier:Number(levels[i]?.tier)||0,
+  tg:levels[i]?.tg===null?null:levels[i]?.tg===undefined?0:Number(levels[i].tg)}));
 }
-root.NRW_BEAR_COMBAT={troopKeys,attack,troopAttack,ready,damage,breakdown,configure,statKeys};
+// Optional per-march allocation consumes the best available tiers ONCE,
+// instead of reusing the same strong troops in every simultaneous march.
+function allocateLevels(marches,levels){
+ if(!Array.isArray(marches)||!Array.isArray(levels))return null;
+ const remaining=levels.map((lvl,i)=>Array.isArray(lvl?.groups)?
+  lvl.groups.map(g=>({...g,attack:troopAttack(troopKeys[i],g.tier,g.tg)})).sort((a,b)=>b.attack-a.attack):null);
+ return marches.map(row=>levels.map((lvl,i)=>{
+  if(!remaining[i])return lvl;
+  let required=Number(row[i])||0;
+  const allocated=[];
+  for(const g of remaining[i]){
+   const n=Math.min(required,g.count);
+   if(n>0){allocated.push({tier:g.tier,tg:g.tg,count:n});g.count-=n;required-=n;}
+   if(required<=0)break;
+  }
+  if(required>0)return {tier:0,tg:null};
+  return {tier:null,tg:null,groups:allocated};
+ }));
+}
+root.NRW_BEAR_COMBAT={troopKeys,attack,troopAttack,ready,damage,breakdown,configure,allocateLevels,attackForGroup,statKeys};
 })(window);

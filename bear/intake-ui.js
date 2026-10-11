@@ -1155,6 +1155,9 @@ function apply(){
     if((hasClass&&hasSquad)||(hasClass&&bonusOverview))
       v.combatStatDetectedOrigin='separate-overview';
    }
+   // A confirmed OCR troop import supersedes a previous manual inventory.
+   // Never merge stale hand-entered groups with the new screenshot counts.
+   if(item.type==='troops')delete v.troopGroups;
    for(const [key,num] of Object.entries(item.values)){
     if(!Number.isFinite(Number(num))||Number(num)<0)continue;
     m.values[key]=Number(num);const input=$(key);if(input){input.value=num;input.dispatchEvent(new Event('input',{bubbles:true}));}

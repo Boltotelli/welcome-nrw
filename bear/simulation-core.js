@@ -32,10 +32,11 @@ function scoreRows(rows,model,combat){
  if(!combat?.ready?.(v,levels)||typeof combat?.damage!=='function')return null;
  const own=root.NRW_BEAR_OWN_BASELINE?.currentStats?.(model)||{...v};
  const pitfall=5; // NRW alliance trap is always Lv5: +25 attack points
+ const rowLevels=combat.allocateLevels?.(rows,levels);
  const scores=rows.map((row,i)=>{
   // The join score intentionally does not use the own starter's extra
   // expedition bonuses or fictional external captain stats.
-  const result=combat.damage(row,i===0?own:v,levels,pitfall);
+  const result=combat.damage(row,i===0?own:v,rowLevels?.[i]||levels,pitfall);
   return Number.isFinite(result)?result:null;
  });
  if(scores.some(x=>x===null))return null;
