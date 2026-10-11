@@ -401,110 +401,16 @@ async function readHeroLevelsMasked(tiles,canvas,worker,scanTag){
   });
  }catch(_){/* Do not invent an unreadable hero level. */}
 }
-function spatialTroops(words,canvas){
- const zones=[
-  {key:'troopsI',x:[.20,.42],y:[.305,.353]},
-  {key:'troopsC',x:[.60,.85],y:[.305,.353]},
-  {key:'troopsA',x:[.20,.51],y:[.402,.451]}
- ],found={};
- for(const zone of zones){
-  const hits=[];
-  for(const word of words||[]){
-   if(!word.bbox||!word.text)continue;
-   const bb=word.bbox,cx=((bb.x0+bb.x1)/2)/canvas.width,
-     cy=((bb.y0+bb.y1)/2)/canvas.height;
-   if(cx<zone.x[0]||cx>zone.x[1]||cy<zone.y[0]||cy>zone.y[1])continue;
-   hits.push({x:bb.x0,y:cy,word:String(word.text)});
-  }
-  hits.sort((a,b)=>a.x-b.x);
-  // Tesseract sometimes reports "557", ".", "731" as three words.
-  const joined=hits.map(x=>x.word).join('');
-  const candidates=[...joined.matchAll(/\d{1,3}(?:[.,]\d{3})+|\d{4,9}/g)]
-    .map(x=>Core.normalizeNumber(x[0]))
-    .filter(n=>Number.isInteger(n)&&n>1000&&n<200000000);
-  if(candidates.length)found[zone.key]=candidates[0];
-  else{
-   const singles=hits.map(x=>Core.normalizeNumber(x.word))
-     .filter(n=>Number.isInteger(n)&&n>1000&&n<200000000);
-   if(singles.length)found[zone.key]=singles[0];
-  }
- }
- return found;
-}
-async function readTroopNumbers(canvas,worker){
- // Isolate each number strip so icons/golden badges cannot hide a leading
- // digit in the full-screen OCR. Resizing keeps original aspect ratio.
- const crops=[
-  {key:'troopsI',x:.202,y:.307,w:.215,h:.044},
-  {key:'troopsC',x:.605,y:.307,w:.218,h:.044},
-  {key:'troopsA',x:.202,y:.405,w:.270,h:.046}
- ];
- const board=document.createElement('canvas');board.width=460;board.height=420;
- const b=board.getContext('2d',{willReadFrequently:true});
- b.fillStyle='#fff';b.fillRect(0,0,board.width,board.height);
- for(let i=0;i<3;i++){
-  const v=crops[i],x=v.x*canvas.width,y=v.y*canvas.height,
-   w=v.w*canvas.width,h=v.h*canvas.height;
-  const ratio=Math.min(2.2,120/h,430/w);
-  b.drawImage(canvas,x,y,w,h,15,14+i*140,w*ratio,h*ratio);
- }
- const result=await worker.recognize(board);
- const found={},words=result.data.words||[];
- for(let i=0;i<3;i++){
-  const row=words.filter(v=>v.bbox&&
-   (v.bbox.y0+v.bbox.y1)/2>=i*140&&
-   (v.bbox.y0+v.bbox.y1)/2<(i+1)*140)
-   .sort((a,b)=>a.bbox.x0-b.bbox.x0).map(x=>x.text).join('');
-  const number=row.match(/\d{1,3}(?:[.,]\d{3})+|\d{4,9}/)?.[0];
-  const value=number?Core.normalizeNumber(number):null;
-  if(Number.isInteger(value)&&value>1000&&value<200000000)found[crops[i].key]=value;
- }
- return found;
-}
-async function recheckTroopFields(canvas,worker,values,uncertainKeys=new Set()){
- // Relative to original Kingshot image, not to the viewing phone/browser.
- // One focused OCR pass per missing quantity or T10 class title.
- const blocks=[
-  {key:'troopsI',name:'Infanterie',n:[.202,.307,.215,.044],label:[.205,.286,.300,.034]},
-  {key:'troopsC',name:'Kavallerie',n:[.605,.307,.218,.044],label:[.609,.286,.300,.034]},
-  {key:'troopsA',name:'Bogenschützen',n:[.202,.405,.270,.046],label:[.205,.384,.305,.034]}
- ];
- let tiersText='';
- for(const block of blocks){
-  function crop(zone){
-   const c=document.createElement('canvas'),w=620,h=104;
-   c.width=w;c.height=h;
-   const cx=c.getContext('2d',{willReadFrequently:true});cx.fillStyle='white';cx.fillRect(0,0,w,h);
-   cx.drawImage(canvas,zone[0]*canvas.width,zone[1]*canvas.height,zone[2]*canvas.width,zone[3]*canvas.height,
-    8,9,w-16,h-18);
-   return c;
-  }
-  if(!uncertainKeys.has(block.key)&&!(Number(values[block.key])>0)){
-   try{
-    const res=await worker.recognize(crop(block.n));
-    const t=(res.data?.text||'').replace(/\s/g,'');
-    const possibles=[...t.matchAll(/\d{1,3}[.,]\d{3}|\d{4,9}/g)]
-     .map(m=>Core.normalizeNumber(m[0]))
-     .filter(n=>Number.isInteger(n)&&n>=1000&&n<200000000);
-    if(possibles.length)values[block.key]=Math.max(...possibles);
-   }catch(_){}
-  }
-  try{
-   const res=await worker.recognize(crop(block.label));
-   const label=String(res.data?.text||'').toLowerCase();
-   if(/spitz\w{0,5}n|spitzen/.test(label))tiersText+='\nSpitzen '+block.name;
-  }catch(_){}
- }
- return tiersText;
-}
+// Troop count and icon OCR lives in entry-anchored passes below.
+// No global troop row coordinates or hardcoded amount strips remain.
 async function readTroopColumnWords(canvas,worker){
  // Tesseract's full-screen pass often loses the infantry/cavalry labels
  // beside the illustrated icons. Re-read the two text columns independently.
  // The source regions are FRACTIONS of original width/height; output word
  // boxes are mapped back to the full-screen coordinate system.
  const columns=[
-  {x:.162,y:.215,w:.337,h:.595},
-  {x:.579,y:.215,w:.355,h:.595}
+  {x:.142,y:.18,w:.375,h:.72},
+  {x:.55,y:.18,w:.410,h:.72}
  ],words=[];
  for(const zone of columns){
   const sourceX=zone.x*canvas.width,sourceY=zone.y*canvas.height,
@@ -783,7 +689,7 @@ function renderQueue(){
   const header=document.createElement('div');header.className='bear-intake-item-head';
   const title=document.createElement('b');title.textContent=item.fileName;
   const type=inputChoice(Object.entries(typeTranslations[locale()]||typeTranslations.en).map(([key,name])=>[key,name]),item.type);
-  type.addEventListener('change',async ()=>{item.type=type.value;item.values=item.type==='troops'?{...Core.parseTroops(item.text),...(item.canvas?spatialTroops(item.words,item.canvas):{})}:item.type==='stats'?{...Core.parseStats(item.text),...Core.parseStats(item.grouped||'')}:{};item.troopEntries=item.type==='troops'&&item.canvas&&ENTRY?ENTRY.detect(item.words||[],item.canvas.width,item.canvas.height):[];if(item.troopEntries.length){item.values={...ENTRY.totals(item.troopEntries)};}item.detail=item.type==='starter'?Core.parseHeroDetail(item.text,allKnown()):null;const scanTag='manual-'+(++heroScanSequence);
+  type.addEventListener('change',async ()=>{item.type=type.value;item.values=item.type==='troops'?{}:item.type==='stats'?{...Core.parseStats(item.text),...Core.parseStats(item.grouped||'')}:{};item.troopEntries=item.type==='troops'&&item.canvas&&ENTRY?ENTRY.detect(item.words||[],item.canvas.width,item.canvas.height):[];if(item.troopEntries.length){item.values={...ENTRY.totals(item.troopEntries)};}item.detail=item.type==='starter'?Core.parseHeroDetail(item.text,allKnown()):null;const scanTag='manual-'+(++heroScanSequence);
     item.cards=item.type==='roster'&&item.canvas?overviewTiles(item.canvas,item.text,item.words,scanTag):[];
     if(item.type==='roster'&&item.cards.length){
      const worker=await loadOCR();
@@ -860,7 +766,7 @@ function renderQueue(){
    }else relevant.forEach(id=>{
     // A guided review should show only found values. Anything not recognized
     // is collected in the final missing-values step, not a wall of blank inputs.
-    if(window.NRW_BEAR_WIZARD&&!Object.prototype.hasOwnProperty.call(item.values,id))return;
+    if(window.NRW_BEAR_WIZARD&&!Object.prototype.hasOwnProperty.call(item.values,id)&&item.type!=='troops')return;
     const label=document.createElement('label');label.className='bear-intake-value';
     const cap=document.createElement('span');cap.textContent=captions[id]||id;
     const field=document.createElement('input');field.type='number';field.step=id.startsWith('troops')?'1':'0.01';field.min='0';
