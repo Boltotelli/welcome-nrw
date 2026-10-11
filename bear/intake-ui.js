@@ -774,7 +774,16 @@ function renderQueue(){
   const header=document.createElement('div');header.className='bear-intake-item-head';
   const title=document.createElement('b');title.textContent=item.fileName;
   const type=inputChoice(Object.entries(typeTranslations[locale()]||typeTranslations.en).map(([key,name])=>[key,name]),item.type);
-  type.addEventListener('change',async ()=>{item.type=type.value;item.values=item.type==='troops'?{}:item.type==='stats'?{...Core.parseStats(item.text),...Core.parseStats(item.grouped||'')}:{};item.troopEntries=item.type==='troops'&&item.canvas&&ENTRY?ENTRY.detect(item.words||[],item.canvas.width,item.canvas.height):[];if(item.troopEntries.length){item.values={...ENTRY.totals(item.troopEntries)};}item.detail=item.type==='starter'?Core.parseHeroDetail(item.text,allKnown()):null;const scanTag='manual-'+(++heroScanSequence);
+  type.addEventListener('change',async ()=>{item.type=type.value;item.values=item.type==='troops'?{}:item.type==='stats'?{...Core.parseStats(item.text),...Core.parseStats(item.grouped||'')}:{};item.troopEntries=item.type==='troops'&&item.canvas&&ENTRY?ENTRY.detect(item.words||[],item.canvas.width,item.canvas.height):[];
+    if(item.type==='troops'&&item.canvas&&
+       item.troopEntries.length<=3&&
+       new Set(item.troopEntries.map(e=>e.type)).size===item.troopEntries.length){
+     try{
+      const fixed=await readFixedTroopNumbers(item.canvas);
+      if(fixed)item.troopEntries=matchFixedTroopEntries(fixed,item.troopEntries);
+     }catch(_){/* Keep dynamic-row fallback. */}
+    }
+    if(item.troopEntries.length){item.values={...ENTRY.totals(item.troopEntries)};}item.detail=item.type==='starter'?Core.parseHeroDetail(item.text,allKnown()):null;const scanTag='manual-'+(++heroScanSequence);
     item.cards=item.type==='roster'&&item.canvas?overviewTiles(item.canvas,item.text,item.words,scanTag):[];
     if(item.type==='roster'&&item.cards.length){
      const worker=await loadOCR();
