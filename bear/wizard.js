@@ -80,7 +80,59 @@ const messages={
   opt:'Réglages experts',advanced:'Tous les champs',api:'Profil local ou JSON',
   skipped:'Tu peux compléter cela plus tard.',estimated:'Résultats provisoires : effets aléatoires des héros non complètement modélisés.',
   hero:'Confirme les héros et étoiles reconnus.',privacy:'Les images restent sur ton appareil.'
- }
+ },
+ es:{
+  "eyebrow": "NRW · TRAMPA DEL OSO",
+  "start": "Tu formación para el oso",
+  "desc": "Un asistente guiado que aprovecha tu perfil y las capturas del juego.",
+  "steps": [
+    "Tu perfil",
+    "Tropas",
+    "Estadísticas de combate",
+    "Equipo del gobernador",
+    "Todos los héroes",
+    "Los 3 mejores héroes",
+    "Detalles de los héroes",
+    "Mascotas y Valora · datos pendientes",
+    "Tu recomendación",
+    "Tu daño al oso"
+  ],
+  "prompts": [
+    "Selecciona tu ID de gobernador o carga un perfil guardado.",
+    "Sube la vista previa de tropas. Una captura suele mostrar las cantidades y niveles.",
+    "Sube el resumen de bonificaciones. Puedes seleccionar varias capturas.",
+    "Una captura completa del equipo del gobernador muestra seis piezas y 18 talismanes.",
+    "Sube las capturas de tu lista de héroes, confírmalas y revisa los Widgets antes de elegir los tres mejores.",
+    "Comprueba y confirma un héroe inicial de cada tipo de tropa.",
+    "Reparte tu mejor equipo de héroe entre los tres seleccionados. Después sube sus capturas de detalles y habilidades.",
+    "Sube las habilidades de mascotas y Valora. Introduce Hunter Instinct y completa solo los datos que falten.",
+    "Revisa las formaciones iniciales y de apoyo con las tropas disponibles.",
+    "Ajusta la formación inicial para estimar un único daño personal sin apoyos."
+  ],
+  "next": "Continuar",
+  "back": "Atrás",
+  "skip": "Añadir captura más tarde",
+  "finish": "Mostrar resultado",
+  "upload": "Elegir captura",
+  "uploads": "Elegir capturas",
+  "progress": "Paso",
+  "profileGood": "Perfil cargado. Continúa con las tropas.",
+  "profileMissing": "Carga un perfil antes de continuar.",
+  "pages": "GitHub Pages no puede consultar MightPulse sin un servidor seguro. Utiliza un perfil guardado o importa un JSON. El perfil local no verifica de nuevo la alianza.",
+  "review": "Comprueba los valores detectados y pulsa Aplicar.",
+  "waiting": "Sube y confirma una captura, o sáltate este paso.",
+  "ready": "Datos guardados. Puedes continuar.",
+  "done": "Configuración completada.",
+  "missing": "Falta",
+  "allGood": "Todos los datos necesarios están presentes.",
+  "opt": "Opciones avanzadas",
+  "advanced": "Mostrar todos los campos",
+  "api": "Perfil guardado o JSON",
+  "skipped": "Puedes completar este paso más tarde.",
+  "estimated": "Es una estimación, no daño garantizado. Las habilidades aleatorias pueden cambiar el resultado.",
+  "hero": "Confirma los héroes y sus estrellas antes de guardarlos.",
+  "privacy": "Las capturas permanecen en tu dispositivo."
+}
 };
 const t=()=>messages[lang()]||messages.en;
 const sections=[],labels=['id','troops','stats','gear','heroes','hero-picks','hero-details','missing','result','simulation'];
@@ -247,7 +299,8 @@ const atlas='https://ks-atlas.com/tools/atlas-database/bear-rally-heroes';
 const types=['infantry','cavalry','archer'],names={
  de:['Infanterie','Kavallerie','Bogenschützen'],
  en:['Infantry','Cavalry','Archers'],
- fr:['Infanterie','Cavalerie','Archers']
+ fr:['Infanterie','Cavalerie','Archers'],
+ es:['Infantería','Caballería','Arqueros']
 };
 const chosenRecommendations=['','',''],detailConfirmed=new Set();
 const recommendationPanel=document.createElement('section');
@@ -264,7 +317,7 @@ for(const i of [1,2,4,6,7]){
  sections[i].prepend(s);storedPanels[i]=s;
  const help=document.createElement('details');help.className='bear-guide-example';
  const head=document.createElement('summary');
- head.textContent=lang()==='de'?'📷 Beispielbilder aus Kingshot':'📷 Kingshot screenshot examples';
+ head.textContent=lang()==='de'?'📷 Beispielbilder aus Kingshot':lang()==='fr'?'📷 Exemples de captures Kingshot':lang()==='es'?'📷 Ejemplos de capturas Kingshot':'📷 Kingshot screenshot examples';
  const note=document.createElement('div');note.className='bear-guide-example-preview';
  const text={
  1:'Schwadron: Infanterie, Kavallerie, Bogenschützen · Anzahl · T/TG',
@@ -302,8 +355,7 @@ function displayStored(i){
  const panel=storedPanels[i];if(!panel)return;
  const m=B.model(),v=m.values||{},x=m.v2||{};
  panel.replaceChildren();
- const header=document.createElement('h3');header.textContent=lang()==='de'?
-  'Bereits gespeicherte Werte':'Saved values';panel.append(header);
+ const header=document.createElement('h3');header.textContent=lang()==='de'?'Bereits gespeicherte Werte':lang()==='fr'?'Valeurs enregistrées':lang()==='es'?'Valores guardados':'Saved values';panel.append(header);
  const num=n=>n==null||n===''?'—':Number(n).toLocaleString('de-DE');
  const add=(key,value)=>{
   const row=document.createElement('div');row.className='bear-stored-row';
@@ -353,11 +405,12 @@ function renderWidgetLevels(){
  widgetHost.replaceChildren();widgetHost.hidden=!scanned.length;
  if(!scanned.length)return;
  const h=document.createElement('h3');
- h.textContent=l==='de'?'Widgets vor der Top-3-Auswahl':l==='fr'?'Widgets avant le top 3':'Widgets before top 3';
+ h.textContent=l==='de'?'Widgets vor der Top-3-Auswahl':l==='fr'?'Widgets avant le top 3':l==='es'?'Widgets antes de elegir los 3 mejores':'Widgets before top 3';
  widgetHost.append(h);
  const note=document.createElement('p');note.className='hint';
  note.textContent=l==='de'?'Die Widget-Level beeinflussen die Auswahl. „—“ = unbekannt, 0 = kein Widget.':
   l==='fr'?'Les Widgets influencent le classement. « — » = inconnu, 0 = aucun Widget.':
+  l==='es'?'Los Widgets afectan la clasificación. «—» = desconocido, 0 = sin Widget.':
   'Widget levels affect the ranking. “—” = unknown, 0 = no Widget.';
  widgetHost.append(note);
  const important=new Set(advisor?.offensiveWidgetHeroes||[]);
@@ -371,7 +424,7 @@ function renderWidgetLevels(){
    const unknown=document.createElement('option');unknown.value='';unknown.textContent='—';select.append(unknown);
    for(let lv=0;lv<=10;lv++){
     const opt=document.createElement('option');opt.value=String(lv);
-    opt.textContent=lv===0?(l==='de'?'0 · kein Widget':'0 · no Widget'):'Lv '+lv;select.append(opt);
+    opt.textContent=lv===0?(l==='de'?'0 · kein Widget':l==='fr'?'0 · aucun Widget':l==='es'?'0 · sin Widget':'0 · no Widget'):'Lv '+lv;select.append(opt);
    }
    const explicit=Object.prototype.hasOwnProperty.call(v.starterWidgetLevels||{},n);
    const value=explicit?v.starterWidgetLevels[n]:v.manualHeroes?.[n]?.widget;
@@ -394,7 +447,7 @@ function renderWidgetLevels(){
   if(!primary.length)more.open=true;
   const head=document.createElement('summary');
   head.textContent=l==='de'?'Weitere Helden ('+others.length+')':
-   l==='fr'?'Autres héros ('+others.length+')':'Other heroes ('+others.length+')';
+   l==='fr'?'Autres héros ('+others.length+')':l==='es'?'Otros héroes ('+others.length+')':'Other heroes ('+others.length+')';
   more.append(head);draw(others,more);widgetHost.append(more);
  }
 }
