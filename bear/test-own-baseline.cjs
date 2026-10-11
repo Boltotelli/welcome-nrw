@@ -9,7 +9,7 @@ const B=ctx.window.NRW_BEAR_OWN_BASELINE,C=ctx.window.NRW_BEAR_COMBAT;
 assert.equal(B.skillCap(4,0),5);
 assert.equal(B.skillCap(3,5),4);
 assert.equal(B.skillCap(2,1),3);
-assert.equal(B.skillCap(0,0),null);
+assert.equal(B.skillCap(0,0),1);
 assert.equal(B.widgetValue('Yang',1).bonusPct,0,'widget Expedition ability unlocked only at Lv2');
 assert.equal(B.widgetValue('Petra',2).bonusPct,5);
 assert.equal(B.widgetValue('Petra',3).bonusPct,5);

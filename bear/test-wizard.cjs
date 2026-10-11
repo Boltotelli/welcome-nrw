@@ -106,9 +106,9 @@ assert.ok(css.includes('.bear-guide-stored'),'mobile saved-values cards styled')
 assert.ok(!wizard.includes('kingshot_beartrap_v3_action_transparent.webm'),'formation-stage loading must not reuse the damage video');
 assert.ok(wizard.includes('stageLoader.append(loaderBear,loaderText)'),'formation stage keeps its own animated bear loading indicator');
 assert.ok(simulation.includes("webm.src='./assets/kingshot_beartrap_v3_action_transparent.webm'"),'damage simulation retains the approved video');
-assert.ok(html.includes('./wizard.js?v=expedition-offense-20261011-1'),'wizard cache version changed');
+assert.ok(html.includes('./wizard.js?v=mini-hero-stats-20261011-1'),'wizard cache version changed');
 assert.ok(html.includes('./wizard.css?v=roster-widgets-20261011-1'),'CSS cache version changed');
-assert.ok(html.includes('./hero-advisor.js?v=expedition-offense-20261011-1'),'advisor cache version changed');
+assert.ok(html.includes('./hero-advisor.js?v=mini-hero-stats-20261011-1'),'advisor cache version changed');
 assert.ok(wizard.includes('new Set(advisor?.offensiveWidgetHeroes||[])'),'offensive heroes shown first');
 assert.ok(wizard.includes('window.NRW_BEAR_HERO_REFERENCE?.get?.(name,stars,tier)'),'verified attack is passed to the ranking engine');
 assert.ok(wizard.includes("'.jpg?v=corrected-examples-20261011-1'"),'corrected original images bypass stale browser caches');
@@ -135,12 +135,12 @@ assert.ok(fs.existsSync(__dirname+'/hero-reference.json'),'Vercel must ship sour
 assert.ok(intake.includes('const guidedDetails=window.NRW_BEAR_SCREENSHOT_STAGE===6'),'details only assigned from confirmed hero selection');
 assert.ok(intake.includes('assignedByOrder:true'),'unreadable hero heading has guarded review workflow');
 assert.ok(intake.includes('entry.countWarning=\'conflicting-line-reads\''),'troop OCR disagreement fails closed');
-assert.ok(html.includes('intake-ui.js?v=standard-icons-20261011-1'),'updated OCR script bypasses old browser cache');
+assert.ok(html.includes('intake-ui.js?v=mini-hero-stats-20261011-1'),'updated OCR script bypasses old browser cache');
 assert.ok(html.includes('score-bonuses.js?v=partial-damage-hotfix-20261011-1'),'updated damage logic bypasses old browser cache');
 
 assert.ok(wizard.includes('window.NRW_BEAR_OWN_BASELINE?.widgetValue?.(name,level)'),
  'offensive widget abilities must reach the ranking calculation');
-assert.ok(wizard.includes('offensiven Helden-Expeditionsfähigkeiten'),
+assert.ok(wizard.includes('Vergleich des erwarteten Gesamtschadens'),
  'explanation cannot revert to guide/rarity multipliers');
 assert.ok(!wizard.includes('Bear-Rolle und geprüfter Expeditionsangriff'),
  'obsolete qualitative role ranking should not be displayed');

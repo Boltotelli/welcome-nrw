@@ -81,7 +81,7 @@ assert.deepEqual(Object.keys(C.parseHeroOrderedExpeditionRows(
  '4.580\n4.476\n45.286\n1.526','cavalry')),[],
  'conquest/base flat numbers are NOT expedition percentage stats');
 
-assert.equal(C.maxSkill(4),5);assert.equal(C.maxSkill(3),4);assert.equal(C.maxSkill(5),5);
+assert.equal(C.maxSkill(4),5);assert.equal(C.maxSkill(3),4);assert.equal(C.maxSkill(5),5);assert.equal(C.maxSkill(0),1);
 const types={Yang:'archer',Rosa:'archer',Petra:'cavalry',Zoe:'infantry'};
 const owned=[{name:'Yang',level:80,stars:4,widget:5},{name:'Rosa',level:80,stars:5,widget:3},{name:'Petra',level:80,stars:5},{name:'Zoe',level:80,stars:5}];
 const suggestion=C.advise(owned,['Zoe','Petra','Rosa'],types);
