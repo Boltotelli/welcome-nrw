@@ -650,9 +650,18 @@ async function inspect(file){
    ENTRY.flagAmbiguousCounts?.(troopEntries,{});
    Object.assign(values,ENTRY.totals(troopEntries));
   }
-  if(troopEntries.length&&TROOP?.recognizeEntries){
-   try{troopTiers=await TROOP.recognizeEntries(canvas,troopEntries,worker);}
-   catch(_){troopTiers=null;/* Badges must not block troop counts. */}
+  if(troopEntries.length&&TROOP){
+   try{
+    // The 3-class inventory OCR no longer relies on translated labels.
+    // Accordingly T/TG must use IMAGE ICONS, not the missing labelBox.
+    troopTiers=fixed&&TROOP.recognizeStandard?
+     await TROOP.recognizeStandard(canvas,text+'\n'+grouped,worker):
+     await TROOP.recognizeEntries(canvas,troopEntries,worker);
+    if(Array.isArray(troopTiers))for(const entry of troopEntries){
+     const badge=troopTiers[entry.type];
+     if(badge){entry.tier=badge.tier??null;entry.tg=badge.tg??null;}
+    }
+   }catch(_){troopTiers=null;/* Badges must not block confirmed amounts. */}
   }
  }
  // If the class headings cannot be located, request manual review. A
@@ -795,7 +804,20 @@ function renderQueue(){
      // portrait recognition path as automatic overview detection.
      item.matcherInfo=await MATCHER.enrich(item.cards);
     }else item.matcherInfo=null;
-    item.troopTiers=null;if(item.type==='troops'&&item.canvas&&TROOP?.recognizeEntries)try{item.troopTiers=await TROOP.recognizeEntries(item.canvas,item.troopEntries,await loadOCR());}catch(_){}renderQueue();});
+    item.troopTiers=null;
+    if(item.type==='troops'&&item.canvas&&TROOP){
+     try{
+      const isFixed=item.troopEntries.length===3&&
+       item.troopEntries.every(e=>e.amountSource==='numeric-position-english');
+      item.troopTiers=isFixed&&TROOP.recognizeStandard?
+       await TROOP.recognizeStandard(item.canvas,item.text+'\n'+(item.grouped||''),await loadOCR()):
+       await TROOP.recognizeEntries(item.canvas,item.troopEntries,await loadOCR());
+      if(Array.isArray(item.troopTiers))for(const e of item.troopEntries){
+       const badge=item.troopTiers[e.type];if(badge){e.tier=badge.tier;e.tg=badge.tg;}
+      }
+     }catch(_){/* Unknown T/TG requires manual confirmation. */}
+    }
+    renderQueue();});
   header.append(title,type);card.appendChild(header);
   const content=document.createElement('div');content.className='bear-intake-values';
   if(item.type==='troops'||item.type==='stats'){
