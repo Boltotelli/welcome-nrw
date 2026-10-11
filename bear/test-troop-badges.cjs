@@ -73,3 +73,16 @@ const levels=test.recognize(canvas,'Spitzen Infanterie / Spitzen Kavallerie / Sp
 assert.deepEqual(Array.from(levels.map(x=>x.tier)),[10,10,10]);
 assert.equal(test.recognize(canvas,'Anfänger Infanterie',[])[0].tier,null);
 console.log('TROOP BADGES: truegold 6/5/6 including real archer badge glyph and tier-X text guard passed.');
+
+// Genuine OCR label boxes from that screenshot: numeral centers verified
+// in the original pixels are (137,363), (460,363) and (128,488).
+const realBadgeLabels=[
+ [{title:'Spitzen Infanterie',labelBox:{x:149/716,y:366/1536,h:31/1536}},{x:137,y:363}],
+ [{title:'Kavallerie',labelBox:{x:548/716,y:371/1536,h:17/1536}},{x:460,y:363}],
+ [{title:'Spitzen Bogenschütze',labelBox:{x:148/716,y:492/1536,h:28/1536}},{x:128,y:488}]
+];
+for(const [entry,actual] of realBadgeLabels){
+ const guess=newScope.window.NRW_BEAR_TROOP_BADGES.locateBadge(entry,{width:716,height:1536});
+ assert.ok(Math.abs(guess.x-actual.x)<=24&&Math.abs(guess.y-actual.y)<=24,
+  entry.title+' medal must be inside the dynamic local search range');
+}
