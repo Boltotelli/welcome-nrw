@@ -882,6 +882,9 @@ window.addEventListener('nrw-bear-buffs-applied',()=>{
 wizard.addEventListener('change',()=>{
  if(active===7)showRelevantManual();
 });
+window.addEventListener('nrw-bear-manual-mode',evt=>{
+ if(evt.detail?.stage===active)render();
+});
 window.addEventListener('nrw-bear-loaded',()=>{
  imported.clear();skipped.clear();finished=false;detailConfirmed.clear();chosenRecommendations.fill('');
  if(active===0){message(t().profileGood);$('bearGuideNext').disabled=false;moveTo(1);}
