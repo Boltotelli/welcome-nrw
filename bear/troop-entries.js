@@ -11,8 +11,8 @@ function fold(s){return String(s||'').normalize('NFKD').replace(/[\u0300-\u036f]
 function kind(s){
  const z=fold(s).replace(/[^a-z]/g,'');
  if(/infant|fussvolk/.test(z))return 0;
- if(/kaval|caval|reiter/.test(z))return 1;
- if(/bogensch|bogen|archer|marksman/.test(z))return 2;
+ if(/kaval|caval|caballer|reiter/.test(z))return 1;
+ if(/bogensch|bogen|archer|arquero|tireur|marksman/.test(z))return 2;
  return -1;
 }
 function norm(words,w,h){
@@ -57,19 +57,22 @@ function readTextCount(text){
 }
 function numeric(line){
  const sorted=[...line].sort((a,b)=>a.x0-b.x0);
- let chunks=[],current=[],right=-1;
+ const chunks=[];let current=[],end=-1;
  for(const w of sorted){
-  const t=w.text.replace(/[^0-9.,]/g,'');
-  if(!t)continue;
-  if(current.length&&w.x0-right>.028){chunks.push(current);current=[];}
-  current.push(t);right=w.x1;
+  const part=String(w.text).replace(/[^0-9.,]/g,'');
+  if(!part)continue;
+  if(current.length&&w.x0-end>.027){chunks.push(current);current=[];}
+  current.push(part);end=w.x1;
  }
  if(current.length)chunks.push(current);
- for(const parts of chunks){
-  const value=count(parts.join(''));
-  if(value!==null)return value;
- }
- return null;
+ // OCR splits 325 . 027 across word boundaries. Prefer the joined
+ // grouped count, not the nearby digit of a troop badge.
+ const parsed=chunks.map(parts=>({
+  raw:parts.join(''),value:count(parts.join(''))
+ })).filter(x=>x.value!==null);
+ parsed.sort((a,b)=>Number(/[.,]/.test(b.raw))-Number(/[.,]/.test(a.raw))||
+  String(b.value).length-String(a.value).length);
+ return parsed[0]?.value??null;
 }
 function labelsFound(words){
  // OCR occasionally splits "Infanterie" into "Infan" + "terie".
@@ -98,16 +101,19 @@ function labelsFound(words){
    const x0=Math.min(...segment.map(w=>w.x0)),x1=Math.max(...segment.map(w=>w.x1)),
     y0=Math.min(...segment.map(w=>w.y0)),y1=Math.max(...segment.map(w=>w.y1));
    if(items.some(a=>a.type===type&&Math.abs(a.y0-y0)<.012&&Math.abs(a.x0-x0)<.045))continue;
-   items.push({type,label:labels[type],x0,y0,x1,y1});
+   items.push({type,label:labels[type],title:segment.map(w=>w.text).join(' '),x0,y0,x1,y1});
   }
  }
  return items.sort((a,b)=>a.y0-b.y0||a.x0-b.x0);
 }
 function readBelow(label,words,w,h){
- // The number is on a distinct text baseline below this troop label.
- // All tolerances are fractions of the screenshot; x/y NEVER pixels.
- const xMin=Math.max(0,label.x0-.025),xMax=Math.min(1,label.x0+.29);
- const yMin=label.y0+.006,yMax=Math.min(1,label.y1+Math.max(.038,Math.min(.062,.10*w/h)));
+ // The count sits just BELOW its own label, never at a hardcoded screen
+ // row. Distances scale with the detected OCR text height.
+ const height=Math.max(label.y1-label.y0,.008);
+ const xMin=Math.max(0,label.x0-.016);
+ const xMax=Math.min(1,Math.max(label.x1+.055,label.x0+.17));
+ const yMin=label.y1+.001;
+ const yMax=Math.min(1,label.y1+Math.max(.022,height*3.5));
  const nearby=words.filter(a=>{
   const x=(a.x0+a.x1)/2,y=(a.y0+a.y1)/2;
   return x>=xMin&&x<=xMax&&y>=yMin&&y<=yMax&&/[0-9]/.test(a.text);
@@ -115,27 +121,35 @@ function readBelow(label,words,w,h){
  const lines=[];
  for(const word of nearby.sort((a,b)=>a.y0-b.y0||a.x0-b.x0)){
   const y=(word.y0+word.y1)/2;
-  let line=lines.find(row=>Math.abs(row.y-y)<.009);
-  if(!line){line={y,words:[]};lines.push(line);}
-  line.words.push(word);
+  let row=lines.find(r=>Math.abs(r.y-y)<Math.max(.006,height*.55));
+  if(!row){row={y,words:[]};lines.push(row);}
+  row.words.push(word);
  }
  for(const row of lines.sort((a,b)=>a.y-b.y)){
-  const value=numeric(row.words);
-  // A badge often contains a lone T/TG digit. Never treat it as the
-  // player's troop COUNT. Small actual armies remain manually reviewable.
-  if(value!==null&&value>=1000)return value;
+  const n=numeric(row.words);
+  if(n!==null)return n;
  }
  return null;
+}
+function cropAroundLabel(label){
+ const h=Math.max(.01,label.y1-label.y0);
+ return {x:Math.max(0,label.x0-.014),y:Math.max(0,label.y1+.002),
+  w:Math.max(.17,Math.min(.37,Math.max(label.x1+.075,label.x0+.18)-label.x0)),
+  h:Math.max(.023,Math.min(.061,h*3.5))};
 }
 function detect(words,width,height){
  const normalized=norm(words,width,height);
  return labelsFound(normalized).map((label,index)=>{
   const quantity=readBelow(label,normalized,width,height);
-  const crop={x:Math.max(0,label.x0-.024),y:Math.min(1,label.y1+.001),
-   w:Math.min(.32,1-label.x0+.024),h:Math.min(.065,.11*width/height)};
+  const crop=cropAroundLabel(label);
+  const fontHeight=Math.max(.008,label.y1-label.y0);
+  const iconWidth=Math.min(.16,Math.max(.095,fontHeight*13));
   return {id:index,type:label.type,label:label.label,count:quantity,
-   // One icon per entry (no assumption of a single tier per class).
-   icon:{x:Math.max(0,label.x0-.13),y:Math.max(0,label.y0-.018),w:.132,h:.082},
+   // Each badge region is derived from its OWN troop heading, not
+   // an absolute screen position or the number of entries.
+   title:label.title||'',labelBox:{x:label.x0,y:label.y0,w:label.x1-label.x0,h:label.y1-label.y0},
+   icon:{x:Math.max(0,label.x0-iconWidth),y:Math.max(0,label.y0-fontHeight*1.7),
+    w:iconWidth,h:Math.max(.055,fontHeight*8.5)},
    crop};
  });
 }
@@ -204,5 +218,5 @@ function totals(entries){
  for(const key of invalid)delete values[key];
  return values;
 }
-root.NRW_BEAR_TROOP_ENTRIES={detect,totals,count,readTextCount,flagAmbiguousCounts,recoverSingleEntries,kind,norm,version:'ratios-dynamic-20261009-2'};
+root.NRW_BEAR_TROOP_ENTRIES={detect,totals,count,readTextCount,flagAmbiguousCounts,recoverSingleEntries,kind,norm,version:'anchored-entry-20261011-1'};
 })(window);
