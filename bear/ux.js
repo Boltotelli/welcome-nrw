@@ -49,7 +49,39 @@ const strings={
   heroHint:'Trois héros facultatifs; le résultat reste approximatif sans leurs données.',
   required:'Manquant',complete:'Toutes les valeurs présentes',detail:'Réglages avancés',
   attackNote:'Estimation non validée dans Kingshot. Compétences et widgets non entièrement modélisés.'
- }
+ },
+ es:{
+  "title": "🐻 Trampa del oso · Configuración rápida",
+  "sub": "Prepara tu formación paso a paso. Abre los detalles solo cuando los necesites.",
+  "troops": "Tropas",
+  "troopsNote": "Un tipo de tropa por nivel. Si tienes niveles mixtos, se requiere una distribución separada.",
+  "type": [
+    "Infantería",
+    "Caballería",
+    "Arqueros"
+  ],
+  "qty": "Cantidad",
+  "stage": "Nivel",
+  "tg": "Oro verdadero",
+  "cap": "Capacidad de escuadrón sin héroes",
+  "team": "Marchas y héroes iniciales",
+  "combat": "Estadísticas de combate",
+  "statNote": "Introduce los seis valores de ataque/letalidad del juego. No añadas bonificaciones que no estén confirmadas.",
+  "atk": "Ataque %",
+  "let": "Letalidad %",
+  "advanced": "⚙️ Editar héroes, mascotas, Valora, equipo y marchas",
+  "overview": "Tu formación inicial",
+  "need": "Faltan datos",
+  "ready": "Lista para estimar",
+  "saved": "Los datos se guardan solo en este dispositivo.",
+  "preview": "Proporción actual",
+  "advanceHint": "Abre aquí los detalles, habilidades, mascotas y apoyos personalizados.",
+  "heroHint": "Tres héroes iniciales; sin sus estadísticas completas, la recomendación es provisional.",
+  "required": "Falta",
+  "complete": "Todos los datos obligatorios están completos",
+  "detail": "Más opciones",
+  "attackNote": "La estimación aún no está validada en Kingshot. Las habilidades y Widgets no están totalmente simulados."
+}
 };
 const l=()=>strings[document.documentElement.lang]||strings.en;
 const el=id=>document.getElementById(id);
