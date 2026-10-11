@@ -182,6 +182,11 @@ function flagAmbiguousCounts(entries,focused){
   if(!Number.isSafeInteger(entry.count)||entry.count<1000)continue;
   const prev=byNumber.get(entry.count);
   if(prev&&prev.type!==entry.type){
+   if(prev.confirmedIndependent===true&&entry.confirmedIndependent===true){
+    // Genuinely equal troop quantities are legal. If the heading OCR and
+    // the individually cropped reading agree for BOTH entries, keep them.
+    continue;
+   }
    for(const e of [prev,entry]){
     e.uncertainCount=true;e.countWarning='duplicate-count-different-class';
     e.count=null;
