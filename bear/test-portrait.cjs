@@ -1,0 +1,12 @@
+'use strict';
+const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
+const env={window:{}};
+vm.runInNewContext(fs.readFileSync(__dirname+'/portrait-matcher.js','utf8'),env);
+const match=env.window.NRW_BEAR_PORTRAIT_MATCHER.match;
+const a=new Uint8Array(12*12*3).fill(80);
+const b=new Uint8Array(12*12*3).fill(180);
+const c=new Uint8Array(12*12*3).fill(120);
+assert.equal(match([a],[{name:'Zoe',rgb:a},{name:'Petra',rgb:b}]).name,'Zoe');
+assert.equal(match([a],[{name:'Zoe',rgb:a},{name:'Triton',rgb:a}]).name,null,'ambiguous twins not auto-assigned');
+assert.equal(match([new Uint8Array(a.length).fill(0)],[{name:'Zoe',rgb:b},{name:'Petra',rgb:c}]).name,null,'weak matches remain unverified');
+console.log('BEAR PORTRAITS: strict match, ambiguous case and weak-match rejection passed.');

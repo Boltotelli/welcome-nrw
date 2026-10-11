@@ -533,3 +533,8 @@ html[data-theme="dark"] .discord-step-icon{background:rgba(88,101,242,.17)!impor
   white-space:nowrap;
  }
 }
+
+/* Bear Optimizer link alongside Dashboard and Server Laws. */
+.btn-bear{background:color-mix(in srgb,var(--gold) 22%,var(--surface));border-color:color-mix(in srgb,var(--gold) 64%,var(--line));color:var(--ink);font-weight:850}
+.btn-bear:hover{filter:brightness(1.06)}
+@media(min-width:931px) and (max-width:1260px){.navlinks a{padding:8px 6px;font-size:11px}}

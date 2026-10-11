@@ -1,0 +1,367 @@
+/* Guided onboarding — intentionally only one task is visible at a time. */
+body.bear-wizard-mode header.hero,
+body.bear-wizard-mode .dashboard{display:none!important}
+.bear-guided-wizard{max-width:860px;margin:18px auto 42px;min-width:0;color:var(--text)}
+.bear-guided-wizard [hidden]{display:none!important}
+.bear-guide-head{padding:21px 24px 16px;border:1px solid rgba(239,183,92,.34);background:linear-gradient(135deg,rgba(247,183,80,.1),transparent 58%),var(--panel);border-radius:18px 18px 0 0;border-bottom:0}
+.bear-guide-head>.micro{font-size:10px;color:var(--amber);letter-spacing:.13em;font-weight:900}
+.bear-guide-head h1{font-size:clamp(20px,4vw,27px);font-weight:900;margin:6px 0 4px;letter-spacing:-.025em}
+.bear-guide-head p{font-size:12px;line-height:1.5;margin:0 0 15px}
+.bear-guide-track{display:flex;gap:5px;margin:0 0 13px}
+.bear-guide-track>span{display:block;min-width:12px;height:6px;border-radius:99px;background:var(--line)}
+.bear-guide-track>span.is-done{background:#789e8b}
+.bear-guide-track>span.is-current{background:#f0b54e}
+.bear-guide-progress{display:flex;justify-content:space-between;gap:15px;font-size:12px;font-weight:800}
+.bear-guide-progress span:last-child{color:var(--amber)}
+.bear-guide-prompt{font-size:14px;line-height:1.55;font-weight:650;padding:17px 24px 13px;margin:0;border:1px solid rgba(239,183,92,.34);border-bottom:0;background:var(--panel)}
+#bearGuideContent{border:1px solid rgba(239,183,92,.34);border-top:0;border-bottom:0;background:var(--panel);padding:0 16px 12px;min-width:0}
+.bear-guide-slide{width:100%;min-width:0}
+.bear-guide-slide>section.panel,.bear-guide-slide>.panel{border:1px solid var(--line);box-shadow:none;border-radius:14px;background:var(--card);margin:0}
+.bear-guide-slide .panel-head{padding:12px 13px}
+.bear-guide-slide .panel-body{padding:12px}
+.bear-guide-slide .panel-head h2{font-size:14px}
+.bear-guide-slide[data-guide=id] .sub{display:none}
+.bear-guide-slide[data-guide=id] #lookupForm{display:flex;gap:9px}
+.bear-guide-slide[data-guide=id] #lookupForm>*{min-width:0}
+.bear-guide-slide[data-guide=id] #lookupButton:disabled{opacity:.4}
+.bear-guide-slide[data-guide=id] #offlineMode{display:none}
+.bear-guide-slide[data-guide=id] #jsonText,.bear-guide-slide[data-guide=id] #jsonPasteSubmit{font-size:12px}
+.bear-guide-api-note{font-size:11px;margin:12px 2px 0;line-height:1.5}
+.bear-guide-slide[data-guide=id] .preset{margin:12px 0 6px}
+.bear-guide-slide[data-guide=id] details{margin-top:8px;font-size:11px}
+.bear-guide-slide[data-guide=id] #playerInfo{margin-top:10px}
+.bear-guide-slide[data-guide=id] .bear-local-id-row{margin:10px 0 0}
+.bear-guide-slide[data-guide=troops] .bear-intake-header,
+.bear-guide-slide[data-guide=stats] .bear-intake-header,
+.bear-guide-slide[data-guide=heroes] .bear-intake-header{padding:12px;border-radius:14px}
+.bear-guide-slide[data-guide=troops] .bear-intake-header h2,
+.bear-guide-slide[data-guide=stats] .bear-intake-header h2,
+.bear-guide-slide[data-guide=heroes] .bear-intake-header h2{display:none}
+.bear-guide-slide[data-guide=troops] .bear-intake-progress,
+.bear-guide-slide[data-guide=stats] .bear-intake-progress,
+.bear-guide-slide[data-guide=heroes] .bear-intake-progress,
+.bear-guide-slide[data-guide=troops] .bear-intake-advice,
+.bear-guide-slide[data-guide=stats] .bear-intake-advice{display:none}
+.bear-guide-slide #intakePicker{width:100%;min-height:56px;border-radius:12px;font-size:15px;font-weight:900}
+.bear-guide-slide .bear-intake-pickers{display:block}
+.bear-guide-slide .bear-intake-pickers #intakeGear{display:none}
+.bear-guide-slide .bear-intake-queue{padding:9px 12px 12px}
+.bear-guide-slide .bear-intake-values{grid-template-columns:repeat(2,minmax(0,1fr))}
+.bear-guide-slide .bear-intake-tier-review{grid-column:1/-1}
+.bear-guide-slide .bear-intake-actions{padding:0 12px 12px}
+.bear-guide-slide .bear-intake-actions button.primary{flex:1}
+.bear-guide-slide[data-guide=gear] .bear-import-head{padding:15px}
+.bear-guide-slide[data-guide=gear] .bear-import-picker{min-height:56px;min-width:210px}
+.bear-guide-slide[data-guide=gear] .bear-import-layout{font-size:11px}
+.bear-guide-slide[data-guide=missing] .bear-intake-missing{border:0;background:transparent}
+.bear-guide-slide[data-guide=missing] .bear-intake-missing>summary{display:none}
+.bear-guide-slide[data-guide=missing] .ux-quick-start{box-shadow:none}
+.bear-guide-slide[data-guide=missing] .ux-quick-head,
+.bear-guide-slide[data-guide=missing] .ux-summary,
+.bear-guide-slide[data-guide=missing] #uxActionSlot,
+.bear-guide-slide[data-guide=missing] #uxDisclaimer{display:none}
+.bear-guide-slide[data-guide=missing] .ux-step{padding:14px 0}
+.bear-guide-slide[data-guide=missing] .ux-step-head{margin-bottom:10px}
+.bear-guide-slide[data-guide=missing] .ux-step-head h3{font-size:14px}
+.bear-guide-slide[data-guide=missing] .ux-step>p.hint{display:none}
+.bear-guide-slide[data-guide=missing] .ux-advanced{margin-top:14px!important}
+.bear-guide-slide[data-guide=result] .bear-optimize-box{margin:0!important}
+.bear-guide-slide[data-guide=result] .bear-optimize-box button.primary{min-height:52px}
+.bear-guide-needed{font-size:12px;line-height:1.6;margin:6px 0 12px;color:var(--amber)}
+.bear-guide-message{padding:0 23px 12px;background:var(--panel);color:var(--muted);font-size:12px;line-height:1.5;border:1px solid rgba(239,183,92,.34);border-top:0;border-bottom:0;min-height:22px}
+.bear-guide-nav{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:16px 23px;background:var(--panel);border:1px solid rgba(239,183,92,.34);border-radius:0 0 18px 18px;border-top:1px solid var(--line)}
+.bear-guide-nav button{font-size:13px;font-weight:900;min-height:46px;padding:9px 15px;border-radius:11px;white-space:normal}
+.bear-guide-nav #bearGuideNext{margin-left:auto;min-width:150px}
+.bear-guide-nav #bearGuideNext:disabled{opacity:.48;cursor:not-allowed}
+.bear-guide-nav #bearGuideSkip{border:0;background:transparent;box-shadow:none;color:var(--muted);font-size:11px;font-weight:700}
+.bear-guided-wizard .hint{line-height:1.5}
+@media(max-width:640px){
+ .bear-guided-wizard{margin:7px auto 28px;max-width:100%}
+ .bear-guide-head{padding:15px 14px 12px;border-radius:14px 14px 0 0}
+ .bear-guide-head h1{font-size:23px}
+ .bear-guide-head p{font-size:11px;margin-bottom:12px}
+ .bear-guide-prompt{padding:12px 14px;font-size:13px}
+ #bearGuideContent{padding:0 8px 9px}
+ .bear-guide-slide>.panel{border-radius:11px}
+ .bear-guide-slide[data-guide=id] #lookupForm{flex-direction:column}
+ .bear-guide-slide[data-guide=id] #lookupForm>*{width:100%}
+ .bear-guide-slide[data-guide=troops] .bear-intake-header,
+ .bear-guide-slide[data-guide=stats] .bear-intake-header,
+ .bear-guide-slide[data-guide=heroes] .bear-intake-header{padding:9px}
+ .bear-guide-slide .bear-intake-values{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .bear-guide-slide .bear-intake-queue{padding:7px}
+ .bear-guide-slide .bear-intake-roster{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .bear-guide-slide[data-guide=gear] .bear-import-head{padding:12px}
+ .bear-guide-slide[data-guide=gear] .bear-import-picker{width:100%}
+ .bear-guide-message{padding:0 13px 12px;font-size:11px}
+ .bear-guide-nav{padding:10px;flex-wrap:wrap;gap:7px}
+ .bear-guide-nav button{font-size:12px;min-height:45px;padding:8px 9px}
+ .bear-guide-nav #bearGuideBack{flex:0 0 92px}
+ .bear-guide-nav #bearGuideSkip{order:3;flex:1 1 100%;min-height:32px}
+ .bear-guide-nav #bearGuideNext{flex:1;min-width:130px}
+}
+
+/* Distinct roster → provisional hero shortlist → gear-first detail sequence. */
+.bear-recommendation-panel{display:grid;gap:12px;padding:10px 5px 18px}
+.bear-recommendation-panel>a{color:var(--amber);font-size:12px}
+.bear-recommendation-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px 16px}
+.bear-recommendation-card strong{display:block;margin-bottom:6px}
+.bear-recommendation-card p{margin:4px 0}
+.bear-recommendation-card details{margin-top:9px}
+.bear-recommendation-card select{max-width:100%;width:100%;margin:8px 0}
+.bear-gear-reminder{border:1px solid rgba(239,183,92,.55);background:rgba(239,183,92,.10);border-radius:12px;padding:14px;font-weight:750;line-height:1.6}
+.bear-required-capacity{margin:4px 0 14px;border:1px solid rgba(239,183,92,.55);border-radius:14px;padding:16px;background:var(--card)}
+.bear-required-capacity::before{content:attr(data-caption);display:block;color:var(--amber);font-size:13px;font-weight:800;margin-bottom:10px}
+.bear-required-capacity .ux-field{display:flex;flex-direction:column;gap:8px}
+.bear-required-capacity input{max-width:300px;width:100%}
+
+.bear-capacity-review{margin-top:13px;padding-top:12px;border-top:1px solid var(--line);display:grid;gap:8px;min-width:0}
+.bear-capacity-review>.hint{margin:4px 0;font-size:11px;line-height:1.55}
+.bear-capacity-line{display:flex;align-items:baseline;justify-content:space-between;gap:12px;min-width:0;font-size:12px}
+.bear-capacity-line span{min-width:0;overflow-wrap:anywhere}
+.bear-capacity-line strong{white-space:nowrap;font-variant-numeric:tabular-nums}
+.bear-capacity-line.muted{color:var(--muted);padding-left:9px}
+.bear-capacity-total{margin-top:4px;padding-top:12px;border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:14px;font-weight:900}
+.bear-capacity-total strong{font-size:18px;color:var(--amber);font-variant-numeric:tabular-nums}
+.bear-required-capacity .field[hidden]{display:none}
+@media(max-width:560px){.bear-capacity-total{align-items:flex-start;flex-direction:column;gap:3px}.bear-capacity-total strong{font-size:20px}}
+
+
+/* Role suggestions appear only in the dedicated, post-roster hero step. */
+.bear-guide-slide[data-guide=heroes] .bear-intake-advice,.bear-guide-slide[data-guide=hero-details] .bear-intake-advice{display:none}
+
+
+/* Owned-only, progression-aware leader review and simultaneous gear handoff. */
+.bear-guide-sources{display:flex;flex-wrap:wrap;column-gap:16px;row-gap:4px;margin:0 0 6px}
+.bear-guide-sources a{color:var(--amber);font-size:12px}
+.bear-leader-summary{display:flex;gap:12px;align-items:center;min-width:0}
+.bear-leader-summary>div{flex:1;min-width:0}
+.bear-leader-summary b{font-size:16px}
+.bear-leader-summary p{margin:5px 0}
+.bear-recommendation-portrait{width:68px;height:68px;flex-shrink:0;border-radius:12px;object-fit:contain;background:#20334e}
+.bear-recommendation-reason{border-top:1px solid var(--line);margin-top:12px!important;padding-top:9px;font-size:12px}
+.bear-gear-hero-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.bear-gear-hero-item{border:1px solid var(--line);border-radius:12px;padding:10px;background:var(--card);text-align:center;min-width:0}
+.bear-gear-hero-item img{display:block;width:60px;height:60px;object-fit:contain;margin:0 auto 5px}
+.bear-gear-hero-item span{display:block;font-size:12px;font-weight:800;line-height:1.5;overflow-wrap:anywhere}
+.bear-gear-shot-note{padding:4px 2px;font-size:13px;font-weight:650}
+@media(max-width:440px){
+ .bear-gear-hero-list{grid-template-columns:1fr;gap:7px}
+ .bear-gear-hero-item{display:flex;align-items:center;text-align:left;gap:10px;padding:7px 10px}
+ .bear-gear-hero-item img{width:46px;height:46px;margin:0}
+ .bear-recommendation-portrait{width:58px;height:58px}
+}
+
+/* Primary-source references: informational, never a simulated damage score. */
+.bear-reference-status{font-size:12px;color:var(--muted);margin:2px 0 4px}
+.bear-reference-fact{font-weight:800;line-height:1.5;font-size:13px;
+ margin:12px 0 7px!important;padding:10px 12px;
+ border:1px solid rgba(239,183,92,.3);border-radius:10px;
+ background:rgba(239,183,92,.08)}
+.bear-reference-skill-panel{font-size:12px;margin-top:7px!important;line-height:1.55}
+.bear-reference-skill-panel>summary{font-weight:750;cursor:pointer;color:var(--amber)}
+.bear-reference-skill-panel ul{padding-left:20px;margin:7px 0 8px}
+.bear-reference-skill-panel li{margin:4px 0}
+.bear-reference-skill-panel>a{color:var(--amber)}
+
+/* Guided march queue choice and actual inventory-safe results */
+.bear-march-queue-setup{margin:14px 0;padding:15px;border:1px solid var(--line);border-radius:13px;background:var(--card)}
+.bear-march-queue-setup h3{margin:0 0 8px;font-size:16px}
+.bear-march-queue-setup p.hint{font-size:12px;line-height:1.55}
+.bear-march-queue-controls{display:grid;grid-template-columns:1fr 1fr;gap:9px;align-items:center}
+.bear-queue-fixed,.bear-queue-total{padding:9px;background:var(--panel);border-radius:9px;font-size:12px;font-weight:800}
+.bear-march-queue-controls label{font-size:12px;font-weight:750;display:flex;align-items:center;justify-content:space-between;gap:9px}
+.bear-march-queue-controls select{width:74px;padding:10px;background:var(--panel);border:1px solid var(--line);border-radius:9px;color:var(--text)}
+.bear-march-queue-controls .bear-queue-total{margin:0;grid-column:1/-1;text-align:center;color:var(--amber)}
+.bear-formation-proposal{display:grid;gap:12px;margin:14px 0 22px}
+.bear-formation-proposal h3{margin:0;font-size:18px}
+.bear-formation-proposal h4{margin:0 0 9px;font-size:14px}
+.bear-usage-summary{padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--card);display:grid;gap:10px}
+.bear-usage-row{display:grid;gap:5px}
+.bear-usage-label{display:flex;justify-content:space-between;gap:10px;font-size:12px}
+.bear-usage-label strong{font-variant-numeric:tabular-nums;text-align:right}
+.bear-usage-track{height:10px;background:var(--panel);border-radius:999px;overflow:hidden;border:1px solid var(--line)}
+.bear-usage-fill{height:100%;background:#cfaf5a;border-radius:999px}
+.bear-usage-fill.type-1{background:#7fbba2}
+.bear-usage-fill.type-2{background:#6daadd}
+.bear-formation-march{padding:12px;border:1px solid var(--line);border-radius:13px;background:var(--card);display:grid;gap:9px}
+.bear-formation-heroes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.bear-formation-hero{display:flex;flex-direction:column;align-items:center;gap:5px;border:1px solid var(--line);border-radius:10px;min-width:0;padding:7px 3px;text-align:center;background:var(--panel)}
+.bear-formation-hero.first{border-color:var(--amber)}
+.bear-formation-hero img{width:42px;height:42px;object-fit:contain}
+.bear-formation-hero div{min-width:0;display:grid;gap:2px}
+.bear-formation-hero strong{font-size:11px;overflow-wrap:anywhere}
+.bear-formation-hero small{font-size:10px;color:var(--muted)}
+.bear-formation-hero .bear-formation-first-note{color:var(--amber)}
+.bear-hero-blank{display:grid;place-items:center;width:42px;height:42px;background:#26364b;border-radius:9px}
+.bear-formation-troops{display:grid;gap:5px;border-top:1px solid var(--line);padding-top:9px}
+.bear-formation-troops strong{font-size:14px;color:var(--amber);font-variant-numeric:tabular-nums}
+.bear-formation-troops span{font-size:11px;line-height:1.6;color:var(--muted)}
+.bear-legacy-result{border:1px solid var(--line);padding:12px;border-radius:12px;margin-bottom:20px}
+.bear-legacy-result summary{cursor:pointer;color:var(--muted);font-size:12px}
+@media(max-width:560px){.bear-march-queue-controls{grid-template-columns:1fr}.bear-queue-total{grid-column:auto!important}.bear-formation-hero img{width:39px;height:39px}}
+
+/* Bear relative-damage simulation lab · guided step 10 */
+.bear-sim-page{display:grid;gap:14px}
+.bear-sim-page h2{font-size:20px;margin:0}
+.bear-sim-page h3{font-size:15px;margin:0 0 10px}
+.bear-sim-page>.hint{margin:0 0 3px}
+.bear-sim-controls,.bear-sim-score-card,.bear-sim-usage,.bear-sim-marches,.bear-sim-comparisons{padding:15px;border:1px solid var(--line);border-radius:14px;background:var(--card)}
+.bear-sim-controls{display:grid;gap:12px}
+.bear-sim-controls-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.bear-sim-controls label{display:grid;gap:5px;font-size:12px;font-weight:750;min-width:0}
+.bear-sim-controls select,.bear-sim-controls input{width:100%;min-width:0;border:1px solid var(--line);border-radius:9px;color:var(--text);background:var(--panel);padding:10px;font-size:15px}
+.bear-sim-numbers{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.bear-sim-numbers label{font-size:11px;line-height:1.5}
+.bear-sim-numbers input{text-align:center;font-weight:800;font-variant-numeric:tabular-nums}
+.bear-sim-numbers input[readonly]{opacity:.65;cursor:default}
+.bear-sim-actions{display:flex;flex-wrap:wrap;gap:8px}
+.bear-sim-actions button{padding:10px 12px}
+.bear-sim-error{color:#ffbda9;font-size:12px;margin:0}
+.bear-sim-loader{min-height:245px;border:1px solid var(--line);border-radius:14px;display:grid;align-content:center;justify-items:center;gap:12px;background:var(--card);padding:20px;text-align:center}
+.bear-sim-loader[hidden],.bear-sim-results[hidden],.bear-sim-video[hidden],.bear-sim-webp[hidden],.bear-sim-fallback[hidden]{display:none!important}
+.bear-sim-loader p{font-weight:850;font-size:13px;color:var(--amber);margin:0}
+.bear-sim-video,.bear-sim-webp{width:210px;height:210px;max-width:100%;object-fit:contain;background:transparent}
+.bear-sim-fallback{width:92px;height:92px;border-radius:50%;border:3px dashed var(--amber);display:grid;place-items:center;font-size:42px;animation:bearSimSpin 1.8s linear infinite}
+.bear-sim-fallback[hidden]{display:none}
+@keyframes bearSimSpin{0%{transform:rotate(-8deg)}50%{transform:rotate(12deg)}100%{transform:rotate(-8deg)}}
+@media(prefers-reduced-motion:reduce){.bear-sim-fallback{animation:none}}
+.bear-sim-results{display:grid;gap:12px}
+.bear-sim-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.bear-sim-metric{display:grid;gap:5px;padding:11px;border-radius:11px;background:var(--panel);min-width:0}
+.bear-sim-metric small{font-size:11px;color:var(--muted)}
+.bear-sim-metric strong{font-size:16px;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.bear-sim-delta{font-size:11px;color:var(--muted)}
+.bear-sim-delta.positive{color:#72d4a1}
+.bear-sim-delta.negative{color:#ffab90}
+.bear-sim-usage{display:grid;gap:7px}
+.bear-sim-usage-label{display:flex;justify-content:space-between;gap:9px;font-size:12px}
+.bear-sim-usage-label strong{white-space:normal;text-align:right;font-variant-numeric:tabular-nums}
+.bear-sim-bar{height:10px;border-radius:999px;overflow:hidden;background:var(--panel);border:1px solid var(--line);margin-bottom:7px}
+.bear-sim-fill{height:100%;background:#cdad57}
+.bear-sim-fill.kind-1{background:#77bc9d}
+.bear-sim-fill.kind-2{background:#7daee1}
+.bear-sim-marches{display:grid;gap:9px}
+.bear-sim-march-row{display:flex;justify-content:space-between;gap:14px;padding:10px 0;border-bottom:1px solid var(--line);font-size:12px}
+.bear-sim-march-row:last-child{border-bottom:0}
+.bear-sim-march-row>strong{flex:0 0 108px}
+.bear-sim-march-row>div{display:grid;gap:3px;text-align:right}
+.bear-sim-march-row small{font-size:11px;color:var(--muted)}
+.bear-sim-disclaimer{font-size:12px;line-height:1.6;color:var(--muted);margin:0}
+.bear-sim-comparisons{display:grid;gap:9px}
+.bear-sim-comparison{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px;border-bottom:1px solid var(--line);padding-bottom:8px}
+.bear-sim-comparison:last-child{border:0}
+.bear-sim-comparison span{font-variant-numeric:tabular-nums}
+.bear-sim-comparison button{font-size:11px;padding:6px 9px}
+@media(max-width:550px){
+ .bear-sim-controls-row{grid-template-columns:1fr}
+ .bear-sim-metrics{grid-template-columns:1fr}
+ .bear-sim-metric{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between}
+ .bear-sim-metric small{width:100%}
+ .bear-sim-march-row>strong{flex-basis:80px}
+ .bear-sim-numbers{gap:5px}
+ .bear-sim-numbers input{font-size:13px;padding:8px 4px}
+}
+
+/* Optional own-rally measurement; never global default for all players. */
+.bear-sim-calibration{padding:13px;border:1px solid var(--line);border-radius:12px;background:var(--card)}
+.bear-sim-calibration summary{cursor:pointer;font-size:13px;font-weight:800}
+.bear-sim-calibration .hint{font-size:11px;line-height:1.6;margin:11px 0}
+.bear-sim-cal-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.bear-sim-cal-fields label{display:grid;gap:4px;min-width:0;font-size:11px;font-weight:700}
+.bear-sim-cal-fields input{width:100%;min-width:0;padding:10px;border:1px solid var(--line);border-radius:9px;background:var(--panel);color:var(--text);font-size:14px}
+.bear-sim-calibration .bear-sim-actions{margin-top:10px}
+@media(max-width:560px){.bear-sim-cal-fields{grid-template-columns:1fr 1fr}.bear-sim-cal-fields input{font-size:12px}}
+
+/* Rally skill scenarios are relative sensitivity tests, NEVER raw damage */
+.bear-sim-scenarios{padding:15px;border:1px solid var(--line);border-radius:14px;background:var(--card);display:grid;gap:8px}
+.bear-sim-scenarios h3{margin:0;font-size:14px}
+.bear-sim-scenarios .hint{font-size:11px;line-height:1.6;margin:0}
+.bear-sim-scenario-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.bear-sim-scenario{background:var(--panel);border-radius:10px;padding:10px;display:grid;gap:5px;min-width:0}
+.bear-sim-scenario span{font-size:12px;overflow-wrap:anywhere}
+.bear-sim-scenario strong{font-size:18px;color:var(--amber);font-variant-numeric:tabular-nums}
+.bear-sim-scenario small{font-size:10px;color:var(--muted)}
+@media(max-width:560px){.bear-sim-scenario-grid{grid-template-columns:1fr 1fr}.bear-sim-scenario strong{font-size:16px}}
+
+/* Manual own-host widget expedition ability levels; never duplicate gear stats. */
+.bear-widget-manual{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-left:auto;font-size:11px;font-weight:700}
+.bear-widget-manual select{width:130px;max-width:100%;border:1px solid var(--line);background:var(--panel);color:var(--text);padding:8px;border-radius:9px;font-size:12px}
+.bear-gear-hero-item{flex-wrap:wrap;row-gap:8px}
+@media(max-width:550px){.bear-widget-manual{width:100%;margin-left:0;justify-content:space-between}.bear-widget-manual select{min-width:110px}}
+
+/* Widgets are gathered on the hero overview BEFORE the top-three ranking. */
+.bear-widget-panel{padding:13px;border:1px solid var(--line);border-radius:13px;margin:12px 0}
+.bear-widget-panel h3{font-size:15px;margin:0 0 5px}
+.bear-widget-more{margin-top:12px;padding-top:9px;border-top:1px solid var(--line)}
+.bear-widget-more summary{font-size:12px;cursor:pointer}
+.bear-widget-panel .hint{font-size:11px;line-height:1.6;margin:0 0 10px}
+.bear-widget-level-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.bear-widget-level-grid .bear-widget-manual{display:grid;align-content:start;gap:5px;margin:0;width:100%}
+.bear-widget-level-grid .bear-widget-manual select{width:100%;max-width:100%;font-size:12px}
+@media(max-width:530px){.bear-widget-level-grid{grid-template-columns:1fr}.bear-widget-level-grid .bear-widget-manual{display:flex;justify-content:space-between;align-items:center}.bear-widget-level-grid .bear-widget-manual select{width:140px}}
+
+/* Soldier math audit: display exact input from the 3 classes; never alter data. */
+.bear-sim-math-audit{margin-top:10px;padding:11px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+.bear-sim-math-audit summary{cursor:pointer;font-size:12px;font-weight:700}
+.bear-sim-math-audit .hint{font-size:11px;line-height:1.55;margin:10px 0 0}
+.bear-sim-math-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}
+.bear-sim-math-type{border:1px solid var(--line);border-radius:9px;padding:8px;display:flex;flex-direction:column;gap:4px;font-size:11px;overflow-wrap:anywhere}
+.bear-sim-math-type strong{font-size:12px}
+.bear-sim-math-type small{color:var(--muted);font-size:10px}
+@media(max-width:640px){.bear-sim-math-grid{grid-template-columns:1fr}.bear-sim-math-type{font-size:12px}}
+
+/* One clear source-selection control: Bonus Overview vs already combined report. */
+.bear-stat-origin{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:9px;font-size:11px;font-weight:700;flex-wrap:wrap}
+.bear-stat-origin select{font-size:12px;max-width:100%;min-width:210px;background:var(--panel);border:1px solid var(--line);border-radius:9px;color:var(--text);padding:9px}
+@media(max-width:540px){.bear-stat-origin{display:grid}.bear-stat-origin select{width:100%;min-width:0}}
+
+
+/* Oct 2026 guided UX: one ID field, existing data preview, one result. */
+.bear-github-id-mode .bear-guide-slide[data-guide=id] .preset,
+.bear-github-id-mode .bear-guide-slide[data-guide=id] details,
+.bear-github-id-mode .bear-guide-slide[data-guide=id] .sub,
+.bear-github-id-mode .bear-guide-slide[data-guide=id] .micro,
+.bear-github-id-mode .bear-guide-slide[data-guide=id] #heroes {display:none!important}
+.bear-guide-stored{padding:14px 16px;margin:6px 0 12px;background:var(--card);border:1px solid var(--line);border-radius:13px;display:grid;gap:6px}
+.bear-guide-stored h3{font-size:14px;margin:0 0 7px}
+.bear-stored-row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:5px 0;border-bottom:1px solid var(--line);font-size:12px;min-width:0}
+.bear-stored-row:last-child{border:0}
+.bear-stored-row span{color:var(--muted);min-width:0;overflow-wrap:anywhere}
+.bear-stored-row strong{font-variant-numeric:tabular-nums;text-align:right;white-space:normal}
+.bear-guide-example{margin:4px 0 16px!important;border:1px solid var(--line);border-radius:12px;background:var(--card);overflow:hidden}
+.bear-guide-example summary{padding:14px 16px;cursor:pointer;font-size:13px;color:var(--amber);font-weight:800}
+.bear-guide-example-preview{padding:16px;background:var(--panel);font-size:13px;line-height:1.65}
+.bear-guide-example-preview hr{border:0;border-top:1px solid var(--line);margin:10px 0}
+.bear-guide-example-preview small{color:var(--muted)}
+.bear-guide-example-gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(136px,1fr));gap:10px;margin-top:12px}
+.bear-guide-example-link{border:1px solid var(--line);border-radius:10px;padding:9px;background:var(--card);display:flex;flex-direction:column;gap:6px;align-items:center;text-align:center;text-decoration:none;color:var(--text)}
+.bear-guide-example-link[hidden]{display:none!important}
+.bear-guide-example[open]>.bear-guide-example-preview{display:block}
+.bear-guide-example-link img{display:block;width:100%;height:170px;object-fit:contain}
+.bear-guide-example-link span{font-size:12px;font-weight:750;line-height:1.3}
+@media(max-width:480px){.bear-guide-example-gallery{grid-template-columns:repeat(2,minmax(0,1fr))}.bear-guide-example-link img{height:145px}}
+.bear-valora-base{display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding:14px 16px;background:var(--card);border:1px solid var(--line);border-radius:12px;font-weight:700;font-size:13px}
+.bear-valora-base input{width:150px;max-width:100%;padding:10px}
+.bear-formation-primary-note{font-size:14px;font-weight:800;line-height:1.6;color:var(--amber);padding:12px 14px;margin:0;background:var(--card);border:1px solid var(--line);border-radius:11px}
+.bear-formation-troops .bear-formation-counts{font-size:clamp(14px,2vw,18px)!important;font-weight:800;color:var(--text)!important;line-height:1.8;display:block}
+.bear-formation-proposal .bear-usage-summary{display:none!important}
+.bear-legacy-result{display:none!important}
+.bear-compare-own{width:100%;min-height:46px;margin-top:14px;border:1px solid var(--line);border-radius:12px;font-weight:750}
+.bear-formation-compare-status{font-size:13px;font-weight:700;color:var(--amber);text-align:center;margin:10px 0 0}
+@media(max-width:600px){
+ .bear-stored-row{align-items:start;flex-direction:column;gap:3px}
+ .bear-stored-row strong{text-align:left}
+ .bear-guide-example summary{font-size:13px}
+ .bear-formation-troops .bear-formation-counts{font-size:15px!important}
+}
+
+/* First generation transition; transparent original video is optional,
+ * a restrained Bear spinner remains when the original binary is missing. */
+.bear-guided-wizard{position:relative}
+.bear-guide-stage-loader{position:absolute;inset:0;z-index:20;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:15px;background:rgba(15,24,39,.96);border-radius:16px;color:#fff;text-align:center;padding:22px}
+.bear-guide-stage-loader[hidden]{display:none!important}
+.bear-guide-stage-loader .bear-guide-loading-bear{font-size:74px;animation:bear-guide-bounce .85s ease-in-out infinite alternate}
+.bear-guide-stage-loader p{font-weight:800;font-size:16px}
+@keyframes bear-guide-bounce{from{transform:translateY(2px) scale(.96)}to{transform:translateY(-10px) scale(1.04)}}
+@media(prefers-reduced-motion:reduce){.bear-guide-stage-loader .bear-guide-loading-bear{animation:none}}

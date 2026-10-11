@@ -1,0 +1,142 @@
+/* Multi-upload NRW Bear wizard: screenshots → verify → calculate */
+.bear-intake-wizard{border:1px solid rgba(246,188,100,.46);box-shadow:var(--shadow)}
+.bear-intake-header{padding:22px 22px 15px;background:linear-gradient(110deg,rgba(227,158,48,.14),transparent 70%)}
+.bear-intake-header h2{font-size:clamp(19px,3vw,24px);font-weight:900;margin:6px 0}
+.bear-intake-header>p.hint{margin:6px 0 12px}
+.bear-intake-pickers{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+#intakePicker{display:inline-flex;align-items:center;justify-content:center;cursor:pointer;padding:12px 18px}
+.bear-intake-pickers>.secondary-btn{min-height:42px}
+#intakeStatus{font-size:12px;line-height:1.5;color:var(--amber);margin:12px 0 0;font-weight:800}
+.bear-intake-queue{display:grid;gap:12px;padding:3px 20px 17px}
+.bear-intake-item{border:1px solid var(--line);background:var(--card);border-radius:14px;padding:12px;min-width:0}
+.bear-intake-item-head{display:flex;gap:12px;justify-content:space-between;align-items:center;margin-bottom:11px}
+.bear-intake-item-head b{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px}
+.bear-intake-item-head select{max-width:210px;font-size:12px;padding:8px 7px}
+.bear-intake-values{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;align-items:start}
+.bear-intake-values>.hint{grid-column:1/-1;margin:3px 0}
+.bear-intake-value{display:grid;gap:5px;font-size:11px;font-weight:800;color:var(--muted);min-width:0}
+.bear-intake-value input,.bear-intake-value select{width:100%;padding:8px 9px;font-size:13px}
+.bear-intake-actions{display:flex;gap:10px;flex-wrap:wrap;padding:0 20px 18px}
+.bear-intake-progress{border-top:1px solid var(--line);padding:13px 20px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:var(--card)}
+.bear-intake-progress strong{white-space:nowrap;font-size:13px;font-weight:900;color:var(--amber)}
+.bear-intake-progress span{font-size:11px;min-width:0}
+.bear-intake-advice{display:grid;gap:6px;padding:0 20px}
+.bear-intake-advice:empty{display:none}
+.bear-intake-advice:not(:empty){padding-top:12px;padding-bottom:12px;border-top:1px solid var(--line)}
+.bear-intake-advice strong{font-size:13px;color:var(--amber)}
+.bear-intake-advice p{margin:0;font-size:12px;color:var(--text)}
+.bear-intake-advice a{font-size:11px;color:var(--amber);text-decoration:underline}
+#intakeResultSlot{padding:0 20px 19px}
+#intakeResultSlot .bear-optimize-box{margin:0}
+.bear-intake-missing,.bear-intake-gear-details{border:1px solid var(--line);background:var(--panel);border-radius:16px;overflow:hidden;margin:0}
+.bear-intake-missing>summary,.bear-intake-gear-details>summary{padding:15px 18px;font-weight:900;font-size:13px}
+.bear-intake-missing>#uxQuickStart{border:0;box-shadow:none;margin:0;border-radius:0}
+.bear-intake-missing>#uxQuickStart .ux-top-optimize{display:none}
+.bear-intake-gear-details>.bear-import-card{border:0;box-shadow:none;border-radius:0}
+.bear-intake-roster{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;grid-column:1/-1}
+.bear-intake-roster-tile{display:grid;gap:6px;background:var(--panel);border:1px solid var(--line);padding:7px;border-radius:12px;min-width:0}
+.bear-intake-roster-tile>img{width:100%;height:auto;max-height:none;object-fit:contain;border-radius:8px}
+.bear-intake-roster-tile select,.bear-intake-roster-tile input{width:100%;padding:7px 5px;font-size:12px}
+.bear-intake-roster-tile small{color:var(--muted);font-size:10px}
+@media(max-width:800px){
+ .bear-intake-values{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .bear-intake-roster{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:560px){
+ .bear-intake-header{padding:16px 13px 12px}
+ .bear-intake-pickers{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+ #intakePicker,.bear-intake-pickers>.secondary-btn{font-size:11px;padding:10px 5px;text-align:center}
+ .bear-intake-queue{padding:0 12px 12px}
+ .bear-intake-item-head{flex-direction:column;align-items:stretch;gap:7px}
+ .bear-intake-item-head select{max-width:none}
+ .bear-intake-values{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ .bear-intake-roster{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .bear-intake-roster-tile>img{height:auto;max-height:none}
+ .bear-intake-actions{padding:0 12px 12px}
+ .bear-intake-actions button{width:100%}
+ .bear-intake-progress{padding:12px 13px}
+ .bear-intake-advice{padding-left:13px;padding-right:13px}
+ #intakeResultSlot{padding:0 12px 14px}
+}
+
+
+/* Keep identity/profile lookup visible; avoid a giant hero banner pushing
+   screenshot onboarding several screen heights down on phones. */
+.bear-local-id-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:10px 0}
+.bear-local-id-row select{flex:1;max-width:320px;min-width:130px}
+.bear-local-id-row button{flex-shrink:0}
+body:has(.bear-intake-wizard) header.hero{min-height:155px;margin:12px 0 14px;padding:15px 24px;grid-template-columns:1fr 155px}
+body:has(.bear-intake-wizard) header.hero h1{font-size:30px;margin:4px 0 7px}
+body:has(.bear-intake-wizard) header.hero p{font-size:11px;max-width:520px;margin:4px 0}
+body:has(.bear-intake-wizard) .boss{min-height:130px}
+body:has(.bear-intake-wizard) .boss img{width:95px}
+@media(max-width:650px){
+ body:has(.bear-intake-wizard) header.hero{display:none}
+ .bear-local-id-row{flex-direction:column;align-items:stretch}
+ .bear-local-id-row select{max-width:none;width:100%}
+}
+
+
+.bear-intake-tier-review{grid-column:1/-1;display:grid;gap:7px;padding:11px;border:1px solid rgba(245,186,95,.3);border-radius:12px;background:rgba(225,150,51,.06)}
+.bear-intake-tier-review>b{font-size:12px;color:var(--amber)}
+.bear-intake-tier-row{display:grid;grid-template-columns:minmax(95px,1fr) minmax(90px,110px) minmax(90px,110px) minmax(0,1.3fr);gap:8px;align-items:center}
+.bear-intake-tier-row strong{font-size:12px}
+.bear-intake-tier-row select{width:100%;min-width:0;font-size:12px;padding:7px 5px}
+.bear-intake-tier-row small{font-size:10px;line-height:1.2;color:var(--muted)}
+@media(max-width:600px){.bear-intake-tier-row{grid-template-columns:1fr 1fr}.bear-intake-tier-row strong{grid-column:1/-1}.bear-intake-tier-row small{grid-column:1/-1}}
+
+/* All-hero overview: identified cards require no open edit form. */
+.bear-hero-found-name{display:block;font-size:13px;line-height:1.35;word-break:break-word;margin:5px 0 3px}
+.bear-hero-edit{width:100%;margin-top:5px}
+.bear-hero-edit summary{font-size:12px;color:var(--amber,#f0b85e);padding:4px 0;cursor:pointer}
+.bear-hero-edit select,.bear-hero-edit input{width:100%;min-width:0;display:block;margin:6px 0}
+.bear-intake-roster-tile>.hint{display:block;font-size:10px;margin:2px 0;color:var(--muted,#c9d5e8)}
+
+/* Troop OCR results: numbered label ABOVE the corresponding quantity.
+   The parent uses a 2-column grid on phones; span it explicitly so a
+   long name or input cannot push the NEXT row's number to the side. */
+.bear-intake-values>.bear-dynamic-troop-list{
+ grid-column:1 / -1;
+ display:grid;
+ grid-template-columns:minmax(0,1fr);
+ gap:11px;
+ min-width:0;
+}
+.bear-intake-values>.bear-dynamic-troop-line{grid-column:1 / -1}
+.bear-dynamic-troop-line{
+ display:grid;
+ grid-template-columns:minmax(0,1fr);
+ gap:5px;
+ align-items:start;
+ min-width:0;
+ color:var(--text);
+ font-size:13px;
+ font-weight:800;
+}
+.bear-dynamic-troop-line>span{
+ display:block;
+ min-width:0;
+ line-height:1.4;
+ overflow-wrap:anywhere;
+}
+.bear-dynamic-troop-line>input{
+ display:block;
+ width:100%;
+ min-width:0;
+ box-sizing:border-box;
+ padding:9px 11px;
+ font-variant-numeric:tabular-nums;
+}
+
+.bear-star-accept{font-size:11px;min-height:34px;padding:7px 5px;width:100%;border-color:var(--amber)}
+
+.bear-detail-observed-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(115px,1fr));gap:9px;grid-column:1/-1}
+
+/* Editable local-only name labels and game-screenshot language. */
+.bear-local-name-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;width:100%}
+.bear-local-name-row[hidden]{display:none!important}
+.bear-local-name-row input{flex:1;min-width:145px;padding:10px 12px}
+.bear-local-name-row button{flex-shrink:0}
+.bear-ocr-language{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin:12px 0 5px;font-size:12px;font-weight:700}
+.bear-ocr-language select{min-width:145px;max-width:100%;background:var(--card);color:var(--text);padding:9px;border:1px solid var(--line);border-radius:10px}
+@media(max-width:510px){.bear-local-name-row input,.bear-local-name-row button{width:100%;flex:auto}.bear-ocr-language{flex-direction:column;align-items:stretch}.bear-ocr-language select{width:100%}}
