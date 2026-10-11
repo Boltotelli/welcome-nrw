@@ -553,6 +553,66 @@ async function readHeroStatPanel(canvas,worker,heroName,originalText){
  }
  return {values:output,conflicts:[...conflicts]};
 }
+// The normal three-class squad preview keeps its NUMBERS in the same visual
+// columns across languages. OCR the numeric fields independently in English
+// instead of pairing broken translated heading text with the wrong amount.
+const numericRegions=[
+ {x:.17,y:.225,w:.32,h:.155}, // left: infantry, then archers
+ {x:.55,y:.225,w:.31,h:.095} // right: cavalry
+];
+function parseNumericColumn(text){
+ const list=[];
+ for(const line of String(text||'').split(/[\r\n]+/)){
+  const long=[...line.matchAll(/\d{1,3}(?:[.,]\d{3})+|\d{4,9}/g)]
+   .map(m=>m[0]).sort((a,b)=>b.replace(/\D/g,'').length-a.replace(/\D/g,'').length);
+  const token=long[0]||(/^\s*\d{1,3}\s*$/.test(line)?line.trim():null);
+  if(!token)continue;
+  const number=Number(token.replace(/[.,]/g,''));
+  if(Number.isSafeInteger(number)&&number>0&&number<200000000)list.push(number);
+ }
+ return list;
+}
+function parseFixedTroopNumbers(left,right){
+ const l=parseNumericColumn(left),r=parseNumericColumn(right);
+ return l.length===2&&r.length===1?
+  {troopsI:l[0],troopsC:r[0],troopsA:l[1]}:null;
+}
+async function readFixedTroopNumbers(canvas){
+ if(!window.Tesseract)return null;
+ // English DIGITS are independent from the DE/EN/FR/ES Kingshot language.
+ // A short-lived worker prevents numerical mode from leaking into heroes.
+ const worker=await window.Tesseract.createWorker('eng',1);
+ try{
+  await worker.setParameters({tessedit_char_whitelist:'0123456789.,',
+   tessedit_pageseg_mode:'11'});
+  const text=[];
+  for(const zone of numericRegions){
+   const cropped=document.createElement('canvas');
+   cropped.width=Math.round(canvas.width*zone.w*3);
+   cropped.height=Math.round(canvas.height*zone.h*3);
+   const ctx=cropped.getContext('2d',{willReadFrequently:true});
+   ctx.fillStyle='#fff';ctx.fillRect(0,0,cropped.width,cropped.height);
+   ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
+   ctx.drawImage(canvas,zone.x*canvas.width,zone.y*canvas.height,
+    zone.w*canvas.width,zone.h*canvas.height,0,0,cropped.width,cropped.height);
+   const result=await worker.recognize(cropped);
+   text.push(String(result.data?.text||''));
+  }
+  return parseFixedTroopNumbers(text[0],text[1]);
+ }finally{await worker.terminate();}
+}
+function matchFixedTroopEntries(values,detected){
+ const names=['Infanterie','Kavallerie','Bogenschützen'],
+  keys=['troopsI','troopsC','troopsA'];
+ return keys.map((key,type)=>{
+  const previous=detected.find(e=>e.type===type);
+  return {...previous,id:type,type,label:previous?.label||names[type],
+   title:previous?.title||'',count:values[key],
+   amountSource:'numeric-position-english',confirmedIndependent:true,
+   trustedLabelCrop:true,uncertainCount:false,countWarning:null};
+ });
+}
+
 async function inspect(file){
  const canvas=await imageCanvas(file);
  const worker=await loadOCR();
@@ -573,16 +633,26 @@ async function inspect(file){
  let troopTiers=null;
  if(type==='troops'&&ENTRY){
   try{troopWords=[...troopWords,...await readTroopColumnWords(canvas,worker)];}
-  catch(_){/* Keep whole-image OCR if the layout-specific fallback fails. */}
+  catch(_){/* Keep whole-image OCR if column labels are unreadable. */}
   troopEntries=ENTRY.detect(troopWords,canvas.width,canvas.height);
-  if(troopEntries.length){
+  // The three-card layout is stable across game languages. Require THREE
+  // independent numeric fields. For mixed T/TG rows keep row-based OCR.
+  let fixed=null;
+  if(troopEntries.length<=3&&new Set(troopEntries.map(e=>e.type)).size===troopEntries.length){
+   try{fixed=await readFixedTroopNumbers(canvas);}
+   catch(_){/* Fall back to the existing reviewable per-row OCR. */}
+  }
+  if(fixed){
+   troopEntries=matchFixedTroopEntries(fixed,troopEntries);
+   Object.assign(values,fixed);
+  }else if(troopEntries.length){
    await verifyTroopEntryCounts(troopEntries,canvas,worker);
    ENTRY.flagAmbiguousCounts?.(troopEntries,{});
    Object.assign(values,ENTRY.totals(troopEntries));
-   if(TROOP?.recognizeEntries){
-    try{troopTiers=await TROOP.recognizeEntries(canvas,troopEntries,worker);}
-    catch(_){troopTiers=null;/* Badge OCR cannot block confirmed troop counts. */}
-   }
+  }
+  if(troopEntries.length&&TROOP?.recognizeEntries){
+   try{troopTiers=await TROOP.recognizeEntries(canvas,troopEntries,worker);}
+   catch(_){troopTiers=null;/* Badges must not block troop counts. */}
   }
  }
  // If the class headings cannot be located, request manual review. A
