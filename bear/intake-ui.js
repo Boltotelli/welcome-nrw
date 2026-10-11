@@ -461,7 +461,7 @@ async function readTroopNumbers(canvas,worker){
  }
  return found;
 }
-async function recheckTroopFields(canvas,worker,values){
+async function recheckTroopFields(canvas,worker,values,uncertainKeys=new Set()){
  // Relative to original Kingshot image, not to the viewing phone/browser.
  // One focused OCR pass per missing quantity or T10 class title.
  const blocks=[
@@ -479,7 +479,7 @@ async function recheckTroopFields(canvas,worker,values){
     8,9,w-16,h-18);
    return c;
   }
-  if(!(Number(values[block.key])>0)){
+  if(!uncertainKeys.has(block.key)&&!(Number(values[block.key])>0)){
    try{
     const res=await worker.recognize(crop(block.n));
     const t=(res.data?.text||'').replace(/\s/g,'');
@@ -633,11 +633,20 @@ async function inspect(file){
  const values=type==='troops'?
   {...Core.parseTroops(text),...spatialTroops(result.data.words,canvas)}:
   type==='stats'?{...Core.parseStats(text),...Core.parseStats(grouped)}:{};
+ const uncertainKeys=new Set(),absoluteReadings={};
  let explicitTierLabels='';
  if(type==='troops'){
-  try{Object.assign(values,await readTroopNumbers(canvas,worker));}
-  catch(_){/* Keep the reviewable full-screen OCR suggestions. */}
-  explicitTierLabels=await recheckTroopFields(canvas,worker,values);
+  try{
+   Object.assign(absoluteReadings,await readTroopNumbers(canvas,worker));
+   for(const [key,n] of Object.entries(absoluteReadings)){
+    if(Number.isSafeInteger(values[key])&&values[key]!==n){
+     // Absolute crops move across phone aspect ratios. Conflicting reads
+     // may NOT replace a class-labeled troop count.
+     uncertainKeys.add(key);delete values[key];
+    }else if(!Object.prototype.hasOwnProperty.call(values,key))values[key]=n;
+   }
+  }catch(_){/* Leave uncertain values reviewable, not fabricated. */}
+  explicitTierLabels=await recheckTroopFields(canvas,worker,values,uncertainKeys);
  }
  let troopEntries=[],troopWords=result.data.words||[];
  if(type==='troops'&&ENTRY){
@@ -646,6 +655,12 @@ async function inspect(file){
   troopEntries=ENTRY.detect(troopWords,canvas.width,canvas.height);
   if(troopEntries.length){
    await recheckUnreadTroopEntries(troopEntries,canvas,worker);
+   ENTRY.flagAmbiguousCounts?.(troopEntries,absoluteReadings);
+   for(const entry of troopEntries){
+    if(uncertainKeys.has(['troopsI','troopsC','troopsA'][entry.type])){
+     entry.uncertainCount=true;entry.countWarning='conflicting-ocr';entry.count=null;
+    }
+   }
    ENTRY.recoverSingleEntries(troopEntries,values);
    const computed=ENTRY.totals(troopEntries);
    for(const type of new Set(troopEntries.map(e=>e.type))){
@@ -654,6 +669,7 @@ async function inspect(file){
    }
    Object.assign(values,computed);
   }
+  for(const key of uncertainKeys)delete values[key];
  }
  const troopTiers=type==='troops'&&TROOP?TROOP.recognize(canvas,text+'\n'+grouped+explicitTierLabels,result.data.words||[]):null;
  const marchSlots=type==='troops'?Core.parseMarchSlots(text+'\n'+grouped):null;
@@ -781,6 +797,15 @@ function renderQueue(){
     intro.textContent=say('Alle erkannten Truppeneinträge, auch mehrfach vorkommende Gattungen. Jede Anzahl separat prüfen. T-/TG-Stufen folgen später.',
      'All detected troop entries, including repeated troop classes. Check every quantity separately; tier/TG recognition follows.');
     content.append(intro);
+    if(item.canvas){
+     const preview=document.createElement('details');preview.className='bear-troop-source-preview';
+     const summary=document.createElement('summary');
+     summary.textContent=say('📷 Originalbild zur Kontrolle anzeigen','📷 View original screenshot for verification');
+     const image=document.createElement('img');image.alt=item.fileName;image.loading='lazy';
+     image.style.cssText='display:block;max-width:100%;height:auto;margin-top:10px;border-radius:12px';
+     image.src=item.canvas.toDataURL('image/jpeg',0.75);
+     preview.append(summary,image);content.append(preview);
+    }
     const list=document.createElement('div');list.className='bear-dynamic-troop-list';
     const refreshTotals=()=>{
      const groups=new Set(item.troopEntries.map(e=>e.type));
@@ -790,12 +815,13 @@ function renderQueue(){
     item.troopEntries.forEach((entry,index)=>{
      const line=document.createElement('label');line.className='bear-dynamic-troop-line';
      const heading=document.createElement('span');
-     heading.textContent=(index+1)+'. '+entry.label;
+     heading.textContent=(index+1)+'. '+entry.label+(entry.uncertainCount?' · ⚠ OCR unklar':'');
      const value=document.createElement('input');value.type='number';value.min='0';value.step='1';
      value.value=entry.count??'';value.placeholder=say('Nicht erkannt','Not recognized');
      value.addEventListener('input',()=>{
       const n=value.value.trim()===''?null:Number(value.value);
-      entry.count=Number.isSafeInteger(n)&&n>=0?n:null;
+      entry.count=value.value.trim()!==''&&Number.isSafeInteger(n)&&n>=0?n:null;
+      if(entry.count!==null){entry.uncertainCount=false;entry.countWarning=null;}
       refreshTotals();
      });
      line.append(heading,value);list.append(line);
