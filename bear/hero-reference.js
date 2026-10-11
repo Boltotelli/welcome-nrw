@@ -8,6 +8,9 @@
 let rows=null,state='idle',pending=null,why='';
 const sourceRepo='https://github.com/Boltotelli/kingshot-data';
 const sourcePath='https://raw.githubusercontent.com/Boltotelli/kingshot-data/';
+// Explicit version + fresh retrieval: a cached outdated JSON must never make
+// every recognized hero appear to have missing data after a deployment.
+const sourceUrl='./hero-reference.json?v=verified-hero-source-20261011-2';
 const allowedClass=new Set(['infantry','cavalry','archer']);
 function validate(x){
  if(!x||x.schemaVersion!==1||x.publicDataOnly!==true||x.releaseStatus!=='research-preview'||
@@ -61,11 +64,11 @@ function load(){
  if(pending)return pending;
  if(typeof root.fetch!=='function'){state='error';why='fetch-unavailable';return Promise.resolve(0);}
  state='loading';
- pending=root.fetch('./hero-reference.json',{cache:'force-cache'})
-  .then(r=>{if(!r.ok)throw Error('HTTP '+r.status);return r.json();})
+ pending=root.fetch(sourceUrl,{cache:'no-store'})
+  .then(r=>{if(!r.ok)throw Error('Hero source HTTP '+r.status);return r.json();})
   .then(accept).catch(e=>{rows=null;state='error';why=String(e?.message||e);pending=null;return 0;});
  return pending;
 }
 root.NRW_BEAR_HERO_REFERENCE={load,get,status,reason,validate,accept,sourceRepo,sourcePath,
- version:'hero-reference-v1',description:'Sourced expedition bonuses and normal skills; NOT a Bear damage model'};
+ sourceUrl,version:'hero-reference-v1',description:'Sourced expedition bonuses and normal skills; NOT a Bear damage model'};
 })(window);
