@@ -103,14 +103,15 @@ function personalDamage(model,counts,combat,reference,catalog,proc){
  const expectation=proc.evaluate(adjusted,counts,combat,reference);
  if(!expectation.ready)return {ready:false,reason:expectation.reason,
   missingPets:[]};
- if(expectation.unmodeled.length||!expectation.includesSunder)
-  return {ready:false,reason:'unmodeled-starter-skills',
-   unmodeled:expectation.unmodeled};
+ // A partial, labeled model index is preferable to no result.
+ // Unsupported skills are EXCLUDED, never assigned fabricated numbers.
+ const partialEstimate=expectation.unmodeled.length>0||!expectation.includesSunder;
  const hunter=talent(model);
  if(!hunter)return {ready:false,reason:'missing-valora-level'};
  const personalFactor=1+hunter.personalPointPercent/100;
  const expectedScore=expectation.expectedIndex*defenseFactor*personalFactor;
  return {ready:true,expectedScore,modelIndex:true,
+  partialEstimate,unmodeledSkills:expectation.unmodeled,
   noJoiningHeroSkills:true,pitfallLevel:5,
   modeledStarterSkills:expectation.skills.length,
   activePets:selected.map(x=>x.name),petAttackPct:attackBonus,
@@ -119,7 +120,7 @@ function personalDamage(model,counts,combat,reference,catalog,proc){
   petBonusIncludedInScreenshot:hasPetStats,
   valoraLevel:hunter.level,valoraPct:hunter.personalPointPercent,
   includesChanceSkills:true,
-  includesAllSourcedOffensiveStarterSkills:true,
+  includesAllSourcedOffensiveStarterSkills:!partialEstimate,
   usesSingleEstimate:true,estimateNotGuaranteed:true,
   warning:'One estimated score based on not fully validated Bear round, Sunder and pet defense mechanics.'};
 }
