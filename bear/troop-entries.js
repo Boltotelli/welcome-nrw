@@ -10,9 +10,9 @@ const keys=['troopsI','troopsC','troopsA'];
 function fold(s){return String(s||'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/ß/g,'ss').toLowerCase();}
 function kind(s){
  const z=fold(s).replace(/[^a-z]/g,'');
- if(/infant|fussvolk/.test(z))return 0;
- if(/kaval|caval|reiter/.test(z))return 1;
- if(/bogensch|bogen|archer|marksman/.test(z))return 2;
+ if(/infant|fussvolk|infanteria/.test(z))return 0;
+ if(/kaval|caval|caballer|reiter/.test(z))return 1;
+ if(/bogensch|bogen|archer|arquero|tireur|tirador|marksman/.test(z))return 2;
  return -1;
 }
 function norm(words,w,h){
@@ -98,7 +98,8 @@ function labelsFound(words){
    const x0=Math.min(...segment.map(w=>w.x0)),x1=Math.max(...segment.map(w=>w.x1)),
     y0=Math.min(...segment.map(w=>w.y0)),y1=Math.max(...segment.map(w=>w.y1));
    if(items.some(a=>a.type===type&&Math.abs(a.y0-y0)<.012&&Math.abs(a.x0-x0)<.045))continue;
-   items.push({type,label:labels[type],x0,y0,x1,y1});
+   items.push({type,label:labels[type],x0,y0,x1,y1,
+    elite:/spitzen|apex|supreme|elite/i.test(phrase)});
   }
  }
  return items.sort((a,b)=>a.y0-b.y0||a.x0-b.x0);
@@ -123,7 +124,7 @@ function readBelow(label,words,w,h){
   const value=numeric(row.words);
   // A badge often contains a lone T/TG digit. Never treat it as the
   // player's troop COUNT. Small actual armies remain manually reviewable.
-  if(value!==null&&value>=1000)return value;
+  if(value!==null&&String(value).length>=3)return value;
  }
  return null;
 }
@@ -133,8 +134,8 @@ function detect(words,width,height){
   const quantity=readBelow(label,normalized,width,height);
   const crop={x:Math.max(0,label.x0-.024),y:Math.min(1,label.y1+.001),
    w:Math.min(.32,1-label.x0+.024),h:Math.min(.065,.11*width/height)};
-  return {id:index,type:label.type,label:label.label,count:quantity,
-   // One icon per entry (no assumption of a single tier per class).
+  return {id:index,type:label.type,label:label.label,count:quantity,elite:label.elite,anchor:{x0:label.x0,y0:label.y0,x1:label.x1,y1:label.y1},
+   // Derived from the name, never from a fixed first/second/third row.
    icon:{x:Math.max(0,label.x0-.13),y:Math.max(0,label.y0-.018),w:.132,h:.082},
    crop};
  });
@@ -152,11 +153,11 @@ function flagAmbiguousCounts(entries,focused){
   if(list.length!==1)continue;
   const entry=list[0],independent=focused?.[keys[type]];
   if(entry.count!==null&&entry.count!==undefined&&
-     (!Number.isSafeInteger(entry.count)||entry.count<1000)){
+     (!Number.isSafeInteger(entry.count)||entry.count<100)){
    entry.count=null;entry.uncertainCount=true;entry.countWarning='badge-digit';
    continue;
   }
-  if(Number.isSafeInteger(independent)&&independent>=1000&&
+  if(Number.isSafeInteger(independent)&&independent>=100&&
      Number.isSafeInteger(entry.count)&&entry.count!==independent){
    // Text beneath a detected class heading is more useful than an absolute
    // pixel crop, but disagreement means we cannot choose safely.
@@ -165,7 +166,7 @@ function flagAmbiguousCounts(entries,focused){
  }
  const byNumber=new Map();
  for(const entry of entries||[]){
-  if(!Number.isSafeInteger(entry.count)||entry.count<1000)continue;
+  if(!Number.isSafeInteger(entry.count)||entry.count<100)continue;
   const prev=byNumber.get(entry.count);
   if(prev&&prev.type!==entry.type){
    for(const e of [prev,entry]){
@@ -186,7 +187,7 @@ function recoverSingleEntries(entries,fallback){
  if(entries.length!==3||new Set(entries.map(e=>e.type)).size!==3)return entries;
  for(const e of entries){
   const key=keys[e.type],n=fallback?.[key];
-  if(!e.uncertainCount&&(e.count===null||e.count===undefined)&&Number.isSafeInteger(n)&&n>=1000){
+  if(!e.uncertainCount&&(e.count===null||e.count===undefined)&&Number.isSafeInteger(n)&&n>=100){
    e.count=n;e.amountSource='focused-strip';
   }
  }
@@ -204,5 +205,5 @@ function totals(entries){
  for(const key of invalid)delete values[key];
  return values;
 }
-root.NRW_BEAR_TROOP_ENTRIES={detect,totals,count,readTextCount,flagAmbiguousCounts,recoverSingleEntries,kind,norm,version:'ratios-dynamic-20261009-2'};
+root.NRW_BEAR_TROOP_ENTRIES={detect,totals,count,readTextCount,flagAmbiguousCounts,recoverSingleEntries,kind,norm,version:'anchor-quantities-20261011-1'};
 })(window);
