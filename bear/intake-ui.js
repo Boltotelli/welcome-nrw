@@ -748,7 +748,21 @@ function renderQueue(){
       if(entry.count!==null){entry.uncertainCount=false;entry.countWarning=null;}
       refreshTotals();
      });
-     line.append(heading,value);list.append(line);
+     line.append(heading,value);
+     // Mixed levels must have their own T/TG selection, never one copied
+     // value per class. Existing simple three-class review stays intact.
+     if(item.troopEntries.length!==3||
+        new Set(item.troopEntries.map(x=>x.type)).size!==3){
+      const badgeInputs=document.createElement('span');badgeInputs.className='bear-entry-badges';
+      const tier=inputChoice([['','T?'],...Array.from({length:11},(_,n)=>[n+1,'T'+(n+1)])],entry.tier??'');
+      const tg=inputChoice([['','TG?'],...Array.from({length:9},(_,n)=>[n,'TG'+n])],entry.tg??'');
+      tier.setAttribute('aria-label',entry.label+' Tier');
+      tg.setAttribute('aria-label',entry.label+' Truegold');
+      tier.addEventListener('change',()=>{entry.tier=tier.value===''?null:Number(tier.value);});
+      tg.addEventListener('change',()=>{entry.tg=tg.value===''?null:Number(tg.value);});
+      badgeInputs.append(tier,tg);line.append(badgeInputs);
+     }
+     list.append(line);
     });
     content.append(list);
     refreshTotals();
