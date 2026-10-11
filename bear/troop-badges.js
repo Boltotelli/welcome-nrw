@@ -172,7 +172,7 @@ async function recognizeEntries(canvas,entries,worker){
     Math.min(canvas.height*(entry.labelBox?.h||.011),24*spot.scale));
    const bx=(best.point?.[0]??spot.x/spot.scale)*spot.scale;
    const by=(best.point?.[1]??spot.y/spot.scale)*spot.scale;
-   const px=bx-1.35*fontHeight,py=by+3.2*fontHeight;
+   const px=bx-1.7*fontHeight,py=by+3.2*fontHeight;
    if(romanXAt(ctx,[px/spot.scale,py/spot.scale])>=.72)tier=10;
    else if(worker){
     // Roman numeral appears on the BOTTOM of that same troop icon.
