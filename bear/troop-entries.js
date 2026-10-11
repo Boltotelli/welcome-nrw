@@ -44,7 +44,7 @@ function readTextCount(text){
  // Individual cropped OCR may contain a title and a separate amount.
  // Prefer full thousands-grouped numbers and longer complete amounts over
  // small stray numeral characters from the troop icon.
- const lines=String(text||'').split(/\n+/).map(t=>t.trim()).filter(Boolean);
+ const lines=String(text||'').replace(/(\d)\s*([.,])\s*(\d)/g,'$1$2$3').split(/\n+/).map(t=>t.trim()).filter(Boolean);
  const candidates=[];
  for(const line of lines){
   for(const m of line.matchAll(/\d{1,3}(?:[.,\s]\d{3}){1,3}|\d{1,9}/g)){
