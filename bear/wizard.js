@@ -536,7 +536,7 @@ function renderRecommendations(){
  recommendationPanel.append(intro);
  const reference=window.NRW_BEAR_HERO_REFERENCE;
  const refState=reference?.status?.()||'unavailable';
- if(refState==='idle')reference.load().then(()=>{
+ if((refState==='idle'||refState==='loading')&&reference?.load)reference.load().then(()=>{
   if(active===5)renderRecommendations();
  });
  const sourceNotice=document.createElement('p');sourceNotice.className='hint bear-reference-status';
