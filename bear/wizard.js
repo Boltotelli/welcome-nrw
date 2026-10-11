@@ -489,7 +489,8 @@ function heroResults(){
  return advisor?.recommend([...roster.values()],window.NRW_BEAR_CATALOG?.heroTypes,
   window.NRW_BEAR_INTAKE_CORE?.rankByType,
   (name,stars,tier)=>window.NRW_BEAR_HERO_REFERENCE?.get?.(name,stars,tier),
-  (name,level)=>window.NRW_BEAR_OWN_BASELINE?.widgetValue?.(name,level))||[];
+  (name,level)=>window.NRW_BEAR_OWN_BASELINE?.widgetValue?.(name,level),
+  advisor?.modelContext?.(B.model(),window.NRW_BEAR_COMBAT))||[];
 }
 function selections(){
  const groups=heroResults();
@@ -517,10 +518,10 @@ function renderRecommendations(){
  const l=lang(),groups=heroResults(),groupNames=names[l]||names.en;
  const intro=document.createElement('p');intro.className='hint';
  intro.textContent=l==='de'?
-  'Auswahl anhand der Expeditions-Basiswerte, offensiven Helden-Expeditionsfähigkeiten und Widget-Expeditionsfähigkeiten. Sterne beeinflussen ihre realen Werte/Skill-Stufen, nicht das Ranking direkt. Relativer Modellindex, keine garantierten Spielpunkte.':
+  'Vergleich des erwarteten Gesamtschadens mit vorläufiger 5/18/77-Formation. Basiswerte wirken auf die jeweilige Truppengattung; Offensivfähigkeiten auf die tatsächlich betroffenen Truppen. Unbekannte Auslöser bleiben markiert. Keine garantierten Spielpunkte.':
   l==='fr'?"Sélection selon les statistiques de base, compétences offensives et capacités d’expédition des Widgets. Les étoiles débloquent les valeurs, sans bonus artificiel. Indice indicatif.":
   l==='es'?'Selección por estadísticas base y habilidades ofensivas de expedición de héroes y Widgets. Las estrellas desbloquean valores, sin bonificación extra. Índice orientativo.':
-  'Selection uses Expedition base stats, offensive hero Expedition skills and widget Expedition abilities. Stars unlock their actual values; they do not add an arbitrary ranking factor. Relative model index, not real points.';
+  'Expected total-rally model with provisional 5/18/77 formation. Base expedition stats affect only that troop class; hero skills affect their recorded targets. Unsupported procs remain flagged. Not guaranteed Kingshot damage.';
  recommendationPanel.append(intro);
  const reference=window.NRW_BEAR_HERO_REFERENCE;
  const refState=reference?.status?.()||'unavailable';
@@ -529,7 +530,7 @@ function renderRecommendations(){
  });
  const sourceNotice=document.createElement('p');sourceNotice.className='hint bear-reference-status';
  sourceNotice.textContent=refState==='ready'?
-  (l==='de'?'✓ 37 quellengeprüfte Helden aus dem separaten GitHub-Repository. Die Rangfolge ist weiterhin eine vorläufige Heuristik.':
+  (l==='de'?'✓ 37 quellengeprüfte Helden; erwarteter Gesamtschaden mit Truppen-/Kampfwerten und vorläufiger 5/18/77-Formation. Kein offizielles Spielschadensmodell.':
    l==='fr'?'✓ 37 références de héros vérifiées depuis GitHub. Classement indicatif.':
    '✓ 37 source-checked heroes from separate GitHub. Shortlist remains heuristic.'):
   refState==='loading'||refState==='idle'?
@@ -624,9 +625,9 @@ function renderRecommendations(){
     (l==='de'?'Basiswert fehlt – kein belastbarer Vergleich möglich.':
      l==='fr'?'Valeur de base manquante – comparaison impossible.':
      l==='es'?'Falta el valor base: comparación no disponible.':'Missing base value – no supported ranking.'):
-    (l==='de'?'Offensiver Vergleichsindex: ':l==='fr'?'Indice offensif : ':
+    (l==='de'?'Gesamtschaden-Index (Basis 100): ':l==='fr'?'Indice offensif : ':
      l==='es'?'Índice ofensivo: ':'Offensive comparison index: ')+asNumber(chosen.score)+
-    ' · '+(l==='de'?'Basis-Expeditionsangriff ':l==='fr'?'Attaque d’expédition ':
+    ' · '+(l==='de'?'Klassen-Expeditionsangriff ':l==='fr'?'Attaque d’expédition ':
      l==='es'?'Ataque base de expedición ':'Base Expedition ATK ')+asNumber(chosen.nativeExpeditionAtk)+' %';
    card.append(compare);
    const effects=(chosen.offensiveSkills||[]).map(f=>f.name+' Lv'+f.skillLevel);
@@ -653,9 +654,9 @@ function renderRecommendations(){
    }
    if(chosen.bearCaution){
     const note=document.createElement('p');note.className='bear-guide-needed';
-    note.textContent=l==='de'?'Für Bären-Rallys eher ein Ersatzheld als eine offensive Empfehlung.':
-     l==='fr'?'Pour l’Ours, c’est plutôt un héros de remplacement qu’un choix offensif.':
-     'Usually a fallback for Bear rallies rather than an offensive specialist.';
+    note.textContent=l==='de'?'Nicht alle Fähigkeiten lassen sich verlässlich modellieren. Die Rangfolge ist entsprechend unsicher.':
+     l==='fr'?'Certaines compétences ne sont pas entièrement modélisées ; classement incertain.':
+     'Some skills cannot yet be modeled reliably. The ranking may change with additional battle data.';
     card.append(note);
    }
    if(group.choices.length>1){
