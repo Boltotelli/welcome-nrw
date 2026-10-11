@@ -74,7 +74,9 @@ function mount(sections,B,language,changed){
   m.v2.troopGroups=[];
   codes.forEach((k,i)=>{
    const c=parsed(v[k],1,200000000,true),tier=parsed(legacy[i]?.tier,1,11,true),tg=parsed(legacy[i]?.tg,0,8,true);
-   if(c!==null&&tier!==null&&tg!==null)m.v2.troopGroups.push({type:types[i],tier,tg,count:c});
+   // Keep OCR-confirmed quantities even when its tiny rank icons were unreadable.
+   // Users can fill the missing T/TG fields without entering their counts again.
+   if(c!==null)m.v2.troopGroups.push({type:types[i],tier,tg,count:c});
   });
  }
  function drawTroops(target){
