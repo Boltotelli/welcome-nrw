@@ -156,3 +156,37 @@ assert.ok(detectedReal.every(e=>e.crop.x*716<=(e.type===0?153:e.type===1?471:153
 assert.ok(detectedReal[0].crop.y*1536<403,'infantry focused crop includes its real 325.027 baseline');
 assert.ok(detectedReal[0].crop.y*1536+detectedReal[0].crop.h*1536<492,
  'focused crop cannot borrow the next class row');
+
+// Real 716×1536 screenshot OCR (including the missing "325" prefix in
+// the whole-screen pass). Verify the SPATIAL crop, not fixed pixel patches.
+// An independently read crop is then expected to recover the true amount.
+const dynamicCropBoxes=E.detect(originalOCR,716,1536).map(e=>({
+ type:e.type,
+ x:e.crop.x*716,y:e.crop.y*1536,
+ width:e.crop.w*716,height:e.crop.h*1536
+}));
+assert.deepEqual(Array.from(dynamicCropBoxes,b=>b.type),[0,1,2]);
+for(const [i,[left,top,right,bottom]] of [
+ [140,393,380,450],  // infantry 325.027, without the gold badge
+ [462,380,675,448],  // cavalry 325.339, even with 'Spitzen' missing
+ [138,514,380,577]   // archer 605.476, not copied to infantry
+].entries()){
+ const b=dynamicCropBoxes[i];
+ assert.ok(b.x>=left&&b.x<=right,'localized left crop '+i);
+ assert.ok(b.y>=top&&b.y<=bottom,'localized vertical crop '+i);
+ assert.ok(b.x+b.width<=710,'crop stays inside image '+i);
+ assert.ok(b.y+b.height<=bottom,'does not touch next troop card '+i);
+}
+assert.equal(E.readTextCount('325.027'),325027);
+assert.equal(E.readTextCount('325.339'),325339);
+assert.equal(E.readTextCount('605.476'),605476);
+assert.equal(E.readTextCount('27'),27,'legitimate short inventory');
+assert.equal(E.readTextCount('3 27'),null,'ambiguous small OCR fragments rejected');
+const fromFocused=[
+ {type:0,count:325027,trustedLabelCrop:true},
+ {type:1,count:325339,trustedLabelCrop:true},
+ {type:2,count:605476,trustedLabelCrop:true}
+];
+E.flagAmbiguousCounts(fromFocused,{});
+assert.deepEqual({...E.totals(fromFocused)},
+ {troopsI:325027,troopsC:325339,troopsA:605476});
