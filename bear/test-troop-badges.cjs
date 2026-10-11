@@ -86,3 +86,45 @@ for(const [entry,actual] of realBadgeLabels){
  assert.ok(Math.abs(guess.x-actual.x)<=24&&Math.abs(guess.y-actual.y)<=24,
   entry.title+' medal must be inside the dynamic local search range');
 }
+
+/* The REAL badge crop silhouettes are verified above. This additional test
+ * proves standard-layout icon lookup no longer depends on labelBox.
+ * No source screenshot or hardcoded troop quantities are required. */
+const digitBegin=moduleCode.indexOf('function digitAt(ctx,center,scratch){');
+const digitEnd=moduleCode.indexOf('// Small verified Roman X',digitBegin);
+const romanBegin=moduleCode.indexOf('function romanXAt(ctx,center){');
+const romanEnd=moduleCode.indexOf('function recognize(canvas,text,words){',romanBegin);
+assert.ok(digitBegin>=0&&digitEnd>digitBegin&&romanBegin>=0&&romanEnd>romanBegin);
+let simulated=moduleCode.slice(0,digitBegin)+`
+function digitAt(ctx,center){
+ const current=ctx.canvas.width===716?
+ [[136,374,4],[450,374,4],[136,493,4]]:
+ [[136,395,6],[454,395,5],[136,520,6]];
+ for(const [x,y,tg] of current){
+  if(Math.abs(center[0]-x)<=4&&Math.abs(center[1]-y)<=4)
+   return {tg,confidence:.95,second:.65};
+ }
+ return {tg:null,confidence:0};
+}
+`+moduleCode.slice(digitEnd,romanBegin)+`
+function romanXAt(ctx,center){
+ const current=ctx.canvas.width===716?
+ [[105,433],[419,433],[105,552]]:
+ [[105,454],[423,454],[105,579]];
+ return current.some(([x,y])=>Math.abs(center[0]-x)<8&&Math.abs(center[1]-y)<10)?.82:0;
+}
+`+moduleCode.slice(romanEnd);
+const simulationScope={window:{},atob,document:{
+ createElement:()=>({width:27,height:26})
+}};
+vm.runInNewContext(simulated,simulationScope);
+for(const width of [716,955]){
+ const c={width,height:Math.round(width*1536/716),
+  getContext:()=>({canvas:{width}})};
+ const expected=width===716?[4,4,4]:[6,5,6];
+ simulationScope.window.NRW_BEAR_TROOP_BADGES.recognizeStandard(c,'')
+  .then(got=>{
+   assert.deepEqual(Array.from(got.map(v=>v.tg)),expected);
+   assert.deepEqual(Array.from(got.map(v=>v.tier)),[10,10,10]);
+  }).catch(e=>{throw e;});
+}
