@@ -674,7 +674,10 @@ async function inspect(file){
  const troopTiers=type==='troops'&&TROOP?TROOP.recognize(canvas,text+'\n'+grouped+explicitTierLabels,result.data.words||[]):null;
  const marchSlots=type==='troops'?Core.parseMarchSlots(text+'\n'+grouped):null;
 
- let detail=(type==='starter'||type==='unknown')?Core.parseHeroDetail(text,allKnown()):null;
+ const guidedDetails=window.NRW_BEAR_SCREENSHOT_STAGE===6?
+  (B.model().v2?.ownHeroes||[]).filter(Boolean):[];
+ const detailCandidates=guidedDetails.length?guidedDetails:allKnown();
+ let detail=(type==='starter'||type==='unknown')?Core.parseHeroDetail(text,detailCandidates):null;
  if((type==='starter'||type==='unknown')&&!detail?.name){
   // Detail screenshots display the hero name at the TOP, above a huge 3D
   // character. A full-page OCR scan can miss the tiny outlined heading.
@@ -685,7 +688,7 @@ async function inspect(file){
     0,0,header.width,header.height);
   const headerOCR=await worker.recognize(header);
   let heading=headerOCR.data.text||'';
-  detail=Core.parseHeroDetail(heading+'\n'+text,allKnown())||detail;
+  detail=Core.parseHeroDetail(heading+'\n'+text,detailCandidates)||detail;
   if(!detail?.name){
    // Short names such as "Zoe" can vanish in the white-on-dark outlined
    // title. Make a second pass across a wider upper heading band with
@@ -706,9 +709,21 @@ async function inspect(file){
    try{
     const focused=await worker.recognize(upper);
     heading+='\n'+(focused.data?.text||'');
-    detail=Core.parseHeroDetail(heading+'\n'+text,allKnown())||detail;
+    detail=Core.parseHeroDetail(heading+'\n'+text,detailCandidates)||detail;
    }catch(_){/* Unknown name still requires user confirmation. */}
   }
+ }
+ if(guidedDetails.length&&!detail?.name&&(type==='starter'||type==='unknown')){
+  const detectedOutside=Core.parseHeroDetail(text,allKnown())?.name;
+  if(!detectedOutside||guidedDetails.includes(detectedOutside)){
+   const occupied=new Set(queue.filter(q=>q.type==='starter').map(q=>q.detail?.name).filter(Boolean));
+   const pending=guidedDetails.filter(n=>!occupied.has(n));
+   if(pending.length){
+    // Roster owns level and stars. If the header is unreadable, map to
+    // the next unassigned approved hero; the review visibly flags this.
+    detail={name:pending[0],level:null,expeditionStats:{},assignedByOrder:true};
+   }
+  }else detail={name:null,unmatchedName:detectedOutside,expeditionStats:{}};
  }
  if(detail?.name&&(type==='starter'||type==='unknown')){
   const focused=await readHeroStatPanel(canvas,worker,detail.name,text+'\n'+grouped);
@@ -880,20 +895,34 @@ function renderQueue(){
     content.append(extra);
    }
   }else if(item.type==='starter'){
-   const picker=document.createElement('label');picker.className='bear-intake-value';
-   picker.append(say('Heldenname','Hero name'));
-   const name=inputChoice(heroChoices(),item.detail?.name||'');picker.append(name);content.appendChild(picker);
-   name.addEventListener('change',()=>{
-    item.detail=item.detail||{};
-    const prev=cat.heroTypes?.[item.detail.name],next=cat.heroTypes?.[name.value];
-    item.detail.name=name.value;
-    if(prev!==next){item.detail.expeditionStats={};item.detail.expeditionConflicts=[];}
-    renderQueue();
-   });
-   const lvl=document.createElement('label');lvl.className='bear-intake-value';lvl.textContent='Level';
-   const val=document.createElement('input');val.type='number';val.min='0';val.max='80';val.value=item.detail?.level??'';
-   val.addEventListener('input',()=>{item.detail=item.detail||{};item.detail.level=val.value===''?null:Number(val.value);});
-   lvl.append(val);content.append(lvl);
+   const guided=window.NRW_BEAR_SCREENSHOT_STAGE===6;
+   if(guided){
+    const label=document.createElement('p');label.className='bear-detail-hero-identity';
+    label.textContent=item.detail?.name?
+     '✓ '+item.detail.name+' · '+say('Level und Sterne aus der Heldenübersicht übernommen','Level and stars retained from hero overview'):
+     '⚠ '+say('Screenshot passt nicht zu den ausgewählten Helden. Bitte richtiges Bild hochladen.','Screenshot does not match your selected heroes. Upload the correct one.');
+    content.append(label);
+    if(item.detail?.assignedByOrder){
+     const warning=document.createElement('p');warning.className='bear-guide-needed';
+     warning.textContent=say('Name im Bild nicht erkannt: nach Upload-Reihenfolge zugeordnet. Bitte prüfen.','Name not recognized: paired by upload order. Please verify.');
+     content.append(warning);
+    }
+   }else{
+    const picker=document.createElement('label');picker.className='bear-intake-value';
+    picker.append(say('Heldenname','Hero name'));
+    const name=inputChoice(heroChoices(),item.detail?.name||'');picker.append(name);content.appendChild(picker);
+    name.addEventListener('change',()=>{
+     item.detail=item.detail||{};
+     const prev=cat.heroTypes?.[item.detail.name],next=cat.heroTypes?.[name.value];
+     item.detail.name=name.value;
+     if(prev!==next){item.detail.expeditionStats={};item.detail.expeditionConflicts=[];}
+     renderQueue();
+    });
+    const lvl=document.createElement('label');lvl.className='bear-intake-value';lvl.textContent='Level';
+    const val=document.createElement('input');val.type='number';val.min='0';val.max='80';val.value=item.detail?.level??'';
+    val.addEventListener('input',()=>{item.detail=item.detail||{};item.detail.level=val.value===''?null:Number(val.value);});
+    lvl.append(val);content.append(lvl);
+   }
    const note=document.createElement('p');note.className='hint';
    const hType=cat.heroTypes?.[item.detail?.name];
    const group={infantry:'i',cavalry:'c',archer:'a'}[hType];
@@ -1126,7 +1155,8 @@ function apply(){
   }else if(item.type==='starter'&&item.detail?.name){
    appliedTypes.push('starter');
    const h=item.detail;appliedNames.push(h.name);const previous=v.manualHeroes[h.name]||{};
-   v.manualHeroes[h.name]={...previous,name:h.name,level:h.level||previous.level||0,
+   v.manualHeroes[h.name]={...previous,name:h.name,level:
+     window.NRW_BEAR_SCREENSHOT_STAGE===6?(previous.level||0):(h.level||previous.level||0),
     // Detail photos are taken AFTER fitting best simultaneous gear; do
     // not back-fill missing new numbers from an older pre-gear screenshot.
     expeditionStats:{...(h.expeditionStats||{})},source:'screenshot'};
