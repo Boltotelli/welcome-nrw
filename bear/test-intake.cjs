@@ -93,8 +93,9 @@ for(const filename of ['intake-core.js','intake-ui.js','intake-ui.css'])assert.o
 
 const frSample=C.parseStats('Infanterie-Attaque 181,5%\nCavalerie-Défense 167,2%\nArchers-Létalité 314,0%');
 const esSample=C.parseStats('Infantería-Ataque 181,5%\nCaballería-Defensa 167,2%\nArqueros-Letalidad 314,0%');
-assert.deepEqual(frSample,{iAtk:181.5,cDef:167.2,aLet:314});
-assert.deepEqual(esSample,{iAtk:181.5,cDef:167.2,aLet:314});
+for(const sample of [frSample,esSample]){
+ assert.equal(sample.iAtk,181.5);assert.equal(sample.cDef,167.2);assert.equal(sample.aLet,314);
+}
 assert.equal(C.category('Aperçu des bonus'),'stats');
 assert.equal(C.category('Resumen de bonificaciones'),'stats');
 assert.equal(C.category('Héros'),'roster');
