@@ -148,7 +148,7 @@ function parseHeroDetail(text,catalog){
 }
 function maxSkill(stars){
  const s=Number(stars);
- if(!Number.isFinite(s)||s<=0)return null;
+ if(!Number.isFinite(s)||s<0)return null;
  return Math.min(5,Math.max(1,Math.floor(s)+1));
 }
 // KS Atlas "Bear Rally Heroes" / Kingshot World generation-6 guidance.

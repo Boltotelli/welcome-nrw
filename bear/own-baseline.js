@@ -31,7 +31,7 @@ const EXPEDITION_WIDGETS=Object.freeze({
 });
 function skillCap(stars,tier){
  const s=Number(stars),t=Number(tier??0);
- if(!Number.isInteger(s)||s<1||s>5||
+ if(!Number.isInteger(s)||s<0||s>5||
     !Number.isInteger(t)||t<0||t>5)return null;
  // The real maximum is based on the full unlocked star, with progress
  // within star used only when the scanned development rank is known.
