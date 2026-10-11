@@ -488,7 +488,8 @@ function heroResults(){
  }
  return advisor?.recommend([...roster.values()],window.NRW_BEAR_CATALOG?.heroTypes,
   window.NRW_BEAR_INTAKE_CORE?.rankByType,
-  (name,stars,tier)=>window.NRW_BEAR_HERO_REFERENCE?.get?.(name,stars,tier))||[];
+  (name,stars,tier)=>window.NRW_BEAR_HERO_REFERENCE?.get?.(name,stars,tier),
+  (name,level)=>window.NRW_BEAR_OWN_BASELINE?.widgetValue?.(name,level))||[];
 }
 function selections(){
  const groups=heroResults();
@@ -516,9 +517,10 @@ function renderRecommendations(){
  const l=lang(),groups=heroResults(),groupNames=names[l]||names.en;
  const intro=document.createElement('p');intro.className='hint';
  intro.textContent=l==='de'?
-  'Nur eingelesene Helden: Sterne, Skills, offensive Widgets, Bear-Rolle und geprüfter Expeditionsangriff (wenn mehrere Vergleichswerte vorliegen) fließen in die Rangfolge ein. Keine garantierte Schadensprognose.':
-  l==='fr'?"Héros détectés : étoiles, compétences, widgets, rôle et attaque d'expédition vérifiée lorsqu'elle est comparable. Ce classement n'est PAS un calcul de dégâts réels.":
-  'Only scanned owned heroes: development, skills, offensive widgets, Bear role and comparable verified Expedition ATK influence this provisional ranking. NOT calculated Bear damage.';
+  'Auswahl anhand der Expeditions-Basiswerte, offensiven Helden-Expeditionsfähigkeiten und Widget-Expeditionsfähigkeiten. Sterne beeinflussen ihre realen Werte/Skill-Stufen, nicht das Ranking direkt. Relativer Modellindex, keine garantierten Spielpunkte.':
+  l==='fr'?"Sélection selon les statistiques de base, compétences offensives et capacités d’expédition des Widgets. Les étoiles débloquent les valeurs, sans bonus artificiel. Indice indicatif.":
+  l==='es'?'Selección por estadísticas base y habilidades ofensivas de expedición de héroes y Widgets. Las estrellas desbloquean valores, sin bonificación extra. Índice orientativo.':
+  'Selection uses Expedition base stats, offensive hero Expedition skills and widget Expedition abilities. Stars unlock their actual values; they do not add an arbitrary ranking factor. Relative model index, not real points.';
  recommendationPanel.append(intro);
  const reference=window.NRW_BEAR_HERO_REFERENCE;
  const refState=reference?.status?.()||'unavailable';
@@ -616,29 +618,38 @@ function renderRecommendations(){
     href.textContent=l==='de'?'Originalquelle aufrufen':l==='fr'?'Source primaire':'Open original source';
     detail.append(href);card.append(detail);
    }
+   const asNumber=n=>Number(n).toLocaleString(l==='de'?'de-DE':l==='fr'?'fr-FR':l==='es'?'es-ES':'en-US',{maximumFractionDigits:1});
+   const compare=document.createElement('p');compare.className='hint bear-recommendation-reason';
+   compare.textContent=chosen.score===null?
+    (l==='de'?'Basiswert fehlt – kein belastbarer Vergleich möglich.':
+     l==='fr'?'Valeur de base manquante – comparaison impossible.':
+     l==='es'?'Falta el valor base: comparación no disponible.':'Missing base value – no supported ranking.'):
+    (l==='de'?'Offensiver Vergleichsindex: ':l==='fr'?'Indice offensif : ':
+     l==='es'?'Índice ofensivo: ':'Offensive comparison index: ')+asNumber(chosen.score)+
+    ' · '+(l==='de'?'Basis-Expeditionsangriff ':l==='fr'?'Attaque d’expédition ':
+     l==='es'?'Ataque base de expedición ':'Base Expedition ATK ')+asNumber(chosen.nativeExpeditionAtk)+' %';
+   card.append(compare);
+   const effects=(chosen.offensiveSkills||[]).map(f=>f.name+' Lv'+f.skillLevel);
+   if(chosen.widgetEffect!==null&&chosen.widgetEffect!==undefined&&chosen.widgetEffect>0)
+    effects.push('Widget '+chosen.widget+' · +'+asNumber(chosen.widgetEffect)+' % ('+chosen.widgetType+')');
+   if(effects.length){
+    const skills=document.createElement('p');skills.className='hint';
+    skills.textContent=(l==='de'?'Offensive Expeditionsfähigkeiten: ':l==='fr'?'Capacités offensives : ':
+     l==='es'?'Habilidades ofensivas: ':'Offensive Expedition abilities: ')+effects.join(' · ');
+    card.append(skills);
+   }
+   if(chosen.unmodeledSkills?.length){
+    const unknown=document.createElement('p');unknown.className='bear-guide-needed';
+    unknown.textContent=(l==='de'?'Noch nicht verlässlich bewertbar: ':l==='fr'?'Non quantifiable : ':
+     l==='es'?'Sin cuantificar: ':'Not yet quantified: ')+chosen.unmodeledSkills.join(', ');
+    card.append(unknown);
+   }
    const second=group.choices.find(x=>x.name!==chosen.name);
-   if(second){
-    const reason=document.createElement('p');reason.className='hint bear-recommendation-reason';
-    if(chosen.usesAttackReference&&second.usesAttackReference&&
-       Number.isFinite(chosen.nativeExpeditionAtk)&&Number.isFinite(second.nativeExpeditionAtk)){
-     const fmt=n=>n.toLocaleString(l==='de'?'de-DE':l==='fr'?'fr-FR':'en-US',{maximumFractionDigits:2});
-     reason.textContent=l==='de'?
-      'Expeditionsangriff: '+fmt(chosen.nativeExpeditionAtk)+' % gegenüber '+fmt(second.nativeExpeditionAtk)+' % ('+second.name+'). Die geprüften Werte werden nun gewichtet. Skill-, Widget- und Kampfbedingungen bleiben relevant.':
-      l==='fr'?"Attaque d'expédition : "+fmt(chosen.nativeExpeditionAtk)+' % contre '+fmt(second.nativeExpeditionAtk)+' % ('+second.name+"). Valeurs pondérées, dégâts réels non garantis.":
-      'Expedition ATK: '+fmt(chosen.nativeExpeditionAtk)+' % vs '+fmt(second.nativeExpeditionAtk)+' % ('+second.name+'). Verified values are weighted; actual damage also depends on skills, widgets and battle conditions.';
-    }else if(chosen.stars!==null&&second.stars!==null&&chosen.stars>=second.stars+2){
-     reason.textContent=l==='de'?
-      chosen.stars+'★ statt '+second.stars+'★ bei '+second.name+
-      ': Ein schwach entwickelter Meta-Held verdrängt keinen gut ausgebauten Starter.':
-      l==='fr'?'Meilleure progression : '+chosen.stars+'★ contre '+second.stars+'★ ('+second.name+').':
-      'More developed: '+chosen.stars+'★ vs '+second.stars+'★ ('+second.name+'). A low-star meta hero does not automatically win.';
-    }else{
-     reason.textContent=l==='de'?
-      'Im Vergleich zu '+second.name+' werden Sterne, Level, Skill-Potenzial und Rollenempfehlung berücksichtigt.':
-      l==='fr'?'Comparé à '+second.name+' : étoiles, niveau, compétences et rôle.':
-      'Compared to '+second.name+': stars, level, skills and Bear role preference.';
-    }
-    card.append(reason);
+   if(second&&second.score!==null){
+    const alternative=document.createElement('p');alternative.className='hint';
+    alternative.textContent=(l==='de'?'Alternative ':l==='fr'?'Alternative ':l==='es'?'Alternativa ':'Alternative ')+
+     second.name+' · '+asNumber(second.score)+' '+(l==='de'?'Vergleichsindex':l==='fr'?'indice':l==='es'?'índice':'index');
+    card.append(alternative);
    }
    if(chosen.bearCaution){
     const note=document.createElement('p');note.className='bear-guide-needed';
