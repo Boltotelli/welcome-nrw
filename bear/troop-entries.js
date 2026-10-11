@@ -143,13 +143,13 @@ function detect(words,width,height){
   const quantity=readBelow(label,normalized,width,height);
   const crop=cropAroundLabel(label);
   const fontHeight=Math.max(.008,label.y1-label.y0);
-  const iconWidth=Math.min(.16,Math.max(.095,fontHeight*13));
+  const iconWidth=Math.min(.145,Math.max(.108,fontHeight*11.2));
   return {id:index,type:label.type,label:label.label,count:quantity,
    // Each badge region is derived from its OWN troop heading, not
    // an absolute screen position or the number of entries.
    title:label.title||'',labelBox:{x:label.x0,y:label.y0,w:label.x1-label.x0,h:label.y1-label.y0},
-   icon:{x:Math.max(0,label.x0-iconWidth),y:Math.max(0,label.y0-fontHeight*1.7),
-    w:iconWidth,h:Math.max(.055,fontHeight*8.5)},
+   icon:{x:Math.max(0,label.x0-iconWidth),y:Math.max(0,label.y0-fontHeight*1.45),
+    w:iconWidth,h:Math.max(.05,Math.min(.085,fontHeight*6.5))},
    crop};
  });
 }
