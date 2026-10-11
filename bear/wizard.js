@@ -379,6 +379,12 @@ function displayStored(i){
   const val=document.createElement('strong');val.textContent=value;row.append(k,val);panel.append(row);
  };
  if(i===1){
+  if(Array.isArray(x.troopGroups)){
+   x.troopGroups.forEach((g,j)=>add('#'+(j+1)+' '+({infantry:'Infanterie',cavalry:'Kavallerie',archer:'Bogenschützen'}[g.type]||'?'),
+    'T'+(g.tier??'?')+' · TG'+(g.tg??'?')+' · '+num(g.count)));
+   add('Gesamt',num(v.troopsI)+' / '+num(v.troopsC)+' / '+num(v.troopsA));
+   return;
+  }
   ['Infanterie','Kavallerie','Bogenschützen'].forEach((label,j)=>{
    const keys=['troopsI','troopsC','troopsA'],tier=x.troopTiers?.[j];
    add(label,num(v[keys[j]])+' · '+(tier?.tier?'T'+tier.tier:'T?')+' / '+
@@ -415,6 +421,9 @@ sections[7].insertBefore(capacityHost,manual);
 const capacityUI=window.NRW_BEAR_CAPACITY_UI?.mount(capacityHost,B,lang);
 const widgetHost=document.createElement('section');widgetHost.className='bear-widget-panel bear-recommendation-panel';
 sections[4].append(widgetHost);
+const manualEntry=window.NRW_BEAR_MANUAL?.mount(sections,B,lang,()=>{
+ if(storedPanels[active])displayStored(active);
+});
 function renderWidgetLevels(){
  const v=B.model().v2||{},l=lang();
  const scanned=Array.isArray(v.scannedOwnedHeroes)?[...new Set(v.scannedOwnedHeroes.filter(Boolean))]:[];
@@ -767,10 +776,14 @@ function renderHeroDetails(){
  detailPanel.append(list);
  const foot=document.createElement('p');foot.className='hint bear-gear-shot-note';
  foot.textContent=l==='de'?
-  'ERST DANACH: Öffne die drei Heldendetailseiten und mache jeweils EINEN Screenshot. Lade diese drei Bilder zusammen hoch, überprüfe die Zuordnung und tippe auf „Übernehmen“.':
+  (manualEntry?.isManual(6)?
+    'Trage nach dem Anlegen deiner besten gleichzeitig getragenen Helden-Ausrüstung die vier Expeditionswerte direkt unten ein.':
+    'ERST DANACH: Öffne die drei Heldendetailseiten und mache jeweils EINEN Screenshot. Lade diese drei Bilder zusammen hoch, überprüfe die Zuordnung und tippe auf „Übernehmen“.'):
  l==='fr'?
   'ENSUITE : ouvre les trois pages de détails et prends UNE capture par héros. Charge les trois images ensemble et confirme.':
-  'ONLY THEN: open each hero’s detail page and take ONE screenshot per hero. Upload all THREE screenshots together, review and tap Apply.';
+  (manualEntry?.isManual(6)?
+    'After equipping all three heroes at the same time, enter their Expedition values below.':
+    'ONLY THEN: open each hero’s detail page and take ONE screenshot per hero. Upload all THREE screenshots together, review and tap Apply.');
  detailPanel.append(foot);
 }
 function render(){
@@ -786,12 +799,17 @@ function render(){
  if(idx===8){formationUI?.show();}
  if(idx===9){simulationUI?.enter();}
  if(storedPanels[idx])displayStored(idx);
+ manualEntry?.render(idx);
  $('bearGuideEyebrow').textContent=s.eyebrow;
  $('bearGuideTitle').textContent=s.start;
  $('bearGuideDesc').textContent=s.desc;
  $('bearGuideStep').textContent=s.progress+' '+(guidedOrder.indexOf(idx)+1)+' / '+guidedOrder.length;
  $('bearGuideStepTitle').textContent=s.steps[idx];
- $('bearGuidePrompt').textContent=s.prompts[idx];
+ $('bearGuidePrompt').textContent=manualEntry?.isManual(idx)?
+  (lang()==='de'?'Trage die Werte direkt unten ein. Mit einem Klick kannst du zur Screenshot-Erkennung wechseln.':
+   lang()==='fr'?'Saisis les valeurs ci-dessous ou utilise les captures.':
+   lang()==='es'?'Introduce los valores abajo o utiliza capturas.':
+   'Enter values below or switch to screenshot recognition.'):s.prompts[idx];
  $('bearGuideBack').textContent='← '+s.back;
  $('bearGuideSkip').textContent=s.skip;
  $('bearGuideNext').textContent=idx===7?
