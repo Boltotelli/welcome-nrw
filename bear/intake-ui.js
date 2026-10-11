@@ -698,7 +698,26 @@ function renderQueue(){
   const header=document.createElement('div');header.className='bear-intake-item-head';
   const title=document.createElement('b');title.textContent=item.fileName;
   const type=inputChoice(Object.entries(typeTranslations[locale()]||typeTranslations.en).map(([key,name])=>[key,name]),item.type);
-  type.addEventListener('change',async ()=>{item.type=type.value;item.values=item.type==='troops'?{}:item.type==='stats'?{...Core.parseStats(item.text),...Core.parseStats(item.grouped||'')}:{};item.troopEntries=item.type==='troops'&&item.canvas&&ENTRY?ENTRY.detect(item.words||[],item.canvas.width,item.canvas.height):[];if(item.troopEntries.length){ENTRY.flagAmbiguousCounts(item.troopEntries,{});Object.assign(item.values,ENTRY.totals(item.troopEntries));}item.detail=item.type==='starter'?Core.parseHeroDetail(item.text,allKnown()):null;const scanTag='manual-'+(++heroScanSequence);
+  type.addEventListener('change',async ()=>{item.type=type.value;item.values=item.type==='troops'?{}:item.type==='stats'?{...Core.parseStats(item.text),...Core.parseStats(item.grouped||'')}:{};item.troopEntries=[];
+    if(item.type==='troops'&&item.canvas&&ENTRY){
+     const worker=await loadOCR();
+     let words=item.words||[];
+     try{words=[...words,...await readTroopColumnWords(item.canvas,worker)];}catch(_){}
+     item.troopEntries=ENTRY.detect(words,item.canvas.width,item.canvas.height);
+     await recheckUnreadTroopEntries(item.troopEntries,item.canvas,worker);
+     ENTRY.flagAmbiguousCounts(item.troopEntries,{});
+     Object.assign(item.values,ENTRY.totals(item.troopEntries));
+     item.troopTiers=TROOP?.recognize(item.canvas,item.text+'\n'+(item.grouped||''),words,item.troopEntries)||null;
+     await readUnmatchedTroopBadges(item.canvas,worker,item.troopEntries);
+     if(item.troopTiers){
+      for(let k=0;k<3;k++){
+       const found=item.troopEntries.filter(e=>e.type===k);
+       if(found.length!==1)continue;
+       item.troopTiers[k].tier=found[0].tier??null;
+       item.troopTiers[k].tg=found[0].tg??null;
+      }
+     }
+    }item.detail=item.type==='starter'?Core.parseHeroDetail(item.text,allKnown()):null;const scanTag='manual-'+(++heroScanSequence);
     item.cards=item.type==='roster'&&item.canvas?overviewTiles(item.canvas,item.text,item.words,scanTag):[];
     if(item.type==='roster'&&item.cards.length){
      const worker=await loadOCR();
@@ -710,7 +729,7 @@ function renderQueue(){
      // portrait recognition path as automatic overview detection.
      item.matcherInfo=await MATCHER.enrich(item.cards);
     }else item.matcherInfo=null;
-    item.troopTiers=item.type==='troops'&&item.canvas&&TROOP?TROOP.recognize(item.canvas,item.text+'\n'+(item.grouped||''),item.words,item.troopEntries):null;renderQueue();});
+    if(item.type!=='troops')item.troopTiers=null;renderQueue();});
   header.append(title,type);card.appendChild(header);
   const content=document.createElement('div');content.className='bear-intake-values';
   if(item.type==='troops'||item.type==='stats'){
