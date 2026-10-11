@@ -128,3 +128,16 @@ for(const width of [716,955]){
    assert.deepEqual(Array.from(got.map(v=>v.tier)),[10,10,10]);
   }).catch(e=>{throw e;});
 }
+
+// Regression: the same gold numeral changes its vertical position between
+// the tall 955x2048 overview and shorter 1080x1920 Android HUD.
+const regionsApi=mock(fixtures[0]);
+const tall=regionsApi.standardGoldRegions({width:955,height:2048});
+const phone=regionsApi.standardGoldRegions({width:1080,height:1920});
+for(let i=0;i<3;i++){
+ const delta=[-37,-37,-29][i];
+ assert.ok(Math.abs(tall[i].y0-regionsApi.standardGoldSearch[i].y0)<.5);
+ assert.ok(Math.abs(phone[i].y0-(tall[i].y0+delta))<.5);
+ assert.equal(phone[i].x0,tall[i].x0,'badge X must not move with language or HUD height');
+}
+console.log('TROOP BADGES: responsive 1080x1920 and 955x2048 gold search regions passed.');
