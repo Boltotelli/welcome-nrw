@@ -530,25 +530,42 @@ async function readTroopColumnWords(canvas,worker){
  }
  return words;
 }
-async function recheckUnreadTroopEntries(entries,canvas,worker){
- // Each entry supplies its OWN normalized crop; no first/second/third-row
- // assumptions. Tesseract OCR result is never accepted if not a whole
- // thousands-formatted troop count.
- if(!Array.isArray(entries))return;
- for(const entry of entries){
-  if(entry.count!==null||!entry.crop)continue;
-  const r=entry.crop,c=document.createElement('canvas');
-  c.width=520;c.height=104;
-  const ctx=c.getContext('2d',{willReadFrequently:true});
-  ctx.fillStyle='white';ctx.fillRect(0,0,c.width,c.height);
-  try{
-   ctx.drawImage(canvas,r.x*canvas.width,r.y*canvas.height,
-    r.w*canvas.width,r.h*canvas.height,8,8,c.width-16,c.height-16);
-   const ocr=await worker.recognize(c);
-   const cleaned=String(ocr.data?.text||'').trim();
-   const candidate=ENTRY.readTextCount(cleaned);
-   if(candidate!==null)entry.count=candidate;
-  }catch(_){/* Leave unreadable rows reviewable, never fabricate counts. */}
+async function verifyTroopEntryCounts(entries,canvas,worker){
+ if(!Array.isArray(entries)||!entries.length)return;
+ // One OCR strip per detected heading; one batch recognition regardless of
+ // whether there are 3, 6 or 12 troop cards. No fixed row positions.
+ const rowH=116,pad=12,width=490;
+ const board=document.createElement('canvas');
+ board.width=width;board.height=rowH*entries.length;
+ const cx=board.getContext('2d',{willReadFrequently:true});
+ cx.fillStyle='white';cx.fillRect(0,0,board.width,board.height);
+ entries.forEach((entry,i)=>{
+  const r=entry.crop;if(!r)return;
+  const left=Math.max(0,r.x*canvas.width),top=Math.max(0,r.y*canvas.height);
+  const w=Math.min(canvas.width-left,r.w*canvas.width);
+  const h=Math.min(canvas.height-top,r.h*canvas.height);
+  if(w>0&&h>0)cx.drawImage(canvas,left,top,w,h,pad,rowH*i+pad,
+   width-pad*2,rowH-pad*2);
+ });
+ let read;
+ try{read=await worker.recognize(board);}catch(_){return;}
+ for(let i=0;i<entries.length;i++){
+  const entry=entries[i];
+  const words=(read.data?.words||[]).filter(w=>w.bbox&&
+   (w.bbox.y0+w.bbox.y1)/2>=i*rowH&&
+   (w.bbox.y0+w.bbox.y1)/2<(i+1)*rowH)
+    .sort((a,b)=>a.bbox.x0-b.bbox.x0).map(w=>w.text);
+  const text=words.join(' ');
+  const detected=ENTRY.readTextCount(text);
+  entry.independentCount=detected;
+  if(detected===null)continue;
+  if(entry.count!==null&&entry.count!==undefined&&entry.count!==detected){
+   entry.uncertainCount=true;entry.countWarning='conflicting-line-reads';
+   entry.count=null;
+  }else{
+   entry.count=detected;entry.confirmedIndependent=true;
+   entry.amountSource='heading-relative-focused';
+  }
  }
 }
 function positionalLines(words,canvas){
@@ -630,48 +647,25 @@ async function inspect(file){
  if(type==='unknown'&&window.NRW_BEAR_SCREENSHOT_STAGE===4&&heroRows(canvas).length>=2)type='roster';
  // A portrait-only roster can be recognized from its dense 4-column grid;
  // unknown layouts remain unrecognized and manually selectable.
- const values=type==='troops'?
-  {...Core.parseTroops(text),...spatialTroops(result.data.words,canvas)}:
+ const values=type==='troops'?{}:
   type==='stats'?{...Core.parseStats(text),...Core.parseStats(grouped)}:{};
- const uncertainKeys=new Set(),absoluteReadings={};
- let explicitTierLabels='';
- if(type==='troops'){
-  try{
-   Object.assign(absoluteReadings,await readTroopNumbers(canvas,worker));
-   for(const [key,n] of Object.entries(absoluteReadings)){
-    if(Number.isSafeInteger(values[key])&&values[key]!==n){
-     // Absolute crops move across phone aspect ratios. Conflicting reads
-     // may NOT replace a class-labeled troop count.
-     uncertainKeys.add(key);delete values[key];
-    }else if(!Object.prototype.hasOwnProperty.call(values,key))values[key]=n;
-   }
-  }catch(_){/* Leave uncertain values reviewable, not fabricated. */}
-  explicitTierLabels=await recheckTroopFields(canvas,worker,values,uncertainKeys);
- }
  let troopEntries=[],troopWords=result.data.words||[];
+ let troopTiers=null;
  if(type==='troops'&&ENTRY){
   try{troopWords=[...troopWords,...await readTroopColumnWords(canvas,worker)];}
-  catch(_){/* Fall back to existing OCR words. */}
+  catch(_){/* Keep whole-image OCR if the layout-specific fallback fails. */}
   troopEntries=ENTRY.detect(troopWords,canvas.width,canvas.height);
   if(troopEntries.length){
-   await recheckUnreadTroopEntries(troopEntries,canvas,worker);
-   ENTRY.flagAmbiguousCounts?.(troopEntries,absoluteReadings);
-   for(const entry of troopEntries){
-    if(uncertainKeys.has(['troopsI','troopsC','troopsA'][entry.type])){
-     entry.uncertainCount=true;entry.countWarning='conflicting-ocr';entry.count=null;
-    }
+   await verifyTroopEntryCounts(troopEntries,canvas,worker);
+   ENTRY.flagAmbiguousCounts?.(troopEntries,{});
+   Object.assign(values,ENTRY.totals(troopEntries));
+   if(TROOP?.recognizeEntries){
+    troopTiers=await TROOP.recognizeEntries(canvas,troopEntries,worker);
    }
-   ENTRY.recoverSingleEntries(troopEntries,values);
-   const computed=ENTRY.totals(troopEntries);
-   for(const type of new Set(troopEntries.map(e=>e.type))){
-    const key=['troopsI','troopsC','troopsA'][type];
-    if(!Object.prototype.hasOwnProperty.call(computed,key))delete values[key];
-   }
-   Object.assign(values,computed);
   }
-  for(const key of uncertainKeys)delete values[key];
  }
- const troopTiers=type==='troops'&&TROOP?TROOP.recognize(canvas,text+'\n'+grouped+explicitTierLabels,result.data.words||[]):null;
+ // If the class headings cannot be located, request manual review. A
+ // full-screen OCR number is NEVER assigned to an unrelated troop class.
  const marchSlots=type==='troops'?Core.parseMarchSlots(text+'\n'+grouped):null;
 
  const guidedDetails=window.NRW_BEAR_SCREENSHOT_STAGE===6?
@@ -789,7 +783,7 @@ function renderQueue(){
   const header=document.createElement('div');header.className='bear-intake-item-head';
   const title=document.createElement('b');title.textContent=item.fileName;
   const type=inputChoice(Object.entries(typeTranslations[locale()]||typeTranslations.en).map(([key,name])=>[key,name]),item.type);
-  type.addEventListener('change',async ()=>{item.type=type.value;item.values=item.type==='troops'?{...Core.parseTroops(item.text),...(item.canvas?spatialTroops(item.words,item.canvas):{})}:item.type==='stats'?{...Core.parseStats(item.text),...Core.parseStats(item.grouped||'')}:{};item.troopEntries=item.type==='troops'&&item.canvas&&ENTRY?ENTRY.detect(item.words||[],item.canvas.width,item.canvas.height):[];if(item.troopEntries.length){ENTRY.recoverSingleEntries(item.troopEntries,item.values);Object.assign(item.values,ENTRY.totals(item.troopEntries));}item.detail=item.type==='starter'?Core.parseHeroDetail(item.text,allKnown()):null;const scanTag='manual-'+(++heroScanSequence);
+  type.addEventListener('change',async ()=>{item.type=type.value;item.values=item.type==='troops'?{...Core.parseTroops(item.text),...(item.canvas?spatialTroops(item.words,item.canvas):{})}:item.type==='stats'?{...Core.parseStats(item.text),...Core.parseStats(item.grouped||'')}:{};item.troopEntries=item.type==='troops'&&item.canvas&&ENTRY?ENTRY.detect(item.words||[],item.canvas.width,item.canvas.height):[];if(item.troopEntries.length){item.values={...ENTRY.totals(item.troopEntries)};}item.detail=item.type==='starter'?Core.parseHeroDetail(item.text,allKnown()):null;const scanTag='manual-'+(++heroScanSequence);
     item.cards=item.type==='roster'&&item.canvas?overviewTiles(item.canvas,item.text,item.words,scanTag):[];
     if(item.type==='roster'&&item.cards.length){
      const worker=await loadOCR();
@@ -801,7 +795,7 @@ function renderQueue(){
      // portrait recognition path as automatic overview detection.
      item.matcherInfo=await MATCHER.enrich(item.cards);
     }else item.matcherInfo=null;
-    item.troopTiers=item.type==='troops'&&item.canvas&&TROOP?TROOP.recognize(item.canvas,item.text+'\n'+(item.grouped||''),item.words):null;renderQueue();});
+    item.troopTiers=null;if(item.type==='troops'&&item.canvas&&TROOP?.recognizeEntries) item.troopTiers=await TROOP.recognizeEntries(item.canvas,item.troopEntries,await loadOCR());renderQueue();});
   header.append(title,type);card.appendChild(header);
   const content=document.createElement('div');content.className='bear-intake-values';
   if(item.type==='troops'||item.type==='stats'){
