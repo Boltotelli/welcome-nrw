@@ -298,6 +298,7 @@ function mount(sections,B,language,changed){
   // not any already confirmed values from this player's profile.
   if(manual&&[1,2,4,6].includes(stage))document.getElementById('intakeClear')?.click();
   B.save();render(stage);
+  root.dispatchEvent?.(new CustomEvent('nrw-bear-manual-mode',{detail:{stage,manual}}));
  }
  function render(stage){
   const view=views.get(stage);if(!view)return;
