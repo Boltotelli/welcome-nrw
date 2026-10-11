@@ -32,7 +32,7 @@ function valid(v,min=0,max=10000){
  const n=Number(v);return Number.isFinite(n)&&n>=min&&n<=max?n:null;
 }
 function skillState(h){
- const stars=valid(h.stars,1,5),cap=stars===null?null:Math.min(5,Math.floor(stars)+1);
+ const stars=valid(h.stars,0,5),cap=stars===null?null:Math.min(5,Math.floor(stars)+1);
  const actual=Array.isArray(h.skills)&&h.skillsAssumedMax===false?
   h.skills.map(x=>valid(x,1,5)):null;
  const confirmed=Boolean(actual?.length>=2&&actual.every(x=>x!==null));
@@ -131,7 +131,7 @@ function modelContext(model,combat){
   ratio:[5,18,77],fromStats:mode!=='illustrative'};
 }
 function evaluate(hero,type,priorities,referenceGet,widgetGet,context){
- const stars=valid(hero.stars,1,5),tier=valid(hero.tier,0,5);
+ const stars=valid(hero.stars,0,5),tier=valid(hero.tier,0,5);
  const level=valid(hero.level,1,80),widget=valid(hero.widget,0,10);
  const state=skillState(hero),index=classesIndex(type);
  const source=typeof referenceGet==='function'&&stars!==null?
@@ -171,7 +171,7 @@ function evaluate(hero,type,priorities,referenceGet,widgetGet,context){
  const score=nativeAtk===null?null:
   Math.round(100*total*squadDamage*widgetFactor*100)/100;
  const confidence=nativeAtk===null?'limited':
-  missing.length||!state.confirmed||!ctx.fromStats?'estimated':'higher';
+  hero.starPendingReview||missing.length||!state.confirmed||!ctx.fromStats?'estimated':'higher';
  return {name:hero.name,type,level,stars,tier:tier??0,widget,
   score,baseIndex:Math.round(baseTotal*10000)/100,nativeExpeditionAtk:nativeAtk,
   skill:state.level,skillCap:state.cap,assumedSkill:state.assumed,
@@ -181,7 +181,7 @@ function evaluate(hero,type,priorities,referenceGet,widgetGet,context){
   damageBonus:Math.round((squadDamage-1)*10000)/100,
   offensiveSkills:effects,unmodeledSkills:missing,
   usesAttackReference:nativeAtk!==null,attackWeight:w[index],guideRank:null,
-  bearCaution:missing.length>0,confidence,rankingBasis:ctx.mode,
+  bearCaution:missing.length>0,confidence,starPendingReview:Boolean(hero.starPendingReview),rankingBasis:ctx.mode,
   modeledPercentAboveBaseline:score===null?null:score-100,
   note:nativeAtk===null?'missing-expedition-base':
    missing.length?'partial-offensive-model':'expected-offense'
