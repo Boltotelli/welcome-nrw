@@ -219,5 +219,57 @@ async function recognizeEntries(canvas,entries,worker){
  for(const item of result)delete item._seen;
  return result;
 }
-root.NRW_BEAR_TROOP_BADGES={recognize,recognizeEntries,locateBadge,digitAt,version:'observed-real-icons-20261011-2'};
+// On the NORMAL 3-class squad preview, the game icons do not move when
+// DE/EN/FR/ES labels change. Numerals are read from the PIXELS, independently
+// of text headings and independent of the troop inventory values.
+// Coordinates are in the canonical 716px-wide screenshot space; searches
+// cover both the 716x1536 and 955x2048 HUD variants, not one set of counts.
+const standardGoldSearch=[
+ {x0:122,x1:151,y0:358,y1:411}, // infantry shield, upper-right medal
+ {x0:439,x1:470,y0:358,y1:411}, // cavalry
+ {x0:122,x1:151,y0:480,y1:541}  // archer
+];
+function standardMedal(ctx,region,scratch){
+ let best={tg:null,confidence:0,point:null};
+ for(let x=region.x0;x<region.x1;x+=4){
+  for(let y=region.y0;y<region.y1;y+=4){
+   const found=digitAt(ctx,[x,y],scratch);
+   if(found.tg!==null&&found.confidence>best.confidence)
+    best={...found,point:[x,y]};
+  }
+ }
+ return best;
+}
+async function recognizeStandard(canvas,text,worker){
+ const output=Array.from({length:3},()=>({tier:null,tg:null,confidence:0}));
+ const ctx=canvas.getContext('2d',{willReadFrequently:true});
+ const scratch=document.createElement('canvas');scratch.width=27;scratch.height=26;
+ const normalized=String(text||'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+ // In languages with a recognizable 'elite' troop prefix, that is an
+ // additional check only. Text NEVER determines the gold TG numeral.
+ const titleT10=(normalized.match(/spitzen|\belite\b|\bapex\b|\bsupreme\b/g)||[]).length>=3;
+ for(let type=0;type<3;type++){
+  const medal=standardMedal(ctx,standardGoldSearch[type],scratch);
+  output[type].tg=medal.tg;
+  output[type].confidence=medal.confidence;
+  // X is on the lower shield, not on the gold badge. Offset is relative
+  // to the located GOLD symbol; two aspect/HUD variants are covered by
+  // the Roman template's own small local search.
+  let matchedX=false;
+  if(medal.point){
+   const [x,y]=medal.point;
+   const seeds=[
+    [x-31,y+59],
+    [x-(type===1?31:38),y+52]
+   ];
+   for(const seed of seeds){
+    if(romanXAt(ctx,seed)>=.72){matchedX=true;break;}
+   }
+  }
+  if(matchedX||titleT10)output[type].tier=10;
+ }
+ return output;
+}
+
+root.NRW_BEAR_TROOP_BADGES={recognize,recognizeEntries,recognizeStandard,standardMedal,standardGoldSearch,locateBadge,digitAt,version:'standard-medal-image-20261011-1'};
 })(window);
