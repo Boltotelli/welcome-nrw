@@ -103,4 +103,44 @@ const duplicates=[{type:0,count:605476},{type:1,count:605476},{type:2,count:1116
 E.flagAmbiguousCounts(duplicates,{});
 assert.equal(duplicates[0].count,null);
 assert.equal(duplicates[1].count,null);
+// Generalized geometry, NOT one hardcoded screenshot. Different screenshot
+// resolutions, amounts, class positions and extra rows must all keep IDs.
+function flexible(w,h,amounts,layout){
+ const rows=[
+  ['Infanterie',amounts[0],layout.x1,layout.y1],
+  ['Kavallerie',amounts[1],layout.x2,layout.y1],
+  ['Bogenschützen',amounts[2],layout.x1,layout.y2]
+ ];
+ const output=[];
+ for(const [name,count,x,y] of rows){
+  output.push(word('Spitzen',x,y,.060,.012,w,h),
+    word(name,x+.067,y,.155,.013,w,h),
+    word(count,x+.002,y+.023,.155,.014,w,h));
+ }
+ output.push(word('5/5',.45,.15,.05,.018,w,h),
+  word('1,2M/1,2M',.15,.13,.19,.017,w,h));
+ return output;
+}
+for(const [w,h,counts,expected,layout] of [
+ [716,1536,['325.027','325.339','605.476'],[325027,325339,605476],{x1:.21,x2:.66,y1:.24,y2:.32}],
+ [1080,1920,['626.634','557.731','1.116.474'],[626634,557731,1116474],{x1:.185,x2:.58,y1:.28,y2:.42}],
+ [1440,2960,['76.304','19.873','2.012.004'],[76304,19873,2012004],{x1:.215,x2:.63,y1:.34,y2:.49}],
+ [720,1280,['8.203','325.339','112.500'],[8203,325339,112500],{x1:.18,x2:.575,y1:.22,y2:.36}],
+ [1080,2340,['560','102.000','998.001'],[560,102000,998001],{x1:.20,x2:.61,y1:.26,y2:.37}]
+]){
+ const output=E.detect(flexible(w,h,counts,layout),w,h);
+ assert.deepEqual(Array.from(output,x=>x.count),expected,'fully variable '+w+'x'+h);
+ assert.deepEqual(Array.from(output,x=>x.type),[0,1,2],'class association '+w+'x'+h);
+ assert.ok(output.every(x=>x.elite===true),'Spitzen implies X/T10 '+w+'x'+h);
+ assert.ok(output.every(x=>x.icon&&x.anchor),'independent dynamic badge anchor '+w+'x'+h);
+}
+// The second line must not be accidentally swallowed by a crop from the first.
+const extra=[...flexible(1080,1920,['21.000','18.000','63.000'],
+ {x1:.18,x2:.58,y1:.26,y2:.38}),
+ word('Spitzen',.59,.46,.060,.012,1080,1920),
+ word('Infanterie',.657,.46,.155,.013,1080,1920),
+ word('560',.592,.483,.14,.014,1080,1920)];
+const rows=E.detect(extra,1080,1920);
+assert.equal(rows.length,4);
+assert.deepEqual({...E.totals(rows)},{troopsI:21560,troopsC:18000,troopsA:63000});
 console.log('TROOP ENTRY OCR: 3+6 separate entries, repeat classes, 3 scaled screens, missing values and separators passed.');
