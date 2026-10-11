@@ -767,7 +767,8 @@ function inputChoice(items,current=''){
 }
 const heroChoices=()=>[['',say('Nicht zuordnen','Skip')],...allKnown().map(n=>[n,n])];
 function starOptions(){
- const options=[['',say('Sterne unbekannt','Stars unknown')]];
+ const options=[['',say('Sterne unbekannt','Stars unknown')],['0','0★']];
+ for(let tier=1;tier<=5;tier++)options.push([tier,'0★ T'+tier]);
  for(let stars=1;stars<5;stars++){
   options.push([stars*6,stars+'★']);
   for(let tier=1;tier<=5;tier++)options.push([stars*6+tier,stars+'★ T'+tier]);
@@ -1015,8 +1016,8 @@ function renderQueue(){
     level.addEventListener('change',()=>{tile.level=level.value?Number(level.value):null;tile.levelManual=true;});
     const stars=inputChoice(starOptions(),tile.starSteps??tile.starSuggestion??'');
     stars.addEventListener('change',()=>{
-     tile.starSteps=stars.value?Number(stars.value):null;
-     tile.starManual=Boolean(tile.starSteps);
+     tile.starSteps=stars.value===''?null:Number(stars.value);
+     tile.starManual=tile.starSteps!==null;
      tile.starReview=false;
     });
     const starLabel=(v)=>v===null||v===undefined?'★ ?':
@@ -1213,15 +1214,15 @@ function apply(){
     if(!tile.name)continue;
     if(!v.scannedOwnedHeroes.includes(tile.name))v.scannedOwnedHeroes.push(tile.name);
     const old=v.manualHeroes[tile.name]||{};
-    // A freshly scanned but ambiguous star bar must not inherit an
-    // older, possibly false screenshot estimate and distort the Bear picks.
-    // Explicitly unknown progress remains 0 until manually confirmed.
-    const stars=tile.starSteps===null?0:Math.floor(tile.starSteps/6);
-    const tier=tile.starSteps===null?0:tile.starSteps%6;
-    const cap=Core.maxSkill(stars);
+    // Keep unknown star bars UNKNOWN. A real 0★ T0 is distinct from
+    // an unreadable star bar, and the hero source has actual 0★ rows.
+    const hasSteps=Number.isInteger(tile.starSteps)&&tile.starSteps>=0&&tile.starSteps<=30;
+    const stars=hasSteps?Math.floor(tile.starSteps/6):null;
+    const tier=hasSteps?tile.starSteps%6:null;
+    const cap=stars===0?1:Core.maxSkill(stars);
     const actualSkills=Array.isArray(old.skills)&&old.skills.some(Number)&&old.skillsAssumedMax===false;
     v.manualHeroes[tile.name]={...old,name:tile.name,level:tile.level||old.level||0,stars,tier,
-     starPendingReview:tile.starSteps===null,
+     starPendingReview:!hasSteps||Boolean(tile.starReview&&!tile.starManual),
      skills:actualSkills?old.skills:(cap?[cap,cap,cap]:[0,0,0]),
      skillsAssumedMax:!actualSkills,source:'screenshot'};
     accepted++;
