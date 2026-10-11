@@ -121,7 +121,9 @@ function readBelow(label,words,w,h){
  }
  for(const row of lines.sort((a,b)=>a.y-b.y)){
   const value=numeric(row.words);
-  if(value!==null)return value;
+  // A badge often contains a lone T/TG digit. Never treat it as the
+  // player's troop COUNT. Small actual armies remain manually reviewable.
+  if(value!==null&&value>=1000)return value;
  }
  return null;
 }
@@ -137,6 +139,44 @@ function detect(words,width,height){
    crop};
  });
 }
+// Disagreeing independent readings are NOT grounds to copy a quantity
+// from one troop type to another. Leave suspect fields blank for review.
+function flagAmbiguousCounts(entries,focused){
+ const byType=new Map();
+ for(const entry of entries||[]){
+  if(Number.isInteger(entry.type)&&entry.type>=0&&entry.type<3){
+   const list=byType.get(entry.type)||[];list.push(entry);byType.set(entry.type,list);
+  }
+ }
+ for(const [type,list] of byType){
+  if(list.length!==1)continue;
+  const entry=list[0],independent=focused?.[keys[type]];
+  if(entry.count!==null&&entry.count!==undefined&&
+     (!Number.isSafeInteger(entry.count)||entry.count<1000)){
+   entry.count=null;entry.uncertainCount=true;entry.countWarning='badge-digit';
+   continue;
+  }
+  if(Number.isSafeInteger(independent)&&independent>=1000&&
+     Number.isSafeInteger(entry.count)&&entry.count!==independent){
+   // Text beneath a detected class heading is more useful than an absolute
+   // pixel crop, but disagreement means we cannot choose safely.
+   entry.count=null;entry.uncertainCount=true;entry.countWarning='conflicting-ocr';
+  }
+ }
+ const byNumber=new Map();
+ for(const entry of entries||[]){
+  if(!Number.isSafeInteger(entry.count)||entry.count<1000)continue;
+  const prev=byNumber.get(entry.count);
+  if(prev&&prev.type!==entry.type){
+   for(const e of [prev,entry]){
+    e.uncertainCount=true;e.countWarning='duplicate-count-different-class';
+   }
+  }else byNumber.set(entry.count,entry);
+ }
+ // Two genuinely equal troop totals are possible: flag the duplication
+ // visibly for confirmation rather than silently replacing actual values.
+ return entries;
+}
 function recoverSingleEntries(entries,fallback){
  // The focused numeric strip and the roster-label OCR are independent.
  // Never let a failed label-specific OCR erase a known focused count when
@@ -145,7 +185,7 @@ function recoverSingleEntries(entries,fallback){
  if(entries.length!==3||new Set(entries.map(e=>e.type)).size!==3)return entries;
  for(const e of entries){
   const key=keys[e.type],n=fallback?.[key];
-  if((e.count===null||e.count===undefined)&&Number.isSafeInteger(n)&&n>0){
+  if(!e.uncertainCount&&(e.count===null||e.count===undefined)&&Number.isSafeInteger(n)&&n>=1000){
    e.count=n;e.amountSource='focused-strip';
   }
  }
@@ -163,5 +203,5 @@ function totals(entries){
  for(const key of invalid)delete values[key];
  return values;
 }
-root.NRW_BEAR_TROOP_ENTRIES={detect,totals,count,readTextCount,recoverSingleEntries,kind,norm,version:'ratios-dynamic-20261009-2'};
+root.NRW_BEAR_TROOP_ENTRIES={detect,totals,count,readTextCount,flagAmbiguousCounts,recoverSingleEntries,kind,norm,version:'ratios-dynamic-20261009-2'};
 })(window);
