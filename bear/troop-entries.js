@@ -140,14 +140,18 @@ function readBelow(label,words,w,h){
  return null;
 }
 function cropAroundLabel(label){
+ // OCR the quantity DIRECTLY below its heading. Do not include the big
+ // illustrated troop icon or the next card: both introduce false digits.
+ // If the 'Spitzen' prefix was recognized, its beginning is the left edge
+ // of the count. Otherwise the missing prefix is ~4.5 text heights left.
+ // All lengths are relative to the local OCR box, not 716x1536 positions.
  const h=Math.max(.008,label.y1-label.y0);
- // Do NOT crop from the first letter of "Infanterie" or "Kavallerie":
- // the inventory is visibly indented LEFT, often outside the class text.
- // This covers varying screen sizes without a single fixed pixel position.
- const x=Math.max(0,label.x0-.15),right=Math.min(1,Math.max(label.x1+.05,label.x0+.20));
- return {x,y:Math.max(0,label.y1+.001),
-  w:Math.max(.21,Math.min(.48,right-x)),
-  h:Math.max(.024,Math.min(.049,h*2.5))};
+ const hasPrefix=/spitzen|apex|elite|supreme/i.test(label.title||'');
+ const gutter=hasPrefix?.006:Math.min(.14,4.5*h);
+ const x=Math.max(0,label.x0-gutter);
+ return {x,y:Math.max(0,label.y1-.10*h),
+  w:Math.min(1-x,Math.max(.25,Math.min(.34,12*h))),
+  h:Math.max(.031,Math.min(.040,1.6*h))};
 }
 function detect(words,width,height){
  const normalized=norm(words,width,height);
@@ -178,7 +182,8 @@ function flagAmbiguousCounts(entries,focused){
   if(list.length!==1)continue;
   const entry=list[0],independent=focused?.[keys[type]];
   if(entry.count!==null&&entry.count!==undefined&&
-     (!Number.isSafeInteger(entry.count)||(entry.count<1000&&!entry.confirmedIndependent))){
+     (!Number.isSafeInteger(entry.count)||(entry.count<1000&&
+      !entry.confirmedIndependent&&!entry.trustedLabelCrop))){
    entry.count=null;entry.uncertainCount=true;entry.countWarning='badge-digit';
    continue;
   }
@@ -194,7 +199,8 @@ function flagAmbiguousCounts(entries,focused){
   if(!Number.isSafeInteger(entry.count)||entry.count<1)continue;
   const prev=byNumber.get(entry.count);
   if(prev&&prev.type!==entry.type){
-   if(prev.confirmedIndependent===true&&entry.confirmedIndependent===true){
+   if((prev.confirmedIndependent||prev.trustedLabelCrop)&&
+      (entry.confirmedIndependent||entry.trustedLabelCrop)){
     // Genuinely equal troop quantities are legal. If the heading OCR and
     // the individually cropped reading agree for BOTH entries, keep them.
     continue;
