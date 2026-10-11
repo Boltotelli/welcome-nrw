@@ -140,3 +140,8 @@ body:has(.bear-intake-wizard) .boss img{width:95px}
 .bear-ocr-language{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin:12px 0 5px;font-size:12px;font-weight:700}
 .bear-ocr-language select{min-width:145px;max-width:100%;background:var(--card);color:var(--text);padding:9px;border:1px solid var(--line);border-radius:10px}
 @media(max-width:510px){.bear-local-name-row input,.bear-local-name-row button{width:100%;flex:auto}.bear-ocr-language{flex-direction:column;align-items:stretch}.bear-ocr-language select{width:100%}}
+
+/* Multiple unit tiers: keep each badge with its own detected class/amount. */
+.bear-entry-badges{display:flex;gap:8px;align-items:center;flex-wrap:wrap;width:100%;margin-top:6px}
+.bear-entry-badges select{flex:1;min-width:100px;max-width:100%;padding:8px 10px}
+@media(max-width:420px){.bear-entry-badges{flex-direction:column;align-items:stretch}.bear-entry-badges select{width:100%}}
