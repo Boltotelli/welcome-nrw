@@ -114,25 +114,78 @@ if(governorInput&&lookup){
  window.addEventListener('nrw-bear-loaded',refresh);
  refresh();
 }
-let ocrWorker=null,queue=[],busy=false,heroScanSequence=0;
+// The language of a screenshot is independent from the website language.
+// No unreliable automatic detection: choose the language of the GAME.
+const screenshotLangRow=document.createElement('label');
+screenshotLangRow.className='bear-ocr-language';
+const screenshotLangTitle=document.createElement('span');
+const screenshotLang=document.createElement('select');screenshotLang.id='bearScreenshotLanguage';
+for(const [value,label] of [
+ ['ui','—'],['de','Deutsch'],['en','English'],['fr','Français'],['es','Español']
+]){
+ const option=document.createElement('option');option.value=value;option.textContent=label;screenshotLang.append(option);
+}
+try{
+ const saved=localStorage.getItem('nrw_bear_ocr_language_v1')||'ui';
+ if(['ui','de','en','fr','es'].includes(saved))screenshotLang.value=saved;
+}catch(_){}
+const languageHint=document.createElement('p');languageHint.className='hint';
+function refreshGameLanguage(){
+ const lc=locale();
+ screenshotLangTitle.textContent=lc==='de'?'Sprache des Kingshot-Screenshots':
+  lc==='fr'?'Langue de la capture Kingshot':lc==='es'?'Idioma de la captura de Kingshot':
+  'Kingshot screenshot language';
+ screenshotLang.options[0].textContent=lc==='de'?'Wie die Website':
+  lc==='fr'?'Comme le site':lc==='es'?'Como el sitio web':'Same as website';
+ languageHint.textContent=lc==='de'?'Wenn dein Spiel eine andere Sprache nutzt, wähle sie hier vor dem Upload. Alle erkannten Werte bitte prüfen.':
+  lc==='fr'?'Si le jeu est dans une autre langue, choisis-la ici avant de charger les images. Vérifie les valeurs reconnues.':
+  lc==='es'?'Si el juego usa otro idioma, elígelo antes de subir imágenes. Comprueba los valores reconocidos.':
+  'If the game uses a different language, select it before upload. Review all detected values.';
+}
+screenshotLangRow.append(screenshotLangTitle,screenshotLang);
+shell.querySelector('.bear-intake-header')?.append(screenshotLangRow,languageHint);
+refreshGameLanguage();
+screenshotLang.addEventListener('change',()=>{
+ try{localStorage.setItem('nrw_bear_ocr_language_v1',screenshotLang.value);}catch(_){}
+});
+document.querySelectorAll('button[data-lang]').forEach(b=>b.addEventListener('click',()=>setTimeout(refreshGameLanguage,0)));
+const ocrLanguages={de:'deu+eng',en:'eng',fr:'fra+eng',es:'spa+eng'};
+const requestedOCR=()=>ocrLanguages[screenshotLang.value==='ui'?locale():screenshotLang.value]||'eng';
+let ocrWorker=null,ocrCode='',ocrPending=null,queue=[],busy=false,heroScanSequence=0;
 const confirmedPortraits=[]; // confirmed across one-by-one screenshots, not persisted
 function state(){const m=B.model();if(!m.v2)m.v2={};if(!m.v2.manualHeroes)m.v2.manualHeroes={};if(!Array.isArray(m.v2.ownHeroes))m.v2.ownHeroes=['','',''];return m.v2;}
 function esc(str){return String(str??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function status(t){$('intakeStatus').textContent=t;}
 async function loadOCR(){
- if(ocrWorker)return ocrWorker;
- if(!window.Tesseract){
-  await new Promise((resolve,reject)=>{
-   const script=document.createElement('script');script.src='https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js';
-   script.onload=resolve;script.onerror=()=>reject(new Error('OCR library blocked'));document.head.appendChild(script);
-  });
- }
- status(say('OCR wird vorbereitet …','Preparing OCR …'));
- try{ocrWorker=await window.Tesseract.createWorker('deu+eng',1,{logger:m=>{
-  if(m.status==='recognizing text')status(say('Bilder werden lokal gelesen','Reading images locally')+' '+Math.round((m.progress||0)*100)+'%');
- }});}
- catch(_){ocrWorker=await window.Tesseract.createWorker('eng',1);}
- return ocrWorker;
+ const target=requestedOCR();
+ if(ocrWorker&&ocrCode===target)return ocrWorker;
+ // Serialize language changes. Never silently interpret French/Spanish
+ // text with the English model after a language-pack download failure.
+ if(ocrPending)return ocrPending.then(()=>loadOCR());
+ ocrPending=(async()=>{
+  if(!window.Tesseract){
+   await new Promise((resolve,reject)=>{
+    const script=document.createElement('script');
+    script.src='https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js';
+    script.onload=resolve;script.onerror=()=>reject(new Error('OCR library blocked'));
+    document.head.append(script);
+   });
+  }
+  if(ocrWorker){await ocrWorker.terminate();ocrWorker=null;ocrCode='';}
+  status(say('OCR wird vorbereitet …','Preparing OCR …'));
+  try{
+   ocrWorker=await window.Tesseract.createWorker(target,1,{logger:m=>{
+    if(m.status==='recognizing text')status(say('Bilder werden lokal gelesen','Reading images locally')+
+     ' '+Math.round((m.progress||0)*100)+'%');
+   }});
+   ocrCode=target;
+  }catch(error){
+   ocrCode='';ocrWorker=null;
+   throw new Error('OCR data for '+target+' unavailable: '+String(error?.message||error));
+  }
+  return ocrWorker;
+ })();
+ try{return await ocrPending;}finally{ocrPending=null;}
 }
 async function imageCanvas(file){
  const url=URL.createObjectURL(file);
@@ -979,7 +1032,7 @@ function apply(){
       .some(key=>Object.prototype.hasOwnProperty.call(stats,key));
     const hasSquad=['squadAtk','squadLet'].some(key=>
       Object.prototype.hasOwnProperty.call(stats,key));
-    const bonusOverview=/bonus[\s\-]*(?:\u00fc|u|ue)bersicht|bonus\s+overview|bonus\s+details/i.test(combined);
+    const bonusOverview=/bonus[\s\-]*(?:\u00fc|u|ue)bersicht|bonus\s+overview|bonus\s+details|apercu\s+des?\s+bonus|resumen\s+de\s+bonificaciones/i.test(Core.fold(combined));
     if((hasClass&&hasSquad)||(hasClass&&bonusOverview))
       v.combatStatDetectedOrigin='separate-overview';
    }
@@ -1085,14 +1138,14 @@ $('intakeApply').addEventListener('click',apply);
 $('intakeClear').addEventListener('click',()=>{queue=[];renderQueue();status(say('Import verworfen.','Import discarded.'));});
 $('intakeFiles').addEventListener('change',async e=>{
  const files=[...e.target.files||[]].filter(f=>f.type.startsWith('image/')).slice(0,12);
- e.target.value='';if(!files.length||busy)return;busy=true;$('intakeFiles').disabled=true;
+ e.target.value='';if(!files.length||busy)return;busy=true;$('intakeFiles').disabled=true;screenshotLang.disabled=true;
  let success=0;
  for(let i=0;i<files.length;i++){
   status((i+1)+'/'+files.length+' · '+files[i].name);
   try{queue.push(await inspect(files[i]));success++;}
   catch(err){queue.push({fileName:files[i].name,type:'unknown',text:'',values:{},detail:null,cards:[],error:String(err)});}
  }
- busy=false;$('intakeFiles').disabled=false;
+ busy=false;$('intakeFiles').disabled=false;screenshotLang.disabled=false;
  status(success+'/'+files.length+' '+say('Bilder gelesen. Bitte alle Vorschläge prüfen und übernehmen.','screenshots read. Review and apply suggestions.'));
  renderQueue();
 });
