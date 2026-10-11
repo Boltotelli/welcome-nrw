@@ -536,7 +536,7 @@ function renderRecommendations(){
  recommendationPanel.append(intro);
  const reference=window.NRW_BEAR_HERO_REFERENCE;
  const refState=reference?.status?.()||'unavailable';
- if(refState==='idle')reference.load().then(()=>{
+ if((refState==='idle'||refState==='loading')&&reference?.load)reference.load().then(()=>{
   if(active===5)renderRecommendations();
  });
  const sourceNotice=document.createElement('p');sourceNotice.className='hint bear-reference-status';
@@ -550,6 +550,22 @@ function renderRecommendations(){
    l==='fr'?'Données indisponibles : classement provisoire conservé.':
    'Source unavailable; provisional shortlist remains.');
  recommendationPanel.append(sourceNotice);
+ if(refState==='error'||refState==='unavailable'){
+  // A fetch failure is not evidence of missing hero progression values.
+  const diagnostic=document.createElement('p');diagnostic.className='bear-guide-needed';
+  diagnostic.textContent=(l==='de'?'Heldendaten konnten nicht geladen werden: ':
+   'Hero reference could not be loaded: ')+(reference?.reason?.()||refState);
+  recommendationPanel.append(diagnostic);
+  if(reference?.load){
+   const retry=document.createElement('button');retry.type='button';retry.className='secondary-btn';
+   retry.textContent=l==='de'?'Heldendaten erneut laden':'Retry hero data';
+   retry.addEventListener('click',()=>{
+    retry.disabled=true;
+    reference.load().then(()=>{if(active===5)renderRecommendations();});
+   });
+   recommendationPanel.append(retry);
+  }
+ }
  const ext=B.model().v2||{},scanned=new Set(ext.scannedOwnedHeroes||[]);
  const unresolved=Object.values(ext.manualHeroes||{})
   .filter(h=>h?.name&&scanned.has(h.name)&&h.starPendingReview).length;
@@ -594,7 +610,7 @@ function renderRecommendations(){
   }else{
    // An all-unknown-star Mini roster must remain reviewable, not crash or
    // silently treat an arbitrary alphabetical hero as the strongest.
-   const chosen=group.choices.find(x=>x.name===chosenRecommendations[i])||group.best||group.choices[0];
+   const chosen=group.choices.find(x=>x.name===chosenRecommendations[i]&&x.score!==null)||group.best||group.choices[0];
    const portrait=window.NRW_BEAR_CATALOG?.heroes?.find(h=>h.name===chosen.name)?.img;
    const summary=document.createElement('div');summary.className='bear-leader-summary';
    if(portrait){
@@ -649,9 +665,14 @@ function renderRecommendations(){
    const asNumber=n=>Number(n).toLocaleString(l==='de'?'de-DE':l==='fr'?'fr-FR':l==='es'?'es-ES':'en-US',{maximumFractionDigits:1});
    const compare=document.createElement('p');compare.className='hint bear-recommendation-reason';
    compare.textContent=chosen.score===null?
-    (l==='de'?'Basiswert fehlt – kein belastbarer Vergleich möglich.':
-     l==='fr'?'Valeur de base manquante – comparaison impossible.':
-     l==='es'?'Falta el valor base: comparación no disponible.':'Missing base value – no supported ranking.'):
+    (refState!=='ready'?
+     (l==='de'?'Heldenreferenz noch nicht geladen – keine Bewertung möglich.':
+      'Hero reference not loaded; ranking unavailable.'):
+     chosen.stars===null?
+     (l==='de'?'Sternstufe unbekannt – zuerst in der Heldenübersicht bestätigen.':
+      'Star level unknown; confirm it in the hero overview.'):
+     (l==='de'?'Für diese Stern-/Teilstufe liegt kein gültiger Referenzwert vor – bitte die Erkennung prüfen.':
+      'No valid reference row for this star/tier combination; check recognition.')):
     (l==='de'?'Gesamtschaden-Index (Basis 100): ':l==='fr'?'Indice offensif : ':
      l==='es'?'Índice ofensivo: ':'Offensive comparison index: ')+asNumber(chosen.score)+
     ' · '+(l==='de'?'Klassen-Expeditionsangriff ':l==='fr'?'Attaque d’expédition ':
@@ -693,7 +714,7 @@ function renderRecommendations(){
     group.choices.forEach(h=>{
      const opt=document.createElement('option');opt.value=h.name;
      const sourceValue=reference?.get?.(h.name,h.stars,h.tier)?.bonus;
-     opt.textContent=h.name+' · '+(h.stars?h.stars+'★':'★ ?')+
+     opt.textContent=h.name+' · '+(h.stars!==null?h.stars+'★':'★ ?')+
       (h.tier?' T'+h.tier:'')+' · '+(h.level?'Lv '+h.level:'Lv ?')+
       (Number.isFinite(sourceValue)?' · Exp ATK '+sourceValue.toFixed(2)+' %':'');
      opt.selected=h.name===chosen.name;select.append(opt);
@@ -711,7 +732,7 @@ function renderRecommendations(){
  'Stars indicate possible skill caps, not verified upgrades. Confirm the three heroes; equip all three before taking their detail screenshots in the next step.';
  recommendationPanel.append(hint);
  const btn=$('bearGuideNext');
- if(active===5&&btn)btn.disabled=!recommendationsReady();
+ if(active===5&&btn)btn.disabled=refState!=='ready'||!recommendationsReady();
 }
 function confirmRecommendedHeroes(){
  const selectionsNow=selections();
@@ -890,6 +911,9 @@ window.addEventListener('nrw-bear-gear-applied',()=>{
  imported.add(3);if(active===3){message(t().ready);$('bearGuideNext').disabled=false;moveTo(4);}
 });
 document.querySelectorAll('button[data-lang]').forEach(b=>b.addEventListener('click',()=>{render();}));
+// Fetch verified hero references at wizard startup, before the picks step.
+// A failed fetch can be retried from the recommendations screen.
+window.NRW_BEAR_HERO_REFERENCE?.load?.();
 render();
 window.NRW_BEAR_WIZARD={step:()=>active,goTo:moveTo,missing:missingValues,completed:()=>[...imported],getState:()=>({active,profile:profileMethod(),skipped:[...skipped]})};
 })();

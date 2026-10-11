@@ -47,3 +47,27 @@ const source=fs.readFileSync(__dirname+'/hero-reference.js','utf8');
 assert.ok(!source.includes('localStorage'),'public reference does not touch private player profile');
 assert.ok(!source.includes('supabase.createClient'),'public source never uses Supabase client');
 console.log('BEAR REFERENCE: fail-closed 37-row source validation and Yang/Rosa step lookup passed.');
+
+\n// A real wizard starts without an accepted fixture: the public JSON must load
+// without accepting a stale browser-cache entry, and failures must be retryable.
+let attempts=0,requestUrl='',requestCache='';
+const live={window:{fetch:async(url,options)=>{
+ attempts++;requestUrl=url;requestCache=options?.cache;
+ if(attempts===1)throw Error('temporary network error');
+ return {ok:true,json:async()=>fixture};
+}}};
+vm.runInNewContext(fs.readFileSync(__dirname+'/hero-reference.js','utf8'),live,{filename:'hero-reference.js'});
+const liveReference=live.window.NRW_BEAR_HERO_REFERENCE;
+liveReference.load().then(first=>{
+ assert.equal(first,0,'initial failure is reported');
+ assert.equal(liveReference.status(),'error');
+ return liveReference.load();
+}).then(recovered=>{
+ assert.equal(recovered,37,'retry must recover all source records');
+ assert.equal(liveReference.status(),'ready');
+ assert.equal(liveReference.get('Yang',4,4).bonus,472.18);
+ assert.equal(attempts,2);
+ assert.equal(requestCache,'no-store','the user must not be stuck with old JSON');
+ assert.match(requestUrl,/hero-reference\.json\?v=/);
+ console.log('BEAR REFERENCE LOAD: versioned fresh data and retry after a fetch failure passed.');
+}).catch(e=>{console.error(e);process.exitCode=1;});
