@@ -139,13 +139,14 @@ async function recognizeEntries(canvas,entries,worker){
  const result=Array.from({length:3},()=>({tier:null,tg:null,confidence:0}));
  if(!Array.isArray(entries)||!entries.length)return result;
  const ctx=canvas.getContext('2d',{willReadFrequently:true});
+ const scratch=document.createElement('canvas');scratch.width=27;scratch.height=26;
  for(const entry of entries){
   if(!Number.isInteger(entry.type)||entry.type<0||entry.type>2)continue;
   const spot=locateBadge(entry,canvas);
   if(!spot)continue;
   let best={tg:null,confidence:0};
   for(const dx of [-5,-2,1,4])for(const dy of [-5,-2,1,4]){
-   const matched=digitAt(ctx,[spot.x/spot.scale+dx,spot.y/spot.scale+dy]);
+   const matched=digitAt(ctx,[spot.x/spot.scale+dx,spot.y/spot.scale+dy],scratch);
    if(matched.tg!==null&&matched.confidence>best.confidence)best=matched;
   }
   const title=String(entry.title||'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
@@ -154,6 +155,21 @@ async function recognizeEntries(canvas,entries,worker){
    const fontHeight=canvas.height*(entry.labelBox?.h||.011);
    const px=spot.x-1.8*fontHeight,py=spot.y+3.2*fontHeight;
    if(romanXAt(ctx,[px/spot.scale,py/spot.scale])>=.72)tier=10;
+   else if(worker){
+    // Roman numeral appears on the BOTTOM of that same troop icon.
+    // Optional OCR covers I..IX without assuming every unit is T10.
+    try{
+     const glyph=document.createElement('canvas');glyph.width=140;glyph.height=120;
+     const g=glyph.getContext('2d',{willReadFrequently:true});
+     g.fillStyle='white';g.fillRect(0,0,glyph.width,glyph.height);
+     g.drawImage(canvas,px-19*spot.scale,py-15*spot.scale,
+      38*spot.scale,30*spot.scale,5,5,130,110);
+     const data=await worker.recognize(glyph);
+     const raw=String(data.data?.text||'').trim().toUpperCase();
+     const numerals={I:1,II:2,III:3,IV:4,V:5,VI:6,VII:7,VIII:8,IX:9,X:10};
+     if(Object.prototype.hasOwnProperty.call(numerals,raw))tier=numerals[raw];
+    }catch(_){/* Unknown tier stays null and reviewable. */}
+   }
   }
   let tg=best.tg;
   // The screenshot language and troop quantities do not determine TG.
