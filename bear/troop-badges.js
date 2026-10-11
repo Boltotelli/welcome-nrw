@@ -6,9 +6,9 @@
  */
 (function(root){
 'use strict';
-const tpl={5:['/////+4A4A+A/4/4P+APAPAPAPAP/+/4'],6:['H4H4P/MAMAMA/w/w/48c8cMMOMOMP4Dw','D+D+H+PCPCMA8A8A/+/P/PMDMDMDP+H+','H4f/f/YJ4A4Azg/4/44c4M4MYcf4f4Pw']}; // additional REAL archer TG6 glyph: 955x2048 screenshot
+const tpl={4:['A8B8B8D8P8P8Ocececcc++++//////Ac','B+B+B+D+H+H+GOcOcO8O/+/+//////AO','A8B8B8D8D8D8O8OcOccc8888///+/+Ac'],5:['/////+4A4A+A/4/4P+APAPAPAPAP/+/4'],6:['H4H4P/MAMAMA/w/w/48c8cMMOMOMP4Dw','D+D+H+PCPCMA8A8A/+/P/PMDMDMDP+H+','H4f/f/YJ4A4Azg/4/44c4M4MYcf4f4Pw']}; // additional REAL archer TG6 glyph: 955x2048 screenshot
 function decode(s){const b=atob(s),bits=new Uint8Array(12*16);for(let i=0;i<bits.length;i++)bits[i]=(b.charCodeAt(i>>3)>>(7-(i%8)))&1;return bits;}
-const patterns={5:tpl[5].map(decode),6:tpl[6].map(decode)};
+const patterns={4:tpl[4].map(decode),5:tpl[5].map(decode),6:tpl[6].map(decode)};
 function ratio(mask,b){return Math.max(...patterns[b].map(p=>{let both=0,aa=0,bb=0;for(let i=0;i<mask.length;i++){both+=mask[i]&&p[i]?1:0;aa+=mask[i];bb+=p[i];}return 2*both/(aa+bb||1);}));}
 function digitAt(ctx,center,scratch){
  const sc=ctx.canvas.width/716;
@@ -47,7 +47,7 @@ function digitAt(ctx,center,scratch){
   const oy=best.y0+Math.min(h-1,Math.floor((yy+.5)*h/16));
   normal[yy*12+xx]=selected[oy*27+ox];
  }
- const scores=[{n:5,s:ratio(normal,5)},{n:6,s:ratio(normal,6)}].sort((a,b)=>b.s-a.s);
+ const scores=[4,5,6].map(n=>({n,s:ratio(normal,n)})).sort((a,b)=>b.s-a.s);
  const gap=scores[0].s-scores[1].s;
  return {tg:scores[0].s>=.80&&gap>=.09?scores[0].n:null,confidence:scores[0].s,second:scores[1].s};
 }
@@ -82,51 +82,47 @@ function romanXAt(ctx,center){
  }
  return best>=.72?best:0;
 }
-function recognize(canvas,text,words){
- const result=[{tier:null,tg:null},{tier:null,tg:null},{tier:null,tg:null}];
- const all=String(text||'');
- // Only the 'Spitzen' name tied to the Roman X base troop icon.
- const lower=all.toLowerCase();
- const classes=[/spitzen[^a-zäöü]{0,18}infant/,/spitzen[^a-zäöü]{0,18}kaval/,/spitzen[^a-zäöü]{0,18}bogen/];
- for(let i=0;i<3;i++)if(classes[i].test(lower))result[i].tier=10;
+// Badge positions are tied to detected TEXT labels for each card; an
+// absolute 716x1536 anchor would shift on other phones / longer troop lists.
+function recognize(canvas,text,words,entries){
+ const output=Array.from({length:3},()=>({tier:null,tg:null}));
+ if(!canvas||!Array.isArray(entries)||!entries.length)return output;
  const ctx=canvas.getContext('2d',{willReadFrequently:true});
- // The game interface moves vertically with phone aspect ratio: old
- // 716x1536 crops were too low on 1080x1920 Android screenshots. Scan only
- // a narrow badge-sized neighborhood after applying the aspect correction.
- const normalizedHeight=canvas.height*716/canvas.width;
- // Standard 716x1536 HUD and current 1080x1920 Android HUD place
- // badges differently, in both X and Y. Interpolate the known anchors.
- const phoneLayout=Math.max(0,Math.min(1,(1536-normalizedHeight)/264)); // still allow HUD overlay position shift
- const oldAnchors=[[133,395],[453,395],[133,518]];
- const phoneAnchors=[[133,358],[455,358],[133,489]];
- const anchors=oldAnchors.map((p,i)=>p.map((v,j)=>v+(phoneAnchors[i][j]-v)*phoneLayout));
- // Two HUD variants: actual 955x2048 overview has Roman X at
- // [106,451], [424,451], [106,575] in normalized 716px coordinates.
- // The bounded matcher also covers earlier layouts shifted downward.
- const romanOld=[[106,451],[424,451],[106,575]];
- const romanPhone=[[106,421],[424,421],[106,546]];
- const roman=romanOld.map((p,i)=>p.map((v,j)=>v+(romanPhone[i][j]-v)*phoneLayout));
- for(let i=0;i<3;i++)if(result[i].tier===null&&romanXAt(ctx,roman[i]))result[i].tier=10;
  const sc=canvas.width/716;
  const scratch=document.createElement('canvas');scratch.width=27;scratch.height=26;
- for(let i=0;i<3;i++){
+ for(const entry of entries){
+  if(!Number.isInteger(entry.type)||entry.type<0||entry.type>2||!entry.icon)continue;
+  const ico=entry.icon;
+  // Base-T10 Roman X is a valid level, but the title alone is just a hint.
+  // The visual X can be recognized even if OCR missed "Spitzen".
+  const roman=[(ico.x+ico.w*.53)*716,(ico.y+ico.h*.53)*canvas.height/sc];
+  const confirmedX=romanXAt(ctx,roman);
+  const tier=(entry.elite||confirmedX)?10:null;
+  // Gold TG numeral lives in the UPPER RIGHT of the corresponding troop
+  // illustration. All search offsets scale WITH the icon, not with pixels.
+  const approx=[(ico.x+ico.w*.80)*canvas.width/sc,
+                (ico.y+ico.h*.145)*canvas.height/sc];
   let best={tg:null,confidence:0};
-  const cx=anchors[i][0]*sc,cy=anchors[i][1]*sc;
-  // Scan in physical pixels: stepping by 2 base units skipped the thin
-  // numeral strokes on high-resolution Android screenshots.
-  for(const dx of [-18,-15,-12,-9,-6,-3,0,3,6,9,12,15,18]){
-   for(const dy of [-20,-17,-14,-11,-8,-5,-2,1,4,7,10,13,16]){
-    const digit=digitAt(ctx,[(cx+dx)/sc,(cy+dy)/sc],scratch);
-    if(digit.tg!==null&&digit.confidence>best.confidence)best=digit;
+  for(const dx of [-.040,-.025,-.010,.005,.020,.035]){
+   for(const dy of [-.035,-.020,-.005,.010,.025,.040]){
+    const point=[approx[0]+dx*ico.w*716,
+                 approx[1]+dy*ico.h*canvas.height/sc];
+    const found=digitAt(ctx,point,scratch);
+    if(found.tg!==null&&found.confidence>best.confidence)best=found;
    }
   }
-  if(best.tg!==null){result[i].tg=best.tg;result[i].confidence=best.confidence;}
+  // Never assign a second tier of the same class the first row's TG.
+  entry.tier=tier;entry.tg=best.tg;
+  entry.tgConfidence=best.tg===null?null:best.confidence;
  }
- // A cropped title may lose troop-type words. Only use the group inference
- // if OCR saw all three explicit Spitzen headings, not merely one troop.
- if((lower.match(/spitzen/g)||[]).length>=3)
-  for(const item of result)item.tier=10;
- return result;
+ for(let type=0;type<3;type++){
+  const matches=entries.filter(e=>e.type===type);
+  if(matches.length!==1)continue;
+  output[type]={tier:matches[0].tier??null,tg:matches[0].tg??null,
+   confidence:matches[0].tgConfidence??null};
+ }
+ return output;
 }
-root.NRW_BEAR_TROOP_BADGES={recognize,digitAt,version:'tier-x-tg5tg6'};
+
+root.NRW_BEAR_TROOP_BADGES={recognize,digitAt,version:'anchored-t10-tg4-5-6-20261011'};
 })(window);
