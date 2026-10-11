@@ -93,4 +93,14 @@ const doubled=[...base,...base.map(w=>({text:w.text,bbox:{
  x0:w.bbox.x0+2,x1:w.bbox.x1+2,y0:w.bbox.y0+2,y1:w.bbox.y1+2}}))];
 assert.deepEqual(Array.from(E.detect(doubled,1080,1920),e=>e.count),
  [626621,557731,1116468], 'overlapping OCR passes must not double any quantity');
+// Regression: bad production OCR must be treated as uncertain, not 3 soldiers.
+const corrupted=[{type:0,count:605476},{type:1,count:3},{type:2,count:605476}];
+E.flagAmbiguousCounts(corrupted,{troopsI:626634,troopsC:557731,troopsA:1116474});
+E.recoverSingleEntries(corrupted,{troopsI:626634,troopsC:557731,troopsA:1116474});
+assert.ok(corrupted.every(x=>x.count===null&&x.uncertainCount),
+ 'conflicting troop amounts or badge digits cannot be applied');
+const duplicates=[{type:0,count:605476},{type:1,count:605476},{type:2,count:1116474}];
+E.flagAmbiguousCounts(duplicates,{});
+assert.equal(duplicates[0].count,null);
+assert.equal(duplicates[1].count,null);
 console.log('TROOP ENTRY OCR: 3+6 separate entries, repeat classes, 3 scaled screens, missing values and separators passed.');

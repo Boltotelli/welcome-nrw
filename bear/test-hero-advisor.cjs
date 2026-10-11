@@ -92,4 +92,23 @@ assert.ok(A.evaluate(h('Howard',5),'infantry',priorities).score<
 
 const guide=String(A.method);
 assert.match(guide,/not Atlas damage/i);
+// Regression from real production screenshots: Vercel must package
+// the validated pinned 37-hero snapshot and weight base attack in the pick.
+const refEnv={window:{}},intakeEnv={window:{}};
+vm.runInNewContext(fs.readFileSync(__dirname+'/hero-reference.js','utf8'),refEnv);
+vm.runInNewContext(fs.readFileSync(__dirname+'/intake-core.js','utf8'),intakeEnv);
+const referenceData=JSON.parse(fs.readFileSync(__dirname+'/hero-reference.json','utf8'));
+const R=refEnv.window.NRW_BEAR_HERO_REFERENCE;
+assert.equal(R.validate(referenceData),true,'validated 37-hero snapshot bundled');
+R.accept(referenceData);
+const liveChoices=A.recommend([
+ h('Long Fei',5),h('Zoe',3,80,{tier:5}),
+ h('Yang',4),h('Rosa',4,80,{tier:2})
+],{...roles,'Long Fei':'infantry'},
+ intakeEnv.window.NRW_BEAR_INTAKE_CORE.rankByType,
+ (name,stars,tier)=>R.get(name,stars,tier));
+assert.equal(liveChoices[0].best.name,'Long Fei',
+ '5★ Long Fei should beat 3★ Zoe with verified base attack');
+assert.equal(liveChoices[2].best.name,'Yang',
+ '4★ Yang should beat 4★ T2 Rosa with verified base attack');
 console.log('BEAR HERO ADVISOR: owned-only, 3 role types, Yang 1★ versus Rosa 4★, development, confidence and fallback passed.');
