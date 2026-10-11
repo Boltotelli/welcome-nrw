@@ -169,6 +169,7 @@ function mount(sections,B,language,changed){
    const tile=tiles.get(name);if(!tile)return;
    const owned=heroSet().includes(name),h=stored(name);
    tile.classList.toggle('is-owned',owned);tile.setAttribute('aria-pressed',String(owned));
+   const edit=tile.querySelector('.bear-manual-hero-edit');if(edit)edit.hidden=!owned;
    const desc=tile.querySelector('.bear-manual-hero-data');
    if(desc)desc.textContent=owned?(h?.stars===null||h?.stars===undefined?'★ ?':h.stars+'★'+(h.tier?' T'+h.tier:''))+
     ' · Lv '+(h?.level??'?')+(rarity(name)==='legendary'?' · W'+(h?.widget??0):''):'＋';
@@ -185,6 +186,17 @@ function mount(sections,B,language,changed){
     tile.type='button';tile.dataset.rarity=rarity(name);tile.setAttribute('aria-label',name);
     const pic=node('img');pic.src=heroIcon.get(name)||'';pic.alt='';pic.loading='lazy';pic.referrerPolicy='no-referrer';
     tile.append(pic,node('b','',name),node('small','bear-manual-hero-data',''));
+    const editButton=node('span','bear-manual-hero-edit','✎');
+    editButton.title=(language()==='de'?'Werte bearbeiten':'Edit hero');
+    // A separate, small control switches the active editor without
+    // accidentally deselecting or erasing a previously saved hero.
+    editButton.addEventListener('click',evt=>{
+     evt.stopPropagation();
+     if(!heroSet().includes(name))return;
+     selected=name;updateEditor();
+     editor.scrollIntoView({block:'nearest',behavior:'smooth'});
+    });
+    tile.append(editButton);
     tile.addEventListener('click',()=>{
      const owned=heroSet();const index=owned.indexOf(name);
      if(index>=0){
