@@ -128,5 +128,5 @@ assert.ok(simulation.includes("video.hidden=mode!=='video'"),'video and WebP are
 assert.ok(simulation.includes("image.hidden=mode!=='image'"),'image cannot remain visible under video');
 assert.ok(simulation.includes("video.addEventListener('playing'"),'WebM is displayed only while playable');
 assert.ok(css.includes('.bear-sim-video[hidden]'),'hidden attribute takes priority over media CSS');
-assert.ok(html.includes('./simulation-ui.js?v=bear-media-exclusive-20261011-1'),'simulation media fix invalidates browser cache');
+assert.ok(html.includes('./simulation-ui.js?v=bear-i18n-20261011-1'),'simulation media fix invalidates browser cache');
 console.log('BEAR WIZARD: nine stages, hero shortlist, separate gear-first detail uploads and independent capacity input verified.');
