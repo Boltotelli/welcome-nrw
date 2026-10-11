@@ -40,8 +40,12 @@ function reason(){return why;}
 function get(name,stars,tier){
  const record=rows?.get(name);
  if(!record)return null;
- const n=Number(stars),t=tier===null||tier===undefined?0:Number(tier);
- const ok=Number.isInteger(n)&&n>=1&&n<=5&&Number.isInteger(t)&&t>=0&&t<=5&&
+ // Progression records include 0★ T0..T5 (rows 1..6).
+ // Distinguish an ACTUAL 0★ hero from null/unknown OCR progress:
+ // Number(null) would otherwise silently turn uncertainty into 0★.
+ const n=stars===null||stars===undefined||stars===''?NaN:Number(stars);
+ const t=tier===null||tier===undefined||tier===''?0:Number(tier);
+ const ok=Number.isInteger(n)&&n>=0&&n<=5&&Number.isInteger(t)&&t>=0&&t<=5&&
   (n!==5||t===0);
  const step=ok?6*n+t:null,bonus=step!==null?record.starProgression.expeditionAttackPercent[step]:null;
  return {name:record.name,troopType:record.troopType,generation:record.generation,
