@@ -37,6 +37,9 @@ function norm(words,w,h){
 function count(s){
  const raw=String(s||'').replace(/\s/g,'').replace(/[^0-9.,]/g,'');
  if(!/^(?:\d{1,9}|\d{1,3}(?:[.,]\d{3}){1,3})$/.test(raw))return null;
+ // OCR can return just "027" when the first half of "325.027" is
+ // hidden by the icon. A leading zero is NEVER a standalone KS troop count.
+ if(/^0\d{2,}$/.test(raw))return null;
  const n=Number(raw.replace(/[.,]/g,''));
  return n>=1&&n<200000000&&Number.isSafeInteger(n)?n:null;
 }
@@ -110,10 +113,15 @@ function readBelow(label,words,w,h){
  // The count sits just BELOW its own label, never at a hardcoded screen
  // row. Distances scale with the detected OCR text height.
  const height=Math.max(label.y1-label.y0,.008);
- const xMin=Math.max(0,label.x0-.016);
- const xMax=Math.min(1,Math.max(label.x1+.055,label.x0+.17));
+ // OCR may recognize "Kavallerie" but not the preceding "Spitzen".
+ // Numbers start LEFT of the class name, so include that leading gutter.
+ // The horizontal zone is scoped to THIS card and not adjacent columns.
+ const xMin=Math.max(0,label.x0-.15);
+ const xMax=Math.min(1,Math.max(label.x1+.046,label.x0+.22));
  const yMin=label.y1+.001;
- const yMax=Math.min(1,label.y1+Math.max(.022,height*3.5));
+ // Keep within the next baseline; a tall text bounding box must never
+ // borrow another troop row's inventory figure.
+ const yMax=Math.min(1,label.y1+Math.max(.022,Math.min(.047,height*2.25)));
  const nearby=words.filter(a=>{
   const x=(a.x0+a.x1)/2,y=(a.y0+a.y1)/2;
   return x>=xMin&&x<=xMax&&y>=yMin&&y<=yMax&&/[0-9]/.test(a.text);
@@ -132,10 +140,14 @@ function readBelow(label,words,w,h){
  return null;
 }
 function cropAroundLabel(label){
- const h=Math.max(.01,label.y1-label.y0);
- return {x:Math.max(0,label.x0-.014),y:Math.max(0,label.y1+.002),
-  w:Math.max(.17,Math.min(.37,Math.max(label.x1+.075,label.x0+.18)-label.x0)),
-  h:Math.max(.023,Math.min(.061,h*3.5))};
+ const h=Math.max(.008,label.y1-label.y0);
+ // Do NOT crop from the first letter of "Infanterie" or "Kavallerie":
+ // the inventory is visibly indented LEFT, often outside the class text.
+ // This covers varying screen sizes without a single fixed pixel position.
+ const x=Math.max(0,label.x0-.15),right=Math.min(1,Math.max(label.x1+.05,label.x0+.20));
+ return {x,y:Math.max(0,label.y1+.001),
+  w:Math.max(.21,Math.min(.48,right-x)),
+  h:Math.max(.024,Math.min(.049,h*2.5))};
 }
 function detect(words,width,height){
  const normalized=norm(words,width,height);
