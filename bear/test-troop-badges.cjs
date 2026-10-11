@@ -49,7 +49,7 @@ assert.ok(detectedArcher.confidence>=.8);
 
 // Real October 11 TG4 glyph (27x26 crop, white-pixel mask from original
 // Kingshot screenshot; source image itself is not part of the repository).
-const trueGoldFourMask='///////////////////4B//+AH/8AAB8AACDgAAAcAAADgAAAYAAABAAcAIAHkAAB8AAAfgAADMAAA5gAAGMAAB7wAAP/AAB/4AAAMAAAAAAAAAAAAAABA==';
+const trueGoldFourMask='/4B//+AH/8AAB8AACDgAAAcAAADgAAAYAAABAAcAIAHkAAB8AAAfgAADMAAA5gAAGMAAB7wAAP/AAB/4AAAMAAAAAAAAAAAAAABAAAAIAAADAAAAYAAADA==';
 const four=mockActual(trueGoldFourMask);
 const match4=four.digitAt({canvas:{width:716,height:1536}},[133,361]);
 assert.equal(match4.tg,4,'TG4 must be recognized from actual screenshot pixels');
