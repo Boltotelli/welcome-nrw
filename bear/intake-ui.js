@@ -465,11 +465,16 @@ async function verifyTroopEntryCounts(entries,canvas,worker){
   const detected=ENTRY.readTextCount(text);
   entry.independentCount=detected;
   if(detected===null)continue;
-  if(entry.count!==null&&entry.count!==undefined&&entry.count!==detected){
+  const initial=entry.count;
+  if(initial!==null&&initial!==undefined&&initial!==detected){
    entry.uncertainCount=true;entry.countWarning='conflicting-line-reads';
    entry.count=null;
   }else{
-   entry.count=detected;entry.confirmedIndependent=true;
+   entry.count=detected;
+   // Two matching, separately recognized values provide stronger evidence.
+   // A single focused OCR reading can fill large amounts, but must not
+   // turn a lone badge numeral or duplicated tiny amount into "confirmed".
+   entry.confirmedIndependent=initial!==null&&initial!==undefined&&initial===detected;
    entry.amountSource='heading-relative-focused';
   }
  }
