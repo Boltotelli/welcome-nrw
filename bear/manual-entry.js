@@ -188,13 +188,18 @@ function mount(sections,B,language,changed){
     tile.append(pic,node('b','',name),node('small','bear-manual-hero-data',''));
     const editButton=node('span','bear-manual-hero-edit','✎');
     editButton.title=(language()==='de'?'Werte bearbeiten':'Edit hero');
-    // A separate, small control switches the active editor without
-    // accidentally deselecting or erasing a previously saved hero.
-    editButton.addEventListener('click',evt=>{
+    // Separate affordance switches the editor without unselecting the hero.
+    // Keyboard users can activate it without toggling the ownership card.
+    editButton.setAttribute('role','button');editButton.tabIndex=0;
+    const edit=evt=>{
      evt.stopPropagation();
      if(!heroSet().includes(name))return;
      selected=name;updateEditor();
      editor.scrollIntoView({block:'nearest',behavior:'smooth'});
+    };
+    editButton.addEventListener('click',edit);
+    editButton.addEventListener('keydown',evt=>{
+     if(evt.key==='Enter'||evt.key===' '){evt.preventDefault();edit(evt);}
     });
     tile.append(editButton);
     tile.addEventListener('click',()=>{
