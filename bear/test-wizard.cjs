@@ -135,7 +135,7 @@ assert.ok(fs.existsSync(__dirname+'/hero-reference.json'),'Vercel must ship sour
 assert.ok(intake.includes('const guidedDetails=window.NRW_BEAR_SCREENSHOT_STAGE===6'),'details only assigned from confirmed hero selection');
 assert.ok(intake.includes('assignedByOrder:true'),'unreadable hero heading has guarded review workflow');
 assert.ok(intake.includes('const uncertainKeys=new Set()'),'troop OCR disagreement fails closed');
-assert.ok(html.includes('intake-ui.js?v=ocr-count-guards-20261011-1'),'updated OCR script bypasses old browser cache');
+assert.ok(html.includes('intake-ui.js?v=dynamic-troops-20261011-1'),'updated OCR script bypasses old browser cache');
 assert.ok(html.includes('score-bonuses.js?v=partial-damage-hotfix-20261011-1'),'updated damage logic bypasses old browser cache');
 
 assert.ok(wizard.includes('window.NRW_BEAR_OWN_BASELINE?.widgetValue?.(name,level)'),
@@ -144,3 +144,18 @@ assert.ok(wizard.includes('offensiven Helden-Expeditionsfähigkeiten'),
  'explanation cannot revert to guide/rarity multipliers');
 assert.ok(!wizard.includes('Bear-Rolle und geprüfter Expeditionsangriff'),
  'obsolete qualitative role ranking should not be displayed');
+
+const troopBadgeSource=fs.readFileSync(__dirname+'/troop-badges.js','utf8');
+const entrySource=fs.readFileSync(__dirname+'/troop-entries.js','utf8');
+assert.ok(!intake.includes('spatialTroops(')&&!intake.includes('readTroopNumbers(')&&
+ !intake.includes('recheckTroopFields('),'no hardcoded amount rectangles remain');
+assert.ok(intake.includes('ENTRY.detect(troopWords,canvas.width,canvas.height)'),
+ 'amounts are mapped to OCR-detected card labels');
+assert.ok(intake.includes('readUnmatchedTroopBadges(canvas,worker,troopEntries)'),
+ 'badge OCR is anchored to recognized troop icons');
+assert.ok(entrySource.includes('anchor:{x0:label.x0')&&
+ !troopBadgeSource.includes('oldAnchors'),'no fixed row coordinates in badge OCR');
+assert.ok(troopBadgeSource.includes('const tpl={4:'),
+ 'the three verified real-image TG4 glyphs are included');
+assert.ok(html.includes('troop-badges.js?v=dynamic-troops-20261011-1'),
+ 'browser must get the updated medal recognition code');
