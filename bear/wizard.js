@@ -478,7 +478,18 @@ function heroResults(){
  for(const h of Object.values(ext.manualHeroes||{}))if(h?.name&&(!restrict||owned.has(h.name))){
   // A partial screenshot can update a profile without erasing API stars.
   const previous=roster.get(h.name)||{};
-  roster.set(h.name,{...previous,...h});
+  const merged={...previous,...h};
+  // The Arena API can establish stars for some confirmed-owned heroes.
+  // An unreadable roster star bar must not overwrite that independent
+  // evidence with null/0. Never use an API hero that was not scanned.
+  if(h.starPendingReview&&(h.stars===null||h.stars===undefined)&&
+     Number.isInteger(Number(previous.stars))&&previous.stars!==null&&
+     Number(previous.stars)>=0&&Number(previous.stars)<=5){
+   merged.stars=Number(previous.stars);
+   merged.tier=previous.tier??0;
+   merged.starDataSource='api-pending-roster-confirmation';
+  }
+  roster.set(h.name,merged);
  }
  const widgetLevels=ext.starterWidgetLevels||{};
  for(const [name,hero] of roster){
@@ -495,7 +506,7 @@ function heroResults(){
 function selections(){
  const groups=heroResults();
  return groups.map((group,i)=>
-  group.choices.some(x=>x.name===chosenRecommendations[i])
+  group.choices.some(x=>x.name===chosenRecommendations[i]&&x.score!==null)
    ?chosenRecommendations[i]
    :group.best?.name||'');
 }
@@ -542,10 +553,24 @@ function renderRecommendations(){
  const ext=B.model().v2||{},scanned=new Set(ext.scannedOwnedHeroes||[]);
  const unresolved=Object.values(ext.manualHeroes||{})
   .filter(h=>h?.name&&scanned.has(h.name)&&h.starPendingReview).length;
+ const missingProgress=[...scanned].filter(name=>{
+  const h=ext.manualHeroes?.[name],api=(window.NRW_BEAR_IMPORTED_HEROES||[]).find(x=>x.name===name);
+  return (h?.stars===null||h?.stars===undefined)&&
+   (api?.stars===null||api?.stars===undefined||!Number.isInteger(Number(api.stars)));
+ }).length;
+ if(missingProgress&&refState==='ready'){
+  const note=document.createElement('p');note.className='bear-guide-needed';
+  note.textContent=l==='de'?
+   'Die Basiswerte sind in der Heldendatenbank vorhanden. Bei '+missingProgress+
+   ' eingelesenen Helden fehlt aber eine verlässliche Sternstufe. Bitte die Sterne in der Heldenübersicht bestätigen – bis dahin ist keine sichere Auswahl möglich.':
+   'Hero base values exist, but '+missingProgress+
+   ' scanned heroes have no reliable star level. Please confirm stars in the hero overview before ranking.';
+  recommendationPanel.append(note);
+ }
  if(unresolved){
   const warning=document.createElement('p');warning.className='bear-guide-needed';
   warning.textContent=l==='de'?
-   'Noch '+unresolved+' Held(en) mit ungeprüften Sternen. Diese Helden werden im Ranking vorsichtig behandelt. Gehe zurück, wenn du die Sternstufen bestätigen möchtest.':
+   'Noch '+unresolved+' Held(en) mit ungeprüften Sternen. Geschätzte Entwicklungsstände sind nur vorläufig; komplett unbekannte Sterne werden nicht gerankt. Bitte in der Heldenübersicht prüfen.':
    l==='fr'?
    'Étoiles non vérifiées pour '+unresolved+' héros. Ils sont évalués prudemment ; reviens les confirmer.':
    unresolved+' heroes have unverified stars. They are conservatively ranked. Go back to confirm their stars before relying on this shortlist.';
@@ -567,7 +592,9 @@ function renderRecommendations(){
     'No recognized scanned hero for this class. Return to the hero overview.';
    card.append(empty);
   }else{
-   const chosen=group.choices.find(x=>x.name===chosenRecommendations[i])||group.best;
+   // An all-unknown-star Mini roster must remain reviewable, not crash or
+   // silently treat an arbitrary alphabetical hero as the strongest.
+   const chosen=group.choices.find(x=>x.name===chosenRecommendations[i])||group.best||group.choices[0];
    const portrait=window.NRW_BEAR_CATALOG?.heroes?.find(h=>h.name===chosen.name)?.img;
    const summary=document.createElement('div');summary.className='bear-leader-summary';
    if(portrait){
@@ -578,7 +605,7 @@ function renderRecommendations(){
    const name=document.createElement('b');name.textContent=chosen.name;
    const data=document.createElement('p');data.className='hint';
    data.textContent=(chosen.level?'Lv '+chosen.level:'Lv ?')+' · '+
-    (chosen.stars?chosen.stars+'★'+(chosen.tier?' T'+chosen.tier:''):'★ ?')+
+    (chosen.stars===null?'★ ?':chosen.stars+'★'+(chosen.tier?' T'+chosen.tier:''))+
     ' · '+(chosen.skillCap?'Skill-Max '+chosen.skillCap:'Skill ?')+
     (chosen.assumedSkill?' ('+(l==='de'?'nur maximal möglich':l==='fr'?'non confirmé':'not verified')+')':'');
    info.append(name,data);summary.append(info);card.append(summary);
