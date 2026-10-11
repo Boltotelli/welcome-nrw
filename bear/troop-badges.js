@@ -132,8 +132,17 @@ function recognize(canvas,text,words){
 function locateBadge(entry,canvas){
  const b=entry?.labelBox;
  if(!b||!Number.isFinite(b.h)||!Number.isFinite(b.x))return null;
- const fh=canvas.height*b.h;
- return {x:canvas.width*b.x-1.15*fh,y:canvas.height*b.y-.73*fh,scale:canvas.width/716};
+ // OCR text height fluctuates when "Spitzen" merges with the icon.
+ // Clamp to the on-screen game font scale, not a fixed pixel coordinate.
+ const scale=canvas.width/716;
+ const fh=Math.max(11*scale,Math.min(canvas.height*b.h,24*scale));
+ const title=String(entry.title||'').toLowerCase();
+ // If only "Kavallerie" was recognized, the missing "Spitzen" prefix
+ // accounts for several glyph widths to the LEFT of the name.
+ const lostPrefix=title&&!/spitzen|elite|apex|supreme/.test(title);
+ const gutter=lostPrefix?4.25*fh:0;
+ return {x:canvas.width*b.x-1.15*fh-gutter,
+  y:canvas.height*b.y-.73*fh,scale};
 }
 async function recognizeEntries(canvas,entries,worker){
  const result=Array.from({length:3},()=>({tier:null,tg:null,confidence:0}));
@@ -144,16 +153,26 @@ async function recognizeEntries(canvas,entries,worker){
   if(!Number.isInteger(entry.type)||entry.type<0||entry.type>2)continue;
   const spot=locateBadge(entry,canvas);
   if(!spot)continue;
-  let best={tg:null,confidence:0};
-  for(const dx of [-5,-2,1,4])for(const dy of [-5,-2,1,4]){
-   const matched=digitAt(ctx,[spot.x/spot.scale+dx,spot.y/spot.scale+dy],scratch);
-   if(matched.tg!==null&&matched.confidence>best.confidence)best=matched;
+  let best={tg:null,confidence:0,point:null};
+  // Truegold glyphs are tiny. A class title's OCR bounding box can vary
+  // by 20+ screen-scaled pixels even in identical layouts.
+  // Scan around THAT label, not a single guessed global HUD position.
+  for(const dx of [-24,-20,-16,-12,-8,-4,0,4,8,12,16,20,24]){
+   for(const dy of [-24,-20,-16,-12,-8,-4,0,4,8,12,16,20,24]){
+    const point=[spot.x/spot.scale+dx,spot.y/spot.scale+dy];
+    const matched=digitAt(ctx,point,scratch);
+    if(matched.tg!==null&&matched.confidence>best.confidence)
+     best={...matched,point};
+   }
   }
   const title=String(entry.title||'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
   let tier=/\bspitzen\b|\belite\b/.test(title)?10:null;
   if(tier===null){
-   const fontHeight=canvas.height*(entry.labelBox?.h||.011);
-   const px=spot.x-1.8*fontHeight,py=spot.y+3.2*fontHeight;
+   const fontHeight=Math.max(11*spot.scale,
+    Math.min(canvas.height*(entry.labelBox?.h||.011),24*spot.scale));
+   const bx=(best.point?.[0]??spot.x/spot.scale)*spot.scale;
+   const by=(best.point?.[1]??spot.y/spot.scale)*spot.scale;
+   const px=bx-1.35*fontHeight,py=by+3.2*fontHeight;
    if(romanXAt(ctx,[px/spot.scale,py/spot.scale])>=.72)tier=10;
    else if(worker){
     // Roman numeral appears on the BOTTOM of that same troop icon.
@@ -184,7 +203,7 @@ async function recognizeEntries(canvas,entries,worker){
      28*spot.scale,28*spot.scale,6,6,112,112);
     const data=await worker.recognize(c);
     const char=String(data.data?.text||'').trim();
-    if(/^[0-9]$/.test(char))tg=Number(char);
+    if(/^[0-9]$/.test(char)&&Number(data.data?.confidence)>=80)tg=Number(char);
    }catch(_){/* UI asks the player to confirm unreadable ranks. */}
   }
   entry.tier=tier;entry.tg=tg;entry.badgeConfidence=best.confidence;
@@ -200,5 +219,5 @@ async function recognizeEntries(canvas,entries,worker){
  for(const item of result)delete item._seen;
  return result;
 }
-root.NRW_BEAR_TROOP_BADGES={recognize,recognizeEntries,locateBadge,digitAt,version:'anchored-badges-20261011-1'};
+root.NRW_BEAR_TROOP_BADGES={recognize,recognizeEntries,locateBadge,digitAt,version:'observed-real-icons-20261011-2'};
 })(window);
