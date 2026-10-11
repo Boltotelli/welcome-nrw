@@ -136,3 +136,23 @@ assert.deepEqual(equal.map(x=>x.count),[560,560],
  'independently confirmed identical small troop groups must survive');
 
 console.log('TROOP ENTRY OCR: 3+6 separate entries, repeat classes, 3 scaled screens, missing values and separators passed.');
+
+// OCR-word bounding boxes from the supplied ORIGINAL 716x1536 screenshot.
+// Unlike invented layout tests, these include real missing/sliced tokens.
+const originalOCR=[
+ ['Spitzen',149,366,70,32],['Infanterie',229,366,102,32],
+ ['Kavallerie',548,371,99,17],['er',135,370,89,49],
+ ['027',203,401,41,18],['325.339',471,401,92,18],
+ ['Spitzen',148,492,63,28],['Bogenschütze',220,492,110,28],
+ ['605.476',153,526,95,18]
+].map(([text,x,y,w,h])=>({text,bbox:{x0:x,y0:y,x1:x+w,y1:y+h}}));
+const detectedReal=E.detect(originalOCR,716,1536);
+assert.deepEqual(Array.from(detectedReal,e=>e.type),[0,1,2]);
+assert.equal(E.count('027'),null,'a sliced OCR count 027 is NOT 27 soldiers');
+assert.deepEqual(Array.from(detectedReal,e=>e.count),[null,325339,605476],
+ 'cavalry works without the missing Spitzen prefix; broken infantry must stay blank');
+assert.ok(detectedReal.every(e=>e.crop.x*716<=(e.type===0?153:e.type===1?471:153)),
+ 'class-labelled crop covers the left-indented inventory quantity');
+assert.ok(detectedReal[0].crop.y*1536<403,'infantry focused crop includes its real 325.027 baseline');
+assert.ok(detectedReal[0].crop.y*1536+detectedReal[0].crop.h*1536<492,
+ 'focused crop cannot borrow the next class row');
