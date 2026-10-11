@@ -55,13 +55,18 @@ function skillToEffect(skill,skillLevel){
  const p=valid(cond.procChancePercent,0,100);
  const chance=p===null?1:p/100;
  let effect=null;
- if(groupAttack.has(kind))effect={kind:'attack',amount:amount*chance};
+ if(groupAttack.has(kind)){
+  // Petra's 'The Favor' is stored as squad_attack_buff although the
+  // verified metric is DAMAGE percent and triggers by chance.
+  effect=kind==='squad_attack_buff'&&skill.metric==='damage_percent'?
+   {kind:'damage',amount:amount*chance}:{kind:'attack',amount:amount*chance};
+ }
  else if(groupLethality.has(kind))effect={kind:'lethality',amount:amount*chance};
  else if(kind==='archer_attack_buff')effect={kind:'class-attack',type:2,amount:amount*chance};
  else if(kind==='damage_up'){
   // "Chance to DEAL 200% damage" means 2x on proc; incremental gain is
   // (200%-100%), NOT +200%. 25% proc at Lv5 => +25% expected.
-  effect={kind:'damage',amount:(amount-100)*chance};
+  effect={kind:'damage',amount:(amount>100?amount-100:amount)*chance};
  }else if(kind==='extra_squad_strike'){
   const every=valid(cond.everyTurns,1,10);
   if(every===null)return {unknown:true,name:skill.name};
@@ -198,7 +203,7 @@ function recommend(owned,types,priorities,referenceGet,widgetGet,context){
    if(b.score===null)return -1;
    return b.score-a.score||a.name.localeCompare(b.name);
   });
-  return {type,choices,best:choices[0]||null,modelContext:ctx};
+  return {type,choices,best:choices.find(x=>x.score!==null)||null,modelContext:ctx};
  });
 }
 root.NRW_BEAR_HERO_ADVISOR={recommend,evaluate,skillState,offensiveEffect:skillToEffect,
