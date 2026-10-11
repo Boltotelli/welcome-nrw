@@ -171,16 +171,64 @@ function showIntake(i){
 const stageLoader=document.createElement('div');
 stageLoader.className='bear-guide-stage-loader';stageLoader.hidden=true;
 stageLoader.setAttribute('role','status');stageLoader.setAttribute('aria-live','polite');
+stageLoader.setAttribute('aria-label','Formationen werden generiert');
+const stageVideo=document.createElement('video');
+stageVideo.className='bear-guide-stage-video';stageVideo.muted=true;
+stageVideo.autoplay=false;stageVideo.loop=false;stageVideo.playsInline=true;
+stageVideo.setAttribute('playsinline','');stageVideo.setAttribute('webkit-playsinline','');
+stageVideo.setAttribute('preload','auto');stageVideo.setAttribute('aria-hidden','true');
+stageVideo.src='./assets/kingshot_formations_loading.webm?v=full-7s-20261011-1';
 const loaderBear=document.createElement('span');loaderBear.className='bear-guide-loading-bear';loaderBear.textContent='🐻';
 const loaderText=document.createElement('p');loaderText.textContent='Formationen werden generiert …';
-stageLoader.append(loaderBear,loaderText);wizard.append(stageLoader);
-let stageBusy=false;
+stageLoader.append(stageVideo,loaderBear,loaderText);document.body.append(stageLoader);
+// Complete the ENTIRE supplied 7-second video even when formation math is ready
+// immediately. Loading on slow phones can fall back to the same 7s duration.
+const stageDurationMs=7000;
+let stageBusy=false,stageTimeout=null,stageMinimum=null;
 function beginStageLoading(next){
  if(stageBusy)return;
  stageBusy=true;stageLoader.hidden=false;
+ const previousOverflow=document.body.style.overflow;
+ document.body.style.overflow='hidden';
  const l=lang();loaderText.textContent=l==='de'?'Formationen werden generiert …':
-  l==='fr'?'Création des formations …':'Generating formations …';
- setTimeout(()=>{stageLoader.hidden=true;stageBusy=false;moveTo(next);},1700);
+  l==='fr'?'Création des formations …':l==='es'?'Generando formaciones …':
+  'Generating formations …';
+ loaderBear.hidden=true;stageVideo.hidden=false;
+ let completed=false,videoEnded=false,minimumElapsed=false;
+ const close=()=>{
+  if(completed)return;
+  completed=true;clearTimeout(stageTimeout);clearTimeout(stageMinimum);
+  stageVideo.pause();stageVideo.onended=null;stageVideo.onerror=null;
+  stageVideo.onloadedmetadata=null;stageVideo.onstalled=null;
+  stageLoader.hidden=true;stageBusy=false;
+  document.body.style.overflow=previousOverflow;
+  moveTo(next);
+ };
+ const maybeFinish=()=>{if(videoEnded&&minimumElapsed)close();};
+ const fallback=()=>{
+  if(completed)return;
+  stageVideo.pause();stageVideo.hidden=true;loaderBear.hidden=false;
+  videoEnded=true;maybeFinish();
+ };
+ stageMinimum=setTimeout(()=>{minimumElapsed=true;maybeFinish();},stageDurationMs);
+ // Guard against stalled/unsupported media so the wizard always proceeds.
+ stageTimeout=setTimeout(fallback,14000);
+ stageVideo.onerror=fallback;
+ stageVideo.onended=()=>{videoEnded=true;maybeFinish();};
+ stageVideo.onloadedmetadata=()=>{
+  // The original runs for 7.005s. A browser reporting a longer duration
+  // must also be allowed to finish it, not cut it off at seven seconds.
+  if(Number.isFinite(stageVideo.duration)&&stageVideo.duration>stageDurationMs/1000+0.2){
+   clearTimeout(stageMinimum);
+   stageMinimum=setTimeout(()=>{minimumElapsed=true;maybeFinish();},
+    Math.ceil(stageVideo.duration*1000));
+  }
+ };
+ try{
+  stageVideo.pause();stageVideo.currentTime=0;
+  const playback=stageVideo.play();
+  if(playback&&typeof playback.catch==='function')playback.catch(fallback);
+ }catch(_){fallback();}
 }
 
 let active=0,finished=false;
