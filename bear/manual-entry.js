@@ -122,7 +122,6 @@ function mount(sections,B,language,changed){
  function drawHeroes(target){
   target.replaceChildren();target.append(node('h3','',tr('owned')),node('p','hint',tr('saved')));
   const current=heroSet(),model=B.model();model.v2.manualHeroes=model.v2.manualHeroes||{};
-  const referenceRecords=root.NRW_BEAR_HERO_REFERENCE_DATA?.records;
   const heroNames=C.heroes||[];
   const gens={1:heroNames.slice(0,16).map(h=>h.name),2:heroNames.slice(16,19).map(h=>h.name),
    3:heroNames.slice(19,22).map(h=>h.name),4:heroNames.slice(22,25).map(h=>h.name),
@@ -130,6 +129,7 @@ function mount(sections,B,language,changed){
    7:heroNames.slice(31,34).map(h=>h.name),8:heroNames.slice(34,37).map(h=>h.name)};
   let selected=current.find(n=>heroNames.some(h=>h.name===n))||'';
   const editor=node('div','bear-manual-hero-editor');editor.hidden=true;
+  target.append(editor);
   const tiles=new Map();
   const heroIcon=new Map(heroNames.map(h=>[h.name,h.img]));
   function updateEditor(){
@@ -205,12 +205,12 @@ function mount(sections,B,language,changed){
       selected=name;
      }
      persist();for(const k of tiles.keys())updateTile(k);updateEditor();
+     if(!editor.hidden)editor.scrollIntoView({block:'nearest',behavior:'smooth'});
     });
     gallery.append(tile);tiles.set(name,tile);
    }
    wrap.append(gallery);target.append(wrap);
   }
-  target.append(editor);
   tiles.forEach((_,name)=>updateTile(name));updateEditor();
  }
  function drawDetails(target){
@@ -276,7 +276,11 @@ function mount(sections,B,language,changed){
  }
  function isManual(stage){return modes()[stage]!==false;}
  function switchMode(stage,manual){
-  modes()[stage]=manual;B.save();render(stage);
+  modes()[stage]=manual;
+  // Switching away from OCR discards only unconfirmed review drafts,
+  // not any already confirmed values from this player's profile.
+  if(manual&&[1,2,4,6].includes(stage))document.getElementById('intakeClear')?.click();
+  B.save();render(stage);
  }
  function render(stage){
   const view=views.get(stage);if(!view)return;
