@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "kingdom": 1044,
   "timezone": "UTC",
-  "updatedAt": "2026-10-09T00:14:30Z",
+  "updatedAt": "2026-10-11T00:19:02Z",
   "events": [
     {
       "id": "golden-glaives-prep-2026-09-20",
@@ -770,238 +770,6 @@
       "sourceUrl": "https://centurygames.helpshift.com/hc/en/140-kingshot/section/1399-fishing-tournament/"
     },
     {
-      "id": "kvk-2026-10-04",
-      "start": "2026-10-04",
-      "end": "2026-10-10",
-      "icon": "⚔️",
-      "iconUrl": "https://kingshotdata.com/uploads/2025/05/kingdom-of-power-event-icon.webp",
-      "manual": false,
-      "confidence": "public-timeline",
-      "name": {
-        "de": "KvK · Matchmaking, Vorbereitung & Schlacht",
-        "en": "KvK · Matchmaking, Preparation & Battle",
-        "fr": "KvK · Matchmaking, préparation et bataille"
-      },
-      "tips": {
-        "de": [
-          "Der Termin folgt dem öffentlichen 4‑Wochen-Rhythmus und bleibt bis zur Ingame-Anzeige voraussichtlich.",
-          "Das Matchmaking beginnt am 04.10.; die Vorbereitung läuft vom 05.–09.10., die Schlachtphase am 10.10. von 10:00–22:00 UTC.",
-          "In der KvK-Vorbereitung gilt keine 3×-Grenze. NRW- und Discord-Absprachen haben Vorrang.",
-          "Prüfe vor größeren Ausgaben immer die Punktequellen im Spiel; Live-Werte haben Vorrang vor öffentlichen Tabellen."
-        ],
-        "en": [
-          "The date follows the public 4-week cycle and remains predicted until it appears in game.",
-          "Matchmaking begins on 4 Oct; preparation runs from 5–9 Oct, followed by the Battle Phase on 10 Oct from 10:00–22:00 UTC.",
-          "The 3× limit does not apply during KvK preparation. NRW and Discord coordination take priority.",
-          "Always check the in-game scoring table before major spending; live values override public tables."
-        ],
-        "fr": [
-          "La date suit le cycle public de 4 semaines et reste prévisionnelle jusqu’à son affichage en jeu.",
-          "Le matchmaking commence le 4 octobre ; la préparation se déroule du 5 au 9 octobre, puis la phase de bataille le 10 octobre de 10:00 à 22:00 UTC.",
-          "La limite de 3× ne s’applique pas pendant la préparation KvK. Les consignes NRW et Discord sont prioritaires.",
-          "Vérifie toujours le barème en jeu avant une dépense importante ; les valeurs en direct priment sur les tableaux publics."
-        ]
-      },
-      "dailyPlans": {
-        "2026-10-04": {
-          "points": {
-            "de": "Matchmaking · noch keine Vorbereitungspunkte",
-            "en": "Matchmaking · no preparation points yet",
-            "fr": "Matchmaking · pas encore de points de préparation"
-          },
-          "steps": {
-            "de": [
-              "Noch keine KvK-Ressourcen ausgeben. Gegner und NRW-Plan nach Bekanntgabe im Discord prüfen.",
-              "00:00 UTC: Intel-Missionen abschließen und Belohnungen abholen.",
-              "08:00 UTC: Intel-Missionen abschließen, Belohnungen wegen Golden Glaives aber NICHT abholen.",
-              "16:00 UTC: Intel-Missionen weder abschließen noch abholen. Danach Pans zusätzliche Intel-Mission aktivieren und ebenfalls offen lassen.",
-              "Gebäude-, Forschungs- und Meisterprojekte so vorbereiten, dass sie erst nach dem Reset am 05.10. abgeschlossen werden."
-            ],
-            "en": [
-              "Do not spend KvK resources yet. Check the opponent and NRW plan in Discord once announced.",
-              "00:00 UTC: complete Intel Missions and claim rewards.",
-              "08:00 UTC: complete Intel Missions, but do NOT claim rewards because Golden Glaives starts next.",
-              "16:00 UTC: neither complete nor claim Intel Missions. Then activate Pan’s extra Intel Mission and leave it unfinished too.",
-              "Prepare building, research and Master projects so they finish only after the 5 Oct reset."
-            ],
-            "fr": [
-              "Ne dépense pas encore de ressources KvK. Vérifie l’adversaire et le plan NRW sur Discord après l’annonce.",
-              "00:00 UTC : termine les missions de renseignement et récupère les récompenses.",
-              "08:00 UTC : termine les missions, mais NE récupère PAS les récompenses à cause du début de Golden Glaives.",
-              "16:00 UTC : ne termine ni ne récupère les missions. Active ensuite la mission supplémentaire de Pan et laisse-la également inachevée.",
-              "Prépare les constructions, recherches et projets de Maître pour qu’ils se terminent seulement après le reset du 5 octobre."
-            ]
-          }
-        },
-        "2026-10-05": {
-          "points": {
-            "de": "Stadtentwicklung · Amulette +1: 70 · Truegold: 2.000 · Gehärtetes Truegold: 30.000 · Truegoldstaub: 1.000 · Intel: 6.000 · 1 Min. Beschleuniger: 30",
-            "en": "City Development · Charm +1: 70 · Truegold: 2,000 · Tempered Truegold: 30,000 · Truegold Dust: 1,000 · Intel: 6,000 · 1 min speedup: 30",
-            "fr": "Développement urbain · Amulette +1 : 70 · Or véritable : 2 000 · Or véritable trempé : 30 000 · Poussière : 1 000 · Renseignement : 6 000 · 1 min d’accélération : 30"
-          },
-          "steps": {
-            "de": [
-              "Nach dem Reset zuerst die zurückgehaltenen 08:00-Belohnungen abholen; danach die offenen 16:00-/Pan-Intel-Missionen abschließen und abholen.",
-              "Bau-, Forschungs- und Meisterbuffs vor großen Projekten aktivieren; dann Truegold, Gehärtetes Truegold, Truegoldstaub und passende Beschleuniger einsetzen.",
-              "Gouverneursamulette nur erhöhen, wenn sie in den NRW-Plan passen. Das tägliche Ingame-Ziel und Discord-Absprachen beachten.",
-              "Vor dem nächsten Reset lange Sammler losschicken. Bison erst aktivieren, sobald die Truppen tatsächlich sammeln."
-            ],
-            "en": [
-              "After reset, first claim the held 08:00 rewards; then complete and claim the unfinished 16:00/Pan Intel Missions.",
-              "Activate construction, research and Master buffs before large projects; then use Truegold, Tempered Truegold, Truegold Dust and matching speedups.",
-              "Upgrade Governor Charms only when they fit the NRW plan. Follow the daily in-game target and Discord instructions.",
-              "Before the next reset, send long gathering marches. Activate Bison only once the troops are actively gathering."
-            ],
-            "fr": [
-              "Après le reset, récupère d’abord les récompenses conservées de 08:00 ; termine et récupère ensuite les missions ouvertes de 16:00 et de Pan.",
-              "Active les bonus de construction, recherche et Maître avant les grands projets ; utilise ensuite l’Or véritable, l’Or véritable trempé, la poussière et les accélérateurs adaptés.",
-              "Améliore les amulettes du Gouverneur seulement si cela correspond au plan NRW. Suis l’objectif quotidien en jeu et les consignes Discord.",
-              "Avant le prochain reset, envoie de longues marches de collecte. Active le Bison seulement lorsque les troupes collectent réellement."
-            ]
-          }
-        },
-        "2026-10-06": {
-          "points": {
-            "de": "Grundfähigkeiten · Roulette: 8.000 · mythischer/epischer/seltener Splitter: 3.040/1.220/350 · Meisteremblem: 6.000 · Manuskript: 60 · Truegold: 2.000 · Gehärtetes Truegold: 30.000 · Sammeln: 2 je Einheit",
-            "en": "Basic Skills · Roulette: 8,000 · mythic/epic/rare shard: 3,040/1,220/350 · Master Emblem: 6,000 · Manuscript: 60 · Truegold: 2,000 · Tempered Truegold: 30,000 · Gathering: 2 per unit",
-            "fr": "Compétences de base · Roulette : 8 000 · fragment mythique/épique/rare : 3 040/1 220/350 · Emblème : 6 000 · Manuscrit : 60 · Or véritable : 2 000 · Or trempé : 30 000 · Collecte : 2 par unité"
-          },
-          "steps": {
-            "de": [
-              "Vorbereitete Sammler erst nach dem Reset zurückkehren lassen. Danach einen weiteren Marsch schicken und die Bison-Sofortsammlung nutzen.",
-              "Nach dem tatsächlichen Bison-Cooldown erneut sammeln und die Fähigkeit ein zweites Mal nutzen.",
-              "Roulette, Heldensplitter und Meistermaterialien gezielt nach NRW-Plan einsetzen; Bau-/Forschungsressourcen nur mit aktiven Buffs verwenden.",
-              "Für Tag 3 die 16:00-UTC-Intel-Missionen offen lassen und nach 16:00 UTC Pans zusätzliche Mission aktivieren, aber nicht abschließen."
-            ],
-            "en": [
-              "Let prepared gatherers return only after reset. Then send another march and use Bison’s instant gathering.",
-              "After Bison’s actual cooldown ends, gather again and use the skill a second time.",
-              "Use Roulette, Hero Shards and Master materials according to the NRW plan; spend building/research resources only with buffs active.",
-              "For Day 3, leave the 16:00 UTC Intel Missions unfinished and activate Pan’s extra mission after 16:00 UTC without completing it."
-            ],
-            "fr": [
-              "Laisse les collecteurs préparés revenir seulement après le reset. Envoie ensuite une nouvelle marche et utilise la collecte instantanée du Bison.",
-              "Après la véritable recharge du Bison, collecte à nouveau et utilise la compétence une deuxième fois.",
-              "Utilise la Roulette, les fragments de héros et les matériaux de Maître selon le plan NRW ; dépense les ressources de construction/recherche uniquement avec les bonus actifs.",
-              "Pour le Jour 3, laisse les missions de 16:00 UTC inachevées et active la mission supplémentaire de Pan après 16:00 UTC sans la terminer."
-            ]
-          }
-        },
-        "2026-10-07": {
-          "points": {
-            "de": "Haustiertraining · Fortentwicklung +1: 50 · fortgeschrittene/normale Zähmungsmarke: 15.000/1.150 · Amulette +1: 70 · Roulette: 8.000 · Splitter: 3.040/1.220/350 · Intel/Meisteremblem/Manuskript: 6.000/6.000/60",
-            "en": "Pet Training · Advancement +1: 50 · advanced/common Taming Mark: 15,000/1,150 · Charm +1: 70 · Roulette: 8,000 · shards: 3,040/1,220/350 · Intel/Emblem/Manuscript: 6,000/6,000/60",
-            "fr": "Entraînement des familiers · Progression +1 : 50 · marque avancée/commune : 15 000/1 150 · Amulette +1 : 70 · Roulette : 8 000 · fragments : 3 040/1 220/350 · Renseignement/Emblème/Manuscrit : 6 000/6 000/60"
-          },
-          "steps": {
-            "de": [
-              "Nach dem Reset die vorbereiteten Intel-Missionen abschließen und abholen.",
-              "Pet-Fortentwicklung und Zähmungsmarken mit passenden Pet-Buffs nutzen; danach Roulette, Splitter, Amulette und Meistermaterialien nach NRW-Plan einsetzen.",
-              "Vor größeren Ausgaben das Ingame-Punktefenster prüfen, besonders bei neuen Pet- oder Meisterstufen.",
-              "Vor dem nächsten Reset lange Sammler losschicken und Bison erst bei aktiv sammelnden Truppen einsetzen."
-            ],
-            "en": [
-              "After reset, complete and claim the prepared Intel Missions.",
-              "Use Pet Advancement and Taming Marks with the appropriate pet buffs; then use Roulette, shards, Charms and Master materials according to the NRW plan.",
-              "Check the in-game scoring window before major spending, especially for new pet or Master levels.",
-              "Before the next reset, send long gathering marches and activate Bison only while the troops are actively gathering."
-            ],
-            "fr": [
-              "Après le reset, termine et récupère les missions de renseignement préparées.",
-              "Utilise la progression des familiers et les marques d’apprivoisement avec les bonus adaptés ; utilise ensuite la Roulette, les fragments, amulettes et matériaux de Maître selon le plan NRW.",
-              "Vérifie le barème en jeu avant une dépense importante, surtout pour les nouveaux niveaux de familier ou de Maître.",
-              "Avant le prochain reset, envoie de longues marches de collecte et active le Bison seulement pendant la collecte active."
-            ]
-          }
-        },
-        "2026-10-08": {
-          "points": {
-            "de": "Heldenentwicklung · Mithril: 40.000 · Widget: 8.000 · Schmiedehammer: 4.000 · Amulette +1: 70 · Truppen T11–T1: 75/60/45/35/25/18/12/8/5/4/3 · Sammeln: 2 je Einheit",
-            "en": "Hero Development · Mithril: 40,000 · Widget: 8,000 · Forgehammer: 4,000 · Charm +1: 70 · troops T11–T1: 75/60/45/35/25/18/12/8/5/4/3 · Gathering: 2 per unit",
-            "fr": "Développement des héros · Mithril : 40 000 · Widget : 8 000 · Marteau : 4 000 · Amulette +1 : 70 · troupes T11–T1 : 75/60/45/35/25/18/12/8/5/4/3 · Collecte : 2 par unité"
-          },
-          "steps": {
-            "de": [
-              "Vorbereitete Sammler nach dem Reset zurückkehren lassen und den Bison-Ablauf für zusätzliche Sofortsammlungen nutzen.",
-              "Vor dem Truppentraining Edler Berater, Trainingsbonus und weitere verfügbare Buffs aktivieren; möglichst vorbereitete Truppen befördern.",
-              "Mithril, Widgets, Schmiedehämmer und Amulette erst nach Prüfung des NRW-Plans einsetzen.",
-              "Für Tag 5 die 16:00-UTC-/Pan-Intel-Missionen offen lassen. Vor Reset erneut lange Sammler schicken; Bison nur verwenden, wenn der Cooldown rechtzeitig bereit ist."
-            ],
-            "en": [
-              "Let prepared gatherers return after reset and use the Bison sequence for additional instant collections.",
-              "Before training troops, activate Noble Advisor, the training boost and any other available buffs; promote prepared troops where possible.",
-              "Use Mithril, Widgets, Forgehammers and Charms only after checking the NRW plan.",
-              "For Day 5, leave the 16:00 UTC/Pan Intel Missions unfinished. Send long gathering marches again before reset; use Bison only if its cooldown is ready in time."
-            ],
-            "fr": [
-              "Laisse les collecteurs préparés revenir après le reset et utilise la séquence du Bison pour des collectes instantanées supplémentaires.",
-              "Avant l’entraînement, active le Conseiller noble, le bonus d’entraînement et les autres bonus disponibles ; promeus si possible les troupes préparées.",
-              "Utilise le Mithril, les Widgets, les Marteaux et les Amulettes seulement après vérification du plan NRW.",
-              "Pour le Jour 5, laisse les missions de 16:00 UTC et de Pan inachevées. Renvoie de longues marches avant le reset ; utilise le Bison seulement si sa recharge est prête à temps."
-            ]
-          }
-        },
-        "2026-10-09": {
-          "points": {
-            "de": "Machtsteigerung · Pet +1: 50 · Zähmungsmarken: 15.000/1.150 · Mithril: 40.000 · Ausrüstung +1: 36 · Widget/Hammer: 8.000/4.000 · Truegold/Gehärtet/Staub: 2.000/30.000/1.000 · Intel: 6.000 · Sammeln: 2 je Einheit",
-            "en": "Power Boost · Pet +1: 50 · Taming Marks: 15,000/1,150 · Mithril: 40,000 · Gear +1: 36 · Widget/Hammer: 8,000/4,000 · Truegold/Tempered/Dust: 2,000/30,000/1,000 · Intel: 6,000 · Gathering: 2 per unit",
-            "fr": "Gain de puissance · Familier +1 : 50 · Marques : 15 000/1 150 · Mithril : 40 000 · Équipement +1 : 36 · Widget/Marteau : 8 000/4 000 · Or véritable/Trempé/Poussière : 2 000/30 000/1 000 · Renseignement : 6 000 · Collecte : 2 par unité"
-          },
-          "steps": {
-            "de": [
-              "Nach dem Reset vorbereitete Sammler und Intel-Missionen abrechnen; den Bison-Ablauf nur mit aktiv sammelnden Truppen nutzen.",
-              "Die noch geplanten Pet-, Ausrüstungs-, Truegold-, Bau-, Forschungs- und Beschleunigeraktionen gebündelt mit allen verfügbaren Buffs ausführen.",
-              "Nicht blind alles verbrauchen: NRW-Ziel, Gegnerstand und Ingame-Punktefenster prüfen und nur den abgestimmten Beitrag leisten.",
-              "Vor Ende der Vorbereitung Truppen zurückholen, Lazarett leeren und den Discord-Schlachtplan prüfen. Schutzschild für das folgende Kampffenster bereithalten."
-            ],
-            "en": [
-              "After reset, settle prepared gathering and Intel Missions; use the Bison sequence only while troops are actively gathering.",
-              "Bundle planned pet, gear, Truegold, construction, research and speedup actions with all available buffs.",
-              "Do not spend blindly: check the NRW target, opponent score and in-game scoring window, and contribute only as coordinated.",
-              "Before preparation ends, recall troops, clear the infirmary and check the Discord battle plan. Keep a shield ready for the following combat window."
-            ],
-            "fr": [
-              "Après le reset, valide les collectes et missions de renseignement préparées ; utilise la séquence du Bison uniquement avec des troupes en collecte active.",
-              "Regroupe les actions prévues de familiers, équipement, Or véritable, construction, recherche et accélération avec tous les bonus disponibles.",
-              "Ne dépense pas aveuglément : vérifie l’objectif NRW, le score adverse et le barème en jeu, puis contribue seulement selon les consignes.",
-              "Avant la fin de la préparation, rappelle les troupes, vide l’infirmerie et consulte le plan de bataille Discord. Garde un bouclier prêt pour la fenêtre de combat suivante."
-            ]
-          }
-        },
-        "2026-10-10": {
-          "points": {
-            "de": "Schlachtphase 10:00–22:00 UTC · Besatzung von Burg/Türmen: 1 Punkt je 1.000 Macht pro 60 Sek. · gegnerische oder verlorene Truppen T10–T1: 13/11/9/7/5/4/3/2/1/1 Punkte",
-            "en": "Battle Phase 10:00–22:00 UTC · Castle/Turret occupation: 1 point per 1,000 power per 60 sec · enemy troops defeated or own troops lost T10–T1: 13/11/9/7/5/4/3/2/1/1 points",
-            "fr": "Phase de bataille 10:00–22:00 UTC · occupation Château/Tourelles : 1 point par 1 000 de puissance pendant 60 s · troupes ennemies éliminées ou troupes perdues T10–T1 : 13/11/9/7/5/4/3/2/1/1 points"
-          },
-          "steps": {
-            "de": [
-              "Vor 10:00 UTC alle Sammler zurückholen, das Lazarett leeren und den NRW-Schlachtplan im Discord prüfen.",
-              "Wer nicht aktiv an der Schlacht teilnimmt, aktiviert rechtzeitig einen Schutzschild und lässt ihn während des gesamten Kampffensters aktiv.",
-              "Ab 10:00 UTC öffnen die Cross-Kingdom-Teleporter. Bei Stadtangriffen zählen nur gegnerische Ziele innerhalb von drei TC-Stufen.",
-              "Die Burgschlacht beginnt um 12:00 UTC. Nur abgestimmten Rallys, Verstärkungen und Zielansagen folgen; keine unkoordinierten Einzelangriffe.",
-              "Nach der Schlacht die Feldtriage sofort nutzen: Medizinische Taschen und Rettungsbefehle können die Rückholquote verlorener Truppen von 30 % auf bis zu 90 % erhöhen."
-            ],
-            "en": [
-              "Before 10:00 UTC, recall all gatherers, clear the infirmary and check the NRW battle plan in Discord.",
-              "Anyone not actively fighting should activate a shield in time and keep it active throughout the combat window.",
-              "Cross-Kingdom Teleporters open at 10:00 UTC. For city attacks, points only count against enemy targets within three Town Center levels.",
-              "The Castle Battle begins at 12:00 UTC. Follow coordinated rallies, reinforcements and target calls only; avoid uncoordinated solo attacks.",
-              "Use Field Triage immediately after battle: Medical Satchels and Rescue Orders can raise recovery of lost troops from 30% up to 90%."
-            ],
-            "fr": [
-              "Avant 10:00 UTC, rappelle tous les collecteurs, vide l’infirmerie et consulte le plan de bataille NRW sur Discord.",
-              "Toute personne qui ne participe pas activement doit activer un bouclier à temps et le garder pendant toute la fenêtre de combat.",
-              "Les téléporteurs inter-royaumes ouvrent à 10:00 UTC. Pour les attaques de villes, seuls les ennemis situés à trois niveaux de Centre-ville au maximum rapportent des points.",
-              "La bataille du Château commence à 12:00 UTC. Suis uniquement les rallyes, renforts et cibles coordonnés ; évite les attaques individuelles non coordonnées.",
-              "Utilise immédiatement le triage après la bataille : les Sacoches médicales et Ordres de sauvetage peuvent faire passer la récupération des troupes perdues de 30 % à 90 %."
-            ]
-          }
-        }
-      },
-      "sourceUrl": "https://kingshotdata.com/events/kingdom-of-power-kvk-event/"
-    },
-    {
       "id": "new-master-2026-09-14",
       "start": "2026-09-14",
       "end": "2026-09-14",
@@ -1099,6 +867,845 @@
       "sourceUrl": "https://kingshot.net/nexus/1044",
       "featuredUntil": "2026-10-12",
       "display": "timeline-only"
+    },
+    {
+      "id": "alliance-brawl-2026-10-12",
+      "start": "2026-10-12",
+      "end": "2026-10-18",
+      "icon": "⚔️",
+      "iconUrl": "https://kingshotdata.com/uploads/2025/07/alliance-brawl-event-icon.webp",
+      "confidence": "predicted",
+      "name": {
+        "de": "Allianzgemenge",
+        "en": "Alliance Brawl",
+        "fr": "Alliance Brawl"
+      },
+      "tips": {
+        "de": [
+          "Täglich zuerst die aktuelle Phase und ihre Punkteaufgaben prüfen.",
+          "Nur Ressourcen einsetzen, die am jeweiligen Tag wirklich Punkte bringen.",
+          "Persönliche Ziele und NRW-Absprachen vor unnötigen Ausgaben priorisieren."
+        ],
+        "en": [
+          "Check the current stage and its scoring tasks first each day.",
+          "Only use resources that actually score in the active stage.",
+          "Prioritize personal milestones and NRW coordination before extra spending."
+        ],
+        "fr": [
+          "Vérifie d’abord chaque jour la phase actuelle et ses tâches de points.",
+          "Utilise uniquement les ressources qui rapportent pendant la phase active.",
+          "Privilégie les paliers personnels et la coordination NRW avant les dépenses supplémentaires."
+        ]
+      },
+      "dailyPlans": {
+        "2026-10-12": {
+          "points": {
+            "de": "Punkte fürs Sammeln",
+            "en": "Points for gathering",
+            "fr": "Points pour la collecte"
+          },
+          "prepare": {
+            "title": {
+              "de": "Intel-Missionen für morgen vorbereiten",
+              "en": "Prepare Intel Missions for tomorrow",
+              "fr": "Préparer les missions de renseignement pour demain"
+            },
+            "status": {
+              "de": "VOR RESET",
+              "en": "BEFORE RESET",
+              "fr": "AVANT RESET"
+            },
+            "steps": {
+              "de": [
+                "00:00-UTC-Missionen abschließen und Belohnungen abholen.",
+                "08:00-UTC-Missionen abschließen und Belohnungen abholen.",
+                "16:00-UTC-Missionen nicht abschließen; nach 16:00 UTC Pans zusätzliche Intel-Mission aktivieren und ebenfalls offen lassen.",
+                "Nach dem nächsten Reset die 16:00-UTC-Missionen und Pans zusätzliche Mission abschließen und Belohnungen abholen."
+              ],
+              "en": [
+                "Complete and claim the 00:00 UTC missions.",
+                "Complete and claim the 08:00 UTC missions.",
+                "Do not complete the 16:00 UTC missions; activate Pan’s extra Intel Mission after 16:00 UTC and leave it unfinished as well.",
+                "After the next reset, complete the 16:00 UTC missions and Pan’s extra mission, then claim their rewards."
+              ],
+              "fr": [
+                "Termine et récupère les missions de 00:00 UTC.",
+                "Termine et récupère les missions de 08:00 UTC.",
+                "Ne termine pas les missions de 16:00 UTC ; active la mission supplémentaire de Pan après 16:00 UTC et laisse-la également inachevée.",
+                "Après le prochain reset, termine les missions de 16:00 UTC et la mission supplémentaire de Pan, puis récupère leurs récompenses."
+              ]
+            }
+          },
+          "steps": {
+            "de": [
+              "Nutze deine Trucks.",
+              "Lass die vor dem Reset gestarteten Sammler erst nach dem Reset zurückkehren – erst dann zählen die gesammelten Ressourcen.",
+              "Schicke danach einen neuen Sammelmarsch los. Die vor dem Reset aktivierte Bison-Fähigkeit wird sofort ausgelöst und der Marsch kehrt direkt vollständig gesammelt zurück.",
+              "Sobald der tatsächliche Bison-Cooldown abgelaufen ist, nutze Bison erneut und schicke einen weiteren Sammelmarsch für eine zweite Sofort-Sammlung."
+            ],
+            "en": [
+              "Use your trucks.",
+              "Let the gatherers sent before reset return only after reset – only then do the gathered resources score.",
+              "Then send one new gathering march. The Bison ability activated before reset triggers immediately, and the march returns at once with a full load.",
+              "Once Bison’s actual cooldown has ended, use Bison again and send another gathering march for a second instant collection."
+            ],
+            "fr": [
+              "Utilise tes camions.",
+              "Laisse les collecteurs envoyés avant le reset revenir uniquement après le reset – les ressources ne rapportent des points qu’à ce moment-là.",
+              "Envoie ensuite une nouvelle marche de collecte. La compétence du Bison activée avant le reset se déclenche immédiatement et la marche revient aussitôt avec une collecte complète.",
+              "Lorsque le véritable temps de recharge du Bison est terminé, utilise-le de nouveau et envoie une autre marche pour une deuxième collecte instantanée."
+            ]
+          }
+        },
+        "2026-10-13": {
+          "points": {
+            "de": "Intel-Missionen abschließen (3.000 Punkte), Trucks senden und überfallen (je 10.000 Punkte)",
+            "en": "Complete Intel Missions (3,000 points), escort and raid trucks (10,000 points each)",
+            "fr": "Terminer les missions de renseignement (3 000 points), escorter et attaquer des camions (10 000 points chacun)"
+          },
+          "prepare": {
+            "title": {
+              "de": "Sammler und Bison für morgen vorbereiten",
+              "en": "Prepare gatherers and Bison for tomorrow",
+              "fr": "Préparer les collecteurs et le Bison pour demain"
+            },
+            "status": {
+              "de": "VOR RESET",
+              "en": "BEFORE RESET",
+              "fr": "AVANT RESET"
+            },
+            "steps": {
+              "de": [
+                "Schicke kurz vor dem Reset lange Sammelmärsche los, sodass sie erst nach dem Reset zurückkehren.",
+                "Aktiviere Bison, sobald deine Truppen aktiv sammeln; dadurch beginnt seine Abklingzeit bereits vor dem Reset.",
+                "Rufe die Sammler vor dem Reset nicht zurück. Nach dem Reset zählen die zurückgebrachten Ressourcen für Tag 3.",
+                "Schicke danach erneut einen Sammelmarsch: Die vorbereitete Bison-Fähigkeit lässt ihn sofort vollständig gesammelt zurückkehren. Nach Ablauf des tatsächlichen Cooldowns kannst du Bison erneut für eine weitere Sofort-Sammlung nutzen."
+              ],
+              "en": [
+                "Shortly before reset, send long gathering marches so they return only after reset.",
+                "Activate Bison once your troops are actively gathering; this starts its cooldown before reset.",
+                "Do not recall the gatherers before reset. After reset, the returned resources score for Day 3.",
+                "Then send another gathering march: the prepared Bison ability makes it return immediately with a full load. Once the actual cooldown ends, use Bison again for another instant collection."
+              ],
+              "fr": [
+                "Peu avant le reset, envoie de longues marches de collecte afin qu’elles ne reviennent qu’après le reset.",
+                "Active le Bison lorsque tes troupes collectent activement ; son temps de recharge commence ainsi avant le reset.",
+                "Ne rappelle pas les collecteurs avant le reset. Après le reset, les ressources rapportées comptent pour le jour 3.",
+                "Envoie ensuite une nouvelle marche de collecte : la compétence préparée du Bison la fait revenir immédiatement avec une collecte complète. Une fois le véritable temps de recharge terminé, utilise de nouveau le Bison pour une autre collecte instantanée."
+              ]
+            }
+          },
+          "steps": {
+            "de": [
+              "Schließe nach dem Reset zuerst die zurückgehaltenen 16:00-UTC-Intel-Missionen und Pans zusätzliche Mission ab.",
+              "Punkte entstehen beim Abschließen der Mission, nicht beim Abholen der Belohnung. Jede abgeschlossene Intel-Mission bringt 3.000 Punkte.",
+              "Erledige anschließend die neu erscheinenden Intel-Missionen und nutze deine täglichen Trucks; Senden und erfolgreicher Überfall bringen jeweils 10.000 Punkte.",
+              "Nutze keine Heldensplitter, Truegold, Truegold-Staub, Speedups, Meistermaterialien oder Edelsteine nur für das Allianzgemenge – diese KvK-Ressourcen sparen."
+            ],
+            "en": [
+              "After reset, first complete the held 16:00 UTC Intel Missions and Pan’s extra mission.",
+              "Points are awarded when a mission is completed, not when its reward is claimed. Each completed Intel Mission gives 3,000 points.",
+              "Then complete the newly appearing Intel Missions and use your daily trucks; escorting and a successful raid each give 10,000 points.",
+              "Do not spend Hero Shards, Truegold, Truegold Dust, speedups, Master materials or gems just for Alliance Brawl—save these KvK resources."
+            ],
+            "fr": [
+              "Après le reset, termine d’abord les missions de renseignement de 16:00 UTC conservées ainsi que la mission supplémentaire de Pan.",
+              "Les points sont accordés lorsque la mission est terminée, et non lors de la récupération de la récompense. Chaque mission terminée rapporte 3 000 points.",
+              "Termine ensuite les nouvelles missions de renseignement et utilise tes camions quotidiens ; une escorte et un raid réussi rapportent chacun 10 000 points.",
+              "Ne dépense pas de fragments de héros, de Truegold, de poussière de Truegold, d’accélérateurs, de matériaux de Maître ou de gemmes uniquement pour l’Alliance Brawl : garde ces ressources pour le KvK."
+            ]
+          }
+        },
+        "2026-10-14": {
+          "points": {
+            "de": "Sammeln (2 Punkte je 2.000 Brot/Holz, 400 Stein oder 100 Eisen), Trucks (je 10.000 Punkte), fortgeschrittene/gewöhnliche Zähmungsmarken (9.370/680), Amulettwert (45 pro Punkt) und Pet-Fortschritt (30 pro Punkt)",
+            "en": "Gathering (2 points per 2,000 Bread/Wood, 400 Stone or 100 Iron), trucks (10,000 points each), Advanced/Common Taming Marks (9,370/680), Charm score (45 per point) and Pet Advancement (30 per point)",
+            "fr": "Collecte (2 points pour 2 000 Pain/Bois, 400 Pierre ou 100 Fer), camions (10 000 points chacun), marques de dressage avancées/ordinaires (9 370/680), score de charme (45 par point) et progression de familier (30 par point)"
+          },
+          "prepare": {
+            "title": {
+              "de": "Intel-Missionen und Truppentraining für morgen vorbereiten",
+              "en": "Prepare Intel Missions and troop training for tomorrow",
+              "fr": "Préparer les missions de renseignement et l’entraînement pour demain"
+            },
+            "status": {
+              "de": "HEUTE VORBEREITEN",
+              "en": "PREPARE TODAY",
+              "fr": "PRÉPARER AUJOURD’HUI"
+            },
+            "steps": {
+              "de": [
+                "00:00-UTC- und 08:00-UTC-Intel-Missionen abschließen und Belohnungen abholen.",
+                "16:00-UTC-Missionen nicht abschließen; nach 16:00 UTC Pans zusätzliche Intel-Mission aktivieren und ebenfalls offen lassen.",
+                "Reserviere rechtzeitig einen passenden Termin für den Ministerposten „Edler Berater“.",
+                "Nur wenn du ohnehin Truppen ausbildest: Morgen vor dem Abschließen der Truppen den Ministerbonus mit dem Trainingsbonus für 3.000 Edelsteine kombinieren.",
+                "Nach dem nächsten Reset zuerst die zurückgehaltenen Intel-Missionen abschließen; danach die für Tag 4 geplanten Truppen fertigstellen."
+              ],
+              "en": [
+                "Complete and claim the 00:00 UTC and 08:00 UTC Intel Missions.",
+                "Do not complete the 16:00 UTC missions; after 16:00 UTC, activate Pan’s extra Intel Mission and leave it unfinished as well.",
+                "Reserve a suitable Noble Advisor ministerial time slot early.",
+                "Only if you are training troops anyway: tomorrow, combine the minister bonus with the 3,000-gem training boost before completing the troops.",
+                "After the next reset, complete the held Intel Missions first, then finish the troops planned for Day 4."
+              ],
+              "fr": [
+                "Termine et récupère les missions de renseignement de 00:00 UTC et de 08:00 UTC.",
+                "Ne termine pas les missions de 16:00 UTC ; après 16:00 UTC, active la mission supplémentaire de Pan et laisse-la également inachevée.",
+                "Réserve suffisamment tôt un créneau adapté pour le poste ministériel de Noble Conseiller.",
+                "Seulement si tu entraînes déjà des troupes : demain, combine le bonus ministériel avec le bonus d’entraînement à 3 000 gemmes avant de terminer les troupes.",
+                "Après le prochain reset, termine d’abord les missions de renseignement conservées, puis les troupes prévues pour le jour 4."
+              ]
+            }
+          },
+          "steps": {
+            "de": [
+              "Lass die vor dem Reset gestarteten Sammler jetzt zurückkehren – die mitgebrachten Ressourcen zählen für Tag 3.",
+              "Schicke danach sofort einen neuen Sammelmarsch los: Die vor dem Reset aktivierte Bison-Fähigkeit wird ausgelöst und lässt ihn direkt vollständig gesammelt zurückkehren.",
+              "Sobald Bisons tatsächliche Abklingzeit abgelaufen ist, nutze ihn erneut für eine weitere Sofort-Sammlung.",
+              "Nutze deine täglichen Trucks; Senden und erfolgreicher Überfall bringen jeweils 10.000 Punkte.",
+              "Verbrauche keine Zähmungsmarken, Amulettmaterialien, Pet-Ressourcen oder Edelsteine nur für das Allianzgemenge – diese KvK-Ressourcen sparen."
+            ],
+            "en": [
+              "Let the gatherers sent before reset return now—the resources they bring back score for Day 3.",
+              "Immediately send another gathering march: the Bison ability activated before reset triggers and makes it return at once with a full load.",
+              "Once Bison’s actual cooldown has ended, use it again for another instant collection.",
+              "Use your daily trucks; escorting and a successful raid each give 10,000 points.",
+              "Do not spend Taming Marks, Charm materials, Pet resources or gems just for Alliance Brawl—save these KvK resources."
+            ],
+            "fr": [
+              "Laisse maintenant revenir les collecteurs envoyés avant le reset : les ressources rapportées comptent pour le jour 3.",
+              "Envoie immédiatement une nouvelle marche de collecte : la compétence du Bison activée avant le reset se déclenche et la fait revenir aussitôt avec une collecte complète.",
+              "Lorsque le véritable temps de recharge du Bison est terminé, utilise-le de nouveau pour une autre collecte instantanée.",
+              "Utilise tes camions quotidiens ; une escorte et un raid réussi rapportent chacun 10 000 points.",
+              "Ne dépense pas de marques de dressage, de matériaux de charme, de ressources de familiers ou de gemmes uniquement pour l’Alliance Brawl : garde ces ressources pour le KvK."
+            ]
+          }
+        },
+        "2026-10-15": {
+          "points": {
+            "de": "Intel-Missionen (3.000 Punkte), Trucks (je 10.000), Truppenausbildung (1–30 Punkte je Truppe nach Stufe), Amulettwert (45 je Punkt), Forgehammer (1.875), Widgets (3.750), Mithril (18.750) und Edelsteine (1 je Edelstein)",
+            "en": "Intel Missions (3,000 points), trucks (10,000 each), troop training (1–30 points per troop by level), Charm score (45 per point), Forgehammers (1,875), Widgets (3,750), Mithril (18,750) and gems (1 per gem)",
+            "fr": "Missions de renseignement (3 000 points), camions (10 000 chacun), entraînement de troupes (1–30 points par troupe selon le niveau), score de charme (45 par point), Marteaux de forge (1 875), Widgets (3 750), Mithril (18 750) et gemmes (1 par gemme)"
+          },
+          "prepare": {
+            "title": {
+              "de": "Ausdauer für Bestien und Schrecken morgen vorbereiten",
+              "en": "Prepare stamina for Beasts and Terrors tomorrow",
+              "fr": "Préparer l’endurance pour les Bêtes et Terreurs de demain"
+            },
+            "status": {
+              "de": "HEUTE VORBEREITEN",
+              "en": "PREPARE TODAY",
+              "fr": "PRÉPARER AUJOURD’HUI"
+            },
+            "steps": {
+              "de": [
+                "Spare heute deine Ausdauerkanister; verbrauche sie nicht nur für gewöhnliche Jagden.",
+                "Halte für den nächsten Reset freie Märsche bereit.",
+                "Morgen zuerst Schrecken-Rallys starten (15.000 Punkte), danach möglichst hochstufige Bestien jagen (bis zu 6.000 Punkte für Level 26–30).",
+                "Auch morgen keine Truegold-, Ausrüstungs- oder Speedup-Ressourcen nur für das Allianzgemenge verbrauchen."
+              ],
+              "en": [
+                "Save your stamina cans today; do not spend them only on routine hunts.",
+                "Keep marches available for the next reset.",
+                "Tomorrow, call Terror rallies first (15,000 points), then hunt the highest-level Beasts available (up to 6,000 points for levels 26–30).",
+                "Tomorrow, do not spend Truegold, gear or speedup resources just for Alliance Brawl."
+              ],
+              "fr": [
+                "Garde aujourd’hui tes réserves d’endurance ; ne les dépense pas uniquement pour des chasses ordinaires.",
+                "Garde des marches disponibles pour le prochain reset.",
+                "Demain, lance d’abord des rallies contre les Terreurs (15 000 points), puis chasse les Bêtes du niveau le plus élevé possible (jusqu’à 6 000 points pour les niveaux 26–30).",
+                "Demain également, ne dépense pas de Truegold, de ressources d’équipement ou d’accélérateurs uniquement pour l’Alliance Brawl."
+              ]
+            }
+          },
+          "steps": {
+            "de": [
+              "Schließe nach dem Reset zuerst die zurückgehaltenen 16:00-UTC-Intel-Missionen und Pans zusätzliche Mission ab; jede abgeschlossene Mission bringt 3.000 Punkte.",
+              "Erledige danach die neuen Intel-Missionen und nutze deine täglichen Trucks; Senden und erfolgreicher Überfall bringen jeweils 10.000 Punkte.",
+              "Nur wenn du ohnehin Truppen ausbildest oder beförderst: Sichere dir den Ministerposten „Edler Berater“, aktiviere vor dem Start der Ausbildung den Trainingsbonus für 3.000 Edelsteine und stelle sicher, dass die Truppen heute fertig werden.",
+              "Nutze Trainings-Speedups nur für ohnehin geplante Truppen – nicht allein für das Allianzgemenge.",
+              "Verbrauche keine Amulettmaterialien, Forgehammer, Widgets, Mithril oder Edelsteine nur für das Allianzgemenge; diese KvK-Ressourcen sparen."
+            ],
+            "en": [
+              "After reset, first complete the held 16:00 UTC Intel Missions and Pan’s extra mission; each completed mission gives 3,000 points.",
+              "Then complete the new Intel Missions and use your daily trucks; escorting and a successful raid each give 10,000 points.",
+              "Only if you are training or promoting troops anyway: secure the Noble Advisor ministerial post, activate the 3,000-gem training boost before starting training, and ensure the troops finish today.",
+              "Use training speedups only for troops you already planned—not solely for Alliance Brawl.",
+              "Do not spend Charm materials, Forgehammers, Widgets, Mithril or gems just for Alliance Brawl; save these KvK resources."
+            ],
+            "fr": [
+              "Après le reset, termine d’abord les missions de renseignement de 16:00 UTC conservées ainsi que la mission supplémentaire de Pan ; chaque mission terminée rapporte 3 000 points.",
+              "Termine ensuite les nouvelles missions de renseignement et utilise tes camions quotidiens ; une escorte et un raid réussi rapportent chacun 10 000 points.",
+              "Seulement si tu entraînes ou promeus déjà des troupes : obtiens le poste ministériel de Noble Conseiller, active le bonus d’entraînement à 3 000 gemmes avant de lancer l’entraînement et assure-toi que les troupes terminent aujourd’hui.",
+              "Utilise des accélérateurs d’entraînement uniquement pour des troupes déjà prévues, pas seulement pour l’Alliance Brawl.",
+              "Ne dépense pas de matériaux de charme, de Marteaux de forge, de Widgets, de Mithril ou de gemmes uniquement pour l’Alliance Brawl ; garde ces ressources pour le KvK."
+            ]
+          }
+        },
+        "2026-10-16": {
+          "points": {
+            "de": "Schrecken-Rallys (15.000 Punkte), Trucks (je 10.000), Bestien (4.000–6.000 nach Level), gehärtetes Truegold (18.750), Truegold (1.250), Truegold-Staub (625), Gouverneursausrüstung (22 je Wertungspunkt), Speedups (18 je Minute) und Edelsteine (1 je Edelstein)",
+            "en": "Terror rallies (15,000 points), trucks (10,000 each), Beasts (4,000–6,000 by level), Tempered Truegold (18,750), Truegold (1,250), Truegold Dust (625), Governor Gear (22 per score point), speedups (18 per minute) and gems (1 per gem)",
+            "fr": "Rallies contre les Terreurs (15 000 points), camions (10 000 chacun), Bêtes (4 000–6 000 selon le niveau), Truegold trempé (18 750), Truegold (1 250), poussière de Truegold (625), équipement du gouverneur (22 par point de score), accélérateurs (18 par minute) et gemmes (1 par gemme)"
+          },
+          "prepare": {
+            "title": {
+              "de": "Ausdauer und Märsche für Tag 6 bereithalten",
+              "en": "Keep stamina and marches ready for Day 6",
+              "fr": "Garder l’endurance et les marches prêtes pour le jour 6"
+            },
+            "status": {
+              "de": "FÜR MORGEN",
+              "en": "FOR TOMORROW",
+              "fr": "POUR DEMAIN"
+            },
+            "steps": {
+              "de": [
+                "Spare deine Ausdauerkanister; nutze heute vorzugsweise natürliche Ausdauer.",
+                "Halte zum nächsten Reset freie Märsche für neue Trucks, Schrecken-Rallys und Bestien bereit.",
+                "Beginne Tag 6 erneut mit Trucks und Jagd, bevor du überhaupt über Materialeinsatz nachdenkst.",
+                "Heldensplitter, Truegold, Ausrüstungs-, Amulett- und Pet-Materialien sowie Speedups bleiben für KvK reserviert."
+              ],
+              "en": [
+                "Save your stamina cans; preferably use natural stamina today.",
+                "Keep marches available at the next reset for new trucks, Terror rallies and Beasts.",
+                "Start Day 6 with trucks and hunting again before considering any material spending.",
+                "Keep Hero Shards, Truegold, gear, Charm and Pet materials, and speedups reserved for KvK."
+              ],
+              "fr": [
+                "Garde tes réserves d’endurance ; utilise de préférence l’endurance naturelle aujourd’hui.",
+                "Garde des marches disponibles au prochain reset pour les nouveaux camions, les rallies contre les Terreurs et les Bêtes.",
+                "Commence de nouveau le jour 6 avec les camions et la chasse avant d’envisager toute dépense de matériaux.",
+                "Conserve les fragments de héros, le Truegold, les matériaux d’équipement, de charme et de familiers ainsi que les accélérateurs pour le KvK."
+              ]
+            }
+          },
+          "steps": {
+            "de": [
+              "Nutze zuerst deine täglichen Trucks; Senden und erfolgreicher Überfall bringen jeweils 10.000 Punkte.",
+              "Setze danach natürliche Ausdauer ein: Starte Schrecken-Rallys für 15.000 Punkte und jage möglichst Bestien der Level 26–30 für 6.000 Punkte.",
+              "Falls keine hochstufige Bestie verfügbar ist, zählen auch niedrigere Level mit 4.000 bis 5.500 Punkten.",
+              "Verbrauche kein gehärtetes Truegold, Truegold, Truegold-Staub, Gouverneursausrüstung, Speedups oder Edelsteine nur für das Allianzgemenge.",
+              "Nutze Ausdauerkanister nur, wenn die zusätzliche Jagd unabhängig vom Gemenge sinnvoll ist; KvK-Vorräte haben Vorrang."
+            ],
+            "en": [
+              "Use your daily trucks first; escorting and a successful raid each give 10,000 points.",
+              "Then use natural stamina: call Terror rallies for 15,000 points and hunt level 26–30 Beasts where possible for 6,000 points.",
+              "If no high-level Beast is available, lower levels still give 4,000 to 5,500 points.",
+              "Do not spend Tempered Truegold, Truegold, Truegold Dust, Governor Gear resources, speedups or gems just for Alliance Brawl.",
+              "Use stamina cans only when the extra hunting is worthwhile independently of Brawl; KvK reserves take priority."
+            ],
+            "fr": [
+              "Utilise d’abord tes camions quotidiens ; une escorte et un raid réussi rapportent chacun 10 000 points.",
+              "Utilise ensuite l’endurance naturelle : lance des rallies contre les Terreurs pour 15 000 points et chasse si possible des Bêtes de niveau 26–30 pour 6 000 points.",
+              "Si aucune Bête de haut niveau n’est disponible, les niveaux inférieurs rapportent tout de même 4 000 à 5 500 points.",
+              "Ne dépense pas de Truegold trempé, de Truegold, de poussière de Truegold, de ressources d’équipement du gouverneur, d’accélérateurs ou de gemmes uniquement pour l’Alliance Brawl.",
+              "Utilise les réserves d’endurance seulement si la chasse supplémentaire est utile indépendamment de l’Alliance Brawl ; les réserves KvK restent prioritaires."
+            ]
+          }
+        },
+        "2026-10-17": {
+          "points": {
+            "de": "Gesamtwettbewerb: Schrecken-Rallys (15.000), Trucks (je 10.000), Bestien (4.000–6.000), Mithril und gehärtetes Truegold (je 18.750), Zähmungsmarken (9.370/680), Widgets (3.750), Forgehammer und mythische Splitter (je 1.875), Truegold (1.250), epische Splitter (750), Truegold-Staub (625), seltene Splitter (210), Amulettwert (45), Pet-Fortschritt (30), Ausrüstungswert (22), Speedups (18 je Minute) und Edelsteine (1 je Edelstein)",
+            "en": "Full-Scale Competition: Terror rallies (15,000), trucks (10,000 each), Beasts (4,000–6,000), Mithril and Tempered Truegold (18,750 each), Taming Marks (9,370/680), Widgets (3,750), Forgehammers and Mythic Shards (1,875 each), Truegold (1,250), Epic Shards (750), Truegold Dust (625), Rare Shards (210), Charm score (45), Pet Advancement (30), Gear score (22), speedups (18 per minute) and gems (1 per gem)",
+            "fr": "Compétition générale : rallies contre les Terreurs (15 000), camions (10 000 chacun), Bêtes (4 000–6 000), Mithril et Truegold trempé (18 750 chacun), marques de dressage (9 370/680), Widgets (3 750), Marteaux de forge et fragments mythiques (1 875 chacun), Truegold (1 250), fragments épiques (750), poussière de Truegold (625), fragments rares (210), score de charme (45), progression de familier (30), score d’équipement (22), accélérateurs (18 par minute) et gemmes (1 par gemme)"
+          },
+          "prepare": {
+            "title": {
+              "de": "Finalphase nach dem nächsten Reset fortsetzen",
+              "en": "Continue the final stage after the next reset",
+              "fr": "Continuer la phase finale après le prochain reset"
+            },
+            "status": {
+              "de": "36-STUNDEN-PHASE",
+              "en": "36-HOUR STAGE",
+              "fr": "PHASE DE 36 HEURES"
+            },
+            "steps": {
+              "de": [
+                "Der letzte Gemenge-Tag dauert 36 Stunden und läuft nach dem nächsten Reset weiter.",
+                "Spare Ausdauerkanister und halte freie Märsche für die neuen täglichen Trucks bereit.",
+                "Nutze morgen nach dem Reset zuerst die neuen Trucks, danach natürliche Ausdauer für Schrecken und hochstufige Bestien.",
+                "Prüfe den Ingame-Countdown und erledige diese kostenlosen Punkte rechtzeitig vor dem tatsächlichen Eventende."
+              ],
+              "en": [
+                "The final Brawl day lasts 36 hours and continues after the next reset.",
+                "Save stamina cans and keep marches available for the new daily trucks.",
+                "After tomorrow’s reset, use the new trucks first, then natural stamina on Terrors and high-level Beasts.",
+                "Check the in-game countdown and complete these free scoring actions before the event actually ends."
+              ],
+              "fr": [
+                "Le dernier jour de l’Alliance Brawl dure 36 heures et continue après le prochain reset.",
+                "Garde les réserves d’endurance et des marches disponibles pour les nouveaux camions quotidiens.",
+                "Après le reset de demain, utilise d’abord les nouveaux camions, puis l’endurance naturelle contre les Terreurs et les Bêtes de haut niveau.",
+                "Vérifie le compte à rebours en jeu et réalise ces actions gratuites avant la fin effective de l’événement."
+              ]
+            }
+          },
+          "steps": {
+            "de": [
+              "Wenn möglich, warte im Handelsimperium ungefähr zehn Stunden nach dem Reset, bevor du deine Karawanen sendest; später finden erfahrungsgemäß weniger Angriffe statt.",
+              "Nutze deine täglichen Trucks; Senden und erfolgreicher Überfall bringen jeweils 10.000 Punkte.",
+              "Setze anschließend natürliche Ausdauer ein: Schrecken-Rallys bringen 15.000 Punkte, Bestien der Level 26–30 jeweils 6.000 Punkte.",
+              "Die Finalphase dauert 36 Stunden – es besteht kein Grund, heute KvK-Vorräte zu verbrennen.",
+              "Verbrauche keine Helden-, Truegold-, Ausrüstungs-, Amulett- oder Pet-Materialien, Speedups, Mithril oder Edelsteine nur für das Allianzgemenge."
+            ],
+            "en": [
+              "If possible, wait about ten hours after reset before sending Merchant Empire caravans; fewer attacks usually happen later.",
+              "Use your daily trucks; escorting and a successful raid each give 10,000 points.",
+              "Then use natural stamina: Terror rallies give 15,000 points, while level 26–30 Beasts give 6,000 each.",
+              "The final stage lasts 36 hours—there is no reason to burn KvK reserves today.",
+              "Do not spend Hero, Truegold, gear, Charm or Pet materials, speedups, Mithril or gems just for Alliance Brawl."
+            ],
+            "fr": [
+              "Si possible, attends environ dix heures après le reset avant d’envoyer tes caravanes de l’Empire commercial ; les attaques sont généralement moins nombreuses plus tard.",
+              "Utilise tes camions quotidiens ; une escorte et un raid réussi rapportent chacun 10 000 points.",
+              "Utilise ensuite l’endurance naturelle : les rallies contre les Terreurs rapportent 15 000 points et les Bêtes de niveau 26–30 rapportent 6 000 points chacune.",
+              "La phase finale dure 36 heures : il n’y a aucune raison de brûler les réserves KvK aujourd’hui.",
+              "Ne dépense pas de fragments de héros, de Truegold, de matériaux d’équipement, de charme ou de familiers, d’accélérateurs, de Mithril ou de gemmes uniquement pour l’Alliance Brawl."
+            ]
+          }
+        },
+        "2026-10-18": {
+          "points": {
+            "de": "Finalphase: Schrecken-Rallys (15.000), Trucks (je 10.000), Bestien (4.000–6.000), Mithril und gehärtetes Truegold (je 18.750), Zähmungsmarken (9.370/680), Widgets (3.750), Forgehammer und mythische Splitter (je 1.875), Truegold (1.250), epische Splitter (750), Truegold-Staub (625), seltene Splitter (210), Amulettwert (45), Pet-Fortschritt (30), Ausrüstungswert (22), Speedups (18 je Minute) und Edelsteine (1 je Edelstein)",
+            "en": "Final stage: Terror rallies (15,000), trucks (10,000 each), Beasts (4,000–6,000), Mithril and Tempered Truegold (18,750 each), Taming Marks (9,370/680), Widgets (3,750), Forgehammers and Mythic Shards (1,875 each), Truegold (1,250), Epic Shards (750), Truegold Dust (625), Rare Shards (210), Charm score (45), Pet Advancement (30), Gear score (22), speedups (18 per minute) and gems (1 per gem)",
+            "fr": "Phase finale : rallies contre les Terreurs (15 000), camions (10 000 chacun), Bêtes (4 000–6 000), Mithril et Truegold trempé (18 750 chacun), marques de dressage (9 370/680), Widgets (3 750), Marteaux de forge et fragments mythiques (1 875 chacun), Truegold (1 250), fragments épiques (750), poussière de Truegold (625), fragments rares (210), score de charme (45), progression de familier (30), score d’équipement (22), accélérateurs (18 par minute) et gemmes (1 par gemme)"
+          },
+          "prepare": {
+            "title": {
+              "de": "Keine Vorbereitung für morgen erforderlich",
+              "en": "No preparation required for tomorrow",
+              "fr": "Aucune préparation nécessaire pour demain"
+            },
+            "status": {
+              "de": "EVENTENDE HEUTE",
+              "en": "EVENT ENDS TODAY",
+              "fr": "FIN DE L’ÉVÉNEMENT AUJOURD’HUI"
+            },
+            "steps": {
+              "de": [
+                "Der 36-Stunden-Finaltag endet heute; prüfe die verbleibende Zeit direkt im Spiel.",
+                "Nach dem Ende keine Ressourcen mehr für das Allianzgemenge einsetzen.",
+                "Bewahre sämtliche Helden-, Truegold-, Ausrüstungs-, Amulett- und Pet-Materialien sowie Speedups für KvK auf."
+              ],
+              "en": [
+                "The 36-hour final day ends today; check the remaining time directly in game.",
+                "Do not spend any resources on Alliance Brawl after it ends.",
+                "Keep all Hero, Truegold, gear, Charm and Pet materials, plus speedups, for KvK."
+              ],
+              "fr": [
+                "La journée finale de 36 heures se termine aujourd’hui ; vérifie le temps restant directement dans le jeu.",
+                "Ne dépense plus aucune ressource pour l’Alliance Brawl après sa fin.",
+                "Conserve tous les fragments de héros, le Truegold, les matériaux d’équipement, de charme et de familiers ainsi que les accélérateurs pour le KvK."
+              ]
+            }
+          },
+          "steps": {
+            "de": [
+              "Nutze zuerst die nach dem Reset erneuerten Trucks; Senden und erfolgreicher Überfall bringen jeweils 10.000 Punkte.",
+              "Wenn du mit dem Senden wartest, achte heute besonders auf den Ingame-Countdown, damit die Karawanen noch vor dem Eventende zählen.",
+              "Nutze anschließend natürliche Ausdauer: Schrecken-Rallys bringen 15.000 Punkte, Bestien der Level 26–30 jeweils 6.000 Punkte.",
+              "Verbrauche auch in den letzten Stunden keine Helden-, Truegold-, Ausrüstungs-, Amulett- oder Pet-Materialien, Speedups, Mithril oder Edelsteine nur für das Allianzgemenge.",
+              "Sobald das Event endet, sofort stoppen; nicht versuchen, eine weitere Belohnungsstufe mit KvK-Vorräten zu erzwingen."
+            ],
+            "en": [
+              "Use the trucks refreshed after reset first; escorting and a successful raid each give 10,000 points.",
+              "If you delay sending them, watch the in-game countdown carefully today so the caravans still score before the event ends.",
+              "Then use natural stamina: Terror rallies give 15,000 points, while level 26–30 Beasts give 6,000 each.",
+              "Even during the final hours, do not spend Hero, Truegold, gear, Charm or Pet materials, speedups, Mithril or gems just for Alliance Brawl.",
+              "Stop immediately when the event ends; do not force another reward milestone with KvK reserves."
+            ],
+            "fr": [
+              "Utilise d’abord les camions renouvelés après le reset ; une escorte et un raid réussi rapportent chacun 10 000 points.",
+              "Si tu retardes leur envoi, surveille attentivement le compte à rebours en jeu afin que les caravanes comptent avant la fin de l’événement.",
+              "Utilise ensuite l’endurance naturelle : les rallies contre les Terreurs rapportent 15 000 points et les Bêtes de niveau 26–30 rapportent 6 000 points chacune.",
+              "Même pendant les dernières heures, ne dépense pas de fragments de héros, de Truegold, de matériaux d’équipement, de charme ou de familiers, d’accélérateurs, de Mithril ou de gemmes uniquement pour l’Alliance Brawl.",
+              "Arrête immédiatement lorsque l’événement se termine ; ne force pas un palier supplémentaire avec les réserves KvK."
+            ]
+          }
+        }
+      },
+      "sourceUrl": "https://kingshotdata.com/events/alliance-brawl-event/"
+    },
+    {
+      "id": "merchant-empire-2026-10-12",
+      "start": "2026-10-12",
+      "end": "2026-10-18",
+      "icon": "🏛️",
+      "iconUrl": "https://kingshotdata.com/uploads/2025/07/merchant-empire-event-icon.webp",
+      "confidence": "predicted",
+      "name": {
+        "de": "Handelsimperium",
+        "en": "Merchant Empire",
+        "fr": "Empire commercial"
+      },
+      "tips": {
+        "de": [
+          "Warte nach dem täglichen Reset ungefähr zehn Stunden, bevor du deine Karawanen sendest; später finden erfahrungsgemäß weniger Angriffe statt.",
+          "Täglich vier Karawanen senden und bis zu vier erfolgreiche Überfälle nutzen.",
+          "Zuerst die Gratis-Aktualisierung und Karawanengutscheine verwenden; Edelsteine nur bewusst einsetzen.",
+          "Für wertvolle Karawanen starke Allianzunterstützung anfordern und vor Überfällen Ladung sowie Feuersymbole prüfen."
+        ],
+        "en": [
+          "Wait about ten hours after the daily reset before sending your caravans; fewer attacks usually happen later.",
+          "Send four caravans daily and use up to four successful raids.",
+          "Use the free refresh and Caravan Vouchers first; spend gems deliberately.",
+          "Request strong alliance support for valuable caravans and check cargo plus fire icons before raiding."
+        ],
+        "fr": [
+          "Attends environ dix heures après le reset quotidien avant d’envoyer tes caravanes ; les attaques sont généralement moins nombreuses plus tard.",
+          "Envoie quatre caravanes par jour et utilise jusqu’à quatre raids réussis.",
+          "Utilise d’abord l’actualisation gratuite et les bons de caravane ; dépense les gemmes avec prudence.",
+          "Demande une forte assistance pour les caravanes précieuses et vérifie la cargaison ainsi que les icônes de feu avant un raid."
+        ]
+      },
+      "sourceUrl": "https://centurygames.helpshift.com/hc/en/140-kingshot/section/1501-merchant-empire/"
+    },
+    {
+      "id": "armament-competition-type1-2026-10-12",
+      "start": "2026-10-12",
+      "end": "2026-10-13",
+      "icon": "🛡️",
+      "iconUrl": "https://kingshotdata.com/uploads/2025/04/city-development-event-icon.webp",
+      "confidence": "predicted",
+      "name": {
+        "de": "Rüstungswettbewerb · Handwerkervision",
+        "en": "Armament Competition · Artisan’s Vision",
+        "fr": "Compétition d’armement · Vision d’artisan"
+      },
+      "dailyPlans": {
+        "2026-10-12": {
+          "points": {
+            "de": "Ausrüstung +1: 3 · Truegold: 100 · Truegoldstaub: 50 · Gehärtetes Truegold: 1.500 · Splitter mythisch/episch/selten: 125/50/15 · Meisteremblem: 200 · Manuskript: 2 · 1 Min. Beschleuniger: 1",
+            "en": "Gear +1: 3 · Truegold: 100 · Truegold Dust: 50 · Tempered Truegold: 1,500 · mythic/epic/rare shard: 125/50/15 · Master Emblem: 200 · Manuscript: 2 · 1 min speedup: 1",
+            "fr": "Équipement +1 : 3 · Or véritable : 100 · Poussière : 50 · Or trempé : 1 500 · fragment mythique/épique/rare : 125/50/15 · Emblème : 200 · Manuscrit : 2 · 1 min d’accélération : 1"
+          },
+          "steps": {
+            "de": [
+              "Dieses Event kann vollständig ausgelassen werden; die Belohnungen rechtfertigen den Einsatz von KvK-Ressourcen nicht.",
+              "Truegold, Gehärtetes Truegold, Splitter, Meistermaterialien und Beschleuniger für die KvK-Vorbereitung sparen.",
+              "Wenn du trotzdem Punkte machst, ausschließlich ohnehin geplante Aktionen nutzen und spätestens bei insgesamt 60.000 Punkten stoppen.",
+              "60.000 Punkte sind die strikte 3×-Gesamtgrenze und ausdrücklich keine Empfehlung."
+            ],
+            "en": [
+              "This event can be skipped completely; the rewards do not justify spending KvK resources.",
+              "Save Truegold, Tempered Truegold, shards, Master materials and speedups for KvK preparation.",
+              "If you score anyway, use only actions you already planned and stop at 60,000 total points at the latest.",
+              "60,000 points is the strict 3× total limit and explicitly not a recommendation."
+            ],
+            "fr": [
+              "Cet événement peut être entièrement ignoré ; les récompenses ne justifient pas l’utilisation de ressources KvK.",
+              "Conserve l’Or véritable, l’Or trempé, les fragments, les matériaux de Maître et les accélérateurs pour la préparation KvK.",
+              "Si tu marques malgré tout, utilise uniquement des actions déjà prévues et arrête-toi au plus tard à 60 000 points au total.",
+              "60 000 points constituent la limite totale stricte de 3× et ne sont explicitement pas une recommandation."
+            ]
+          },
+          "limits": {
+            "hardCap": 60000,
+            "note": {
+              "de": "60.000 Punkte sind die strikte 3×-Gesamtgrenze – keine Empfehlung.",
+              "en": "60,000 points is the strict 3× total limit, not a recommendation.",
+              "fr": "60 000 points constituent la limite totale stricte de 3×, pas une recommandation."
+            }
+          }
+        },
+        "2026-10-13": {
+          "points": {
+            "de": "Ausrüstung +1: 3 · Truegold: 100 · Truegoldstaub: 50 · Gehärtetes Truegold: 1.500 · Splitter mythisch/episch/selten: 125/50/15 · Meisteremblem: 200 · Manuskript: 2 · 1 Min. Beschleuniger: 1",
+            "en": "Gear +1: 3 · Truegold: 100 · Truegold Dust: 50 · Tempered Truegold: 1,500 · mythic/epic/rare shard: 125/50/15 · Master Emblem: 200 · Manuscript: 2 · 1 min speedup: 1",
+            "fr": "Équipement +1 : 3 · Or véritable : 100 · Poussière : 50 · Or trempé : 1 500 · fragment mythique/épique/rare : 125/50/15 · Emblème : 200 · Manuscrit : 2 · 1 min d’accélération : 1"
+          },
+          "steps": {
+            "de": [
+              "Dieses Event kann vollständig ausgelassen werden; die Belohnungen rechtfertigen den Einsatz von KvK-Ressourcen nicht.",
+              "Truegold, Gehärtetes Truegold, Splitter, Meistermaterialien und Beschleuniger für die KvK-Vorbereitung sparen.",
+              "Wenn du trotzdem Punkte machst, ausschließlich ohnehin geplante Aktionen nutzen und spätestens bei insgesamt 60.000 Punkten stoppen.",
+              "60.000 Punkte sind die strikte 3×-Gesamtgrenze und ausdrücklich keine Empfehlung."
+            ],
+            "en": [
+              "This event can be skipped completely; the rewards do not justify spending KvK resources.",
+              "Save Truegold, Tempered Truegold, shards, Master materials and speedups for KvK preparation.",
+              "If you score anyway, use only actions you already planned and stop at 60,000 total points at the latest.",
+              "60,000 points is the strict 3× total limit and explicitly not a recommendation."
+            ],
+            "fr": [
+              "Cet événement peut être entièrement ignoré ; les récompenses ne justifient pas l’utilisation de ressources KvK.",
+              "Conserve l’Or véritable, l’Or trempé, les fragments, les matériaux de Maître et les accélérateurs pour la préparation KvK.",
+              "Si tu marques malgré tout, utilise uniquement des actions déjà prévues et arrête-toi au plus tard à 60 000 points au total.",
+              "60 000 points constituent la limite totale stricte de 3× et ne sont explicitement pas une recommandation."
+            ]
+          },
+          "limits": {
+            "hardCap": 60000,
+            "note": {
+              "de": "60.000 Punkte sind die strikte 3×-Gesamtgrenze – keine Empfehlung.",
+              "en": "60,000 points is the strict 3× total limit, not a recommendation.",
+              "fr": "60 000 points constituent la limite totale stricte de 3×, pas une recommandation."
+            }
+          }
+        }
+      },
+      "sourceUrl": "https://kingshotdata.com/events/armament-competition/"
+    },
+    {
+      "id": "officer-project-forgehammers-2026-10-14",
+      "start": "2026-10-14",
+      "end": "2026-10-15",
+      "icon": "🎖️",
+      "iconUrl": "https://kingshotdata.com/uploads/2025/03/power-up-event-icon.webp",
+      "confidence": "predicted",
+      "name": {
+        "de": "Offiziersprojekt · Schmiedehämmer",
+        "en": "Officer Project · Forgehammers",
+        "fr": "Projet d’officier · Marteaux de forge"
+      },
+      "dailyPlans": {
+        "2026-10-14": {
+          "points": {
+            "de": "Amulette +1: 70 · Schmiedehammer: 6.000 · Mithril: 60.000 · Widget: 12.000 · Truppen T11–T1: 37/30/22/17/12/9/6/4/3/2/1",
+            "en": "Charm +1: 70 · Forgehammer: 6,000 · Mithril: 60,000 · Widget: 12,000 · troops T11–T1: 37/30/22/17/12/9/6/4/3/2/1",
+            "fr": "Amulette +1 : 70 · Marteau : 6 000 · Mithril : 60 000 · Widget : 12 000 · troupes T11–T1 : 37/30/22/17/12/9/6/4/3/2/1"
+          },
+          "steps": {
+            "de": [
+              "Die Belohnung sind Schmiedehämmer; Punkte entstehen durch Amulette, Mithril, Widgets, Schmiedehämmer und Truppen.",
+              "Mithril, Widgets, Schmiedehämmer und Amulettmaterialien möglichst vollständig für KvK Tag 4/5 sparen.",
+              "Truppen nur normal weitertrainieren; keinen zusätzlichen KvK-Vorrat ausschließlich für dieses Event verbrauchen.",
+              "Wenn du ein lohnendes persönliches Ziel abschließt, spätestens bei insgesamt 930.000 Punkten stoppen. Das ist die strikte 3×-Grenze, keine Empfehlung."
+            ],
+            "en": [
+              "The reward is Forgehammers; points come from Charms, Mithril, Widgets, Forgehammers and troops.",
+              "Save Mithril, Widgets, Forgehammers and Charm materials for KvK Day 4/5 whenever possible.",
+              "Train troops normally; do not consume extra KvK stock solely for this event.",
+              "If you complete a worthwhile personal milestone, stop at 930,000 total points at the latest. This is the strict 3× limit, not a recommendation."
+            ],
+            "fr": [
+              "La récompense est constituée de Marteaux ; les points viennent des Amulettes, du Mithril, des Widgets, des Marteaux et des troupes.",
+              "Conserve autant que possible le Mithril, les Widgets, les Marteaux et les matériaux d’Amulette pour les Jours KvK 4/5.",
+              "Entraîne les troupes normalement ; ne consomme pas de réserve KvK supplémentaire uniquement pour cet événement.",
+              "Si tu atteins un palier personnel rentable, arrête-toi au plus tard à 930 000 points au total. C’est la limite stricte de 3×, pas une recommandation."
+            ]
+          },
+          "limits": {
+            "hardCap": 930000,
+            "note": {
+              "de": "930.000 Punkte sind die strikte 3×-Gesamtgrenze – keine Empfehlung.",
+              "en": "930,000 points is the strict 3× total limit, not a recommendation.",
+              "fr": "930 000 points constituent la limite totale stricte de 3×, pas une recommandation."
+            }
+          }
+        },
+        "2026-10-15": {
+          "points": {
+            "de": "Amulette +1: 70 · Schmiedehammer: 6.000 · Mithril: 60.000 · Widget: 12.000 · Truppen T11–T1: 37/30/22/17/12/9/6/4/3/2/1",
+            "en": "Charm +1: 70 · Forgehammer: 6,000 · Mithril: 60,000 · Widget: 12,000 · troops T11–T1: 37/30/22/17/12/9/6/4/3/2/1",
+            "fr": "Amulette +1 : 70 · Marteau : 6 000 · Mithril : 60 000 · Widget : 12 000 · troupes T11–T1 : 37/30/22/17/12/9/6/4/3/2/1"
+          },
+          "steps": {
+            "de": [
+              "Die Belohnung sind Schmiedehämmer; Punkte entstehen durch Amulette, Mithril, Widgets, Schmiedehämmer und Truppen.",
+              "Mithril, Widgets, Schmiedehämmer und Amulettmaterialien möglichst vollständig für KvK Tag 4/5 sparen.",
+              "Truppen nur normal weitertrainieren; keinen zusätzlichen KvK-Vorrat ausschließlich für dieses Event verbrauchen.",
+              "Wenn du ein lohnendes persönliches Ziel abschließt, spätestens bei insgesamt 930.000 Punkten stoppen. Das ist die strikte 3×-Grenze, keine Empfehlung."
+            ],
+            "en": [
+              "The reward is Forgehammers; points come from Charms, Mithril, Widgets, Forgehammers and troops.",
+              "Save Mithril, Widgets, Forgehammers and Charm materials for KvK Day 4/5 whenever possible.",
+              "Train troops normally; do not consume extra KvK stock solely for this event.",
+              "If you complete a worthwhile personal milestone, stop at 930,000 total points at the latest. This is the strict 3× limit, not a recommendation."
+            ],
+            "fr": [
+              "La récompense est constituée de Marteaux ; les points viennent des Amulettes, du Mithril, des Widgets, des Marteaux et des troupes.",
+              "Conserve autant que possible le Mithril, les Widgets, les Marteaux et les matériaux d’Amulette pour les Jours KvK 4/5.",
+              "Entraîne les troupes normalement ; ne consomme pas de réserve KvK supplémentaire uniquement pour cet événement.",
+              "Si tu atteins un palier personnel rentable, arrête-toi au plus tard à 930 000 points au total. C’est la limite stricte de 3×, pas une recommandation."
+            ]
+          },
+          "limits": {
+            "hardCap": 930000,
+            "note": {
+              "de": "930.000 Punkte sind die strikte 3×-Gesamtgrenze – keine Empfehlung.",
+              "en": "930,000 points is the strict 3× total limit, not a recommendation.",
+              "fr": "930 000 points constituent la limite totale stricte de 3×, pas une recommandation."
+            }
+          }
+        }
+      },
+      "sourceUrl": "https://kingshotdata.com/events/officer-project-event/"
+    },
+    {
+      "id": "armament-competition-type2-2026-10-16",
+      "start": "2026-10-16",
+      "end": "2026-10-17",
+      "icon": "🛡️",
+      "iconUrl": "https://kingshotdata.com/uploads/2025/04/city-development-event-icon.webp",
+      "confidence": "predicted",
+      "name": {
+        "de": "Rüstungswettbewerb · Truegold",
+        "en": "Armament Competition · Truegold",
+        "fr": "Compétition d’armement · Or véritable"
+      },
+      "dailyPlans": {
+        "2026-10-16": {
+          "points": {
+            "de": "Truegold: 100 · Truegoldstaub: 50 · Gehärtetes Truegold: 1.500 · Ausrüstung +1: 3 · Schmiedehammer: 800 · Mithril: 8.000 · Widget: 1.600 · 1 Min. Beschleuniger: 1",
+            "en": "Truegold: 100 · Truegold Dust: 50 · Tempered Truegold: 1,500 · Gear +1: 3 · Forgehammer: 800 · Mithril: 8,000 · Widget: 1,600 · 1 min speedup: 1",
+            "fr": "Or véritable : 100 · Poussière : 50 · Or trempé : 1 500 · Équipement +1 : 3 · Marteau : 800 · Mithril : 8 000 · Widget : 1 600 · 1 min d’accélération : 1"
+          },
+          "steps": {
+            "de": [
+              "Dieses Event kann vollständig ausgelassen werden; die Belohnungen sind den Einsatz der unmittelbar vor KvK benötigten Materialien nicht wert.",
+              "Truegold, Mithril, Widgets, Schmiedehämmer und Beschleuniger für die KvK-Vorbereitung zurückhalten.",
+              "Wenn du trotzdem Punkte machst, nur ohnehin geplante Aktionen nutzen und spätestens bei insgesamt 60.000 Punkten stoppen.",
+              "60.000 Punkte sind die strikte 3×-Gesamtgrenze und ausdrücklich keine Empfehlung."
+            ],
+            "en": [
+              "This event can be skipped completely; the rewards are not worth using materials needed immediately for KvK.",
+              "Hold Truegold, Mithril, Widgets, Forgehammers and speedups for KvK preparation.",
+              "If you score anyway, use only actions you already planned and stop at 60,000 total points at the latest.",
+              "60,000 points is the strict 3× total limit and explicitly not a recommendation."
+            ],
+            "fr": [
+              "Cet événement peut être entièrement ignoré ; les récompenses ne valent pas les matériaux nécessaires immédiatement pour le KvK.",
+              "Garde l’Or véritable, le Mithril, les Widgets, les Marteaux et les accélérateurs pour la préparation KvK.",
+              "Si tu marques malgré tout, utilise uniquement des actions déjà prévues et arrête-toi au plus tard à 60 000 points au total.",
+              "60 000 points constituent la limite totale stricte de 3× et ne sont explicitement pas une recommandation."
+            ]
+          },
+          "limits": {
+            "hardCap": 60000,
+            "note": {
+              "de": "60.000 Punkte sind die strikte 3×-Gesamtgrenze – keine Empfehlung.",
+              "en": "60,000 points is the strict 3× total limit, not a recommendation.",
+              "fr": "60 000 points constituent la limite totale stricte de 3×, pas une recommandation."
+            }
+          }
+        },
+        "2026-10-17": {
+          "points": {
+            "de": "Truegold: 100 · Truegoldstaub: 50 · Gehärtetes Truegold: 1.500 · Ausrüstung +1: 3 · Schmiedehammer: 800 · Mithril: 8.000 · Widget: 1.600 · 1 Min. Beschleuniger: 1",
+            "en": "Truegold: 100 · Truegold Dust: 50 · Tempered Truegold: 1,500 · Gear +1: 3 · Forgehammer: 800 · Mithril: 8,000 · Widget: 1,600 · 1 min speedup: 1",
+            "fr": "Or véritable : 100 · Poussière : 50 · Or trempé : 1 500 · Équipement +1 : 3 · Marteau : 800 · Mithril : 8 000 · Widget : 1 600 · 1 min d’accélération : 1"
+          },
+          "steps": {
+            "de": [
+              "Dieses Event kann vollständig ausgelassen werden; die Belohnungen sind den Einsatz der unmittelbar vor KvK benötigten Materialien nicht wert.",
+              "Truegold, Mithril, Widgets, Schmiedehämmer und Beschleuniger für die KvK-Vorbereitung zurückhalten.",
+              "Wenn du trotzdem Punkte machst, nur ohnehin geplante Aktionen nutzen und spätestens bei insgesamt 60.000 Punkten stoppen.",
+              "60.000 Punkte sind die strikte 3×-Gesamtgrenze und ausdrücklich keine Empfehlung."
+            ],
+            "en": [
+              "This event can be skipped completely; the rewards are not worth using materials needed immediately for KvK.",
+              "Hold Truegold, Mithril, Widgets, Forgehammers and speedups for KvK preparation.",
+              "If you score anyway, use only actions you already planned and stop at 60,000 total points at the latest.",
+              "60,000 points is the strict 3× total limit and explicitly not a recommendation."
+            ],
+            "fr": [
+              "Cet événement peut être entièrement ignoré ; les récompenses ne valent pas les matériaux nécessaires immédiatement pour le KvK.",
+              "Garde l’Or véritable, le Mithril, les Widgets, les Marteaux et les accélérateurs pour la préparation KvK.",
+              "Si tu marques malgré tout, utilise uniquement des actions déjà prévues et arrête-toi au plus tard à 60 000 points au total.",
+              "60 000 points constituent la limite totale stricte de 3× et ne sont explicitement pas une recommandation."
+            ]
+          },
+          "limits": {
+            "hardCap": 60000,
+            "note": {
+              "de": "60.000 Punkte sind die strikte 3×-Gesamtgrenze – keine Empfehlung.",
+              "en": "60,000 points is the strict 3× total limit, not a recommendation.",
+              "fr": "60 000 points constituent la limite totale stricte de 3×, pas une recommandation."
+            }
+          }
+        }
+      },
+      "sourceUrl": "https://kingshotdata.com/events/armament-competition/"
+    },
+    {
+      "id": "officer-project-charm-designs-2026-10-18",
+      "start": "2026-10-18",
+      "end": "2026-10-19",
+      "icon": "🎖️",
+      "iconUrl": "https://kingshotdata.com/uploads/2025/03/power-up-event-icon.webp",
+      "confidence": "predicted",
+      "name": {
+        "de": "Offiziersprojekt · Amulettdesigns",
+        "en": "Officer Project · Charm Designs",
+        "fr": "Projet d’officier · Plans d’amulette"
+      },
+      "dailyPlans": {
+        "2026-10-18": {
+          "points": {
+            "de": "Ausrüstung +1: 70 · Splitter mythisch/episch/selten: 3.040/1.220/350 · Schmiedehammer: 6.000 · Widget: 12.000",
+            "en": "Gear +1: 70 · mythic/epic/rare shard: 3,040/1,220/350 · Forgehammer: 6,000 · Widget: 12,000",
+            "fr": "Équipement +1 : 70 · fragment mythique/épique/rare : 3 040/1 220/350 · Marteau : 6 000 · Widget : 12 000"
+          },
+          "steps": {
+            "de": [
+              "Die Belohnung sind Amulettdesigns; Punkte entstehen dagegen durch Ausrüstung, Heldensplitter, Widgets und Schmiedehämmer.",
+              "Am 04.10. während des Matchmakings nichts nur für dieses Event ausgeben. Splitter und Ausrüstungsmaterialien für die passenden KvK-Tage sparen.",
+              "Am 05.10. hat der KvK-Tagesplan Vorrang; Offiziersprojekt nur als Überschneidung nutzen, wenn dieselbe geplante Aktion in beiden Events zählt.",
+              "Spätestens bei insgesamt 1.359.000 Punkten stoppen. Das ist die strikte 3×-Grenze, keine Empfehlung."
+            ],
+            "en": [
+              "The reward is Charm Designs; points instead come from Gear, Hero Shards, Widgets and Forgehammers.",
+              "Do not spend solely for this event during matchmaking on 4 Oct. Save shards and gear materials for the matching KvK days.",
+              "On 5 Oct, the KvK daily plan takes priority; use Officer Project only as an overlap when the same planned action scores in both events.",
+              "Stop at 1,359,000 total points at the latest. This is the strict 3× limit, not a recommendation."
+            ],
+            "fr": [
+              "La récompense est constituée de Plans d’Amulette ; les points viennent toutefois de l’Équipement, des fragments de héros, des Widgets et des Marteaux.",
+              "Le 4 octobre, pendant le matchmaking, ne dépense rien uniquement pour cet événement. Garde les fragments et matériaux d’équipement pour les jours KvK adaptés.",
+              "Le 5 octobre, le plan quotidien KvK est prioritaire ; utilise le Projet d’officier seulement si une même action planifiée marque dans les deux événements.",
+              "Arrête-toi au plus tard à 1 359 000 points au total. C’est la limite stricte de 3×, pas une recommandation."
+            ]
+          },
+          "limits": {
+            "hardCap": 1359000,
+            "note": {
+              "de": "1.359.000 Punkte sind die strikte 3×-Gesamtgrenze – keine Empfehlung.",
+              "en": "1,359,000 points is the strict 3× total limit, not a recommendation.",
+              "fr": "1 359 000 points constituent la limite totale stricte de 3×, pas une recommandation."
+            }
+          }
+        },
+        "2026-10-19": {
+          "points": {
+            "de": "Ausrüstung +1: 70 · Splitter mythisch/episch/selten: 3.040/1.220/350 · Schmiedehammer: 6.000 · Widget: 12.000",
+            "en": "Gear +1: 70 · mythic/epic/rare shard: 3,040/1,220/350 · Forgehammer: 6,000 · Widget: 12,000",
+            "fr": "Équipement +1 : 70 · fragment mythique/épique/rare : 3 040/1 220/350 · Marteau : 6 000 · Widget : 12 000"
+          },
+          "steps": {
+            "de": [
+              "Die Belohnung sind Amulettdesigns; Punkte entstehen dagegen durch Ausrüstung, Heldensplitter, Widgets und Schmiedehämmer.",
+              "Am 04.10. während des Matchmakings nichts nur für dieses Event ausgeben. Splitter und Ausrüstungsmaterialien für die passenden KvK-Tage sparen.",
+              "Am 05.10. hat der KvK-Tagesplan Vorrang; Offiziersprojekt nur als Überschneidung nutzen, wenn dieselbe geplante Aktion in beiden Events zählt.",
+              "Spätestens bei insgesamt 1.359.000 Punkten stoppen. Das ist die strikte 3×-Grenze, keine Empfehlung."
+            ],
+            "en": [
+              "The reward is Charm Designs; points instead come from Gear, Hero Shards, Widgets and Forgehammers.",
+              "Do not spend solely for this event during matchmaking on 4 Oct. Save shards and gear materials for the matching KvK days.",
+              "On 5 Oct, the KvK daily plan takes priority; use Officer Project only as an overlap when the same planned action scores in both events.",
+              "Stop at 1,359,000 total points at the latest. This is the strict 3× limit, not a recommendation."
+            ],
+            "fr": [
+              "La récompense est constituée de Plans d’Amulette ; les points viennent toutefois de l’Équipement, des fragments de héros, des Widgets et des Marteaux.",
+              "Le 4 octobre, pendant le matchmaking, ne dépense rien uniquement pour cet événement. Garde les fragments et matériaux d’équipement pour les jours KvK adaptés.",
+              "Le 5 octobre, le plan quotidien KvK est prioritaire ; utilise le Projet d’officier seulement si une même action planifiée marque dans les deux événements.",
+              "Arrête-toi au plus tard à 1 359 000 points au total. C’est la limite stricte de 3×, pas une recommandation."
+            ]
+          },
+          "limits": {
+            "hardCap": 1359000,
+            "note": {
+              "de": "1.359.000 Punkte sind die strikte 3×-Gesamtgrenze – keine Empfehlung.",
+              "en": "1,359,000 points is the strict 3× total limit, not a recommendation.",
+              "fr": "1 359 000 points constituent la limite totale stricte de 3×, pas une recommandation."
+            }
+          }
+        }
+      },
+      "sourceUrl": "https://kingshotdata.com/events/officer-project-event/"
     }
   ]
 }
