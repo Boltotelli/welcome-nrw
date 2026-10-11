@@ -571,7 +571,8 @@ async function inspect(file){
    ENTRY.flagAmbiguousCounts?.(troopEntries,{});
    Object.assign(values,ENTRY.totals(troopEntries));
    if(TROOP?.recognizeEntries){
-    troopTiers=await TROOP.recognizeEntries(canvas,troopEntries,worker);
+    try{troopTiers=await TROOP.recognizeEntries(canvas,troopEntries,worker);}
+    catch(_){troopTiers=null;/* Badge OCR cannot block confirmed troop counts. */}
    }
   }
  }
@@ -706,7 +707,7 @@ function renderQueue(){
      // portrait recognition path as automatic overview detection.
      item.matcherInfo=await MATCHER.enrich(item.cards);
     }else item.matcherInfo=null;
-    item.troopTiers=null;if(item.type==='troops'&&item.canvas&&TROOP?.recognizeEntries) item.troopTiers=await TROOP.recognizeEntries(item.canvas,item.troopEntries,await loadOCR());renderQueue();});
+    item.troopTiers=null;if(item.type==='troops'&&item.canvas&&TROOP?.recognizeEntries)try{item.troopTiers=await TROOP.recognizeEntries(item.canvas,item.troopEntries,await loadOCR());}catch(_){}renderQueue();});
   header.append(title,type);card.appendChild(header);
   const content=document.createElement('div');content.className='bear-intake-values';
   if(item.type==='troops'||item.type==='stats'){
