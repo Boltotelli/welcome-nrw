@@ -132,8 +132,11 @@ function detect(words,width,height){
  const normalized=norm(words,width,height);
  return labelsFound(normalized).map((label,index)=>{
   const quantity=readBelow(label,normalized,width,height);
+  // Stop before the next row: a long crop can otherwise swallow a
+  // different troop class' count and silently duplicate it.
   const crop={x:Math.max(0,label.x0-.024),y:Math.min(1,label.y1+.001),
-   w:Math.min(.32,1-label.x0+.024),h:Math.min(.065,.11*width/height)};
+   w:Math.min(.32,1-label.x0+.024),
+   h:Math.min(.048,Math.max(.029,(label.y1-label.y0)*2.7))};
   return {id:index,type:label.type,label:label.label,count:quantity,elite:label.elite,anchor:{x0:label.x0,y0:label.y0,x1:label.x1,y1:label.y1},
    // Derived from the name, never from a fixed first/second/third row.
    icon:{x:Math.max(0,label.x0-.13),y:Math.max(0,label.y0-.018),w:.132,h:.082},
