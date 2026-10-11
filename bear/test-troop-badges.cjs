@@ -47,6 +47,26 @@ const detectedArcher=archer.digitAt({canvas:{width:716,height:1536}},[133,518]);
 assert.equal(detectedArcher.tg,6,'real archer TG6 pixel silhouette recognized end-to-end');
 assert.ok(detectedArcher.confidence>=.8);
 
+// Real October 11 TG4 glyph (27x26 crop, white-pixel mask from original
+// Kingshot screenshot; source image itself is not part of the repository).
+const trueGoldFourMask='///////////////////4B//+AH/8AAB8AACDgAAAcAAADgAAAYAAABAAcAIAHkAAB8AAAfgAADMAAA5gAAGMAAB7wAAP/AAB/4AAAMAAAAAAAAAAAAAABA==';
+const four=mockActual(trueGoldFourMask);
+const match4=four.digitAt({canvas:{width:716,height:1536}},[133,361]);
+assert.equal(match4.tg,4,'TG4 must be recognized from actual screenshot pixels');
+assert.ok(match4.confidence>=.8);
+const newScope={window:{},atob,document:{createElement:()=>({width:27,height:26})}};
+vm.runInNewContext(moduleCode,newScope);
+const anchored=newScope.window.NRW_BEAR_TROOP_BADGES.locateBadge(
+ {labelBox:{x:153/716,y:373/1536,h:19/1536}}, {width:716,height:1536});
+assert.ok(Math.abs(anchored.x-133)<5&&Math.abs(anchored.y-361)<5,
+ 'gold badge found relative to dynamic OCR text anchor');
+const scaled=newScope.window.NRW_BEAR_TROOP_BADGES.locateBadge(
+ {labelBox:{x:153/716,y:373/1536+.035,h:19/1536}},
+ {width:1432,height:3072});
+assert.ok(Math.abs(scaled.x-anchored.x*2)<1);
+assert.ok(Math.abs(scaled.y-(anchored.y+.035*1536)*2)<1,
+ 'location tracks resized and vertically shifted screenshots');
+
 const test=mock(fixtures[0]);
 const canvas={width:716,height:1536,getContext:()=>({canvas:{width:716,height:1536}})};
 const levels=test.recognize(canvas,'Spitzen Infanterie / Spitzen Kavallerie / Spitzen Bogenschützen',[]);

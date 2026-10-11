@@ -103,4 +103,36 @@ const duplicates=[{type:0,count:605476},{type:1,count:605476},{type:2,count:1116
 E.flagAmbiguousCounts(duplicates,{});
 assert.equal(duplicates[0].count,null);
 assert.equal(duplicates[1].count,null);
+// The screenshot supplied on 2026-10-11 is a fixture, not a lookup
+// table: arbitrary quantities, resolutions and HUD translations are tested.
+function dynamic(w,h,shift,values){
+ const src=[
+  ['Spitzen','Infanterie',values[0],.22,.244],
+  ['Spitzen','Kavallerie',values[1],.63,.244],
+  ['Spitzen','Bogenschützen',values[2],.22,.332]
+ ];
+ return src.flatMap(([grade,klass,count,x,y])=>[
+  word(grade,x,y+shift,.08,.012,w,h),
+  word(klass,x+.088,y+shift,.145,.012,w,h),
+  word(count,x,y+shift+.023,.15,.014,w,h)
+ ]);
+}
+for(const [w,h,dy,counts] of [
+ [716,1536,0,['325.027','325.339','605.476']],
+ [1080,1920,.028,['626.634','557.731','1.116.474']],
+ [1440,2560,-.025,['1.000','2.250','4.567.890']],
+ [720,1280,.058,['123.456','7.654','891.234']]
+]){
+ const e=E.detect(dynamic(w,h,dy,counts),w,h);
+ assert.deepEqual(Array.from(e,x=>x.count),
+  counts.map(x=>Number(x.replace(/[.]/g,''))),
+  'independent anchored amounts '+w+'x'+h);
+ assert.ok(e.every(x=>x.labelBox&&x.crop&&x.icon),'no fixed badge/quantity rectangles');
+}
+const equal=[{type:0,count:560,confirmedIndependent:true},
+ {type:1,count:560,confirmedIndependent:true}];
+E.flagAmbiguousCounts(equal,{});
+assert.deepEqual(equal.map(x=>x.count),[560,560],
+ 'independently confirmed identical small troop groups must survive');
+
 console.log('TROOP ENTRY OCR: 3+6 separate entries, repeat classes, 3 scaled screens, missing values and separators passed.');
