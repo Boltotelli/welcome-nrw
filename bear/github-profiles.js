@@ -54,7 +54,7 @@ function install(){
     return;
    }
    const saved=result.profile;
-   const name=String(saved?.name||saved?.player?.name||id).slice(0,80);
+   const name=String(saved?.name||saved?.player?.name||bridge.storedGovernorName?.(id)||id).slice(0,80);
    bridge.activateSavedId(id,name);
    if(saved){
     const m=bridge.model(),fields=['troopsI','troopsC','troopsA','cap','squadAtk','squadLet','iAtk','iLet','cAtk','cLet','aAtk','aLet'];

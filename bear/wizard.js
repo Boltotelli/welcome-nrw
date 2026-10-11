@@ -262,7 +262,7 @@ const storedPanels={};
 for(const i of [1,2,4,6,7]){
  const s=document.createElement('section');s.className='bear-guide-stored';
  sections[i].prepend(s);storedPanels[i]=s;
- const help=document.createElement('details');help.className='bear-guide-example';help.open=true;
+ const help=document.createElement('details');help.className='bear-guide-example';
  const head=document.createElement('summary');
  head.textContent=lang()==='de'?'📷 Beispielbilder aus Kingshot':'📷 Kingshot screenshot examples';
  const note=document.createElement('div');note.className='bear-guide-example-preview';

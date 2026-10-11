@@ -36,6 +36,14 @@ assert.equal(p.validate('295189783',{...obj,values:{'<script>':'alert()'}}),fals
  assert.ok(html.includes('github-profiles.js?v='));
  assert.ok(html.indexOf('github-profiles.js')<html.indexOf('wizard.js'));
  assert.ok(html.includes('activateSavedId:function(id,name)'));
+assert.ok(source.includes('bridge.storedGovernorName?.(id)'),'local label used when no public name available');
+assert.ok(html.includes('nrw_bear_profile_name_v1_'),'display name saved per numeric ID');
+assert.ok(html.includes('./intake-ui.js?v=player-names-20261011-1'),'picker cache version updated');
+const intake=fs.readFileSync(path.join(__dirname,'intake-ui.js'),'utf8');
+assert.ok(intake.includes("opt.textContent=name?name+' · ID '+id:id"),'saved profile picker uses name with ID');
+assert.ok(intake.includes("window.addEventListener('nrw-bear-loaded',refresh)"),'picker refreshes after loading a profile');
+assert.ok(intake.includes('opt.value=id'),'player ID remains stable option value');
+assert.ok(html.includes("name:storedGovernorName(id)||'Local demo'"),'offline opening retains cached real name');
  assert.ok(source.includes('event.stopImmediatePropagation()'));
  assert.ok(!source.includes("fetch('/api/bear-profile"));
  console.log('STATIC GITHUB PROFILES: numeric ID source, matching profile ID, local fallback and no API, XSS key validation, script wiring passed.');

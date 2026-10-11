@@ -295,6 +295,17 @@ function calculate(marches){
  return {raw:raw,actual:actual,spent:spent,stock:stock,joinFactor:joinFactor,cap:cap,
   score:score,ownScore:ownScore,totalScore:totalScore,fullOwn:fullOwn,fullJoins:fullJoins};
 }
+
+function storedGovernorName(id){
+ if(!/^[0-9]{5,20}$/.test(String(id)))return '';
+ try{return String(localStorage.getItem('nrw_bear_profile_name_v1_'+id)||'').slice(0,80);}catch(_){return '';}
+}
+function rememberGovernorName(id,name){
+ if(!/^[0-9]{5,20}$/.test(String(id)))return;
+ var label=String(name||'').trim().slice(0,80);
+ if(!label||/^[0-9]{5,20}$/.test(label)||label==='Local demo')return;
+ try{localStorage.setItem('nrw_bear_profile_name_v1_'+id,label);}catch(_){}
+}
 function save(){if(profile)try{localStorage.setItem('nrw_bear_profile_v1_'+profile.governor_id,JSON.stringify(model));}catch(_){}}
 function read(id){try{var value=JSON.parse(localStorage.getItem('nrw_bear_profile_v1_'+id)||'null');if(value&&typeof value==='object'){model.v2=value.v2||{};['heroCapManual','squadAtk','squadLet','pitfall'].forEach(function(k){if(value.values&&Object.prototype.hasOwnProperty.call(value.values,k)){var a=Number(value.values[k]);if(Number.isFinite(a)&&a>=0)model.values[k]=a;}});fields.forEach(function(k){if(value.values&&Object.prototype.hasOwnProperty.call(value.values,k)){var v=Number(value.values[k]);if(Number.isFinite(v)&&v>=0)model.values[k]=v;}});model.textValues=value.textValues||{};if(Array.isArray(value.marches)&&value.marches.length===7){value.marches.forEach(function(m,j){var i=Number(m.i),c=Number(m.c);if(Number.isFinite(i)&&Number.isFinite(c)&&i>=0&&c>=0&&i+c<=100){model.marches[j]={hero:String(m.hero||'').slice(0,70),i:i,c:c,leaderStats:(m.leaderStats&&typeof m.leaderStats==='object')?m.leaderStats:{}};}});}}}catch(_){}
  fields.forEach(function(k){el(k).value=Object.prototype.hasOwnProperty.call(model.values,k)?model.values[k]:'';});textFields.forEach(function(k){el(k).value=String((model.textValues||{})[k]||'');});}
@@ -423,6 +434,7 @@ el('copyJoins').addEventListener('click',function(){var m=model.marches[active];
 el('simulate').addEventListener('click',function(){if(!profile)return;render();var score=el('score');score.animate([{transform:'scale(1)',opacity:.65},{transform:'scale(1.11)',opacity:1},{transform:'scale(1)',opacity:1}],{duration:600,easing:'ease-out'});});
 function activate(data,online){
  profile=data.player;
+ rememberGovernorName(profile.governor_id,profile.name);
  // Browser-local cache of previously imported API hero metadata. Reopening
  // a cached ID never implies currently verified NRW membership.
  try{
@@ -441,7 +453,7 @@ function activate(data,online){
 }
 el('offlineMode').addEventListener('click',function(){
  var id=el('governorId').value.trim();
- activate({player:{governor_id:/^\d{5,20}$/.test(id)?id:'offline-demo',name:'Local demo',kid:1044,power:0},heroes:[]},false);
+ activate({player:{governor_id:/^\d{5,20}$/.test(id)?id:'offline-demo',name:storedGovernorName(id)||'Local demo',kid:1044,power:0},heroes:[]},false);
 });
 function applyApiJson(raw){
  var p=raw&&raw.player||{};
@@ -463,10 +475,10 @@ el('themeButton').addEventListener('click',function(){
  document.documentElement.dataset.theme=theme;try{localStorage.setItem('nrw_theme',theme);}catch(_){}
 });
 document.querySelectorAll('button[data-lang]').forEach(function(btn){btn.addEventListener('click',function(){language(btn.dataset.lang);});});
-window.NRW_BEAR_BRIDGE={model:function(){return model;},save:save,render:render,calculate:calculate,capacity:capacity,optimizeStarter:optimizeStarter,profile:function(){return profile;},activeMarchCount:activeMarchCount,active:function(){return active;},selectMarch:function(i){active=i;render();},activateSavedId:function(id,name){activate({player:{governor_id:id,name:name,kid:1044,power:0},heroes:[]},false);}};
+window.NRW_BEAR_BRIDGE={model:function(){return model;},save:save,render:render,calculate:calculate,capacity:capacity,optimizeStarter:optimizeStarter,profile:function(){return profile;},storedGovernorName:storedGovernorName,activeMarchCount:activeMarchCount,active:function(){return active;},selectMarch:function(i){active=i;render();},activateSavedId:function(id,name){activate({player:{governor_id:id,name:name,kid:1044,power:0},heroes:[]},false);}};
 try{document.documentElement.dataset.theme=localStorage.getItem('nrw_theme')||'dark';language(localStorage.getItem('nrw_page_lang')||'en');}catch(_){language('en');}
 })();
 </script>
-<script src="./catalog.js"></script><script src="./v2.js?v=additive-base-20261010-7"></script><script src="./ux.js"></script><script src="./charm-references.js"></script><script src="./charm-shapes.js"></script><script src="./charm-guide-silhouettes.js?v=charms-11-1"></script><script src="./charm-guide-matcher.js?v=charms-11-1"></script><script src="./tier-recognizer.js"></script><script src="./gear-layout.js?v=hero-details-20261010-3"></script><script src="./screenshot-importer.js?v=hero-details-20261010-3"></script><script src="./intake-core.js?v=hero-expedition-20261010-4"></script><script src="./troop-badges.js?v=bear-review-20261010-2"></script><script src="./troop-entries.js?v=troop-count-4"></script><script src="./hero-grid.js?v=roster-20261010-1"></script><script src="./hero-stars.js?v=phone-diagnostics-20261010-1"></script><script src="./hero-level.js?v=level-glyph-20261010-3"></script><script src="./portrait-matcher.js?v=roster-20261010-3"></script><script src="./intake-ui.js?v=additive-base-20261010-7"></script><script src="./hero-reference.js?v=baseline-widget-final-20261010-3"></script><script src="./hero-advisor.js?v=roster-widgets-20261011-1"></script><script src="./capacity-core.js?v=capacity-20261010-1"></script><script src="./capacity-ui.js?v=formations-20261010-1"></script><script src="./formation-core.js?v=additive-base-20261010-7"></script><script src="./formation-ui.js?v=guided-nrw-20261010-2"></script><script src="./simulation-core.js?v=additive-base-20261010-7"></script><script src="./own-baseline.js?v=additive-base-20261010-7"></script><script src="./proc-expectation.js?v=single-bear-damage-20261010-1"></script><script src="./score-bonuses.js?v=single-bear-damage-20261010-1"></script><script src="./simulation-ui.js?v=bear-media-exclusive-20261011-1"></script><script src="./buff-intake-core.js?v=valora-full-badge-20261010-7"></script><script src="./buff-import.js?v=capacity-20261010-2"></script><script src="./github-profiles.js?v=guided-nrw-20261010-2"></script><script src="./wizard.js?v=roster-widgets-20261011-1"></script>
+<script src="./catalog.js"></script><script src="./v2.js?v=additive-base-20261010-7"></script><script src="./ux.js"></script><script src="./charm-references.js"></script><script src="./charm-shapes.js"></script><script src="./charm-guide-silhouettes.js?v=charms-11-1"></script><script src="./charm-guide-matcher.js?v=charms-11-1"></script><script src="./tier-recognizer.js"></script><script src="./gear-layout.js?v=hero-details-20261010-3"></script><script src="./screenshot-importer.js?v=hero-details-20261010-3"></script><script src="./intake-core.js?v=hero-expedition-20261010-4"></script><script src="./troop-badges.js?v=bear-review-20261010-2"></script><script src="./troop-entries.js?v=troop-count-4"></script><script src="./hero-grid.js?v=roster-20261010-1"></script><script src="./hero-stars.js?v=phone-diagnostics-20261010-1"></script><script src="./hero-level.js?v=level-glyph-20261010-3"></script><script src="./portrait-matcher.js?v=roster-20261010-3"></script><script src="./intake-ui.js?v=player-names-20261011-1"></script><script src="./hero-reference.js?v=baseline-widget-final-20261010-3"></script><script src="./hero-advisor.js?v=roster-widgets-20261011-1"></script><script src="./capacity-core.js?v=capacity-20261010-1"></script><script src="./capacity-ui.js?v=formations-20261010-1"></script><script src="./formation-core.js?v=additive-base-20261010-7"></script><script src="./formation-ui.js?v=guided-nrw-20261010-2"></script><script src="./simulation-core.js?v=additive-base-20261010-7"></script><script src="./own-baseline.js?v=additive-base-20261010-7"></script><script src="./proc-expectation.js?v=single-bear-damage-20261010-1"></script><script src="./score-bonuses.js?v=single-bear-damage-20261010-1"></script><script src="./simulation-ui.js?v=bear-media-exclusive-20261011-1"></script><script src="./buff-intake-core.js?v=valora-full-badge-20261010-7"></script><script src="./buff-import.js?v=capacity-20261010-2"></script><script src="./github-profiles.js?v=player-names-20261011-1"></script><script src="./wizard.js?v=examples-closed-20261011-1"></script>
 </body>
 </html>

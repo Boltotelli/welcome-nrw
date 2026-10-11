@@ -45,27 +45,50 @@ $('intakeGear').addEventListener('click',()=>{
  const d=gear?.closest('details');if(d)d.open=true;
  document.getElementById('bearGearPhoto')?.click();
 });
-// Fast re-entry for players who have previously imported or edited a profile.
- // This is a local picker, NOT a substitute for fresh API membership checking.
+// Re-entry dropdown: labels are local-only and IDs remain the unique key.
 const governorInput=$('governorId'),lookup=$('lookupForm');
 if(governorInput&&lookup){
- let savedIds=[];
- try{
-  savedIds=Object.keys(localStorage).filter(k=>k.startsWith('nrw_bear_profile_v1_'))
-   .map(k=>k.slice('nrw_bear_profile_v1_'.length)).filter(k=>/^\d{5,20}$/.test(k));
- }catch(_){}
- if(savedIds.length){
-  const localRow=document.createElement('div');localRow.className='bear-local-id-row';
-  const savedPick=inputChoice([['',say('Gespeicherte ID auswählen','Select saved ID')],...savedIds.map(id=>[id,id])]);
-  const open=document.createElement('button');open.type='button';open.className='secondary-btn';
-  open.textContent=say('Gespeicherten Stand öffnen','Open saved profile');
-  savedPick.addEventListener('change',()=>{if(savedPick.value)governorInput.value=savedPick.value;});
-  open.addEventListener('click',()=>{if(savedPick.value){governorInput.value=savedPick.value;$('offlineMode')?.click();}});
-  localRow.append(savedPick,open);lookup.after(localRow);
-  const note=document.createElement('p');note.className='hint';
-  note.textContent=say('Lokale Daten sind kein erneuter Allianz-Check; für frische API-Daten ist eine sichere Serververbindung nötig.','Saved local data does not verify current alliance membership; live API access needs a secure backend.');
-  localRow.after(note);
+ const localRow=document.createElement('div');localRow.className='bear-local-id-row';
+ const savedPick=document.createElement('select');
+ savedPick.setAttribute('aria-label',say('Gespeicherten Spieler auswählen','Choose saved player'));
+ const open=document.createElement('button');open.type='button';open.className='secondary-btn';
+ open.textContent=say('Gespeicherten Stand öffnen','Open saved profile');
+ function knownIds(){
+  try{return Object.keys(localStorage).filter(k=>k.startsWith('nrw_bear_profile_v1_'))
+   .map(k=>k.slice('nrw_bear_profile_v1_'.length)).filter(id=>/^[0-9]{5,20}$/.test(id));}
+  catch(_){return [];}
  }
+ function refreshSavedPlayers(){
+  const chosen=savedPick.value;
+  const known=knownIds().map(id=>({id,name:B.storedGovernorName?.(id)||''}));
+  known.sort((a,b)=>(a.name||a.id).localeCompare(b.name||b.id,undefined,{sensitivity:'base'})||
+   a.id.localeCompare(b.id));
+  savedPick.replaceChildren();
+  const placeholder=document.createElement('option');placeholder.value='';
+  placeholder.textContent=say('Gespeicherten Spieler auswählen','Select saved player');
+  savedPick.append(placeholder);
+  for(const {id,name} of known){
+   const opt=document.createElement('option');opt.value=id;
+   opt.textContent=name?name+' · ID '+id:id;
+   savedPick.append(opt);
+  }
+  savedPick.value=known.some(x=>x.id===chosen)?chosen:'';
+  localRow.hidden=known.length===0;
+ }
+ savedPick.addEventListener('change',()=>{if(savedPick.value)governorInput.value=savedPick.value;});
+ open.addEventListener('click',()=>{
+  if(!savedPick.value)return;
+  governorInput.value=savedPick.value;
+  $('offlineMode')?.click();
+ });
+ localRow.append(savedPick,open);lookup.after(localRow);
+ const note=document.createElement('p');note.className='hint';
+ note.textContent=say('Gespeicherte Profile auf diesem Gerät. Keine erneute Prüfung der Allianzzugehörigkeit.',
+  'Saved profiles on this device. This does not recheck alliance membership.');
+ localRow.after(note);
+ const refresh=()=>{refreshSavedPlayers();note.hidden=localRow.hidden;};
+ window.addEventListener('nrw-bear-loaded',refresh);
+ refresh();
 }
 let ocrWorker=null,queue=[],busy=false,heroScanSequence=0;
 const confirmedPortraits=[]; // confirmed across one-by-one screenshots, not persisted

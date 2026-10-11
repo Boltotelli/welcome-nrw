@@ -106,7 +106,7 @@ assert.ok(css.includes('.bear-guide-stored'),'mobile saved-values cards styled')
 assert.ok(!wizard.includes('kingshot_beartrap_v3_action_transparent.webm'),'formation-stage loading must not reuse the damage video');
 assert.ok(wizard.includes('stageLoader.append(loaderBear,loaderText)'),'formation stage keeps its own animated bear loading indicator');
 assert.ok(simulation.includes("webm.src='./assets/kingshot_beartrap_v3_action_transparent.webm'"),'damage simulation retains the approved video');
-assert.ok(html.includes('./wizard.js?v=roster-widgets-20261011-1'),'wizard cache version changed');
+assert.ok(html.includes('./wizard.js?v=examples-closed-20261011-1'),'wizard cache version changed');
 assert.ok(html.includes('./wizard.css?v=roster-widgets-20261011-1'),'CSS cache version changed');
 assert.ok(html.includes('./hero-advisor.js?v=roster-widgets-20261011-1'),'advisor cache version changed');
 assert.ok(wizard.includes('new Set(advisor?.offensiveWidgetHeroes||[])'),'offensive heroes shown first');
@@ -120,7 +120,8 @@ for(const [target,source] of [['troops.jpg','roster.jpg'],['stats.jpg','troops.j
 assert.ok(wizard.includes("2:['stats','stats-extra']"),'two complementary bonus-overview screenshots appear in combat stats example');
 assert.ok(wizard.includes('const gallery=document.createElement'),'screenshot examples display as compact gallery');
 assert.ok(css.includes('.bear-guide-example-link img'),'mobile-sized authentic example thumbnails are styled');
-assert.ok(wizard.includes("help.open=true"),'real screenshot gallery is initially visible');
+assert.ok(!wizard.includes('help.open=true'),'all screenshot help panels must start closed');
+assert.ok(wizard.includes("const help=document.createElement('details')"),'screenshot example panels remain expandable');
 assert.ok(wizard.includes("img.loading='eager'"),'gallery loads images even when slides start hidden');
 assert.ok(!wizard.includes("link.hidden=true"),'gallery links do not block their own image loads');
 assert.ok(simulation.includes("video.hidden=mode!=='video'"),'video and WebP are mutually exclusive');
