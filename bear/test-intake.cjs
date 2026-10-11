@@ -91,8 +91,8 @@ assert.equal(C.advise(owned,['Zoe','Petra','Yang'],types).length,0);
 const html=fs.readFileSync(__dirname+'/index.html','utf8');
 for(const filename of ['intake-core.js','intake-ui.js','intake-ui.css'])assert.ok(html.includes('./'+filename));
 
-const frSample=C.parseStats('Infanterie-Attaque 181,5%\\nCavalerie-Défense 167,2%\\nArchers-Létalité 314,0%');
-const esSample=C.parseStats('Infantería-Ataque 181,5%\\nCaballería-Defensa 167,2%\\nArqueros-Letalidad 314,0%');
+const frSample=C.parseStats('Infanterie-Attaque 181,5%\nCavalerie-Défense 167,2%\nArchers-Létalité 314,0%');
+const esSample=C.parseStats('Infantería-Ataque 181,5%\nCaballería-Defensa 167,2%\nArqueros-Letalidad 314,0%');
 assert.deepEqual(frSample,{iAtk:181.5,cDef:167.2,aLet:314});
 assert.deepEqual(esSample,{iAtk:181.5,cDef:167.2,aLet:314});
 assert.equal(C.category('Aperçu des bonus'),'stats');
