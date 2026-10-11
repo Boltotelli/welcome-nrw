@@ -59,9 +59,47 @@ function mount(host,B,language){
   missing:'Saisis capacité, héros et troupes avant de simuler.',
   invalid:'Uniquement des pourcentages entiers de 0 à 100 avec une somme maximale de 100.',
   loader:'Simulation de l’ours …',unassigned:'Les renforts sans héros offensif ne reçoivent pas de troupes.',versus:'par rapport à la recommandation',
-  noVideo:'L’animation approuvée sera affichée après réception du fichier'}
+  noVideo:'L’animation approuvée sera affichée après réception du fichier'},
+ es:{
+  "title": "🐻 Simulación de daño",
+  "desc": "Prueba distintas formaciones. Las marchas comparten las mismas tropas disponibles.",
+  "target": "Modificar marcha",
+  "starter": "★ Mi rally",
+  "all": "Todos los apoyos",
+  "join": "Apoyo",
+  "preset": "Plantilla",
+  "i": "Infantería %",
+  "c": "Caballería %",
+  "a": "Arqueros %",
+  "custom": "Manual",
+  "reset": "Restaurar formación optimizada",
+  "save": "Comparar variante",
+  "baseline": "Recomendación",
+  "comparison": "Variantes guardadas",
+  "load": "Aplicar",
+  "head": "Comparación relativa de formaciones",
+  "own": "Rally inicial · respecto a la recomendación",
+  "joins": "Apoyos · estimación relativa",
+  "overall": "No hay suma de daño comparable",
+  "stocks": "Uso de tropas",
+  "free": "restantes",
+  "assigned": "asignadas",
+  "total": "Tropas",
+  "results": "Resultados por marcha",
+  "desired": "Deseado",
+  "actual": "Real",
+  "adapted": "Fue necesario adaptar al menos una marcha para respetar la cantidad total de tropas.",
+  "pending": "Faltan estadísticas de combate completas o niveles válidos. Aun así se comprueban las cantidades de tropas.",
+  "uncertain": "Los valores son estimaciones relativas, no puntos reales contra el oso. Faltan estadísticas de líderes externos; habilidades y Widgets no están simulados completamente.",
+  "missing": "Faltan datos para esta comparación",
+  "invalid": "Formación no válida",
+  "loader": "Calculando el daño estimado…",
+  "unassigned": "No se asignan tropas a este apoyo sin un héroe ofensivo.",
+  "versus": "respecto a la recomendación",
+  "noVideo": "Se mostrará la animación original cuando el archivo sea compatible."
+}
  };
- const t=()=>L[language()]||L.en,fmt=n=>Number(n||0).toLocaleString(language()==='de'?'de-DE':language()==='fr'?'fr-FR':'en-US',{maximumFractionDigits:0});
+ const t=()=>L[language()]||L.en,fmt=n=>Number(n||0).toLocaleString(language()==='de'?'de-DE':language()==='fr'?'fr-FR':language()==='es'?'es-ES':'en-US',{maximumFractionDigits:0});
  const sim=root.NRW_BEAR_SIMULATION;
  const container=el('div','bear-sim-page');host.append(container);
  const heading=el('h2'),desc=el('p','hint');
