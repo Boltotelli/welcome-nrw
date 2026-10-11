@@ -401,101 +401,28 @@ async function readHeroLevelsMasked(tiles,canvas,worker,scanTag){
   });
  }catch(_){/* Do not invent an unreadable hero level. */}
 }
-function spatialTroops(words,canvas){
- const zones=[
-  {key:'troopsI',x:[.20,.42],y:[.305,.353]},
-  {key:'troopsC',x:[.60,.85],y:[.305,.353]},
-  {key:'troopsA',x:[.20,.51],y:[.402,.451]}
- ],found={};
- for(const zone of zones){
-  const hits=[];
-  for(const word of words||[]){
-   if(!word.bbox||!word.text)continue;
-   const bb=word.bbox,cx=((bb.x0+bb.x1)/2)/canvas.width,
-     cy=((bb.y0+bb.y1)/2)/canvas.height;
-   if(cx<zone.x[0]||cx>zone.x[1]||cy<zone.y[0]||cy>zone.y[1])continue;
-   hits.push({x:bb.x0,y:cy,word:String(word.text)});
-  }
-  hits.sort((a,b)=>a.x-b.x);
-  // Tesseract sometimes reports "557", ".", "731" as three words.
-  const joined=hits.map(x=>x.word).join('');
-  const candidates=[...joined.matchAll(/\d{1,3}(?:[.,]\d{3})+|\d{4,9}/g)]
-    .map(x=>Core.normalizeNumber(x[0]))
-    .filter(n=>Number.isInteger(n)&&n>1000&&n<200000000);
-  if(candidates.length)found[zone.key]=candidates[0];
-  else{
-   const singles=hits.map(x=>Core.normalizeNumber(x.word))
-     .filter(n=>Number.isInteger(n)&&n>1000&&n<200000000);
-   if(singles.length)found[zone.key]=singles[0];
-  }
- }
- return found;
-}
-async function readTroopNumbers(canvas,worker){
- // Isolate each number strip so icons/golden badges cannot hide a leading
- // digit in the full-screen OCR. Resizing keeps original aspect ratio.
- const crops=[
-  {key:'troopsI',x:.202,y:.307,w:.215,h:.044},
-  {key:'troopsC',x:.605,y:.307,w:.218,h:.044},
-  {key:'troopsA',x:.202,y:.405,w:.270,h:.046}
- ];
- const board=document.createElement('canvas');board.width=460;board.height=420;
- const b=board.getContext('2d',{willReadFrequently:true});
- b.fillStyle='#fff';b.fillRect(0,0,board.width,board.height);
- for(let i=0;i<3;i++){
-  const v=crops[i],x=v.x*canvas.width,y=v.y*canvas.height,
-   w=v.w*canvas.width,h=v.h*canvas.height;
-  const ratio=Math.min(2.2,120/h,430/w);
-  b.drawImage(canvas,x,y,w,h,15,14+i*140,w*ratio,h*ratio);
- }
- const result=await worker.recognize(board);
- const found={},words=result.data.words||[];
- for(let i=0;i<3;i++){
-  const row=words.filter(v=>v.bbox&&
-   (v.bbox.y0+v.bbox.y1)/2>=i*140&&
-   (v.bbox.y0+v.bbox.y1)/2<(i+1)*140)
-   .sort((a,b)=>a.bbox.x0-b.bbox.x0).map(x=>x.text).join('');
-  const number=row.match(/\d{1,3}(?:[.,]\d{3})+|\d{4,9}/)?.[0];
-  const value=number?Core.normalizeNumber(number):null;
-  if(Number.isInteger(value)&&value>1000&&value<200000000)found[crops[i].key]=value;
- }
- return found;
-}
-async function recheckTroopFields(canvas,worker,values,uncertainKeys=new Set()){
- // Relative to original Kingshot image, not to the viewing phone/browser.
- // One focused OCR pass per missing quantity or T10 class title.
- const blocks=[
-  {key:'troopsI',name:'Infanterie',n:[.202,.307,.215,.044],label:[.205,.286,.300,.034]},
-  {key:'troopsC',name:'Kavallerie',n:[.605,.307,.218,.044],label:[.609,.286,.300,.034]},
-  {key:'troopsA',name:'Bogenschützen',n:[.202,.405,.270,.046],label:[.205,.384,.305,.034]}
- ];
- let tiersText='';
- for(const block of blocks){
-  function crop(zone){
-   const c=document.createElement('canvas'),w=620,h=104;
-   c.width=w;c.height=h;
-   const cx=c.getContext('2d',{willReadFrequently:true});cx.fillStyle='white';cx.fillRect(0,0,w,h);
-   cx.drawImage(canvas,zone[0]*canvas.width,zone[1]*canvas.height,zone[2]*canvas.width,zone[3]*canvas.height,
-    8,9,w-16,h-18);
-   return c;
-  }
-  if(!uncertainKeys.has(block.key)&&!(Number(values[block.key])>0)){
-   try{
-    const res=await worker.recognize(crop(block.n));
-    const t=(res.data?.text||'').replace(/\s/g,'');
-    const possibles=[...t.matchAll(/\d{1,3}[.,]\d{3}|\d{4,9}/g)]
-     .map(m=>Core.normalizeNumber(m[0]))
-     .filter(n=>Number.isInteger(n)&&n>=1000&&n<200000000);
-    if(possibles.length)values[block.key]=Math.max(...possibles);
-   }catch(_){}
-  }
+// A fallback for visually unknown TG levels. Read only the numeral in the
+// gold medal next to an OCR-detected troop CLASS label, never an absolute row.
+async function readUnmatchedTroopBadges(canvas,worker,entries){
+ for(const entry of entries||[]){
+  if(entry.tg!==null&&entry.tg!==undefined||!entry.icon)continue;
+  const i=entry.icon,x=(i.x+i.w*.66)*canvas.width,y=(i.y+i.h*.13)*canvas.height,
+   w=i.w*.29*canvas.width,h=i.h*.23*canvas.height;
+  const board=document.createElement('canvas');board.width=180;board.height=150;
+  const bc=board.getContext('2d',{willReadFrequently:true});
+  bc.fillStyle='#fff';bc.fillRect(0,0,board.width,board.height);
+  bc.imageSmoothingEnabled=true;bc.imageSmoothingQuality='high';
   try{
-   const res=await worker.recognize(crop(block.label));
-   const label=String(res.data?.text||'').toLowerCase();
-   if(/spitz\w{0,5}n|spitzen/.test(label))tiersText+='\nSpitzen '+block.name;
-  }catch(_){}
+   bc.drawImage(canvas,Math.max(0,x),Math.max(0,y),w,h,0,0,board.width,board.height);
+   const read=await worker.recognize(board);
+   const raw=String(read.data?.text||'').trim().replace(/\s/g,'');
+   const matched=raw.match(/^([1-8])$/),confidence=Number(read.data?.confidence);
+   if(matched&&Number.isFinite(confidence)&&confidence>=78){
+    entry.tg=Number(matched[1]);entry.tgConfidence=confidence/100;
+    entry.tgSource='isolated-medal';
+   }
+  }catch(_){/* Unknown is safer than a made-up TG level. */}
  }
- return tiersText;
 }
 async function readTroopColumnWords(canvas,worker){
  // Tesseract's full-screen pass often loses the infantry/cavalry labels
@@ -630,48 +557,30 @@ async function inspect(file){
  if(type==='unknown'&&window.NRW_BEAR_SCREENSHOT_STAGE===4&&heroRows(canvas).length>=2)type='roster';
  // A portrait-only roster can be recognized from its dense 4-column grid;
  // unknown layouts remain unrecognized and manually selectable.
- const values=type==='troops'?
-  {...Core.parseTroops(text),...spatialTroops(result.data.words,canvas)}:
-  type==='stats'?{...Core.parseStats(text),...Core.parseStats(grouped)}:{};
- const uncertainKeys=new Set(),absoluteReadings={};
- let explicitTierLabels='';
- if(type==='troops'){
-  try{
-   Object.assign(absoluteReadings,await readTroopNumbers(canvas,worker));
-   for(const [key,n] of Object.entries(absoluteReadings)){
-    if(Number.isSafeInteger(values[key])&&values[key]!==n){
-     // Absolute crops move across phone aspect ratios. Conflicting reads
-     // may NOT replace a class-labeled troop count.
-     uncertainKeys.add(key);delete values[key];
-    }else if(!Object.prototype.hasOwnProperty.call(values,key))values[key]=n;
-   }
-  }catch(_){/* Leave uncertain values reviewable, not fabricated. */}
-  explicitTierLabels=await recheckTroopFields(canvas,worker,values,uncertainKeys);
- }
+ // Each troop quantity is tied to its name, not to an x/y screenshot crop
+ // or to the order in which the OCR engine emits unrelated numbers.
+ const values=type==='stats'?{...Core.parseStats(text),...Core.parseStats(grouped)}:{};
  let troopEntries=[],troopWords=result.data.words||[];
  if(type==='troops'&&ENTRY){
   try{troopWords=[...troopWords,...await readTroopColumnWords(canvas,worker)];}
-  catch(_){/* Fall back to existing OCR words. */}
+  catch(_){/* Keep results from the original full-screen pass. */}
   troopEntries=ENTRY.detect(troopWords,canvas.width,canvas.height);
-  if(troopEntries.length){
-   await recheckUnreadTroopEntries(troopEntries,canvas,worker);
-   ENTRY.flagAmbiguousCounts?.(troopEntries,absoluteReadings);
-   for(const entry of troopEntries){
-    if(uncertainKeys.has(['troopsI','troopsC','troopsA'][entry.type])){
-     entry.uncertainCount=true;entry.countWarning='conflicting-ocr';entry.count=null;
-    }
-   }
-   ENTRY.recoverSingleEntries(troopEntries,values);
-   const computed=ENTRY.totals(troopEntries);
-   for(const type of new Set(troopEntries.map(e=>e.type))){
-    const key=['troopsI','troopsC','troopsA'][type];
-    if(!Object.prototype.hasOwnProperty.call(computed,key))delete values[key];
-   }
-   Object.assign(values,computed);
-  }
-  for(const key of uncertainKeys)delete values[key];
+  await recheckUnreadTroopEntries(troopEntries,canvas,worker);
+  ENTRY.flagAmbiguousCounts(troopEntries,{});
+  Object.assign(values,ENTRY.totals(troopEntries));
  }
- const troopTiers=type==='troops'&&TROOP?TROOP.recognize(canvas,text+'\n'+grouped+explicitTierLabels,result.data.words||[]):null;
+ const troopTiers=type==='troops'&&TROOP?
+  TROOP.recognize(canvas,text+'\n'+grouped,troopWords,troopEntries):null;
+ if(type==='troops'&&troopEntries.length){
+  await readUnmatchedTroopBadges(canvas,worker,troopEntries);
+  for(let k=0;k<3;k++){
+   const items=troopEntries.filter(e=>e.type===k);
+   if(items.length!==1)continue;
+   troopTiers[k].tier=items[0].tier??null;
+   troopTiers[k].tg=items[0].tg??null;
+   troopTiers[k].confidence=items[0].tgConfidence??null;
+  }
+ }
  const marchSlots=type==='troops'?Core.parseMarchSlots(text+'\n'+grouped):null;
 
  const guidedDetails=window.NRW_BEAR_SCREENSHOT_STAGE===6?
@@ -789,7 +698,7 @@ function renderQueue(){
   const header=document.createElement('div');header.className='bear-intake-item-head';
   const title=document.createElement('b');title.textContent=item.fileName;
   const type=inputChoice(Object.entries(typeTranslations[locale()]||typeTranslations.en).map(([key,name])=>[key,name]),item.type);
-  type.addEventListener('change',async ()=>{item.type=type.value;item.values=item.type==='troops'?{...Core.parseTroops(item.text),...(item.canvas?spatialTroops(item.words,item.canvas):{})}:item.type==='stats'?{...Core.parseStats(item.text),...Core.parseStats(item.grouped||'')}:{};item.troopEntries=item.type==='troops'&&item.canvas&&ENTRY?ENTRY.detect(item.words||[],item.canvas.width,item.canvas.height):[];if(item.troopEntries.length){ENTRY.recoverSingleEntries(item.troopEntries,item.values);Object.assign(item.values,ENTRY.totals(item.troopEntries));}item.detail=item.type==='starter'?Core.parseHeroDetail(item.text,allKnown()):null;const scanTag='manual-'+(++heroScanSequence);
+  type.addEventListener('change',async ()=>{item.type=type.value;item.values=item.type==='troops'?{}:item.type==='stats'?{...Core.parseStats(item.text),...Core.parseStats(item.grouped||'')}:{};item.troopEntries=item.type==='troops'&&item.canvas&&ENTRY?ENTRY.detect(item.words||[],item.canvas.width,item.canvas.height):[];if(item.troopEntries.length){ENTRY.flagAmbiguousCounts(item.troopEntries,{});Object.assign(item.values,ENTRY.totals(item.troopEntries));}item.detail=item.type==='starter'?Core.parseHeroDetail(item.text,allKnown()):null;const scanTag='manual-'+(++heroScanSequence);
     item.cards=item.type==='roster'&&item.canvas?overviewTiles(item.canvas,item.text,item.words,scanTag):[];
     if(item.type==='roster'&&item.cards.length){
      const worker=await loadOCR();
@@ -801,7 +710,7 @@ function renderQueue(){
      // portrait recognition path as automatic overview detection.
      item.matcherInfo=await MATCHER.enrich(item.cards);
     }else item.matcherInfo=null;
-    item.troopTiers=item.type==='troops'&&item.canvas&&TROOP?TROOP.recognize(item.canvas,item.text+'\n'+(item.grouped||''),item.words):null;renderQueue();});
+    item.troopTiers=item.type==='troops'&&item.canvas&&TROOP?TROOP.recognize(item.canvas,item.text+'\n'+(item.grouped||''),item.words,item.troopEntries):null;renderQueue();});
   header.append(title,type);card.appendChild(header);
   const content=document.createElement('div');content.className='bear-intake-values';
   if(item.type==='troops'||item.type==='stats'){
@@ -1145,7 +1054,7 @@ function apply(){
    }
    if(item.type==='troops'&&Array.isArray(item.troopEntries)&&item.troopEntries.length){
     v.troopEntries=item.troopEntries.map(e=>({type:e.type,label:e.label,count:e.count,
-     icon:e.icon,crop:e.crop}));
+     icon:e.icon,crop:e.crop,tier:e.tier??null,tg:e.tg??null}));
     const totals=ENTRY.totals(item.troopEntries);
     for(const type of new Set(item.troopEntries.map(e=>e.type))){
      const key=['troopsI','troopsC','troopsA'][type];
