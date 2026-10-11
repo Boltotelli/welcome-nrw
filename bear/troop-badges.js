@@ -101,7 +101,7 @@ function recognize(canvas,text,words,entries){
   // Gold TG numeral lives in the UPPER RIGHT of the corresponding troop
   // illustration. All search offsets scale WITH the icon, not with pixels.
   const approx=[(ico.x+ico.w*.80)*canvas.width/sc,
-                (ico.y+ico.h*.145)*canvas.height/sc];
+                (ico.y+ico.h*.25)*canvas.height/sc];
   let best={tg:null,confidence:0};
   for(const dx of [-.040,-.025,-.010,.005,.020,.035]){
    for(const dy of [-.035,-.020,-.005,.010,.025,.040]){
