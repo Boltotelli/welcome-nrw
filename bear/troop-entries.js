@@ -170,6 +170,7 @@ function flagAmbiguousCounts(entries,focused){
   if(prev&&prev.type!==entry.type){
    for(const e of [prev,entry]){
     e.uncertainCount=true;e.countWarning='duplicate-count-different-class';
+    e.count=null;
    }
   }else byNumber.set(entry.count,entry);
  }
