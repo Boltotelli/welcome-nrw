@@ -208,8 +208,10 @@ function missingValues(){
   ['iAtk','Inf Angriff'],['iLet','Inf Tödlichkeit'],['cAtk','Kav Angriff'],['cLet','Kav Tödlichkeit'],['aAtk','Bogen Angriff'],['aLet','Bogen Tödlichkeit']]){
   if(v[id]===undefined||v[id]===''||!Number.isFinite(Number(v[id]))||(id==='cap'&&Number(v[id])<=0))out.push(name);
  }
- if(!Array.isArray(ext.troopTiers)||ext.troopTiers.some(x=>!x?.tier))out.push('T-Stufen');
- if(!Array.isArray(ext.troopTiers)||ext.troopTiers.some(x=>x?.tg===null||x?.tg===undefined||x?.tg===''))out.push('Truegold');
+ const groupsComplete=Array.isArray(ext.troopGroups)&&ext.troopGroups.length>0&&
+  ext.troopGroups.every(g=>window.NRW_BEAR_MANUAL?.validGroup(g));
+ if(!groupsComplete&&(!Array.isArray(ext.troopTiers)||ext.troopTiers.some(x=>!x?.tier)))out.push('T-Stufen');
+ if(!groupsComplete&&(!Array.isArray(ext.troopTiers)||ext.troopTiers.some(x=>x?.tg===null||x?.tg===undefined||x?.tg==='')))out.push('Truegold');
  if((ext.ownHeroes||[]).filter(Boolean).length<3)out.push('Starterhelden');
  return out;
 }
@@ -218,8 +220,10 @@ function showRelevantManual(){
  if(folds)folds.open=true;
  const m=B.model(),v=m.values||{},ext=m.v2||{};
  const missing=missingValues();
+ const completeGroups=Array.isArray(ext.troopGroups)&&ext.troopGroups.length>0&&
+  ext.troopGroups.every(g=>window.NRW_BEAR_MANUAL?.validGroup(g));
  const troopMissing=['troopsI','troopsC','troopsA'].some(k=>!Number.isFinite(Number(v[k]))||v[k]===undefined)
-  || !Array.isArray(ext.troopTiers)||ext.troopTiers.some(x=>!x?.tier||x?.tg===null||x?.tg===undefined||x?.tg==='');
+  || (!completeGroups&&(!Array.isArray(ext.troopTiers)||ext.troopTiers.some(x=>!x?.tier||x?.tg===null||x?.tg===undefined||x?.tg==='')));
  const statsMissing=['iAtk','iLet','cAtk','cLet','aAtk','aLet'].some(k=>v[k]===undefined);
  const capMissing=!(Number(v.cap)>0)||(ext.ownHeroes||[]).filter(Boolean).length<3;
  const blocks=quick?.querySelectorAll('.ux-step')||[];
@@ -228,7 +232,7 @@ function showRelevantManual(){
  // inputs simply because the tier or a different field in the row is missing.
  const ownKeys=['troopsI','troopsC','troopsA'];
  quick?.querySelectorAll('#uxTroopRows .ux-troop-row').forEach((row,i)=>{
-  const tier=ext.troopTiers?.[i];
+  const tier=completeGroups?{tier:1,tg:0}:ext.troopTiers?.[i];
   const amount=row.querySelector('.ux-count');
   const stage=row.querySelector('.ux-tier');
   const gold=row.querySelector('.ux-tg');
@@ -291,6 +295,7 @@ if(profilePanel){
  // falling back to existing local saved data. Never disable the ID form.
 }
 const processQueue=()=>{
+ if(manualEntry?.isManual(active))return false;
  const review=$('intakeQueue');return Boolean(review&&!review.hidden&&review.children.length);
 };
 function message(content){$('bearGuideMessage').textContent=content||'';}
