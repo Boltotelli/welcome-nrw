@@ -59,7 +59,7 @@ function load(){
  state='loading';
  pending=root.fetch('./hero-reference.json',{cache:'force-cache'})
   .then(r=>{if(!r.ok)throw Error('HTTP '+r.status);return r.json();})
-  .then(accept).catch(e=>{rows=null;state='error';why=String(e?.message||e);return 0;});
+  .then(accept).catch(e=>{rows=null;state='error';why=String(e?.message||e);pending=null;return 0;});
  return pending;
 }
 root.NRW_BEAR_HERO_REFERENCE={load,get,status,reason,validate,accept,sourceRepo,sourcePath,
