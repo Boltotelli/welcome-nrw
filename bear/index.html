@@ -52,7 +52,7 @@ details{border-top:1px solid var(--line);margin-top:14px;padding-top:14px}summar
 <nav class="top">
  <a class="brand" href="/dashboard/"><img src="/assets/nrw-banner.svg" alt="NRW"><span>NRW BEAR OPTIMIZER<small>KINGDOM 1044 · UNITED</small></span></a>
  <a class="back" href="/dashboard/" data-t="back">← Player Dashboard</a>
- <div class="top-actions"><div class="lang" aria-label="Language"><button data-lang="de">DE</button><button data-lang="en">EN</button><button data-lang="fr">FR</button></div><button class="theme" id="themeButton" aria-label="Change theme">☼</button></div>
+ <div class="top-actions"><div class="lang" aria-label="Language"><button data-lang="de">DE</button><button data-lang="en">EN</button><button data-lang="fr">FR</button><button data-lang="es">ES</button></div><button class="theme" id="themeButton" aria-label="Change theme">☼</button></div>
 </nav>
 <header class="hero">
   <div>
@@ -207,9 +207,76 @@ details{border-top:1px solid var(--line);margin-top:14px;padding-top:14px}summar
 var languages = {
  en:{back:'← Player Dashboard',heroTitle:'Make every march',heroTitle2:'count.',heroDesc:'Build your available marches, compare troop formations and battle the bear on paper before the trap opens.',profileTitle:'Your governor',profileInfo:'Enter your Governor ID. Only members of [NRW]United, alliance 105300097 on kingdom 1044, can use the optimizer.',load:'Load player',heroTitleSection:'Hero deck',heroNote:'The API only reveals the five arena defense heroes. Starter and join heroes can be edited manually below.',army:'Troop arsenal',private:'LOCAL ONLY',inf:'Infantry',cav:'Cavalry',arch:'Archers',baseCap:'March capacity (unbuffed)',masterBuff:'Valora bonus',petBuff:'Bison bonus',extraStats:'Optional: offensive battle stats for theoretical scoring',statsHelp:'Enter attack and lethality percentages for each troop class. Missing values are treated as 0%, not estimated from gear.',iAtk:'Infantry attack %',iLet:'Infantry lethality %',cAtk:'Cavalry attack %',cLet:'Cavalry lethality %',aAtk:'Archer attack %',aLet:'Archer lethality %',formation:'March war room · 1–7 marches',edit:'EDIT MARCH',firstHero:'First hero / lineup',preset:'Formation preset',custom:'Custom',allJoins:'Apply to all active joins',formationHelp:'Tap any march to change its lineup and formation. Values recalculate for all seven marches.',resources:'Resource check',perMarch:'Capacity / march',totalDeployed:'Troops deployed',archLeft:'Archers remaining',joinFill:'Join fill rate',unlockHint:'Load a verified NRW profile to activate the war room.',simTitle:'Battle simulator',simHelp:'This is an experimental relative indicator, NOT actual game damage. Hero procs, troop base stats and rally-leader values are not fully modeled.',damageIndex:'Estimated relative damage index',simFoot:'For comparisons only · unvalidated model',simulate:'⚔ Simulate attack',compare:'Formation matchup',compareHelp:'Join preset comparison, with the same lead march and available troops.',footerNote:'No account login, no central saving. Personal settings stay in this browser.',starter:'START',join:'JOIN',hero:'Hero',fill:'filled',noData:'Enter your troop counts and base march capacity to see results.',shortage:'Some marches cannot be fully filled. Selected joins are scaled down evenly after reserving the starter.',ready:'All selected marches are filled under this assumed capacity.',notMember:'This ID does not currently belong to NRW on kingdom 1044.',missingKey:'Bear API is not yet configured on this preview. The game page is ready, but profile lookup requires a new server-side API key.',notFound:'Player ID not found.',badId:'Please enter a valid Governor ID.',busy:'Fetching profile… the provider may take up to one minute.',rate:'The data provider is rate-limiting requests. Try again later.',failed:'Player lookup failed. Please retry later.',saved:'Profile loaded. Manual data stays on your device.',lead:'YOUR RALLY',heroesUnavailable:'No arena heroes returned.',privateStats:'Arena heroes only · hidden equipment is not imported',unknownStats:'Enter offensive stats for meaningful damage-index comparisons.'},
  de:{back:'← Spieler-Dashboard',heroTitle:'Jeder Marsch',heroTitle2:'zählt.',heroDesc:'Stelle deine verfügbaren Märsche zusammen, vergleiche Truppenformationen und simuliere die Bärenfalle vor dem nächsten Kampf.',profileTitle:'Dein Governor',profileInfo:'Gib deine Governor-ID ein. Nur [NRW]United, Allianz-ID 105300097 auf Server 1044, kann den Optimierer nutzen.',load:'Spieler laden',heroTitleSection:'Heldendeck',heroNote:'Die API zeigt nur fünf Arena-Verteidigungshelden. Starter- und Join-Helden lassen sich unten manuell anpassen.',army:'Truppenarsenal',private:'NUR AUF DIESEM GERÄT',inf:'Infanterie',cav:'Kavallerie',arch:'Bogenschützen',baseCap:'Marschkapazität ohne Buffs',masterBuff:'Valora-Bonus',petBuff:'Bison-Bonus',extraStats:'Optional: Offensive Kampfstats für theoretische Prognosen',statsHelp:'Gib Angriff und Tödlichkeit je Truppenklasse in Prozent ein. Leere Felder zählen als 0 %, nicht als ausgerüstete Boni.',iAtk:'Infanterie Angriff %',iLet:'Infanterie Tödlichkeit %',cAtk:'Kavallerie Angriff %',cLet:'Kavallerie Tödlichkeit %',aAtk:'Bogenschützen Angriff %',aLet:'Bogenschützen Tödlichkeit %',formation:'Marsch-Kommandozentrale · 1–7',edit:'MARSCH BEARBEITEN',firstHero:'Erster Held / Aufstellung',preset:'Formationsvorlage',custom:'Eigene Formation',allJoins:'Auf alle aktiven Joins anwenden',formationHelp:'Tippe einen Marsch an, um Helden und Formation zu ändern. Alle sieben Märsche werden neu berechnet.',resources:'Truppencheck',perMarch:'Kapazität je Marsch',totalDeployed:'Eingesetzte Truppen',archLeft:'Bogenschützen übrig',joinFill:'Join-Auslastung',unlockHint:'Lade ein bestätigtes NRW-Profil, um den Optimierer freizuschalten.',simTitle:'Bären-Simulator',simHelp:'Ein experimenteller relativer Index, KEIN echter Kingshot-Schaden. Helden-Auslösungen, Truppenbasiswerte und fremde Rallyleader sind noch nicht vollständig modelliert.',damageIndex:'Geschätzter relativer Schadensindex',simFoot:'Nur zum Vergleichen · unvalidiertes Modell',simulate:'⚔ Angriff simulieren',compare:'Formationsduell',compareHelp:'Vergleich von Join-Vorlagen mit gleicher eigener Rally und denselben verfügbaren Truppen.',footerNote:'Kein Login, keine zentrale Speicherung. Persönliche Eingaben bleiben in deinem Browser.',starter:'START',join:'JOIN',hero:'Held',fill:'gefüllt',noData:'Trage deine Truppenanzahlen und die Marschkapazität ein.',shortage:'Nicht alle Märsche passen. Die eigene Rally hat Vorrang; aktive Joins werden gleichmäßig verkleinert.',ready:'Alle ausgewählten Märsche sind bei der angenommenen Kapazität vollständig gefüllt.',notMember:'Diese Governor-ID gehört derzeit nicht zur Allianz NRW auf Server 1044.',missingKey:'Der API-Schlüssel für diesen Teststand ist noch nicht serverseitig eingerichtet. Die Oberfläche ist fertig, aber die Spielerabfrage noch nicht aktiv.',notFound:'Spieler-ID nicht gefunden.',badId:'Bitte gib eine gültige Governor-ID ein.',busy:'Profil wird geladen … die API kann bis zu einer Minute benötigen.',rate:'Der Datenanbieter begrenzt gerade die Anfragen. Später erneut versuchen.',failed:'Spielerabruf fehlgeschlagen. Bitte später erneut versuchen.',saved:'Profil geladen. Eigene Eingaben bleiben auf deinem Gerät.',lead:'EIGENE RALLY',heroesUnavailable:'Keine Arena-Helden geliefert.',privateStats:'Nur Arena-Helden · verborgene Ausrüstung wird nicht importiert',unknownStats:'Für sinnvolle Schadensvergleiche bitte die offensiven Werte ergänzen.'},
- fr:{back:'← Tableau de bord',heroTitle:'Chaque marche',heroTitle2:'compte.',heroDesc:'Compose tes sept marches, compare les formations et simule le piège à ours avant le prochain combat.',profileTitle:'Ton gouverneur',profileInfo:'Saisis ton identifiant. Seuls les joueurs de [NRW]United (alliance 105300097, royaume 1044) peuvent utiliser cet outil.',load:'Charger le joueur',heroTitleSection:'Cartes de héros',heroNote:"L’API ne montre que cinq héros de défense d’arène. Tu peux modifier les héros de départ et de renfort ci-dessous.",army:'Réserve de troupes',private:'LOCAL UNIQUEMENT',inf:'Infanterie',cav:'Cavalerie',arch:'Archers',baseCap:'Capacité sans bonus',masterBuff:'Bonus Valora',petBuff:'Bonus Bison',extraStats:'Facultatif : statistiques offensives pour les estimations',statsHelp:'Saisis attaque et létalité de chaque type de troupes en %. Les champs vides valent 0 %, sans estimation des équipements.',iAtk:'Attaque infanterie %',iLet:'Létalité infanterie %',cAtk:'Attaque cavalerie %',cLet:'Létalité cavalerie %',aAtk:'Attaque archers %',aLet:'Létalité archers %',formation:'Salle de guerre : 1–7 marches',edit:'MODIFIER LA MARCHE',firstHero:'Premier héros / équipe',preset:'Formation prédéfinie',custom:'Personnalisée',allJoins:'Appliquer à tous les renforts actifs',formationHelp:'Touche une marche pour modifier ses héros et sa formation. Les sept marches sont recalculées.',resources:'Contrôle des troupes',perMarch:'Capacité par marche',totalDeployed:'Troupes déployées',archLeft:'Archers restants',joinFill:'Remplissage renforts',unlockHint:'Charge un profil NRW confirmé pour débloquer les fonctions.',simTitle:'Simulateur',simHelp:"Indicateur relatif expérimental, PAS les dégâts réels du jeu. Les talents aléatoires, les valeurs de base et les chefs d'autres rallyes ne sont pas complètement modélisés.",damageIndex:'Indice relatif de dégâts estimés',simFoot:'Comparaison uniquement · modèle non validé',simulate:'⚔ Simuler',compare:'Duels de formations',compareHelp:'Comparaison des renforts avec le même rallye personnel et les mêmes troupes.',footerNote:'Sans connexion ni stockage central. Tes valeurs restent sur cet appareil.',starter:'DÉPART',join:'RENFORT',hero:'Héros',fill:'rempli',noData:'Saisis tes troupes et ta capacité de marche.',shortage:'Toutes les marches ne sont pas complètes. Le rallye personnel est prioritaire et les renforts actifs sont réduits équitablement.',ready:'Toutes les marches choisies sont complètes avec cette capacité.',notMember:"Cet identifiant n'appartient pas à NRW dans le royaume 1044.",missingKey:"La clé API n'est pas encore configurée pour cet aperçu. L’interface est prête, mais l'import du profil est désactivé.",notFound:'Identifiant introuvable.',badId:'Saisis un identifiant valide.',busy:'Chargement du profil… cela peut durer une minute.',rate:'Le fournisseur limite les requêtes. Réessaie plus tard.',failed:'Échec du chargement. Réessaie plus tard.',saved:'Profil chargé. Les saisies manuelles restent sur cet appareil.',lead:'MON RALLYE',heroesUnavailable:"Aucun héros d'arène fourni.",privateStats:"Héros d’arène seulement · équipements masqués non importés",unknownStats:'Renseigne les statistiques offensives pour des comparaisons significatives.'}
+ fr:{back:'← Tableau de bord',heroTitle:'Chaque marche',heroTitle2:'compte.',heroDesc:'Compose tes sept marches, compare les formations et simule le piège à ours avant le prochain combat.',profileTitle:'Ton gouverneur',profileInfo:'Saisis ton identifiant. Seuls les joueurs de [NRW]United (alliance 105300097, royaume 1044) peuvent utiliser cet outil.',load:'Charger le joueur',heroTitleSection:'Cartes de héros',heroNote:"L’API ne montre que cinq héros de défense d’arène. Tu peux modifier les héros de départ et de renfort ci-dessous.",army:'Réserve de troupes',private:'LOCAL UNIQUEMENT',inf:'Infanterie',cav:'Cavalerie',arch:'Archers',baseCap:'Capacité sans bonus',masterBuff:'Bonus Valora',petBuff:'Bonus Bison',extraStats:'Facultatif : statistiques offensives pour les estimations',statsHelp:'Saisis attaque et létalité de chaque type de troupes en %. Les champs vides valent 0 %, sans estimation des équipements.',iAtk:'Attaque infanterie %',iLet:'Létalité infanterie %',cAtk:'Attaque cavalerie %',cLet:'Létalité cavalerie %',aAtk:'Attaque archers %',aLet:'Létalité archers %',formation:'Salle de guerre : 1–7 marches',edit:'MODIFIER LA MARCHE',firstHero:'Premier héros / équipe',preset:'Formation prédéfinie',custom:'Personnalisée',allJoins:'Appliquer à tous les renforts actifs',formationHelp:'Touche une marche pour modifier ses héros et sa formation. Les sept marches sont recalculées.',resources:'Contrôle des troupes',perMarch:'Capacité par marche',totalDeployed:'Troupes déployées',archLeft:'Archers restants',joinFill:'Remplissage renforts',unlockHint:'Charge un profil NRW confirmé pour débloquer les fonctions.',simTitle:'Simulateur',simHelp:"Indicateur relatif expérimental, PAS les dégâts réels du jeu. Les talents aléatoires, les valeurs de base et les chefs d'autres rallyes ne sont pas complètement modélisés.",damageIndex:'Indice relatif de dégâts estimés',simFoot:'Comparaison uniquement · modèle non validé',simulate:'⚔ Simuler',compare:'Duels de formations',compareHelp:'Comparaison des renforts avec le même rallye personnel et les mêmes troupes.',footerNote:'Sans connexion ni stockage central. Tes valeurs restent sur cet appareil.',starter:'DÉPART',join:'RENFORT',hero:'Héros',fill:'rempli',noData:'Saisis tes troupes et ta capacité de marche.',shortage:'Toutes les marches ne sont pas complètes. Le rallye personnel est prioritaire et les renforts actifs sont réduits équitablement.',ready:'Toutes les marches choisies sont complètes avec cette capacité.',notMember:"Cet identifiant n'appartient pas à NRW dans le royaume 1044.",missingKey:"La clé API n'est pas encore configurée pour cet aperçu. L’interface est prête, mais l'import du profil est désactivé.",notFound:'Identifiant introuvable.',badId:'Saisis un identifiant valide.',busy:'Chargement du profil… cela peut durer une minute.',rate:'Le fournisseur limite les requêtes. Réessaie plus tard.',failed:'Échec du chargement. Réessaie plus tard.',saved:'Profil chargé. Les saisies manuelles restent sur cet appareil.',lead:'MON RALLYE',heroesUnavailable:"Aucun héros d'arène fourni.",privateStats:"Héros d’arène seulement · équipements masqués non importés",unknownStats:'Renseigne les statistiques offensives pour des comparaisons significatives.'},
+ es:{
+  "back": "← Panel de jugadores",
+  "heroTitle": "Cada marcha",
+  "heroTitle2": "cuenta.",
+  "heroDesc": "Organiza tus marchas disponibles, compara formaciones y simula la trampa del oso antes de la batalla.",
+  "profileTitle": "Tu gobernador",
+  "profileInfo": "Introduce tu ID de gobernador. El optimizador está destinado a miembros de [NRW]United, alianza 105300097 del reino 1044.",
+  "load": "Cargar jugador",
+  "heroTitleSection": "Tus héroes",
+  "heroNote": "La API muestra hasta cinco héroes de defensa de arena. Puedes ajustar manualmente tus héroes de salida y apoyo.",
+  "army": "Reservas de tropas",
+  "private": "SOLO LOCAL",
+  "inf": "Infantería",
+  "cav": "Caballería",
+  "arch": "Arqueros",
+  "baseCap": "Capacidad de marcha sin bonificaciones",
+  "masterBuff": "Bonificación de Valora",
+  "petBuff": "Bonificación de Bison",
+  "extraStats": "Opcional: estadísticas ofensivas para estimaciones",
+  "statsHelp": "Introduce los porcentajes de ataque y letalidad por tipo de tropa. No se estiman los datos que faltan a partir del equipo.",
+  "iAtk": "Ataque de infantería %",
+  "iLet": "Letalidad de infantería %",
+  "cAtk": "Ataque de caballería %",
+  "cLet": "Letalidad de caballería %",
+  "aAtk": "Ataque de arqueros %",
+  "aLet": "Letalidad de arqueros %",
+  "formation": "Sala de guerra · 1–7 marchas",
+  "edit": "EDITAR MARCHA",
+  "firstHero": "Primer héroe / formación",
+  "preset": "Formación predefinida",
+  "custom": "Personalizada",
+  "allJoins": "Aplicar a todos los apoyos activos",
+  "formationHelp": "Toca una marcha para cambiar sus héroes y formación. Se recalculan las siete marchas.",
+  "resources": "Control de tropas",
+  "perMarch": "Capacidad por marcha",
+  "totalDeployed": "Tropas desplegadas",
+  "archLeft": "Arqueros restantes",
+  "joinFill": "Ocupación de apoyos",
+  "unlockHint": "Carga un perfil de NRW para activar la herramienta.",
+  "simTitle": "Simulador de batalla",
+  "simHelp": "Indicador relativo experimental, NO el daño real del juego. Las habilidades, estadísticas base y líderes de otros rallies aún no están completamente modelados.",
+  "damageIndex": "Índice relativo de daño estimado",
+  "simFoot": "Solo para comparar · modelo no validado",
+  "simulate": "⚔ Simular ataque",
+  "compare": "Comparar formaciones",
+  "compareHelp": "Comparación de apoyos con la misma marcha inicial y las tropas disponibles.",
+  "footerNote": "Sin inicio de sesión ni almacenamiento central. Los datos personales se guardan en este navegador.",
+  "starter": "INICIO",
+  "join": "APOYO",
+  "hero": "Héroe",
+  "fill": "completo",
+  "noData": "Introduce la cantidad de tropas y la capacidad base de marcha.",
+  "shortage": "No todas las marchas pueden completarse. La marcha inicial tiene prioridad; los apoyos se reducen proporcionalmente.",
+  "ready": "Todas las marchas seleccionadas están completas para esta capacidad.",
+  "notMember": "Este ID no pertenece actualmente a NRW en el reino 1044.",
+  "missingKey": "La API segura no está configurada en esta vista previa. Usa un perfil local o importa JSON.",
+  "notFound": "No se encuentra el ID del jugador.",
+  "badId": "Introduce un ID de gobernador válido.",
+  "busy": "Cargando perfil… puede tardar hasta un minuto.",
+  "rate": "El proveedor limita las consultas. Inténtalo más tarde.",
+  "failed": "Error al cargar el perfil. Inténtalo de nuevo.",
+  "saved": "Perfil cargado. Tus datos se guardan en este dispositivo.",
+  "lead": "TU RALLY",
+  "heroesUnavailable": "No se recibieron héroes de arena.",
+  "privateStats": "Solo héroes de arena · no se importa el equipo oculto",
+  "unknownStats": "Completa las estadísticas ofensivas para comparar daños."
+}
 };
-for(var l of ['de','en','fr'])Object.assign(languages[l],{
+for(var l of ['de','en','fr','es'])Object.assign(languages[l],{
  offlineMode:l==='de'?'Offline testen':l==='fr'?'Tester hors ligne':'Try offline',
  jsonImportLabel:l==='de'?'MightPulse-JSON importieren':l==='fr'?'Importer le JSON MightPulse':'Import MightPulse JSON',
  offlineWarning:l==='de'?'Offline-Eingaben sind nicht NRW-verifiziert und bleiben nur auf deinem Gerät.':l==='fr'?'Le mode hors ligne ne vérifie pas NRW. Les données restent sur cet appareil.':'Offline data is not NRW-verified and remains on this device.',
@@ -222,17 +289,29 @@ for(var l of ['de','en','fr'])Object.assign(languages[l],{
  offlineNotice:l==='de'?'Offline-Test: keine Allianzprüfung, alle Eingaben bleiben lokal.':l==='fr'?'Test hors ligne : aucune vérification de l’alliance.':'Offline test: no alliance verification; your inputs stay local.',
  offlineError:l==='de'?'JSON ungültig oder nicht NRW/1044.':l==='fr'?'JSON invalide ou hors NRW/1044.':'Invalid JSON or not NRW/1044.'
 });
-for(var loc of ['de','en','fr'])Object.assign(languages[loc],{
+for(var loc of ['de','en','fr','es'])Object.assign(languages[loc],{
  leaderStatsTitle:loc==='de'?'Kampfwerte des Rallyleaders':loc==='fr'?'Statistiques du chef de rallye':'Rally leader battle stats',
  leaderStatsHelp:loc==='de'?'Beim Join wirken die Stats des Rallyleaders, NICHT deine eigenen. Für Vergleiche bitte alle sechs Werte je Rallyleader aus dem Kampfbericht ergänzen.':loc==='fr'?'En renfort les statistiques du chef sont utilisées, pas les tiennes. Renseigne les six valeurs par chef.':'Joins use the rally leader’s stats, NOT your own. Enter all six stats for each leader for comparisons.',
  leaderMissing:loc==='de'?'Noch kein Schadenvergleich: Bitte deine Angriffs-/Tödlichkeitswerte und die Werte aller sechs Rallyleader ergänzen. Die Truppenverteilung funktioniert bereits.':loc==='fr'?'Pas de comparaison de dégâts sans les statistiques de chaque chef et les tiennes. Les troupes peuvent déjà être réparties.':'No damage comparison until your offensive stats and the stats of all six rally leaders are filled in. Troop allocation is ready.'
 });
-for(var pLang of ['de','en','fr'])Object.assign(languages[pLang],{
+for(var pLang of ['de','en','fr','es'])Object.assign(languages[pLang],{
  jsonPasteTitle:pLang==='de'?'API-JSON direkt einfügen':pLang==='fr'?'Coller directement le JSON API':'Paste API JSON',
  jsonPasteButton:pLang==='de'?'JSON lokal übernehmen':pLang==='fr'?'Importer le JSON localement':'Import JSON locally',
  pagesApiPending:pLang==='de'?'GitHub Pages kann keinen geheimen API-Schlüssel verwenden. Bis der sichere Server-Endpunkt eingerichtet ist, bitte Offline testen oder API-JSON einfügen.':pLang==='fr'?'GitHub Pages ne peut pas garder une clé secrète. Utilise le mode hors ligne ou importe le JSON.':'GitHub Pages cannot hold a private API key. Until the secure endpoint is set up, use offline mode or import API JSON.'
 });
-var num = function(value){ return Math.round(value).toLocaleString(document.documentElement.lang === 'de' ? 'de-DE' : document.documentElement.lang === 'fr' ? 'fr-FR' : 'en-GB'); };
+Object.assign(languages.es,{
+ offlineMode:'Probar sin conexión',jsonImportLabel:'Importar JSON de MightPulse',
+ offlineWarning:'Los datos sin conexión no están verificados por NRW y permanecen en este dispositivo.',
+ missingTitle:'Completar datos del juego',missingHelp:'El equipo, las mascotas y las habilidades se guardan localmente. No sumes las bonificaciones dos veces.',
+ petLevels:'Mascotas y bonificaciones',valoraLevels:'Valora y maestros',gearLevels:'Equipo de gobernador y talismanes',
+ missingHeroes:'Héroes que no aparecen en la API',offlineNotice:'Modo local: sin verificación de alianza; datos solo en este dispositivo.',
+ offlineError:'JSON no válido o que no pertenece a NRW/1044.',
+ leaderStatsTitle:'Estadísticas del líder del rally',leaderStatsHelp:'En los apoyos se aplican las estadísticas del líder del rally, no las tuyas. Introduce los seis valores.',
+ leaderMissing:'Para comparar daño se necesitan las estadísticas ofensivas propias y las de los líderes de rally.',
+ jsonPasteTitle:'Pegar JSON de API',jsonPasteButton:'Importar JSON localmente',
+ pagesApiPending:'GitHub Pages no permite guardar una clave API secreta. Usa un perfil local o importa JSON.'
+});
+var num = function(value){ return Math.round(value).toLocaleString(document.documentElement.lang === 'de' ? 'de-DE' : document.documentElement.lang === 'fr' ? 'fr-FR' : document.documentElement.lang === 'es' ? 'es-ES' : 'en-GB'); };
 var defaultMar = [
  {hero:'', i:1,c:12},
  {hero:'',i:10,c:10},{hero:'',i:10,c:10},{hero:'',i:10,c:10},
