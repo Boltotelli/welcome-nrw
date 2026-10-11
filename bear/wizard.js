@@ -431,7 +431,10 @@ const manualEntry=window.NRW_BEAR_MANUAL?.mount(sections,B,lang,()=>{
 });
 function renderWidgetLevels(){
  const v=B.model().v2||{},l=lang();
- const scanned=Array.isArray(v.scannedOwnedHeroes)?[...new Set(v.scannedOwnedHeroes.filter(Boolean))]:[];
+ // Widgets are equipment exclusive to legendary/gold heroes.
+ // Purple and blue heroes never receive a Widget input, even in OCR mode.
+ const scanned=Array.isArray(v.scannedOwnedHeroes)?
+  [...new Set(v.scannedOwnedHeroes.filter(n=>n&&window.NRW_BEAR_MANUAL?.rarity(n)==='legendary'))]:[];
  widgetHost.replaceChildren();widgetHost.hidden=!scanned.length;
  if(!scanned.length)return;
  const h=document.createElement('h3');
