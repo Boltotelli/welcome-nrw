@@ -101,8 +101,10 @@ assert.ok(corrupted.every(x=>x.count===null&&x.uncertainCount),
  'conflicting troop amounts or badge digits cannot be applied');
 const duplicates=[{type:0,count:605476},{type:1,count:605476},{type:2,count:1116474}];
 E.flagAmbiguousCounts(duplicates,{});
-assert.equal(duplicates[0].count,null);
-assert.equal(duplicates[1].count,null);
+assert.equal(duplicates[0].count,605476);
+assert.equal(duplicates[1].count,605476);
+assert.equal(duplicates[0].equalCountAcrossClasses,true,'identical legitimate inventories must not be erased');
+assert.equal(duplicates[1].equalCountAcrossClasses,true);
 // Generalized geometry, NOT one hardcoded screenshot. Different screenshot
 // resolutions, amounts, class positions and extra rows must all keep IDs.
 function flexible(w,h,amounts,layout){
@@ -134,6 +136,12 @@ for(const [w,h,counts,expected,layout] of [
  assert.ok(output.every(x=>x.elite===true),'Spitzen implies X/T10 '+w+'x'+h);
  assert.ok(output.every(x=>x.icon&&x.anchor),'independent dynamic badge anchor '+w+'x'+h);
 }
+// Even small REAL quantities remain valid when spatially below the
+// correct troop title. The old badge-digit failure came from fixed crops.
+const small=E.detect(flexible(1080,1920,['3','27','560'],
+ {x1:.20,x2:.61,y1:.26,y2:.38}),1080,1920);
+assert.deepEqual(Array.from(small,x=>x.count),[3,27,560],
+ 'do not erase legitimate small troops just because the count has few digits');
 // The second line must not be accidentally swallowed by a crop from the first.
 const extra=[...flexible(1080,1920,['21.000','18.000','63.000'],
  {x1:.18,x2:.58,y1:.26,y2:.38}),
