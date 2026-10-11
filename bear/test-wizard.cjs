@@ -128,13 +128,13 @@ assert.ok(simulation.includes("video.hidden=mode!=='video'"),'video and WebP are
 assert.ok(simulation.includes("image.hidden=mode!=='image'"),'image cannot remain visible under video');
 assert.ok(simulation.includes("video.addEventListener('playing'"),'WebM is displayed only while playable');
 assert.ok(css.includes('.bear-sim-video[hidden]'),'hidden attribute takes priority over media CSS');
-assert.ok(html.includes('./simulation-ui.js?v=bear-i18n-20261011-1'),'simulation media fix invalidates browser cache');
+assert.ok(html.includes('./simulation-ui.js?v=partial-damage-hotfix-20261011-1'),'simulation media fix invalidates browser cache');
 console.log('BEAR WIZARD: nine stages, hero shortlist, separate gear-first detail uploads and independent capacity input verified.');
 
 assert.ok(fs.existsSync(__dirname+'/hero-reference.json'),'Vercel must ship source snapshot for hero and Bear damage');
 assert.ok(intake.includes('const guidedDetails=window.NRW_BEAR_SCREENSHOT_STAGE===6'),'details only assigned from confirmed hero selection');
 assert.ok(intake.includes('assignedByOrder:true'),'unreadable hero heading has guarded review workflow');
-assert.ok(intake.includes('const uncertainKeys=new Set()'),'troop OCR disagreement fails closed');
+assert.ok(intake.includes('ENTRY.flagAmbiguousCounts(troopEntries,{})'),'ambiguous troop OCR remains flagged for review');
 assert.ok(html.includes('intake-ui.js?v=dynamic-troops-20261011-1'),'updated OCR script bypasses old browser cache');
 assert.ok(html.includes('score-bonuses.js?v=partial-damage-hotfix-20261011-1'),'updated damage logic bypasses old browser cache');
 
