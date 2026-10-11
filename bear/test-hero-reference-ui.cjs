@@ -68,6 +68,6 @@ liveReference.load().then(first=>{
  assert.equal(liveReference.get('Yang',4,4).bonus,472.18);
  assert.equal(attempts,2);
  assert.equal(requestCache,'no-store','the user must not be stuck with old JSON');
- assert.match(requestUrl,/hero-reference\\.json\\?v=/);
+ assert.match(requestUrl,/hero-reference\.json\?v=/);
  console.log('BEAR REFERENCE LOAD: versioned fresh data and retry after a fetch failure passed.');
 }).catch(e=>{console.error(e);process.exitCode=1;});
