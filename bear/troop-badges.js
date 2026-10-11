@@ -260,7 +260,8 @@ async function recognizeStandard(canvas,text,worker){
    const [x,y]=medal.point;
    const seeds=[
     [x-31,y+59],
-    [x-(type===1?31:38),y+52]
+    [x-(type===1?31:38),y+52],
+    ...(type===1?[[x-25,y+59]]:[])
    ];
    for(const seed of seeds){
     if(romanXAt(ctx,seed)>=.72){matchedX=true;break;}
