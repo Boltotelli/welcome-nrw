@@ -108,7 +108,7 @@ function readBelow(label,words,w,h){
  // The number is on a distinct text baseline below this troop label.
  // All tolerances are fractions of the screenshot; x/y NEVER pixels.
  const xMin=Math.max(0,label.x0-.025),xMax=Math.min(1,label.x0+.29);
- const yMin=label.y0+.006,yMax=Math.min(1,label.y1+Math.max(.038,Math.min(.062,.10*w/h)));
+ const yMin=label.y1+.003,yMax=Math.min(1,label.y1+Math.max(.038,Math.min(.062,.10*w/h)));
  const nearby=words.filter(a=>{
   const x=(a.x0+a.x1)/2,y=(a.y0+a.y1)/2;
   return x>=xMin&&x<=xMax&&y>=yMin&&y<=yMax&&/[0-9]/.test(a.text);
@@ -124,7 +124,7 @@ function readBelow(label,words,w,h){
   const value=numeric(row.words);
   // A badge often contains a lone T/TG digit. Never treat it as the
   // player's troop COUNT. Small actual armies remain manually reviewable.
-  if(value!==null&&String(value).length>=3)return value;
+  if(value!==null)return value; // Below a verified class label, including small legitimate amounts.
  }
  return null;
 }
@@ -156,11 +156,11 @@ function flagAmbiguousCounts(entries,focused){
   if(list.length!==1)continue;
   const entry=list[0],independent=focused?.[keys[type]];
   if(entry.count!==null&&entry.count!==undefined&&
-     (!Number.isSafeInteger(entry.count)||entry.count<100)){
+     (!Number.isSafeInteger(entry.count)||entry.count<1)){
    entry.count=null;entry.uncertainCount=true;entry.countWarning='badge-digit';
    continue;
   }
-  if(Number.isSafeInteger(independent)&&independent>=100&&
+  if(Number.isSafeInteger(independent)&&independent>=1&&
      Number.isSafeInteger(entry.count)&&entry.count!==independent){
    // Text beneath a detected class heading is more useful than an absolute
    // pixel crop, but disagreement means we cannot choose safely.
@@ -169,12 +169,14 @@ function flagAmbiguousCounts(entries,focused){
  }
  const byNumber=new Map();
  for(const entry of entries||[]){
-  if(!Number.isSafeInteger(entry.count)||entry.count<100)continue;
+  if(!Number.isSafeInteger(entry.count)||entry.count<1)continue;
   const prev=byNumber.get(entry.count);
   if(prev&&prev.type!==entry.type){
+   // Equal inventories across TWO DIFFERENT troop classes are valid.
+   // Retain them for review, because matching numbers alone are not
+   // evidence of an OCR error once each is tied to its own class label.
    for(const e of [prev,entry]){
-    e.uncertainCount=true;e.countWarning='duplicate-count-different-class';
-    e.count=null;
+    e.equalCountAcrossClasses=true;
    }
   }else byNumber.set(entry.count,entry);
  }
@@ -190,7 +192,7 @@ function recoverSingleEntries(entries,fallback){
  if(entries.length!==3||new Set(entries.map(e=>e.type)).size!==3)return entries;
  for(const e of entries){
   const key=keys[e.type],n=fallback?.[key];
-  if(!e.uncertainCount&&(e.count===null||e.count===undefined)&&Number.isSafeInteger(n)&&n>=100){
+  if(!e.uncertainCount&&(e.count===null||e.count===undefined)&&Number.isSafeInteger(n)&&n>=1){
    e.count=n;e.amountSource='focused-strip';
   }
  }
