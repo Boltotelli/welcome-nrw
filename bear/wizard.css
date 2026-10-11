@@ -356,12 +356,16 @@ body.bear-wizard-mode .dashboard{display:none!important}
  .bear-formation-troops .bear-formation-counts{font-size:15px!important}
 }
 
-/* First generation transition; transparent original video is optional,
- * a restrained Bear spinner remains when the original binary is missing. */
+/* Full, uncropped seven-second formation-building animation. The loader
+ * covers the viewport rather than a scroll position in the long wizard. */
 .bear-guided-wizard{position:relative}
-.bear-guide-stage-loader{position:absolute;inset:0;z-index:20;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:15px;background:rgba(15,24,39,.96);border-radius:16px;color:#fff;text-align:center;padding:22px}
+.bear-guide-stage-loader{position:fixed;inset:0;z-index:2147483000;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:12px;background:#000;color:#fff;text-align:center;padding:clamp(8px,3vw,32px);overscroll-behavior:contain}
 .bear-guide-stage-loader[hidden]{display:none!important}
+.bear-guide-stage-video{display:block;width:min(100%,960px);max-height:min(74vh,650px);aspect-ratio:16/9;object-fit:contain;background:#000}
+.bear-guide-stage-video[hidden]{display:none!important}
 .bear-guide-stage-loader .bear-guide-loading-bear{font-size:74px;animation:bear-guide-bounce .85s ease-in-out infinite alternate}
-.bear-guide-stage-loader p{font-weight:800;font-size:16px}
+.bear-guide-stage-loader .bear-guide-loading-bear[hidden]{display:none!important}
+.bear-guide-stage-loader p{margin:0;font-weight:800;font-size:clamp(14px,3.6vw,18px);line-height:1.35;color:#f7dcaf}
 @keyframes bear-guide-bounce{from{transform:translateY(2px) scale(.96)}to{transform:translateY(-10px) scale(1.04)}}
 @media(prefers-reduced-motion:reduce){.bear-guide-stage-loader .bear-guide-loading-bear{animation:none}}
+@media(max-width:650px){.bear-guide-stage-loader{padding:12px 3vw}.bear-guide-stage-video{width:100%;max-height:60vh}}
