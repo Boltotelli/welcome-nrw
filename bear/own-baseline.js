@@ -24,6 +24,7 @@ const EXPEDITION_WIDGETS=Object.freeze({
  'Thrud':{type:'rally-lethality',name:'Wolf-Kissed',source:'https://www.kingshotcommand.com/hero-widgets/thrud'},
  'Ava':{type:'rally-lethality',name:'Color Storm',source:'https://www.kingshotcommand.com/hero-widgets/ava'},
  'Zoe':{type:'defense-only',name:'Dark Lady',source:'https://www.kingshotcommand.com/hero-widgets/zoe'},
+ 'Long Fei':{type:'defense-only',name:'Strategic Strike',source:'https://www.kingshotcommand.com/heroes/long-fei'},
  'Vivian':{type:'defense-only',name:'Money Driven',source:'https://www.kingshotcommand.com/heroes/vivian'},
  'Hilde':{type:'defense-only',name:'Fortitude',source:'https://www.kingshotcommand.com/heroes/hilde'},
  'Margot':{type:'defense-only',name:'Pugilist',source:'https://www.kingshotcommand.com/heroes/margot'}
