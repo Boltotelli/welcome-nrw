@@ -106,7 +106,7 @@ assert.ok(css.includes('.bear-guide-stored'),'mobile saved-values cards styled')
 assert.ok(!wizard.includes('kingshot_beartrap_v3_action_transparent.webm'),'formation-stage loading must not reuse the damage video');
 assert.ok(wizard.includes('stageLoader.append(loaderBear,loaderText)'),'formation stage keeps its own animated bear loading indicator');
 assert.ok(simulation.includes("webm.src='./assets/kingshot_beartrap_v3_action_transparent.webm'"),'damage simulation retains the approved video');
-assert.ok(html.includes('./wizard.js?v=wizard-es-20261011-1'),'wizard cache version changed');
+assert.ok(html.includes('./wizard.js?v=bear-i18n-20261011-1'),'wizard cache version changed');
 assert.ok(html.includes('./wizard.css?v=roster-widgets-20261011-1'),'CSS cache version changed');
 assert.ok(html.includes('./hero-advisor.js?v=roster-widgets-20261011-1'),'advisor cache version changed');
 assert.ok(wizard.includes('new Set(advisor?.offensiveWidgetHeroes||[])'),'offensive heroes shown first');

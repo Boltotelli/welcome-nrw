@@ -319,13 +319,29 @@ for(const i of [1,2,4,6,7]){
  const head=document.createElement('summary');
  head.textContent=lang()==='de'?'📷 Beispielbilder aus Kingshot':lang()==='fr'?'📷 Exemples de captures Kingshot':lang()==='es'?'📷 Ejemplos de capturas Kingshot':'📷 Kingshot screenshot examples';
  const note=document.createElement('div');note.className='bear-guide-example-preview';
- const text={
- 1:'Schwadron: Infanterie, Kavallerie, Bogenschützen · Anzahl · T/TG',
- 2:'Bonusübersicht: Klassen-ATK, Klassen-Tödlichkeit, Schwadron-ATK/LET',
- 4:'Heldenübersicht: mehrere überlappende Screenshots · Namen · Sterne · Level',
- 6:'Heldendetails: Screenshot eines einzelnen ausgewählten Helden · Expedition',
- 7:'Pets: Skill-Level · Valora: Skills und Grund-Level'
- }[i];
+ const screenshotHints={
+ de:{1:'Schwadron: Infanterie, Kavallerie, Bogenschützen · Anzahl · T/TG',
+  2:'Bonusübersicht: Angriff, Tödlichkeit und Schwadronwerte',
+  4:'Heldenübersicht: überlappende Screenshots · Namen · Sterne · Level',
+  6:'Heldendetails: einzelne Helden · Expeditionswerte',
+  7:'Pets: Skill-Level · Valora: vier Fähigkeiten'},
+ en:{1:'Squad preview: infantry, cavalry, archers · quantities · tiers',
+  2:'Bonus overview: attack, lethality and squad stats',
+  4:'Hero list: overlapping screenshots · names · stars · levels',
+  6:'Hero details: one hero at a time · expedition stats',
+  7:'Pets: skill levels · Valora: four abilities'},
+ fr:{1:'Aperçu des troupes : quantités et niveaux',
+  2:'Bonus : attaque, létalité et statistiques de l’escouade',
+  4:'Héros : captures chevauchantes, noms, étoiles et niveaux',
+  6:'Détails : un héros à la fois, statistiques d’expédition',
+  7:'Familiers : niveaux de compétences · Valora : quatre capacités'},
+ es:{1:'Vista de tropas: cantidades y niveles',
+  2:'Bonificaciones: ataque, letalidad y estadísticas del escuadrón',
+  4:'Héroes: capturas superpuestas, nombres, estrellas y niveles',
+  6:'Detalles: un héroe por captura, estadísticas de expedición',
+  7:'Mascotas: niveles de habilidad · Valora: cuatro habilidades'}
+ };
+ const text=(screenshotHints[lang()]||screenshotHints.en)[i];
  note.textContent=text;
  const warning=document.createElement('small');warning.textContent=
   'Beispielbilder nicht verfügbar. Bitte die Originaldateien prüfen.';warning.hidden=true;

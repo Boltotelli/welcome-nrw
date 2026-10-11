@@ -38,7 +38,7 @@ assert.equal(p.validate('295189783',{...obj,values:{'<script>':'alert()'}}),fals
  assert.ok(html.includes('activateSavedId:function(id,name)'));
 assert.ok(source.includes('bridge.storedGovernorName?.(id)'),'local label used when no public name available');
 assert.ok(html.includes('nrw_bear_profile_name_v1_'),'display name saved per numeric ID');
-assert.ok(html.includes('./intake-ui.js?v=multilang-ocr-20261011-1'),'picker cache version updated');
+assert.ok(html.includes('./intake-ui.js?v=bear-i18n-20261011-1'),'picker cache version updated');
 assert.ok(html.includes('rememberGovernorName:rememberGovernorName'),'bridge accepts local nickname assignment');
 const intake=fs.readFileSync(path.join(__dirname,'intake-ui.js'),'utf8');
 assert.ok(intake.includes('B.rememberGovernorName?.(id,name)'),'older saved IDs can be labelled without another API');

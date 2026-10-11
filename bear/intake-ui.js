@@ -64,7 +64,7 @@ if(governorInput&&lookup){
  const open=document.createElement('button');open.type='button';open.className='secondary-btn';
  open.textContent=say('Gespeicherten Stand öffnen','Open saved profile');
  const rename=document.createElement('div');rename.className='bear-local-name-row';
- const nameInput=document.createElement('input');nameInput.type='text';nameInput.maxLength=80;
+ const nameInput=document.createElement('input');nameInput.type='text';nameInput.maxLength=80;nameInput.setAttribute('aria-label',say('Spielername für diese ID','Player name for this ID'));
  nameInput.placeholder=say('Spielername für diese ID','Player name for this ID');
  const saveName=document.createElement('button');saveName.type='button';saveName.className='secondary-btn';
  saveName.textContent=say('Namen speichern','Save name');
@@ -120,7 +120,13 @@ if(governorInput&&lookup){
  note.textContent=say('Gespeicherte Profile auf diesem Gerät. Keine erneute Prüfung der Allianzzugehörigkeit.',
   'Saved profiles on this device. This does not recheck alliance membership.');
  localRow.after(note);
- const refresh=()=>{refreshSavedPlayers();updateNameEditor();note.hidden=localRow.hidden;};
+ const refresh=()=>{
+  refreshSavedPlayers();updateNameEditor();note.hidden=localRow.hidden;
+  nameInput.placeholder=say('Spielername für diese ID','Player name for this ID');
+  saveName.textContent=say('Namen speichern','Save name');
+  open.textContent=say('Gespeicherten Stand öffnen','Open saved profile');
+ };
+ document.querySelectorAll('button[data-lang]').forEach(b=>b.addEventListener('click',()=>setTimeout(refresh,0)));
  window.addEventListener('nrw-bear-loaded',refresh);
  refresh();
 }
@@ -142,6 +148,14 @@ try{
 const languageHint=document.createElement('p');languageHint.className='hint';
 function refreshGameLanguage(){
  const lc=locale();
+ // Existing fields are reused; update visible labels on each language change.
+ shell.querySelector('.bear-intake-header h2').textContent='📸 '+say('Screenshots statt Eingabe','Screenshots instead of typing');
+ shell.querySelector('.bear-intake-header > p.hint').textContent=say('Alle Bilder gleichzeitig auswählen – auch mehrere Stats- und Helden-Screenshots. Werte werden zusammengeführt und vor dem Speichern geprüft.','Choose multiple troop, combat and hero screenshots at once. Review all values before saving.');
+ shell.querySelector('#intakePicker span').textContent='📂 '+say('Screenshots auswählen','Select screenshots');
+ shell.querySelector('#intakeGear').textContent='🛡️ '+say('GovGear-Screenshot','GovGear screenshot');
+ document.querySelector('#intakeApply').textContent='✓ '+say('Geprüfte Angaben übernehmen','Apply reviewed values');
+ document.querySelector('#intakeClear').textContent=say('Verwerfen','Discard');
+ missingSummary.textContent='✏️ '+say('Fehlende Werte / Einstellungen','Missing values / settings');
  screenshotLangTitle.textContent=lc==='de'?'Sprache des Kingshot-Screenshots':
   lc==='fr'?'Langue de la capture Kingshot':lc==='es'?'Idioma de la captura de Kingshot':
   'Kingshot screenshot language';
