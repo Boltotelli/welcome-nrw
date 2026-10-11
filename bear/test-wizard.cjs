@@ -104,14 +104,25 @@ assert.ok(wizard.includes('Formationen generieren'),'simple formation generation
 assert.ok(wizard.includes('Grundschaden ohne Joiner berechnen'),'simple no-join damage action');
 assert.ok(css.includes('.bear-guide-stored'),'mobile saved-values cards styled');
 assert.ok(!wizard.includes('kingshot_beartrap_v3_action_transparent.webm'),'formation-stage loading must not reuse the damage video');
-assert.ok(wizard.includes('stageLoader.append(loaderBear,loaderText)'),'formation stage keeps its own animated bear loading indicator');
+assert.ok(wizard.includes('stageLoader.append(stageVideo,loaderBear,loaderText)'),'formation stage includes supplied video and fallback spinner');
 assert.ok(simulation.includes("webm.src='./assets/kingshot_beartrap_v3_action_transparent.webm'"),'damage simulation retains the approved video');
-assert.ok(html.includes('./wizard.js?v=mini-hero-stats-20261011-1'),'wizard cache version changed');
-assert.ok(html.includes('./wizard.css?v=roster-widgets-20261011-1'),'CSS cache version changed');
+assert.ok(html.includes('./wizard.js?v=formation-full-video-20261011-1'),'wizard cache version changed');
+assert.ok(html.includes('./wizard.css?v=formation-full-video-20261011-1'),'CSS cache version changed');
 assert.ok(html.includes('./hero-advisor.js?v=mini-hero-stats-20261011-1'),'advisor cache version changed');
 assert.ok(wizard.includes('new Set(advisor?.offensiveWidgetHeroes||[])'),'offensive heroes shown first');
 assert.ok(wizard.includes('window.NRW_BEAR_HERO_REFERENCE?.get?.(name,stars,tier)'),'verified attack is passed to the ranking engine');
 assert.ok(wizard.includes("'.jpg?v=corrected-examples-20261011-1'"),'corrected original images bypass stale browser caches');
+
+// Full Kingshot formation video plays for the entire 7 seconds, even when
+// the underlying calculations finish faster. The damage clip stays separate.
+assert.ok(wizard.includes("stageVideo.src='./assets/kingshot_formations_loading.webm?v=full-7s-20261011-1'"),'uploaded formation video is the media source');
+assert.ok(wizard.includes('const stageDurationMs=7000'),'never skip part of the seven-second clip');
+assert.ok(wizard.includes('stageVideo.onended='),'advance only after complete video');
+assert.ok(wizard.includes('stageVideo.playsInline=true'),'Android/iOS inline playback');
+assert.ok(wizard.includes('stageVideo.muted=true'),'allow autoplay on mobile');
+assert.ok(css.includes('.bear-guide-stage-video{'),'video has responsive CSS');
+assert.ok(css.includes('object-fit:contain'),'never crop characters out');
+assert.ok(css.includes('.bear-guide-stage-loader{position:fixed'),'the animation covers the viewport');
 const workflow=fs.readFileSync(__dirname+'/../.github/workflows/bear-pages.yml','utf8');
 assert.ok(workflow.includes('57bd5246b3e9c21904ef2f11ae4db246c5cd9780d55a333efd0bbadfa41e9418'),'exact archived ZIP is identified');
 for(const [target,source] of [['troops.jpg','roster.jpg'],['stats.jpg','troops.jpg'],['stats-extra.jpg','stats.jpg'],['roster.jpg','stats-extra.jpg']]){
