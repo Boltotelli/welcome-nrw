@@ -1074,15 +1074,38 @@ function availableOwned(){
  return [...new Map([...api,...Object.values(state().manualHeroes)].filter(h=>h&&h.name).map(h=>[h.name,h])).values()];
 }
 function updateAdvisor(){
- const m=B.model(),v=state();
- const advice=Core.advise(availableOwned(),v.ownHeroes,cat.heroTypes);
- const box=$('intakeAdvice');box.innerHTML='';
- if(!advice.length)return;
- const heading=document.createElement('strong');heading.textContent='🐻 '+say('Mögliche bessere Bear-Starter','Potentially better Bear starters');box.append(heading);
- for(const a of advice){
-  const line=document.createElement('p');line.textContent=a.suggestion+' statt '+a.current+' ('+a.type+') – '+a.reason;box.append(line);
+ const m=B.model(),v=state(),box=$('intakeAdvice');box.innerHTML='';
+ const advisor=window.NRW_BEAR_HERO_ADVISOR,reference=window.NRW_BEAR_HERO_REFERENCE;
+ if(!advisor||reference?.status?.()!=='ready')return;
+ // Do not present the older static Gen-6/guide list as a stronger hero.
+ const scanned=new Set(v.scannedOwnedHeroes||[]);
+ const owned=availableOwned().filter(h=>scanned.has(h.name));
+ const groups=advisor.recommend(owned,cat.heroTypes,{},
+  (n,stars,tier)=>reference.get(n,stars,tier),
+  (n,l)=>window.NRW_BEAR_OWN_BASELINE?.widgetValue(n,l));
+ const advice=[];
+ for(let i=0;i<3;i++){
+  const group=groups[i],current=v.ownHeroes?.[i];
+  if(!group?.best||!current||group.best.score===null||group.best.name===current)continue;
+  const old=group.choices.find(c=>c.name===current);
+  if(old?.score!==null&&old?.score!==undefined&&group.best.score>old.score)
+   advice.push({current,suggestion:group.best.name,index:group.best.score});
  }
- const source=document.createElement('a');source.href='https://ks-atlas.com/tools/atlas-database/bear-rally-heroes';source.target='_blank';source.rel='noopener noreferrer';source.textContent='KS Atlas · Bear Rally Heroes';box.append(source);
+ if(!advice.length)return;
+ const heading=document.createElement('strong');
+ heading.textContent='🐻 '+say('Offensiver Expeditionsvergleich','Expedition offense comparison');
+ box.append(heading);
+ for(const a of advice){
+  const line=document.createElement('p');
+  line.textContent=a.suggestion+' statt '+a.current+
+   ' · '+say('Basiswerte + offensive Expeditions- und Widget-Skills',
+             'Base stats + offensive Expedition and widget skills');
+  box.append(line);
+ }
+ const note=document.createElement('p');note.className='hint';
+ note.textContent=say('Vorläufiger Modellindex, keine garantierten Bärenpunkte.',
+                      'Indicative model index, not guaranteed Bear points.');
+ box.append(note);
 }
 function updateProgress(){
  const v=B.model()?.values||{};
