@@ -38,13 +38,15 @@ assert.equal(p.validate('295189783',{...obj,values:{'<script>':'alert()'}}),fals
  assert.ok(html.includes('activateSavedId:function(id,name)'));
 assert.ok(source.includes('bridge.storedGovernorName?.(id)'),'local label used when no public name available');
 assert.ok(html.includes('nrw_bear_profile_name_v1_'),'display name saved per numeric ID');
-assert.ok(html.includes('./intake-ui.js?v=player-label-edit-20261011-1'),'picker cache version updated');
+assert.ok(html.includes('./intake-ui.js?v=multilang-ocr-20261011-1'),'picker cache version updated');
 assert.ok(html.includes('rememberGovernorName:rememberGovernorName'),'bridge accepts local nickname assignment');
-assert.ok(intake.includes('B.rememberGovernorName?.(id,name)'),'older saved IDs can be labelled without another API');
 const intake=fs.readFileSync(path.join(__dirname,'intake-ui.js'),'utf8');
+assert.ok(intake.includes('B.rememberGovernorName?.(id,name)'),'older saved IDs can be labelled without another API');
 assert.ok(intake.includes("opt.textContent=name?name+' · ID '+id:id"),'saved profile picker uses name with ID');
 assert.ok(intake.includes("window.addEventListener('nrw-bear-loaded',refresh)"),'picker refreshes after loading a profile');
 assert.ok(intake.includes('opt.value=id'),'player ID remains stable option value');
+assert.ok(intake.includes("screenshotLang.id='bearScreenshotLanguage'"),'game-language selection is separate from UI');
+assert.ok(intake.includes("fr:'fra+eng'")&&intake.includes("es:'spa+eng'"),'French and Spanish models are available');
 assert.ok(html.includes("name:storedGovernorName(id)||'Local demo'"),'offline opening retains cached real name');
  assert.ok(source.includes('event.stopImmediatePropagation()'));
  assert.ok(!source.includes("fetch('/api/bear-profile"));
