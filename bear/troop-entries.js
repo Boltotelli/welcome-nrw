@@ -166,7 +166,7 @@ function flagAmbiguousCounts(entries,focused){
   if(list.length!==1)continue;
   const entry=list[0],independent=focused?.[keys[type]];
   if(entry.count!==null&&entry.count!==undefined&&
-     (!Number.isSafeInteger(entry.count)||entry.count<1000)){
+     (!Number.isSafeInteger(entry.count)||(entry.count<1000&&!entry.confirmedIndependent))){
    entry.count=null;entry.uncertainCount=true;entry.countWarning='badge-digit';
    continue;
   }
@@ -179,7 +179,7 @@ function flagAmbiguousCounts(entries,focused){
  }
  const byNumber=new Map();
  for(const entry of entries||[]){
-  if(!Number.isSafeInteger(entry.count)||entry.count<1000)continue;
+  if(!Number.isSafeInteger(entry.count)||entry.count<1)continue;
   const prev=byNumber.get(entry.count);
   if(prev&&prev.type!==entry.type){
    if(prev.confirmedIndependent===true&&entry.confirmedIndependent===true){
