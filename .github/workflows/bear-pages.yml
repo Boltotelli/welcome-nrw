@@ -1,0 +1,200 @@
+name: NRW Bear Optimizer - GitHub Pages test
+
+on:
+  push:
+    branches:
+      - feature/bear-optimizer-nrw-prototype
+    paths:
+      - 'bear/**'
+      - '.github/workflows/bear-pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: nrw-bear-github-pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: bear-pages-preview
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - name: Verify Bear scripts and combat data
+        run: |
+          node --check bear/catalog.js
+          node --check bear/hero-reference/test-hero-reference.cjs
+          node bear/hero-reference/test-hero-reference.cjs
+          node --check bear/combat.js
+          node --check bear/v2.js
+          node --check bear/ux.js
+          node --check bear/charm-references.js
+          node --check bear/charm-shapes.js
+          node --check bear/charm-guide-silhouettes.js
+          node --check bear/charm-guide-matcher.js
+          node bear/test-charm-guide.cjs
+          node --check bear/tier-recognizer.js
+          node --check bear/gear-layout.js
+          node --check bear/troop-badges.js
+          node --check bear/troop-entries.js
+          node bear/test-troop-entries.cjs
+          node bear/test-gear-layout.cjs
+          node bear/test-troop-badges.cjs
+          node --check bear/screenshot-importer.js
+          node --check bear/intake-core.js
+          node --check bear/portrait-matcher.js
+          node --check bear/hero-grid.js
+          node --check bear/hero-stars.js
+          node --check bear/hero-level.js
+          node bear/test-hero-level.cjs
+          node bear/test-hero-stars.cjs
+          node --check bear/intake-ui.js
+          node --check bear/hero-reference.js
+          node bear/test-hero-reference-ui.cjs
+          node --check bear/hero-advisor.js
+          node --check bear/github-profiles.js
+          node bear/test-github-profiles.cjs
+          node --check bear/wizard.js
+          node bear/test-hero-advisor.cjs
+          node bear/test-wizard.cjs
+          node --check bear/buff-intake-core.js
+          node --check bear/buff-import.js
+          node bear/test-buff-import.cjs
+          node --check bear/capacity-core.js
+          node --check bear/capacity-ui.js
+          node bear/test-capacity.cjs
+          node --check bear/formation-core.js
+          node --check bear/formation-ui.js
+          node bear/test-formation.cjs
+          node --check bear/simulation-core.js
+          node --check bear/simulation-ui.js
+          node bear/test-simulation.cjs
+          node --check bear/own-baseline.js
+          node bear/test-own-baseline.cjs
+          node --check bear/proc-expectation.js
+          node bear/test-proc-expectation.cjs
+          node --check bear/score-bonuses.js
+          node bear/test-score-bonuses.cjs
+          node bear/test-personal-damage.cjs
+          node bear/test-intake.cjs
+          node bear/test-portrait.cjs
+          node bear/test-hud-portraits.cjs
+          node bear/test-hero-grid.cjs
+          node bear/test-tier.cjs
+          python3 -m py_compile bear/build-charm-shapes.py bear/build-hero-signatures.py
+          node bear/test-screenshot.cjs
+          node - <<'NODE'
+          global.window = {};
+          require('./bear/charm-references.js');
+          const v = window.NRW_BEAR_CHARM_REFERENCES;
+          if(v.maxLevel !== 22 || v.sourceImages.length !== 22 || v.sourceImages.some((x,i)=>x.level!==i+1 || !x.reference.includes('infantry_lvl'+(i+1)+'.webp')))process.exit(1);
+          console.log('Charm reference metadata: 22 levels valid');
+          NODE
+          node bear/test-combat.cjs
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          text = Path('bear/index.html').read_text()
+          scripts = re.findall(r'<script(?:[^>]*)>(.*?)</script>', text, re.S)
+          Path('/tmp/bear-inline.js').write_text('\n'.join(scripts))
+          PY
+          node --check /tmp/bear-inline.js
+      - name: Build isolated static test
+        run: |
+          mkdir -p _site/assets
+          cp bear/index.html _site/index.html
+          cp bear/hero-hud-fingerprints.json _site/hero-hud-fingerprints.json
+          # Public-only, version-pinned data from its own independent GitHub repo.
+          # No personal player files and NO Supabase. Fail deployment if unavailable.
+          curl --fail --silent --show-error --location --retry 3 --max-time 40 \
+            https://raw.githubusercontent.com/Boltotelli/kingshot-data/8947b4813ac2b82b1c3672a9d59c7eb014b843c8/heroes.v1.json \
+            --output _site/hero-reference.json
+          node - <<'NODE'
+          const fs=require('node:fs'),vm=require('node:vm');
+          const ref=JSON.parse(fs.readFileSync('_site/hero-reference.json','utf8'));
+          const context={window:{}};
+          vm.runInNewContext(fs.readFileSync('bear/hero-reference.js','utf8'),context);
+          if(!context.window.NRW_BEAR_HERO_REFERENCE.validate(ref))process.exit(2);
+          if(ref.records.find(h=>h.name==='Marlin').expeditionSkills.length!==2)process.exit(3);
+          console.log('Verified external 37-hero source and Marlin correction');
+          NODE
+          cp bear/catalog.js bear/combat.js bear/v2.js bear/v2.css bear/ux.js bear/ux.css bear/charm-references.js bear/charm-shapes.js bear/charm-guide-silhouettes.js bear/charm-guide-matcher.js bear/tier-recognizer.js bear/gear-layout.js bear/troop-badges.js bear/troop-entries.js bear/hero-grid.js bear/hero-stars.js bear/hero-level.js bear/portrait-matcher.js bear/hero-reference.js bear/hero-advisor.js bear/buff-intake-core.js bear/buff-import.js bear/buff-import.css bear/capacity-core.js bear/capacity-ui.js bear/formation-core.js bear/formation-ui.js bear/simulation-core.js bear/simulation-ui.js bear/own-baseline.js bear/proc-expectation.js bear/score-bonuses.js bear/screenshot-importer.js bear/screenshot-importer.css bear/intake-core.js bear/intake-ui.js bear/intake-ui.css bear/github-profiles.js bear/wizard.js bear/wizard.css _site/
+          # Real game screenshots, only when the user provides unmodified originals.
+          if [ -d bear/examples ]; then
+            mkdir -p _site/examples
+            find bear/examples -maxdepth 1 -type f -name '*.jpg' -exec cp '{}' _site/examples/ \;
+            # A single user-supplied ZIP can carry all nine unmodified assets.
+            if [ -f bear/examples/nrw-bear-assets.zip ]; then
+              unzip -tq bear/examples/nrw-bear-assets.zip
+              zip_sha="$(sha256sum bear/examples/nrw-bear-assets.zip | cut -d ' ' -f 1)"
+              # This first approved ZIP was packed with four mislabeled JPGs.
+              # Detect the exact uploaded original so later corrected ZIPs
+              # retain conventional filenames and never get swapped again.
+              needs_mapping_fix=false
+              if [ "$zip_sha" = "57bd5246b3e9c21904ef2f11ae4db246c5cd9780d55a333efd0bbadfa41e9418" ]; then
+                needs_mapping_fix=true
+                echo "Applying verified source-to-screen mapping for the uploaded seven examples."
+              fi
+              for name in troops.jpg stats.jpg stats-extra.jpg roster.jpg hero-details.jpg pets.jpg valora.jpg; do
+                source="$name"
+                if [ "$needs_mapping_fix" = true ]; then
+                  case "$name" in
+                    troops.jpg) source="roster.jpg" ;;
+                    stats.jpg) source="troops.jpg" ;;
+                    stats-extra.jpg) source="stats.jpg" ;;
+                    roster.jpg) source="stats-extra.jpg" ;;
+                  esac
+                fi
+                if [ ! -f "_site/examples/$name" ]; then
+                  unzip -p bear/examples/nrw-bear-assets.zip "$source" > "_site/examples/$name"
+                fi
+                test -s "_site/examples/$name" || { echo "Missing example: $name (ZIP source: $source)"; exit 1; }
+                echo "Example: $name <= ZIP $source"
+              done
+            fi
+          fi
+          # Optional opt-in player snapshots. Never expose local browser data
+          # or fetch a secure API key during the static build.
+          if [ -d bear/profiles ]; then
+            mkdir -p _site/profiles
+            find bear/profiles -maxdepth 1 -type f -name '*.json' -exec cp '{}' _site/profiles/ \;
+          fi
+          # The approved V3 transparent animation is intentionally NOT rebuilt:
+          # when the user supplies the original binary assets, ship them unchanged.
+          for name in kingshot_beartrap_v3_action_transparent.webm kingshot_beartrap_v3_action_transparent.webp; do
+            # One-folder manual upload: keep the nine approved files together
+            # in bear/examples. Do not recompress or alter original media.
+            if [ -f "bear/examples/$name" ]; then
+              cp "bear/examples/$name" "_site/assets/$name"
+            elif [ -f "bear/assets/$name" ]; then
+              cp "bear/assets/$name" "_site/assets/$name"
+            elif [ -f bear/examples/nrw-bear-assets.zip ]; then
+              unzip -p bear/examples/nrw-bear-assets.zip "$name" > "_site/assets/$name"
+            fi
+            if [ -f bear/examples/nrw-bear-assets.zip ]; then
+              test -s "_site/assets/$name" || { echo "Missing combat media: $name"; exit 1; }
+            fi
+          done
+          cp assets/nrw-banner.svg _site/assets/nrw-banner.svg
+          sed -i 's|/assets/nrw-banner.svg|./assets/nrw-banner.svg|g' _site/index.html
+          sed -i 's|href="/dashboard/"|href="https://welcome-nrw.vercel.app/dashboard/"|g' _site/index.html
+          # Best effort: only compact shape signatures (no copied artwork).
+          if python3 -m venv /tmp/bear-charm-venv && /tmp/bear-charm-venv/bin/pip install --quiet Pillow; then
+            /tmp/bear-charm-venv/bin/python bear/build-charm-shapes.py _site/charm-signatures.json || true
+          else
+            echo 'Online charm signatures unavailable; local Lv3–Lv8 examples remain usable.'
+          fi
+          # In-game 6x6 signatures are prebuilt and shipped with the test.\n          touch _site/.nojekyll
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - name: Deploy to GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v4

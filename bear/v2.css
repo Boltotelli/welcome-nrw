@@ -1,0 +1,165 @@
+/* Bear Optimizer V2 galleries: complements the existing game skin. */
+.bear-v1-manual{display:none!important}
+.bear-v2-mount{display:grid;gap:18px}
+.bear-v2-panel{box-shadow:var(--shadow)}
+.bear-data-note{margin:0 0 15px;padding:12px 15px;border:1px solid rgba(245,181,86,.4);color:var(--amber);background:rgba(245,181,86,.09);border-radius:12px;font-size:12px;font-weight:800;line-height:1.5}
+.bear-art-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin:15px 0}
+.bear-art-card{background:var(--card);border:1px solid var(--line);border-radius:17px;display:flex;flex-direction:column;align-items:center;gap:9px;padding:13px 9px;min-width:0}
+.bear-art-card>img{height:82px;width:82px;object-fit:cover;border-radius:13px;background:radial-gradient(circle at 50% 80%,#8173548a,transparent),#28354c;filter:drop-shadow(0 4px 6px rgba(0,0,0,.25))}
+.bear-art-card>b{text-align:center;font-size:12px;line-height:1.3;min-height:30px;overflow-wrap:anywhere}
+.bear-art-card .bear-note{font-size:10px;line-height:1.3;color:var(--muted);text-align:center}
+.bear-level-row{display:flex;align-items:center;gap:5px;width:100%;justify-content:center}
+.bear-level-row button{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:10px;min-width:32px;height:35px;font-weight:900;font-size:18px;transition:background .15s}
+.bear-level-row button:hover{background:var(--amber-deep)}
+.bear-level-row input{width:56px;padding:7px 3px!important;text-align:center;font-size:13px;font-weight:900;font-variant-numeric:tabular-nums}
+.bear-active{font-size:11px;display:flex;align-items:center;gap:5px;color:var(--muted);cursor:pointer}
+.bear-active input{accent-color:var(--amber);width:16px;height:16px;padding:0}
+.bear-master-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.bear-master-grid .bear-art-card{flex-direction:row;flex-wrap:wrap;justify-content:flex-start;min-height:106px}
+.bear-master-grid .bear-art-card img{width:58px;height:58px;flex:0 0 58px}
+.bear-master-grid .bear-art-card b{width:calc(100% - 72px);text-align:left}
+.bear-master-grid .bear-note{width:100%}
+.bear-master-grid .bear-level-row{width:100%}
+.bear-valora-footer{border-top:1px solid var(--line);padding-top:13px;margin-top:10px;display:flex;flex-direction:column;gap:9px}
+.bear-valora-footer .secondary-btn{align-self:flex-start}
+.bear-hero-maker{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:10px;margin:13px 0}
+.bear-hero-maker .field,.bear-skill-row .field{font-size:11px;font-weight:800;color:var(--muted)}
+.bear-hero-maker select,.bear-hero-maker input,.bear-skill-row select{width:100%;padding:9px 7px;font-size:13px}
+.bear-skill-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-bottom:11px}
+.bear-skill-tip{font-size:11px;color:var(--muted);line-height:1.5;margin-bottom:10px}
+.bear-hero-actions{display:flex;gap:10px;flex-wrap:wrap;padding-bottom:4px}
+.bear-character{cursor:pointer;appearance:none;min-width:130px;text-align:left;color:var(--text)}
+.bear-character:focus-visible{outline:2px solid var(--amber)}
+.bear-character .portrait{height:77px}
+.bear-character .portrait img{height:77px;width:77px;object-fit:cover;border-radius:12px}
+.bear-character .stars{white-space:nowrap}
+.bear-gear-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:15px}
+.bear-gear-card{border:1px solid var(--line);background:var(--card);border-radius:17px;padding:14px;display:grid;gap:13px}
+.bear-gear-head{display:flex;align-items:center;gap:10px;min-width:0}
+.bear-gear-head>img{width:51px;height:51px;object-fit:contain;background:var(--panel);border-radius:11px;padding:5px;flex-shrink:0}
+.bear-gear-head b{font-size:13px;display:block;line-height:1.35}.bear-gear-head small{font-size:10px;color:var(--muted);display:block}
+.bear-gear-settings{display:grid;grid-template-columns:1.25fr 1fr .85fr;gap:7px}
+.bear-gear-settings label,.bear-charm-row label{font-size:10px;color:var(--muted);font-weight:700}
+.bear-gear-settings select{width:100%;padding:8px 5px;font-size:12px}
+.bear-charm-row{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;border-top:1px solid var(--line);padding-top:12px}
+.bear-charm-row label{display:grid;gap:4px;text-align:center}.bear-charm-row input{width:100%;padding:8px 3px;text-align:center;font-weight:800;font-size:13px}
+.bear-march-count{margin-bottom:13px;padding:13px;background:var(--card);border:1px solid var(--line);border-radius:15px;display:grid;grid-template-columns:1fr 185px;gap:8px;align-items:center}
+.bear-march-count label{font-size:13px;font-weight:900}
+.bear-march-count select{max-width:100%;padding:9px;font-size:13px}
+.bear-march-count p{margin:0;grid-column:1/-1}
+.bear-own-pickers{margin:15px 0 4px;padding:14px;background:var(--panel);border:1px solid var(--line);border-radius:12px}
+.bear-own-pickers .bear-own-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+.bear-own-pickers select{width:100%;font-size:12px;padding:8px 5px}
+#joinHeroPick{min-width:0}
+@media (max-width:650px){
+ .bear-art-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ .bear-art-card{padding:10px 5px}
+ .bear-art-card>img{width:68px;height:68px}
+ .bear-master-grid{grid-template-columns:1fr}
+ .bear-gear-grid{grid-template-columns:1fr}
+ .bear-hero-maker{grid-template-columns:2fr 1fr;gap:8px}
+ .bear-skill-row{gap:6px}
+ .bear-march-count{grid-template-columns:1fr}
+ .bear-own-pickers .bear-own-grid{grid-template-columns:1fr}
+ .bear-own-pickers select{padding:10px}
+ .bear-hero-actions{flex-direction:column}
+ .bear-hero-actions button{width:100%}
+}
+
+.bear-pet-buff{width:100%;border-top:1px solid var(--line);padding-top:9px;display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.bear-pet-buff label{display:grid;gap:4px;font-size:10px;color:var(--muted);min-width:0}
+.bear-pet-buff input,.bear-pet-buff select{width:100%;padding:6px 3px;font-size:11px;min-width:0}
+
+.bear-hero-preview{display:flex;align-items:center;gap:13px;background:radial-gradient(circle at 12% 80%,rgba(249,175,76,.14),transparent 55%),var(--card);border:1px solid var(--line);border-radius:14px;padding:11px 13px;margin-top:12px}
+.bear-hero-preview img{width:74px;height:74px;object-fit:cover;border-radius:12px;background:var(--panel)}
+.bear-hero-preview b{display:block;font-size:17px;font-weight:900;color:var(--text)}
+.bear-hero-preview small{display:block;font-size:10px;letter-spacing:.12em;color:var(--amber);font-weight:900;margin-top:4px}
+
+
+/* Streamlined heroes: roster first, then add/search. */
+.bear-hero-roster{margin:12px 0 16px;display:flex;gap:9px;overflow-x:auto;padding:3px 0 7px;scroll-snap-type:x proximity}
+.bear-hero-roster .hero-tile{scroll-snap-align:start}
+.bear-hero-controls{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.bear-current-count{font-size:12px;color:var(--muted);font-weight:800}
+.bear-hero-browser{border:1px solid var(--line);border-radius:14px;background:var(--card);padding:12px;margin:12px 0}
+.bear-hero-browser>input{width:100%;border-radius:12px;font-size:13px}
+.bear-portrait-gallery{margin-top:12px;display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:8px;max-height:280px;overflow-y:auto;overscroll-behavior:contain}
+.bear-portrait-pick{border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--text);display:grid;justify-items:center;gap:5px;padding:7px 3px;font-size:10px;font-weight:900;min-width:0}
+.bear-portrait-pick img{width:62px;height:62px;object-fit:cover;border-radius:9px}
+.bear-portrait-pick span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bear-portrait-pick:active,.bear-portrait-pick:hover{border-color:var(--amber)}
+.bear-card-editor{margin-top:13px;border:1px solid var(--line);background:var(--card);padding:12px;border-radius:15px}
+.bear-card-editor .bear-hero-preview{margin:0}
+.bear-editor-close{margin-left:auto;align-self:start;background:transparent;color:var(--muted);border:0;padding:5px;font-size:18px}
+.bear-star-progress{background:var(--panel);padding:12px;border-radius:12px;margin:12px 0}
+.bear-star-progress>.field{display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:10px}
+.bear-star-progress output{font-size:15px;font-weight:900;color:var(--amber)}
+.bear-star-progress small{display:block;text-align:right;font-size:10px;color:var(--muted)}
+.bear-step-row{display:flex;align-items:center;gap:12px;margin:12px 0}
+.bear-step-row button{background:var(--card);border:1px solid var(--line);border-radius:9px;color:var(--text);font-weight:900;height:38px;min-width:38px;font-size:20px}
+.bear-step-row input{flex:1;min-width:0;accent-color:var(--amber);border:0;padding:0}
+.bear-widget-input{max-width:155px}
+.bear-widget-input input{width:100%;margin-top:5px}
+.bear-skills-advanced{margin:12px 0;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--panel)}
+.bear-skills-advanced .bear-skill-row{margin:12px 0 8px}
+.bear-pet-compact .bear-pet-effect{background:var(--panel);border-radius:11px;border:1px solid var(--line);width:100%;padding:9px 7px;display:grid;gap:3px;align-items:center;text-align:center}
+.bear-pet-compact .bear-pet-effect small{font-size:10px;color:var(--muted);line-height:1.3}
+.bear-pet-compact .bear-pet-effect strong{font-size:14px;color:var(--amber);line-height:1.4}
+.bear-pet-compact .bear-apply-bison{max-width:100%;font-size:11px;text-align:center}
+.bear-pet-compact .bear-apply-bison:disabled{opacity:.45}
+.bear-pet-footnote{margin:12px 2px 0}
+.bear-relevant-pets{grid-template-columns:repeat(auto-fit,minmax(156px,1fr))}
+.bear-relevant-pets .bear-art-card{min-height:240px}
+@media(max-width:650px){
+ .bear-portrait-gallery{grid-template-columns:repeat(3,minmax(0,1fr));max-height:340px}
+ .bear-relevant-pets{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .bear-relevant-pets .bear-art-card{min-height:225px;padding:11px 6px}
+ .bear-card-editor .bear-skill-row{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .bear-star-progress output{font-size:13px}
+}
+
+
+/* Troop tiers / combat setup (October 2026) */
+.bear-troop-tier-wrap{margin:14px 0;padding:13px;border:1px solid var(--line);border-radius:14px;background:var(--card)}
+.bear-troop-tier-wrap>p:first-child{margin:0 0 10px}
+.bear-troop-tier-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.bear-troop-tier-card{display:grid;gap:8px;border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:11px}
+.bear-troop-tier-card>b{font-size:12px;min-height:25px}
+.bear-troop-tier-card label{display:grid;gap:4px;font-size:11px;font-weight:800;color:var(--muted)}
+.bear-troop-tier-card select{width:100%;padding:9px 6px}
+.bear-cap-extra{border-top:1px solid var(--line);padding:12px 0;display:grid;gap:9px}
+.bear-cap-extra>.field{max-width:340px;font-weight:800;font-size:12px;color:var(--muted)}
+.bear-cap-extra>.field input{margin-top:4px}
+.bear-cap-extra>p{margin:0}
+.bear-squad-buffs{display:grid;grid-template-columns:1fr 1fr;gap:9px;align-items:end}
+.bear-squad-buffs>.field{font-size:12px;color:var(--muted);font-weight:800}
+.bear-squad-buffs .bear-active{grid-column:1/-1;line-height:1.5}
+.bear-pitfall{display:flex;align-items:center;gap:13px;flex-wrap:wrap;font-size:12px;font-weight:900;color:var(--amber)}
+.bear-pitfall select{max-width:220px}
+.bear-hero-basic-fields{display:grid;grid-template-columns:1fr 1fr;max-width:340px;gap:13px;margin:12px 0}
+.bear-hero-basic-fields>.field{font-size:12px;font-weight:800;color:var(--muted)}
+.bear-hero-basic-fields input{width:100%;margin-top:5px}
+.bear-hero-gear{padding:12px;margin:13px 0;border:1px solid var(--line);background:var(--panel);border-radius:13px}
+.bear-hero-gear-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:12px}
+.bear-gear-entry{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;min-width:0;background:var(--card);padding:9px;border:1px solid var(--line);border-radius:11px}
+.bear-gear-entry>b{grid-column:1/-1;font-size:12px;color:var(--amber)}
+.bear-gear-entry label{display:grid;gap:4px;font-size:10px;color:var(--muted);min-width:0}
+.bear-gear-entry input,.bear-gear-entry select{width:100%;padding:7px 5px;font-size:12px}
+.bear-optimize-box{border:1px solid rgba(247,184,91,.4);background:linear-gradient(135deg,rgba(235,150,40,.11),transparent),var(--panel);border-radius:13px;padding:12px;margin:12px 0}
+.bear-optimize-box>.primary{width:100%}
+.bear-optimize-results{margin-top:10px;font-size:13px}
+.bear-optimize-results>strong{color:var(--amber)}
+.bear-optimize-option{display:grid;grid-template-columns:38px 1fr auto;align-items:center;gap:8px;border-bottom:1px solid var(--line);padding:7px 0}
+.bear-optimize-option small{font-size:11px;color:var(--muted)}
+/* Distinct thumb and track so users can operate all three coupled sliders. */
+.editor input[type=range]{appearance:none;-webkit-appearance:none;height:9px;border-radius:9px;background:linear-gradient(90deg,rgba(253,194,96,.4),var(--track))}
+.editor input[type=range]::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;height:24px;width:24px;border:3px solid #fff3d4;border-radius:50%;background:#c88832;box-shadow:0 1px 5px rgba(0,0,0,.4)}
+.editor input[type=range]::-moz-range-thumb{height:18px;width:18px;border:3px solid #fff3d4;border-radius:50%;background:#c88832;box-shadow:0 1px 5px rgba(0,0,0,.4)}
+@media(max-width:650px){
+ .bear-troop-tier-grid{grid-template-columns:1fr}
+ .bear-troop-tier-card{grid-template-columns:1fr 1fr;align-items:end}
+ .bear-troop-tier-card>b{grid-column:1/-1}
+ .bear-hero-gear-grid{grid-template-columns:1fr}
+ .bear-optimize-option{grid-template-columns:26px 1fr auto}
+ .bear-optimize-option small{font-size:10px}
+}
