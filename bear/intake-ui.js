@@ -476,17 +476,16 @@ async function verifyTroopEntryCounts(entries,canvas,worker){
   entry.independentCount=detected;
   if(detected===null)continue;
   const initial=entry.count;
-  if(initial!==null&&initial!==undefined&&initial!==detected){
-   entry.uncertainCount=true;entry.countWarning='conflicting-line-reads';
-   entry.count=null;
-  }else{
-   entry.count=detected;
-   // Two matching, separately recognized values provide stronger evidence.
-   // A single focused OCR reading can fill large amounts, but must not
-   // turn a lone badge numeral or duplicated tiny amount into "confirmed".
-   entry.confirmedIndependent=initial!==null&&initial!==undefined&&initial===detected;
-   entry.amountSource='heading-relative-focused';
-  }
+  // The focused strip is cut only BELOW this exact class heading and
+  // excludes its illustrated unit/badge. It is therefore more specific
+  // than whole-screen OCR, whose broken words may belong to another class.
+  // Preserve a disagreement for review, but do not replace good focused
+  // evidence with an unrelated class' number or leave a stale number.
+  entry.fullScreenConflict=initial!==null&&initial!==undefined&&initial!==detected;
+  entry.count=detected;
+  entry.confirmedIndependent=initial!==null&&initial!==undefined&&initial===detected;
+  entry.trustedLabelCrop=true;
+  entry.amountSource='isolated-heading-strip';
  }
 }
 function positionalLines(words,canvas){
