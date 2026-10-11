@@ -612,9 +612,14 @@ function mount(host,B,language){
     'Für deine persönliche Schadensschätzung fehlen noch Angaben.':
     language()==='fr'?'Des données manquent pour estimer tes dégâts.':
     'More information is needed to estimate your own damage.';
-   if(estimate?.reason==='hero-reference-unavailable')
-    msg=language()==='de'?'Heldendaten werden geladen. Bitte einen Moment warten.':
-     'Loading verified hero skills. Please wait.';
+   if(estimate?.reason==='hero-reference-unavailable'){
+    const failed=ref?.status?.()==='error';
+    msg=language()==='de'?
+     (failed?'Heldenreferenz konnte nicht geladen werden: '+(ref?.reason?.()||'unbekannt')+'. Bitte Seite neu laden.':
+      'Heldendaten werden geladen. Bitte einen Moment warten.'):
+     (failed?'Hero source unavailable: '+(ref?.reason?.()||'unknown')+'. Reload this page.':
+      'Loading verified hero skills. Please wait.');
+   }
    if(estimate?.reason==='missing-active-pet-skill')
     msg=language()==='de'?'Bei einem aktiven Pet fehlt der Skill-Rang: '+
      (estimate.missingPets||[]).join(', '):'An active pet is missing its skill rank.';
@@ -628,8 +633,14 @@ function mount(host,B,language){
    return;
   }
   const section=el('section','bear-sim-score-card');
+  if(estimate.partialEstimate){
+   const excluded=(estimate.unmodeledSkills||[]).map(q=>q.hero+' · '+q.skill).join(', ');
+   section.append(el('p','bear-guide-needed',language()==='de'?
+    'Vorläufiger Modellindex: Nicht alle Fähigkeiten berücksichtigt'+(excluded?': '+excluded:'')+'. Kein garantierter Kingshot-Schaden.':
+    'Partial model index: not all skills are included'+(excluded?': '+excluded:'')+'. Not a guaranteed Kingshot score.'));
+  }
   section.append(el('h3','',
-   language()==='de'?'Dein erwarteter Bärenschaden':
+   language()==='de'?(estimate.partialEstimate?'Berechenbarer Teilschaden · Modellindex':'Dein erwarteter Bärenschaden'):
    language()==='fr'?'Tes dégâts Ours estimés':'Your estimated Bear damage'));
   const headline=el('strong','');
   headline.style.display='block';
