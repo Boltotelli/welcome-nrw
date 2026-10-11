@@ -17,20 +17,20 @@ function normalizeNumber(text){
 }
 function classFrom(text){
  const s=fold(text).replace(/[^a-z]/g,'');
- if(/infant|infantr|fussvolk|infentry/.test(s))return 0;
- if(/kaval|caval|reiter/.test(s))return 1;
- if(/bogen|archer|marksman|schutze|schutzen/.test(s))return 2;
+ if(/infant|infantr|fussvolk|infentry|infanteria/.test(s))return 0;
+ if(/kaval|caval|caballer|reiter/.test(s))return 1;
+ if(/bogen|archer|arquero|arquera|tireur|tirador|marksman|schutze|schutzen/.test(s))return 2;
  return -1;
 }
 function parseTroops(text){
  const ls=String(text||'').split(/\n+/),values={};
- const pattern=/\b\d{1,3}(?:[., ]\d{3}){1,3}\b|\b\d{4,9}\b/g;
+ const pattern=/\b\d{1,3}(?:[., \u00a0\u202f]\d{3}){1,3}\b|\b\d{4,9}\b/g;
  for(let i=0;i<ls.length;i++){
   const type=classFrom(ls[i]);if(type<0)continue;
   const combined=[ls[i],ls[i+1]||''].join(' ');
   // If OCR puts two troop cards on the same line, never assign both
   // quantities to the first class. Split at each class heading.
-  const segments=combined.split(/(?=spitzen\s+(?:infant|kaval|bogen)|(?:(?:infantry|cavalry|archers?)\s*[:\-]))/i);
+  const segments=combined.split(/(?=spitzen\s+(?:infant|kaval|bogen)|(?:(?:infantry|cavalry|archers?|infanterie|infanteria|cavalerie|caballeria|arqueros?|tireurs?)\s*[:\-]))/i);
   for(const segment of segments){
    const kind=classFrom(segment);
    if(kind<0)continue;
@@ -46,7 +46,7 @@ function parseTroops(text){
 }
 function parseMarchSlots(text){
  const value=fold(text).replace(/\s+/g,' ');
- const m=value.match(/(?:marschschlange|march\s*queue|marches)[^\d]{0,24}(\d+)\s*\/\s*(\d+)/i);
+ const m=value.match(/(?:marschschlange|march\s*queue|marches|file\s*de\s*marche|cola\s*de\s*marcha|marchas)[^\d]{0,24}(\d+)\s*\/\s*(\d+)/i);
  if(!m)return null;
  const total=Number(m[2]);
  return total>=1&&total<=7?total:null;
@@ -58,11 +58,11 @@ function parseStats(text){
   let key=null;
   const type=classFrom(f);
   let prefix=type===0?'i':type===1?'c':type===2?'a':'squad';
-  if(/schwadron|squadron|squad|truppengruppe/.test(f))prefix='squad';
-  if(/angriff|attack|atk|angrif/.test(f))key='Atk';
-  else if(/todlich|lethal|letali/.test(f))key='Let';
-  else if(/verteid|defen/.test(f))key='Def';
-  else if(/gesund|health|hp\b/.test(f))key='Hp';
+  if(/schwadron|squadron|squad|truppengruppe|escouade|escuadron/.test(f))prefix='squad';
+  if(/angriff|attaque|ataque|attack|atk|angrif/.test(f))key='Atk';
+  else if(/todlich|lethal|letali|letalidad|letalite/.test(f))key='Let';
+  else if(/verteid|defen|defensa|defense/.test(f))key='Def';
+  else if(/gesund|health|salud|sante|hp\b/.test(f))key='Hp';
   if(!key)continue;
   const target=prefix+key;
   const found=line.match(/[+-]?\d{1,4}[.,]\d{1,3}\s*%?/g);
@@ -87,10 +87,10 @@ function parseHeroStats(text,type){
   const seenType=classFrom(f);
   if(seenType>=0&&['i','c','a'][seenType]!==prefix)continue;
   let key=null;
-  if(/angriff|attack|atk|angrif/.test(f))key='Atk';
-  else if(/todlich|lethal|letali/.test(f))key='Let';
-  else if(/verteid|defen/.test(f))key='Def';
-  else if(/gesund|health|hp\b/.test(f))key='Hp';
+  if(/angriff|attaque|ataque|attack|atk|angrif/.test(f))key='Atk';
+  else if(/todlich|lethal|letali|letalidad|letalite/.test(f))key='Let';
+  else if(/verteid|defen|defensa|defense/.test(f))key='Def';
+  else if(/gesund|health|salud|sante|hp\b/.test(f))key='Hp';
   if(!key)continue;
   // Require a percentage or a visibly signed decimal, not any digit on
   // the hero's power, widget or skill badges.
@@ -181,11 +181,11 @@ function advise(owned,selected,heroTypes){
 }
 function category(text){
  const f=fold(String(text||'').slice(0,4000));
- if(/gouverneur.*ausrust|governor.*gear|talismanverbesser/.test(f))return 'gear';
- if(/schwadronvorschau|spitzen\s*infant|spitzen\s*kaval|spitzen\s*bogen|all\s*troops/.test(f))return 'troops';
- if(/bonusubersicht|schwadron\s*angriff|schwadron\s*todlich|infanterie-todlich|bogenschutzen-angriff/.test(f))return 'stats';
- if(/gesamteigenschaften|hero\s*properties|expedition/.test(f))return 'starter';
- if(/helden|heroes/.test(f))return 'roster';
+ if(/gouverneur.*ausrust|governor.*gear|talismanverbesser|equipement.*gouverneur|equipo.*gobernador/.test(f))return 'gear';
+ if(/schwadronvorschau|spitzen\s*infant|spitzen\s*kaval|spitzen\s*bogen|all\s*troops|apercu.*troupes|apercu.*escouade|vista.*escuadron|vista.*tropas/.test(f))return 'troops';
+ if(/bonusubersicht|schwadron\s*angriff|schwadron\s*todlich|infanterie-todlich|bogenschutzen-angriff|apercu.*bonus|resume.*bonus|resumen.*bonifica|escuadron.*ataque|escouade.*attaque/.test(f))return 'stats';
+ if(/gesamteigenschaften|hero\s*properties|expedition|proprietes.*heros|propiedades.*heroe/.test(f))return 'starter';
+ if(/helden|heroes|heros/.test(f))return 'roster';
  return 'unknown';
 }
 root.NRW_BEAR_INTAKE_CORE={parseHeroStats,parseHeroOrderedExpeditionRows,fold,normalizeNumber,classFrom,parseTroops,parseMarchSlots,parseStats,parseHeroDetail,maxSkill,advise,category,rankByType};
