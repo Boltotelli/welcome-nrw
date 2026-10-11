@@ -453,8 +453,18 @@ async function verifyTroopEntryCounts(entries,canvas,worker){
   if(w>0&&h>0)cx.drawImage(canvas,left,top,w,h,pad,rowH*i+pad,
    width-pad*2,rowH-pad*2);
  });
+ // The board contains one row per ALREADY DETECTED class heading.
+ // AUTO layout (PSM3) often omits the first 325.027 after the icon,
+ // whereas SINGLE_BLOCK (PSM6) reliably reads all three lines.
  let read;
- try{read=await worker.recognize(board);}catch(_){return;}
+ try{
+  if(worker.setParameters)await worker.setParameters({tessedit_pageseg_mode:6});
+  read=await worker.recognize(board);
+ }catch(_){return;}
+ finally{
+  // Never leak troop-specific OCR settings into hero, gear or stat scans.
+  try{if(worker.setParameters)await worker.setParameters({tessedit_pageseg_mode:3});}catch(_){}
+ }
  for(let i=0;i<entries.length;i++){
   const entry=entries[i];
   const words=(read.data?.words||[]).filter(w=>w.bbox&&
