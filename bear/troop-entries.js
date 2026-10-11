@@ -139,7 +139,7 @@ function readBelow(label,words,w,h){
  }
  return null;
 }
-function cropAroundLabel(label){
+function cropAroundLabel(label,width,height){
  // OCR the quantity DIRECTLY below its heading. Do not include the big
  // illustrated troop icon or the next card: both introduce false digits.
  // If the 'Spitzen' prefix was recognized, its beginning is the left edge
@@ -147,17 +147,18 @@ function cropAroundLabel(label){
  // All lengths are relative to the local OCR box, not 716x1536 positions.
  const h=Math.max(.008,label.y1-label.y0);
  const hasPrefix=/spitzen|apex|elite|supreme/i.test(label.title||'');
- const gutter=hasPrefix?.006:Math.min(.14,4.5*h);
+ const horizontalFontHeight=h*height/width;
+ const gutter=hasPrefix?.006:Math.min(.14,4.5*horizontalFontHeight);
  const x=Math.max(0,label.x0-gutter);
  return {x,y:Math.max(0,label.y1-.10*h),
-  w:Math.min(1-x,Math.max(.25,Math.min(.34,12*h))),
+  w:Math.min(1-x,Math.max(.25,Math.min(.31,10*horizontalFontHeight))),
   h:Math.max(.031,Math.min(.040,1.6*h))};
 }
 function detect(words,width,height){
  const normalized=norm(words,width,height);
  return labelsFound(normalized).map((label,index)=>{
   const quantity=readBelow(label,normalized,width,height);
-  const crop=cropAroundLabel(label);
+  const crop=cropAroundLabel(label,width,height);
   const fontHeight=Math.max(.008,label.y1-label.y0);
   const iconWidth=Math.min(.145,Math.max(.108,fontHeight*11.2));
   return {id:index,type:label.type,label:label.label,count:quantity,
