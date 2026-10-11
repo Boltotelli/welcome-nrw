@@ -13,8 +13,9 @@ function mount(host,B,language){
  function refresh(){
   const calc=root.NRW_BEAR_CAPACITY?.breakdown(B.model(),root.NRW_BEAR_CATALOG);
   if(!calc)return;
-  const l=language(),tr=(de,en,fr)=>l==='de'?de:l==='fr'?fr:en;
-  const fmt=n=>Number(n||0).toLocaleString(l==='de'?'de-DE':l==='fr'?'fr-FR':'en-US');
+  const l=language(),esTexts={"Enter the base WITHOUT heroes or active Bison/Valora bonuses.":"Introduce la capacidad base SIN héroes ni bonificaciones activas de Bison o Valora.","Base (manual)":"Base (manual)","Hero missing":"Falta héroe","Hero capacity":"Capacidad por héroes"," (inactive)":" (inactivo)","Total squad capacity":"Capacidad total del escuadrón","Hero bonus missing":"Falta bonificación del héroe","Enter an exact hero bonus below if hero levels are unknown or level 39 is selected.":"Introduce una bonificación exacta si desconoces los niveles de héroes o seleccionaste nivel 39.","* Legacy manual bonuses are only fallbacks, never added twice.":"* Los valores manuales anteriores solo son alternativas; nunca se suman dos veces.","Rally capacity is excluded.":"La capacidad del rally no se incluye."};
+  const tr=(de,en,fr)=>l==='de'?de:l==='fr'?fr:l==='es'?(esTexts[en]||en):en;
+  const fmt=n=>Number(n||0).toLocaleString(l==='de'?'de-DE':l==='fr'?'fr-FR':l==='es'?'es-ES':'en-US');
   panel.replaceChildren();
   const p=document.createElement('p');p.className='hint';
   p.textContent=tr('Bitte Basiswert OHNE Helden und aktive Bison-/Valora-Buffs eintragen.',
