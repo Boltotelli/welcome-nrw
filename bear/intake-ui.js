@@ -53,6 +53,12 @@ if(governorInput&&lookup){
  savedPick.setAttribute('aria-label',say('Gespeicherten Spieler auswählen','Choose saved player'));
  const open=document.createElement('button');open.type='button';open.className='secondary-btn';
  open.textContent=say('Gespeicherten Stand öffnen','Open saved profile');
+ const rename=document.createElement('div');rename.className='bear-local-name-row';
+ const nameInput=document.createElement('input');nameInput.type='text';nameInput.maxLength=80;
+ nameInput.placeholder=say('Spielername für diese ID','Player name for this ID');
+ const saveName=document.createElement('button');saveName.type='button';saveName.className='secondary-btn';
+ saveName.textContent=say('Namen speichern','Save name');
+ rename.append(nameInput,saveName);rename.hidden=true;
  function knownIds(){
   try{return Object.keys(localStorage).filter(k=>k.startsWith('nrw_bear_profile_v1_'))
    .map(k=>k.slice('nrw_bear_profile_v1_'.length)).filter(id=>/^[0-9]{5,20}$/.test(id));}
@@ -75,18 +81,36 @@ if(governorInput&&lookup){
   savedPick.value=known.some(x=>x.id===chosen)?chosen:'';
   localRow.hidden=known.length===0;
  }
- savedPick.addEventListener('change',()=>{if(savedPick.value)governorInput.value=savedPick.value;});
+ function updateNameEditor(){
+  const id=savedPick.value;
+  rename.hidden=!id;
+  nameInput.value=id?(B.storedGovernorName?.(id)||''):'';
+ }
+ savedPick.addEventListener('change',()=>{
+  if(savedPick.value)governorInput.value=savedPick.value;
+  updateNameEditor();
+ });
+ saveName.addEventListener('click',()=>{
+  const id=savedPick.value,name=nameInput.value.trim();
+  if(!id||!name||/^[0-9]{5,20}$/.test(name))return;
+  B.rememberGovernorName?.(id,name);
+  refreshSavedPlayers();
+  updateNameEditor();
+ });
+ nameInput.addEventListener('keydown',evt=>{
+  if(evt.key==='Enter'){evt.preventDefault();saveName.click();}
+ });
  open.addEventListener('click',()=>{
   if(!savedPick.value)return;
   governorInput.value=savedPick.value;
   $('offlineMode')?.click();
  });
- localRow.append(savedPick,open);lookup.after(localRow);
+ localRow.append(savedPick,open,rename);lookup.after(localRow);
  const note=document.createElement('p');note.className='hint';
  note.textContent=say('Gespeicherte Profile auf diesem Gerät. Keine erneute Prüfung der Allianzzugehörigkeit.',
   'Saved profiles on this device. This does not recheck alliance membership.');
  localRow.after(note);
- const refresh=()=>{refreshSavedPlayers();note.hidden=localRow.hidden;};
+ const refresh=()=>{refreshSavedPlayers();updateNameEditor();note.hidden=localRow.hidden;};
  window.addEventListener('nrw-bear-loaded',refresh);
  refresh();
 }

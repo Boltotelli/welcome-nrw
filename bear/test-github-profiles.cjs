@@ -38,7 +38,9 @@ assert.equal(p.validate('295189783',{...obj,values:{'<script>':'alert()'}}),fals
  assert.ok(html.includes('activateSavedId:function(id,name)'));
 assert.ok(source.includes('bridge.storedGovernorName?.(id)'),'local label used when no public name available');
 assert.ok(html.includes('nrw_bear_profile_name_v1_'),'display name saved per numeric ID');
-assert.ok(html.includes('./intake-ui.js?v=player-names-20261011-1'),'picker cache version updated');
+assert.ok(html.includes('./intake-ui.js?v=player-label-edit-20261011-1'),'picker cache version updated');
+assert.ok(html.includes('rememberGovernorName:rememberGovernorName'),'bridge accepts local nickname assignment');
+assert.ok(intake.includes('B.rememberGovernorName?.(id,name)'),'older saved IDs can be labelled without another API');
 const intake=fs.readFileSync(path.join(__dirname,'intake-ui.js'),'utf8');
 assert.ok(intake.includes("opt.textContent=name?name+' · ID '+id:id"),'saved profile picker uses name with ID');
 assert.ok(intake.includes("window.addEventListener('nrw-bear-loaded',refresh)"),'picker refreshes after loading a profile');
