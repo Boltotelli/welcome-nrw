@@ -66,10 +66,24 @@ async function gh(path,method='GET',body){
  return response.json();
 }
 module.exports=async function handler(req,res){
- res.setHeader('Cache-Control','no-store');
+ res.setHeader('Cache-Control','private, no-store');
+ res.setHeader('X-Robots-Tag','noindex, nofollow');
+ // API is intentionally in a disabled state until consent, abuse protection,
+ // account recovery and a least-privilege GitHub token are configured.
+ if(process.env.BEAR_PROFILE_FEATURE_ENABLED!=='true'){
+  res.status(503).json({error:'profile-sync-not-enabled'});return;
+ }
  res.setHeader('X-Content-Type-Options','nosniff');
  try{
   if(!['GET','POST'].includes(req.method)){res.status(405).json({error:'method'});return;}
+  if(req.method==='POST'){
+   if(!/^application\/json(?:;|$)/i.test(String(req.headers['content-type']||''))){
+    res.status(415).json({error:'content-type'});return;
+   }
+   if(Buffer.byteLength(JSON.stringify(req.body||{}),'utf8')>64000){
+    res.status(413).json({error:'payload-too-large'});return;
+   }
+  }
   const name=normalize(req.method==='GET'?req.query.name:req.body?.name);
   if(!validName(name)){res.status(400).json({error:'name'});return;}
   const path=pathFor(name),stored=await gh(path);
