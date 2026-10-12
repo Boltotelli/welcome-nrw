@@ -151,6 +151,8 @@ function pack(){
  }
  return {heroes,ownHeroes:v.ownHeroes||[],joinCount:v.joinCount||0,
   joinLeaderComparison:v.joinLeaderComparison||'similar',
+  ministers:v.ministers||{},ministerBuffCapturedInStats:!!v.ministerBuffCapturedInStats,
+  ministerCapacityInBase:!!v.ministerCapacityInBase,
   troopGroups:v.troopGroups||[],values:m.values||{},combatStatOrigin:v.combatStatOrigin||'combined-report',
   valoraTalent:v.valoraTalent||0,savageAdvantage:v.valora?.[3]||0,
   petActive:v.petActive||{},petSkillRanks:v.petSkillRanks||{},petBuffCapturedInStats:!!v.petBuffCapturedInStats};
@@ -167,6 +169,9 @@ function unpack(d){
  v.joinCount=Math.max(0,Math.min(6,Number(d.joinCount)||0));
  v.joinLeaderComparison=['weaker','similar','stronger'].includes(d.joinLeaderComparison)?
   d.joinLeaderComparison:'similar';
+ v.ministers=d.ministers||{};
+ v.ministerBuffCapturedInStats=!!d.ministerBuffCapturedInStats;
+ v.ministerCapacityInBase=!!d.ministerCapacityInBase;
  v.troopGroups=d.troopGroups||[];v.troopTiers=[{tier:10,tg:0},{tier:10,tg:0},{tier:10,tg:0}];
  v.valora=[0,0,0,Number(d.savageAdvantage)||0];v.valoraTalent=Number(d.valoraTalent)||0;
  v.petActive=d.petActive||{};v.petSkillRanks=d.petSkillRanks||{};v.petBuffCapturedInStats=!!d.petBuffCapturedInStats;
@@ -300,6 +305,38 @@ function rallyStrengthField(){
    saveLocal();
   });
 }
+function ministerSection(){
+ const v=state().v2,section=el('section','bear-name-ministers');
+ v.ministers=v.ministers||{};
+ section.append(title('Ministerbuffs · König und Hochkönig','h3'),
+  el('p','bear-name-muted','Aktiviere nur Posten, die während der Bärenfalle wirklich gelten.'));
+ const groups=el('div','bear-name-minister-grid');
+ for(const [key,caption] of [['king','König'],['highKing','Hochkönig']]){
+  const area=el('div','bear-name-minister-group');
+  area.append(el('strong','',caption));
+  const flags=v.ministers[key]||(v.ministers[key]={fc:false,m:false});
+  for(const [flag,text] of [['fc','FC · +10 % Tödlichkeit'],['m','M · +5 % Angriff, +2.500 Kapazität']]){
+   const label=el('label','bear-name-minister-check'),input=el('input');
+   input.type='checkbox';input.checked=flags[flag]===true;
+   input.addEventListener('change',()=>{flags[flag]=input.checked;saveLocal();});
+   label.append(input,el('span','',text));area.append(label);
+  }
+  groups.append(area);
+ }
+ section.append(groups);
+ function option(field,caption){
+  const label=el('label','bear-name-minister-check bear-name-minister-meta'),input=el('input');
+  input.type='checkbox';input.checked=!!v[field];
+  input.addEventListener('change',()=>{v[field]=input.checked;saveLocal();});
+  label.append(input,el('span','',caption));return label;
+ }
+ section.append(
+  option('ministerBuffCapturedInStats','FC/M-Kampfboni sind bereits in meinen Basiswerten enthalten'),
+  option('ministerCapacityInBase','M-Kapazitätsbonus ist bereits in der eingegebenen Marschkapazität enthalten'),
+  el('p','bear-name-muted','Gleiche FC- oder M-Boni aus König und Hochkönig werden derzeit nicht doppelt gerechnet.')
+ );
+ return section;
+}
 function scalarSection(){
  const m=state(),v=m.v2,section=el('section','bear-name-panel');
  section.append(title('Basiswerte & aktive Buffs'),el('p','bear-name-muted','Angriff und Tödlichkeit aller Truppentypen aus der Bonusübersicht. Fehlende Werte bleiben offen – keine stillen Schätzungen.'));
@@ -324,7 +361,7 @@ function scalarSection(){
    },{step:0.1,max:10000}));
   section.append(gr);
  }
- section.append(title('Pets & Valora','h3'));
+ section.append(ministerSection(),title('Pets & Valora','h3'));
  const petGrid=el('div','bear-name-pet-grid');
  v.petActive=v.petActive||{};v.petSkillRanks=v.petSkillRanks||{};
  const assetImg=(url,label)=>{
@@ -419,6 +456,34 @@ function starterGearSection(picked){
 }
 // Show complete owned hero portraits and physically feasible troop mixes.
 // The beginner mode can suggest safe ratios without asking for combat stats.
+function troopUtilization(plan){
+ const section=el('section','bear-name-utilization');
+ section.append(title('Truppenauslastung','h3'));
+ const types=['Infanterie','Kavallerie','Bogenschützen'];
+ const total=plan.stock.reduce((a,b)=>a+b,0),used=plan.used.reduce((a,b)=>a+b,0);
+ section.append(el('p','bear-name-util-total',
+  num(used)+' / '+num(total)+' '+T('Truppen eingesetzt')));
+ const overall=el('div','bear-name-util-track');
+ const fill=el('span','bear-name-util-fill');
+ fill.style.width=(total?used/total*100:0).toFixed(2)+'%';
+ overall.append(fill);section.append(overall);
+ const legend=el('div','bear-name-util-legend');
+ legend.append(el('span','',T('Eingesetzt')+' · '+(total?Math.round(used/total*100):0)+' %'),
+  el('span','',T('Restbestand')+' · '+num(total-used)));
+ section.append(legend);
+ for(let k=0;k<3;k++){
+  const available=plan.stock[k],spent=plan.used[k],remain=plan.leftover[k],
+   percent=available?spent/available*100:0;
+  const row=el('div','bear-name-util-row');
+  const head=el('div','bear-name-util-legend');
+  head.append(el('strong','',T(types[k])),el('span','',
+    num(spent)+' / '+num(available)+' · '+T('Rest')+': '+num(remain)));
+  const track=el('div','bear-name-util-track bear-name-util-type-'+k);
+  const bar=el('span','bear-name-util-fill');bar.style.width=percent.toFixed(2)+'%';
+  track.append(bar);row.append(head,track);section.append(row);
+ }
+ return section;
+}
 function formationCards(){
  const section=el('section','bear-name-panel bear-name-formation-result');
  section.id='bearFormationResult';
@@ -478,6 +543,7 @@ function formationCards(){
   article.append(mix);cards.append(article);
  }
  section.append(cards);
+ if(validCap)section.append(troopUtilization(plan));
  if(!validCap){
   section.append(el('p','bear-name-muted',
    capMissing?'Marschkapazität und Truppenbestand ergänzen, damit wir die Formation berechnen können.':
