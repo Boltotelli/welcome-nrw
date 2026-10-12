@@ -61,10 +61,12 @@ function breakdown(model,catalog){
   bisonSelected&&validRank?positive(bison.bearSkill.values[rank-1]):0:
   positive(values.pet);
  const petSource=bisonRecorded||validRank||bisonSelected?'skill':positive(values.pet)>0?'manual':'none';
- const total=hasBase?base+heroes+master+pet:null;
+ const minister=root.NRW_BEAR_MINISTERS?.derived?.(model)?.capacity||0;
+ const total=hasBase?base+heroes+master+pet+minister:null;
  return {base,hasBase,heroRows,heroes,heroSource:hasManualHero?'manual':heroesKnown?'levels':'pending',
   heroesPending,pet,petSource,petRank:validRank?rank:null,petActive:bisonSelected,
-  master,masterSource,savageLevel:hasSavage?savage:null,total,complete:hasBase&&!heroesPending};
+  master,masterSource,savageLevel:hasSavage?savage:null,
+  minister,total,complete:hasBase&&!heroesPending};
 }
 root.NRW_BEAR_CAPACITY={levelCapacity,breakdown,heroCapacityByLevel:HERO_CAP.slice()};
 })(window);
