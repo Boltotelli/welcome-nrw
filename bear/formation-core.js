@@ -194,7 +194,8 @@ function plan(model,catalog,combat,capacityCore){
  if(leftover.some(x=>x<0)||actual.some((row,i)=>row.reduce((a,b)=>a+b,0)>caps[i]))
   throw Error('Unsafe formation: inventory or capacity exceeded');
  const ratios=actual.map(integerPercentages);
- const full=useDamage?combat.damage(actual[0],ownStats,tiers,5):null;
+ const ownedLevels=useDamage?combat.allocateLevels?.(actual,tiers,true)?.[0]||tiers:null;
+ const full=useDamage?combat.damage(actual[0],ownStats,ownedLevels,5):null;
  return {ready:true,stock,used,leftover,targets,total,availableTotal,demand,
   marches:marches.map((m,i)=>({...m,troops:actual[i],ratio:ratios[i],filled:actual[i].reduce((a,b)=>a+b,0),
    shortage:Math.max(0,m.capacity-actual[i].reduce((a,b)=>a+b,0))})),
