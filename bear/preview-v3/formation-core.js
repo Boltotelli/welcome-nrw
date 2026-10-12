@@ -355,7 +355,9 @@ function plan(model,catalog,combat,capacityCore){
  // average Gen-based Bear ratio instead of maximizing arbitrary T/TG
  // √troop weights. Scarce archers go to JOIN marches first. Each
  // unit is assigned exactly once and not beyond a march's capacity.
- const targets=splitShares(total,caps);
+ // Never pre-split scarce troop stock equally: doing so would prevent
+ // the stronger own rally from receiving extra troops.
+ const targets=caps;
  const expected=expectedWeights(targets,model,catalog,combat,stock);
  const distribution=allocateByMarginal(targets,stock,expected.weights);
  const actual=distribution.rows;
