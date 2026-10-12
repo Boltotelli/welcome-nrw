@@ -277,17 +277,45 @@ function scalarSection(){
   section.append(gr);
  }
  section.append(title('Pets & Valora','h3'));
- const petGrid=el('div','bear-name-stat-grid');v.petActive=v.petActive||{};v.petSkillRanks=v.petSkillRanks||{};
+ const petGrid=el('div','bear-name-pet-grid');
+ v.petActive=v.petActive||{};v.petSkillRanks=v.petSkillRanks||{};
+ const assetImg=(url,label)=>{
+  const img=el('img','bear-name-buff-icon');
+  img.src=url||'';img.alt=label;img.loading='lazy';
+  img.onerror=()=>{img.onerror=null;img.style.visibility='hidden';};
+  return img;
+ };
  for(const n of ['Giant Rhino','Black Panther','War Bear','Moose','Mighty Bison']){
-  const line=el('div','bear-name-pet-line'),lab=el('label'),check=el('input');check.type='checkbox';check.checked=!!v.petActive[n];
-  check.onchange=()=>{v.petActive[n]=check.checked;saveLocal();};lab.append(check,document.createTextNode(' '+n));line.append(lab,
-   numberField('Skill-Level',v.petSkillRanks[n],x=>{if(x===null)delete v.petSkillRanks[n];else v.petSkillRanks[n]=x;saveLocal();},{min:1,max:10}));
+  const pet=(C.pets||[]).find(p=>p.name===n||(n==='Moose'&&p.name==='Great Moose'));
+  const line=el('div','bear-name-buff-card'),lab=el('label','bear-name-buff-title'),check=el('input');
+  check.type='checkbox';check.checked=!!v.petActive[n];
+  check.onchange=()=>{v.petActive[n]=check.checked;saveLocal();};
+  lab.append(check,assetImg(pet?.img||'',n),el('span','',n==='Moose'?'Elch':n));
+  line.append(lab,numberField('Fähigkeitslevel',v.petSkillRanks[n],x=>{
+   if(x===null)delete v.petSkillRanks[n];else v.petSkillRanks[n]=x;saveLocal();
+  },{min:1,max:10}));
   petGrid.append(line);
  }
- petGrid.append(numberField('Valora · Savage Advantage',v.valora?.[3],x=>{
-  v.valora=v.valora||[0,0,0,0];v.valora[3]=x||0;saveLocal();},{min:0,max:10}),
-  numberField('Valora · Hunter Instinct',v.valoraTalent,x=>{v.valoraTalent=x||0;saveLocal();},{min:0,max:11}));
- section.append(petGrid,el('p','bear-name-muted','Level-5-Falle: +25 Prozentpunkte Angriff. Bison und Valora erhöhen Kapazität; aktivierte Rhino-/Panther-Buffs werden nur hinzugerechnet, wenn sie nicht bereits in den eingegebenen Kampfwerten enthalten sind.'));
+ const skills=el('div','bear-name-buff-card bear-name-valora'),valoraSkill=(C.valora||[]).find(x=>x.name==='Savage Advantage');
+ const valoraPicture=assetImg(valoraSkill?.img||'','Valora');
+ const valoraTitle=el('div','bear-name-buff-title');valoraTitle.append(valoraPicture,el('strong','','Valora'));
+ skills.append(valoraTitle);
+ const skillRows=el('div','bear-name-valora-skills');
+ const savage=el('div','bear-name-buff-skill');
+ savage.append(assetImg(valoraSkill?.img||'','Savage Advantage'),
+  numberField('Savage Advantage',v.valora?.[3],x=>{
+   v.valora=v.valora||[0,0,0,0];v.valora[3]=x||0;saveLocal();
+  },{min:0,max:10}));
+ const hunter=el('div','bear-name-buff-skill');
+ const hunterImg=assetImg('https://kingshotdata.com/icons/master-valora-talent.png','Hunter Instinct');
+ hunterImg.onerror=()=>{hunterImg.onerror=null;hunterImg.src=valoraSkill?.img||'';};
+ hunter.append(hunterImg,numberField('Hunter Instinct',v.valoraTalent,x=>{
+  v.valoraTalent=x||0;saveLocal();
+ },{min:0,max:11}));
+ skillRows.append(savage,hunter);skills.append(skillRows);petGrid.append(skills);
+ section.append(petGrid);
+ section.append(el('p','bear-name-muted','Aktive Buffs markieren. Die bereits eingetragenen Kampfwerte nicht doppelt erhöhen.'));
+
  const present=el('label','bear-name-pet-line'),ch=el('input');ch.type='checkbox';ch.checked=!!v.petBuffCapturedInStats;ch.onchange=()=>{v.petBuffCapturedInStats=ch.checked;saveLocal();};
  present.append(ch,document.createTextNode(' Aktive Pet-ATK/LET-Buffs sind bereits in diesen Werten enthalten'));section.append(present);
  return section;
@@ -326,7 +354,6 @@ function summaryHeroes(){
   const joined=el('div','bear-name-joins');formation.joins.forEach((row,i)=>{
    const article=el('div','bear-name-join');article.append(el('strong','',String(i+1)+'. Join'));
    const heroes=row.heroes.map(x=>x?.name||'—');article.append(el('span','',heroes.join(' · ')));
-   if(row.skillLevel===null)article.append(el('small','','Erste Fähigkeit: Sterne-basierte Annahme, nicht bestätigt'));
    joined.append(article);
   });section.append(title('Joiner: erster Held = relevante Fähigkeit','h3'),joined);
  }
@@ -422,13 +449,11 @@ function predicted(){
      'Berechnung nicht verfügbar'));
   lines.append(line);
  }
- const note=prepared.unmodeled.length||prepared.speculativePets.length?
-  ' Einige Fähigkeiten/Pet-Effekte sind gegen den Bären nicht sicher quantifizierbar; sie werden nicht als garantierter Bonus behandelt.':'';
  out.append(el('p','bear-name-result',
   'Starter '+best.ratio.join(' / ')+' · '+counts.map(num).join(' / ')+' Truppen'),
-  el('p','bear-name-muted','Alle Expeditionsfähigkeiten deiner drei Starter werden geprüft. Joiner bleiben bei 10/10/80, solange der Truppenbestand reicht.'),
+  el('p','bear-name-muted','Berechnung anhand deiner ausgewählten Starter und Truppen.'),
   lines,el('p','bear-name-warning',
-   '⚠ Nur relative Modellwerte, keine bestätigten Kingshot-Schadenspunkte. Zufällige Effekte werden über Wahrscheinlichkeitswerte berücksichtigt. Eine Spanne bezeichnet unsichere Dauer-/Debuffmechaniken.'+note));
+   '⚠ Geschätzter Modellwert – kein bestätigter Kingshot-Schadenswert.'));
  lastResult=best;return out;
 }
 function landing(){
