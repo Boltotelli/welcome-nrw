@@ -303,30 +303,32 @@ function scalarSection(){
  // These six images are genuine in-game art cropped from the supplied
  // screenshots: Rhino, Panther, Bear, Moose, Bison, Valora.
  const gameIcon=(n)=>{
-  // IMPORTANT: Ironclad War Bear (Gen 7, Ursa's Rage) is a different
-  // pet from Grizzly Bear (Gen 3, The Howler), Moose and Mighty Bison.
-  // The user's pet screenshot has no confirmed Gen-7 War Bear portrait;
-  // use the independently identified real Ursa's Rage game artwork.
-  if(n==='War Bear'){
-   const img=el('img','bear-name-buff-icon bear-name-war-bear-icon');
-   img.src='https://kingshotdata.com/uploads/2026/05/ursas-rage.webp';
-   img.alt='Ironclad War Bear';
-   img.loading='lazy';
-   img.onerror=()=>{
-    img.onerror=null;
-    const src=(C.pets||[]).find(p=>p.name==='War Bear')?.img;
-    if(src)img.src=src;
-   };
-   return img;
+  // Game icons audited by pet identity + active skill, NOT sprite position.
+  // Mighty Bison (Fearless Roar) is distinct from early Bison;
+  // Ironclad War Bear (Ursa's Rage) is distinct from Grizzly Bear.
+  if(n==='Valora'){
+   const span=el('span','bear-name-buff-icon bear-name-game-icon');
+   span.setAttribute('role','img');span.setAttribute('aria-label',n);
+   span.style.backgroundImage="url('./assets/pet-valora-sprite.webp')";
+   span.style.backgroundPosition='100% center';
+   return span;
   }
-  // Original user screenshot, six crops: Rhino, Panther, Bison, Moose,
-  // Great Moose, Valora. Mighty Bison is crop #2; crop #4 is a MOOSE.
-  const positions={'Giant Rhino':0,'Black Panther':1,'Mighty Bison':2,'Moose':3,'Valora':5};
-  const span=el('span','bear-name-buff-icon bear-name-game-icon');
-  span.setAttribute('role','img');span.setAttribute('aria-label',n);
-  span.style.backgroundImage="url('./assets/pet-valora-sprite.webp')";
-  span.style.backgroundPosition=(Number(positions[n]||0)*20)+'% center';
-  return span;
+  const pet=(C.pets||[]).find(p=>p.name===n||
+   (n==='Moose'&&p.name==='Moose'));
+  const imageBySkill={
+   'Giant Rhino':'https://kingshotdata.com/uploads/2025/09/giant-rhino-avatar.webp',
+   'Mighty Bison':'https://kingshotdata.com/uploads/2025/09/fearless-roar.webp',
+   'War Bear':'https://kingshotdata.com/uploads/2026/05/ursas-rage.webp'
+  };
+  const src=imageBySkill[n]||pet?.img||'';
+  const img=el('img','bear-name-buff-icon bear-name-pet-portrait');
+  img.src=src;img.alt=n;img.loading='lazy';img.referrerPolicy='no-referrer';
+  img.onerror=()=>{
+   img.onerror=null;
+   if(pet?.img&&img.src!==pet.img)img.src=pet.img;
+   else img.style.visibility='hidden';
+  };
+  return img;
  };
  const petNames={'Giant Rhino':'Riesennashorn','Black Panther':'Schwarzer Panther',
   'War Bear':'Eisenpanzer-Kriegsbär','Moose':'Elch','Mighty Bison':'Mächtiger Bison'};
