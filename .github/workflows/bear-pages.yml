@@ -213,6 +213,7 @@ jobs:
           grep -Fq 'saveLocal();refreshHeroRecommendations()' _site/bear/preview-v3/name-flow.js
           # Hero stars: five clickable six-petal flowers, +/- and live result.
           grep -Fq 'function starProgressField(heroName)' _site/bear/preview-v3/name-flow.js
+          grep -Fq 'const angle=-90-petal*60;' _site/bear/preview-v3/name-flow.js
           grep -Fq "meta.append(starProgressField(n))" _site/bear/preview-v3/name-flow.js
           grep -Fq '.bear-name-star-controls' _site/bear/preview-v3/name-flow.css
           ! grep -Fq "choose('Sterne / Tier'" _site/bear/preview-v3/name-flow.js
