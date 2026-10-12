@@ -5,6 +5,11 @@
 'use strict';
 const table=[
 ['Deine Helden','Your heroes','Tes héros','Tus héroes'],
+['Joiner','Joiner','Renfort','Apoyo'],
+['Truppen und Marschkapazität eingeben, um diese Formation zu berechnen.','Enter troops and march capacity to calculate this formation.','Renseigne troupes et capacité pour calculer cette formation.','Introduce tropas y capacidad para calcular esta formación.'],
+['Marschkapazität und Truppenbestand ergänzen, damit wir die Formation berechnen können.','Enter march capacity and troop inventory to calculate the formations.','Renseigne la capacité et les troupes pour calculer les formations.','Introduce la capacidad y las tropas para calcular las formaciones.'],
+['Truppenbestand und Marschkapazität fehlen noch.','Troop inventory and march capacity are still missing.','Effectifs et capacité de marche manquants.','Faltan tropas y capacidad de marcha.'],
+['Alle Märsche nutzen denselben Truppenbestand. Die Verteilung wird gemeinsam optimiert.','All marches share the same troop inventory. Allocation is optimized together.','Toutes les marches utilisent les mêmes troupes. Répartition optimisée ensemble.','Todas las marchas comparten las mismas tropas. Distribución optimizada conjuntamente.'],
 ['Aus deinen ausgewählten Helden.','Based on your selected heroes.','D’après les héros sélectionnés.','Según los héroes seleccionados.'],
 ['Deine Bear-Formation. Ohne Screenshot-Marathon.','Your Bear formation. No screenshot marathon.','Ta formation Ours. Sans avalanche de captures.','Tu formación del Oso. Sin maratón de capturas.'],
 ['🐻 NRW · BÄREN-OPTIMIERER','🐻 NRW · BEAR OPTIMIZER','🐻 NRW · OPTIMISEUR OURS','🐻 NRW · OPTIMIZADOR DEL OSO'],
@@ -66,14 +71,14 @@ const table=[
 ['Werte geprüft','Stats checked','Stats vérifiées','Datos comprobados'],
 ['Schätzung – Werte ergänzen','Estimate – add stats','Estimation – compléter les stats','Estimación – añade datos'],
 ['Deine Starter- & Joiner-Formationen','Your starter & joiner formations','Tes formations lanceur et renfort','Tus formaciones de inicio y apoyo'],
-['Eigene Starter-Rally','Own starter rally','Ton propre rally','Tu propio rally'],
+['Eigene Starter-Rally','My starter rally','Rally de départ','Rally de inicio'],
 ['Nicht belegt','Empty','Vide','Vacío'],
 ['Bitte einen passenden Joiner-Helden ergänzen.','Add a suitable joiner hero.','Ajoute un héros participant adapté.','Añade un héroe de apoyo adecuado.'],
 ['Bitte zuerst deine Helden auswählen.','Select your heroes first.','Sélectionne d’abord tes héros.','Selecciona primero tus héroes.'],
 ['Truppenbestände werden nur einmal verteilt. Bogenschützen haben für Joiner Vorrang.','Troops are allocated once. Joiners have priority for scarce archers.','Les troupes sont réparties une seule fois. Priorité aux archers pour les renforts.','Las tropas se asignan una vez. Prioridad a arqueros para apoyos.'],
 ['10/10/80 ist hier ein Richtwert. Mit deiner Marschkapazität und deinem Truppenbestand können wir die tatsächlichen Anzahlen ermitteln.','10/10/80 is a starting point. Enter march capacity and troops to get exact counts.','10/10/80 est un point de départ. Renseigne capacité et troupes pour les quantités exactes.','10/10/80 es una referencia. Introduce capacidad y tropas para cantidades exactas.'],
 ['Für genaue Truppenzahlen bitte die Bestände vervollständigen.','Complete troop inventory for exact numbers.','Complète les effectifs pour les nombres exacts.','Completa las tropas para obtener cantidades exactas.'],
-['10/10/80 als Ausgangsformation; ohne Truppenbestände noch keine exakte Verteilung.','10/10/80 as a baseline; enter troop inventory for an exact allocation.','10/10/80 comme base ; saisis tes troupes pour une répartition exacte.','10/10/80 como base; introduce tropas para distribución exacta.'],
+
 ['⚔️ Formationen berechnen','⚔️ Calculate formations','⚔️ Calculer les formations','⚔️ Calcular formaciones'],
 ['☁️ Schadenswert berechnen','☁️ Calculate damage','☁️ Calculer les dégâts','☁️ Calcular daño'],
 ['Helden und Truppen werden zusammengestellt …','Selecting heroes and troops …','Assemblage des héros et troupes…','Preparando héroes y tropas…'],
