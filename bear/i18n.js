@@ -5,6 +5,7 @@
 'use strict';
 const table=[
 ['Deine Helden','Your heroes','Tes héros','Tus héroes'],
+['Truppen bleiben wegen der ganzzahligen Prozentvorgabe unverteilt.','troops remain unallocated because the game only accepts whole percentages.','troupes restent disponibles car le jeu n’accepte que les pourcentages entiers.','tropas quedan sin asignar porque el juego solo acepta porcentajes enteros.'],
 ['Die Starter-Truppenzahlen stehen ausschließlich in der Formationskarte. Beide Berechnungen verwenden dieselbe Aufstellung.','Starter troop counts are shown only on the formation card. Both calculations use the same lineup.','Les effectifs du rally de départ figurent uniquement sur la carte de formation. Les deux calculs utilisent la même composition.','Las tropas del rally de inicio se muestran solo en la tarjeta de formación. Ambos cálculos utilizan la misma formación.'],
 ['Nicht genug Infanterie für den Mindestanteil aller Märsche. Es wurde nur der tatsächliche Bestand verteilt.','Not enough infantry for the minimum of all marches. Only troops actually available were allocated.','Pas assez d’infanterie pour le minimum de chaque marche. Seules les troupes disponibles ont été réparties.','No hay suficiente infantería para el mínimo de todas las marchas. Solo se asignaron las tropas disponibles.'],
 
