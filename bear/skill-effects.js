@@ -138,7 +138,8 @@ function interpret(skill,level,heroName){
   }
   if(kind==='enemy_damage_taken_up'){
    if(c.everyTurns||c.everyAttacks){
-    const upper=amount*periodic;
+    const turns=Number(c.durationTurns)||1;
+    const upper=amount*Math.min(1,Math.floor(10/attackInterval)*turns/10);
     add('damage',upper,{uncertain:true,lower:0,assumption:'target-debuff-duration-and-stacking'});
    }else if(piece!==skill&&c.durationTurns===1){
     // Alcar and Vivian have secondary next-attack debuffs. Without verified
