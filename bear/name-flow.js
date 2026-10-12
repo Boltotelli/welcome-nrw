@@ -325,7 +325,8 @@ function landing(){
   el('p','bear-name-muted','Nur deinen Spielernamen eingeben. Danach wählst du zwischen Heldenempfehlung und erweiterter Schadensoptimierung.'));
  const inp=el('input','bear-name-input');inp.placeholder='Dein Kingshot-Name';inp.maxLength=50;inp.autocomplete='off';
  inp.value=name;inp.onkeydown=e=>{if(e.key==='Enter'&&valid(inp.value))openProfile(inp.value);};
- head.append(inp,button('Profil öffnen / neu anlegen →',()=>{if(valid(inp.value))openProfile(inp.value);else showStatus('Bitte einen Namen mit mindestens zwei Zeichen eingeben.',true);},'bear-name-btn primary'));box.append(head);
+ head.append(inp,button('Profil öffnen / neu anlegen →',()=>{if(valid(inp.value))openProfile(inp.value);else showStatus('Bitte einen Namen mit mindestens zwei Zeichen eingeben.',true);},'bear-name-btn primary'));head.append(el('p','bear-name-muted','Hinweis: Wenn GitHub-Speicherung aktiviert ist, kann jeder, der diesen Namen kennt, die hinterlegten Spielwerte lesen. Es werden keine Screenshots oder Kingshot-IDs gespeichert.'));
+ box.append(head);
  const saved=JSON.parse(localStorage.getItem('nrw_bear_name_list_v1')||'[]');
  if(saved.length){const row=el('div','bear-name-saved');row.append(title('Bereits auf diesem Gerät geöffnet','h3'));
   for(const n of saved.slice(0,12))row.append(button(n,()=>openProfile(n)));box.append(row);}
@@ -357,8 +358,26 @@ function render(){
   const main=el('div','bear-name-two-columns'),left=el('div'),right=el('div');
   left.append(rosterSection(),troopsSection(true),scalarSection());
   const r=summaryHeroes();right.append(r.section,starterGearSection(r.picked),
-   button('🔎 Formationen & Szenarien berechnen',()=>{const old=document.getElementById('bearAdvancedResult');if(old)old.remove();
-    const result=predicted();result.id='bearAdvancedResult';box.append(result);result.scrollIntoView({behavior:'smooth'});},'bear-name-btn primary'));
+   button('🔎 Formationen & Szenarien berechnen',async()=>{
+    const old=document.getElementById('bearAdvancedResult');if(old)old.remove();
+    const loading=el('div','bear-name-loading');loading.id='bearNameLoading';
+    const video=el('video');video.src='./assets/kingshot_formations_loading.webm';video.autoplay=true;
+    video.muted=true;video.playsInline=true;video.controls=false;
+    loading.append(video,el('p','','Deine Formationen werden berechnet …'));
+    box.append(loading);loading.scrollIntoView({behavior:'smooth'});
+    // Play the complete existing animation; a failed/unplayable video must
+    // not trap the user on a permanent spinner.
+    await new Promise(done=>{
+     let finished=false;const finish=()=>{if(!finished){finished=true;clearTimeout(timer);done();}};
+     const timer=setTimeout(finish,30000);
+     video.addEventListener('ended',finish,{once:true});
+     video.addEventListener('error',finish,{once:true});
+     video.play().catch(finish);
+    });
+    loading.remove();
+    const result=predicted();result.id='bearAdvancedResult';
+    box.append(result);result.scrollIntoView({behavior:'smooth'});
+   },'bear-name-btn primary'));
   main.append(left,right);box.append(main);
  }
  if(!localStorage.getItem('nrw_bear_name_list_v1'))localStorage.setItem('nrw_bear_name_list_v1','[]');
