@@ -63,6 +63,22 @@ assert.equal(j.process(['Jabel'],n=>dict.get(n)).ready,false,
 const damage=fs.readFileSync(path.join(__dirname,'damage-skills.js'),'utf8');
 assert(damage.includes('pointFactor*joinerMultiplier'),
  'Apply joiner multiplier to final index, not leader raw ATK/LET');
+vm.runInNewContext(damage,root,{filename:'damage-skills.js'});
+const dmg=root.window.NRW_BEAR_SKILL_DAMAGE,prepared={
+ ready:true,modifiers:{attack:0,lethality:0,classAttack:[0,0,0],classDamage:[1,1,1],
+ lowClassDamage:[1,1,1],lowDamage:1,damage:1},valoraPoints:0,unmodeled:[]
+};
+const dummyCombat={breakdown:()=>({types:[
+ {damageTenRounds:1000},{damageTenRounds:1000},{damageTenRounds:1000}
+]})};
+const stats={iAtk:600,iLet:600,cAtk:600,cLet:600,aAtk:600,aLet:600};
+const result=m=>dmg.evaluate(prepared,[5000,10000,50000],[],stats,dummyCombat,m);
+const plain=result(1).estimatedIndex;
+assert.equal(result(1.5).estimatedIndex/ plain,1.5);
+assert.equal(result(2).estimatedIndex/ plain,2);
+assert.equal(result(2.25).estimatedIndex/ plain,2.25);
+assert.equal(result(0.5).ready,false,'Below 1 modifier is not an eligible Lv5 scenario');
+
 const flow=fs.readFileSync(path.join(__dirname,'name-flow.js'),'utf8');
 assert(flow.includes('stack.process(sc.heroes,refSkill)'),'Scenarios must reference actual hero skills');
 assert(flow.includes('const plan=alloc.plan(model,C,combat,window.NRW_BEAR_CAPACITY)'),
