@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "kingdom": 1044,
   "timezone": "UTC",
-  "updatedAt": "2026-10-11T00:19:02Z",
+  "updatedAt": "2026-10-12T00:11:55Z",
   "events": [
     {
       "id": "golden-glaives-prep-2026-09-20",
@@ -874,7 +874,7 @@
       "end": "2026-10-18",
       "icon": "⚔️",
       "iconUrl": "https://kingshotdata.com/uploads/2025/07/alliance-brawl-event-icon.webp",
-      "confidence": "predicted",
+      "confidence": "public-timeline",
       "name": {
         "de": "Allianzgemenge",
         "en": "Alliance Brawl",
@@ -1369,7 +1369,7 @@
       "end": "2026-10-13",
       "icon": "🛡️",
       "iconUrl": "https://kingshotdata.com/uploads/2025/04/city-development-event-icon.webp",
-      "confidence": "predicted",
+      "confidence": "public-timeline",
       "name": {
         "de": "Rüstungswettbewerb · Handwerkervision",
         "en": "Armament Competition · Artisan’s Vision",
