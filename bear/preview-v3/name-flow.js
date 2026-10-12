@@ -150,12 +150,12 @@ function rosterSection(){
     const step=Number(h.stars||0)*6+Number(h.tier||0);
     meta.append(choose('Sterne / Tier',steps,step,x=>{
      const val=Number(x),v=state().v2.manualHeroes[n];v.stars=Math.floor(val/6);v.tier=val%6;
-     v.skills=Array(3).fill(Math.min(5,v.stars+1));v.skillsAssumedMax=true;v.starPendingReview=false;saveLocal();
+     v.skills=Array(3).fill(Math.min(5,v.stars+1));v.skillsAssumedMax=true;v.starPendingReview=false;saveLocal();refreshHeroRecommendations();
     }));
     const notGold=new Set(['Olive','Edwin','Forrest','Seth','Quinn','Diana','Amane','Yeonwoo','Gordon','Chenko','Fahd','Howard']);
     if(!notGold.has(n)){
      meta.append(choose('Widget',Array.from({length:11},(_,i)=>[i,'+'+i]),h.widget??0,x=>{
-      state().v2.manualHeroes[n].widget=Number(x);saveLocal();
+      state().v2.manualHeroes[n].widget=Number(x);saveLocal();refreshHeroRecommendations();
      }));
     }
     // Hero skills and widgets are resolved by the calculator's reference
@@ -230,6 +230,7 @@ function scalarSection(){
 }
 function starterGearSection(picked){
  const v=state().v2,section=el('section','bear-name-panel');
+ section.id='bearStarterGear';
  section.append(title('Heldenausrüstung nach dem Umziehen prüfen'),el('p','bear-name-muted','Ziehe zuerst deine beste Heldenausrüstung auf die drei empfohlenen Starter um. Trage DANACH ihre tatsächlichen Expeditionsboni für Angriff und Tödlichkeit ein. Nichts wird doppelt addiert.'));
  const list=el('div','bear-name-stat-grid');
  picked.forEach((n,i)=>{
@@ -246,6 +247,7 @@ function starterGearSection(picked){
 }
 function summaryHeroes(){
  const {picked,groups}=rankAndSelect(),v=state().v2,section=el('section','bear-name-panel');
+ section.id='bearHeroRecommendation';
  section.append(title('Empfohlene Starter & Joiner'),el('p','bear-name-muted',
   'Die Heldenwahl ist modellbasiert. Alle Helden sind Level 80, die Skills werden aus Sternen als maximal ausgebaut angenommen.'));
  const starter=el('div','bear-name-picks');
@@ -265,6 +267,26 @@ function summaryHeroes(){
   });section.append(title('Joiner: erster Held = relevante Fähigkeit','h3'),joined);
  }
  return {section,picked};
+}
+function refreshHeroRecommendations(){
+ if(!name||!mode)return;
+ const current=document.getElementById('bearHeroRecommendation');
+ if(!current)return;
+ // Only the recommendation panel is rebuilt. Keep the clicked star/widget
+ // selector, all expanded seasons, and the scroll position untouched.
+ const previous=Array.isArray(state().v2.ownHeroes)?state().v2.ownHeroes.slice():[];
+ const result=summaryHeroes();
+ current.replaceWith(result.section);
+ if(mode==='advanced'){
+  const gear=document.getElementById('bearStarterGear');
+  // Rebuild the equipment inputs ONLY when actual recommended starter
+  // identities change. Other input values/focus remain undisturbed.
+  if(gear&&previous.join('\u0000')!==result.picked.join('\u0000')){
+   gear.replaceWith(starterGearSection(result.picked));
+  }
+  // Any previously calculated damage result no longer reflects the edited hero.
+  document.getElementById('bearAdvancedResult')?.remove();
+ }
 }
 function predicted(){
  const out=el('section','bear-name-panel');out.append(title('Erweiterte Schadensoptimierung'));
@@ -393,5 +415,8 @@ function render(){
  if(!arr.includes(name))localStorage.setItem('nrw_bear_name_list_v1',JSON.stringify([name,...arr].slice(0,30)));
 }
 render();
-window.NRW_BEAR_NAME_FLOW={openProfile,render,pack,unpack};
+// The public reference loads asynchronously. Update a visible recommendation
+// as soon as its complete hero data is available (without a further click).
+window.NRW_BEAR_HERO_REFERENCE?.load?.().then(()=>refreshHeroRecommendations());
+window.NRW_BEAR_NAME_FLOW={openProfile,render,pack,unpack,refreshHeroRecommendations};
 })();
