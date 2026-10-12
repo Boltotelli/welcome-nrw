@@ -570,7 +570,7 @@ function predicted(){
   scores=window.NRW_BEAR_SCORE_BONUSES,
   ref=window.NRW_BEAR_HERO_REFERENCE,
   skillDamage=window.NRW_BEAR_SKILL_DAMAGE;
- if(!combat||!alloc||!scores||!skillDamage||!ref||ref.status?.()!=='ready'){
+ if(!combat||!alloc||!scores||!skillDamage||!window.NRW_BEAR_JOINER_SKILLS||!ref||ref.status?.()!=='ready'){
   out.append(el('p','bear-name-muted','Helden-Referenzdaten werden noch geladen. Bitte danach erneut berechnen.'));
   return out;
  }
@@ -600,19 +600,26 @@ function predicted(){
  const best={rows,leader:ownLevels,ratio:plan.marches[0].ratio,
   score:plan.starterScore,method:plan.ratioMethod};
  const counts=best.rows[0],lines=el('div','bear-name-score-list');
- const scenarios=[
-  {name:'Ohne Joinerfähigkeiten',atk:0,let:0},
-  {name:'2× Chenko + 2× Amane (Lv5)',atk:50,let:50},
-  {name:'4× Chenko (Lv5)',atk:0,let:100},
-  {name:'Chenko + Yeonwoo + Amane + Margot (Lv5)',atk:50,let:50}
- ];
- for(const sc of scenarios){
-  const answer=skillDamage.evaluate(prepared,counts,best.leader,current,combat,sc.atk,sc.let);
+ const stack=window.NRW_BEAR_JOINER_SKILLS;
+ const referenceMap=Object.fromEntries((C.heroes||[]).map(x=>[x.name,x]));
+ const refSkill=name=>{
+  // Skills and Lv5 values come from the same complete 37-hero reference
+  // used for starter ranking, never from our simplified scenario labels.
+  const skill=ref.get?.(name,5,0);
+  return skill?{skills:skill.skills}:null;
+ };
+ for(const sc of stack?.SCENARIOS||[]){
+  const combo=stack.process(sc.heroes,refSkill);
+  const answer=combo.ready?
+    skillDamage.evaluate(prepared,counts,best.leader,current,combat,combo.multiplier):
+    {ready:false};
   const line=el('div','bear-name-score');
-  line.append(el('strong','',sc.name),
+  const label=sc.label.replace('(Lv5)',T('(Lv5)'));
+  line.append(el('strong','',label),
    el('span','',answer.ready?num(answer.estimatedIndex)+
-    (answer.isUpperConditional?' – '+num(answer.upper):'')+' '+T('Modellindex'):
-     'Berechnung nicht verfügbar'));
+    (answer.isUpperConditional?' – '+num(answer.upper):'')+' '+T('Modellindex')+
+    ' · ×'+combo.multiplier.toFixed(2):
+    T('Berechnung nicht verfügbar')));
   lines.append(line);
  }
  out.append(el('p','bear-name-result',
