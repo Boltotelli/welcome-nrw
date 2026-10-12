@@ -42,7 +42,11 @@ for(const comparison of ['weaker','similar','stronger']){
  assert.equal(output.marches.length,7,'Starter + 6 joins');
  const rows=output.marches.map(x=>Array.from(x.troops));
  const total=rows.reduce((n,r)=>n+r.reduce((a,b)=>a+b,0),0);
- assert.equal(total,stock.reduce((a,b)=>a+b,0),'All available troops are allocated');
+ assert(total<=stock.reduce((a,b)=>a+b,0),
+  'Whole-percent projection must never invent troops');
+ assert.equal(total+output.leftover.reduce((a,b)=>a+b,0),
+  stock.reduce((a,b)=>a+b,0),
+  'Any troop amount not selectable with integer ratios must be reported as unused');
  for(const [i,row] of rows.entries()){
   assert(row.every(n=>Number.isSafeInteger(n)&&n>=0),'Negative or fractional troop quantities');
   assert(row.reduce((a,b)=>a+b,0)<=output.marches[i].capacity,'Overfilled march');
@@ -57,7 +61,8 @@ for(const comparison of ['weaker','similar','stronger']){
    'Displayed integer ratio must correspond to every exact troop quantity');
  }
  for(let k=0;k<3;k++)
-  assert.equal(rows.reduce((n,r)=>n+r[k],0),stock[k],'Do not reuse or lose troop stock');
+  assert.equal(rows.reduce((n,r)=>n+r[k],0)+output.leftover[k],stock[k],
+   'Do not reuse troops; track any leftovers from whole-percentage rounding');
  byMode[comparison]={own:output.marches[0].filled,
    joins:output.marches.slice(1).reduce((n,r)=>n+r.filled,0),
    ownArchers:rows[0][2],joinArchers:rows.slice(1).reduce((n,r)=>n+r[2],0),
@@ -74,7 +79,8 @@ const rows=f.plan(makeModel('weaker'),catalog,c,cap).marches.map(x=>x.troops);
 const tiersOrdered=c.allocateLevels(rows,allLevels,byMode.weaker.order);
 for(let type=0;type<3;type++){
  const used=tiersOrdered.reduce((n,perMarch)=>n+perMarch[type].groups.reduce((x,g)=>x+g.count,0),0);
- assert.equal(used,stock[type],'Mixed-TG assignment must consume only available stock once');
+ assert.equal(used,rows.reduce((n,r)=>n+r[type],0),
+  'Tier assignment must match projected physically selectable class totals');
 }
 const noJoin=makeModel('similar');noJoin.v2.joinCount=0;
 const one=f.plan(noJoin,catalog,c,cap);
