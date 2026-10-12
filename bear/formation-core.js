@@ -154,9 +154,117 @@ function allocate(targets,stock,starterRatio,joinRatio){
  }
  return rows;
 }
+
+function availableStock(model){
+ const v=model?.values||{},ext=model?.v2||{};
+ // Source of truth: multiple troop groups by T and TG, never use one
+ // best-T for every march.
+ const groups=Array.isArray(ext.troopGroups)?ext.troopGroups:[];
+ const stock=['troopsI','troopsC','troopsA'].map(k=>int(v[k]));
+ const keys=['infantry','cavalry','archer'];
+ if(groups.length)for(let k=0;k<3;k++){
+  const relevant=groups.filter(g=>g.type===keys[k]);
+  if(relevant.length)stock[k]=relevant.reduce((n,g)=>n+int(g.count),0);
+ }
+ return stock;
+}
+// Basic normalized class efficiencies for UNKNOWN external rally leaders.
+// Base attacks are derived from owned T/TG, not from our hero or research
+// stats, which cannot be assumed to apply to somebody else's rally.
+function typeWeights(model,combat){
+ const groups=model?.v2?.troopGroups||[],types=['infantry','cavalry','archer'];
+ return types.map((type,k)=>{
+  const own=groups.filter(g=>g.type===type&&int(g.count)>0);
+  const avg=own.length?own.reduce((sum,g)=>sum+int(g.count)*
+   (Number(combat?.troopAttack?.(type,Number(g.tier),Number(g.tg)))||0),0)/
+   own.reduce((sum,g)=>sum+int(g.count),0):0;
+  const legacy=model?.v2?.troopTiers?.[k];
+  const fallback=Number(combat?.troopAttack?.(type,Number(legacy?.tier||10),Number(legacy?.tg||0)))||[472,1416,1888][k];
+  // Ranged strike vs bear infantry: +10% to archer damage.
+  return Math.max(1,avg||fallback)*(k===2?1.1:1);
+ });
+}
+function starterWeights(model,combat,neutral,catalog){
+ const own=root.NRW_BEAR_OWN_BASELINE?.currentStats?.(model)||model?.values||{};
+ const keys=['i','c','a'];
+ if(keys.some(k=>!Number.isFinite(Number(own[k+'Atk']))||
+   !Number.isFinite(Number(own[k+'Let']))))return {weights:neutral.slice(),personal:false};
+ let modifiers=null;
+ const ref=root.NRW_BEAR_HERO_REFERENCE,eng=root.NRW_BEAR_SKILL_DAMAGE;
+ if(ref?.status?.()==='ready'&&eng?.prepare){
+  const scores=root.NRW_BEAR_SCORE_BONUSES;
+  const prepared=eng.prepare(model,ref,catalog,scores,root.NRW_BEAR_OWN_BASELINE);
+  if(prepared.ready)modifiers=prepared.modifiers;
+ }
+ const weights=neutral.map((w,k)=>{
+  const t=keys[k],attack=Number(own[t+'Atk'])+25+(modifiers?.attack||0)+
+   (modifiers?.classAttack?.[k]||0);
+  const lethality=Number(own[t+'Let'])+(modifiers?.lethality||0);
+  const damage=(modifiers?.lowDamage||1)*(modifiers?.lowClassDamage?.[k]||1);
+  return w*(1+attack/100)*(1+lethality/100)*damage;
+ });
+ return {weights,personal:true};
+}
+// Maximize the source community model sum(w_k*sqrt(troops_k)) for a
+// fixed target and limited per-class stock. KKT water filling:
+// unconstrained optimum n_k ∝ w_k². Pin classes at their stock cap
+// and redistribute the remainder among unconstrained classes.
+// This has no 10/10/80 constant and produces ratios from actual stats.
+function optimumMix(target,stock,weights){
+ const total=Math.min(int(target),stock.reduce((a,b)=>a+int(b),0));
+ const chosen=[0,0,0],free=new Set([0,1,2]);
+ let left=total;
+ while(free.size&&left>0){
+  const denominator=[...free].reduce((n,k)=>n+Math.pow(Math.max(0,weights[k]||0),2),0);
+  const candidates=[...free].map(k=>({k,target:denominator?
+    left*Math.pow(Math.max(0,weights[k]||0),2)/denominator:left/free.size}));
+  const capped=candidates.filter(x=>x.target>stock[x.k]+1e-8);
+  if(!capped.length)break;
+  for(const x of capped){chosen[x.k]=stock[x.k];left-=chosen[x.k];free.delete(x.k);}
+ }
+ if(left>0&&free.size){
+  const sums=[...free].reduce((n,k)=>n+Math.pow(Math.max(0,weights[k]||0),2),0);
+  const shares=[...free].map(k=>({k,amount:left*(sums?
+   Math.pow(Math.max(0,weights[k]||0),2)/sums:1/free.size)}));
+  for(const x of shares)chosen[x.k]=Math.floor(x.amount);
+  let still=total-chosen.reduce((a,b)=>a+b,0);
+  shares.sort((a,b)=>(b.amount-Math.floor(b.amount))-
+   (a.amount-Math.floor(a.amount))||a.k-b.k);
+  for(const x of shares){if(!still)break;if(chosen[x.k]<stock[x.k]){chosen[x.k]++;still--;}}
+ }
+ // Strict stock bounds and exact sum (within 1 integer).
+ if(chosen.some((x,k)=>x<0||x>stock[k])||chosen.reduce((a,b)=>a+b,0)!==total)
+  throw Error('Waterfill stock conservation');
+ return chosen;
+}
+// Split a class mixture over joins without leaving capacity overhang.
+// Every march receives a fair share, with class mix changing only for
+// the unavoidable one-troop rounding.
+function distributeMix(targets,mix){
+ const rows=targets.map(()=>[0,0,0]);
+ for(const k of [2,1,0]){
+  const room=rows.map((row,i)=>targets[i]-row.reduce((a,b)=>a+b,0));
+  const allot=splitShares(mix[k],room);
+  for(let i=0;i<rows.length;i++)rows[i][k]+=allot[i];
+ }
+ return rows;
+}
+function optimizeCombined(targets,stock,joinWeights,ownWeights){
+ if(!targets.length)return [];
+ const joined=targets.slice(1),joinNeed=joined.reduce((n,x)=>n+x,0);
+ const joinMix=optimumMix(joinNeed,stock,joinWeights);
+ const joins=distributeMix(joined,joinMix);
+ const left=stock.map((n,k)=>n-joinMix[k]);
+ const starter=optimumMix(targets[0],left,ownWeights);
+ const rows=[starter,...joins];
+ const used=stock.map((_,k)=>rows.reduce((n,r)=>n+r[k],0));
+ if(used.some((n,k)=>n>stock[k])||rows.some((r,i)=>
+  r.reduce((n,x)=>n+x,0)>targets[i]))throw Error('Unsafe optimized stock/capacity');
+ return rows;
+}
 function plan(model,catalog,combat,capacityCore){
  const v=model?.values||{},cap=capacityCore?.breakdown(model,catalog);
- const stock=[int(v.troopsI),int(v.troopsC),int(v.troopsA)];
+ const stock=availableStock(model);
  const selected=chooseHeroes(model,catalog);
  const missing=[];
  if(!cap?.hasBase||!cap.complete)missing.push('capacity');
@@ -185,11 +293,13 @@ function plan(model,catalog,combat,capacityCore){
  const availableTotal=stock.reduce((a,b)=>a+b,0),demand=caps.reduce((a,b)=>a+b,0);
  const total=Math.min(availableTotal,demand);
  if(total===0)return {ready:false,missing:['capacity'],stock,marches,selected};
- // Equal capacity allocation, then put scarce Archers into Joins first.
- // The default 10/10/80 is a community baseline, not a mathematically
- // proven universal optimum for an unknown external rally leader.
+ // Optimize the source √troops model: simultaneous stock and capacity,
+ // join priority, unknown-rally-leader-neutral troop class efficiencies.
+ // Own starter uses personal class stats and sourced hero effects when entered.
  const targets=splitShares(total,caps);
- const actual=allocate(targets,stock,[10,10],[10,10]);
+ const neutral=typeWeights(model,combat);
+ const starter=starterWeights(model,combat,neutral,catalog);
+ const actual=optimizeCombined(targets,stock,neutral,starter.weights);
  const engineReady=Boolean(combat?.ready&&combat?.configure&&combat?.damage);
  const tiers=engineReady?combat.configure(model.v2):null;
  const useDamage=engineReady&&combat.ready(v,tiers);
@@ -204,10 +314,11 @@ function plan(model,catalog,combat,capacityCore){
  return {ready:true,stock,used,leftover,targets,total,availableTotal,demand,
   marches:marches.map((m,i)=>({...m,troops:actual[i],ratio:ratios[i],filled:actual[i].reduce((a,b)=>a+b,0),
    shortage:Math.max(0,m.capacity-actual[i].reduce((a,b)=>a+b,0))})),
-  starterScore:full,scoreType:'join-priority-10-10-80',
+  starterScore:full,scoreType:'inventory-constrained-expected-damage',
+  ratioMethod:starter.personal?'starter-personal-and-join-neutral':'neutral-hero-independent',
   allHeroLevelsKnown:marches.every(m=>m.capacityKnown),
   allHeroesAssigned:marches.every(m=>m.missingHeroSlots===0),
   joinCount:selected.joins.length,selected};
 }
-root.NRW_BEAR_FORMATION={plan,chooseHeroes,JOIN_PRIORITIES,allocateStock:allocate,integerPercentages};
+root.NRW_BEAR_FORMATION={plan,chooseHeroes,JOIN_PRIORITIES,allocateStock:allocate,integerPercentages,availableStock,typeWeights,starterWeights,optimumMix,optimizeCombined};
 })(window);
