@@ -36,6 +36,84 @@ function choose(label,values,value,onChange){
  for(const [id,title] of values){const o=el('option','',title);o.value=String(id);s.append(o)}s.value=String(value??'');
  s.addEventListener('change',()=>onChange(s.value));w.append(caption,s);return w;
 }
+// Kingshot uses five flowers with SIX progress petals each (0..30).
+// Touch a flower to set complete stars, use +/- for one petal / T step.
+let bearFlowerSequence=0;
+function starProgressField(heroName){
+ const ns='http://www.w3.org/2000/svg',wrap=el('div','bear-name-star-field');
+ const row=el('div','bear-name-star-controls');
+ const minus=button('−',()=>changeStep(currentStep-1),'bear-name-star-step');
+ const plus=button('+',()=>changeStep(currentStep+1),'bear-name-star-step');
+ const flowers=el('div','bear-name-star-flowers');
+ flowers.setAttribute('role','group');
+ flowers.setAttribute('aria-label','Sternstufe von '+heroName);
+ const live=el('span','bear-name-sr-only');live.setAttribute('aria-live','polite');
+ const nodes=[];
+ const svgNode=(tag,attrs)=>{
+  const node=document.createElementNS(ns,tag);
+  for(const [key,value] of Object.entries(attrs||{}))node.setAttribute(key,String(value));
+  return node;
+ };
+ const point=(radius,deg)=>{
+  const rad=deg*Math.PI/180;
+  return [(12+Math.cos(rad)*radius).toFixed(2),(12+Math.sin(rad)*radius).toFixed(2)].join(',');
+ };
+ const initial=state().v2.manualHeroes[heroName]||{};
+ let currentStep=Math.max(0,Math.min(30,Math.floor(Number(initial.stars||0))*6+Math.floor(Number(initial.tier||0))));
+ for(let i=0;i<5;i++){
+  const flower=button('',()=>changeStep((i+1)*6),'bear-name-flower');
+  flower.setAttribute('aria-label',(i+1)+' Sterne einstellen');
+  const svg=svgNode('svg',{viewBox:'0 0 24 24','aria-hidden':'true',focusable:'false'});
+  const id='nrw-bear-flower-'+(++bearFlowerSequence),defs=svgNode('defs');
+  const gradient=svgNode('linearGradient',{id,x1:'0%',y1:'0%',x2:'80%',y2:'100%'});
+  for(const [offset,color] of [['0%','#fff9d8'],['32%','#ffeaa0'],['70%','#f6c466'],['100%','#ba7c29']]){
+   const stop=svgNode('stop',{offset,'stop-color':color});gradient.append(stop);
+  }
+  defs.append(gradient);svg.append(defs);
+  const petals=[];
+  for(let petal=0;petal<6;petal++){
+   const angle=-90+petal*60;
+   const coords=[point(2.4,angle),point(7.0,angle-17),point(11.2,angle),point(7.0,angle+17)].join(' ');
+   const polygon=svgNode('polygon',{points:coords,'stroke-width':'.45','stroke-linejoin':'round'});
+   svg.append(polygon);petals.push(polygon);
+  }
+  const center=svgNode('circle',{cx:12,cy:12,r:2.5,'stroke-width':'.3'});
+  svg.append(center);flower.append(svg);flowers.append(flower);
+  nodes.push({flower,petals,center,gold:'url(#'+id+')'});
+ }
+ function repaint(){
+  minus.disabled=currentStep<=0;plus.disabled=currentStep>=30;
+  const stars=Math.floor(currentStep/6),tier=currentStep%6;
+  const description=stars+' Sterne'+(tier?' · T'+tier:'')+' von 5';
+  wrap.title=description;live.textContent=description;
+  for(let i=0;i<nodes.length;i++){
+   const item=nodes[i],lit=Math.max(0,Math.min(6,currentStep-i*6));
+   for(let p=0;p<6;p++){
+    const active=p<lit,shape=item.petals[p];
+    shape.setAttribute('fill',active?item.gold:'#2e394c');
+    shape.setAttribute('stroke',active?'#a97230':'#202a3b');
+   }
+   item.center.setAttribute('fill',lit? '#ffdf92':'#263245');
+   item.center.setAttribute('stroke',lit? '#a97230':'#202a3b');
+   item.flower.classList.toggle('is-lit',lit>0);
+   item.flower.setAttribute('aria-pressed',lit===6?'true':'false');
+   item.flower.title=(i+1)+' Sterne wählen';
+  }
+ }
+ function changeStep(next){
+  const step=Math.max(0,Math.min(30,Math.trunc(Number(next))));
+  if(!Number.isFinite(step)||step===currentStep)return;
+  currentStep=step;
+  const hero=state().v2.manualHeroes[heroName];
+  if(!hero)return;
+  hero.stars=Math.floor(step/6);hero.tier=step%6;
+  hero.skills=Array(3).fill(Math.min(5,hero.stars+1));
+  hero.skillsAssumedMax=true;hero.starPendingReview=false;
+  repaint();saveLocal();refreshHeroRecommendations();
+ }
+ row.append(minus,flowers,plus);wrap.append(row,live);
+ repaint();return wrap;
+}
 function heroStock(){const v=state().v2;return v.scannedOwnedHeroes.filter(n=>heroNames.has(n)&&v.manualHeroes[n]);}
 function rankAndSelect(){
  const m=state(),v=m.v2,owned=heroStock().map(n=>v.manualHeroes[n]);
@@ -146,12 +224,7 @@ function rosterSection(){
    const text=el('span','',n);tap.append(img,text);card.append(tap);
    if(owned){
     const meta=el('div','bear-name-hero-fields');
-    const steps=[];for(let i=0;i<=30;i++)steps.push([i,Math.floor(i/6)+'★'+(i%6?' T'+i%6:'')]);
-    const step=Number(h.stars||0)*6+Number(h.tier||0);
-    meta.append(choose('Sterne / Tier',steps,step,x=>{
-     const val=Number(x),v=state().v2.manualHeroes[n];v.stars=Math.floor(val/6);v.tier=val%6;
-     v.skills=Array(3).fill(Math.min(5,v.stars+1));v.skillsAssumedMax=true;v.starPendingReview=false;saveLocal();refreshHeroRecommendations();
-    }));
+    meta.append(starProgressField(n));
     const notGold=new Set(['Olive','Edwin','Forrest','Seth','Quinn','Diana','Amane','Yeonwoo','Gordon','Chenko','Fahd','Howard']);
     if(!notGold.has(n)){
      meta.append(choose('Widget',Array.from({length:11},(_,i)=>[i,'+'+i]),h.widget??0,x=>{
