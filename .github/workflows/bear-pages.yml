@@ -213,6 +213,8 @@ jobs:
           find v3-latest/bear -maxdepth 1 -type f -exec cp '{}' _site/bear/ \;
           cp v3-latest/bear/preview-v3/* _site/bear/preview-v3/
           cp v3-latest/bear/assets/kingshot_formations_loading.webm _site/bear/assets/
+          cp v3-latest/bear/assets/pet-valora-sprite.webp _site/bear/assets/
+          test -s _site/bear/assets/pet-valora-sprite.webp
           # Two real loading videos: provided hero-selection WebM and
           # a short original cloud clip generated for damage calculation.
           command -v ffmpeg
@@ -229,9 +231,13 @@ jobs:
           grep -Fq 'preview-v3/hero-advisor.js' _site/bear/preview-v3.html
           grep -Fq 'preview-v3/skill-effects.js' _site/bear/preview-v3.html
           grep -Fq 'preview-v3/damage-skills.js' _site/bear/preview-v3.html
+          node --check _site/bear/preview-v3/i18n.js
           node --check _site/bear/preview-v3/name-flow.js
+          grep -Fq 'Empfohlene Starter' _site/bear/preview-v3/name-flow.js
           grep -Fq 'function formationCards()' _site/bear/preview-v3/name-flow.js
           grep -Fq 'Schadenswert berechnen' _site/bear/preview-v3/name-flow.js
+          grep -Fq 'bear-name-game-icon' _site/bear/preview-v3/name-flow.js
+          grep -Fq 'bear-name-languages' _site/bear/preview-v3/name-flow.js
           grep -Fq 'Formationen berechnen' _site/bear/preview-v3/name-flow.js
           grep -Fq 'kingshot_cloud_damage_loading.webm' _site/bear/preview-v3/name-flow.js
           grep -Fq '.bear-name-formations-grid' _site/bear/preview-v3/name-flow.css
