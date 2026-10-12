@@ -273,7 +273,7 @@ jobs:
           grep -Fq "section.id='bearHeroRecommendation'" _site/bear/preview-v3/name-flow.js
           node _site/bear/preview-v3/test-optimize-troops.cjs
           grep -Fq 'formation-core.js?v=20261012-16' _site/bear/preview-v3.html
-          grep -Fq 'name-flow.js?v=20261012-16' _site/bear/preview-v3.html
+          grep -Fq 'name-flow.js?v=20261012-17' _site/bear/preview-v3.html
           node --check _site/bear/preview-v3/formation-core.js
           node --check _site/bear/preview-v3/combat.js
           test -s _site/bear/preview-v3.html
