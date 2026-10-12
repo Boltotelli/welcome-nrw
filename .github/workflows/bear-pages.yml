@@ -211,6 +211,11 @@ jobs:
           cp _site/hero-reference.json _site/bear/hero-reference.json
           node --check _site/bear/preview-v3/name-flow.js
           grep -Fq 'saveLocal();refreshHeroRecommendations()' _site/bear/preview-v3/name-flow.js
+          # Hero stars: five clickable six-petal flowers, +/- and live result.
+          grep -Fq 'function starProgressField(heroName)' _site/bear/preview-v3/name-flow.js
+          grep -Fq "meta.append(starProgressField(n))" _site/bear/preview-v3/name-flow.js
+          grep -Fq '.bear-name-star-controls' _site/bear/preview-v3/name-flow.css
+          ! grep -Fq "choose('Sterne / Tier'" _site/bear/preview-v3/name-flow.js
           grep -Fq "section.id='bearHeroRecommendation'" _site/bear/preview-v3/name-flow.js
           node --check _site/bear/preview-v3/formation-core.js
           node --check _site/bear/preview-v3/combat.js
