@@ -55,7 +55,7 @@ function pack(){
  return {heroes,ownHeroes:v.ownHeroes||[],joinCount:v.joinCount||0,
   troopGroups:v.troopGroups||[],values:m.values||{},combatStatOrigin:v.combatStatOrigin||'combined-report',
   valoraTalent:v.valoraTalent||0,savageAdvantage:v.valora?.[3]||0,
-  petActive:v.petActive||{},petSkillRanks:v.petSkillRanks||{}};
+  petActive:v.petActive||{},petSkillRanks:v.petSkillRanks||{},petBuffCapturedInStats:!!v.petBuffCapturedInStats};
 }
 function unpack(d){
  const m=state(),v=m.v2;v.manualHeroes={};v.scannedOwnedHeroes=[];
@@ -69,7 +69,7 @@ function unpack(d){
  v.joinCount=Math.max(0,Math.min(6,Number(d.joinCount)||0));
  v.troopGroups=d.troopGroups||[];v.troopTiers=[{tier:10,tg:0},{tier:10,tg:0},{tier:10,tg:0}];
  v.valora=[0,0,0,Number(d.savageAdvantage)||0];v.valoraTalent=Number(d.valoraTalent)||0;
- v.petActive=d.petActive||{};v.petSkillRanks=d.petSkillRanks||{};
+ v.petActive=d.petActive||{};v.petSkillRanks=d.petSkillRanks||{};v.petBuffCapturedInStats=!!d.petBuffCapturedInStats;
  v.combatStatOrigin=d.combatStatOrigin||'combined-report';
  Object.assign(m.values,d.values||{});
  for(const [i,type] of CL.entries())m.values[['troopsI','troopsC','troopsA'][i]]=v.troopGroups.filter(g=>g.type===type).reduce((n,g)=>n+Number(g.count),0);
@@ -115,7 +115,7 @@ function rosterSection(){
   const caption=el('summary','',season===1?'Generation 1 · Basishelden':'Generation '+season);details.append(caption);
   const grid=el('div','bear-name-hero-grid');
   for(const hero of heroes){
-   const n=hero.name,owned=selected.includes(n),h=state().v2.manualHeroes[n]||{name:n,level:80,stars:4,tier:0,widget:0};
+   const n=hero.name,owned=selected.includes(n),h=state().v2.manualHeroes[n]||{name:n,level:80,stars:0,tier:0,widget:0,starPendingReview:true};
    const card=el('div','bear-name-hero-card'+(owned?' active':'')),tap=button('',()=>{
     const v=state().v2;
     if(v.scannedOwnedHeroes.includes(n))v.scannedOwnedHeroes=v.scannedOwnedHeroes.filter(x=>x!==n);
@@ -130,10 +130,10 @@ function rosterSection(){
     const step=Number(h.stars||0)*6+Number(h.tier||0);
     meta.append(choose('Sterne / Tier',steps,step,x=>{
      const val=Number(x),v=state().v2.manualHeroes[n];v.stars=Math.floor(val/6);v.tier=val%6;
-     v.skills=Array(3).fill(Math.min(5,v.stars+1));v.skillsAssumedMax=true;saveLocal();
+     v.skills=Array(3).fill(Math.min(5,v.stars+1));v.skillsAssumedMax=true;v.starPendingReview=false;saveLocal();
     }));
-    const rareType=C.heroRarities?.[n]||C.heroRarity?.[n];
-    if(rareType!=='rare'&&rareType!=='epic'){
+    const notGold=new Set(['Olive','Edwin','Forrest','Seth','Quinn','Diana','Amane','Yeonwoo','Gordon','Chenko','Fahd','Howard']);
+    if(!notGold.has(n)){
      meta.append(choose('Widget',Array.from({length:11},(_,i)=>[i,'+'+i]),h.widget??0,x=>{
       state().v2.manualHeroes[n].widget=Number(x);saveLocal();
      }));
@@ -274,12 +274,14 @@ function predicted(){
  }
  const totalSlots=Math.min(7,1+Number(v.joinCount||0));const capacity=cap.total;
  if(!capacity){out.append(el('p','bear-name-muted','Keine gültige Marschkapazität.'));return out;}
- const targets=Array(totalSlots).fill(Math.floor(Math.min(stock.reduce((a,b)=>a+b,0),totalSlots*capacity)/totalSlots));
+ const shareTotal=Math.min(stock.reduce((a,b)=>a+b,0),totalSlots*capacity);
+ const targetBase=Math.floor(shareTotal/totalSlots),extra=shareTotal-targetBase*totalSlots;
+ const targets=Array.from({length:totalSlots},(_,i)=>targetBase+(i<extra?1:0));
  // All joins use 10/10/80, Archers are reserved for them before the starter.
  let best=null;
  for(let inf=0;inf<=100;inf++)for(let cav=0;cav<=100-inf;cav++){
   const rows=alloc.allocateStock(targets,stock,[inf,cav],[10,10]);
-  const perMarch=combat.allocateLevels?.(rows,tiers);
+  const perMarch=combat.allocateLevels?.(rows,tiers,true);
   const leader=perMarch?.[0]||tiers;
   const score=combat.damage(rows[0],current,leader,5);
   if(Number.isFinite(score)&&(best===null||score>best.score+0.000001||
