@@ -197,7 +197,8 @@ function joinerBaseline(model,catalog){
  const number=Number(raw);
  const generation=Number.isInteger(number)&&number>=1&&number<=8?number:4;
  const proportions=GENERATION_BASELINES[generation]||[1,10,89];
- return {generation,proportions,
+ return {generation,generationLabel:Number.isInteger(number)&&number>=1&&number<=8?
+  String(number):'4+',proportions,
   source:'Gen4+ community Bear joiner baseline for kingdom 1044; rally-leader unknown'};
 }
 function plan(model,catalog,combat,capacityCore){
