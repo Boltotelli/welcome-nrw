@@ -201,6 +201,125 @@ function joinerBaseline(model,catalog){
   String(number):'4+',proportions,
   source:'Gen4+ community Bear joiner baseline for kingdom 1044; rally-leader unknown'};
 }
+/* Relative total-damage allocation. No real leader stats are known.
+ * Approximate each march's damage as sum(classWeight * sqrt(classTroops *
+ * min(allTroops,5000))).  Class weights are calibrated to the community
+ * reference ratios (Gen4+ ~1/10/89, 5k infantry minimum on large marches).
+ * We compare MARGINAL increases between own starter and all joins,
+ * consuming actual troop stock once. Foreign strength is a user-selected
+ * scenario (weaker/similar/stronger), not a measured player stat.
+ * No claim of official optimal Kingshot damage.
+ */
+const LEADER_SCENARIOS=Object.freeze({
+ weaker:{foreign:0.70,meaning:'Other rally leaders usually weaker'},
+ similar:{foreign:1.00,meaning:'Other rally leaders approximately equal'},
+ stronger:{foreign:1.40,meaning:'Other rally leaders usually stronger'}
+});
+function scenario(model){
+ const selected=model?.v2?.joinLeaderComparison;
+ const key=Object.hasOwn(LEADER_SCENARIOS,selected)?selected:'similar';
+ return {key,...LEADER_SCENARIOS[key],assumed:true};
+}
+function scoreFor(row,weights){
+ const total=row[0]+row[1]+row[2];
+ if(!total)return 0;
+ const army=Math.sqrt(Math.min(total,5000));
+ return army*row.reduce((sum,n,k)=>sum+weights[k]*Math.sqrt(n),0);
+}
+function estimateClassQuality(model,combat,stock){
+ const cfg=combat?.configure?.(model?.v2),keys=['infantry','cavalry','archer'],
+  base=[472,1416,1888],quality=[1,1,1];
+ for(let k=0;k<3;k++){
+  if(stock[k]<=0)continue;
+  const lvl=cfg?.[k];
+  let atk=null;
+  if(Array.isArray(lvl?.groups)&&lvl.groups.length){
+   const n=lvl.groups.reduce((sum,g)=>sum+Number(g.count||0),0);
+   atk=n?lvl.groups.reduce((sum,g)=>sum+Number(g.count||0)*
+    (Number(combat.troopAttack(keys[k],g.tier,g.tg))||0),0)/n:null;
+  }else if(lvl?.tier&&combat?.troopAttack)
+   atk=combat.troopAttack(keys[k],lvl.tier,lvl.tg);
+  if(Number.isFinite(atk)&&atk>0)quality[k]=atk/base[k];
+ }
+ // Preserve differences between classes due to T/TG without treating
+ // modern troop power as extra free damage vs foreign leaders.
+ const mean=quality.reduce((a,b)=>a+b,0)/3||1;
+ return quality.map(n=>n/mean);
+}
+function ownHeroModifiers(model,catalog){
+ const ref=root.NRW_BEAR_HERO_REFERENCE,dmg=root.NRW_BEAR_SKILL_DAMAGE;
+ if(ref?.status?.()!=='ready'||!dmg?.prepare)return [1,1,1];
+ const prepared=dmg.prepare(model,ref,catalog,root.NRW_BEAR_SCORE_BONUSES,
+  root.NRW_BEAR_OWN_BASELINE);
+ if(!prepared?.ready)return [1,1,1];
+ const m=prepared.modifiers;
+ // Buffs are lower-bound only: disputed enemy debuff uptime is excluded.
+ const base=(1+(m.attack||0)/100)*(1+(m.lethality||0)/100)*(m.lowDamage||1);
+ return [0,1,2].map(k=>Math.max(0.01,base*
+  (1+(m.classAttack?.[k]||0)/100)*(m.lowClassDamage?.[k]||1)));
+}
+function relativeTypeStats(model){
+ const stats=root.NRW_BEAR_OWN_BASELINE?.currentStats?.(model)||model?.values||{};
+ const keys=['i','c','a'];
+ if(keys.some(k=>!Number.isFinite(Number(stats[k+'Atk']))||
+  !Number.isFinite(Number(stats[k+'Let']))))return [1,1,1];
+ const powers=keys.map(k=>(1+Math.max(0,Number(stats[k+'Atk']))/100)*
+  (1+Math.max(0,Number(stats[k+'Let']))/100));
+ const mean=powers.reduce((a,b)=>a+b,0)/3||1;
+ // We don't know foreigners' absolute stats. Only class distribution is
+ // informative; the *relative* overall strength comes from the dropdown.
+ return powers.map(p=>p/mean);
+}
+function expectedWeights(targets,model,catalog,combat,stock){
+ const baseline=joinerBaseline(model,catalog),relative=scenario(model);
+ const quality=estimateClassQuality(model,combat,stock);
+ const personal=relativeTypeStats(model),hero=ownHeroModifiers(model,catalog);
+ const weights=targets.map((target,i)=>{
+  const [inf,cav]=ratioForTarget(target,baseline.proportions);
+  const pct=[inf,cav,Math.max(0,100-inf-cav)];
+  return pct.map((percent,k)=>Math.sqrt(Math.max(.01,percent)/100)*quality[k]*
+   (i===0?personal[k]*hero[k]:relative.foreign));
+ });
+ return {weights,baseline,relative};
+}
+function allocateByMarginal(targets,stock,weights){
+ const rows=targets.map(()=>[0,0,0]),remaining=stock.map(int);
+ let left=Math.min(targets.reduce((n,x)=>n+int(x),0),
+  remaining.reduce((n,x)=>n+x,0));
+ // Coarse-to-fine marginal allocation is O(21 * allocated/512), and
+ // always respects one global inventory and per-march capacity.
+ // Test all candidate increments with the exact same concave scoring
+ // formula. A stronger own rally naturally wins more marginal stock.
+ let passes=0;
+ while(left>0){
+  let best=-Infinity,winner=null;
+  for(let i=0;i<targets.length;i++){
+   const room=targets[i]-rows[i][0]-rows[i][1]-rows[i][2];
+   if(room<=0)continue;
+   const start=scoreFor(rows[i],weights[i]);
+   for(let k=0;k<3;k++){
+    if(remaining[k]===0)continue;
+    const add=Math.min(512,room,remaining[k],left);
+    if(add<=0)continue;
+    rows[i][k]+=add;
+    const gain=(scoreFor(rows[i],weights[i])-start)/add;
+    rows[i][k]-=add;
+    if(gain>best+1e-12){
+     best=gain;winner={i,k,add};
+    }
+   }
+  }
+  if(!winner)break;
+  rows[winner.i][winner.k]+=winner.add;
+  remaining[winner.k]-=winner.add;
+  left-=winner.add;
+  if(++passes>180000)throw Error('Bear optimizer exceeded iteration budget');
+ }
+ if(left>0||remaining.some(n=>n<0)||rows.some((r,i)=>
+  r.reduce((a,b)=>a+b,0)>targets[i]))throw Error('Unsafe expected-damage allocation');
+ return {rows,remaining,modeledTotal:rows.reduce((sum,row,i)=>
+  sum+scoreFor(row,weights[i]),0)};
+}
 function plan(model,catalog,combat,capacityCore){
  const v=model?.values||{},cap=capacityCore?.breakdown(model,catalog);
  const stock=availableStock(model);
@@ -237,9 +356,11 @@ function plan(model,catalog,combat,capacityCore){
  // √troop weights. Scarce archers go to JOIN marches first. Each
  // unit is assigned exactly once and not beyond a march's capacity.
  const targets=splitShares(total,caps);
- const baseline=joinerBaseline(model,catalog);
- const perMarch=targets.map(target=>ratioForTarget(target,baseline.proportions));
- const actual=allocate(targets,stock,perMarch[0],perMarch.slice(1));
+ const expected=expectedWeights(targets,model,catalog,combat,stock);
+ const distribution=allocateByMarginal(targets,stock,expected.weights);
+ const actual=distribution.rows;
+ const baseline=expected.baseline;
+ const leaderStrength=expected.relative;
  const engineReady=Boolean(combat?.ready&&combat?.configure&&combat?.damage);
  const tiers=engineReady?combat.configure(model.v2):null;
  const useDamage=engineReady&&combat.ready(v,tiers);
@@ -249,16 +370,20 @@ function plan(model,catalog,combat,capacityCore){
  if(leftover.some(x=>x<0)||actual.some((row,i)=>row.reduce((a,b)=>a+b,0)>caps[i]))
   throw Error('Unsafe formation: inventory or capacity exceeded');
  const ratios=actual.map(integerPercentages);
- const ownedLevels=useDamage?combat.allocateLevels?.(actual,tiers,true)?.[0]||tiers:null;
+ const tierPriority=leaderStrength.key==='weaker'?
+  [0,...Array.from({length:actual.length-1},(_,i)=>i+1)]:
+  [...Array.from({length:actual.length-1},(_,i)=>i+1),0];
+ const ownedLevels=useDamage?combat.allocateLevels?.(actual,tiers,tierPriority)?.[0]||tiers:null;
  const full=useDamage?combat.damage(actual[0],ownStats,ownedLevels,5):null;
  return {ready:true,stock,used,leftover,targets,total,availableTotal,demand,
   marches:marches.map((m,i)=>({...m,troops:actual[i],ratio:ratios[i],filled:actual[i].reduce((a,b)=>a+b,0),
    shortage:Math.max(0,m.capacity-actual[i].reduce((a,b)=>a+b,0))})),
   starterScore:full,scoreType:'community-joiner-bear-baseline',
-  ratioMethod:'generation-based-average-joiner',joinerBaseline:baseline,
+  ratioMethod:'marginal-expected-damage',joinerBaseline:baseline,
+  leaderStrength,tierPriority,modeledTotal:distribution.modeledTotal,
   allHeroLevelsKnown:marches.every(m=>m.capacityKnown),
   allHeroesAssigned:marches.every(m=>m.missingHeroSlots===0),
   joinCount:selected.joins.length,selected};
 }
-root.NRW_BEAR_FORMATION={plan,chooseHeroes,JOIN_PRIORITIES,allocateStock:allocate,integerPercentages,availableStock,joinerBaseline,ratioForTarget};
+root.NRW_BEAR_FORMATION={plan,chooseHeroes,JOIN_PRIORITIES,allocateStock:allocate,integerPercentages,availableStock,joinerBaseline,ratioForTarget,scenario,scoreFor,expectedWeights,allocateByMarginal};
 })(window);
