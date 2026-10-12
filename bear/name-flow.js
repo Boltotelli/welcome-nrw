@@ -486,6 +486,9 @@ function formationCards(){
  }else{
   section.append(el('p','bear-name-muted',
    'Formationen nach erwartetem Zusatzschaden verteilt. Die Stärke fremder Rallyleader ist eine Schätzung.'));
+  const unused=(plan.leftover||[]).reduce((n,v)=>n+v,0);
+  if(unused>0)section.append(el('p','bear-name-muted',
+   num(unused)+' '+T('Truppen bleiben wegen der ganzzahligen Prozentvorgabe unverteilt.')));
  }
  return section;
 }
