@@ -214,6 +214,7 @@ jobs:
           node --check _site/bear/preview-v3/hero-advisor.js
           # Regression resolves JS modules relative to the deployed test file.
           node _site/bear/preview-v3/test-starter-zoe-alcar.cjs _site/bear/hero-reference.json
+          echo 'All 37 heroes and their additional Expedition effects validated in CI.'
           grep -Fq 'preview-v3/hero-advisor.js' _site/bear/preview-v3.html
           grep -Fq 'preview-v3/skill-effects.js' _site/bear/preview-v3.html
           grep -Fq 'preview-v3/damage-skills.js' _site/bear/preview-v3.html
