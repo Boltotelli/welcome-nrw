@@ -486,8 +486,6 @@ function formationCards(){
  }else{
   section.append(el('p','bear-name-muted',
    'Formationen nach erwartetem Zusatzschaden verteilt. Die Stärke fremder Rallyleader ist eine Schätzung.'));
-  if(plan.infantryShortage)section.append(el('p','bear-name-warning',
-   'Nicht genug Infanterie für den Mindestanteil aller Märsche. Es wurde nur der tatsächliche Bestand verteilt.'));
  }
  return section;
 }
