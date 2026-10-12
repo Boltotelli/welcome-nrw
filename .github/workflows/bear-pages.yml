@@ -232,6 +232,12 @@ jobs:
           grep -Fq 'preview-v3/skill-effects.js' _site/bear/preview-v3.html
           grep -Fq 'preview-v3/damage-skills.js' _site/bear/preview-v3.html
           node --check _site/bear/preview-v3/i18n.js
+          # The initial screen must show ONLY starter portraits; joiner
+          # lineup cards belong to the separate Calculate Formations result.
+          ! grep -Fq 'Joiner: erster Held = relevante Fähigkeit' _site/bear/preview-v3/name-flow.js
+          grep -Fq "Empfohlene Starter" _site/bear/preview-v3/name-flow.js
+          grep -Fq "bear-name-languages" _site/bear/preview-v3/name-flow.js
+          grep -Fq "nrw_page_lang" _site/bear/preview-v3/i18n.js
           node --check _site/bear/preview-v3/name-flow.js
           grep -Fq 'Empfohlene Starter' _site/bear/preview-v3/name-flow.js
           grep -Fq 'function formationCards()' _site/bear/preview-v3/name-flow.js
