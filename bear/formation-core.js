@@ -99,17 +99,16 @@ function splitShares(total,caps){
 function integerPercentages(row){
  const total=row.reduce((a,b)=>a+b,0);
  if(!total)return [0,0,0];
- const values=row.map(n=>100*n/total);
- // Never show "0%" for a physically positive infantry squad. We retain
- // whole percentages normally and use tenths only for sub-1% quantities.
- const scale=values.some((v,i)=>row[i]>0&&v<1)?10:1;
- const target=100*scale,result=values.map(v=>Math.floor(v*scale));
- let diff=target-result.reduce((a,b)=>a+b,0);
- for(const i of [0,1,2].sort((a,b)=>
-   (values[b]*scale-result[b])-(values[a]*scale-result[a])||a-b)){
-  if(diff<=0)break;result[i]++;diff--;
+ // Kingshot's formation selector accepts integer percentages only.
+ const exact=row.map(n=>100*n/total);
+ const rounded=exact.map(Math.floor);
+ let remaining=100-rounded.reduce((a,b)=>a+b,0);
+ for(const k of [0,1,2].sort((a,b)=>
+   (exact[b]-rounded[b])-(exact[a]-rounded[a])||a-b)){
+  if(!remaining)break;
+  rounded[k]++;remaining--;
  }
- return result.map(v=>v/scale);
+ return rounded;
 }
 function composition(target,inf,cav){
  if(!target)return [0,0,0];
@@ -327,6 +326,100 @@ function allocateByMarginal(targets,stock,weights){
  return {rows,remaining,modeledTotal:rows.reduce((sum,row,i)=>
   sum+scoreFor(row,weights[i]),0)};
 }
+// Project unconstrained theoretical troop splits onto REAL game inputs:
+// whole percentages (1% increments), integer unit counts, one shared stock.
+// Count prediction uses exactly the same composition() as the displayed
+// percentage. Rounding may leave a few troops unused instead of claiming
+// impossible ratios or overlapping inventory.
+function playableProjection(desired,stock,capacities,weights){
+ const size=desired.map((row,i)=>Math.min(int(capacities[i]),row.reduce((n,v)=>n+v,0)));
+ const percents=desired.map((row,i)=>{
+  const p=integerPercentages(row);
+  if(!size[i])return p;
+  // 0.45% Infantry with 858 units is NOT a selectable 0.45% input.
+  // Use a 1% step when a troop type was positively selected, or
+  // allow a real 0% with zero units when inventory is insufficient.
+  for(let k=0;k<3;k++)if(row[k]>0&&p[k]===0){
+   const donors=[0,1,2].filter(j=>j!==k&&p[j]>1)
+    .sort((a,b)=>p[b]-p[a]||a-b);
+   if(donors.length){p[donors[0]]--;p[k]++;}
+  }
+  return p;
+ });
+ const make=(i,n=size[i],p=percents[i])=>composition(n,p[0],p[1]);
+ let rows=size.map((_,i)=>make(i));
+ const expenditure=()=>stock.map((_,k)=>rows.reduce((n,r)=>n+r[k],0));
+ let used=expenditure();
+ const shortage=arr=>arr.reduce((n,v,k)=>n+Math.max(0,v-stock[k]),0);
+ let currentShort=shortage(used);
+ let turns=0;
+ while(currentShort){
+  if(++turns>2500)throw Error('Unresolvable integer Bear proportions');
+  let choice=null;
+  function consider(i,newSize,p){
+   const next=make(i,newSize,p);
+   const nextUsed=used.map((v,k)=>v-rows[i][k]+next[k]);
+   const smaller=shortage(nextUsed);
+   const benefit=currentShort-smaller;
+   if(benefit<=0)return;
+   const lost=scoreFor(rows[i],weights[i])-scoreFor(next,weights[i]);
+   const relativeLoss=lost/benefit;
+   if(!choice||relativeLoss<choice.relativeLoss-1e-10||
+      (Math.abs(relativeLoss-choice.relativeLoss)<1e-10&&benefit>choice.benefit))
+    choice={i,newSize,p,next,nextUsed,smaller,relativeLoss,benefit};
+  }
+  for(let i=0;i<size.length;i++)if(size[i]>0)
+   for(let k=0;k<3;k++)if(used[k]>stock[k]&&percents[i][k]>0){
+    for(let j=0;j<3;j++)if(j!==k&&percents[i][j]<100){
+     const p=percents[i].slice();p[k]--;p[j]++;
+     consider(i,size[i],p);
+    }
+    // If no whole-percent exchange fits available stock, decrease march
+    // troop count instead; do NOT invent a fractional game setting.
+    const dec=Math.min(size[i],
+      Math.max(1,Math.ceil((used[k]-stock[k])*100/percents[i][k])));
+    consider(i,size[i]-dec,percents[i]);
+   }
+  if(!choice)throw Error('Cannot fit integer percentages to shared inventory');
+  size[choice.i]=choice.newSize;percents[choice.i]=choice.p;
+  rows[choice.i]=choice.next;used=choice.nextUsed;currentShort=choice.smaller;
+ }
+ // Where capacity and troop class stock permit, refill the same integer
+ // ratios without going over any other simultaneous march's allocation.
+ for(let pass=0;pass<size.length;pass++){
+  let best=null;
+  for(let i=0;i<size.length;i++){
+   if(size[i]===0||size[i]>=int(capacities[i]))continue;
+   const other=used.map((v,k)=>v-rows[i][k]);
+   const fits=n=>make(i,n).every((v,k)=>v+other[k]<=stock[k]);
+   let low=size[i],high=int(capacities[i]);
+   while(low<high){
+    const mid=Math.floor((low+high+1)/2);
+    if(fits(mid))low=mid;else high=mid-1;
+   }
+   if(low<=size[i])continue;
+   const next=make(i,low);
+   const gain=scoreFor(next,weights[i])-scoreFor(rows[i],weights[i]);
+   if(!best||gain>best.gain)best={i,low,next,gain};
+  }
+  if(!best)break;
+  size[best.i]=best.low;rows[best.i]=best.next;used=expenditure();
+ }
+ for(let i=0;i<rows.length;i++){
+  const p=percents[i],r=rows[i];
+  if(p.some(v=>!Number.isInteger(v)||v<0||v>100)||
+     (p.reduce((a,b)=>a+b,0)!==(size[i]===0&&p.every(x=>x===0)?0:100))||
+     r.some(n=>!Number.isSafeInteger(n)||n<0)||
+     r.reduce((a,b)=>a+b,0)!==size[i]||
+     size[i]>capacities[i]||
+     r.some((n,k)=>n!==make(i)[k]))
+   throw Error('Invalid in-game integer ratio');
+ }
+ used=expenditure();
+ if(shortage(used))throw Error('Playable projection exceeds troop inventory');
+ return {rows,ratios:percents,used,unallocated:stock.map((v,k)=>v-used[k]),
+  modeledTotal:rows.reduce((sum,r,i)=>sum+scoreFor(r,weights[i]),0)};
+}
 function plan(model,catalog,combat,capacityCore){
  const v=model?.values||{},cap=capacityCore?.breakdown(model,catalog);
  const stock=availableStock(model);
@@ -367,7 +460,9 @@ function plan(model,catalog,combat,capacityCore){
  const targets=caps;
  const expected=expectedWeights(targets,model,catalog,combat,stock);
  const distribution=allocateByMarginal(targets,stock,expected.weights);
- const actual=distribution.rows;
+ // Quantize before exposing formations OR calculating damage.
+ const playable=playableProjection(distribution.rows,stock,targets,expected.weights);
+ const actual=playable.rows;
  const baseline=expected.baseline;
  const leaderStrength=expected.relative;
  const engineReady=Boolean(combat?.ready&&combat?.configure&&combat?.damage);
@@ -378,7 +473,7 @@ function plan(model,catalog,combat,capacityCore){
  const leftover=stock.map((s,k)=>s-used[k]);
  if(leftover.some(x=>x<0)||actual.some((row,i)=>row.reduce((a,b)=>a+b,0)>caps[i]))
   throw Error('Unsafe formation: inventory or capacity exceeded');
- const ratios=actual.map(integerPercentages);
+ const ratios=playable.ratios;
  const tierPriority=leaderStrength.key==='weaker'?
   [0,...Array.from({length:actual.length-1},(_,i)=>i+1)]:
   [...Array.from({length:actual.length-1},(_,i)=>i+1),0];
@@ -389,10 +484,11 @@ function plan(model,catalog,combat,capacityCore){
    shortage:Math.max(0,m.capacity-actual[i].reduce((a,b)=>a+b,0))})),
   starterScore:full,scoreType:'community-joiner-bear-baseline',
   ratioMethod:'marginal-expected-damage',joinerBaseline:baseline,
-  leaderStrength,tierPriority,modeledTotal:distribution.modeledTotal,
+  leaderStrength,tierPriority,modeledTotal:playable.modeledTotal,
+  quantizedToWholePercent:true,
   allHeroLevelsKnown:marches.every(m=>m.capacityKnown),
   allHeroesAssigned:marches.every(m=>m.missingHeroSlots===0),
   joinCount:selected.joins.length,selected};
 }
-root.NRW_BEAR_FORMATION={plan,chooseHeroes,JOIN_PRIORITIES,allocateStock:allocate,integerPercentages,availableStock,joinerBaseline,ratioForTarget,scenario,scoreFor,expectedWeights,allocateByMarginal};
+root.NRW_BEAR_FORMATION={plan,chooseHeroes,JOIN_PRIORITIES,allocateStock:allocate,integerPercentages,availableStock,joinerBaseline,ratioForTarget,scenario,scoreFor,expectedWeights,allocateByMarginal,playableProjection};
 })(window);
