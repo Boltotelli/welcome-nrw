@@ -4,7 +4,7 @@
 const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
 const source=JSON.parse(fs.readFileSync(process.argv[2]||'./bear/hero-reference.json','utf8'));
 const ctx={window:{},console,Math};ctx.window.window=ctx.window;
-for(const file of ['skill-effects.js','hero-advisor.js','../own-baseline.js','combat.js']){
+for(const file of ['skill-effects.js','hero-advisor.js','../own-baseline.js','combat.js','../score-bonuses.js','damage-skills.js']){
  const p=path.resolve(__dirname,file);
  vm.runInNewContext(fs.readFileSync(p,'utf8'),ctx,{filename:p});
 }
@@ -51,5 +51,28 @@ assert(by(thrud,'Battle Hunger').some(x=>x.kind==='class-damage'&&x.type===2),'T
 assert(!by(thrud,'Battle Hunger').some(x=>x.kind==='damage'),'Thrud must not apply entire squad');
 const sophia=a.evaluate({name:'Sophia',level:80,stars:4,tier:0,widget:2},'cavalry',null,get,b.widgetValue,a.modelContext(null,W.NRW_BEAR_COMBAT));
 assert(sophia.uncertainSkills.some(x=>x.effect==='squad_bonus_damage_vs_terrified'),'Terror mechanics remain unverified');
+// Advanced own-rally damage must include any selected three heroes, not
+// silently revert to the old Zoe/Petra/Yang-only proc evaluator.
+const skillDamage=W.NRW_BEAR_SKILL_DAMAGE;
+const simulate=names=>{
+ const model={values:{iAtk:650,iLet:500,cAtk:700,cLet:530,aAtk:720,aLet:620},
+  v2:{ownHeroes:names,manualHeroes:Object.fromEntries(names.map(n=>
+   [n,{name:n,stars:4,tier:0,widget:2,skillsAssumedMax:true,level:80}])),
+   valoraTalent:8,petActive:{},petSkillRanks:{}}};
+ const ready=skillDamage.prepare(model,{get}, {pets:[]},W.NRW_BEAR_SCORE_BONUSES,b);
+ assert(ready.ready,'Advanced preparation failed for '+names.join(', '));
+ const groups=[{tier:10,tg:6},{tier:10,tg:6},{tier:10,tg:6}];
+ const result=skillDamage.evaluate(ready,[10000,10000,80000],groups,model.values,W.NRW_BEAR_COMBAT);
+ assert(result.ready&&result.estimatedIndex>0&&result.upper>=result.lower,
+  'Advanced damage bounds failed for '+names.join(', '));
+ assert.equal(ready.reports.length,3,'Three starter kits must be included');
+ return result;
+};
+const trioAlcar=simulate(['Alcar','Petra','Yang']);
+const trioZoe=simulate(['Zoe','Petra','Yang']);
+simulate(['Zoe','Thrud','Wee & Woo']);
+assert(trioAlcar.lower<trioZoe.lower&&trioAlcar.upper>trioZoe.lower,
+ 'Advanced expectation must expose Alcar conditional debuff bounds, not force a winner');
+
 console.log('PASS '+verified+' heroes / '+source.records.reduce((n,r)=>n+r.expeditionSkills.length,0)+' skills: class scopes, procs, secondaries, missing-effects audit and unknown Bear conditions.');
 console.log('Alcar conservative='+alcar.score+', possible upper='+alcar.optimisticScore+', Zoe='+zoe.score+' (relative indices; not real Bear points).');
