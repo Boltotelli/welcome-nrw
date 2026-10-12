@@ -156,3 +156,25 @@ body.bear-name-mode>*:not(#bearNewApp){display:none!important}
 
 /* Preserve the uploaded game's pale impact cloud and blend out VP9 black backing. */
 .bear-name-loading-cloud .bear-name-cloud-video{width:min(100%,320px);max-height:320px;background:transparent;mix-blend-mode:screen;object-fit:contain}
+
+
+/* Ministry toggles are simple, real inputs rather than a second wizard. */
+.bear-name-ministers{border-top:1px solid #445b70;margin-top:18px;padding-top:13px}
+.bear-name-ministers h3,.bear-name-utilization h3{margin:0 0 8px;color:#ffd995;font-size:18px}
+.bear-name-minister-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:10px 0 12px}
+.bear-name-minister-group{padding:12px;border:1px solid #4c6682;background:#21364d;border-radius:11px;display:grid;gap:10px}
+.bear-name-minister-group>strong{color:#ffe0a3}
+.bear-name-minister-check{display:flex;align-items:flex-start;gap:9px;font-size:13px;color:#e2e9f2;line-height:1.4}
+.bear-name-minister-check input{accent-color:#ffd076;flex:0 0 auto;margin-top:3px;width:17px;height:17px}
+.bear-name-minister-meta{margin-top:9px;color:#b8c9db}
+.bear-name-utilization{margin-top:18px;padding:16px;border:1px solid #58718c;background:#122339;border-radius:14px}
+.bear-name-util-total{color:#fbce76;font-weight:750;font-size:14px;margin:7px 0}
+.bear-name-util-track{height:13px;overflow:hidden;border-radius:40px;background:#425166;border:1px solid #61718a}
+.bear-name-util-fill{display:block;height:100%;background:linear-gradient(90deg,#a7c67f,#ffd26b)}
+.bear-name-util-row{padding-top:13px}
+.bear-name-util-legend{display:flex;justify-content:space-between;gap:6px;flex-wrap:wrap;margin:5px 0;font-size:12px;color:#ccd7e9}
+.bear-name-util-legend strong{color:#f1e5ca}
+.bear-name-util-type-0 .bear-name-util-fill{background:#d28b51}
+.bear-name-util-type-1 .bear-name-util-fill{background:#849ae7}
+.bear-name-util-type-2 .bear-name-util-fill{background:#e2bc65}
+@media(max-width:550px){.bear-name-minister-grid{grid-template-columns:1fr}.bear-name-utilization{padding:11px}.bear-name-util-legend{font-size:11px}}
