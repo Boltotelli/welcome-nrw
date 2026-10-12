@@ -45,7 +45,12 @@ function chooseHeroes(model,catalog){
   const join=joinMap.get(h.name);if(!join)return -1;
   const first=Array.isArray(h.skills)?Number(h.skills[0]):0;
   const confirmed=h.skillsAssumedMax===false&&Number.isInteger(first)&&first>=1&&first<=5;
-  return join.score+(confirmed?first*12:0)+(confirmed?35:0);
+  const stars=Number(h.stars),assumedCap=Number.isInteger(stars)&&stars>=0&&stars<=5?
+   Math.min(5,stars+1):0;
+  const level=confirmed?first:assumedCap;
+  // Prioritize better first-expedition SKILL ranks, including visibly
+  // marked star-derived upper bounds. Do not claim unconfirmed ranks are owned.
+  return join.score+level*12+(confirmed?35:0);
  };
  const joinCount=Math.max(0,Math.min(6,Math.floor(Number(v.joinCount)||0)));
  const reserved=owned.filter(h=>!taken.has(h.name)&&joinMap.has(h.name)&&classOf(h.name,catalog))
