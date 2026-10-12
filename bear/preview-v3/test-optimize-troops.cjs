@@ -30,12 +30,14 @@ const allocate=(stock,t=targets)=>{
  return rows;
 };
 const full=allocate([400000,400000,1400000]);
-assert.equal(f.integerPercentages(full[1]).join('/'),'3/10/87',
- 'Gen4+ baseline must include the 5000-infantry floor');
+assert.equal(f.integerPercentages(full[1]).join('/'),'1/10/89',
+ 'Gen4+ baseline is 1/10/89; no unverified 5k attacker Infantry requirement');
+assert.equal(f.ratioForTarget(190810,[1,10,89])[0] < 2,true,
+ 'Do not reinterpret the 5k defending Bear troops as an attacker minimum');
 const scarce=allocate([650000,650000,450000]);
 const joinsArchers=scarce.slice(1).reduce((n,row)=>n+row[2],0);
 assert(joinsArchers>=scarce[0][2],'Archer scarcity must favor joins');
-assert(scarce.slice(1).some(r=>f.integerPercentages(r)[2]!==87),
+assert(scarce.slice(1).some(r=>f.integerPercentages(r)[2]!==89),
  'Not enough archers to keep baseline on all joins');
 allocate([700000,700000,0],Array(3).fill(180000));
 allocate([100000,150000,800000],[180000]);
@@ -86,4 +88,4 @@ const flow=fs.readFileSync(path.join(__dirname,'name-flow.js'),'utf8');
 assert(flow.includes('stack.process(sc.heroes,refSkill)'),'Scenarios must reference actual hero skills');
 assert((flow.match(/const plan=currentFormationPlan\(\);/g)||[]).length===2,
  'Both calculations must reuse one cached troop plan');
-console.log('PASS generation baseline, 5000 infantry, shared inventory, Joiner-first Archer scarcity, 4-slot effect_op stacking (1.5, 2, 2.25).');
+console.log('PASS Gen4+ 1/10/89 without arbitrary attacker minimum; inventory conservation and 4-slot effect_op stacking.');
