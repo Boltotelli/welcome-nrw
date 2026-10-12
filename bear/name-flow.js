@@ -608,12 +608,12 @@ function predicted(){
   const line=el('div','bear-name-score');
   line.append(el('strong','',sc.name),
    el('span','',answer.ready?num(answer.estimatedIndex)+
-    (answer.isUpperConditional?' – '+num(answer.upper):'')+' Modellindex':
+    (answer.isUpperConditional?' – '+num(answer.upper):'')+' '+T('Modellindex'):
      'Berechnung nicht verfügbar'));
   lines.append(line);
  }
  out.append(el('p','bear-name-result',
-  'Starter '+best.ratio.join(' / ')+' · '+counts.map(num).join(' / ')+' Truppen'),
+  T('Starter ') +best.ratio.join(' / ')+' · '+counts.map(num).join(' / ')+' '+T('Truppen')),
   el('p','bear-name-muted','Berechnung anhand deiner ausgewählten Starter und Truppen.'),
   lines,el('p','bear-name-warning',
    '⚠ Geschätzter Modellwert – kein bestätigter Kingshot-Schadenswert.'));
