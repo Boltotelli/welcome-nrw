@@ -5,6 +5,11 @@
 'use strict';
 const table=[
 ['Deine Helden','Your heroes','Tes héros','Tus héroes'],
+['Rallyleader, denen du beitrittst','Rally leaders you join','Chefs des rallys que tu rejoins','Líderes de rally a los que te unes'],
+['Meist schwächer als ich','Usually weaker than me','Généralement moins forts que moi','Normalmente más débiles que yo'],
+['Ungefähr gleich stark','About as strong as me','À peu près aussi forts que moi','De fuerza similar a la mía'],
+['Meist stärker als ich','Usually stronger than me','Généralement plus forts que moi','Normalmente más fuertes que yo'],
+['Formationen nach erwartetem Zusatzschaden verteilt. Die Stärke fremder Rallyleader ist eine Schätzung.','Troops assigned by estimated additional damage. Other leaders’ strength is an estimate.','Troupes réparties selon les dégâts supplémentaires estimés. La force des chefs est approximative.','Tropas distribuidas según el daño adicional estimado. La fuerza de los líderes es aproximada.'],
 ['Joiner','Joiner','Renfort','Apoyo'],
 ['Truppen und Marschkapazität eingeben, um diese Formation zu berechnen.','Enter troops and march capacity to calculate this formation.','Renseigne troupes et capacité pour calculer cette formation.','Introduce tropas y capacidad para calcular esta formación.'],
 ['Marschkapazität und Truppenbestand ergänzen, damit wir die Formation berechnen können.','Enter march capacity and troop inventory to calculate the formations.','Renseigne la capacité et les troupes pour calculer les formations.','Introduce la capacidad y las tropas para calcular las formaciones.'],
