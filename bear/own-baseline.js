@@ -133,7 +133,10 @@ function composeCombatStats(model){
  }
  return {stats,origin,heroes,totals,missing};
 }
-function currentStats(model){return composeCombatStats(model).stats;}
+function currentStats(model){
+  return root.NRW_BEAR_MINISTERS?.applyStats?.(model,composeCombatStats(model).stats)||
+    composeCombatStats(model).stats;
+ }
 /* Forensic audit ONLY. This does not apply or save hidden bonuses.
  * The Bonus Overview displays separate all-squad bonuses and separate class
  * stats, and starter Hero Details may provide extra Expedition percentages.
