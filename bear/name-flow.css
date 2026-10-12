@@ -136,3 +136,20 @@ body.bear-name-mode>*:not(#bearNewApp){display:none!important}
 .bear-name-cloud-video{width:min(100%,420px);max-height:235px;object-fit:contain;border-radius:20px;background:#142438}
 .bear-name-cloud-scene[hidden],.bear-name-cloud-video[hidden]{display:none!important}
 .bear-name-loading-cloud .bear-name-cloud-scene{max-width:420px}
+
+/* In-game portraits are six exact screenshot crops bundled into one small
+ * WebP (Rhino, Panther, Bear, Moose, Bison and supplied Valora portrait). */
+.bear-name-game-icon{display:inline-block;flex:0 0 44px;min-width:44px;width:44px;height:44px;
+ background-color:#142136;background-size:600% 100%;background-repeat:no-repeat;
+ background-image:url('assets/pet-valora-sprite.webp');border-radius:9px}
+.bear-name-game-icon[role="img"]{vertical-align:middle}
+.bear-name-languages{display:flex;justify-content:center;align-items:center;gap:4px;flex-wrap:wrap;
+ padding:4px;border:1px solid #495773;border-radius:13px;background:#17273b}
+.bear-name-lang-button{border:0!important;background:transparent!important;color:#bac6d8!important;
+ padding:7px 10px!important;border-radius:8px!important;font-size:12px!important;font-weight:800!important;
+ min-height:29px!important;cursor:pointer;letter-spacing:.06em}
+.bear-name-lang-button.active{background:#ffc976!important;color:#2e2317!important}
+.bear-name-landing>.bear-name-languages{width:max-content;max-width:100%;margin:0 0 12px auto}
+.bear-name-top>.bear-name-languages{margin-left:auto}
+@media(max-width:520px){.bear-name-game-icon{width:40px;min-width:40px;height:40px}.bear-name-lang-button{padding:7px!important}
+ .bear-name-top>.bear-name-languages{margin:0}}
