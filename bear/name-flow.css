@@ -153,3 +153,6 @@ body.bear-name-mode>*:not(#bearNewApp){display:none!important}
 .bear-name-top>.bear-name-languages{margin-left:auto}
 @media(max-width:520px){.bear-name-game-icon{width:40px;min-width:40px;height:40px}.bear-name-lang-button{padding:7px!important}
  .bear-name-top>.bear-name-languages{margin:0}}
+
+/* Preserve the uploaded game's pale impact cloud and blend out VP9 black backing. */
+.bear-name-loading-cloud .bear-name-cloud-video{width:min(100%,320px);max-height:320px;background:transparent;mix-blend-mode:screen;object-fit:contain}
