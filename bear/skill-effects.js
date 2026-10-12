@@ -148,6 +148,11 @@ function interpret(skill,level,heroName){
    continue;
   }
   if(kind==='damage_up'){
+   if(heroName==='Thrud'&&skill.name==='Battle Hunger'){
+    // Scope of the secondary "damage up" is Infantry + Archers only.
+    for(const type of [0,2])add('class-damage',amount,{type,assumption:'infantry-and-archer-only'});
+    continue;
+   }
    if(c.everyCavalryAttacks){
     const upper=amount*Math.min(1,(Number(c.durationTurns)||1)/Number(c.everyCavalryAttacks));
     add('damage',upper,{uncertain:true,lower:0,assumption:'cavalry-triggered-duration'});
