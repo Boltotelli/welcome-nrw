@@ -346,6 +346,135 @@ function starterGearSection(picked){
   list.append(div);
  });section.append(list);return section;
 }
+// Show complete owned hero portraits and physically feasible troop mixes.
+// The beginner mode can suggest safe ratios without asking for combat stats.
+function formationCards(){
+ const section=el('section','bear-name-panel bear-name-formation-result');
+ section.id='bearFormationResult';
+ section.append(title('Deine Starter- & Joiner-Formationen'));
+ const model=state(),v=model.v2,formationCore=window.NRW_BEAR_FORMATION,
+  chosen=formationCore?.chooseHeroes?.(model,C);
+ if(!chosen){section.append(el('p','bear-name-muted','Bitte zuerst deine Helden auswählen.'));return section;}
+ const plan=formationCore.plan?.(model,C,window.NRW_BEAR_COMBAT,window.NRW_BEAR_CAPACITY);
+ const groups=[{kind:'starter',heroes:chosen.starter},
+  ...chosen.joins.map(join=>({kind:'join',heroes:join.heroes}))];
+ const validCap=plan?.ready===true,hasStock=['troopsI','troopsC','troopsA']
+  .some(k=>Number(model.values[k])>0);
+ const capMissing=!validCap&&!window.NRW_BEAR_CAPACITY?.breakdown?.(model,C)?.complete;
+ const cards=el('div','bear-name-formations-grid');
+ const baseRatios=[10,10,80];
+ const label=(item,i)=>item.kind==='starter'?'Eigene Starter-Rally':(i+'. Joiner');
+ const numberRow=(ratio,counts,hasCounts)=>{
+  const info=el('div','bear-name-mix-caption');
+  for(let k=0;k<3;k++){
+   const part=el('span','bear-name-mix-part');
+   const pct=el('strong','',ratio[k]+' %');
+   const txt=el('small','',['Inf','Kav','Bog'][k]+
+    (hasCounts?' · '+num(counts[k]):''));
+   part.append(pct,txt);info.append(part);
+  }return info;
+ };
+ for(let index=0;index<groups.length;index++){
+  const row=groups[index],detail=validCap?plan.marches[index]:null;
+  const article=el('article','bear-name-formation-card');
+  article.append(title(label(row,index),'h3'));
+  const avatars=el('div','bear-name-formation-heroes');
+  for(let i=0;i<3;i++){
+   const h=row.heroes[i],hero=heroList.find(x=>x.name===h?.name);
+   const div=el('div','bear-name-formation-hero'+(!h?' unavailable':''));
+   if(hero){
+    const img=el('img');img.src=hero.img;img.alt=hero.name;img.loading='lazy';
+    div.append(img,el('span','',hero.name));
+   }else div.append(el('div','bear-name-formation-empty','+'),el('span','','Nicht belegt'));
+   avatars.append(div);
+  }
+  article.append(avatars);
+  const troopRow=detail?.troops||null;
+  let ratio=detail?.ratio||baseRatios;
+  if(!row.heroes[0])ratio=[0,0,0];
+  const mix=el('div','bear-name-mix');
+  const bar=el('div','bear-name-mix-bar');
+  for(let k=0;k<3;k++){
+   const segment=el('div','bear-name-mix-segment bear-name-mix-'+k);
+   segment.style.width=ratio[k]+'%';bar.append(segment);
+  }
+  mix.append(bar,numberRow(ratio,troopRow||[],Boolean(detail&&detail.filled&&row.heroes[0])));
+  if(detail?.troops&&row.heroes[0]){
+   const amount=detail.troops.reduce((a,b)=>a+b,0);
+   mix.append(el('p','bear-name-form-count',num(amount)+' Truppen'));
+  }else if(!row.heroes[0]){
+   mix.append(el('p','bear-name-muted','Bitte einen passenden Joiner-Helden ergänzen.'));
+  }
+  article.append(mix);cards.append(article);
+ }
+ section.append(cards);
+ if(!validCap){
+  section.append(el('p','bear-name-muted',
+   capMissing?'10/10/80 ist hier ein Richtwert. Mit deiner Marschkapazität und deinem Truppenbestand können wir die tatsächlichen Anzahlen ermitteln.':
+   hasStock?'Für genaue Truppenzahlen bitte die Bestände vervollständigen.':'10/10/80 als Ausgangsformation; ohne Truppenbestände noch keine exakte Verteilung.'));
+ }else section.append(el('p','bear-name-muted',
+  'Truppenbestände werden nur einmal verteilt. Bogenschützen haben für Joiner Vorrang.'));
+ return section;
+}
+// One loading surface for each separate result. The formation video is the
+// complete existing Kingshot hero-selection WebM; damage has a cloud-themed
+// dedicated animation until an approved original cloud WebM is available.
+async function loadingSequence(kind){
+ const old=document.getElementById('bearNameLoading');old?.remove();
+ const loading=el('div','bear-name-loading '+(kind==='formation'?'bear-name-loading-hero':'bear-name-loading-cloud'));
+ loading.id='bearNameLoading';
+ loading.setAttribute('role','status');
+ const text=el('p','',kind==='formation'?'Helden und Truppen werden zusammengestellt …':'Schadenswerte werden berechnet …');
+ if(kind==='formation'){
+  const video=el('video');video.src='./assets/kingshot_formations_loading.webm';
+  video.autoplay=true;video.muted=true;video.playsInline=true;video.preload='auto';
+  loading.append(video);
+  const sample=state().v2.scannedOwnedHeroes.slice(0,7);
+  const strip=el('div','bear-name-loader-heroes');
+  for(const n of sample){
+   const item=heroList.find(h=>h.name===n);if(!item)continue;
+   const img=el('img');img.src=item.img;img.alt=n;strip.append(img);
+  }
+  if(strip.children.length)loading.append(strip);
+  loading.append(text);box.append(loading);loading.scrollIntoView({behavior:'smooth'});
+  await new Promise(resolve=>{
+   let finished=false;
+   const finish=()=>{if(finished)return;finished=true;clearTimeout(timer);resolve();};
+   const timer=setTimeout(finish,30000);
+   video.addEventListener('ended',finish,{once:true});
+   video.addEventListener('error',finish,{once:true});
+   video.play?.().catch(finish);
+  });
+ }else{
+  const clouds=el('div','bear-name-cloud-scene');
+  for(let i=0;i<4;i++){const cloud=el('span','bear-name-cloud cloud-'+i,'☁');clouds.append(cloud);}
+  clouds.append(el('span','bear-name-cloud-center','⚡'));
+  loading.append(clouds,text);box.append(loading);loading.scrollIntoView({behavior:'smooth'});
+  // The cloud effect is separate from the selection video; this is a
+  // CSS animation, not an invented claim that the old cloud WebM was present.
+  await new Promise(done=>setTimeout(done,4200));
+ }
+ loading.remove();
+}
+async function performCalculation(kind){
+ const id=kind==='formation'?'bearFormationResult':'bearAdvancedResult';
+ document.getElementById(id)?.remove();
+ const controls=box.querySelectorAll('.bear-name-action-btn');
+ controls.forEach(b=>b.disabled=true);
+ try{
+  await loadingSequence(kind);
+  const result=kind==='formation'?formationCards():predicted();
+  result.id=id;box.append(result);result.scrollIntoView({behavior:'smooth'});
+ }finally{controls.forEach(b=>b.disabled=false);}
+}
+function actionButtons(advanced){
+ const holder=el('div','bear-name-actions');
+ holder.append(button('⚔️ Formationen berechnen',()=>performCalculation('formation'),
+  'bear-name-btn primary bear-name-action-btn'));
+ if(advanced)holder.append(button('☁️ Schadenswert berechnen',()=>performCalculation('damage'),
+  'bear-name-btn bear-name-action-btn'));
+ return holder;
+}
 function summaryHeroes(){
  const {picked,groups}=rankAndSelect(),v=state().v2,section=el('section','bear-name-panel');
  section.id='bearHeroRecommendation';
@@ -499,31 +628,11 @@ function render(){
   left.append(choose('Märsche insgesamt',Array.from({length:7},(_,i)=>[i+1,String(i+1)]),
    Number(v.joinCount||0)+1,x=>{v.joinCount=Number(x)-1;saveLocal();render();}),rosterSection());
   const t=el('details','bear-name-optional');t.append(el('summary','','Truppen ergänzen (optional)'),troopsSection(false));left.append(t);
-  right.append(summaryHeroes().section);main.append(left,right);box.append(main);
+  right.append(summaryHeroes().section,actionButtons(false));main.append(left,right);box.append(main);
  }else{
   const main=el('div','bear-name-two-columns'),left=el('div'),right=el('div');
   left.append(rosterSection(),troopsSection(true),scalarSection());
-  const r=summaryHeroes();right.append(r.section,starterGearSection(r.picked),
-   button('🔎 Formationen & Szenarien berechnen',async()=>{
-    const old=document.getElementById('bearAdvancedResult');if(old)old.remove();
-    const loading=el('div','bear-name-loading');loading.id='bearNameLoading';
-    const video=el('video');video.src='./assets/kingshot_formations_loading.webm';video.autoplay=true;
-    video.muted=true;video.playsInline=true;video.controls=false;
-    loading.append(video,el('p','','Deine Formationen werden berechnet …'));
-    box.append(loading);loading.scrollIntoView({behavior:'smooth'});
-    // Play the complete existing animation; a failed/unplayable video must
-    // not trap the user on a permanent spinner.
-    await new Promise(done=>{
-     let finished=false;const finish=()=>{if(!finished){finished=true;clearTimeout(timer);done();}};
-     const timer=setTimeout(finish,30000);
-     video.addEventListener('ended',finish,{once:true});
-     video.addEventListener('error',finish,{once:true});
-     video.play().catch(finish);
-    });
-    loading.remove();
-    const result=predicted();result.id='bearAdvancedResult';
-    box.append(result);result.scrollIntoView({behavior:'smooth'});
-   },'bear-name-btn primary'));
+  const r=summaryHeroes();right.append(r.section,starterGearSection(r.picked),actionButtons(true));
   main.append(left,right);box.append(main);
  }
  if(!localStorage.getItem('nrw_bear_name_list_v1'))localStorage.setItem('nrw_bear_name_list_v1','[]');
