@@ -462,7 +462,7 @@ function formationCards(){
  }else{
   const basis=plan.joinerBaseline;
   const message=basis?
-   T('Joiner-Richtwert')+' · Gen '+basis.generation+': '+
+   T('Joiner-Richtwert')+' · Gen '+basis.generationLabel+': '+
     basis.proportions.join('/')+' · '+T('an Truppenbestand und Infanterie-Mindestmenge angepasst.') :
    T('Alle Märsche nutzen denselben Truppenbestand. Die Verteilung wird gemeinsam optimiert.');
   section.append(el('p','bear-name-muted',message));
