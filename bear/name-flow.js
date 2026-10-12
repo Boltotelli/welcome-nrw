@@ -354,63 +354,81 @@ function refreshHeroRecommendations(){
 }
 function predicted(){
  const out=el('section','bear-name-panel');out.append(title('Erweiterte Schadensoptimierung'));
- const model=state(),v=model.v2,combat=window.NRW_BEAR_COMBAT,alloc=window.NRW_BEAR_FORMATION,
-  scores=window.NRW_BEAR_SCORE_BONUSES,proc=window.NRW_BEAR_PROC_EXPECTATION,
-  ref=window.NRW_BEAR_HERO_REFERENCE;
- if(!combat||!alloc||!scores||!ref||ref.status?.()!=='ready'){
-  out.append(el('p','bear-name-muted','Helden-Referenzdaten noch nicht geladen. Bitte erneut berechnen.'));return out;
+ const model=state(),v=model.v2,
+  combat=window.NRW_BEAR_COMBAT,alloc=window.NRW_BEAR_FORMATION,
+  scores=window.NRW_BEAR_SCORE_BONUSES,
+  ref=window.NRW_BEAR_HERO_REFERENCE,
+  skillDamage=window.NRW_BEAR_SKILL_DAMAGE;
+ if(!combat||!alloc||!scores||!skillDamage||!ref||ref.status?.()!=='ready'){
+  out.append(el('p','bear-name-muted','Helden-Referenzdaten werden noch geladen. Bitte danach erneut berechnen.'));
+  return out;
  }
- const tiers=combat.configure(v),current=window.NRW_BEAR_OWN_BASELINE.currentStats(model);
- const stock=CL.map((x,i)=>Number(model.values[['troopsI','troopsC','troopsA'][i]])||0);
+ const stock=CL.map((_,i)=>Number(model.values[['troopsI','troopsC','troopsA'][i]])||0);
+ const tiers=combat.configure(v),current=window.NRW_BEAR_OWN_BASELINE?.currentStats?.(model);
  const cap=window.NRW_BEAR_CAPACITY?.breakdown(model,C);
  if(!combat.ready(current,tiers)||stock.some(x=>!x)||!cap?.complete){
-  out.append(el('p','bear-name-muted','Es fehlen Truppen (T/TG), sechs Kampfwerte oder Basis-Marschkapazität. Keine erfundenen Zahlen.'));return out;
+  out.append(el('p','bear-name-muted','Für die Berechnung fehlen Truppen, Basiswerte oder die Marschkapazität.'));
+  return out;
  }
- const totalSlots=Math.min(7,1+Number(v.joinCount||0));const capacity=cap.total;
- if(!capacity){out.append(el('p','bear-name-muted','Keine gültige Marschkapazität.'));return out;}
+ // All three owned starters, their Expedition skills AND applicable Widget
+ // rally abilities enter the same calculation. No Zoe/Yang/Petra-only code.
+ const prepared=skillDamage.prepare(model,ref,C,scores,window.NRW_BEAR_OWN_BASELINE);
+ if(!prepared.ready){
+  out.append(el('p','bear-name-muted','Noch fehlende Helden-/Pet-Angaben: '+prepared.reason));
+  return out;
+ }
+ const totalSlots=Math.min(7,1+Number(v.joinCount||0)),capacity=cap.total;
+ if(!capacity){
+  out.append(el('p','bear-name-muted','Keine gültige Marschkapazität.'));
+  return out;
+ }
  const shareTotal=Math.min(stock.reduce((a,b)=>a+b,0),totalSlots*capacity);
  const targetBase=Math.floor(shareTotal/totalSlots),extra=shareTotal-targetBase*totalSlots;
  const targets=Array.from({length:totalSlots},(_,i)=>targetBase+(i<extra?1:0));
- // All joins use 10/10/80, Archers are reserved for them before the starter.
  let best=null;
+ // Reserve Archers for joins first, then search own ratios against the
+ // WHOLE selected starter skill kit (not merely class attack values).
+ // Conservative conditional-uptime bound is the ranking objective.
  for(let inf=0;inf<=100;inf++)for(let cav=0;cav<=100-inf;cav++){
   const rows=alloc.allocateStock(targets,stock,[inf,cav],[10,10]);
   const perMarch=combat.allocateLevels?.(rows,tiers,true);
   const leader=perMarch?.[0]||tiers;
-  const score=combat.damage(rows[0],current,leader,5);
-  if(Number.isFinite(score)&&(best===null||score>best.score+0.000001||
-    (Math.abs(score-best.score)<0.000001&&Math.abs(inf-10)+Math.abs(cav-10)<best.distance)))
-   best={score,distance:Math.abs(inf-10)+Math.abs(cav-10),ratio:[inf,cav,100-inf-cav],rows,leader};
+  const trial=skillDamage.evaluate(prepared,rows[0],leader,current,combat);
+  const score=trial.ready?trial.estimatedIndex:null;
+  if(score!==null&&Number.isFinite(score)&&
+   (best===null||score>best.score+1e-7||
+    (Math.abs(score-best.score)<1e-7&&
+     Math.abs(inf-10)+Math.abs(cav-10)<best.distance)))
+   best={score,distance:Math.abs(inf-10)+Math.abs(cav-10),
+    ratio:[inf,cav,100-inf-cav],rows,leader};
  }
- if(!best){out.append(el('p','bear-name-muted','Keine gültige Formation gefunden.'));return out;}
- const counts=best.rows[0];
- const cloned={...model,v2:{...v,troopGroups:best.leader.flatMap((lvl,i)=>Array.isArray(lvl.groups)?
-   lvl.groups.map(g=>({type:CL[i],tier:g.tier,tg:g.tg,count:g.count})):
-   [{type:CL[i],tier:lvl.tier,tg:lvl.tg,count:counts[i]}]).filter(g=>g.count>0)}};
- // Apply first to self, then independent Join skill configurations; NEVER
- // use the current player's own combat stats as a proxy for external leads.
- const baselineStats=window.NRW_BEAR_OWN_BASELINE.currentStats(model);
+ if(!best){
+  out.append(el('p','bear-name-muted','Mit diesen Truppen lässt sich keine gültige Formation berechnen.'));
+  return out;
+ }
+ const counts=best.rows[0],lines=el('div','bear-name-score-list');
  const scenarios=[
   {name:'Ohne Joinerfähigkeiten',atk:0,let:0},
   {name:'2× Chenko + 2× Amane (Lv5)',atk:50,let:50},
   {name:'4× Chenko (Lv5)',atk:0,let:100},
   {name:'Chenko + Yeonwoo + Amane + Margot (Lv5)',atk:50,let:50}
  ];
- const lines=el('div','bear-name-score-list');
  for(const sc of scenarios){
-  const vals={...cloned.values};
-  for(const k of ['i','c','a']){vals[k+'Atk']=Number(baselineStats[k+'Atk'])+sc.atk;
-   vals[k+'Let']=Number(baselineStats[k+'Let'])+sc.let;}
-  const scenario={...cloned,values:vals,v2:{...cloned.v2,combatStatOrigin:'combined-report'}};
-  const answer=scores.personalDamage(scenario,counts,combat,ref,C,proc);
-  const line=el('div','bear-name-score');line.append(el('strong','',sc.name),
-   el('span','',answer.ready?num(answer.expectedScore)+' Modellindex':'Berechnung nicht verfügbar'));
+  const answer=skillDamage.evaluate(prepared,counts,best.leader,current,combat,sc.atk,sc.let);
+  const line=el('div','bear-name-score');
+  line.append(el('strong','',sc.name),
+   el('span','',answer.ready?num(answer.estimatedIndex)+
+    (answer.isUpperConditional?' – '+num(answer.upper):'')+' Modellindex':
+     'Berechnung nicht verfügbar'));
   lines.append(line);
  }
+ const note=prepared.unmodeled.length||prepared.speculativePets.length?
+  ' Einige Fähigkeiten/Pet-Effekte sind gegen den Bären nicht sicher quantifizierbar; sie werden nicht als garantierter Bonus behandelt.':'';
  out.append(el('p','bear-name-result',
   'Starter '+best.ratio.join(' / ')+' · '+counts.map(num).join(' / ')+' Truppen'),
-  el('p','bear-name-muted','Joiner bleiben bei 10/10/80 soweit der Bestand reicht; gemeinsame Bestände werden nicht mehrfach vergeben.'),
-  lines,el('p','bear-name-warning','⚠ Diese Werte sind relative Schadensmodell-Indizes, keine verifizierten Kingshot-Schadenspunkte. Skill-Proc-Frequenz, Dauer und Stacking sind nur teilweise belegt. Join-Effekte als +25 Prozentpunkte ATK/LET pro Lv5-Held modelliert; keine unbekannten fremden Rallyleader-Werte.'));
+  el('p','bear-name-muted','Alle Expeditionsfähigkeiten deiner drei Starter werden geprüft. Joiner bleiben bei 10/10/80, solange der Truppenbestand reicht.'),
+  lines,el('p','bear-name-warning',
+   '⚠ Nur relative Modellwerte, keine bestätigten Kingshot-Schadenspunkte. Zufällige Effekte werden über Wahrscheinlichkeitswerte berücksichtigt. Eine Spanne bezeichnet unsichere Dauer-/Debuffmechaniken.'+note));
  lastResult=best;return out;
 }
 function landing(){
