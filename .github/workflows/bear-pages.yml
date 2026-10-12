@@ -224,6 +224,14 @@ jobs:
           grep -Fq 'preview-v3/skill-effects.js' _site/bear/preview-v3.html
           grep -Fq 'preview-v3/damage-skills.js' _site/bear/preview-v3.html
           node --check _site/bear/preview-v3/name-flow.js
+          grep -Fq 'function formationCards()' _site/bear/preview-v3/name-flow.js
+          grep -Fq 'Schadenswert berechnen' _site/bear/preview-v3/name-flow.js
+          grep -Fq 'Formationen berechnen' _site/bear/preview-v3/name-flow.js
+          grep -Fq 'kingshot_cloud_damage_loading.webm' _site/bear/preview-v3/name-flow.js
+          grep -Fq '.bear-name-formations-grid' _site/bear/preview-v3/name-flow.css
+          if command -v ffprobe >/dev/null; then
+            ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1 _site/bear/assets/kingshot_cloud_damage_loading.webm
+          fi
           grep -Fq 'saveLocal();refreshHeroRecommendations()' _site/bear/preview-v3/name-flow.js
           # Hero stars: five clickable six-petal flowers, +/- and live result.
           grep -Fq 'function starProgressField(heroName)' _site/bear/preview-v3/name-flow.js
