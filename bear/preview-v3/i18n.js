@@ -5,6 +5,7 @@
 'use strict';
 const table=[
 ['Deine Helden','Your heroes','Tes héros','Tus héroes'],
+['Aus deinen ausgewählten Helden.','Based on your selected heroes.','D’après les héros sélectionnés.','Según los héroes seleccionados.'],
 ['Deine Bear-Formation. Ohne Screenshot-Marathon.','Your Bear formation. No screenshot marathon.','Ta formation Ours. Sans avalanche de captures.','Tu formación del Oso. Sin maratón de capturas.'],
 ['🐻 NRW · BÄREN-OPTIMIERER','🐻 NRW · BEAR OPTIMIZER','🐻 NRW · OPTIMISEUR OURS','🐻 NRW · OPTIMIZADOR DEL OSO'],
 ['Nur deinen Spielernamen eingeben. Danach wählst du zwischen Heldenempfehlung und erweiterter Schadensoptimierung.','Enter your player name, then choose hero recommendations or advanced damage optimization.','Saisis ton pseudo, puis choisis les héros ou l’optimisation avancée des dégâts.','Introduce tu nombre y elige héroes u optimización avanzada de daño.'],
