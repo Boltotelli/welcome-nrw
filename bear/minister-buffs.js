@@ -29,12 +29,15 @@ function derived(model){
  // descriptions say High King appointments are stronger, but exact numbers
  // remain unverified. Ignore them until the player enters in-game values.
  const fc=flags.king.fc||flags.highKing.fc,m=flags.king.m||flags.highKing.m;
+ const validHighFC=flags.highKing.fc&&high.fcLethality!==null;
+ const validHighM=flags.highKing.m&&high.marshalAttack!==null&&
+  high.marshalCapacity!==null&&Number.isInteger(high.marshalCapacity);
  const lethal=Math.max(flags.king.fc?KING.fcLethality:0,
-  flags.highKing.fc?(high.fcLethality||0):0);
+  validHighFC?high.fcLethality:0);
  const attack=Math.max(flags.king.m?KING.marshalAttack:0,
-  flags.highKing.m?(high.marshalAttack||0):0);
+  validHighM?high.marshalAttack:0);
  const capacity=Math.max(flags.king.m?KING.marshalCapacity:0,
-  flags.highKing.m?(high.marshalCapacity||0):0);
+  validHighM?high.marshalCapacity:0);
  return {flags,fc,m,unconfirmedHighKing:unconfirmed,
   sources:[...(flags.king.fc?['King FC']:[]),...(flags.highKing.fc?['High King FC']:[]),
    ...(flags.king.m?['King Marshal']:[]),...(flags.highKing.m?['High King Marshal']:[])],
