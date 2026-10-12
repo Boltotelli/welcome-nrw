@@ -1,46 +1,70 @@
-const assert=require('node:assert/strict');
-const fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
+/* Joiner ratio is an average KINGSHOT generation baseline, not an
+ * optimization of unobservable foreign rally-leader combat stats. */
+const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
 const root={window:{},Math,console};root.window.window=root.window;
-const base=__dirname;
-for(const f of ['formation-core.js','combat.js']){
- vm.runInNewContext(fs.readFileSync(path.join(base,f),'utf8'),root,{filename:f});
+for(const file of ['formation-core.js','joiner-skills.js','combat.js']){
+ vm.runInNewContext(fs.readFileSync(path.join(__dirname,file),'utf8'),root,{filename:file});
 }
-const p=root.window.NRW_BEAR_FORMATION,c=root.window.NRW_BEAR_COMBAT;
-const output=(targets,stock,own)=>p.optimizeCombined(targets,stock,[472,1416,1888*1.1],own||[472,1416,1888*1.1]);
-const check=(targets,stock,own)=>{
- const rows=output(targets,stock,own);
- assert.equal(rows.length,targets.length);
- for(const [i,row] of rows.entries()){
-  assert(row.every(n=>Number.isSafeInteger(n)&&n>=0));
-  assert(row.reduce((a,b)=>a+b,0)<=targets[i]);
+const f=root.window.NRW_BEAR_FORMATION,c=root.window.NRW_BEAR_COMBAT,
+ j=root.window.NRW_BEAR_JOINER_SKILLS;
+const catalog={heroes:[...Array.from({length:16},(_,i)=>({name:'old'+i})),
+ ...Array.from({length:18},(_,i)=>({name:'new'+i}))]};
+const age=names=>f.joinerBaseline({v2:{scannedOwnedHeroes:names}},catalog).proportions;
+assert.equal(age(['old1']).join('/'),'10/30/60');
+assert.equal(age(['new0']).join('/'),'10/20/70');
+assert.equal(age(['new3']).join('/'),'10/10/80');
+assert.equal(age(['new6']).join('/'),'1/10/89');
+assert.equal(age(['new15']).join('/'),'1/10/89');
+const targets=Array(7).fill(180000),base=age(['new6']);
+const allocate=(stock,t=targets)=>{
+ const ratios=t.map(x=>f.ratioForTarget(x,base));
+ const rows=f.allocateStock(t,stock,ratios[0],ratios.slice(1));
+ for(const [i,r] of rows.entries()){
+  assert(r.every(v=>Number.isSafeInteger(v)&&v>=0),'invalid troop count');
+  assert(r.reduce((a,b)=>a+b,0)<=t[i],'over-cap');
  }
- for(let k=0;k<3;k++)assert(rows.reduce((n,r)=>n+r[k],0)<=stock[k]);
+ for(let k=0;k<3;k++)assert(rows.reduce((n,r)=>n+r[k],0)<=stock[k],'stock reused');
  return rows;
 };
-const ample=check(Array(7).fill(180000),[450000,450000,800000],[472*3,1416*1.5,1888*2.2]);
-assert.notDeepEqual(Array.from(ample[0],x=>Math.round(x/1800)),[10,10,80],
- 'Starter must not always be forced to 10/10/80');
-assert(ample[1][2]>0,'Join should include archers');
-const scarce=check(Array(5).fill(160000),[450000,300000,300000],[472,1416,1888*1.1]);
-assert(scarce.some((x,i)=>i>0&&p.integerPercentages(x)[2]!==80),
- 'Scarce Archers cannot be 80% on every join');
-check([200000,200000,200000],[0,600000,0]);
-check([250000],[100000,150000,250000]);
-check([1,1,1,1,1,1,1],[1,1,3]);
+const full=allocate([400000,400000,1400000]);
+assert.equal(f.integerPercentages(full[1]).join('/'),'3/10/87',
+ 'Gen4+ baseline must include the 5000-infantry floor');
+const scarce=allocate([650000,650000,450000]);
+const joinsArchers=scarce.slice(1).reduce((n,row)=>n+row[2],0);
+assert(joinsArchers>=scarce[0][2],'Archer scarcity must favor joins');
+assert(scarce.slice(1).some(r=>f.integerPercentages(r)[2]!==87),
+ 'Not enough archers to keep baseline on all joins');
+allocate([700000,700000,0],Array(3).fill(180000));
+allocate([100000,150000,800000],[180000]);
 const model={v2:{troopGroups:[{type:'infantry',tier:10,tg:5,count:10000},
  {type:'infantry',tier:9,tg:2,count:8000},
  {type:'cavalry',tier:10,tg:5,count:11000},
  {type:'archer',tier:10,tg:8,count:90000}]},
  values:{troopsI:999999,troopsC:999999,troopsA:999999}};
-assert.deepEqual(Array.from(p.availableStock(model)),[18000,11000,90000],
- 'Actual mixed T/TG troop inventory must take priority over stale totals');
-const weights=p.typeWeights(model,c);
-assert(weights[2]>weights[1]&&weights[1]>weights[0]);
-const page=fs.readFileSync(path.join(base,'../preview-v3.html'),'utf8');
-assert(page.includes('name-flow.js'));
-const flow=fs.readFileSync(path.join(base,'name-flow.js'),'utf8');
-assert(!flow.includes('const baseRatios=[10,10,80]'),'No fabricated 10/10/80 displayed');
-assert(!flow.includes('for(let inf=0;inf<=100;inf++)'),'No second independent starter optimizer');
+assert.equal(Array.from(f.availableStock(model)).join('/'),'18000/11000/90000');
+const reference=JSON.parse(fs.readFileSync(process.argv[2]||'./bear/hero-reference.json','utf8'));
+const dict=new Map(reference.records.map(x=>[x.name,x]));
+const checkJoin=(heroes,expected)=>{
+ const effect=j.process(heroes,n=>dict.get(n));
+ assert(effect.ready,'Reference must support first skill of all scenario heroes');
+ assert.equal(effect.multiplier,expected,'wrong 101/102 stacking '+heroes.join(', '));
+ return effect;
+};
+checkJoin([],1);checkJoin(['Chenko','Chenko'],1.5);
+checkJoin(['Chenko','Chenko','Chenko','Chenko'],2);
+checkJoin(['Chenko','Chenko','Amane','Amane'],2.25);
+checkJoin(['Chenko','Yeonwoo','Amane','Margot'],2.25);
+checkJoin(['Amadeus','Yeonwoo','Margot','Amane'],2.25);
+assert(2.25>2&&2>1.5,'4 Chenko > 2 Chenko but < 2+2');
+const five=checkJoin(['Chenko','Chenko','Amane','Amane','Margot'],2.25);
+assert.equal(five.active.length,4,'Never count five joiner skills');
+assert.equal(j.process(['Jabel'],n=>dict.get(n)).ready,false,
+ 'Unknown/random skills must NOT be silently modeled as known DamageUp effect_op');
+const damage=fs.readFileSync(path.join(__dirname,'damage-skills.js'),'utf8');
+assert(damage.includes('pointFactor*joinerMultiplier'),
+ 'Apply joiner multiplier to final index, not leader raw ATK/LET');
+const flow=fs.readFileSync(path.join(__dirname,'name-flow.js'),'utf8');
+assert(flow.includes('stack.process(sc.heroes,refSkill)'),'Scenarios must reference actual hero skills');
 assert(flow.includes('const plan=alloc.plan(model,C,combat,window.NRW_BEAR_CAPACITY)'),
- 'Damage and formation results must use same stock allocation');
-console.log('PASS stock conservation, scarcity, starter-vs-joins, mixed tiers and one unified optimizer');
+ 'Same troop plan for formation and damage output');
+console.log('PASS generation baseline, 5000 infantry, shared inventory, Joiner-first Archer scarcity, 4-slot effect_op stacking (1.5, 2, 2.25).');
