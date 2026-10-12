@@ -5,6 +5,14 @@
 'use strict';
 const table=[
 ['Deine Helden','Your heroes','Tes héros','Tus héroes'],
+['Hochkönig FC · Tödlichkeit %','High King FC · Lethality %','Haut Roi FC · Létalité %','Rey Supremo FC · Letalidad %'],
+['Hochkönig M · Angriff %','High King M · Attack %','Haut Roi M · Attaque %','Rey Supremo M · Ataque %'],
+['Hochkönig M · Kapazität','High King M · Capacity','Haut Roi M · Capacité','Rey Supremo M · Capacidad'],
+['Hochkönigboni: Werte aus dem Spiel eintragen. Nicht bestätigte Werte werden nicht geschätzt.','High King bonuses: enter the in-game values. Unconfirmed amounts are not estimated.','Bonus Haut Roi : saisir les valeurs du jeu. Les montants non confirmés ne sont pas estimés.','Bonificaciones del Rey Supremo: introduce los valores del juego. No se estiman valores sin confirmar.'],
+['FC · Wert bestätigen','FC · Confirm value','FC · Confirmer la valeur','FC · Confirmar valor'],
+['M · Werte bestätigen','M · Confirm values','M · Confirmer les valeurs','M · Confirmar valores'],
+['Boni identischer Ministerposten werden nicht doppelt addiert.','The same minister bonuses are not counted twice.','Les mêmes bonus ministériels ne sont pas comptés deux fois.','No se suman dos veces las mismas bonificaciones ministeriales.'],
+
 ["Ministerbuffs · König und Hochkönig","Minister buffs · King and High King","Bonus des ministres · Roi et Grand Roi","Bonos ministeriales · Rey y Gran Rey"],
 ["Aktiviere nur Posten, die während der Bärenfalle wirklich gelten.","Select only appointments active during the Bear Trap.","Active uniquement les postes en vigueur durant le piège à ours.","Activa solo los cargos vigentes durante la Trampa del Oso."],
 ["König","King","Roi","Rey"],
