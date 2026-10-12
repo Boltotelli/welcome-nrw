@@ -64,14 +64,14 @@ function prepare(model,reference,catalog,scores,own){
   assumptions:['independent-skill-proc','sourced-skill-levels',
    'unverified-damage-stacking','level5-bear-trap']};
 }
-function evaluate(prepared,counts,levels,stats,combat,joinAttack=0,joinLethality=0){
+function evaluate(prepared,counts,levels,stats,combat,joinerMultiplier=1){
  if(!prepared?.ready||!combat?.breakdown||!Array.isArray(counts))
   return {ready:false,reason:'missing-input'};
  const m=prepared.modifiers,values={...stats};
  for(let i=0;i<3;i++){
   const key=keys[i];
-  values[key+'Atk']=Number(stats[key+'Atk'])+m.attack+m.classAttack[i]+joinAttack;
-  values[key+'Let']=Number(stats[key+'Let'])+m.lethality+joinLethality;
+  values[key+'Atk']=Number(stats[key+'Atk'])+m.attack+m.classAttack[i];
+  values[key+'Let']=Number(stats[key+'Let'])+m.lethality;
  }
  const data=combat.breakdown(counts,values,levels,5);
  if(!data?.types||data.types.length!==3)return {ready:false,reason:'invalid-combat-breakdown'};
@@ -83,8 +83,13 @@ function evaluate(prepared,counts,levels,stats,combat,joinAttack=0,joinLethality
   high+=base*m.classDamage[i];
  }
  const pointFactor=1+prepared.valoraPoints/100;
- const lower=low*m.lowDamage*pointFactor;
- const upper=high*m.damage*pointFactor;
+ // Expedition joiner skills affect DamageUp effect_op, NOT a direct addition
+ // to the rally leader's Attack/Lethality percentages. Their stacking
+ // multiplier is applied after the base combat estimate.
+ if(!Number.isFinite(joinerMultiplier)||joinerMultiplier<1||joinerMultiplier>16)
+  return {ready:false,reason:'invalid-joiner-stacking'};
+ const lower=low*m.lowDamage*pointFactor*joinerMultiplier;
+ const upper=high*m.damage*pointFactor*joinerMultiplier;
  return {ready:true,estimatedIndex:lower,lower,upper,
   isUpperConditional:upper>lower+1e-6,unmodeled:prepared.unmodeled,
   classBreakdown:data.types.map((t,i)=>({type:keys[i],damage:t.damageTenRounds})),
