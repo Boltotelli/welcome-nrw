@@ -62,3 +62,20 @@ body.bear-name-mode>*:not(#bearNewApp){display:none!important}
 
 .bear-name-loading{display:grid;place-items:center;gap:10px;margin:20px auto;max-width:600px;padding:20px;border:1px solid #ffc47766;border-radius:22px;background:#1a293c;text-align:center;font-weight:800;color:#ffdc9c}
 .bear-name-loading video{width:min(100%,470px);max-height:400px;object-fit:contain;background:transparent;pointer-events:none}
+
+
+/* Compact, five Kingshot-style six-petal stars. Touch a star for full
+ * stars; +/- walks the six partial steps (T1..T5) between full stars.
+ * UI is deliberately no taller than the previous star-level selector.
+ */
+.bear-name-star-field{min-width:0;width:100%;margin:1px 0;box-sizing:border-box}
+.bear-name-star-controls{width:100%;display:grid;grid-template-columns:20px minmax(0,1fr) 20px;gap:2px;align-items:center;background:#0c1523;border:1px solid #34445a;border-radius:8px;padding:2px;box-sizing:border-box}
+.bear-name-star-step{width:20px;min-width:0;height:25px;min-height:25px;display:grid;place-items:center;margin:0;padding:0!important;color:#d7e4f0!important;background:#182536!important;border:1px solid #3e4b61!important;border-radius:6px!important;font-size:16px!important;font-weight:600!important;line-height:1!important;touch-action:manipulation}
+.bear-name-star-step:disabled{opacity:.27;cursor:default}
+.bear-name-star-flowers{min-width:0;display:flex;align-items:center;justify-content:space-between;gap:0}
+.bear-name-flower{display:flex;align-items:center;justify-content:center;flex:1 1 0;min-width:0;height:25px;min-height:25px;padding:1px 0!important;margin:0!important;border:0!important;background:transparent!important;cursor:pointer;touch-action:manipulation}
+.bear-name-flower svg{display:block;width:100%;max-width:20px;height:auto;max-height:22px;aspect-ratio:1/1;overflow:visible}
+.bear-name-flower.is-lit svg{filter:drop-shadow(0 0 1.5px #ffcb70b0)}
+.bear-name-flower:focus-visible,.bear-name-star-step:focus-visible{outline:2px solid #ffd18a!important;outline-offset:1px}
+.bear-name-sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+@media(max-width:480px){.bear-name-hero-fields{padding:4px}.bear-name-star-controls{grid-template-columns:18px minmax(0,1fr) 18px;gap:1px;padding:1px}.bear-name-star-step{width:18px;height:24px;min-height:24px}.bear-name-flower{height:24px;min-height:24px}}
