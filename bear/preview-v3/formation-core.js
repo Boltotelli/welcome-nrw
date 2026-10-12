@@ -1,7 +1,7 @@
 /* Inventory-constrained Bear Trap starter + join formation suggestions.
  * Uses ONLY scanned/owned heroes; no invented hero skill levels, no external
  * leader damage stats. One starter plus at most six parallel joins.
- * Join-priority 10/10/80 allocation, not a real-game damage optimizer.
+ * Generation-based general joiner baseline with inventory constraints; not guaranteed optimal for every leader.
  */
 (function(root){
 'use strict';
@@ -300,6 +300,40 @@ function optimizeCombined(targets,stock,joinWeights,ownWeights){
    remaining.some(n=>n<0))throw Error('Unsafe optimized stock/capacity');
  return rows;
 }
+// A joiner attacks with UNKNOWN rally-leader combat stats and hero skills.
+// T/TG base attack alone and an arbitrary +4% Archer factor cannot identify
+// the best mixture for an "average" leader. Use literature-backed
+// generation-specific Bear presets instead, adapting to actual march size.
+const GENERATION_BASELINES={
+  1:[10,30,60],2:[10,20,70],3:[10,10,80]
+};
+function highestOwnedGeneration(model,catalog){
+ const list=catalog?.heroes||[],owned=model?.v2?.scannedOwnedHeroes||[];
+ let found=1;
+ for(const name of owned){
+  const index=list.findIndex(h=>h.name===name);
+  if(index>=0)found=Math.max(found,index<16?1:Math.min(8,Math.floor((index-16)/3)+2));
+ }
+ return found;
+}
+function ratioForTarget(target,baseline){
+ const t=int(target);if(!t)return [0,0];
+ const [baseInf,baseCav]=baseline;
+ // Community guides recommend keeping ~5000 Infantry when the
+ // march is large enough, instead of applying literal 1%=1800.
+ // For smaller marches the upper floor is 10% of capacity.
+ const i=Math.max(Math.round(t*baseInf/100),
+  Math.min(5000,Math.round(t*0.10)));
+ const c=Math.round(t*baseCav/100);
+ const cappedI=Math.min(i,Math.max(0,t-c));
+ return [100*cappedI/t,100*c/t];
+}
+function joinerBaseline(model,catalog){
+ const generation=highestOwnedGeneration(model,catalog);
+ const proportions=GENERATION_BASELINES[generation]||[1,10,89];
+ return {generation,proportions,
+  source:'Community generation-based Bear joiner baseline; unverified per-leader optimum'};
+}
 function plan(model,catalog,combat,capacityCore){
  const v=model?.values||{},cap=capacityCore?.breakdown(model,catalog);
  const stock=availableStock(model);
@@ -331,13 +365,14 @@ function plan(model,catalog,combat,capacityCore){
  const availableTotal=stock.reduce((a,b)=>a+b,0),demand=caps.reduce((a,b)=>a+b,0);
  const total=Math.min(availableTotal,demand);
  if(total===0)return {ready:false,missing:['capacity'],stock,marches,selected};
- // Optimize the source √troops model: simultaneous stock and capacity,
- // soft Join Archer priority; unknown-leader-neutral troop class efficiencies.
- // Own starter uses personal class stats and sourced hero effects when entered.
+ // For JOINERS the leader's effective stats are unknown. Select an
+ // average Gen-based Bear ratio instead of maximizing arbitrary T/TG
+ // √troop weights. Scarce archers go to JOIN marches first. Each
+ // unit is assigned exactly once and not beyond a march's capacity.
  const targets=splitShares(total,caps);
- const neutral=typeWeights(model,combat);
- const starter=starterWeights(model,combat,neutral,catalog);
- const actual=optimizeCombined(targets,stock,neutral,starter.weights);
+ const baseline=joinerBaseline(model,catalog);
+ const perMarch=targets.map(target=>ratioForTarget(target,baseline.proportions));
+ const actual=allocate(targets,stock,perMarch[0],perMarch.slice(1));
  const engineReady=Boolean(combat?.ready&&combat?.configure&&combat?.damage);
  const tiers=engineReady?combat.configure(model.v2):null;
  const useDamage=engineReady&&combat.ready(v,tiers);
@@ -352,11 +387,11 @@ function plan(model,catalog,combat,capacityCore){
  return {ready:true,stock,used,leftover,targets,total,availableTotal,demand,
   marches:marches.map((m,i)=>({...m,troops:actual[i],ratio:ratios[i],filled:actual[i].reduce((a,b)=>a+b,0),
    shortage:Math.max(0,m.capacity-actual[i].reduce((a,b)=>a+b,0))})),
-  starterScore:full,scoreType:'inventory-constrained-expected-damage',
-  ratioMethod:starter.personal?'starter-personal-and-join-neutral':'neutral-hero-independent',
+  starterScore:full,scoreType:'community-joiner-bear-baseline',
+  ratioMethod:'generation-based-average-joiner',joinerBaseline:baseline,
   allHeroLevelsKnown:marches.every(m=>m.capacityKnown),
   allHeroesAssigned:marches.every(m=>m.missingHeroSlots===0),
   joinCount:selected.joins.length,selected};
 }
-root.NRW_BEAR_FORMATION={plan,chooseHeroes,JOIN_PRIORITIES,allocateStock:allocate,integerPercentages,availableStock,typeWeights,starterWeights,optimumMix,optimizeCombined};
+root.NRW_BEAR_FORMATION={plan,chooseHeroes,JOIN_PRIORITIES,allocateStock:allocate,integerPercentages,availableStock,joinerBaseline,ratioForTarget};
 })(window);
