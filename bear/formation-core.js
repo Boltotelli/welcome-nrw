@@ -175,15 +175,6 @@ function availableStock(model){
 const GENERATION_BASELINES={
   1:[10,30,60],2:[10,20,70],3:[10,10,80]
 };
-function highestOwnedGeneration(model,catalog){
- const list=catalog?.heroes||[],owned=model?.v2?.scannedOwnedHeroes||[];
- let found=1;
- for(const name of owned){
-  const index=list.findIndex(h=>h.name===name);
-  if(index>=0)found=Math.max(found,index<16?1:Math.min(8,Math.floor((index-16)/3)+2));
- }
- return found;
-}
 function ratioForTarget(target,baseline){
  const t=int(target);if(!t)return [0,0];
  const [baseInf,baseCav]=baseline;
@@ -197,10 +188,17 @@ function ratioForTarget(target,baseline){
  return [100*cappedI/t,100*c/t];
 }
 function joinerBaseline(model,catalog){
- const generation=highestOwnedGeneration(model,catalog);
+ // NRW #1044 is in the late-game (Gen4+) Bear meta. The age of the
+ // kingdom is NOT the generation of the player's strongest owned hero:
+ // a small account without Gen4+ heroes still joins late-game leaders.
+ // An explicit server generation, if known from a future import, takes
+ // precedence. Never infer kingdom age from hero ownership.
+ const raw=model?.v2?.kingdomGeneration;
+ const number=Number(raw);
+ const generation=Number.isInteger(number)&&number>=1&&number<=8?number:4;
  const proportions=GENERATION_BASELINES[generation]||[1,10,89];
  return {generation,proportions,
-  source:'Community generation-based Bear joiner baseline; unverified per-leader optimum'};
+  source:'Gen4+ community Bear joiner baseline for kingdom 1044; rally-leader unknown'};
 }
 function plan(model,catalog,combat,capacityCore){
  const v=model?.values||{},cap=capacityCore?.breakdown(model,catalog);
