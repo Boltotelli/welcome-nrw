@@ -132,22 +132,32 @@ function configure(v2){
 }
 // Optional per-march allocation consumes the best available tiers ONCE,
 // instead of reusing the same strong troops in every simultaneous march.
-function allocateLevels(marches,levels){
+function allocateLevels(marches,levels,prioritizeJoinArchers=false){
  if(!Array.isArray(marches)||!Array.isArray(levels))return null;
- const remaining=levels.map((lvl,i)=>Array.isArray(lvl?.groups)?
-  lvl.groups.map(g=>({...g,attack:troopAttack(troopKeys[i],g.tier,g.tg)})).sort((a,b)=>b.attack-a.attack):null);
- return marches.map(row=>levels.map((lvl,i)=>{
-  if(!remaining[i])return lvl;
-  let required=Number(row[i])||0;
-  const allocated=[];
-  for(const g of remaining[i]){
-   const n=Math.min(required,g.count);
-   if(n>0){allocated.push({tier:g.tier,tg:g.tg,count:n});g.count-=n;required-=n;}
-   if(required<=0)break;
+ const results=marches.map(()=>Array(3).fill(null));
+ for(let type=0;type<3;type++){
+  const lvl=levels[type];
+  if(!Array.isArray(lvl?.groups)){
+   for(let march=0;march<marches.length;march++)results[march][type]=lvl;
+   continue;
   }
-  if(required>0)return {tier:0,tg:null};
-  return {tier:null,tg:null,groups:allocated};
- }));
+  const remaining=lvl.groups.map(g=>({...g,attack:troopAttack(troopKeys[type],g.tier,g.tg)}))
+   .sort((a,b)=>b.attack-a.attack);
+  const order=prioritizeJoinArchers&&type===2&&marches.length>1?
+   [...marches.keys()].slice(1).concat(0):[...marches.keys()];
+  for(const march of order){
+   let required=Number(marches[march][type])||0;
+   const allocated=[];
+   for(const g of remaining){
+    if(required<=0)break;
+    const count=Math.min(required,g.count);
+    if(count>0){allocated.push({tier:g.tier,tg:g.tg,count});g.count-=count;required-=count;}
+   }
+   results[march][type]=required>0?{tier:0,tg:null}:{tier:null,tg:null,groups:allocated};
+  }
+ }
+ return results;
 }
+
 root.NRW_BEAR_COMBAT={troopKeys,attack,troopAttack,ready,damage,breakdown,configure,allocateLevels,attackForGroup,statKeys};
 })(window);
