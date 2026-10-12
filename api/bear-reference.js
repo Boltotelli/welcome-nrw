@@ -2,7 +2,7 @@
  * Tool schemas are discovered, not guessed. No player account OAuth here.
  * Hero artwork is only referenced if KAC returns an approved HTTPS image URL.
  */
-const ALLOWED=new Set(('Olive Edwin Forrest Seth Quinn Diana Amane Yeonwoo Chenko Amadeus Helga Jabel Howard Saul Fahd Gordon Eric Jaeger Petra Alcar Margot Rosa Vivian Hilde Marlin Sophia Triton Yang Ava Charles').split(' ').concat(['Long Fei','Wee & Woo','Zoe','Thrud','Luna','Liz','Diego']));
+const ALLOWED=new Set(('Olive Edwin Forrest Seth Quinn Diana Amane Yeonwoo Chenko Amadeus Helga Jabel Howard Saul Fahd Gordon Eric Jaeger Jaegar Petra Alcar Margot Rosa Vivian Hilde Marlin Sophia Triton Yang Ava Charles').split(' ').concat(['Long Fei','Wee & Woo','Zoe','Thrud','Luna','Liz','Diego']));
 const endpoint='https://api.kingshotcommand.com/mcp';
 async function rpc(method,params){
  const response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json',
@@ -30,7 +30,8 @@ function findArt(node,seen=new Set(),depth=0){
 module.exports=async function handler(req,res){
  res.setHeader('Cache-Control','public, max-age=3600, s-maxage=86400');
  if(req.method!=='GET')return res.status(405).json({error:'method'});
- const hero=String(req.query.hero||'').trim();
+ const requested=String(req.query.hero||'').trim();
+ const hero=requested==='Jaegar'?'Jaeger':requested;
  if(!ALLOWED.has(hero))return res.status(400).json({error:'unknown-hero'});
  try{
   const tools=await rpc('tools/list');
