@@ -182,14 +182,13 @@ const GENERATION_BASELINES={
 function ratioForTarget(target,baseline){
  const t=int(target);if(!t)return [0,0];
  const [baseInf,baseCav]=baseline;
- // Community guides recommend keeping ~5000 Infantry when the
- // march is large enough, instead of applying literal 1%=1800.
- // For smaller marches the upper floor is 10% of capacity.
- const i=Math.max(Math.round(t*baseInf/100),
-  Math.min(5000,Math.round(t*0.10)));
- const c=Math.round(t*baseCav/100);
- const cappedI=Math.min(i,Math.max(0,t-c));
- return [100*cappedI/t,100*c/t];
+ // A late-generation 1/10/89 is a community starting point,
+ // NOT a mandate to bring 5,000 ATTACKING Infantry. In the
+ // published combat formula, 5,000 denotes the DEFENDING Bear army
+ // and the army_min factor. No abrupt Infantry threshold was shown.
+ const i=Math.min(t,Math.max(0,Math.round(t*baseInf/100)));
+ const c=Math.min(t-i,Math.max(0,Math.round(t*baseCav/100)));
+ return [100*i/t,100*c/t];
 }
 function joinerBaseline(model,catalog){
  // NRW #1044 is in the late-game (Gen4+) Bear meta. The age of the
@@ -208,7 +207,7 @@ function joinerBaseline(model,catalog){
 /* Relative total-damage allocation. No real leader stats are known.
  * Approximate each march's damage as sum(classWeight * sqrt(classTroops *
  * min(allTroops,5000))).  Class weights are calibrated to the community
- * reference ratios (Gen4+ ~1/10/89, 5k infantry minimum on large marches).
+ * reference ratios (Gen4+ ~1/10/89; 5k is the DEFENDING Bear army).
  * We compare MARGINAL increases between own starter and all joins,
  * consuming actual troop stock once. Foreign strength is a user-selected
  * scenario (weaker/similar/stronger), not a measured player stat.
@@ -286,26 +285,14 @@ function expectedWeights(targets,model,catalog,combat,stock){
  });
  return {weights,baseline,relative};
 }
-function minimumInfantry(target){
- const count=int(target);
- if(!count)return 0;
- // Kingshot Bear join community rule: roughly 5,000 Infantry on large
- // marches, or 10% for small marches. This is a FORMATION constraint,
- // not a verified game-engine damage bonus. Never fabricate missing troops.
- return Math.min(count,Math.max(Math.ceil(count/100),Math.min(5000,Math.round(count*.1))));
-}
 function allocateByMarginal(targets,stock,weights){
  const rows=targets.map(()=>[0,0,0]),remaining=stock.map(int);
- // Reserve a practical minimum Infantry amount for every active march.
- // Only what is physically in inventory is assigned. In extreme Infantry
- // shortage, proportionally share what's available rather than show
- // fictional 5k Infantry or misleading rounded 0% on a populated march.
- const floors=targets.map(minimumInfantry),needed=floors.reduce((a,b)=>a+b,0);
- const initial=needed>remaining[0]?splitShares(remaining[0],floors):floors;
- for(let i=0;i<rows.length;i++)rows[i][0]=initial[i];
- remaining[0]-=initial.reduce((a,b)=>a+b,0);
+ // No arbitrary class minimum: compare the actual marginal estimated
+ // benefit of each troop type using the same continuous damage model.
+ // Special hero-activation rules must be supported by evidence before
+ // being enforced as a hard requirement.
  let left=Math.min(targets.reduce((n,x)=>n+int(x),0),
-  stock.reduce((n,x)=>n+int(x),0))-initial.reduce((a,b)=>a+b,0);
+  remaining.reduce((n,x)=>n+x,0));
  // Coarse-to-fine marginal allocation is O(21 * allocated/512), and
  // always respects one global inventory and per-march capacity.
  // Test all candidate increments with the exact same concave scoring
@@ -337,8 +324,7 @@ function allocateByMarginal(targets,stock,weights){
  }
  if(left>0||remaining.some(n=>n<0)||rows.some((r,i)=>
   r.reduce((a,b)=>a+b,0)>targets[i]))throw Error('Unsafe expected-damage allocation');
- return {rows,remaining,infantryShortage:initial.some((n,i)=>n<floors[i]),
-  infantryFloor:floors,modeledTotal:rows.reduce((sum,row,i)=>
+ return {rows,remaining,modeledTotal:rows.reduce((sum,row,i)=>
   sum+scoreFor(row,weights[i]),0)};
 }
 function plan(model,catalog,combat,capacityCore){
@@ -404,10 +390,9 @@ function plan(model,catalog,combat,capacityCore){
   starterScore:full,scoreType:'community-joiner-bear-baseline',
   ratioMethod:'marginal-expected-damage',joinerBaseline:baseline,
   leaderStrength,tierPriority,modeledTotal:distribution.modeledTotal,
-  infantryShortage:distribution.infantryShortage,infantryFloor:distribution.infantryFloor,
   allHeroLevelsKnown:marches.every(m=>m.capacityKnown),
   allHeroesAssigned:marches.every(m=>m.missingHeroSlots===0),
   joinCount:selected.joins.length,selected};
 }
-root.NRW_BEAR_FORMATION={plan,chooseHeroes,JOIN_PRIORITIES,allocateStock:allocate,integerPercentages,availableStock,joinerBaseline,ratioForTarget,scenario,scoreFor,expectedWeights,allocateByMarginal,minimumInfantry};
+root.NRW_BEAR_FORMATION={plan,chooseHeroes,JOIN_PRIORITIES,allocateStock:allocate,integerPercentages,availableStock,joinerBaseline,ratioForTarget,scenario,scoreFor,expectedWeights,allocateByMarginal};
 })(window);
