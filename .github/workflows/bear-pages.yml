@@ -201,6 +201,12 @@ jobs:
           ref: main
           path: v3-latest
           persist-credentials: false
+      - name: Install lightweight video encoder for preview cloud loader
+        run: |
+          if ! command -v ffmpeg >/dev/null 2>&1; then
+            sudo apt-get update -qq
+            sudo apt-get install -y --no-install-recommends ffmpeg
+          fi
       - name: Add isolated V3 route to GitHub Pages artifact
         run: |
           mkdir -p _site/bear/assets _site/bear/preview-v3
