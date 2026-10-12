@@ -499,18 +499,12 @@ async function loadingSequence(kind){
   await new Promise(resolve=>{
    let finished=false;
    const finish=()=>{if(finished)return;finished=true;clearTimeout(timer);resolve();};
-   let usingFallback=false;
-   const fallback=()=>{
-    if(!usingFallback){
-     usingFallback=true;
-     video.src='./assets/kingshot_cloud_damage_loading.webm';
-     video.load?.();
-     video.play?.().catch(()=>{video.hidden=true;clouds.hidden=false;setTimeout(finish,4200);});
-    }else{video.hidden=true;clouds.hidden=false;setTimeout(finish,4200);}
-   };
+   // Do not serve a pixelated downscaled copy of the provided animation.
+   // If this browser cannot decode VP9, show the non-video CSS fallback.
+   const fallback=()=>{video.hidden=true;clouds.hidden=false;setTimeout(finish,4200);};
    const timer=setTimeout(finish,15000);
    video.addEventListener('ended',finish,{once:true});
-   video.addEventListener('error',fallback);
+   video.addEventListener('error',fallback,{once:true});
    video.play?.().catch(fallback);
   });
  }
