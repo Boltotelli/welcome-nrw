@@ -226,13 +226,10 @@ jobs:
           fi
           cp v3-latest/bear/assets/pet-valora-sprite.webp _site/bear/assets/
           test -s _site/bear/assets/pet-valora-sprite.webp
-          # Two real loading videos: provided hero-selection WebM and
-          # a short original cloud clip generated for damage calculation.
-          # Actual user-provided animated Bear smoke video, re-encoded to
-          # a lightweight mobile VP9 WebM; NOT the generated emoji animation.
-          cat v3-latest/bear/preview-v3/cloud-source-parts/*.b64 | base64 --decode > _site/bear/assets/kingshot_cloud_damage_loading.webm
-          echo "2236322722c90d075e7cfb45722b305891201fd136c58295c60253828c0579d8  _site/bear/assets/kingshot_cloud_damage_loading.webm" | sha256sum --check
-          test -s _site/bear/assets/kingshot_cloud_damage_loading.webm
+          # Verify bit-identical copy of the user's ORIGINAL VP9 source
+          # (512 x 512, 5.0 s, 2,003,443 bytes). Never re-encode or upscale.
+          test -s _site/bear/assets/kingshot_beartrap_v3_action_transparent.webm
+          echo "822e9bd9d5c4a3221539357dddfc05f512b839d1b6f35e747a014cc47315b93b  _site/bear/assets/kingshot_beartrap_v3_action_transparent.webm" | sha256sum --check
           cp v3-latest/assets/nrw-banner.svg _site/bear/assets/nrw-banner.svg
           cp _site/hero-reference.json _site/bear/hero-reference.json
           node --check _site/bear/preview-v3/skill-effects.js
@@ -261,10 +258,10 @@ jobs:
           grep -Fq 'Mighty Bison' _site/bear/preview-v3/name-flow.js
           grep -Fq 'bear-name-languages' _site/bear/preview-v3/name-flow.js
           grep -Fq 'Formationen berechnen' _site/bear/preview-v3/name-flow.js
-          grep -Fq 'kingshot_cloud_damage_loading.webm' _site/bear/preview-v3/name-flow.js
+          grep -Fq 'kingshot_beartrap_v3_action_transparent.webm' _site/bear/preview-v3/name-flow.js
           grep -Fq '.bear-name-formations-grid' _site/bear/preview-v3/name-flow.css
           if command -v ffprobe >/dev/null; then
-            ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1 _site/bear/assets/kingshot_cloud_damage_loading.webm
+            ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1 _site/bear/assets/kingshot_beartrap_v3_action_transparent.webm
           fi
           grep -Fq 'saveLocal();refreshHeroRecommendations()' _site/bear/preview-v3/name-flow.js
           # Hero stars: five clickable six-petal flowers, +/- and live result.
