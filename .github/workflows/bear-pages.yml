@@ -243,6 +243,9 @@ jobs:
           grep -Fq 'function formationCards()' _site/bear/preview-v3/name-flow.js
           grep -Fq 'Schadenswert berechnen' _site/bear/preview-v3/name-flow.js
           grep -Fq 'bear-name-game-icon' _site/bear/preview-v3/name-flow.js
+          grep -Fq 'Ironclad War Bear' _site/bear/preview-v3/name-flow.js
+          grep -Fq 'ursas-rage.webp' _site/bear/preview-v3/name-flow.js
+          grep -Fq 'Mighty Bison' _site/bear/preview-v3/name-flow.js
           grep -Fq 'bear-name-languages' _site/bear/preview-v3/name-flow.js
           grep -Fq 'Formationen berechnen' _site/bear/preview-v3/name-flow.js
           grep -Fq 'kingshot_cloud_damage_loading.webm' _site/bear/preview-v3/name-flow.js
