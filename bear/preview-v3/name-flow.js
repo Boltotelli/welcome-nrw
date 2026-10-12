@@ -584,6 +584,11 @@ function refreshHeroRecommendations(){
  if(!name||!mode)return;
  const current=document.getElementById('bearHeroRecommendation');
  if(!current)return;
+ // New hero reference data can change damage even when the best three
+ // hero names stay identical; discard both old result views and the cache.
+ cachedFormationPlan=null;
+ document.getElementById('bearFormationResult')?.remove();
+ document.getElementById('bearAdvancedResult')?.remove();
  // Only the recommendation panel is rebuilt. Keep the clicked star/widget
  // selector, all expanded seasons, and the scroll position untouched.
  const previous=Array.isArray(state().v2.ownHeroes)?state().v2.ownHeroes.slice():[];
