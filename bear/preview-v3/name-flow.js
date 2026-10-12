@@ -20,7 +20,14 @@ const title=(txt,tag='h2')=>el(tag,'',txt);
 const button=(txt,fn,cls='bear-name-btn')=>{const b=el('button',cls,txt);b.type='button';b.addEventListener('click',fn);return b;};
 function state(){const m=B.model();m.v2=m.v2||{};m.values=m.values||{};m.v2.manualHeroes=m.v2.manualHeroes||{};m.v2.scannedOwnedHeroes=m.v2.scannedOwnedHeroes||[];return m;}
 function keyForName(value){return 'nrw_bear_name_edit_v1:'+value.normalize('NFKC').toLowerCase().trim();}
-function saveLocal(){B.save();dirty=true;clearTimeout(syncTimer);syncTimer=setTimeout(push,1400);}
+function saveLocal(){
+ B.save();dirty=true;
+ // Never keep already calculated formations or damage after inputs change.
+ document.getElementById('bearFormationResult')?.remove();
+ document.getElementById('bearAdvancedResult')?.remove();
+ lastResult=null;
+ clearTimeout(syncTimer);syncTimer=setTimeout(push,1400);
+}
 function showStatus(s,error=false){status.textContent=s;status.classList.toggle('error',error);}
 function numberField(label,value,onChange,options={}){
  const wrap=el('label','bear-name-field'),span=el('span','',label),input=el('input');
@@ -259,7 +266,13 @@ function troopsSection(required){
  function update(){for(const [i,type] of CL.entries())m.values[['troopsI','troopsC','troopsA'][i]]=(v.troopGroups||[])
   .filter(g=>g.type===type).reduce((n,g)=>n+Math.max(0,Number(g.count)||0),0);saveLocal();}
  section.append(rows,button('+ Truppen hinzufügen',()=>{v.troopGroups=v.troopGroups||[];v.troopGroups.push({type:'archer',tier:10,tg:0,count:1});update();redraw();}));
- redraw();if(!required)section.append(el('p','bear-name-muted','Optional für die schnelle Heldenempfehlung.'));
+ redraw();
+ if(!required)section.append(
+  numberField('Marschkapazität ohne Helden (optional)',m.values.cap,x=>{
+   if(x===null)delete m.values.cap;else m.values.cap=x;saveLocal();
+  },{min:1,max:1000000}),
+  el('p','bear-name-muted','Mit Marschkapazität und Truppenbestand werden genaue Stückzahlen pro Marsch berechnet.')
+ );
  return section;
 }
 function scalarSection(){
@@ -446,13 +459,26 @@ async function loadingSequence(kind){
    video.play?.().catch(finish);
   });
  }else{
+  // Real 5-second cloud WebM is generated from source by the GitHub Pages
+  // build; CSS provides the fallback if a browser cannot play VP8 WebM.
+  const video=el('video','bear-name-cloud-video');
+  video.src='./assets/kingshot_cloud_damage_loading.webm';
+  video.autoplay=true;video.muted=true;video.playsInline=true;video.preload='auto';
   const clouds=el('div','bear-name-cloud-scene');
   for(let i=0;i<4;i++){const cloud=el('span','bear-name-cloud cloud-'+i,'☁');clouds.append(cloud);}
   clouds.append(el('span','bear-name-cloud-center','⚡'));
-  loading.append(clouds,text);box.append(loading);loading.scrollIntoView({behavior:'smooth'});
-  // The cloud effect is separate from the selection video; this is a
-  // CSS animation, not an invented claim that the old cloud WebM was present.
-  await new Promise(done=>setTimeout(done,4200));
+  clouds.hidden=true;
+  loading.append(video,clouds,text);box.append(loading);loading.scrollIntoView({behavior:'smooth'});
+  await new Promise(resolve=>{
+   let finished=false;
+   const finish=()=>{if(finished)return;finished=true;clearTimeout(timer);resolve();};
+   const fallback=()=>{video.hidden=true;clouds.hidden=false;
+    setTimeout(finish,4200);};
+   const timer=setTimeout(finish,12000);
+   video.addEventListener('ended',finish,{once:true});
+   video.addEventListener('error',fallback,{once:true});
+   video.play?.().catch(fallback);
+  });
  }
  loading.remove();
 }
