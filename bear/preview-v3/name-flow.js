@@ -309,19 +309,31 @@ function scalarSection(){
   img.onerror=()=>{img.onerror=null;img.style.visibility='hidden';};
   return img;
  };
+ // These six images are genuine in-game art cropped from the supplied
+ // screenshots: Rhino, Panther, Bear, Moose, Bison, Valora.
+ const gameIcon=(n)=>{
+  const positions={'Giant Rhino':0,'Black Panther':1,'War Bear':2,'Moose':3,'Mighty Bison':4,'Valora':5};
+  const span=el('span','bear-name-buff-icon bear-name-game-icon');
+  span.setAttribute('role','img');span.setAttribute('aria-label',n);
+  span.style.backgroundImage="url('./assets/pet-valora-sprite.webp')";
+  span.style.backgroundPosition=(Number(positions[n]||0)*20)+'% center';
+  return span;
+ };
+ const petNames={'Giant Rhino':'Riesennashorn','Black Panther':'Schwarzer Panther',
+  'War Bear':'Kriegsbär','Moose':'Elch','Mighty Bison':'Mächtiger Bison'};
  for(const n of ['Giant Rhino','Black Panther','War Bear','Moose','Mighty Bison']){
   const pet=(C.pets||[]).find(p=>p.name===n||(n==='Moose'&&p.name==='Great Moose'));
   const line=el('div','bear-name-buff-card'),lab=el('label','bear-name-buff-title'),check=el('input');
   check.type='checkbox';check.checked=!!v.petActive[n];
   check.onchange=()=>{v.petActive[n]=check.checked;saveLocal();};
-  lab.append(check,assetImg(pet?.img||'',n),el('span','',n==='Moose'?'Elch':n));
+  lab.append(check,gameIcon(n),el('span','',petNames[n]));
   line.append(lab,numberField('Fähigkeitslevel',v.petSkillRanks[n],x=>{
    if(x===null)delete v.petSkillRanks[n];else v.petSkillRanks[n]=x;saveLocal();
   },{min:1,max:10}));
   petGrid.append(line);
  }
  const skills=el('div','bear-name-buff-card bear-name-valora'),valoraSkill=(C.valora||[]).find(x=>x.name==='Savage Advantage');
- const valoraPicture=assetImg(valoraSkill?.img||'','Valora');
+ const valoraPicture=gameIcon('Valora');
  const valoraTitle=el('div','bear-name-buff-title');valoraTitle.append(valoraPicture,el('strong','','Valora'));
  skills.append(valoraTitle);
  const skillRows=el('div','bear-name-valora-skills');
