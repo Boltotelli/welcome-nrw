@@ -6,28 +6,40 @@
  */
 (function(root){
 'use strict';
-const FC_LETHALITY=10,MARSHAL_ATTACK=5,MARSHAL_CAPACITY=2500;
+const KING={fcLethality:10,marshalAttack:5,marshalCapacity:2500};
 function active(model){
- const source=model?.v2?.ministers||{};
- const flags={king:{fc:false,m:false},highKing:{fc:false,m:false}};
- for(const group of ['king','highKing']){
-  const entry=source[group]||{};
-  flags[group]={fc:entry.fc===true,m:entry.m===true};
- }
- return flags;
+ const src=model?.v2?.ministers||{};
+ return {king:{fc:src.king?.fc===true,m:src.king?.m===true},
+  highKing:{fc:src.highKing?.fc===true,m:src.highKing?.m===true}};
 }
 function derived(model){
- const flags=active(model);
- const fc=flags.king.fc||flags.highKing.fc;
- const m=flags.king.m||flags.highKing.m;
- return {flags,fc,m,
-  sources:[...(flags.king.fc?['King FC']:[]),
-   ...(flags.highKing.fc?['High King FC']:[]),
-   ...(flags.king.m?['King Marshal']:[]),
-   ...(flags.highKing.m?['High King Marshal']:[])],
-  lethality:fc?FC_LETHALITY:0,
-  attack:m?MARSHAL_ATTACK:0,
-  capacity:m&&!model?.v2?.ministerCapacityInBase?MARSHAL_CAPACITY:0,
+ const flags=active(model),data=model?.v2?.ministers?.highKingValues||{};
+ const asVerified=(name,max)=>{
+  if(data[name]===undefined||data[name]===null||data[name]==='')return null;
+  const n=Number(data[name]);
+  return Number.isFinite(n)&&n>=0&&n<=max?n:null;
+ };
+ const wantsHigh=flags.highKing.fc||flags.highKing.m;
+ const high={fcLethality:asVerified('fcLethality',100),
+  marshalAttack:asVerified('marshalAttack',100),
+  marshalCapacity:asVerified('marshalCapacity',100000)};
+ const unconfirmed=(flags.highKing.fc&&high.fcLethality===null)||
+  (flags.highKing.m&&(high.marshalAttack===null||!Number.isInteger(high.marshalCapacity)));
+ // Do not assume High King posts have King's ordinary numbers: reference
+ // descriptions say High King appointments are stronger, but exact numbers
+ // remain unverified. Ignore them until the player enters in-game values.
+ const fc=flags.king.fc||flags.highKing.fc,m=flags.king.m||flags.highKing.m;
+ const lethal=Math.max(flags.king.fc?KING.fcLethality:0,
+  flags.highKing.fc?(high.fcLethality||0):0);
+ const attack=Math.max(flags.king.m?KING.marshalAttack:0,
+  flags.highKing.m?(high.marshalAttack||0):0);
+ const capacity=Math.max(flags.king.m?KING.marshalCapacity:0,
+  flags.highKing.m?(high.marshalCapacity||0):0);
+ return {flags,fc,m,unconfirmedHighKing:unconfirmed,
+  sources:[...(flags.king.fc?['King FC']:[]),...(flags.highKing.fc?['High King FC']:[]),
+   ...(flags.king.m?['King Marshal']:[]),...(flags.highKing.m?['High King Marshal']:[])],
+  lethality:lethal,attack,
+  capacity:!model?.v2?.ministerCapacityInBase?capacity:0,
   statCaptured:model?.v2?.ministerBuffCapturedInStats===true,
   noDoubleStack:true};
 }
@@ -41,6 +53,5 @@ function applyStats(model,stats){
  return result;
 }
 root.NRW_BEAR_MINISTERS={derived,applyStats,active,
- metadata:{fieldCommanderLethality:FC_LETHALITY,marshalAttack:MARSHAL_ATTACK,
- marshalCapacity:MARSHAL_CAPACITY,assumption:'same-position-court-buffs-not-double-counted'}};
+ metadata:{...KING,assumption:'same-position-court-buffs-not-double-counted'}};
 })(window);
