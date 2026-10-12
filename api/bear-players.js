@@ -51,6 +51,7 @@ function pickData(v){
   const n=Number(v.petSkillRanks?.[k]);if(Number.isInteger(n)&&n>=1&&n<=10)out.petSkillRanks[k]=n;
  }
  out.combatStatOrigin=['separate-overview','combined-report'].includes(v.combatStatOrigin)?v.combatStatOrigin:'combined-report';
+ out.petBuffCapturedInStats=v.petBuffCapturedInStats===true;
  return out;
 }
 async function gh(path,method='GET',body){
