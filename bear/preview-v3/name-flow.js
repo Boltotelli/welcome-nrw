@@ -519,12 +519,11 @@ function summaryHeroes(){
  const {picked,groups}=rankAndSelect(),v=state().v2,section=el('section','bear-name-panel');
  section.id='bearHeroRecommendation';
  section.append(title('Empfohlene Starter'),el('p','bear-name-muted',
-  'Die Heldenwahl ist modellbasiert. Alle Helden sind Level 80, die Skills werden aus Sternen als maximal ausgebaut angenommen.'));
+  'Aus deinen ausgewählten Helden.'));
  const starter=el('div','bear-name-picks');
  picked.forEach((n,i)=>{const h=el('div','bear-name-pick'),hero=heroList.find(x=>x.name===n);
   if(hero){const img=el('img');img.src=heroInfoCache[n]?.imageUrl||hero.img;img.alt='';h.append(img);}
   h.append(el('strong','',LABEL[i]),el('span','',n||'Noch kein passender Held'));
-  if(groups[i]?.best?.confidence)h.append(el('small','',groups[i].best.confidence==='higher'?'Werte geprüft':'Schätzung – Werte ergänzen'));
   starter.append(h);
  });section.append(starter);
 
