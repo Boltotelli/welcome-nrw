@@ -217,8 +217,10 @@ jobs:
           test -s _site/bear/assets/pet-valora-sprite.webp
           # Two real loading videos: provided hero-selection WebM and
           # a short original cloud clip generated for damage calculation.
-          command -v ffmpeg
-          python3 v3-latest/bear/preview-v3/build-cloud-video.py _site/bear/assets/kingshot_cloud_damage_loading.webm
+          # Actual user-provided animated Bear smoke video, re-encoded to
+          # a lightweight mobile VP9 WebM; NOT the generated emoji animation.
+          cat v3-latest/bear/preview-v3/cloud-source-parts/*.b64 | base64 --decode > _site/bear/assets/kingshot_cloud_damage_loading.webm
+          echo "2236322722c90d075e7cfb45722b305891201fd136c58295c60253828c0579d8  _site/bear/assets/kingshot_cloud_damage_loading.webm" | sha256sum --check
           test -s _site/bear/assets/kingshot_cloud_damage_loading.webm
           cp v3-latest/assets/nrw-banner.svg _site/bear/assets/nrw-banner.svg
           cp _site/hero-reference.json _site/bear/hero-reference.json
