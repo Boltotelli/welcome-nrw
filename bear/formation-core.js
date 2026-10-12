@@ -251,15 +251,53 @@ function distributeMix(targets,mix){
 }
 function optimizeCombined(targets,stock,joinWeights,ownWeights){
  if(!targets.length)return [];
- const joined=targets.slice(1),joinNeed=joined.reduce((n,x)=>n+x,0);
- const joinMix=optimumMix(joinNeed,stock,joinWeights);
- const joins=distributeMix(joined,joinMix);
- const left=stock.map((n,k)=>n-joinMix[k]);
- const starter=optimumMix(targets[0],left,ownWeights);
- const rows=[starter,...joins];
- const used=stock.map((_,k)=>rows.reduce((n,r)=>n+r[k],0));
- if(used.some((n,k)=>n>stock[k])||rows.some((r,i)=>
-  r.reduce((n,x)=>n+x,0)>targets[i]))throw Error('Unsafe optimized stock/capacity');
+ const rows=targets.map(()=>[0,0,0]);
+ const remaining=stock.slice();
+ const positive=target=>Math.max(0,int(target));
+ const desired=targets.map(positive);
+ const weights=targets.map((_,i)=>{
+  if(i!==0)return joinWeights.map((w,k)=>w*(k===2?1.04:1));
+  // Normalize unknown-leader and self weights to the same global scale.
+  // This lets own stats alter the optimal RATIO, but cannot make our
+  // rally monopolize the stock over unknown external rally leaders.
+  const ownTotal=ownWeights.reduce((a,b)=>a+b,0);
+  const joinTotal=joinWeights.reduce((a,b)=>a+b,0);
+  return ownWeights.map(x=>x*joinTotal/Math.max(1,ownTotal));
+ });
+ // Greedy discretized concave maximization of Σw*sqrt(n), subject
+ // to ALL march-capacity and shared troop-class constraints at once.
+ // The 4% Archer preference is a transparent join-priority policy,
+ // not an assertion about another player's unknown rally stats.
+ let left=Math.min(desired.reduce((a,b)=>a+b,0),stock.reduce((a,b)=>a+b,0));
+ let passes=0;
+ while(left>0){
+  let winner=null,best=-Infinity;
+  for(let i=0;i<rows.length;i++){
+   const room=desired[i]-rows[i].reduce((a,b)=>a+b,0);
+   if(room<=0)continue;
+   for(let k=0;k<3;k++){
+    const available=remaining[k];
+    if(available<=0)continue;
+    const add=Math.min(256,available,room,left);
+    if(add<=0)continue;
+    const amount=rows[i][k];
+    const slope=weights[i][k]*(Math.sqrt(amount+add)-Math.sqrt(amount))/add;
+    // Stable tie breaks: joiner first, then earlier march, then Archers.
+    const tie=winner&&Math.abs(slope-best)<=1e-12;
+    if(slope>best+1e-12||(tie&&i>0&&winner.i===0)||
+      (tie&&i===winner.i&&k===2&&winner.k!==2)){
+     best=slope;winner={i,k,add};
+    }
+   }
+  }
+  if(!winner)break;
+  rows[winner.i][winner.k]+=winner.add;
+  remaining[winner.k]-=winner.add;
+  left-=winner.add;
+  if(++passes>30000)throw Error('Excessive optimization iterations');
+ }
+ if(left||rows.some((r,i)=>r.reduce((a,b)=>a+b,0)>desired[i])||
+   remaining.some(n=>n<0))throw Error('Unsafe optimized stock/capacity');
  return rows;
 }
 function plan(model,catalog,combat,capacityCore){
@@ -294,7 +332,7 @@ function plan(model,catalog,combat,capacityCore){
  const total=Math.min(availableTotal,demand);
  if(total===0)return {ready:false,missing:['capacity'],stock,marches,selected};
  // Optimize the source √troops model: simultaneous stock and capacity,
- // join priority, unknown-rally-leader-neutral troop class efficiencies.
+ // soft Join Archer priority; unknown-leader-neutral troop class efficiencies.
  // Own starter uses personal class stats and sourced hero effects when entered.
  const targets=splitShares(total,caps);
  const neutral=typeWeights(model,combat);
