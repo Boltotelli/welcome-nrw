@@ -149,21 +149,9 @@ function rosterSection(){
       state().v2.manualHeroes[n].widget=Number(x);saveLocal();
      }));
     }
-    const info=button('ℹ KAC-Daten',async()=>{
-     if(!heroInfoCache[n]?.reference){
-      info.disabled=true;info.textContent='Lade…';
-      try{
-       const response=await fetch('/api/bear-reference?hero='+encodeURIComponent(n));if(!response.ok)throw Error();
-       heroInfoCache[n]=await response.json();
-       const url=heroInfoCache[n].imageUrl;
-       if(url){img.onerror=()=>{img.onerror=null;img.src=hero.img||'';};img.src=url;}
-      }catch(_){info.textContent='Quelle nicht verfügbar';info.disabled=false;return;}
-     }
-     info.textContent='Quelle ansehen ↗';
-     const a=el('a','bear-name-ref-link','Kingshot Alliance Command · '+n);
-     a.href=heroInfoCache[n].sourceUrl;a.target='_blank';a.rel='noopener noreferrer';
-     const old=card.querySelector('.bear-name-ref-link');if(old)old.remove();card.append(a);info.disabled=false;
-    },'bear-name-info');meta.append(info);card.append(meta);
+    // Hero skills and widgets are resolved by the calculator's reference
+    // data internally. Never expose provider-specific controls in the deck.
+    card.append(meta);
    }
    grid.append(card);
   }
