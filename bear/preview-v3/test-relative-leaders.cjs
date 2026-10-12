@@ -85,9 +85,14 @@ assert(source.includes('joinLeaderComparison:v.joinLeaderComparison'),'Persist s
 assert(source.includes('plan.tierPriority'),'Both result views must agree on high-tier assignment');
 assert((source.match(/const plan=currentFormationPlan\(\);/g)||[]).length===2,
  'Both views share one cached troop plan');
-// Reproduce the reported 0% Infantry / duplicated starter UI bug.
-// ~190,810 march capacity with 7 marches and plenty of actual Infantry:
+// 5,000 denotes DEFENDING Bear units in the published model, not a
+// mandatory Infantry count for every attacking march. A 1/10/89
+// starting ratio at 190,810 troops contains only ~1,908 Infantry.
 const screenshotCapacity=190810,screenshotTargets=Array(7).fill(screenshotCapacity);
+assert(f.ratioForTarget(screenshotCapacity,[1,10,89])[0]<2,
+ 'The 5k defending-Bear army must not become an attacker Infantry floor');
+assert(!Object.hasOwn(f,'minimumInfantry'),
+ 'An unsourced 5k Infantry constraint must not remain in the optimizer');
 const screenshotStock=[120000,195000,945000];
 const example=makeModel('weaker');
 example.v2.troopGroups=[
@@ -97,19 +102,14 @@ example.v2.troopGroups=[
 ];
 const estimate=f.expectedWeights(screenshotTargets,example,catalog,c,screenshotStock);
 const screenshot=f.allocateByMarginal(screenshotTargets,screenshotStock,estimate.weights);
-for(const [i,row] of screenshot.rows.entries()){
- assert(row[0]>=5000,'March '+i+' should receive >=5000 Infantry when stock allows');
- assert(f.integerPercentages(row)[0]>=1,
-  'Do not show 0% Infantry for a nonzero, sufficiently supplied march');
-}
-assert.equal(screenshot.infantryShortage,false);
+const available=screenshot.rows.map(row=>row.reduce((n,x)=>n+x,0));
+assert(available.every((n,i)=>n<=screenshotTargets[i]));
 assert.deepEqual(Array.from(f.integerPercentages([858,3072,186880])),[0.5,1.6,97.9],
- 'Even historic low-Infantry data must not be rounded to an illusory zero');
+ 'Physically present Infantry must not be rounded to a misleading 0%');
 const tooFew=f.allocateByMarginal(screenshotTargets,[70,195000,945000],estimate.weights);
-assert(tooFew.infantryShortage,'Insufficient Infantry must be signalled');
 assert(tooFew.rows.every(row=>row[0]>=0));
 assert.equal(tooFew.rows.reduce((n,row)=>n+row[0],0),70,
- 'Never invent 5,000 infantry that the user does not own');
+ 'Do not invent Infantry for an imaginary 5,000 troop rule');
 const flowSource=fs.readFileSync(path.join(__dirname,'name-flow.js'),'utf8');
 assert(flowSource.includes('let cachedFormationPlan=null'),'One cached plan for both buttons');
 assert((flowSource.match(/const plan=currentFormationPlan\(\);/g)||[]).length===2,
