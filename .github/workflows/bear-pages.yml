@@ -211,7 +211,7 @@ jobs:
         run: |
           mkdir -p _site/bear/assets _site/bear/preview-v3
           find v3-latest/bear -maxdepth 1 -type f -exec cp '{}' _site/bear/ \;
-          cp v3-latest/bear/preview-v3/* _site/bear/preview-v3/
+          find v3-latest/bear/preview-v3 -maxdepth 1 -type f -exec cp '{}' _site/bear/preview-v3/ \;
           cp v3-latest/bear/assets/kingshot_formations_loading.webm _site/bear/assets/
           cp v3-latest/bear/assets/pet-valora-sprite.webp _site/bear/assets/
           test -s _site/bear/assets/pet-valora-sprite.webp
@@ -263,6 +263,7 @@ jobs:
           grep -Fq '.bear-name-star-controls' _site/bear/preview-v3/name-flow.css
           ! grep -Fq "choose('Sterne / Tier'" _site/bear/preview-v3/name-flow.js
           grep -Fq "section.id='bearHeroRecommendation'" _site/bear/preview-v3/name-flow.js
+          node _site/bear/preview-v3/test-optimize-troops.cjs
           node --check _site/bear/preview-v3/formation-core.js
           node --check _site/bear/preview-v3/combat.js
           test -s _site/bear/preview-v3.html
