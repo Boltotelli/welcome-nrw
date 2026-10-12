@@ -72,7 +72,7 @@ function starProgressField(heroName){
   defs.append(gradient);svg.append(defs);
   const petals=[];
   for(let petal=0;petal<6;petal++){
-   const angle=-90+petal*60;
+   const angle=-90-petal*60; // Fill partial T-segments counterclockwise from top.
    const coords=[point(2.4,angle),point(7.0,angle-17),point(11.2,angle),point(7.0,angle+17)].join(' ');
    const polygon=svgNode('polygon',{points:coords,'stroke-width':'.45','stroke-linejoin':'round'});
    svg.append(polygon);petals.push(polygon);
