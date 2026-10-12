@@ -131,3 +131,8 @@ body.bear-name-mode>*:not(#bearNewApp){display:none!important}
 @keyframes bearDamageFlash{from{transform:scale(.8);opacity:.48}to{transform:scale(1.2);opacity:1}}
 @media(max-width:550px){.bear-name-formations-grid{grid-template-columns:1fr}.bear-name-buff-card.bear-name-valora{grid-column:1/-1}.bear-name-valora-skills{grid-template-columns:1fr}.bear-name-buff-icon{width:36px;min-width:36px;height:36px}.bear-name-actions{padding:2px}}
 @media(prefers-reduced-motion:reduce){.bear-name-loader-heroes img,.bear-name-cloud,.bear-name-cloud-center{animation:none!important}}
+
+/* Real generated 5-second cloud loading WebM; CSS cloud scene is fallback. */
+.bear-name-cloud-video{width:min(100%,420px);max-height:235px;object-fit:contain;border-radius:20px;background:#142438}
+.bear-name-cloud-scene[hidden],.bear-name-cloud-video[hidden]{display:none!important}
+.bear-name-loading-cloud .bear-name-cloud-scene{max-width:420px}
