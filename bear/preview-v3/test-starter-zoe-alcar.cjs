@@ -1,11 +1,12 @@
 /* Bear V3 role-specific skill scope regression. Run after Pages reference JSON exists.
  * No hero gets a forced ranking; comparison depends on Bear assumptions.
  */
-const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
+const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
 const p=process.argv[2]||'./bear/hero-reference.json';
 const catalog=JSON.parse(fs.readFileSync(p,'utf8'));
 const context={window:{},console,Math};context.window.window=context.window;
-for(const file of ['bear/preview-v3/hero-advisor.js','bear/own-baseline.js','bear/preview-v3/combat.js']){
+for(const relative of ['hero-advisor.js','../own-baseline.js','combat.js']){
+ const file=path.resolve(__dirname,relative);
  vm.runInNewContext(fs.readFileSync(file,'utf8'),context,{filename:file});
 }
 const w=context.window;
