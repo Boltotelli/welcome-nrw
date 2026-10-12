@@ -398,14 +398,13 @@ function formationCards(){
   .some(k=>Number(model.values[k])>0);
  const capMissing=!validCap&&!window.NRW_BEAR_CAPACITY?.breakdown?.(model,C)?.complete;
  const cards=el('div','bear-name-formations-grid');
- const baseRatios=[10,10,80];
- const label=(item,i)=>item.kind==='starter'?'Eigene Starter-Rally':(i+'. Joiner');
+ const label=(item,i)=>item.kind==='starter'?T('Eigene Starter-Rally'):T('Joiner')+' '+i;
  const numberRow=(ratio,counts,hasCounts)=>{
   const info=el('div','bear-name-mix-caption');
   for(let k=0;k<3;k++){
    const part=el('span','bear-name-mix-part');
    const pct=el('strong','',ratio[k]+' %');
-   const txt=el('small','',['Inf','Kav','Bog'][k]+
+   const txt=el('small','',T(['Inf','Kav','Bog'][k])+
     (hasCounts?' · '+num(counts[k]):''));
    part.append(pct,txt);info.append(part);
   }return info;
@@ -426,30 +425,31 @@ function formationCards(){
   }
   article.append(avatars);
   const troopRow=detail?.troops||null;
-  let ratio=detail?.ratio||baseRatios;
-  if(!row.heroes[0])ratio=[0,0,0];
   const mix=el('div','bear-name-mix');
-  const bar=el('div','bear-name-mix-bar');
-  for(let k=0;k<3;k++){
-   const segment=el('div','bear-name-mix-segment bear-name-mix-'+k);
-   segment.style.width=ratio[k]+'%';bar.append(segment);
-  }
-  mix.append(bar,numberRow(ratio,troopRow||[],Boolean(detail&&detail.filled&&row.heroes[0])));
-  if(detail?.troops&&row.heroes[0]){
-   const amount=detail.troops.reduce((a,b)=>a+b,0);
-   mix.append(el('p','bear-name-form-count',num(amount)+' Truppen'));
-  }else if(!row.heroes[0]){
-   mix.append(el('p','bear-name-muted','Bitte einen passenden Joiner-Helden ergänzen.'));
+  if(detail?.filled&&row.heroes[0]){
+   const ratio=detail.ratio;
+   const bar=el('div','bear-name-mix-bar');
+   for(let k=0;k<3;k++){
+    const segment=el('div','bear-name-mix-segment bear-name-mix-'+k);
+    segment.style.width=ratio[k]+'%';bar.append(segment);
+   }
+   mix.append(bar,numberRow(ratio,troopRow,true));
+   mix.append(el('p','bear-name-form-count',num(detail.filled)+' '+T('Truppen')));
+  }else{
+   mix.append(el('p','bear-name-muted',!row.heroes[0]?
+    'Bitte einen passenden Joiner-Helden ergänzen.':
+    'Truppen und Marschkapazität eingeben, um diese Formation zu berechnen.'));
   }
   article.append(mix);cards.append(article);
  }
  section.append(cards);
  if(!validCap){
   section.append(el('p','bear-name-muted',
-   capMissing?'10/10/80 ist hier ein Richtwert. Mit deiner Marschkapazität und deinem Truppenbestand können wir die tatsächlichen Anzahlen ermitteln.':
-   hasStock?'Für genaue Truppenzahlen bitte die Bestände vervollständigen.':'10/10/80 als Ausgangsformation; ohne Truppenbestände noch keine exakte Verteilung.'));
+   capMissing?'Marschkapazität und Truppenbestand ergänzen, damit wir die Formation berechnen können.':
+   hasStock?'Für genaue Truppenzahlen bitte die Bestände vervollständigen.':
+   'Truppenbestand und Marschkapazität fehlen noch.'));
  }else section.append(el('p','bear-name-muted',
-  'Truppenbestände werden nur einmal verteilt. Bogenschützen haben für Joiner Vorrang.'));
+  'Alle Märsche nutzen denselben Truppenbestand. Die Verteilung wird gemeinsam optimiert.'));
  return section;
 }
 // One loading surface for each separate result. The formation video is the
@@ -583,35 +583,17 @@ function predicted(){
   out.append(el('p','bear-name-muted','Noch fehlende Helden-/Pet-Angaben: '+prepared.reason));
   return out;
  }
- const totalSlots=Math.min(7,1+Number(v.joinCount||0)),capacity=cap.total;
- if(!capacity){
-  out.append(el('p','bear-name-muted','Keine gültige Marschkapazität.'));
+ // Both result buttons MUST use the exact same simultaneous formation.
+ const plan=alloc.plan(model,C,combat,window.NRW_BEAR_CAPACITY);
+ if(!plan.ready||!plan.marches?.[0]?.filled){
+  out.append(el('p','bear-name-muted','Truppen und Marschkapazität eingeben, um diese Formation zu berechnen.'));
   return out;
  }
- const shareTotal=Math.min(stock.reduce((a,b)=>a+b,0),totalSlots*capacity);
- const targetBase=Math.floor(shareTotal/totalSlots),extra=shareTotal-targetBase*totalSlots;
- const targets=Array.from({length:totalSlots},(_,i)=>targetBase+(i<extra?1:0));
- let best=null;
- // Reserve Archers for joins first, then search own ratios against the
- // WHOLE selected starter skill kit (not merely class attack values).
- // Conservative conditional-uptime bound is the ranking objective.
- for(let inf=0;inf<=100;inf++)for(let cav=0;cav<=100-inf;cav++){
-  const rows=alloc.allocateStock(targets,stock,[inf,cav],[10,10]);
-  const perMarch=combat.allocateLevels?.(rows,tiers,true);
-  const leader=perMarch?.[0]||tiers;
-  const trial=skillDamage.evaluate(prepared,rows[0],leader,current,combat);
-  const score=trial.ready?trial.estimatedIndex:null;
-  if(score!==null&&Number.isFinite(score)&&
-   (best===null||score>best.score+1e-7||
-    (Math.abs(score-best.score)<1e-7&&
-     Math.abs(inf-10)+Math.abs(cav-10)<best.distance)))
-   best={score,distance:Math.abs(inf-10)+Math.abs(cav-10),
-    ratio:[inf,cav,100-inf-cav],rows,leader};
- }
- if(!best){
-  out.append(el('p','bear-name-muted','Mit diesen Truppen lässt sich keine gültige Formation berechnen.'));
-  return out;
- }
+ const rows=plan.marches.map(m=>m.troops);
+ const equipped=combat.allocateLevels?.(rows,tiers,true);
+ const ownLevels=equipped?.[0]||tiers;
+ const best={rows,leader:ownLevels,ratio:plan.marches[0].ratio,
+  score:plan.starterScore,method:plan.ratioMethod};
  const counts=best.rows[0],lines=el('div','bear-name-score-list');
  const scenarios=[
   {name:'Ohne Joinerfähigkeiten',atk:0,let:0},
