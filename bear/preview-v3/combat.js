@@ -143,8 +143,15 @@ function allocateLevels(marches,levels,prioritizeJoinArchers=false){
   }
   const remaining=lvl.groups.map(g=>({...g,attack:troopAttack(troopKeys[type],g.tier,g.tg)}))
    .sort((a,b)=>b.attack-a.attack);
-  const order=prioritizeJoinArchers&&type===2&&marches.length>1?
-   [...marches.keys()].slice(1).concat(0):[...marches.keys()];
+  // The same relative-leader decision used by the formation planner
+  // determines which march receives the strongest mixed-T/TG groups.
+  const explicit=Array.isArray(prioritizeJoinArchers)?prioritizeJoinArchers:null;
+  const validOrder=explicit&&explicit.length===marches.length&&
+   new Set(explicit).size===marches.length&&
+   explicit.every(i=>Number.isInteger(i)&&i>=0&&i<marches.length);
+  const order=validOrder?explicit:
+   prioritizeJoinArchers===true&&type===2&&marches.length>1?
+    [...marches.keys()].slice(1).concat(0):[...marches.keys()];
   for(const march of order){
    let required=Number(marches[march][type])||0;
    const allocated=[];
