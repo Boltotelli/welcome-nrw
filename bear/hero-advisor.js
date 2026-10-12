@@ -67,6 +67,10 @@ function skillToEffect(skill,skillLevel){
   // "Chance to DEAL 200% damage" means 2x on proc; incremental gain is
   // (200%-100%), NOT +200%. 25% proc at Lv5 => +25% expected.
   effect={kind:'damage',amount:(amount>100?amount-100:amount)*chance};
+ }else if(kind==='extra_damage_up'&&skill.name==='Carpe Diem'){
+  // Kingshot's description is INFANTRY damage per attack, not a +60%
+  // squad-wide buff. The enemy-taken secondary effect is handled separately.
+  effect={kind:'class-damage',type:0,amount:amount*chance};
  }else if(kind==='extra_squad_strike'){
   const every=valid(cond.everyTurns,1,10);
   if(every===null)return {unknown:true,name:skill.name};
@@ -142,13 +146,36 @@ function evaluate(hero,type,priorities,referenceGet,widgetGet,context){
  const widgetOffense=widgetData&&['rally-attack','rally-lethality'].includes(widgetData.type)?
   valid(widgetData.bonusPct,0,50):null;
  const effects=[],missing=[];
- let squadAttack=0,squadLethality=0,squadDamage=1;
+ let squadAttack=0,squadLethality=0,squadDamage=1,provisionalDamageFactor=1;
  const typeAttack=[0,0,0],typeDamage=[1,1,1];
  (source?.skills||[]).forEach((skill,i)=>{
   const result=skillToEffect(skill,state.confirmed?state.actual[i]:state.cap);
   if(!result||result.unknown){missing.push(skill.name);return;}
   if(result.ignored)return;
   effects.push(result);
+  // The canonical primary expedition value is NOT always the complete
+  // skill. Alcar has two explicitly documented secondary effects.
+  if(hero.name==='Alcar'){
+   for(const secondary of skill.additionalEffects||[]){
+    const value=valid(secondary.valuesBySkillLevel?.[(state.confirmed?state.actual[i]:state.cap)-1],0,2000);
+    if(value===null){missing.push(skill.name+' (secondary)');continue;}
+    if(secondary.effect==='cavalry_archer_damage_up'){
+     for(const t of [1,2]){
+      typeDamage[t]*=1+value/100;
+      effects.push({kind:'class-damage',type:t,amount:value,
+       name:skill.name+' (secondary)',source:'canonical-additional-effect'});
+     }
+    }else if(secondary.effect==='enemy_damage_taken_up'){
+     // Carpe Diem: +25% target damage taken for one turn on attack.
+     // One-turn Bear timing/uptime and stacking cannot be confirmed.
+     // Include a full-uptime ESTIMATE and expose its no-uptime bound.
+     const factor=1+value/100;
+     squadDamage*=factor;provisionalDamageFactor*=factor;
+     effects.push({kind:'damage',amount:value,name:skill.name+' (target debuff)',
+      source:'canonical-additional-effect',bearTiming:'one-turn-unverified'});
+    }else missing.push(skill.name+' (unsupported secondary)');
+   }
+  }
   if(result.kind==='attack')squadAttack+=result.amount;
   if(result.kind==='lethality')squadLethality+=result.amount;
   if(result.kind==='damage')squadDamage*=1+result.amount/100;
@@ -170,10 +197,13 @@ function evaluate(hero,type,priorities,referenceGet,widgetGet,context){
  const widgetFactor=widgetOffense===null?1:1+widgetOffense/100;
  const score=nativeAtk===null?null:
   Math.round(100*total*squadDamage*widgetFactor*100)/100;
+ const conservativeScore=score===null?null:
+  Math.round(score/provisionalDamageFactor*100)/100;
  const confidence=nativeAtk===null?'limited':
-  hero.starPendingReview||missing.length||!state.confirmed||!ctx.fromStats?'estimated':'higher';
+  hero.starPendingReview||missing.length||!state.confirmed||!ctx.fromStats||provisionalDamageFactor>1?'estimated':'higher';
  return {name:hero.name,type,level,stars,tier:tier??0,widget,
-  score,baseIndex:Math.round(baseTotal*10000)/100,nativeExpeditionAtk:nativeAtk,
+  score,conservativeScore,includesUnverifiedBearUptime:provisionalDamageFactor>1,
+  baseIndex:Math.round(baseTotal*10000)/100,nativeExpeditionAtk:nativeAtk,
   skill:state.level,skillCap:state.cap,assumedSkill:state.assumed,
   hasConfirmedSkill:state.confirmed,
   widgetEffect:widgetOffense,widgetType:widgetData?.type||null,
