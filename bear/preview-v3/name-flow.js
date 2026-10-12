@@ -22,8 +22,16 @@ const title=(txt,tag='h2')=>el(tag,'',txt);
 const button=(txt,fn,cls='bear-name-btn')=>{const b=el('button',cls,txt);b.type='button';b.addEventListener('click',fn);return b;};
 function state(){const m=B.model();m.v2=m.v2||{};m.values=m.values||{};m.v2.manualHeroes=m.v2.manualHeroes||{};m.v2.scannedOwnedHeroes=m.v2.scannedOwnedHeroes||[];return m;}
 function keyForName(value){return 'nrw_bear_name_edit_v1:'+value.normalize('NFKC').toLowerCase().trim();}
+let cachedFormationPlan=null;
+function currentFormationPlan(){
+ // Both buttons must consume one immutable calculation between changes.
+ if(!cachedFormationPlan)cachedFormationPlan=window.NRW_BEAR_FORMATION?.plan?.(
+  state(),C,window.NRW_BEAR_COMBAT,window.NRW_BEAR_CAPACITY);
+ return cachedFormationPlan;
+}
 function saveLocal(){
  B.save();dirty=true;
+ cachedFormationPlan=null;
  // Never keep already calculated formations or damage after inputs change.
  document.getElementById('bearFormationResult')?.remove();
  document.getElementById('bearAdvancedResult')?.remove();
@@ -168,6 +176,7 @@ function unpack(d){
  B.save();
 }
 async function openProfile(value){
+ cachedFormationPlan=null;
  name=value.trim().replace(/\s+/g,' ');version=null;dirty=false;
  editKey=localStorage.getItem(keyForName(name));
  if(!editKey){editKey=Array.from(crypto.getRandomValues(new Uint8Array(32)),x=>x.toString(16).padStart(2,'0')).join('');localStorage.setItem(keyForName(name),editKey);}
@@ -417,7 +426,7 @@ function formationCards(){
  const model=state(),v=model.v2,formationCore=window.NRW_BEAR_FORMATION,
   chosen=formationCore?.chooseHeroes?.(model,C);
  if(!chosen){section.append(el('p','bear-name-muted','Bitte zuerst deine Helden auswählen.'));return section;}
- const plan=formationCore.plan?.(model,C,window.NRW_BEAR_COMBAT,window.NRW_BEAR_CAPACITY);
+ const plan=currentFormationPlan();
  const groups=[{kind:'starter',heroes:chosen.starter},
   ...chosen.joins.map(join=>({kind:'join',heroes:join.heroes}))];
  const validCap=plan?.ready===true,hasStock=['troopsI','troopsC','troopsA']
@@ -477,6 +486,8 @@ function formationCards(){
  }else{
   section.append(el('p','bear-name-muted',
    'Formationen nach erwartetem Zusatzschaden verteilt. Die Stärke fremder Rallyleader ist eine Schätzung.'));
+  if(plan.infantryShortage)section.append(el('p','bear-name-warning',
+   'Nicht genug Infanterie für den Mindestanteil aller Märsche. Es wurde nur der tatsächliche Bestand verteilt.'));
  }
  return section;
 }
@@ -577,6 +588,11 @@ function refreshHeroRecommendations(){
  // selector, all expanded seasons, and the scroll position untouched.
  const previous=Array.isArray(state().v2.ownHeroes)?state().v2.ownHeroes.slice():[];
  const result=summaryHeroes();
+ if(previous.join('\u0000')!==result.picked.join('\u0000')){
+  cachedFormationPlan=null;
+  document.getElementById('bearFormationResult')?.remove();
+  document.getElementById('bearAdvancedResult')?.remove();
+ }
  current.replaceWith(result.section);
  if(mode==='advanced'){
   const gear=document.getElementById('bearStarterGear');
@@ -615,7 +631,7 @@ function predicted(){
   return out;
  }
  // Both result buttons MUST use the exact same simultaneous formation.
- const plan=alloc.plan(model,C,combat,window.NRW_BEAR_CAPACITY);
+ const plan=currentFormationPlan();
  if(!plan.ready||!plan.marches?.[0]?.filled){
   out.append(el('p','bear-name-muted','Truppen und Marschkapazität eingeben, um diese Formation zu berechnen.'));
   return out;
@@ -648,9 +664,8 @@ function predicted(){
     T('Berechnung nicht verfügbar')));
   lines.append(line);
  }
- out.append(el('p','bear-name-result',
-  T('Starter ') +best.ratio.join(' / ')+' · '+counts.map(num).join(' / ')+' '+T('Truppen')),
-  el('p','bear-name-muted','Berechnung anhand deiner ausgewählten Starter und Truppen.'),
+ out.append(el('p','bear-name-muted',
+  'Die Starter-Truppenzahlen stehen ausschließlich in der Formationskarte. Beide Berechnungen verwenden dieselbe Aufstellung.'),
   lines,el('p','bear-name-warning',
    '⚠ Geschätzter Modellwert – kein bestätigter Kingshot-Schadenswert.'));
  lastResult=best;return out;
