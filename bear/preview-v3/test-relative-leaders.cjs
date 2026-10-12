@@ -83,7 +83,8 @@ const source=fs.readFileSync(path.join(__dirname,'name-flow.js'),'utf8');
 assert(source.includes('rallyStrengthField()'),'UI must expose strength selector');
 assert(source.includes('joinLeaderComparison:v.joinLeaderComparison'),'Persist strength scenario');
 assert(source.includes('plan.tierPriority'),'Both result views must agree on high-tier assignment');
-assert(source.includes('alloc.plan(model,C,combat,window.NRW_BEAR_CAPACITY)'));
+assert((source.match(/const plan=currentFormationPlan\(\);/g)||[]).length===2,
+ 'Both views share one cached troop plan');
 // Reproduce the reported 0% Infantry / duplicated starter UI bug.
 // ~190,810 march capacity with 7 marches and plenty of actual Infantry:
 const screenshotCapacity=190810,screenshotTargets=Array(7).fill(screenshotCapacity);
