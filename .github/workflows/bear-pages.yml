@@ -215,6 +215,7 @@ jobs:
           test -s _site/bear/preview-v3.html
           grep -Fq '<base href="./">' _site/bear/preview-v3.html
           echo 'Published GitHub Pages V3 at /bear/preview-v3.html'
+          # UI update: KAC provider details are now internal-only (2026-10-12).
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site
