@@ -315,11 +315,26 @@ function ministerSection(){
   const area=el('div','bear-name-minister-group');
   area.append(el('strong','',caption));
   const flags=v.ministers[key]||(v.ministers[key]={fc:false,m:false});
-  for(const [flag,text] of [['fc','FC · +10 % Tödlichkeit'],['m','M · +5 % Angriff, +2.500 Kapazität']]){
+  for(const [flag,text] of [['fc',key==='king'?'FC · +10 % Tödlichkeit':'FC · Wert bestätigen'],
+   ['m',key==='king'?'M · +5 % Angriff, +2.500 Kapazität':'M · Werte bestätigen']]){
    const label=el('label','bear-name-minister-check'),input=el('input');
    input.type='checkbox';input.checked=flags[flag]===true;
    input.addEventListener('change',()=>{flags[flag]=input.checked;saveLocal();});
    label.append(input,el('span','',text));area.append(label);
+  }
+  if(key==='highKing'){
+   const custom=v.ministers.highKingValues||(v.ministers.highKingValues={});
+   const fields=el('div','bear-name-stat-grid');
+   if(flags.fc)fields.append(numberField('Hochkönig FC · Tödlichkeit %',
+    custom.fcLethality,n=>{custom.fcLethality=n;saveLocal();},{min:0,max:100,step:1}));
+   if(flags.m){
+    fields.append(numberField('Hochkönig M · Angriff %',
+     custom.marshalAttack,n=>{custom.marshalAttack=n;saveLocal();},{min:0,max:100,step:1}));
+    fields.append(numberField('Hochkönig M · Kapazität',
+     custom.marshalCapacity,n=>{custom.marshalCapacity=n;saveLocal();},{min:0,max:100000,step:1}));
+   }
+   if(flags.fc||flags.m)area.append(fields,el('small','bear-name-muted',
+    'Hochkönigboni: Werte aus dem Spiel eintragen. Nicht bestätigte Werte werden nicht geschätzt.'));
   }
   groups.append(area);
  }
@@ -333,7 +348,7 @@ function ministerSection(){
  section.append(
   option('ministerBuffCapturedInStats','FC/M-Kampfboni sind bereits in meinen Basiswerten enthalten'),
   option('ministerCapacityInBase','M-Kapazitätsbonus ist bereits in der eingegebenen Marschkapazität enthalten'),
-  el('p','bear-name-muted','Gleiche FC- oder M-Boni aus König und Hochkönig werden derzeit nicht doppelt gerechnet.')
+  el('p','bear-name-muted','Boni identischer Ministerposten werden nicht doppelt addiert.')
  );
  return section;
 }
