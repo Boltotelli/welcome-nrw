@@ -84,6 +84,6 @@ assert.equal(result(0.5).ready,false,'Below 1 modifier is not an eligible Lv5 sc
 
 const flow=fs.readFileSync(path.join(__dirname,'name-flow.js'),'utf8');
 assert(flow.includes('stack.process(sc.heroes,refSkill)'),'Scenarios must reference actual hero skills');
-assert(flow.includes('const plan=alloc.plan(model,C,combat,window.NRW_BEAR_CAPACITY)'),
- 'Same troop plan for formation and damage output');
+assert((flow.match(/const plan=currentFormationPlan\(\);/g)||[]).length===2,
+ 'Both calculations must reuse one cached troop plan');
 console.log('PASS generation baseline, 5000 infantry, shared inventory, Joiner-first Archer scarcity, 4-slot effect_op stacking (1.5, 2, 2.25).');
