@@ -487,7 +487,9 @@ async function loadingSequence(kind){
   // Real 5-second cloud WebM is generated from source by the GitHub Pages
   // build; CSS provides the fallback if a browser cannot play VP8 WebM.
   const video=el('video','bear-name-cloud-video');
-  video.src='./assets/kingshot_cloud_damage_loading.webm';
+  // Use the exact 512×512 source video when it is present on GitHub Pages.
+  // The 160×160 preview remains a fallback, never passed off as original.
+  video.src='./assets/kingshot_beartrap_v3_action_transparent.webm';
   video.autoplay=true;video.muted=true;video.playsInline=true;video.preload='auto';
   const clouds=el('div','bear-name-cloud-scene');
   for(let i=0;i<4;i++){const cloud=el('span','bear-name-cloud cloud-'+i,'☁');clouds.append(cloud);}
@@ -497,11 +499,18 @@ async function loadingSequence(kind){
   await new Promise(resolve=>{
    let finished=false;
    const finish=()=>{if(finished)return;finished=true;clearTimeout(timer);resolve();};
-   const fallback=()=>{video.hidden=true;clouds.hidden=false;
-    setTimeout(finish,4200);};
-   const timer=setTimeout(finish,12000);
+   let usingFallback=false;
+   const fallback=()=>{
+    if(!usingFallback){
+     usingFallback=true;
+     video.src='./assets/kingshot_cloud_damage_loading.webm';
+     video.load?.();
+     video.play?.().catch(()=>{video.hidden=true;clouds.hidden=false;setTimeout(finish,4200);});
+    }else{video.hidden=true;clouds.hidden=false;setTimeout(finish,4200);}
+   };
+   const timer=setTimeout(finish,15000);
    video.addEventListener('ended',finish,{once:true});
-   video.addEventListener('error',fallback,{once:true});
+   video.addEventListener('error',fallback);
    video.play?.().catch(fallback);
   });
  }
