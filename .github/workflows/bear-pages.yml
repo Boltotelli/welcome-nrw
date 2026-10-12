@@ -273,9 +273,10 @@ jobs:
           grep -Fq "section.id='bearHeroRecommendation'" _site/bear/preview-v3/name-flow.js
           node --check _site/bear/preview-v3/joiner-skills.js
           node _site/bear/preview-v3/test-optimize-troops.cjs _site/bear/hero-reference.json
+          node _site/bear/preview-v3/test-relative-leaders.cjs
           grep -Fq 'preview-v3/joiner-skills.js' _site/bear/preview-v3.html
-          grep -Fq 'formation-core.js?v=20261012-20' _site/bear/preview-v3.html
-          grep -Fq 'name-flow.js?v=20261012-20' _site/bear/preview-v3.html
+          grep -Fq 'formation-core.js?v=20261012-21' _site/bear/preview-v3.html
+          grep -Fq 'name-flow.js?v=20261012-21' _site/bear/preview-v3.html
           node --check _site/bear/preview-v3/formation-core.js
           node --check _site/bear/preview-v3/combat.js
           test -s _site/bear/preview-v3.html
