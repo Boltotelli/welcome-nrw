@@ -450,8 +450,14 @@ function formationCards(){
    capMissing?'Marschkapazität und Truppenbestand ergänzen, damit wir die Formation berechnen können.':
    hasStock?'Für genaue Truppenzahlen bitte die Bestände vervollständigen.':
    'Truppenbestand und Marschkapazität fehlen noch.'));
- }else section.append(el('p','bear-name-muted',
-  'Alle Märsche nutzen denselben Truppenbestand. Die Verteilung wird gemeinsam optimiert.'));
+ }else{
+  const basis=plan.joinerBaseline;
+  const message=basis?
+   T('Joiner-Richtwert')+' · Gen '+basis.generation+': '+
+    basis.proportions.join('/')+' · '+T('an Truppenbestand und Infanterie-Mindestmenge angepasst.') :
+   T('Alle Märsche nutzen denselben Truppenbestand. Die Verteilung wird gemeinsam optimiert.');
+  section.append(el('p','bear-name-muted',message));
+ }
  return section;
 }
 // One loading surface for each separate result. The formation video is the
