@@ -100,12 +100,16 @@ function integerPercentages(row){
  const total=row.reduce((a,b)=>a+b,0);
  if(!total)return [0,0,0];
  const values=row.map(n=>100*n/total);
- const result=values.map(Math.floor);
- let diff=100-result.reduce((a,b)=>a+b,0);
- for(const i of [0,1,2].sort((a,b)=>(values[b]-result[b])-(values[a]-result[a])||a-b)){
+ // Never show "0%" for a physically positive infantry squad. We retain
+ // whole percentages normally and use tenths only for sub-1% quantities.
+ const scale=values.some((v,i)=>row[i]>0&&v<1)?10:1;
+ const target=100*scale,result=values.map(v=>Math.floor(v*scale));
+ let diff=target-result.reduce((a,b)=>a+b,0);
+ for(const i of [0,1,2].sort((a,b)=>
+   (values[b]*scale-result[b])-(values[a]*scale-result[a])||a-b)){
   if(diff<=0)break;result[i]++;diff--;
  }
- return result;
+ return result.map(v=>v/scale);
 }
 function composition(target,inf,cav){
  if(!target)return [0,0,0];
@@ -282,10 +286,26 @@ function expectedWeights(targets,model,catalog,combat,stock){
  });
  return {weights,baseline,relative};
 }
+function minimumInfantry(target){
+ const count=int(target);
+ if(!count)return 0;
+ // Kingshot Bear join community rule: roughly 5,000 Infantry on large
+ // marches, or 10% for small marches. This is a FORMATION constraint,
+ // not a verified game-engine damage bonus. Never fabricate missing troops.
+ return Math.min(count,Math.max(Math.ceil(count/100),Math.min(5000,Math.round(count*.1))));
+}
 function allocateByMarginal(targets,stock,weights){
  const rows=targets.map(()=>[0,0,0]),remaining=stock.map(int);
+ // Reserve a practical minimum Infantry amount for every active march.
+ // Only what is physically in inventory is assigned. In extreme Infantry
+ // shortage, proportionally share what's available rather than show
+ // fictional 5k Infantry or misleading rounded 0% on a populated march.
+ const floors=targets.map(minimumInfantry),needed=floors.reduce((a,b)=>a+b,0);
+ const initial=needed>remaining[0]?splitShares(remaining[0],floors):floors;
+ for(let i=0;i<rows.length;i++)rows[i][0]=initial[i];
+ remaining[0]-=initial.reduce((a,b)=>a+b,0);
  let left=Math.min(targets.reduce((n,x)=>n+int(x),0),
-  remaining.reduce((n,x)=>n+x,0));
+  stock.reduce((n,x)=>n+int(x),0))-initial.reduce((a,b)=>a+b,0);
  // Coarse-to-fine marginal allocation is O(21 * allocated/512), and
  // always respects one global inventory and per-march capacity.
  // Test all candidate increments with the exact same concave scoring
@@ -317,7 +337,8 @@ function allocateByMarginal(targets,stock,weights){
  }
  if(left>0||remaining.some(n=>n<0)||rows.some((r,i)=>
   r.reduce((a,b)=>a+b,0)>targets[i]))throw Error('Unsafe expected-damage allocation');
- return {rows,remaining,modeledTotal:rows.reduce((sum,row,i)=>
+ return {rows,remaining,infantryShortage:initial.some((n,i)=>n<floors[i]),
+  infantryFloor:floors,modeledTotal:rows.reduce((sum,row,i)=>
   sum+scoreFor(row,weights[i]),0)};
 }
 function plan(model,catalog,combat,capacityCore){
@@ -383,9 +404,10 @@ function plan(model,catalog,combat,capacityCore){
   starterScore:full,scoreType:'community-joiner-bear-baseline',
   ratioMethod:'marginal-expected-damage',joinerBaseline:baseline,
   leaderStrength,tierPriority,modeledTotal:distribution.modeledTotal,
+  infantryShortage:distribution.infantryShortage,infantryFloor:distribution.infantryFloor,
   allHeroLevelsKnown:marches.every(m=>m.capacityKnown),
   allHeroesAssigned:marches.every(m=>m.missingHeroSlots===0),
   joinCount:selected.joins.length,selected};
 }
-root.NRW_BEAR_FORMATION={plan,chooseHeroes,JOIN_PRIORITIES,allocateStock:allocate,integerPercentages,availableStock,joinerBaseline,ratioForTarget,scenario,scoreFor,expectedWeights,allocateByMarginal};
+root.NRW_BEAR_FORMATION={plan,chooseHeroes,JOIN_PRIORITIES,allocateStock:allocate,integerPercentages,availableStock,joinerBaseline,ratioForTarget,scenario,scoreFor,expectedWeights,allocateByMarginal,minimumInfantry};
 })(window);
