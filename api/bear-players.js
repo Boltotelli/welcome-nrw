@@ -19,6 +19,7 @@ function pickData(v){
   !Number.isInteger(g.tg)||g.tg<0||g.tg>8||!Number.isSafeInteger(g.count)||g.count<1||g.count>100000000))
   throw Error('Invalid troop groups');
  out.joinCount=Math.min(6,Math.max(0,Math.trunc(Number(v.joinCount)||0)));
+ out.joinLeaderComparison=['weaker','similar','stronger'].includes(v.joinLeaderComparison)?v.joinLeaderComparison:'similar';
  const rawHeroes=v.heroes&&typeof v.heroes==='object'&&!Array.isArray(v.heroes)?v.heroes:{};
  out.heroes={};
  for(const [name,h] of Object.entries(rawHeroes).slice(0,55)){
