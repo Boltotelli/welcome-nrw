@@ -39,7 +39,7 @@ function pointScore(index,model){
 function petAudit(model,catalog){
  const v=model?.v2||{},list=Array.isArray(catalog?.pets)?catalog.pets:[];
  return PET_CANDIDATES.map((entry)=>{
-  const pet=list.find(p=>p.name===entry.name);
+  const pet=list.find(p=>p.name===entry.name||(entry.name==='Moose'&&p.name==='Great Moose'));
   if(!pet||pet.bearSkill?.id!==entry.id)return null;
   const active=v.petActive?.[entry.name]===true;
   const manual=v.petSkillRanks?.[entry.name];
