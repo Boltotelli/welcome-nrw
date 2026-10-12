@@ -11,6 +11,8 @@ const el=(tag,cls='',txt)=>{const node=document.createElement(tag);if(cls)node.c
 const num=x=>Number(x||0).toLocaleString('de-DE',{maximumFractionDigits:1});
 const valid=x=>typeof x==='string'&&x.trim().length>=2&&x.trim().length<=50;
 let name='',mode='',version=null,editKey=null,syncTimer=null,syncInFlight=false,dirty=false,heroInfoCache={},lastResult=null;
+// Preserve expanded generations when hero tiles refresh.
+const expandedSeasons=new Set([5,6,7,8]);
 const app=el('main','bear-name-app');app.id='bearNewApp';document.body.prepend(app);document.body.classList.add('bear-name-mode');
 const box=el('div','bear-name-container'),status=el('p','bear-name-status');
 app.append(box,status);
@@ -111,7 +113,13 @@ function rosterSection(){
  const groups=new Map();
  heroList.forEach((h,i)=>{const season=i<16?1:Math.min(8,Math.floor((i-16)/3)+2);if(!groups.has(season))groups.set(season,[]);groups.get(season).push(h);});
  for(const [season,heroes] of groups){
-  const details=el('details','bear-name-season');details.open=season>=5;
+  const details=el('details','bear-name-season');details.open=expandedSeasons.has(season);
+  // Record user intent, instead of recreating every <details> as closed
+  // whenever the selection rerenders the hero gallery.
+  details.addEventListener('toggle',()=>{
+   if(!details.isConnected)return;
+   if(details.open)expandedSeasons.add(season);else expandedSeasons.delete(season);
+  });
   const caption=el('summary','',season===1?'Generation 1 · Basishelden':'Generation '+season);details.append(caption);
   const grid=el('div','bear-name-hero-grid');
   for(const hero of heroes){
@@ -120,7 +128,10 @@ function rosterSection(){
     const v=state().v2;
     if(v.scannedOwnedHeroes.includes(n))v.scannedOwnedHeroes=v.scannedOwnedHeroes.filter(x=>x!==n);
     else{v.scannedOwnedHeroes.push(n);v.manualHeroes[n]={...h,name:n,level:80,skillsAssumedMax:true};}
+    const previousY=window.scrollY||0;
     saveLocal();render();
+    // Preserve the reader's position when the selected card gains fields.
+    window.requestAnimationFrame?.(()=>window.scrollTo({top:previousY,behavior:'instant'}));
    },'bear-name-hero-pick');
    const img=el('img');img.src=heroInfoCache[n]?.imageUrl||hero.img||'';img.alt=n;img.loading='lazy';
    const text=el('span','',n);tap.append(img,text);card.append(tap);
