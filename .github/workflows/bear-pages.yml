@@ -213,6 +213,17 @@ jobs:
           find v3-latest/bear -maxdepth 1 -type f -exec cp '{}' _site/bear/ \;
           find v3-latest/bear/preview-v3 -maxdepth 1 -type f -exec cp '{}' _site/bear/preview-v3/ \;
           cp v3-latest/bear/assets/kingshot_formations_loading.webm _site/bear/assets/
+          # The original transparent 512px Kingshot video is already in the
+          # archived user-provided bear/examples/nrw-bear-assets.zip on this
+          # workflow's source branch. Reuse those original bytes unmodified.
+          if [ -s _site/assets/kingshot_beartrap_v3_action_transparent.webm ]; then
+            cp _site/assets/kingshot_beartrap_v3_action_transparent.webm _site/bear/assets/kingshot_beartrap_v3_action_transparent.webm
+            echo 'Original Bear damage video SHA-256:'
+            sha256sum _site/bear/assets/kingshot_beartrap_v3_action_transparent.webm
+            ffprobe -v error -show_entries stream=width,height,codec_name:format=duration,size -of default=noprint_wrappers=1 _site/bear/assets/kingshot_beartrap_v3_action_transparent.webm
+          else
+            echo 'WARN: Original Bear video not in base Pages artifact; use compressed fallback.'
+          fi
           cp v3-latest/bear/assets/pet-valora-sprite.webp _site/bear/assets/
           test -s _site/bear/assets/pet-valora-sprite.webp
           # Two real loading videos: provided hero-selection WebM and
