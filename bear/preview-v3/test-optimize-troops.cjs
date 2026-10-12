@@ -9,12 +9,15 @@ const f=root.window.NRW_BEAR_FORMATION,c=root.window.NRW_BEAR_COMBAT,
  j=root.window.NRW_BEAR_JOINER_SKILLS;
 const catalog={heroes:[...Array.from({length:16},(_,i)=>({name:'old'+i})),
  ...Array.from({length:18},(_,i)=>({name:'new'+i}))]};
-const age=names=>f.joinerBaseline({v2:{scannedOwnedHeroes:names}},catalog).proportions;
-assert.equal(age(['old1']).join('/'),'10/30/60');
-assert.equal(age(['new0']).join('/'),'10/20/70');
-assert.equal(age(['new3']).join('/'),'10/10/80');
-assert.equal(age(['new6']).join('/'),'1/10/89');
+const age=(names,kingdomGeneration)=>f.joinerBaseline({
+ v2:{scannedOwnedHeroes:names,kingdomGeneration}},catalog).proportions;
+assert.equal(age(['old1']).join('/'),'1/10/89',
+ 'Old-generation mini-account must not force a Gen1 joiner ratio on modern #1044');
 assert.equal(age(['new15']).join('/'),'1/10/89');
+assert.equal(age([],1).join('/'),'10/30/60');
+assert.equal(age([],2).join('/'),'10/20/70');
+assert.equal(age([],3).join('/'),'10/10/80');
+assert.equal(age([],8).join('/'),'1/10/89');
 const targets=Array(7).fill(180000),base=age(['new6']);
 const allocate=(stock,t=targets)=>{
  const ratios=t.map(x=>f.ratioForTarget(x,base));
