@@ -430,7 +430,8 @@ function plan(model,catalog,combat,capacityCore){
  if(selected.starter.some(h=>!h))missing.push('starter');
  if(new Set(selected.starter.map(h=>h&&classOf(h.name,catalog))).size!==3||
     selected.starter.some(h=>!h||!classOf(h.name,catalog)))missing.push('starter-classes');
- const base=cap?.base||0,master=cap?.master||0,pet=cap?.pet||0;
+ const base=cap?.base||0,master=cap?.master||0,pet=cap?.pet||0,
+  minister=cap?.minister||0;
  const teams=[{kind:'starter',heroes:selected.starter},...selected.joins.map(j=>({kind:'join',...j}))];
  // Add capacity of the actual three heroes on EACH march. Unknown hero levels
  // never become 80 by assumption. Display provisional lower-bound capacity.
@@ -442,7 +443,7 @@ function plan(model,catalog,combat,capacityCore){
   // The player can still manually join without a hero in game, but that
   // is NOT a valid offensive-leader recommendation.
   const eligible=i===0||Boolean(team.heroes[0]);
-  const size=eligible?base+master+pet+lv.reduce((a,b)=>a+(b||0),0):0;
+  const size=eligible?base+master+pet+minister+lv.reduce((a,b)=>a+(b||0),0):0;
   return {...team,slot:i,capacity:size,capacityKnown:known,
    eligible,missingHeroSlots:team.heroes.filter(h=>!h).length};
  });
