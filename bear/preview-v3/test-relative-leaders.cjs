@@ -134,4 +134,26 @@ assert(!flowSource.includes("T('Starter ') +best.ratio.join"),
 const noInf=f.playableProjection([[1,9999,0]],[0,10000,0],[10000],[[1,2,3]]);
 assert.deepEqual(Array.from(noInf.ratios[0]),[0,100,0]);
 assert.deepEqual(Array.from(noInf.rows[0]),[0,10000,0]);
+// Simulated late-game inventories, 1..7 marches and 100%-only settings:
+let seed=2678;const rand=()=>((seed=(seed*1664525+1013904223)>>>0)/4294967296);
+for(let test=0;test<60;test++){
+ const n=1+Math.floor(rand()*7),caps=Array.from({length:n},()=>
+  5000+Math.floor(rand()*210000));
+ const inv=Array.from({length:3},()=>Math.floor(rand()*550000));
+ const w=Array.from({length:n},()=>Array.from({length:3},()=>.01+rand()*4));
+ const optimum=f.allocateByMarginal(caps,inv,w);
+ const playable=f.playableProjection(optimum.rows,inv,caps,w);
+ const used=inv.map((_,k)=>playable.rows.reduce((sum,row)=>sum+row[k],0));
+ assert(used.every((x,k)=>x<=inv[k]),'Never reuse shared soldiers #'+test);
+ playable.rows.forEach((row,i)=>{
+  const percent=playable.ratios[i],total=row.reduce((x,y)=>x+y,0);
+  assert(total<=caps[i]&&row.every(Number.isSafeInteger));
+  assert(percent.every(Number.isInteger),'Whole percent selection only #'+test);
+  const rounded=[Math.floor(total*percent[0]/100),
+   Math.floor(total*percent[1]/100)];
+  rounded[2]=total-rounded[0]-rounded[1];
+  assert.equal(row.join(','),rounded.join(','),
+   'Game ratio must recreate exact troop counts #'+test);
+ });
+}
 console.log('PASS relative leader strength moves shared scarce troops and high-TG groups between own and joins:',JSON.stringify(byMode));
