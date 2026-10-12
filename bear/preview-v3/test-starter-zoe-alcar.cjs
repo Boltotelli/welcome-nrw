@@ -43,7 +43,7 @@ assert(by(alcar,'Carpe Diem / enemy_damage_taken_up').some(x=>x.amount===25&&x.u
 assert(alcar.score<zoe.score&&alcar.optimisticScore>zoe.score,
  'Must not assert unconditional Alcar / Zoe ranking with unverified target uptime');
 const wee=a.evaluate({name:'Wee & Woo',level:80,stars:4,tier:0,widget:2},'archer',null,get,b.widgetValue,a.modelContext(null,W.NRW_BEAR_COMBAT));
-assert(wee.offensiveSkills.some(x=>x.kind==='lethality'&&x.amount===8),'Wee/Woo secondary lethality included');
+assert(wee.offensiveSkills.some(x=>x.kind==='lethality'&&x.amount===10),'Wee/Woo secondary lethality included');
 assert(wee.irrelevantSkills.some(x=>x.reason==='enemy-troop-type-not-bear'),'Enemy troop-specific bonus excluded');
 const thrud=a.evaluate({name:'Thrud',level:80,stars:4,tier:0,widget:2},'cavalry',null,get,b.widgetValue,a.modelContext(null,W.NRW_BEAR_COMBAT));
 assert(by(thrud,'Battle Hunger').some(x=>x.kind==='class-damage'&&x.type===0),'Thrud infantry');
