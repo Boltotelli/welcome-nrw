@@ -52,7 +52,7 @@ const table=[
 ['Fähigkeitslevel','Skill level','Niveau de compétence','Nivel de habilidad'],
 ['Riesennashorn','Giant Rhino','Rhinocéros géant','Rinoceronte gigante'],
 ['Schwarzer Panther','Black Panther','Panthère noire','Pantera negra'],
-['Kriegsbär','War Bear','Ours de guerre','Oso de guerra'],
+['Eisenpanzer-Kriegsbär','Ironclad War Bear','Ours de guerre cuirassé','Oso de guerra acorazado'],
 ['Elch','Moose','Élan','Alce'],
 ['Mächtiger Bison','Mighty Bison','Bison puissant','Bisonte poderoso'],
 ['Aktive Buffs markieren. Die bereits eingetragenen Kampfwerte nicht doppelt erhöhen.','Select active buffs. Do not count buffs already included in combat stats twice.','Sélectionne les bonus actifs. Ne les compte pas deux fois.','Marca las bonificaciones activas. No las cuentes dos veces.'],
