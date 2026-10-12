@@ -4,11 +4,13 @@
 (function(){
 'use strict';
 const B=window.NRW_BEAR_BRIDGE,C=window.NRW_BEAR_CATALOG;
+const I18N=window.NRW_BEAR_I18N;
+const T=text=>I18N?.tr?.(text)??text;
 if(!B||!C)return;
 const CL=['infantry','cavalry','archer'],LABEL=['Infanterie','Kavallerie','Bogenschützen'];
 const heroList=C.heroes||[],heroNames=new Set(heroList.map(h=>h.name));
-const el=(tag,cls='',txt)=>{const node=document.createElement(tag);if(cls)node.className=cls;if(txt!==undefined)node.textContent=txt;return node;};
-const num=x=>Number(x||0).toLocaleString('de-DE',{maximumFractionDigits:1});
+const el=(tag,cls='',txt)=>{const node=document.createElement(tag);if(cls)node.className=cls;if(txt!==undefined)node.textContent=T(txt);return node;};
+const num=x=>Number(x||0).toLocaleString(document.documentElement.lang==='de'?'de-DE':document.documentElement.lang==='fr'?'fr-FR':document.documentElement.lang==='es'?'es-ES':'en-GB',{maximumFractionDigits:1});
 const valid=x=>typeof x==='string'&&x.trim().length>=2&&x.trim().length<=50;
 let name='',mode='',version=null,editKey=null,syncTimer=null,syncInFlight=false,dirty=false,heroInfoCache={},lastResult=null;
 // Preserve expanded generations when hero tiles refresh.
@@ -28,7 +30,7 @@ function saveLocal(){
  lastResult=null;
  clearTimeout(syncTimer);syncTimer=setTimeout(push,1400);
 }
-function showStatus(s,error=false){status.textContent=s;status.classList.toggle('error',error);}
+function showStatus(s,error=false){status.textContent=T(s);status.classList.toggle('error',error);}
 function numberField(label,value,onChange,options={}){
  const wrap=el('label','bear-name-field'),span=el('span','',label),input=el('input');
  input.type='number';input.min=options.min??0;input.max=options.max??100000000;input.step=options.step??1;
@@ -339,7 +341,7 @@ function scalarSection(){
  section.append(el('p','bear-name-muted','Aktive Buffs markieren. Die bereits eingetragenen Kampfwerte nicht doppelt erhöhen.'));
 
  const present=el('label','bear-name-pet-line'),ch=el('input');ch.type='checkbox';ch.checked=!!v.petBuffCapturedInStats;ch.onchange=()=>{v.petBuffCapturedInStats=ch.checked;saveLocal();};
- present.append(ch,document.createTextNode(' Aktive Pet-ATK/LET-Buffs sind bereits in diesen Werten enthalten'));section.append(present);
+ present.append(ch,document.createTextNode(' '+T('Aktive Pet-ATK/LET-Buffs sind bereits in diesen Werten enthalten')));section.append(present);
  return section;
 }
 function starterGearSection(picked){
@@ -613,13 +615,28 @@ function predicted(){
    '⚠ Geschätzter Modellwert – kein bestätigter Kingshot-Schadenswert.'));
  lastResult=best;return out;
 }
+function languageSwitcher(){
+ const div=el('nav','bear-name-languages');
+ div.setAttribute('aria-label','Language / Sprache');
+ for(const lang of ['de','en','fr','es']){
+  const b=button(lang.toUpperCase(),()=>{
+   I18N?.setLanguage?.(lang);
+   render();
+  },'bear-name-lang-button');
+  b.setAttribute('lang',lang);
+  if((I18N?.language?.()||document.documentElement.lang)===lang)b.classList.add('active');
+  div.append(b);
+ }
+ return div;
+}
 function landing(){
  const head=el('div','bear-name-landing');head.append(el('p','bear-name-eyebrow','🐻 NRW · BÄREN-OPTIMIERER'),
   title('Deine Bear-Formation. Ohne Screenshot-Marathon.','h1'),
   el('p','bear-name-muted','Nur deinen Spielernamen eingeben. Danach wählst du zwischen Heldenempfehlung und erweiterter Schadensoptimierung.'));
- const inp=el('input','bear-name-input');inp.placeholder='Dein Kingshot-Name';inp.maxLength=50;inp.autocomplete='off';
+ const inp=el('input','bear-name-input');inp.placeholder=T('Dein Kingshot-Name');inp.maxLength=50;inp.autocomplete='off';
  inp.value=name;inp.onkeydown=e=>{if(e.key==='Enter'&&valid(inp.value))openProfile(inp.value);};
  head.append(inp,button('Profil öffnen / neu anlegen →',()=>{if(valid(inp.value))openProfile(inp.value);else showStatus('Bitte einen Namen mit mindestens zwei Zeichen eingeben.',true);},'bear-name-btn primary'));head.append(el('p','bear-name-muted','Hinweis: Wenn GitHub-Speicherung aktiviert ist, kann jeder, der diesen Namen kennt, die hinterlegten Spielwerte lesen. Es werden keine Screenshots oder Kingshot-IDs gespeichert.'));
+ head.prepend(languageSwitcher());
  box.append(head);
  const saved=JSON.parse(localStorage.getItem('nrw_bear_name_list_v1')||'[]');
  if(saved.length){const row=el('div','bear-name-saved');row.append(title('Bereits auf diesem Gerät geöffnet','h3'));
@@ -630,7 +647,7 @@ function render(){
  if(!name){landing();return;}
  const bar=el('header','bear-name-top');
  bar.append(button('← Namen wechseln',()=>{clearTimeout(syncTimer);name='';mode='';render();}),
-  title('🐻 '+name,'h2'),button('Jetzt speichern',push));
+  title('🐻 '+name,'h2'),languageSwitcher(),button('Jetzt speichern',push));
  box.append(bar);
  if(!mode){
   const options=el('section','bear-name-choice');
