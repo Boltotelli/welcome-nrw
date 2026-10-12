@@ -145,7 +145,7 @@ function rosterSection(){
        const response=await fetch('/api/bear-reference?hero='+encodeURIComponent(n));if(!response.ok)throw Error();
        heroInfoCache[n]=await response.json();
        const url=heroInfoCache[n].imageUrl;
-       if(url)img.src=url;
+       if(url){img.onerror=()=>{img.onerror=null;img.src=hero.img||'';};img.src=url;}
       }catch(_){info.textContent='Quelle nicht verfügbar';info.disabled=false;return;}
      }
      info.textContent='Quelle ansehen ↗';
