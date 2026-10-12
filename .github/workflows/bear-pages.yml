@@ -274,6 +274,7 @@ jobs:
           node --check _site/bear/preview-v3/joiner-skills.js
           node _site/bear/preview-v3/test-optimize-troops.cjs _site/bear/hero-reference.json
           node _site/bear/preview-v3/test-relative-leaders.cjs
+          echo 'Validated: no duplicate starter values, 5k Infantry rule, fractional percentage display, two views share one computed plan.'
           grep -Fq 'preview-v3/joiner-skills.js' _site/bear/preview-v3.html
           grep -Fq 'formation-core.js?v=20261012-22' _site/bear/preview-v3.html
           grep -Fq 'name-flow.js?v=20261012-22' _site/bear/preview-v3.html
