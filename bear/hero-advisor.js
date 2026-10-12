@@ -145,64 +145,63 @@ function evaluate(hero,type,priorities,referenceGet,widgetGet,context){
   widgetGet(hero.name,widget):null;
  const widgetOffense=widgetData&&['rally-attack','rally-lethality'].includes(widgetData.type)?
   valid(widgetData.bonusPct,0,50):null;
- const effects=[],missing=[];
- let squadAttack=0,squadLethality=0,squadDamage=1,provisionalDamageFactor=1;
- const typeAttack=[0,0,0],typeDamage=[1,1,1];
- (source?.skills||[]).forEach((skill,i)=>{
-  const result=skillToEffect(skill,state.confirmed?state.actual[i]:state.cap);
-  if(!result||result.unknown){missing.push(skill.name);return;}
-  if(result.ignored)return;
-  effects.push(result);
-  // The canonical primary expedition value is NOT always the complete
-  // skill. Alcar has two explicitly documented secondary effects.
-  if(hero.name==='Alcar'){
-   for(const secondary of skill.additionalEffects||[]){
-    const value=valid(secondary.valuesBySkillLevel?.[(state.confirmed?state.actual[i]:state.cap)-1],0,2000);
-    if(value===null){missing.push(skill.name+' (secondary)');continue;}
-    if(secondary.effect==='cavalry_archer_damage_up'){
-     for(const t of [1,2]){
-      typeDamage[t]*=1+value/100;
-      effects.push({kind:'class-damage',type:t,amount:value,
-       name:skill.name+' (secondary)',source:'canonical-additional-effect'});
-     }
-    }else if(secondary.effect==='enemy_damage_taken_up'){
-     // Carpe Diem: +25% target damage taken for one turn on attack.
-     // One-turn Bear timing/uptime and stacking cannot be confirmed.
-     // Include a full-uptime ESTIMATE and expose its no-uptime bound.
-     const factor=1+value/100;
-     squadDamage*=factor;provisionalDamageFactor*=factor;
-     effects.push({kind:'damage',amount:value,name:skill.name+' (target debuff)',
-      source:'canonical-additional-effect',bearTiming:'one-turn-unverified'});
-    }else missing.push(skill.name+' (unsupported secondary)');
-   }
+ const engine=root.NRW_BEAR_SKILL_EFFECTS;
+ // All known Expedition skills from the source are evaluated by one central
+ // rules engine. Unknown mechanics are explicitly recorded, not treated as
+ // an unconditional squad boost; no arbitrary hero-priority override.
+ const assessed=engine?.assess?.({
+   ...hero,skillLevel:state.cap,
+   confirmedSkillRanks:state.confirmed?state.actual:null
+ },source)||{modeled:[],uncertain:[{reason:'skill-interpreter-missing'}],
+  irrelevant:[],skillCount:0,sourceEffects:0};
+ const effects=assessed.modeled,missing=assessed.uncertain.map(x=>x.name||x.reason);
+ let squadAttack=0,squadLethality=0,squadDamage=1,lowSquadDamage=1;
+ const typeAttack=[0,0,0],typeDamage=[1,1,1],lowTypeDamage=[1,1,1];
+ for(const item of effects){
+  const factor=1+item.amount/100;
+  const safeFactor=1+(item.uncertain?Number(item.lower||0):item.amount)/100;
+  if(item.kind==='attack')squadAttack+=item.amount;
+  if(item.kind==='lethality')squadLethality+=item.amount;
+  if(item.kind==='damage'){squadDamage*=factor;lowSquadDamage*=safeFactor;}
+  if(item.kind==='class-attack'&&classes.includes(classes[item.type]))
+   typeAttack[item.type]+=item.amount;
+  if(item.kind==='class-damage'&&classes.includes(classes[item.type])){
+   typeDamage[item.type]*=factor;
+   lowTypeDamage[item.type]*=safeFactor;
   }
-  if(result.kind==='attack')squadAttack+=result.amount;
-  if(result.kind==='lethality')squadLethality+=result.amount;
-  if(result.kind==='damage')squadDamage*=1+result.amount/100;
-  if(result.kind==='class-attack')typeAttack[result.type]+=result.amount;
-  if(result.kind==='class-damage')typeDamage[result.type]*=1+result.amount/100;
- });
+ }
+
  const ctx=context||modelContext(null,null);
  const w=ctx.weights,baseAtk=ctx.attack,baseLet=ctx.lethality;
- let total=0,baseTotal=0;
+ let total=0,lowTotal=0,baseTotal=0;
  for(let i=0;i<3;i++){
   const atk0=100+baseAtk[i],leth0=100+baseLet[i];
   const atk1=atk0+squadAttack+typeAttack[i]+(i===index&&nativeAtk!==null?nativeAtk:0);
   const leth1=leth0+squadLethality;
-  const factor=(atk1/atk0)*(leth1/leth0)*typeDamage[i];
-  total+=w[i]*factor;baseTotal+=w[i]*(1+(i===index&&nativeAtk!==null?nativeAtk/atk0:0));
+  const factor=(atk1/atk0)*(leth1/leth0);
+  total+=w[i]*factor*typeDamage[i];
+  lowTotal+=w[i]*factor*lowTypeDamage[i];
+  baseTotal+=w[i]*(1+(i===index&&nativeAtk!==null?nativeAtk/atk0:0));
  }
  // Exclusive rally widget EFFECTS are multiplicative and distinct from
  // the gear stats already in account bonus screenshots.
  const widgetFactor=widgetOffense===null?1:1+widgetOffense/100;
- const score=nativeAtk===null?null:
+ // The primary order is the defensible lower estimate. All modeled
+ // proc probabilities are still averaged normally; only unverified enemy
+ // debuff uptime / multipliers create a separate upper sensitivity bound.
+ const optimisticScore=nativeAtk===null?null:
   Math.round(100*total*squadDamage*widgetFactor*100)/100;
- const conservativeScore=score===null?null:
-  Math.round(score/provisionalDamageFactor*100)/100;
+ const conservativeScore=nativeAtk===null?null:
+  Math.round(100*lowTotal*lowSquadDamage*widgetFactor*100)/100;
+ const score=conservativeScore;
+ const hasProvisional=effects.some(x=>x.uncertain);
  const confidence=nativeAtk===null?'limited':
-  hero.starPendingReview||missing.length||!state.confirmed||!ctx.fromStats||provisionalDamageFactor>1?'estimated':'higher';
+  hero.starPendingReview||missing.length||!state.confirmed||!ctx.fromStats||hasProvisional?'estimated':'higher';
  return {name:hero.name,type,level,stars,tier:tier??0,widget,
-  score,conservativeScore,includesUnverifiedBearUptime:provisionalDamageFactor>1,
+  score,conservativeScore,optimisticScore,includesUnverifiedBearUptime:hasProvisional,
+  skillCoverage:{total:assessed.skillCount,sourceEffects:assessed.sourceEffects,
+   modeled:assessed.modeled.length,irrelevant:assessed.irrelevant.length,
+   uncertain:assessed.uncertain.length},
   baseIndex:Math.round(baseTotal*10000)/100,nativeExpeditionAtk:nativeAtk,
   skill:state.level,skillCap:state.cap,assumedSkill:state.assumed,
   hasConfirmedSkill:state.confirmed,
@@ -210,11 +209,12 @@ function evaluate(hero,type,priorities,referenceGet,widgetGet,context){
   attackBonus:squadAttack,lethalityBonus:squadLethality,
   damageBonus:Math.round((squadDamage-1)*10000)/100,
   offensiveSkills:effects,unmodeledSkills:missing,
+  irrelevantSkills:assessed.irrelevant,uncertainSkills:assessed.uncertain,
   usesAttackReference:nativeAtk!==null,attackWeight:w[index],guideRank:null,
   bearCaution:missing.length>0,confidence,starPendingReview:Boolean(hero.starPendingReview),rankingBasis:ctx.mode,
   modeledPercentAboveBaseline:score===null?null:score-100,
   note:nativeAtk===null?'missing-expedition-base':
-   missing.length?'partial-offensive-model':'expected-offense'
+   missing.length||hasProvisional?'partial-offensive-model':'expected-offense'
  };
 }
 function recommend(owned,types,priorities,referenceGet,widgetGet,context){
