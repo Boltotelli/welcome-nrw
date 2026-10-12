@@ -92,6 +92,15 @@ const table=[
 ['GitHub Pages-Test: ausschließlich lokal gespeichert.','GitHub Pages preview: saved locally only.','Aperçu GitHub Pages : sauvegarde locale uniquement.','Vista previa GitHub Pages: guardado solo local.'],
 ['✓ Gespeichert (privates GitHub-Profil): ','✓ Saved (private GitHub profile): ','✓ Sauvegardé (profil GitHub privé) : ','✓ Guardado (perfil privado de GitHub): '],
 ['Bitte einen Namen mit mindestens zwei Zeichen eingeben.','Please enter at least two characters.','Saisis au moins deux caractères.','Introduce al menos dos caracteres.'],
+['Starter ','Starter ','Lanceur ','Inicio '],
+['Gemeinsames Profil geladen: ','Shared profile loaded: ','Profil partagé chargé : ','Perfil compartido cargado: '],
+['Lokales Profil geöffnet. GitHub-Synchronisierung derzeit nicht verfügbar.','Local profile opened. GitHub sync is currently unavailable.','Profil local ouvert. Synchronisation GitHub indisponible.','Perfil local abierto. Sin sincronización de GitHub.'],
+['Dieses Profil wird auf einem anderen Gerät verwaltet. Hier nur lokal gespeichert.','This profile is managed on another device. Saved locally only.','Ce profil est géré sur un autre appareil. Sauvegarde locale uniquement.','Este perfil se administra en otro dispositivo. Solo guardado local.'],
+['Profil wurde zwischenzeitlich geändert. Neu öffnen, um Änderungen abzugleichen.','This profile was changed elsewhere. Reopen it to sync changes.','Ce profil a changé ailleurs. Rouvre-le pour synchroniser.','Este perfil cambió en otro dispositivo. Reábrelo para sincronizar.'],
+['Nur lokal gespeichert – GitHub-Schreibzugang noch nicht bereit.','Saved locally only – GitHub writes not configured yet.','Sauvegarde locale – écriture GitHub non configurée.','Solo guardado local – escritura de GitHub no configurada.'],
+['Nur lokal gespeichert – GitHub nicht erreichbar.','Saved locally only – GitHub unavailable.','Sauvegarde locale – GitHub indisponible.','Solo guardado local – GitHub no disponible.'],
+['Noch fehlende Helden-/Pet-Angaben: ','Hero/pet info missing: ','Données héros/animaux manquantes : ','Faltan datos de héroes/mascotas: '],
+['Generation ','Generation ','Génération ','Generación '],
 ['★','★','★','★']
 ];
 const catalog={en:1,fr:2,es:3};
@@ -102,7 +111,7 @@ function tr(v){
  const ix=catalog[language()];
  const entry=exact.get(v);if(entry)return entry[ix];
  // Dynamic labels assembled with a known translated static prefix.
- for(const prefix of ['Infanterie','Kavallerie','Bogenschützen','Starter ','Noch fehlende Helden-/Pet-Angaben: ']){
+ for(const prefix of ['Infanterie','Kavallerie','Bogenschützen','Starter ','Generation ','Gemeinsames Profil geladen: ','✓ Gespeichert (privates GitHub-Profil): ','Noch fehlende Helden-/Pet-Angaben: ']){
   if(v.startsWith(prefix)){const item=exact.get(prefix);
    if(item)return item[ix]+v.slice(prefix.length);}
  }
