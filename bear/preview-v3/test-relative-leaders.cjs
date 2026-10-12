@@ -84,4 +84,35 @@ assert(source.includes('rallyStrengthField()'),'UI must expose strength selector
 assert(source.includes('joinLeaderComparison:v.joinLeaderComparison'),'Persist strength scenario');
 assert(source.includes('plan.tierPriority'),'Both result views must agree on high-tier assignment');
 assert(source.includes('alloc.plan(model,C,combat,window.NRW_BEAR_CAPACITY)'));
+// Reproduce the reported 0% Infantry / duplicated starter UI bug.
+// ~190,810 march capacity with 7 marches and plenty of actual Infantry:
+const screenshotCapacity=190810,screenshotTargets=Array(7).fill(screenshotCapacity);
+const screenshotStock=[120000,195000,945000];
+const example=makeModel('weaker');
+example.v2.troopGroups=[
+ {type:'infantry',tier:10,tg:6,count:screenshotStock[0]},
+ {type:'cavalry',tier:10,tg:5,count:screenshotStock[1]},
+ {type:'archer',tier:10,tg:7,count:screenshotStock[2]}
+];
+const estimate=f.expectedWeights(screenshotTargets,example,catalog,c,screenshotStock);
+const screenshot=f.allocateByMarginal(screenshotTargets,screenshotStock,estimate.weights);
+for(const [i,row] of screenshot.rows.entries()){
+ assert(row[0]>=5000,'March '+i+' should receive >=5000 Infantry when stock allows');
+ assert(f.integerPercentages(row)[0]>=1,
+  'Do not show 0% Infantry for a nonzero, sufficiently supplied march');
+}
+assert.equal(screenshot.infantryShortage,false);
+assert.deepEqual(Array.from(f.integerPercentages([858,3072,186880])),[0.5,1.6,97.9],
+ 'Even historic low-Infantry data must not be rounded to an illusory zero');
+const tooFew=f.allocateByMarginal(screenshotTargets,[70,195000,945000],estimate.weights);
+assert(tooFew.infantryShortage,'Insufficient Infantry must be signalled');
+assert(tooFew.rows.every(row=>row[0]>=0));
+assert.equal(tooFew.rows.reduce((n,row)=>n+row[0],0),70,
+ 'Never invent 5,000 infantry that the user does not own');
+const flowSource=fs.readFileSync(path.join(__dirname,'name-flow.js'),'utf8');
+assert(flowSource.includes('let cachedFormationPlan=null'),'One cached plan for both buttons');
+assert((flowSource.match(/const plan=currentFormationPlan\(\);/g)||[]).length===2,
+ 'Formation cards and damage scenarios must use exactly the same cached plan');
+assert(!flowSource.includes("T('Starter ') +best.ratio.join"),
+ 'Do not print redundant/independently perceived Starter troop values in damage output');
 console.log('PASS relative leader strength moves shared scarce troops and high-TG groups between own and joins:',JSON.stringify(byMode));
