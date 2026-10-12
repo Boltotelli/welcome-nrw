@@ -504,7 +504,7 @@ function actionButtons(advanced){
 function summaryHeroes(){
  const {picked,groups}=rankAndSelect(),v=state().v2,section=el('section','bear-name-panel');
  section.id='bearHeroRecommendation';
- section.append(title('Empfohlene Starter & Joiner'),el('p','bear-name-muted',
+ section.append(title('Empfohlene Starter'),el('p','bear-name-muted',
   'Die Heldenwahl ist modellbasiert. Alle Helden sind Level 80, die Skills werden aus Sternen als maximal ausgebaut angenommen.'));
  const starter=el('div','bear-name-picks');
  picked.forEach((n,i)=>{const h=el('div','bear-name-pick'),hero=heroList.find(x=>x.name===n);
@@ -513,14 +513,7 @@ function summaryHeroes(){
   if(groups[i]?.best?.confidence)h.append(el('small','',groups[i].best.confidence==='higher'?'Werte geprüft':'Schätzung – Werte ergänzen'));
   starter.append(h);
  });section.append(starter);
- const formation=window.NRW_BEAR_FORMATION?.chooseHeroes?.(state(),C);
- if(formation){
-  const joined=el('div','bear-name-joins');formation.joins.forEach((row,i)=>{
-   const article=el('div','bear-name-join');article.append(el('strong','',String(i+1)+'. Join'));
-   const heroes=row.heroes.map(x=>x?.name||'—');article.append(el('span','',heroes.join(' · ')));
-   joined.append(article);
-  });section.append(title('Joiner: erster Held = relevante Fähigkeit','h3'),joined);
- }
+
  return {section,picked};
 }
 function refreshHeroRecommendations(){
