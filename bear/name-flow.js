@@ -142,6 +142,7 @@ function pack(){
    level:80,expeditionStats:h.expeditionStats||{}};
  }
  return {heroes,ownHeroes:v.ownHeroes||[],joinCount:v.joinCount||0,
+  joinLeaderComparison:v.joinLeaderComparison||'similar',
   troopGroups:v.troopGroups||[],values:m.values||{},combatStatOrigin:v.combatStatOrigin||'combined-report',
   valoraTalent:v.valoraTalent||0,savageAdvantage:v.valora?.[3]||0,
   petActive:v.petActive||{},petSkillRanks:v.petSkillRanks||{},petBuffCapturedInStats:!!v.petBuffCapturedInStats};
@@ -156,6 +157,8 @@ function unpack(d){
  }
  v.ownHeroes=(d.ownHeroes||[]).slice(0,3);
  v.joinCount=Math.max(0,Math.min(6,Number(d.joinCount)||0));
+ v.joinLeaderComparison=['weaker','similar','stronger'].includes(d.joinLeaderComparison)?
+  d.joinLeaderComparison:'similar';
  v.troopGroups=d.troopGroups||[];v.troopTiers=[{tier:10,tg:0},{tier:10,tg:0},{tier:10,tg:0}];
  v.valora=[0,0,0,Number(d.savageAdvantage)||0];v.valoraTalent=Number(d.valoraTalent)||0;
  v.petActive=d.petActive||{};v.petSkillRanks=d.petSkillRanks||{};v.petBuffCapturedInStats=!!d.petBuffCapturedInStats;
@@ -171,6 +174,12 @@ async function openProfile(value){
  // Deterministic opaque local key; NO player ID is needed or requested.
  let hash=2166136261;for(const ch of name.toLocaleLowerCase()){hash^=ch.charCodeAt(0);hash=Math.imul(hash,16777619);}
  B.activateSavedId('name-'+(hash>>>0),name);
+ if(location.hostname.endsWith('github.io')){
+  // GitHub Pages hosts a static preview: never pretend server-side GitHub
+  // profile storage or private API routes are available.
+  showStatus('GitHub Pages: Eingaben werden nur lokal auf diesem Gerät gespeichert.');
+  mode='';render();return;
+ }
  try{
   const response=await fetch('/api/bear-players?name='+encodeURIComponent(name),{cache:'no-store'});
   if(response.ok){const remote=await response.json();unpack(remote.data);version=remote.version;showStatus('Gemeinsames Profil geladen: '+remote.name);}
@@ -181,6 +190,9 @@ async function openProfile(value){
 }
 async function push(){
  if(!name||syncInFlight||!dirty)return;
+ if(location.hostname.endsWith('github.io')){
+  showStatus('GitHub Pages-Test: ausschließlich lokal gespeichert.');dirty=false;return;
+ }
  syncInFlight=true;
  try{
   const response=await fetch('/api/bear-players',{method:'POST',headers:{'Content-Type':'application/json'},
@@ -268,11 +280,23 @@ function troopsSection(required){
  );
  return section;
 }
+function rallyStrengthField(){
+ const v=state().v2;
+ return choose('Rallyleader, denen du beitrittst',
+  [['weaker','Meist schwächer als ich'],
+   ['similar','Ungefähr gleich stark'],
+   ['stronger','Meist stärker als ich']],
+  v.joinLeaderComparison||'similar',value=>{
+   v.joinLeaderComparison=value;
+   saveLocal();
+  });
+}
 function scalarSection(){
  const m=state(),v=m.v2,section=el('section','bear-name-panel');
  section.append(title('Basiswerte & aktive Buffs'),el('p','bear-name-muted','Angriff und Tödlichkeit aller Truppentypen aus der Bonusübersicht. Fehlende Werte bleiben offen – keine stillen Schätzungen.'));
  section.append(choose('Anzahl aller Märsche (inkl. eigener Rally)',Array.from({length:7},(_,i)=>[i+1,String(i+1)]),
   Number(v.joinCount||0)+1,x=>{v.joinCount=Number(x)-1;saveLocal();}));
+ section.append(rallyStrengthField());
  const grid=el('div','bear-name-stat-grid');
  grid.append(numberField('Basis-Marschkapazität ohne Helden',m.values.cap,x=>{m.values.cap=x;saveLocal();},{max:1000000}));
  for(const [i,cl] of CL.entries())for(const [field,label] of [['Atk','Angriff %'],['Let','Tödlichkeit %']]){
@@ -451,12 +475,8 @@ function formationCards(){
    hasStock?'Für genaue Truppenzahlen bitte die Bestände vervollständigen.':
    'Truppenbestand und Marschkapazität fehlen noch.'));
  }else{
-  const basis=plan.joinerBaseline;
-  const message=basis?
-   T('Joiner-Richtwert')+' · Gen '+basis.generationLabel+': '+
-    basis.proportions.join('/')+' · '+T('an Truppenbestand und Infanterie-Mindestmenge angepasst.') :
-   T('Alle Märsche nutzen denselben Truppenbestand. Die Verteilung wird gemeinsam optimiert.');
-  section.append(el('p','bear-name-muted',message));
+  section.append(el('p','bear-name-muted',
+   'Formationen nach erwartetem Zusatzschaden verteilt. Die Stärke fremder Rallyleader ist eine Schätzung.'));
  }
  return section;
 }
@@ -601,7 +621,7 @@ function predicted(){
   return out;
  }
  const rows=plan.marches.map(m=>m.troops);
- const equipped=combat.allocateLevels?.(rows,tiers,true);
+ const equipped=combat.allocateLevels?.(rows,tiers,plan.tierPriority);
  const ownLevels=equipped?.[0]||tiers;
  const best={rows,leader:ownLevels,ratio:plan.marches[0].ratio,
   score:plan.starterScore,method:plan.ratioMethod};
@@ -682,7 +702,7 @@ function render(){
   const main=el('div','bear-name-two-columns'),left=el('div'),right=el('div');
   const v=state().v2;
   left.append(choose('Märsche insgesamt',Array.from({length:7},(_,i)=>[i+1,String(i+1)]),
-   Number(v.joinCount||0)+1,x=>{v.joinCount=Number(x)-1;saveLocal();render();}),rosterSection());
+   Number(v.joinCount||0)+1,x=>{v.joinCount=Number(x)-1;saveLocal();render();}),rallyStrengthField(),rosterSection());
   const t=el('details','bear-name-optional');t.append(el('summary','','Truppen ergänzen (optional)'),troopsSection(false));left.append(t);
   right.append(summaryHeroes().section,actionButtons(false));main.append(left,right);box.append(main);
  }else{
