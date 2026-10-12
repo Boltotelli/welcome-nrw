@@ -48,6 +48,13 @@ for(const comparison of ['weaker','similar','stronger']){
   assert(row.reduce((a,b)=>a+b,0)<=output.marches[i].capacity,'Overfilled march');
   assert.equal(row.reduce((a,b)=>a+b,0),output.marches[i].filled,'Shown counts must match');
   assert.equal(output.marches[i].ratio.reduce((a,b)=>a+b,0),100,'Displayed percent sum');
+  assert(output.marches[i].ratio.every(p=>Number.isInteger(p)&&p>=0&&p<=100),
+   'Only whole percentages can be selected in Kingshot');
+  const p=output.marches[i].ratio,full=row.reduce((a,b)=>a+b,0);
+  const exact=[Math.floor(full*p[0]/100),Math.floor(full*p[1]/100),0];
+  exact[2]=full-exact[0]-exact[1];
+  assert.equal(row.join('/'),exact.join('/'),
+   'Displayed integer ratio must correspond to every exact troop quantity');
  }
  for(let k=0;k<3;k++)
   assert.equal(rows.reduce((n,r)=>n+r[k],0),stock[k],'Do not reuse or lose troop stock');
@@ -104,8 +111,14 @@ const estimate=f.expectedWeights(screenshotTargets,example,catalog,c,screenshotS
 const screenshot=f.allocateByMarginal(screenshotTargets,screenshotStock,estimate.weights);
 const available=screenshot.rows.map(row=>row.reduce((n,x)=>n+x,0));
 assert(available.every((n,i)=>n<=screenshotTargets[i]));
-assert.deepEqual(Array.from(f.integerPercentages([858,3072,186880])),[0.5,1.6,97.9],
- 'Physically present Infantry must not be rounded to a misleading 0%');
+const playable=f.playableProjection([[858,3072,186880]],
+ [10000,10000,220000],[190810],[[1,3,9]]);
+assert.deepEqual(Array.from(playable.ratios[0]),[1,2,97],
+ '0.45% Infantry cannot be entered: choose a real whole 1% Infantry setting');
+assert.deepEqual(Array.from(playable.rows[0]),[1908,3816,185086],
+ 'Whole game inputs and troop numbers must agree EXACTLY');
+assert(Array.from(f.integerPercentages([858,3072,186880]))
+ .every(Number.isInteger),'Percentages shown must always be whole numbers');
 const tooFew=f.allocateByMarginal(screenshotTargets,[70,195000,945000],estimate.weights);
 assert(tooFew.rows.every(row=>row[0]>=0));
 assert.equal(tooFew.rows.reduce((n,row)=>n+row[0],0),70,
@@ -116,4 +129,9 @@ assert((flowSource.match(/const plan=currentFormationPlan\(\);/g)||[]).length===
  'Formation cards and damage scenarios must use exactly the same cached plan');
 assert(!flowSource.includes("T('Starter ') +best.ratio.join"),
  'Do not print redundant/independently perceived Starter troop values in damage output');
+// If there is NO Infantry stock, the game cannot set 1% Infantry;
+// report exactly 0% and 0 troops instead of inventing a stock minimum.
+const noInf=f.playableProjection([[1,9999,0]],[0,10000,0],[10000],[[1,2,3]]);
+assert.deepEqual(Array.from(noInf.ratios[0]),[0,100,0]);
+assert.deepEqual(Array.from(noInf.rows[0]),[0,10000,0]);
 console.log('PASS relative leader strength moves shared scarce troops and high-TG groups between own and joins:',JSON.stringify(byMode));
