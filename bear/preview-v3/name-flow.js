@@ -14,7 +14,7 @@ const num=x=>Number(x||0).toLocaleString(document.documentElement.lang==='de'?'d
 const valid=x=>typeof x==='string'&&x.trim().length>=2&&x.trim().length<=50;
 let name='',mode='',version=null,editKey=null,syncTimer=null,syncInFlight=false,dirty=false,heroInfoCache={},lastResult=null;
 // Preserve expanded generations when hero tiles refresh.
-const expandedSeasons=new Set([5,6,7,8]);
+const expandedSeasons=new Set();
 const app=el('main','bear-name-app');app.id='bearNewApp';document.body.prepend(app);document.body.classList.add('bear-name-mode');
 const box=el('div','bear-name-container'),status=el('p','bear-name-status');
 app.append(box,status);
@@ -277,9 +277,20 @@ function rosterSection(){
  }
  return section;
 }
+// Preserve collapsible panel state after unrelated redraws.
+const openPanels=new Map();
+function foldingPanel(key,label,content,defaultOpen=false){
+ const details=el('details','bear-name-panel bear-name-fold');
+ details.open=openPanels.has(key)?openPanels.get(key):defaultOpen;
+ details.append(el('summary','bear-name-fold-heading',label),content);
+ details.addEventListener('toggle',()=>{
+  if(details.isConnected)openPanels.set(key,details.open);
+ });
+ return details;
+}
 function troopsSection(required){
- const m=state(),v=m.v2,section=el('section','bear-name-panel');
- section.append(title('Truppen'),el('p','bear-name-muted','Pro Truppentyp beliebig viele T- und TG-Stufen hinzufügen. Die Summen werden automatisch ermittelt.'));
+ const m=state(),v=m.v2,section=el('div','bear-name-fold-body');
+ section.append(el('p','bear-name-muted','Pro Truppentyp beliebig viele T- und TG-Stufen hinzufügen. Die Summen werden automatisch ermittelt.'));
  const rows=el('div','bear-name-troops');
  function redraw(){
   rows.replaceChildren();
@@ -302,7 +313,9 @@ function troopsSection(required){
   },{min:1,max:1000000}),
   el('p','bear-name-muted','Mit Marschkapazität und Truppenbestand werden genaue Stückzahlen pro Marsch berechnet.')
  );
- return section;
+ const filled=CL.every(type=>(v.troopGroups||[]).some(g=>g.type===type&&
+  Number(g.tier)>=1&&Number(g.tg)>=0&&Number(g.count)>0));
+ return foldingPanel('troops','Truppen',section,!filled);
 }
 function rallyStrengthField(){
  const v=state().v2;
@@ -318,8 +331,7 @@ function rallyStrengthField(){
 function ministerSection(){
  const v=state().v2,section=el('section','bear-name-ministers');
  const selected=v.ministers;
- section.append(title('Ministerbuffs','h3'),
-  el('p','bear-name-muted','Die eingetragenen Werte sind immer ungebufft. Ministerboni werden automatisch hinzugefügt.'));
+ section.append(el('p','bear-name-muted','Die eingetragenen Werte sind immer ungebufft. Ministerboni werden automatisch hinzugefügt.'));
  // Tap/click and keyboard-friendly, two-position switch. Native range
  // was previously re-rendered during its INPUT event, interrupting
  // pointer dragging on mobile. Clickable buttons do not have that race.
@@ -376,8 +388,8 @@ function ministerSection(){
  return section;
 }
 function scalarSection(){
- const m=state(),v=m.v2,section=el('section','bear-name-panel');
- section.append(title('Basiswerte & aktive Buffs'),el('p','bear-name-muted','Bitte ausschließlich ungebuffte Grundwerte eintragen. Fehlende Werte bleiben offen.'));
+ const m=state(),v=m.v2,section=el('div','bear-name-fold-body');
+ section.append(el('p','bear-name-muted','Bitte ausschließlich ungebuffte Grundwerte eintragen. Fehlende Werte bleiben offen.'));
  section.append(choose('Anzahl aller Märsche (inkl. eigener Rally)',Array.from({length:7},(_,i)=>[i+1,String(i+1)]),
   Number(v.joinCount||0)+1,x=>{v.joinCount=Number(x)-1;saveLocal();}));
  section.append(rallyStrengthField());
@@ -399,7 +411,13 @@ function scalarSection(){
    },{step:0.1,max:10000}));
   section.append(gr);
  }
- section.append(ministerSection(),title('Pets & Valora','h3'));
+ const statsFilled=Number(m.values.cap)>0&&['iAtk','iLet','cAtk','cLet','aAtk','aLet'].every(k=>
+  m.values[k]!==null&&m.values[k]!==undefined&&m.values[k]!==''&&Number.isFinite(Number(m.values[k])))&&
+  (v.combatStatOrigin!=='separate-overview'||['squadAtk','squadLet'].every(k=>
+   m.values[k]!==null&&m.values[k]!==undefined&&m.values[k]!==''&&Number.isFinite(Number(m.values[k]))));
+ const settings=el('div','bear-name-settings');
+ settings.append(foldingPanel('baseStats','Basisstats',section,!statsFilled));
+ const petSection=el('div','bear-name-fold-body');
  const petGrid=el('div','bear-name-pet-grid');
  v.petActive=v.petActive||{};v.petSkillRanks=v.petSkillRanks||{};
  const assetImg=(url,label)=>{
@@ -468,9 +486,11 @@ function scalarSection(){
   v.valoraTalent=x||0;saveLocal();
  },{min:0,max:11}));
  skillRows.append(savage,hunter);skills.append(skillRows);petGrid.append(skills);
- section.append(petGrid);
- section.append(el('p','bear-name-muted','Pet- und Valora-Boni werden zu den ungebufften Basiswerten addiert.'));
- return section;
+ petSection.append(petGrid);
+ petSection.append(el('p','bear-name-muted','Pet- und Valora-Boni werden zu den ungebufften Basiswerten addiert.'));
+ settings.append(foldingPanel('ministers','Ministerbuffs',ministerSection(),false),
+  foldingPanel('pets','Pets & Valora',petSection,false));
+ return settings;
 }
 function starterGearSection(picked){
  const v=state().v2,section=el('section','bear-name-panel');
@@ -498,11 +518,7 @@ function troopUtilization(plan){
  const total=plan.stock.reduce((a,b)=>a+b,0),used=plan.used.reduce((a,b)=>a+b,0);
  section.append(el('p','bear-name-util-total',
   num(used)+' / '+num(total)+' '+T('Truppen eingesetzt')));
- const overall=el('div','bear-name-util-track');
- const fill=el('span','bear-name-util-fill');
- fill.style.width=(total?used/total*100:0).toFixed(2)+'%';
- overall.append(fill);section.append(overall);
- const legend=el('div','bear-name-util-legend');
+  const legend=el('div','bear-name-util-legend');
  legend.append(el('span','',T('Eingesetzt')+' · '+(total?Math.round(used/total*100):0)+' %'),
   el('span','',T('Restbestand')+' · '+num(total-used)));
  section.append(legend);
@@ -825,7 +841,7 @@ function render(){
   const v=state().v2;
   left.append(choose('Märsche insgesamt',Array.from({length:7},(_,i)=>[i+1,String(i+1)]),
    Number(v.joinCount||0)+1,x=>{v.joinCount=Number(x)-1;saveLocal();render();}),rallyStrengthField(),rosterSection());
-  const t=el('details','bear-name-optional');t.append(el('summary','','Truppen ergänzen (optional)'),troopsSection(false));left.append(t);
+  left.append(troopsSection(false));
   right.append(summaryHeroes().section,actionButtons(false));main.append(left,right);box.append(main);
  }else{
   const main=el('div','bear-name-two-columns'),left=el('div'),right=el('div');
