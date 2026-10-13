@@ -5,6 +5,11 @@
 'use strict';
 const table=[
 ['Deine Helden','Your heroes','Tes héros','Tus héroes'],
+["🔐 Eigene PIN einrichten","🔐 Set your PIN","🔐 Définir ton PIN","🔐 Configurar tu PIN"],
+["Bestehendes Profil geladen. Jetzt mit dem bisherigen Code eine eigene Zahlen-PIN einrichten.","Existing profile loaded. Use your previous editing code to set your own numeric PIN.","Profil existant chargé. Utilise ton ancien code de modification pour définir ton code PIN.","Perfil existente cargado. Usa tu código anterior para establecer un PIN numérico."],
+["Für die einmalige Umstellung wird der alte Bearbeitungscode aus dem ursprünglichen Browser benötigt.","To migrate this existing profile, you need its original edit code from the browser used before.","Pour migrer ce profil, il faut l’ancien code depuis le navigateur d’origine.","Para migrar el perfil necesitas el código anterior del navegador original."],
+["✓ Bestehendes Profil ohne Datenverlust auf deine neue PIN umgestellt.","✓ Existing profile migrated to your new PIN without losing data.","✓ Profil existant migré vers ton PIN sans perte de données.","✓ Perfil migrado a tu PIN sin perder datos."],
+["Starter ohne Bestandsgrenze: ","Starter without inventory constraints: ","Rallye de départ sans limite de stock : ","Iniciador sin límite de tropas: "],
 ["🔐 PIN festlegen","🔐 Set PIN","🔐 Définir le code PIN","🔐 Crear PIN"],
 ["🔒 PIN eingeben","🔒 Enter PIN","🔒 Saisir le code PIN","🔒 Introducir PIN"],
 ["Bearbeitungs-PIN festlegen","Set editing PIN","Définir le code PIN de modification","Establecer PIN de edición"],
