@@ -31,7 +31,7 @@ for(const scenario of ['weaker','similar','stronger']){
  validate(p,enough);
  for(let i=1;i<7;i++)assert.equal(Array.from(p.ratios[i]).join('/'),'5/15/80');
  assert.equal(p.archerShortage,0);
- assert.equal(p.rows[0][2],Math.min(enough[2],caps[0]*.8));
+ assert.equal(p.rows[0][2],Math.min(enough[2],caps[0]-Math.floor(caps[0]*.03)-Math.floor(caps[0]*.17)));
 }
 const scarce=[250000,600000,750000];
 const starter=f.priorityAllocation(caps,scarce,ratio,'weaker',weights);
