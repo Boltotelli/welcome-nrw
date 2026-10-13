@@ -209,7 +209,9 @@ function unpack(d){
  v.valora=[0,0,0,Number(d.savageAdvantage)||0];v.valoraTalent=Number(d.valoraTalent)||0;
  v.petActive=d.petActive||{};v.petSkillRanks=d.petSkillRanks||{};v.petBuffCapturedInStats=false;
  v.combatStatOrigin=d.combatStatOrigin||'combined-report';
- Object.assign(m.values,d.values||{});
+ // A shared profile is authoritative: do not retain stale local fields
+ // when its remote snapshot has intentionally omitted a value.
+ m.values={...(d.values||{})};
  for(const [i,type] of CL.entries())m.values[['troopsI','troopsC','troopsA'][i]]=v.troopGroups.filter(g=>g.type===type).reduce((n,g)=>n+Number(g.count),0);
  B.save();
 }
