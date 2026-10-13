@@ -21,6 +21,13 @@ body.bear-name-mode>*:not(#bearNewApp){display:none!important}
 .bear-name-two-columns>div{display:grid;gap:14px;min-width:0}
 .bear-name-panel{background:#1b2b43;border:1px solid #41546a;border-radius:18px;padding:20px;overflow:hidden}
 .bear-name-panel summary{cursor:pointer;padding:8px 0;font-weight:800}
+.bear-name-settings{display:grid;gap:14px}
+.bear-name-fold{min-width:0}
+.bear-name-fold>.bear-name-fold-heading{cursor:pointer;color:#ffcf87;font-size:17px;font-weight:900;line-height:1.35;list-style-position:inside;touch-action:manipulation}
+.bear-name-fold[open]>.bear-name-fold-heading{padding-bottom:13px;border-bottom:1px solid #445b70;margin-bottom:12px}
+.bear-name-fold-body{min-width:0}
+.bear-name-fold-body>.bear-name-muted:first-child{margin-top:0}
+.bear-name-fold .bear-name-ministers{border-top:0;margin-top:0;padding-top:0}
 .bear-name-season{border-top:1px solid #3b4d62;margin-top:8px}
 .bear-name-hero-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(125px,1fr));gap:10px;padding:12px 0 22px}
 .bear-name-hero-card{background:#132238;border:1px solid #42546c;border-radius:12px;overflow:hidden}
