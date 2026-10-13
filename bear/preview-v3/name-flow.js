@@ -14,7 +14,7 @@ const el=(tag,cls='',txt)=>{const node=document.createElement(tag);if(cls)node.c
 const num=x=>Number(x||0).toLocaleString(document.documentElement.lang==='de'?'de-DE':document.documentElement.lang==='fr'?'fr-FR':document.documentElement.lang==='es'?'es-ES':'en-GB',{maximumFractionDigits:1});
 const valid=x=>typeof x==='string'&&x.trim().length>=2&&x.trim().length<=50;
 let name='',mode='',version=null,editKey=null,syncTimer=null,syncInFlight=false,dirty=false,heroInfoCache={},lastResult=null;
-let activePlayer=null,canEdit=false,localOnly=false,editCount=0,opening=0;
+let activePlayer=null,canEdit=false,localOnly=false,editCount=0,opening=0,needsPinMigration=false;
 // Preserve expanded generations when hero tiles refresh.
 const expandedSeasons=new Set();
 const app=el('main','bear-name-app');app.id='bearNewApp';document.body.prepend(app);document.body.classList.add('bear-name-mode');
@@ -230,7 +230,7 @@ function legacyNameId(value){
 }
 async function openProfile(value){
  const sequence=++opening;
- clearTimeout(syncTimer);cachedFormationPlan=null;dirty=false;canEdit=false;version=null;
+ clearTimeout(syncTimer);cachedFormationPlan=null;dirty=false;canEdit=false;version=null;needsPinMigration=false;
  let player=typeof value==='object'&&value?value:null;
  const requested=(player?.name||String(value||'')).trim().replace(/\s+/g,' ');
  if(!valid(requested)){showStatus('Bitte einen Namen mit mindestens zwei Zeichen eingeben.',true);return;}
@@ -268,16 +268,19 @@ async function openProfile(value){
    activePlayer=remote.player;name=remote.player.name;
    if(remote.profile){
     unpack(remote.profile.data);version=remote.profile.revision;
-    if(editKey){
+    needsPinMigration=remote.profile.pinSetupRequired===true;
+    if(editKey&&!needsPinMigration){
      try{
       const permission=await PROFILES.verify(player.id,editKey);
       canEdit=Boolean(permission.canEdit);
      }catch(_){canEdit=false;}
     }
-    showStatus(canEdit?'Gemeinsames Profil geladen · Bearbeitung erlaubt.':
+    showStatus(needsPinMigration?
+     'Bestehendes Profil geladen. Jetzt mit dem bisherigen Code eine eigene Zahlen-PIN einrichten.':
+     canEdit?'Gemeinsames Profil geladen · Bearbeitung erlaubt.':
      'Gemeinsames Profil geladen · schreibgeschützt. PIN zum Ändern erforderlich.');
    }else{
-    version=null;canEdit=false;editKey=null;
+    version=null;canEdit=false;editKey=null;needsPinMigration=false;
     showStatus('Neues gemeinsames Profil: Bitte eine eigene vier- bis sechsstellige Zahlen-PIN festlegen.');
    }
    PROFILES.remember(activePlayer);
@@ -359,11 +362,20 @@ function requestNumericPin(create){
 }
 async function unlockProfile(){
  if(!activePlayer?.id||!PROFILES)return;
- const profileId=activePlayer.id,isNew=version===null;
- const pin=await requestNumericPin(isNew);
+ const profileId=activePlayer.id,isNew=version===null,migrating=needsPinMigration;
+ const oldEditKey=migrating?PROFILES.getLegacyEditKey(profileId):null;
+ if(migrating&&!oldEditKey){
+  showStatus('Für die einmalige Umstellung wird der alte Bearbeitungscode aus dem ursprünglichen Browser benötigt.',true);
+  return;
+ }
+ const pin=await requestNumericPin(isNew||migrating);
  if(pin===null||activePlayer?.id!==profileId)return;
  try{
-  if(!isNew){
+  if(migrating){
+   const result=await PROFILES.migratePin(profileId,oldEditKey,pin,version);
+   version=result.revision;needsPinMigration=false;
+   PROFILES.forgetLegacyEditKey(profileId);
+  }else if(!isNew){
    const r=await PROFILES.verify(profileId,pin);
    if(!r.canEdit){showStatus('Falsche PIN.',true);return;}
   }
@@ -372,7 +384,7 @@ async function unlockProfile(){
   if(isNew){
    // Claim the profile once, even if the owner has made no edits yet.
    dirty=true;editCount++;await push();
-  }else showStatus('✓ Profil mit deiner PIN freigeschaltet.');
+  }else showStatus(migrating?'✓ Bestehendes Profil ohne Datenverlust auf deine neue PIN umgestellt.':'✓ Profil mit deiner PIN freigeschaltet.');
  }catch(err){
   if(err?.status===429){
    const minutes=Math.max(1,Math.ceil(Number(err.retryAfterSeconds||1800)/60));
@@ -383,7 +395,7 @@ async function unlockProfile(){
 async function leaveProfile(){
  clearTimeout(syncTimer);
  if(dirty&&canEdit&&!localOnly){await push();if(dirty){showStatus('Nicht online gespeichert. Lokale Daten bleiben erhalten.',true);return;}}
- name='';mode='';activePlayer=null;editKey=null;canEdit=false;localOnly=false;version=null;
+ name='';mode='';activePlayer=null;editKey=null;canEdit=false;localOnly=false;version=null;needsPinMigration=false;
  render();
 }
 function rosterSection(){
@@ -1070,7 +1082,7 @@ function render(){
  if(canEdit&&!localOnly){
   bar.append(button('Jetzt speichern',async()=>{dirty=true;await push();}));
  }else if(activePlayer?.id&&!localOnly)
-  bar.append(button(version===null?'🔐 PIN festlegen':'🔒 PIN eingeben',
+  bar.append(button(version===null?'🔐 PIN festlegen':needsPinMigration?'🔐 Eigene PIN einrichten':'🔒 PIN eingeben',
    unlockProfile,'bear-name-code-btn'));
 
  box.append(bar);
