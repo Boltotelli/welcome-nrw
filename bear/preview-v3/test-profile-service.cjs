@@ -17,7 +17,7 @@ const fetch=async(url,opts={})=>{
  if(opts.method==='POST'){
   const body=JSON.parse(opts.body);
   if(body.action==='check')return {ok:true,json:async()=>({canEdit:true})};
-  assert.equal(body.action,'save');
+  assert(['save','migrate'].includes(body.action));
   return {ok:true,json:async()=>({ok:true,revision:4})};
  }
  return {ok:true,json:async()=>({player:{id:'152394512',name:'Boltotelli',avatarUrl:'https://kingshotstats.com/a.png'},profile:null})};
@@ -48,6 +48,9 @@ assert.equal(svc.storeEditKey(one.id,'12ab'),false,'letters rejected');
 assert.equal(svc.storeEditKey(one.id,key),true);
 assert.equal(svc.getEditKey(one.id),key);
 assert.equal(svc.getEditKey(two.id),'');
+const oldKey='ab'.repeat(32);
+localStorage.setItem('nrw_bear_edit_key_v2:'+one.id,oldKey);
+assert.equal(svc.getLegacyEditKey(one.id),oldKey);
 assert.equal(JSON.stringify(svc.ordered()).includes(key),false);
 (async()=>{
  const names=await svc.search('Bolto');assert.equal(names.players.length,2);
@@ -55,6 +58,11 @@ assert.equal(JSON.stringify(svc.ordered()).includes(key),false);
  const check=await svc.verify(one.id,key);assert.equal(check.canEdit,true);
  const save=await svc.save(one.id,key,3,{heroes:{}});
  assert.equal(save.revision,4);
+ const migrate=await svc.migratePin(one.id,oldKey,key,3);
+ assert.equal(migrate.revision,4);
+ svc.forgetLegacyEditKey(one.id);
+ assert.equal(svc.getLegacyEditKey(one.id),'');
+ assert(ui.includes('PROFILES.migratePin'),'Existing profile migration must preserve owner edit access');
  assert(hits.every(x=>x.url.startsWith('https://bdzlgirowutasrsycjfj.supabase.co/functions/v1/nrw-bear-profiles')));
  assert(ui.includes('PROFILES.save')&&ui.includes('PROFILES.verify'));
  assert(ui.includes('playerPicture(activePlayer)')&&ui.includes('toggleFavorite'));
