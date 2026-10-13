@@ -321,6 +321,7 @@ jobs:
           grep -Fq 'formation-core.js?v=20261012-24' _site/bear/preview-v3.html
           grep -Fq 'name-flow.js?v=20261013-4' _site/bear/preview-v3.html
           grep -Fq 'name-flow.css?v=20261013-4' _site/bear/preview-v3.html
+          grep -Fq 'i18n.js?v=20261013-3' _site/bear/preview-v3.html
           grep -Fq 'const expandedSeasons=new Set();' _site/bear/preview-v3/name-flow.js
           grep -Fq "return foldingPanel('troops'" _site/bear/preview-v3/name-flow.js
           grep -Fq "foldingPanel('baseStats'" _site/bear/preview-v3/name-flow.js
