@@ -24,7 +24,7 @@ const fetch=async(url,opts={})=>{
 };
 const clock={setTimeout:()=>22,clearTimeout:()=>{}};
 const window={};
-vm.runInNewContext(source,{window,localStorage,crypto,fetch,URL,encodeURIComponent,
+vm.runInNewContext(source,{window,localStorage,crypto,fetch,URL,AbortController,encodeURIComponent,
  setTimeout:clock.setTimeout,clearTimeout:clock.clearTimeout});
 const svc=window.NRW_BEAR_PROFILES;assert(svc);
 const one={id:'152394512',name:'Boltotelli',avatarUrl:'https://kingshotstats.com/a.png'};
