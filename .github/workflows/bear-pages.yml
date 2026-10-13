@@ -325,6 +325,7 @@ jobs:
           grep -Fq "if(options.preserveAllocation && next[2]>desired[i][2])return;" _site/bear/preview-v3/formation-core.js
           node --check _site/bear/preview-v3/test-priority-joiner.cjs
           node _site/bear/preview-v3/test-priority-joiner.cjs
+          grep -Fq 'if(!choice&&options.preserveAllocation)' _site/bear/preview-v3/formation-core.js
           grep -Fq 'JOIN_STANDARD=Object.freeze([5,15,80])' _site/bear/preview-v3/formation-core.js
           grep -Fq 'needsPinMigration=remote.profile.pinSetupRequired===true' _site/bear/preview-v3/name-flow.js
           grep -Fq 'function requestNumericPin(create)' _site/bear/preview-v3/name-flow.js
