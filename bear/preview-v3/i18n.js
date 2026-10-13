@@ -5,6 +5,7 @@
 'use strict';
 const table=[
 ['Deine Helden','Your heroes','Tes héros','Tus héroes'],
+['Basisstats','Base stats','Statistiques de base','Estadísticas base'],
 ['Ministerbuffs','Minister buffs','Bonus de ministres','Bonificaciones ministeriales'],
 ['Ministerhof wählen: König oder Hochkönig','Choose ministers: King or High King','Choisir la cour : Roi ou Haut Roi','Elegir corte: Rey o Rey Supremo'],
 ['König','King','Roi','Rey'],
