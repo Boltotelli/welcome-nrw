@@ -320,7 +320,12 @@ jobs:
           node --check _site/bear/preview-v3/profile-service.js
           node --check _site/bear/preview-v3/test-profile-service.cjs
           node _site/bear/preview-v3/test-profile-service.cjs
-          grep -Fq 'profile-service.js?v=20261013-profiles-2' _site/bear/preview-v3.html
+          node --check _site/bear/preview-v3/test-priority-joiner.cjs
+          node _site/bear/preview-v3/test-priority-joiner.cjs
+          grep -Fq 'JOIN_STANDARD=Object.freeze([5,15,80])' _site/bear/preview-v3/formation-core.js
+          grep -Fq 'function requestNumericPin(create)' _site/bear/preview-v3/name-flow.js
+          grep -Fq 'playableProjection(rows,inventory,caps,weights,{preserveAllocation:true})' _site/bear/preview-v3/formation-core.js
+          grep -Fq 'profile-service.js?v=20261013-priority-pin-1' _site/bear/preview-v3.html
           grep -Fq 'PROFILES.save' _site/bear/preview-v3/name-flow.js
           grep -Fq 'PROFILES?.toggleFavorite' _site/bear/preview-v3/name-flow.js
           grep -Fq 'playerPicture(activePlayer)' _site/bear/preview-v3/name-flow.js
@@ -329,10 +334,10 @@ jobs:
           echo '60 randomized whole-percent Kingshot formations checked for exact troop counts and shared stock.'
           echo 'Validated: physical coefficients, audited hero coupling, scenario weighting, deterministic shared inventory, stock-safe integer percent, no infantry floor.'
           grep -Fq 'preview-v3/joiner-skills.js' _site/bear/preview-v3.html
-          grep -Fq 'formation-core.js?v=20261013-math2' _site/bear/preview-v3.html
-          grep -Fq 'name-flow.js?v=20261013-profiles-2' _site/bear/preview-v3.html
-          grep -Fq 'name-flow.css?v=20261013-profiles-1' _site/bear/preview-v3.html
-          grep -Fq 'i18n.js?v=20261013-profiles-2' _site/bear/preview-v3.html
+          grep -Fq 'formation-core.js?v=20261013-priority-1' _site/bear/preview-v3.html
+          grep -Fq 'name-flow.js?v=20261013-priority-pin-1' _site/bear/preview-v3.html
+          grep -Fq 'name-flow.css?v=20261013-priority-pin-1' _site/bear/preview-v3.html
+          grep -Fq 'i18n.js?v=20261013-priority-pin-1' _site/bear/preview-v3.html
           grep -Fq 'const expandedSeasons=new Set();' _site/bear/preview-v3/name-flow.js
           grep -Fq "return foldingPanel('troops'" _site/bear/preview-v3/name-flow.js
           grep -Fq "foldingPanel('baseStats'" _site/bear/preview-v3/name-flow.js
