@@ -178,3 +178,32 @@ body.bear-name-mode>*:not(#bearNewApp){display:none!important}
 .bear-name-util-type-1 .bear-name-util-fill{background:#849ae7}
 .bear-name-util-type-2 .bear-name-util-fill{background:#e2bc65}
 @media(max-width:550px){.bear-name-minister-grid{grid-template-columns:1fr}.bear-name-utilization{padding:11px}.bear-name-util-legend{font-size:11px}}
+
+/* One-court ministry toggle: two-position genuine range control. */
+.bear-name-court-switch{display:flex;align-items:center;justify-content:center;gap:14px;
+ padding:10px 14px;margin:12px auto 14px;max-width:410px;border:1px solid #486580;border-radius:14px;
+ background:#14263b}
+.bear-name-court-switch>span{font-size:13px;color:#aabacf;font-weight:800;cursor:pointer;
+ white-space:nowrap;user-select:none}
+.bear-name-court-switch>span.active{color:#ffd17b}
+.bear-name-court-range{flex:1;min-width:80px;height:24px;margin:0;cursor:pointer;
+ accent-color:#ffc66e}
+.bear-name-minister-roles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;margin-top:10px}
+.bear-name-minister-role{display:flex;align-items:center;gap:10px;padding:12px;
+ border:1px solid #496580;border-radius:14px;background:#1c3047;
+ cursor:pointer;min-height:82px;transition:border-color .12s,background .12s}
+.bear-name-minister-role.selected{border-color:#e8bb62;background:#2b3b4c}
+.bear-name-minister-role input{width:18px;height:18px;flex:0 0 18px;accent-color:#ffcd73;cursor:pointer}
+.bear-name-minister-art{display:flex;align-items:center;justify-content:center;flex:0 0 48px;
+ width:48px;height:48px;border-radius:10px;overflow:hidden;background:#0f2236;border:1px solid #546e87}
+.bear-name-minister-art img{width:100%;height:100%;object-fit:contain}
+.bear-name-minister-art-placeholder{display:grid;place-items:center;width:100%;height:100%;
+ font-weight:900;font-size:14px;letter-spacing:.05em;color:#ecd39b}
+.bear-name-minister-info{display:grid;gap:4px;min-width:0}
+.bear-name-minister-info strong{font-size:15px;color:#ffdda1}
+.bear-name-minister-info small{font-size:12px;line-height:1.35;color:#d4e1ef}
+@media(max-width:575px){
+ .bear-name-minister-roles{grid-template-columns:1fr}
+ .bear-name-minister-role{min-height:72px}
+ .bear-name-court-switch{gap:9px;padding:10px}
+}
