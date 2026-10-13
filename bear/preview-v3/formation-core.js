@@ -228,61 +228,77 @@ function scoreFor(row,weights){
  const army=Math.sqrt(Math.min(total,5000));
  return army*row.reduce((sum,n,k)=>sum+weights[k]*Math.sqrt(n),0);
 }
-function estimateClassQuality(model,combat,stock){
- const cfg=combat?.configure?.(model?.v2),keys=['infantry','cavalry','archer'],
-  base=[472,1416,1888],quality=[1,1,1];
- for(let k=0;k<3;k++){
-  if(stock[k]<=0)continue;
-  const lvl=cfg?.[k];
-  let atk=null;
-  if(Array.isArray(lvl?.groups)&&lvl.groups.length){
-   const n=lvl.groups.reduce((sum,g)=>sum+Number(g.count||0),0);
-   atk=n?lvl.groups.reduce((sum,g)=>sum+Number(g.count||0)*
-    (Number(combat.troopAttack(keys[k],g.tier,g.tg))||0),0)/n:null;
-  }else if(lvl?.tier&&combat?.troopAttack)
-   atk=combat.troopAttack(keys[k],lvl.tier,lvl.tg);
-  if(Number.isFinite(atk)&&atk>0)quality[k]=atk/base[k];
- }
- // Preserve differences between classes due to T/TG without treating
- // modern troop power as extra free damage vs foreign leaders.
- const mean=quality.reduce((a,b)=>a+b,0)/3||1;
- return quality.map(n=>n/mean);
-}
-function ownHeroModifiers(model,catalog){
- const ref=root.NRW_BEAR_HERO_REFERENCE,dmg=root.NRW_BEAR_SKILL_DAMAGE;
- if(ref?.status?.()!=='ready'||!dmg?.prepare)return [1,1,1];
- const prepared=dmg.prepare(model,ref,catalog,root.NRW_BEAR_SCORE_BONUSES,
-  root.NRW_BEAR_OWN_BASELINE);
- if(!prepared?.ready)return [1,1,1];
- const m=prepared.modifiers;
- // Buffs are lower-bound only: disputed enemy debuff uptime is excluded.
- const base=(1+(m.attack||0)/100)*(1+(m.lethality||0)/100)*(m.lowDamage||1);
- return [0,1,2].map(k=>Math.max(0.01,base*
-  (1+(m.classAttack?.[k]||0)/100)*(m.lowClassDamage?.[k]||1)));
-}
-function relativeTypeStats(model){
- const stats=root.NRW_BEAR_OWN_BASELINE?.currentStats?.(model)||model?.values||{};
- const keys=['i','c','a'];
- if(keys.some(k=>!Number.isFinite(Number(stats[k+'Atk']))||
-  !Number.isFinite(Number(stats[k+'Let']))))return [1,1,1];
- const powers=keys.map(k=>(1+Math.max(0,Number(stats[k+'Atk']))/100)*
-  (1+Math.max(0,Number(stats[k+'Let']))/100));
- const mean=powers.reduce((a,b)=>a+b,0)/3||1;
- // We don't know foreigners' absolute stats. Only class distribution is
- // informative; the *relative* overall strength comes from the dropdown.
- return powers.map(p=>p/mean);
-}
-function expectedWeights(targets,model,catalog,combat,stock){
- const baseline=joinerBaseline(model,catalog),relative=scenario(model);
- const quality=estimateClassQuality(model,combat,stock);
- const personal=relativeTypeStats(model),hero=ownHeroModifiers(model,catalog);
- const weights=targets.map((target,i)=>{
-  const [inf,cav]=ratioForTarget(target,baseline.proportions);
-  const pct=[inf,cav,Math.max(0,100-inf-cav)];
-  return pct.map((percent,k)=>Math.sqrt(Math.max(.01,percent)/100)*quality[k]*
-   (i===0?personal[k]*hero[k]:relative.foreign));
+// Community-verified attack coefficients by T/TG, never a ratio prior.
+function classAttack(model,combat){
+ const levels=combat?.configure?.(model?.v2);
+ return ['infantry','cavalry','archer'].map((type,k)=>{
+  const level=levels?.[k],groups=level?.groups;
+  if(Array.isArray(groups)&&groups.length){
+   const count=groups.reduce((n,g)=>n+Number(g.count||0),0);
+   const avg=count>0?groups.reduce((n,g)=>n+Number(g.count||0)*
+    (combat?.troopAttack?.(type,g.tier,g.tg)||0),0)/count:0;
+   if(Number.isFinite(avg)&&avg>0)return {attack:avg,confirmed:true};
+  }
+  const known=combat?.troopAttack?.(type,level?.tier,level?.tg);
+  if(Number.isFinite(known)&&known>0)return {attack:known,confirmed:true};
+  return {attack:combat?.troopAttack?.(type,10,0)||
+   [472,1416,1888][k],confirmed:false};
  });
- return {weights,baseline,relative};
+}
+function knownStats(model){
+ const src=root.NRW_BEAR_OWN_BASELINE?.currentStats?.(model)||model?.values||{};
+ const keys=['iAtk','iLet','cAtk','cLet','aAtk','aLet'];
+ const complete=keys.every(k=>src[k]!==null&&src[k]!==undefined&&
+  src[k]!==''&&Number.isFinite(Number(src[k]))&&Number(src[k])>=0);
+ return {complete,stats:complete?src:null};
+}
+function preparedOffense(model,catalog){
+ const ref=root.NRW_BEAR_HERO_REFERENCE,dmg=root.NRW_BEAR_SKILL_DAMAGE;
+ if(ref?.status?.()!=='ready'||!dmg?.prepare)return null;
+ const result=dmg.prepare(model,ref,catalog,root.NRW_BEAR_SCORE_BONUSES,
+  root.NRW_BEAR_OWN_BASELINE);
+ return result?.ready?result:null;
+}
+function squareOptimal(c){
+ const total=c.reduce((n,x)=>n+x*x,0);
+ return total>0?c.map(x=>100*x*x/total):[0,0,0];
+}
+// Same community equation as combat.js: T/TG base attack × attack ×
+// lethality × Archer-vs-Infantry × supported offensive hero effects.
+// At fixed march size, unconstrained optimum is proportional to w[k]².
+function expectedWeights(targets,model,catalog,combat,stock){
+ const relative=scenario(model),quality=classAttack(model,combat),
+  known=knownStats(model),prepared=preparedOffense(model,catalog),m=prepared?.modifiers||{};
+ const own=quality.map((q,k)=>{
+  const t=['i','c','a'][k],counter=k===2?1.10:1;
+  const atk=25+(known.complete?Number(known.stats[t+'Atk']):0)+
+   Number(m.attack||0)+Number(m.classAttack?.[k]||0);
+  const leth=(known.complete?Number(known.stats[t+'Let']):0)+Number(m.lethality||0);
+  return q.attack*counter*(1+atk/100)*(1+leth/100)*
+   (Number(m.lowClassDamage?.[k])||1)*(Number(m.lowDamage)||1)*
+   (1+Number(prepared?.valoraPoints||0)/100);
+ });
+ // A foreign rally leader's class stats and heroes are NOT known. Model
+ // neutral, class-independent buffs, calibrated to the mean own strength.
+ // The weaker/similar/stronger input scales overall leader strength only.
+ const neutral=quality.map((q,k)=>q.attack*(k===2?1.10:1));
+ const nSum=neutral.reduce((s,x)=>s+x,0),oSum=own.reduce((s,x)=>s+x,0);
+ const foreign=neutral.map(n=>n*(nSum>0?oSum/nSum:1)*relative.foreign);
+ const norm=Math.max(...own,...foreign,1);
+ const hosted=own.map(x=>x/norm),joining=foreign.map(x=>x/norm);
+ return {weights:targets.map((_,i)=>(i===0?hosted:joining).slice()),
+  ownOptimal:squareOptimal(hosted),joinOptimal:squareOptimal(joining),
+  relative,quality,baseline:null,hasKnownStats:known.complete,
+  hasKnownHeroEffects:Boolean(prepared),
+  model:'physical-troop-coefficients-no-fixed-prior',
+  assumptions:[
+   ...(quality.some(q=>!q.confirmed)?['missing-tier-tg-provisional-T10']:[]),
+   ...(!known.complete?['missing-attack-lethality-neutral']:[]),
+   ...(!prepared?['missing-hero-effects']:[]),
+   'foreign-leader-class-stats-unknown',
+   'mixed-TG-uses-average-before-tier-assignment',
+   'sqrt-quantity-community-bear-formula',
+   'not-official-in-game-damage']};
 }
 function allocateByMarginal(targets,stock,weights){
  const rows=targets.map(()=>[0,0,0]),remaining=stock.map(int);
@@ -305,7 +321,7 @@ function allocateByMarginal(targets,stock,weights){
    const start=scoreFor(rows[i],weights[i]);
    for(let k=0;k<3;k++){
     if(remaining[k]===0)continue;
-    const add=Math.min(512,room,remaining[k],left);
+    const add=Math.min(128,room,remaining[k],left);
     if(add<=0)continue;
     rows[i][k]+=add;
     const gain=(scoreFor(rows[i],weights[i])-start)/add;
@@ -319,7 +335,7 @@ function allocateByMarginal(targets,stock,weights){
   rows[winner.i][winner.k]+=winner.add;
   remaining[winner.k]-=winner.add;
   left-=winner.add;
-  if(++passes>180000)throw Error('Bear optimizer exceeded iteration budget');
+  if(++passes>250000)throw Error('Bear optimizer exceeded iteration budget');
  }
  if(left>0||remaining.some(n=>n<0)||rows.some((r,i)=>
   r.reduce((a,b)=>a+b,0)>targets[i]))throw Error('Unsafe expected-damage allocation');
@@ -484,12 +500,15 @@ function plan(model,catalog,combat,capacityCore){
   marches:marches.map((m,i)=>({...m,troops:actual[i],ratio:ratios[i],filled:actual[i].reduce((a,b)=>a+b,0),
    shortage:Math.max(0,m.capacity-actual[i].reduce((a,b)=>a+b,0))})),
   starterScore:full,scoreType:'community-joiner-bear-baseline',
-  ratioMethod:'marginal-expected-damage',joinerBaseline:baseline,
+  ratioMethod:'marginal-physical-damage-model',joinerBaseline:baseline,
+  ownUnconstrainedRatio:expected.ownOptimal,joinUnconstrainedRatio:expected.joinOptimal,
+  modelAssumptions:expected.assumptions,referenceQuality:expected.quality,
+  modelHasStats:expected.hasKnownStats,modelHasHeroEffects:expected.hasKnownHeroEffects,
   leaderStrength,tierPriority,modeledTotal:playable.modeledTotal,
   quantizedToWholePercent:true,
   allHeroLevelsKnown:marches.every(m=>m.capacityKnown),
   allHeroesAssigned:marches.every(m=>m.missingHeroSlots===0),
   joinCount:selected.joins.length,selected};
 }
-root.NRW_BEAR_FORMATION={plan,chooseHeroes,JOIN_PRIORITIES,allocateStock:allocate,integerPercentages,availableStock,joinerBaseline,ratioForTarget,scenario,scoreFor,expectedWeights,allocateByMarginal,playableProjection};
+root.NRW_BEAR_FORMATION={plan,chooseHeroes,JOIN_PRIORITIES,allocateStock:allocate,integerPercentages,availableStock,joinerBaseline,ratioForTarget,scenario,scoreFor,expectedWeights,allocateByMarginal,playableProjection,squareOptimal};
 })(window);
