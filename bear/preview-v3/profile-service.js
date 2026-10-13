@@ -1,12 +1,12 @@
 /* Bear V3 shared game profile client.
  * Game player/avatar lookup from existing 1044 Supabase cache.
- * Shared settings: readable by other players; writes require a random edit key.
- * Favorites and edit keys remain local to this browser only. */
+ * Shared settings: readable by other players; writes require a user-chosen numeric PIN.
+ * Favorites and saved PINs remain local to this browser only. */
 (function(root){
  'use strict';
  const ENDPOINT='https://bdzlgirowutasrsycjfj.supabase.co/functions/v1/nrw-bear-profiles';
  const FAVORITES='nrw_bear_favorites_v1',HISTORY='nrw_bear_recent_v2';
- const EDIT_PREFIX='nrw_bear_edit_key_v2:';
+ const EDIT_PREFIX='nrw_bear_edit_pin_v1:';
  const identity=x=>String(x?.id||'').trim();
  const read=(k,fallback)=>{try{const val=JSON.parse(localStorage.getItem(k)||'null');return Array.isArray(val)?val:fallback;}catch{return fallback;}};
  const clean=x=>({id:identity(x),name:String(x?.name||'').slice(0,80),
@@ -39,12 +39,8 @@
  function keyFor(id){return EDIT_PREFIX+String(id);}
  function getEditKey(id){return localStorage.getItem(keyFor(id))||'';}
  function storeEditKey(id,secret){
-  if(!/^[a-f0-9]{64}$/i.test(String(secret)))return false;
-  try{localStorage.setItem(keyFor(id),String(secret).toLowerCase());return true;}catch{return false;}
- }
- function newEditKey(){
-  const a=new Uint8Array(32);crypto.getRandomValues(a);
-  return [...a].map(x=>x.toString(16).padStart(2,'0')).join('');
+  if(!/^\d{4,6}$/.test(String(secret)))return false;
+  try{localStorage.setItem(keyFor(id),String(secret));return true;}catch{return false;}
  }
  async function request(query,body){
   const opt=body?{method:'POST',headers:{'Content-Type':'application/json'},
@@ -61,6 +57,6 @@
  function get(id){return request('?id='+encodeURIComponent(id));}
  function verify(id,editKey){return request('',{action:'check',id,editKey});}
  function save(id,editKey,revision,data){return request('',{action:'save',id,editKey,revision,data});}
- root.NRW_BEAR_PROFILES={search,get,verify,save,newEditKey,getEditKey,storeEditKey,
+ root.NRW_BEAR_PROFILES={search,get,verify,save,getEditKey,storeEditKey,
   remember,ordered,favorites,isFavorite,toggleFavorite,endpoint:ENDPOINT};
 })(window);
