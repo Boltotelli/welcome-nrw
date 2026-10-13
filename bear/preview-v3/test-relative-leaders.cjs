@@ -68,8 +68,10 @@ for(const comparison of ['weaker','similar','stronger']){
    ownArchers:rows[0][2],joinArchers:rows.slice(1).reduce((n,r)=>n+r[2],0),
    order:Array.from(output.tierPriority),score:output.modeledTotal};
 }
-assert(byMode.weaker.own>byMode.similar.own,'Stronger own rally receives MORE troops than equal case');
-assert(byMode.similar.own>byMode.stronger.own,'Weaker own rally receives FEWER troops than equal case');
+// Under policy allocation, whole marching strength is secondary to the
+// explicit Archer priority; do not demand obsolete marginal-size ordering.
+assert.equal(byMode.similar.ownArchers,byMode.stronger.ownArchers,
+ 'Equal strength uses the explicitly requested Joiner-first Archer reservation');
 assert(byMode.weaker.ownArchers>byMode.stronger.ownArchers,
  'Scarce archers shift toward stronger own rally');
 assert.equal(byMode.weaker.order[0],0,'High-TG troop allocation starts at own rally when own is stronger');
