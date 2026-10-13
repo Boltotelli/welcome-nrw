@@ -145,14 +145,34 @@ function starProgressField(heroName){
 function heroStock(){const v=state().v2;return v.scannedOwnedHeroes.filter(n=>heroNames.has(n)&&v.manualHeroes[n]);}
 function rankAndSelect(){
  const m=state(),v=m.v2,owned=heroStock().map(n=>v.manualHeroes[n]);
- const advisor=window.NRW_BEAR_HERO_ADVISOR,ref=window.NRW_BEAR_HERO_REFERENCE;
- let groups=advisor?.recommend(owned,C.heroTypes,window.NRW_BEAR_INTAKE_CORE?.rankByType,
-  (n,s,t)=>ref?.get?.(n,s,t),(n,w)=>window.NRW_BEAR_OWN_BASELINE?.widgetValue?.(n,w),
-  advisor?.modelContext?.(m,window.NRW_BEAR_COMBAT))||[];
- const picked=CL.map((cl,i)=>groups[i]?.best?.name||owned.find(h=>C.heroTypes[h.name]===cl)?.name||'');
- v.ownHeroes=picked;
+ const advisor=window.NRW_BEAR_HERO_ADVISOR,ref=window.NRW_BEAR_HERO_REFERENCE,
+  combat=window.NRW_BEAR_COMBAT,formation=window.NRW_BEAR_FORMATION;
+ const chooseAt=ratio=>{
+  const groups=advisor?.recommend(owned,C.heroTypes,window.NRW_BEAR_INTAKE_CORE?.rankByType,
+   (n,stars,tier)=>ref?.get?.(n,stars,tier),
+   (n,widget)=>window.NRW_BEAR_OWN_BASELINE?.widgetValue?.(n,widget),
+   advisor?.modelContext?.(m,combat,ratio))||[];
+  return {groups,picked:CL.map((cl,i)=>groups[i]?.best?.name||
+    owned.find(h=>C.heroTypes[h.name]===cl)?.name||'')};
+ };
+ // Reassess hero ranking after the proposed optimal troop composition.
+ // Both hero choice and troop ratio may affect one another.
+ let result=chooseAt(null);
+ const seen=new Set();
+ for(let attempt=0;attempt<5;attempt++){
+  const key=result.picked.join('|');
+  if(seen.has(key))break;
+  seen.add(key);
+  v.ownHeroes=result.picked;
+  const expected=formation?.expectedWeights?.([100000],m,C,combat,
+   CL.map((_,i)=>Number(m.values[['troopsI','troopsC','troopsA'][i]])||0));
+  const next=chooseAt(expected?.ownOptimal);
+  if(next.picked.join('|')===key){result=next;break;}
+  result=next;
+ }
+ v.ownHeroes=result.picked;
  B.save();
- return {picked,groups};
+ return result;
 }
 function pack(){
  const m=state(),v=m.v2,heroes={};
@@ -602,7 +622,21 @@ function formationCards(){
    'Truppenbestand und Marschkapazität fehlen noch.'));
  }else{
   section.append(el('p','bear-name-muted',
-   'Formationen nach erwartetem Zusatzschaden verteilt. Die Stärke fremder Rallyleader ist eine Schätzung.'));
+   'Aus T/TG, Angriff, Tödlichkeit und unterstützten Heldenfähigkeiten berechnet – ohne festes 1/10/89. Fremde Rallyleader bleiben geschätzt.'));
+  const diag=el('div','bear-name-fold-body'),
+   fmt=p=>Array.isArray(p)?p.map(x=>Number(x).toFixed(1)).join(' / ')+' %':'–';
+  diag.append(el('p','bear-name-muted','Das Einzelmarsch-Ideal folgt aus den quadrierten Schadensgewichtungen. Die tatsächliche Verteilung nutzt den gemeinsamen Truppenbestand sowie ganze Ingame-Prozentwerte.'));
+  diag.append(el('p','','Starter ohne Bestandsgrenze: '+fmt(plan.ownUnconstrainedRatio)));
+  diag.append(el('p','','Joiner mit neutral angenommenem Rallyleader: '+fmt(plan.joinUnconstrainedRatio)));
+  diag.append(el('p','','Tatsächlicher Starter: '+plan.marches[0].ratio.join(' / ')+' %'));
+  if(plan.referenceQuality?.some(q=>!q.confirmed))
+   diag.append(el('p','bear-name-warning','⚠ Unbekannte T/TG-Stufen: Vorläufige T10/TG0-Vergleichswerte werden verwendet.'));
+  if(!plan.modelHasStats)
+   diag.append(el('p','bear-name-warning','⚠ Einige Angriffs- oder Tödlichkeitswerte fehlen. Diese werden nur neutral angenähert.'));
+  if(!plan.modelHasHeroEffects)
+   diag.append(el('p','bear-name-warning','⚠ Noch keine vollständige Berücksichtigung der Heldenfähigkeiten möglich.'));
+  diag.append(el('p','bear-name-muted','Unterschiedliche Joiner-Verhältnisse können wegen des gemeinsamen Bestands und der Rundung entstehen. Dies ist ein Community-Modell, kein bestätigter Kingshot-Schadenswert.'));
+  section.append(foldingPanel('formationWhy','Warum diese Formation?',diag,false));
   const unused=(plan.leftover||[]).reduce((n,v)=>n+v,0);
   if(unused>0)section.append(el('p','bear-name-muted',
    num(unused)+' '+T('Truppen bleiben wegen der ganzzahligen Prozentvorgabe unverteilt.')));
