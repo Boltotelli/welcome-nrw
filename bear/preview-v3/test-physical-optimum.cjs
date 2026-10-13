@@ -70,7 +70,8 @@ for(const row of plan.marches){
  assert.equal(row.ratio.reduce((n,p)=>n+p,0),100);
  assert(row.ratio.every(p=>Number.isInteger(p)&&p>=0));
  const inf=Math.floor(row.filled*row.ratio[0]/100),
-  cav=Math.floor(row.filled*row.ratio[1]/100);
+  cav=row.ratio[2]===0?row.filled-inf:
+   Math.floor(row.filled*row.ratio[1]/100);
  assert.deepEqual(Array.from(row.troops),[inf,cav,row.filled-inf-cav]);
 }
 const repeat=f.plan(model,catalog,c,capacity);
