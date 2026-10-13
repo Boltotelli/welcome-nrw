@@ -347,7 +347,7 @@ function allocateByMarginal(targets,stock,weights){
 // Count prediction uses exactly the same composition() as the displayed
 // percentage. Rounding may leave a few troops unused instead of claiming
 // impossible ratios or overlapping inventory.
-function playableProjection(desired,stock,capacities,weights){
+function playableProjection(desired,stock,capacities,weights,options={}){
  const size=desired.map((row,i)=>Math.min(int(capacities[i]),row.reduce((n,v)=>n+v,0)));
  const percents=desired.map((row,i)=>{
   const p=integerPercentages(row);
@@ -396,7 +396,7 @@ function playableProjection(desired,stock,capacities,weights){
  }
  // Where capacity and troop class stock permit, refill the same integer
  // ratios without going over any other simultaneous march's allocation.
- for(let pass=0;pass<size.length;pass++){
+ if(!options.preserveAllocation)for(let pass=0;pass<size.length;pass++){
   let best=null;
   for(let i=0;i<size.length;i++){
    if(size[i]===0||size[i]>=int(capacities[i]))continue;
@@ -417,7 +417,7 @@ function playableProjection(desired,stock,capacities,weights){
  }
  // Post-projection one-point improvements and pairwise stock-safe
  // exchanges remove avoidable losses from the integer-percentage grid.
- for(let pass=0;pass<60;pass++){
+ if(!options.preserveAllocation)for(let pass=0;pass<60;pass++){
   let best=null;
   const moves=rows.map((row,i)=>{
    if(size[i]===0)return [];
@@ -467,6 +467,62 @@ function playableProjection(desired,stock,capacities,weights){
  return {rows,ratios:percents,used,unallocated:stock.map((v,k)=>v-used[k]),
   modeledTotal:rows.reduce((sum,r,i)=>sum+scoreFor(r,weights[i]),0)};
 }
+// User-directed allocation policy: joiners aim at 5/15/80. Full actual
+// capacities (base, heroes, Pets, Valora and Marshal) are computed in plan().
+// The three policies are explicit rather than inferred from unknown leaders.
+const JOIN_STANDARD=Object.freeze([5,15,80]);
+function priorityAllocation(targets,stock,starterOptimal,strength,weights){
+ const caps=targets.map(int),inventory=stock.map(int),N=caps.length;
+ const priority=strength==='weaker'?'starter':'joins';
+ const requests=caps.map((cap,i)=>{
+  if(!cap)return [0,0,0];
+  return i===0?composition(cap,starterOptimal[0],starterOptimal[1]):
+   composition(cap,JOIN_STANDARD[0],JOIN_STANDARD[1]);
+ });
+ const archNeed=requests.map(row=>row[2]),arch=new Array(N).fill(0);
+ const joinNeed=archNeed.slice(1),joinSum=joinNeed.reduce((n,x)=>n+x,0);
+ const requiredArchers=archNeed.reduce((n,x)=>n+x,0);
+ let remaining=inventory[2];
+ if(priority==='starter'){
+  arch[0]=Math.min(remaining,archNeed[0]);remaining-=arch[0];
+  const fair=splitShares(Math.min(remaining,joinSum),joinNeed);
+  for(let i=1;i<N;i++)arch[i]=fair[i-1];
+ }else{
+  const fair=splitShares(Math.min(remaining,joinSum),joinNeed);
+  for(let i=1;i<N;i++)arch[i]=fair[i-1];
+  remaining-=fair.reduce((n,x)=>n+x,0);
+  arch[0]=Math.min(remaining,archNeed[0]);
+ }
+ // After reserving Archers, distribute Infantry and Cavalry among the
+ // remaining real slots. Joiners retain their 5:15 non-Archer ratio,
+ // including when there are too few Archers to reach 80%.
+ const rows=caps.map((_,i)=>[0,0,arch[i]]);
+ const nonArchRoom=caps.map((cap,i)=>Math.max(0,cap-arch[i]));
+ const ownIC=Math.max(0,starterOptimal[0])+Math.max(0,starterOptimal[1]);
+ const infNeed=nonArchRoom.map((room,i)=>i===0?
+  Math.floor(room*(ownIC>0?Math.max(0,starterOptimal[0])/ownIC:.25)):
+  Math.floor(room*.25));
+ const cavNeed=nonArchRoom.map((room,i)=>Math.max(0,room-infNeed[i]));
+ const allotInf=splitShares(Math.min(inventory[0],infNeed.reduce((n,x)=>n+x,0)),infNeed);
+ const allotCav=splitShares(Math.min(inventory[1],cavNeed.reduce((n,x)=>n+x,0)),cavNeed);
+ for(let i=0;i<N;i++){rows[i][0]=allotInf[i];rows[i][1]=allotCav[i];}
+ const utilized=k=>rows.reduce((sum,row)=>sum+row[k],0);
+ // Other classes may replace a missing Infantry or Cavalry unit, but
+ // never steal an Archer reserved for a priority march.
+ for(const k of [1,0]){
+  const remainingClass=Math.max(0,inventory[k]-utilized(k));
+  const empty=caps.map((cap,i)=>Math.max(0,cap-rows[i].reduce((n,x)=>n+x,0)));
+  const extra=splitShares(Math.min(remainingClass,empty.reduce((n,x)=>n+x,0)),empty);
+  for(let i=0;i<N;i++)rows[i][k]+=extra[i];
+ }
+ // Convert to real 1%-step game inputs without polishing back toward the
+ // unrelated unconstrained foreign-leader damage model.
+ const playable=playableProjection(rows,inventory,caps,weights,{preserveAllocation:true});
+ return {...playable,priority,requiredArchers,archerSupply:inventory[2],
+  archerShortage:Math.max(0,requiredArchers-inventory[2]),
+  joinArcherDemand:joinSum,joinRatio:JOIN_STANDARD.slice(),
+  reservedArchers:arch};
+}
 function plan(model,catalog,combat,capacityCore){
  const v=model?.values||{},cap=capacityCore?.breakdown(model,catalog);
  const stock=availableStock(model);
@@ -507,9 +563,11 @@ function plan(model,catalog,combat,capacityCore){
  // the stronger own rally from receiving extra troops.
  const targets=caps;
  const expected=expectedWeights(targets,model,catalog,combat,stock);
- const distribution=allocateByMarginal(targets,stock,expected.weights);
- // Quantize before exposing formations OR calculating damage.
- const playable=playableProjection(distribution.rows,stock,targets,expected.weights);
+ // Starter strength means my account versus foreign Rallyleaders:
+ // foreign stronger => JOIN priority; foreign weaker => STARTER priority;
+ // similar => SHARED (join reservation first as explicitly requested).
+ const playable=priorityAllocation(targets,stock,expected.ownOptimal,
+  expected.relative.key,expected.weights);
  const actual=playable.rows;
  const baseline=expected.baseline;
  const leaderStrength=expected.relative;
@@ -531,7 +589,13 @@ function plan(model,catalog,combat,capacityCore){
   marches:marches.map((m,i)=>({...m,troops:actual[i],ratio:ratios[i],filled:actual[i].reduce((a,b)=>a+b,0),
    shortage:Math.max(0,m.capacity-actual[i].reduce((a,b)=>a+b,0))})),
   starterScore:full,scoreType:'community-joiner-bear-baseline',
-  ratioMethod:'marginal-physical-damage-model',joinerBaseline:baseline,
+  ratioMethod:'join-5-15-80-with-archer-priority',joinerBaseline:baseline,
+  allocationPriority:leaderStrength.key==='weaker'?'starter':
+   leaderStrength.key==='stronger'?'joins':'shared',
+  requiredArchers:playable.requiredArchers,
+  archerSupply:playable.archerSupply,archerShortage:playable.archerShortage,
+  joinArcherDemand:playable.joinArcherDemand,
+  joinBaseRatio:playable.joinRatio,
   ownUnconstrainedRatio:expected.ownOptimal,joinUnconstrainedRatio:expected.joinOptimal,
   modelAssumptions:expected.assumptions,referenceQuality:expected.quality,
   modelHasStats:expected.hasKnownStats,modelHasHeroEffects:expected.hasKnownHeroEffects,
@@ -541,5 +605,5 @@ function plan(model,catalog,combat,capacityCore){
   allHeroesAssigned:marches.every(m=>m.missingHeroSlots===0),
   joinCount:selected.joins.length,selected};
 }
-root.NRW_BEAR_FORMATION={plan,chooseHeroes,JOIN_PRIORITIES,allocateStock:allocate,integerPercentages,availableStock,joinerBaseline,ratioForTarget,scenario,scoreFor,expectedWeights,allocateByMarginal,playableProjection,squareOptimal};
+root.NRW_BEAR_FORMATION={plan,chooseHeroes,JOIN_PRIORITIES,allocateStock:allocate,integerPercentages,availableStock,joinerBaseline,ratioForTarget,scenario,scoreFor,expectedWeights,allocateByMarginal,playableProjection,squareOptimal,priorityAllocation,JOIN_STANDARD};
 })(window);
