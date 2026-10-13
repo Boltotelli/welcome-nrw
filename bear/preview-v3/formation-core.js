@@ -175,42 +175,22 @@ function availableStock(model){
 // T/TG base attack alone and an arbitrary +4% Archer factor cannot identify
 // the best mixture for an "average" leader. Use literature-backed
 // generation-specific Bear presets instead, adapting to actual march size.
-const GENERATION_BASELINES={
-  1:[10,30,60],2:[10,20,70],3:[10,10,80]
-};
+const GENERATION_BASELINES={1:[5,15,80],2:[5,15,80],3:[5,15,80]};
 function ratioForTarget(target,baseline){
  const t=int(target);if(!t)return [0,0];
  const [baseInf,baseCav]=baseline;
- // A late-generation 1/10/89 is a community starting point,
- // NOT a mandate to bring 5,000 ATTACKING Infantry. In the
- // published combat formula, 5,000 denotes the DEFENDING Bear army
- // and the army_min factor. No abrupt Infantry threshold was shown.
- const i=Math.min(t,Math.max(0,Math.round(t*baseInf/100)));
- const c=Math.min(t-i,Math.max(0,Math.round(t*baseCav/100)));
- return [100*i/t,100*c/t];
+ const counts=composition(t,baseInf,baseCav);
+ return [100*counts[0]/t,100*counts[1]/t];
 }
 function joinerBaseline(model,catalog){
- // NRW #1044 is in the late-game (Gen4+) Bear meta. The age of the
- // kingdom is NOT the generation of the player's strongest owned hero:
- // a small account without Gen4+ heroes still joins late-game leaders.
- // An explicit server generation, if known from a future import, takes
- // precedence. Never infer kingdom age from hero ownership.
- const raw=model?.v2?.kingdomGeneration;
- const number=Number(raw);
- const generation=Number.isInteger(number)&&number>=1&&number<=8?number:4;
- const proportions=GENERATION_BASELINES[generation]||[1,10,89];
- return {generation,generationLabel:Number.isInteger(number)&&number>=1&&number<=8?
-  String(number):'4+',proportions,
-  source:'Gen4+ community Bear joiner baseline for kingdom 1044; rally-leader unknown'};
+ const generation=Number(model?.v2?.kingdomGeneration)||4;
+ return {generation,generationLabel:String(generation)+'+',
+  proportions:[5,15,80],
+  source:'NRW #1044 user-selected default 5/15/80 for all Joiner marches'};
 }
-/* Relative total-damage allocation. No real leader stats are known.
- * Approximate each march's damage as sum(classWeight * sqrt(classTroops *
- * min(allTroops,5000))).  Class weights are calibrated to the community
- * reference ratios (Gen4+ ~1/10/89; 5k is the DEFENDING Bear army).
- * We compare MARGINAL increases between own starter and all joins,
- * consuming actual troop stock once. Foreign strength is a user-selected
- * scenario (weaker/similar/stronger), not a measured player stat.
- * No claim of official optimal Kingshot damage.
+/* Physical damage weights are used for the Starter's preferred individual
+ * composition; Joiner allocations use the explicit 5/15/80 target.
+ * Unknown foreign Rallyleaders do not imply a measured damage optimum.
  */
 const LEADER_SCENARIOS=Object.freeze({
  weaker:{foreign:0.70,meaning:'Other rally leaders usually weaker'},
@@ -288,7 +268,7 @@ function expectedWeights(targets,model,catalog,combat,stock){
  const hosted=own.map(x=>x/norm),joining=foreign.map(x=>x/norm);
  return {weights:targets.map((_,i)=>(i===0?hosted:joining).slice()),
   ownOptimal:squareOptimal(hosted),joinOptimal:squareOptimal(joining),
-  relative,quality,baseline:null,hasKnownStats:known.complete,
+  relative,quality,baseline:joinerBaseline(model,catalog),hasKnownStats:known.complete,
   hasKnownHeroEffects:Boolean(prepared),
   model:'physical-troop-coefficients-no-fixed-prior',
   assumptions:[
