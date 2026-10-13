@@ -49,7 +49,7 @@
   try{
    const r=await fetch(ENDPOINT+(query||''),{...opt,signal:controller.signal,cache:'no-store'});
    let data={};try{data=await r.json();}catch{}
-   if(!r.ok){const err=new Error(data.error||'api-'+r.status);err.status=r.status;throw err;}
+   if(!r.ok){const err=new Error(data.error||'api-'+r.status);err.status=r.status;err.retryAfterSeconds=Number(data.retryAfterSeconds||0);throw err;}
    return data;
   }finally{clearTimeout(timeout);}
  }
