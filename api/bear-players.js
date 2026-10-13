@@ -53,22 +53,15 @@ function pickData(v){
  }
  out.combatStatOrigin=['separate-overview','combined-report'].includes(v.combatStatOrigin)?v.combatStatOrigin:'combined-report';
  out.petBuffCapturedInStats=v.petBuffCapturedInStats===true;
- const rawMin=v.ministers||{},rawHigh=rawMin.highKingValues||{};
- out.ministers={
-  king:{fc:rawMin.king?.fc===true,m:rawMin.king?.m===true},
-  highKing:{fc:rawMin.highKing?.fc===true,m:rawMin.highKing?.m===true},
-  highKingValues:{}
- };
- for(const [k,limit] of Object.entries({fcLethality:100,marshalAttack:100,marshalCapacity:100000})){
-  const raw=rawHigh[k];
-  if(raw===null||raw===undefined||raw==='')continue;
-  const n=Number(raw);
-  if(Number.isFinite(n)&&n>=0&&n<=limit&&(k!=='marshalCapacity'||Number.isInteger(n)))
-   out.ministers.highKingValues[k]=n;
- }
- out.ministerBuffCapturedInStats=v.ministerBuffCapturedInStats===true;
- out.ministerCapacityInBase=v.ministerCapacityInBase===true;
-
+ const old=v.ministers||{};
+ const legacyHigh=old.highKing?.fc===true||old.highKing?.m===true;
+ const court=['king','highKing'].includes(old.court)?old.court:legacyHigh?'highKing':'king';
+ const legacy=old[court]||{};
+ out.ministers={court,
+  fc:old.fc===undefined?legacy.fc===true:old.fc===true,
+  m:old.m===undefined?legacy.m===true:old.m===true};
+ // User input is ALWAYS unbuffed: never persist conflicting legacy flags.
+ out.petBuffCapturedInStats=false;
  return out;
 }
 async function gh(path,method='GET',body){
