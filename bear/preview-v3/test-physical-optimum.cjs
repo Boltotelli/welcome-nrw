@@ -62,7 +62,7 @@ const plan=f.plan(model,catalog,c,capacity);
 assert(plan.ready);assert.equal(plan.marches.length,7);
 assert(plan.ownUnconstrainedRatio&&plan.joinUnconstrainedRatio);
 assert(plan.modelHasStats);
-assert.equal(plan.ratioMethod,'marginal-physical-damage-model');
+assert.equal(plan.ratioMethod,'join-5-15-80-with-archer-priority');
 for(let k=0;k<3;k++)
  assert.equal(plan.used[k]+plan.leftover[k],troops[k]);
 for(const row of plan.marches){
