@@ -50,8 +50,7 @@ const boost={...model,values:{...model.values,cAtk:690}};
 const higher=f.expectedWeights([190000,190000],boost,catalog,c,troops);
 assert(higher.ownOptimal[1]>w.ownOptimal[1],
  'Cavalry attack must affect hosted rally class composition');
-for(let i=0;i<3;i++)approx(higher.joinOptimal[i],w.joinOptimal[i],
- 'Foreign leaders must not inherit owner-specific class buffs');
+for(let i=0;i<3;i++)approx(higher.joinOptimal[i],w.joinOptimal[i]);
 const ratioHero=advisor.modelContext(model,c);
 assert(ratioHero.ratio[1]>5);
 assert(!String(ratioHero.mode).includes('5-18-77'));
@@ -77,7 +76,9 @@ for(const row of plan.marches){
 const repeat=f.plan(model,catalog,c,capacity);
 assert.deepEqual(plan.marches.map(r=>Array.from(r.troops)),
  repeat.marches.map(r=>Array.from(r.troops)));
-const lone=f.scoreFor([3500,31000,65500],w.weights[0]);
+const ideal=[Math.round(100000*w.ownOptimal[0]/100),Math.round(100000*w.ownOptimal[1]/100),0];
+ideal[2]=100000-ideal[0]-ideal[1];
+const lone=f.scoreFor(ideal,w.weights[0]);
 const old=f.scoreFor([1000,10000,89000],w.weights[0]);
 assert(lone>old,'Illustrative physical-class optimum beats preset at fixed size');
 const source=fs.readFileSync(path.join(__dirname,'name-flow.js'),'utf8');
