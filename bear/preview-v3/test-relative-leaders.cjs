@@ -119,10 +119,21 @@ const available=screenshot.rows.map(row=>row.reduce((n,x)=>n+x,0));
 assert(available.every((n,i)=>n<=screenshotTargets[i]));
 const playable=f.playableProjection([[858,3072,186880]],
  [10000,10000,220000],[190810],[[1,3,9]]);
-assert.deepEqual(Array.from(playable.ratios[0]),[1,2,97],
- '0.45% Infantry cannot be entered: choose a real whole 1% Infantry setting');
-assert.deepEqual(Array.from(playable.rows[0]),[1908,3816,185086],
- 'Whole game inputs and troop numbers must agree EXACTLY');
+// The new physical-weight solver is allowed to IMPROVE the old 1/2/97
+// snapshot. Test game legality and stock, not the retired fixed answer.
+const actualRatio=Array.from(playable.ratios[0]),actual=Array.from(playable.rows[0]);
+assert(actualRatio.every(Number.isInteger)&&actualRatio.reduce((n,p)=>n+p,0)===100,
+ 'Only whole in-game percentages may be returned');
+assert.equal(actual.reduce((n,x)=>n+x,0),190810);
+assert.deepEqual(actual,[
+ Math.floor(190810*actualRatio[0]/100),
+ Math.floor(190810*actualRatio[1]/100),
+ 190810-Math.floor(190810*actualRatio[0]/100)-
+   Math.floor(190810*actualRatio[1]/100)
+],'Actual counts must match game-selected percentages');
+assert(actual.every((n,k)=>n<=[10000,10000,220000][k]));
+assert(f.scoreFor(actual,[1,3,9])>=f.scoreFor([1908,3816,185086],[1,3,9])-1e-6,
+ 'Discrete local improvement must not regress the old 1/2/97 score');
 assert(Array.from(f.integerPercentages([858,3072,186880]))
  .every(Number.isInteger),'Percentages shown must always be whole numbers');
 const tooFew=f.allocateByMarginal(screenshotTargets,[70,195000,945000],estimate.weights);
