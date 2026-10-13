@@ -113,6 +113,9 @@ function integerPercentages(row){
 function composition(target,inf,cav){
  if(!target)return [0,0,0];
  const a=Math.floor(target*inf/100),b=Math.floor(target*cav/100);
+ // The final rounding unit belongs to an actually selected troop type:
+ // never display 0% Archers while silently allocating one Archer.
+ if(inf+cav===100)return [a,target-a,0];
  return [a,b,target-a-b];
 }
 // First aim for the selected starter/join ratios; if one troop class runs
