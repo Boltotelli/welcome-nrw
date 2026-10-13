@@ -5,6 +5,7 @@
 'use strict';
 const B=window.NRW_BEAR_BRIDGE,C=window.NRW_BEAR_CATALOG;
 const I18N=window.NRW_BEAR_I18N;
+const PROFILES=window.NRW_BEAR_PROFILES;
 const T=text=>I18N?.tr?.(text)??text;
 if(!B||!C)return;
 const CL=['infantry','cavalry','archer'],LABEL=['Infanterie','Kavallerie','Bogenschützen'];
@@ -13,6 +14,7 @@ const el=(tag,cls='',txt)=>{const node=document.createElement(tag);if(cls)node.c
 const num=x=>Number(x||0).toLocaleString(document.documentElement.lang==='de'?'de-DE':document.documentElement.lang==='fr'?'fr-FR':document.documentElement.lang==='es'?'es-ES':'en-GB',{maximumFractionDigits:1});
 const valid=x=>typeof x==='string'&&x.trim().length>=2&&x.trim().length<=50;
 let name='',mode='',version=null,editKey=null,syncTimer=null,syncInFlight=false,dirty=false,heroInfoCache={},lastResult=null;
+let activePlayer=null,canEdit=false,localOnly=false,editCount=0,opening=0;
 // Preserve expanded generations when hero tiles refresh.
 const expandedSeasons=new Set();
 const app=el('main','bear-name-app');app.id='bearNewApp';document.body.prepend(app);document.body.classList.add('bear-name-mode');
@@ -41,13 +43,14 @@ function currentFormationPlan(){
  return cachedFormationPlan;
 }
 function saveLocal(){
- B.save();dirty=true;
+ B.save();dirty=true;editCount++;
  cachedFormationPlan=null;
  // Never keep already calculated formations or damage after inputs change.
  document.getElementById('bearFormationResult')?.remove();
  document.getElementById('bearAdvancedResult')?.remove();
  lastResult=null;
- clearTimeout(syncTimer);syncTimer=setTimeout(push,1400);
+ clearTimeout(syncTimer);if(canEdit&&!localOnly)syncTimer=setTimeout(push,1600);
+ else if(activePlayer)showStatus('Lokale Änderung – für gemeinsames Speichern wird der Bearbeitungscode benötigt.');
 }
 function showStatus(s,error=false){status.textContent=T(s);status.classList.toggle('error',error);}
 function numberField(label,value,onChange,options={}){
@@ -210,44 +213,121 @@ function unpack(d){
  for(const [i,type] of CL.entries())m.values[['troopsI','troopsC','troopsA'][i]]=v.troopGroups.filter(g=>g.type===type).reduce((n,g)=>n+Number(g.count),0);
  B.save();
 }
+function playerPicture(player,cls='bear-name-profile-image'){
+ const img=el('img',cls);img.alt='';
+ img.loading='lazy';img.referrerPolicy='no-referrer';
+ if(player?.avatarUrl&&/^https:\/\//.test(player.avatarUrl))img.src=player.avatarUrl;
+ else img.hidden=true;
+ img.addEventListener('error',()=>{img.hidden=true;});
+ return img;
+}
+function legacyNameId(value){
+ let hash=2166136261;
+ for(const ch of value.toLocaleLowerCase()) {hash^=ch.charCodeAt(0);hash=Math.imul(hash,16777619);}
+ return 'name-'+(hash>>>0);
+}
 async function openProfile(value){
- cachedFormationPlan=null;
- name=value.trim().replace(/\s+/g,' ');version=null;dirty=false;
- editKey=localStorage.getItem(keyForName(name));
- if(!editKey){editKey=Array.from(crypto.getRandomValues(new Uint8Array(32)),x=>x.toString(16).padStart(2,'0')).join('');localStorage.setItem(keyForName(name),editKey);}
- // Deterministic opaque local key; NO player ID is needed or requested.
- let hash=2166136261;for(const ch of name.toLocaleLowerCase()){hash^=ch.charCodeAt(0);hash=Math.imul(hash,16777619);}
- B.activateSavedId('name-'+(hash>>>0),name);
- if(location.hostname.endsWith('github.io')){
-  // GitHub Pages hosts a static preview: never pretend server-side GitHub
-  // profile storage or private API routes are available.
-  showStatus('GitHub Pages: Eingaben werden nur lokal auf diesem Gerät gespeichert.');
-  mode='';render();return;
+ const sequence=++opening;
+ clearTimeout(syncTimer);cachedFormationPlan=null;dirty=false;canEdit=false;
+ let player=typeof value==='object'&&value?value:null;
+ const requested=(player?.name||String(value||'')).trim().replace(/\s+/g,' ');
+ if(!valid(requested)){showStatus('Bitte einen Namen mit mindestens zwei Zeichen eingeben.',true);return;}
+ if(!player?.id&&PROFILES){
+  try{
+   const found=(await PROFILES.search(requested)).players||[];
+   if(sequence!==opening)return;
+   const matched=found.filter(x=>x.name?.normalize('NFKC').toLocaleLowerCase()===
+    requested.normalize('NFKC').toLocaleLowerCase());
+   if(matched.length===1)player=matched[0];
+   else if(matched.length>1){
+    showStatus('Mehrere Spieler mit diesem Namen gefunden – bitte die passende ID aus der Liste auswählen.',true);return;
+   }
+  }catch(_){showStatus('Spielersuche gerade nicht erreichbar – lokales Profil wird geöffnet.',true);}
  }
- try{
-  const response=await fetch('/api/bear-players?name='+encodeURIComponent(name),{cache:'no-store'});
-  if(response.ok){const remote=await response.json();unpack(remote.data);version=remote.version;showStatus('Gemeinsames Profil geladen: '+remote.name);}
-  else if(response.status===404)showStatus('Neuer Name – Eingaben werden automatisch gespeichert, sobald der Server bereit ist.');
-  else showStatus('Lokales Profil geöffnet. GitHub-Synchronisierung derzeit nicht verfügbar.');
- }catch(_){showStatus('Lokales Profil geöffnet. GitHub-Synchronisierung derzeit nicht verfügbar.');}
+ if(sequence!==opening)return;
+ name=player?.name||requested;activePlayer=player?.id?player:{name};
+ localOnly=!Boolean(player?.id&&PROFILES);
+ editKey=localOnly?null:PROFILES.getEditKey(player.id);
+ const localId=legacyNameId(name),stableId=player?.id?'k1044-'+player.id:localId;
+ if(player?.id){
+  // Migrate the older name-only browser draft without overwriting a newer
+  // stable-ID profile; no credentials or other players' records are copied.
+  const oldKey='nrw_bear_profile_v1_'+localId,stableKey='nrw_bear_profile_v1_'+stableId;
+  try{if(!localStorage.getItem(stableKey)&&localStorage.getItem(oldKey))
+   localStorage.setItem(stableKey,localStorage.getItem(oldKey));}catch(_){}
+ }
+ B.activateSavedId(stableId,name);
+ if(localOnly){
+  showStatus('Nur lokal: Spielername noch nicht im Cache von Server 1044 gefunden.');
+ }else{
+  try{
+   const remote=await PROFILES.get(player.id);
+   if(sequence!==opening)return;
+   activePlayer=remote.player;name=remote.player.name;
+   if(remote.profile){
+    unpack(remote.profile.data);version=remote.profile.revision;
+    if(editKey){
+     const permission=await PROFILES.verify(player.id,editKey);
+     canEdit=Boolean(permission.canEdit);
+    }
+    showStatus(canEdit?'Gemeinsames Profil geladen · Bearbeitung erlaubt.':
+     'Gemeinsames Profil geladen · schreibgeschützt. Bearbeitungscode zum Ändern erforderlich.');
+   }else{
+    version=null;canEdit=true;
+    editKey=editKey||PROFILES.newEditKey();
+    PROFILES.storeEditKey(player.id,editKey);
+    showStatus('Neues gemeinsames Profil: Deine Änderungen werden mit einem lokalen Bearbeitungscode geschützt.');
+   }
+   PROFILES.remember(activePlayer);
+  }catch(_){
+   localOnly=true;canEdit=false;
+   showStatus('Supabase nicht erreichbar. Eingaben bleiben lokal; es wird nichts unbemerkt überschrieben.',true);
+  }
+ }
  mode='';render();
 }
 async function push(){
- if(!name||syncInFlight||!dirty)return;
- if(location.hostname.endsWith('github.io')){
-  showStatus('GitHub Pages-Test: ausschließlich lokal gespeichert.');dirty=false;return;
- }
- syncInFlight=true;
+ if(!name||syncInFlight||!dirty||!activePlayer?.id||!canEdit||!editKey||localOnly)return;
+ const playerId=activePlayer.id,code=editKey,savedVersion=version,
+  payload=pack(),serial=editCount;
+ syncInFlight=true;clearTimeout(syncTimer);
  try{
-  const response=await fetch('/api/bear-players',{method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({name,data:pack(),editKey,version})});
-  const answer=await response.json();
-  if(response.ok){version=answer.version;dirty=false;showStatus('✓ Gespeichert (privates GitHub-Profil): '+name);}
-  else if(response.status===403){showStatus('Dieses Profil wird auf einem anderen Gerät verwaltet. Hier nur lokal gespeichert.',true);dirty=false;}
-  else if(response.status===409){showStatus('Profil wurde zwischenzeitlich geändert. Neu öffnen, um Änderungen abzugleichen.',true);dirty=false;}
-  else{showStatus('Nur lokal gespeichert – GitHub-Schreibzugang noch nicht bereit.',true);}
- }catch(_){showStatus('Nur lokal gespeichert – GitHub nicht erreichbar.',true);}
- syncInFlight=false;
+  const result=await PROFILES.save(playerId,code,savedVersion,payload);
+  if(activePlayer?.id===playerId){
+   version=result.revision;
+   if(editCount===serial)dirty=false;
+   else syncTimer=setTimeout(push,250);
+   showStatus('✓ Gemeinsam gespeichert · Version '+version);
+  }
+ }catch(err){
+  if(err?.status===403){canEdit=false;showStatus('Bearbeitungscode ungültig. Änderungen bleiben lokal.',true);}
+  else if(err?.status===409)showStatus('Profil wurde inzwischen auf einem anderen Gerät aktualisiert. Bitte neu öffnen und Änderungen vergleichen.',true);
+  else showStatus('Online-Speicherung fehlgeschlagen. Änderungen bleiben lokal.',true);
+ }finally{syncInFlight=false;}
+}
+async function unlockProfile(){
+ if(!activePlayer?.id||!PROFILES)return;
+ const code=window.prompt('64-stelligen Bearbeitungscode für '+name+' eingeben:');
+ if(code===null)return;
+ if(!/^[a-f0-9]{64}$/i.test(code.trim())){showStatus('Ungültiger Bearbeitungscode.',true);return;}
+ try{
+  const r=await PROFILES.verify(activePlayer.id,code.trim());
+  if(!r.canEdit){showStatus('Dieser Bearbeitungscode ist nicht gültig.',true);return;}
+  editKey=code.trim().toLowerCase();PROFILES.storeEditKey(activePlayer.id,editKey);
+  canEdit=true;render();showStatus('Bearbeitung freigeschaltet. Änderungen werden gemeinsam gespeichert.');
+ }catch(_){showStatus('Berechtigung konnte nicht geprüft werden.',true);}
+}
+async function copyEditCode(){
+ if(!canEdit||!editKey||!activePlayer?.id)return;
+ try{await navigator.clipboard.writeText(editKey);
+  showStatus('Bearbeitungscode kopiert. Nur mit vertrauenswürdigen Mitspielern teilen.');
+ }catch(_){showStatus('Kopieren im Browser nicht verfügbar. Bitte sichere Clipboard-Berechtigung prüfen.',true);}
+}
+async function leaveProfile(){
+ clearTimeout(syncTimer);
+ if(dirty&&canEdit&&!localOnly){await push();if(dirty){showStatus('Nicht online gespeichert. Lokale Daten bleiben erhalten.',true);return;}}
+ name='';mode='';activePlayer=null;editKey=null;canEdit=false;localOnly=false;version=null;
+ render();
 }
 function rosterSection(){
  const section=el('section','bear-name-panel'),head=title('Deine Helden');
@@ -844,29 +924,94 @@ function languageSwitcher(){
 function landing(){
  const head=el('div','bear-name-landing');head.append(el('p','bear-name-eyebrow','🐻 NRW · BÄREN-OPTIMIERER'),
   title('Deine Bear-Formation. Ohne Screenshot-Marathon.','h1'),
-  el('p','bear-name-muted','Nur deinen Spielernamen eingeben. Danach wählst du zwischen Heldenempfehlung und erweiterter Schadensoptimierung.'));
- const inp=el('input','bear-name-input');inp.placeholder=T('Dein Kingshot-Name');inp.maxLength=50;inp.autocomplete='off';
- inp.value=name;inp.onkeydown=e=>{if(e.key==='Enter'&&valid(inp.value))openProfile(inp.value);};
- head.append(inp,button('Profil öffnen / neu anlegen →',()=>{if(valid(inp.value))openProfile(inp.value);else showStatus('Bitte einen Namen mit mindestens zwei Zeichen eingeben.',true);},'bear-name-btn primary'));head.append(el('p','bear-name-muted','Hinweis: Wenn GitHub-Speicherung aktiviert ist, kann jeder, der diesen Namen kennt, die hinterlegten Spielwerte lesen. Es werden keine Screenshots oder Kingshot-IDs gespeichert.'));
- head.prepend(languageSwitcher());
- box.append(head);
- const saved=JSON.parse(localStorage.getItem('nrw_bear_name_list_v1')||'[]');
- if(saved.length){const row=el('div','bear-name-saved');row.append(title('Bereits auf diesem Gerät geöffnet','h3'));
-  for(const n of saved.slice(0,12))row.append(button(n,()=>openProfile(n)));box.append(row);}
+  el('p','bear-name-muted','Spielername suchen, ein gemeinsames Profil ansehen und eigene Favoriten speichern.'));
+ const input=el('input','bear-name-input');
+ input.placeholder=T('Dein Kingshot-Name');input.maxLength=50;input.autocomplete='off';
+ input.setAttribute('aria-label',T('Dein Kingshot-Name'));
+ const results=el('div','bear-name-search-results');
+ let timer=null,token=0;
+ function showResults(players){
+  results.replaceChildren();
+  for(const player of players){
+   const item=button('',()=>openProfile(player),'bear-name-search-item');
+   item.append(playerPicture(player),el('span','',player.name+' · '+(player.alliance||'#1044')),
+    el('small','',player.id));
+   results.append(item);
+  }
+ }
+ input.addEventListener('input',()=>{
+  clearTimeout(timer);const id=++token,query=input.value.trim();
+  results.replaceChildren();
+  if(!PROFILES||query.length<2)return;
+  timer=setTimeout(async()=>{
+   try{const r=await PROFILES.search(query);
+    if(id===token&&input.isConnected)showResults(r.players||[]);
+   }catch(_){if(id===token)results.replaceChildren();}
+  },260);
+ });
+ input.onkeydown=e=>{if(e.key==='Enter'&&valid(input.value)){
+  e.preventDefault();openProfile(input.value);
+ }};
+ head.append(input,results,button('Profil öffnen →',()=>{
+  if(valid(input.value))openProfile(input.value);
+  else showStatus('Bitte einen Namen mit mindestens zwei Zeichen eingeben.',true);
+ },'bear-name-btn primary'));
+ head.append(el('p','bear-name-muted','Gemeinsame Profile können angesehen werden. Änderungen sind mit einem profilspezifischen Bearbeitungscode geschützt. Deine Favoriten bleiben nur auf diesem Gerät.'));
+ head.prepend(languageSwitcher());box.append(head);
+ const saved=PROFILES?.ordered()||[];
+ const legacy=(()=>{
+  try{return JSON.parse(localStorage.getItem('nrw_bear_name_list_v1')||'[]');}catch{return [];}
+ })();
+ const all=saved.concat(legacy.filter(n=>typeof n==='string'&&
+  !saved.some(x=>x.name.toLocaleLowerCase()===n.toLocaleLowerCase()))
+  .map(n=>({name:n})));
+ if(all.length){
+  const section=el('div','bear-name-saved');
+  section.append(title('⭐ Favoriten zuerst · zuletzt geöffnet','h3'));
+  for(const item of all.slice(0,30)){
+   const line=el('div','bear-name-history-row'),
+    open=button('',()=>openProfile(item),'bear-name-history-open');
+   open.append(playerPicture(item),el('span','',item.name));
+   const favorite=PROFILES?.isFavorite(item);
+   const star=button(favorite?'★':'☆',()=>{
+    PROFILES?.toggleFavorite(item);render();
+   },'bear-name-favorite-btn'+(favorite?' selected':''));
+   star.setAttribute('aria-label',favorite?'Favorit entfernen':'Als Favorit markieren');
+   line.append(open,star);section.append(line);
+  }
+  box.append(section);
+ }
 }
 function render(){
  box.replaceChildren();
  if(!name){landing();return;}
  const bar=el('header','bear-name-top');
- bar.append(button('← Namen wechseln',()=>{clearTimeout(syncTimer);name='';mode='';render();}),
-  title('🐻 '+name,'h2'),languageSwitcher(),button('Jetzt speichern',push));
+ bar.append(button('← Namen wechseln',leaveProfile));
+ const identity=el('div','bear-name-identity');
+ identity.append(playerPicture(activePlayer));
+ identity.append(title(name,'h2'));
+ bar.append(identity);
+ const starred=PROFILES?.isFavorite(activePlayer);
+ const star=button(starred?'★':'☆',()=>{
+  if(!activePlayer)return;
+  PROFILES?.toggleFavorite(activePlayer);
+  render();
+ },'bear-name-favorite-btn'+(starred?' selected':''));
+ star.setAttribute('aria-label',starred?'Favorit entfernen':'Als Favorit markieren');
+ bar.append(star,languageSwitcher());
+ if(canEdit&&!localOnly){
+  bar.append(button('Jetzt speichern',async()=>{dirty=true;await push();}),
+   button('🔑 Bearbeitungscode kopieren',copyEditCode,'bear-name-code-btn'));
+ }else if(activePlayer?.id&&!localOnly)
+  bar.append(button('🔒 Bearbeitung freischalten',unlockProfile,'bear-name-code-btn'));
+
  box.append(bar);
  if(!mode){
   const options=el('section','bear-name-choice');
   options.append(title('Was möchtest du optimieren?'),
    button('⚔️ Nur Starter-/Joiner-Helden',()=>{mode='quick';render();},'bear-name-btn primary'),
    button('📈 Erweiterte Schadensoptimierung',()=>{mode='advanced';render();},'bear-name-btn'),
-   el('p','bear-name-muted','Alle Eingaben werden unter diesem Namen gespeichert. OCR bleibt ausgeschaltet. Auf anderen Geräten ist derselbe Name abrufbar, sobald die GitHub-Synchronisierung eingerichtet ist.'));
+   el('p','bear-name-muted','Gespeicherte Werte sind geräteübergreifend einsehbar. Favoriten sind lokal, Änderungen benötigen den Bearbeitungscode. OCR bleibt ausgeschaltet.'));
   box.append(options);return;
  }
  box.append(button('← Modus wählen',()=>{mode='';render();}));
@@ -883,9 +1028,8 @@ function render(){
   const r=summaryHeroes();right.append(r.section,starterGearSection(r.picked),actionButtons(true));
   main.append(left,right);box.append(main);
  }
- if(!localStorage.getItem('nrw_bear_name_list_v1'))localStorage.setItem('nrw_bear_name_list_v1','[]');
- const arr=JSON.parse(localStorage.getItem('nrw_bear_name_list_v1')||'[]');
- if(!arr.includes(name))localStorage.setItem('nrw_bear_name_list_v1',JSON.stringify([name,...arr].slice(0,30)));
+ // Recent profile ordering is managed separately from saved model values.
+ if(activePlayer)PROFILES?.remember(activePlayer);
 }
 render();
 // The public reference loads asynchronously. Update a visible recommendation
