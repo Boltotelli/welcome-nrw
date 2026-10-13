@@ -319,7 +319,14 @@ jobs:
           echo 'Validated: two views share one computed plan, all ratios game-selectable whole percentages, no forced 5000 Infantry.'
           grep -Fq 'preview-v3/joiner-skills.js' _site/bear/preview-v3.html
           grep -Fq 'formation-core.js?v=20261012-24' _site/bear/preview-v3.html
-          grep -Fq 'name-flow.js?v=20261013-3' _site/bear/preview-v3.html
+          grep -Fq 'name-flow.js?v=20261013-4' _site/bear/preview-v3.html
+          grep -Fq 'name-flow.css?v=20261013-4' _site/bear/preview-v3.html
+          grep -Fq 'const expandedSeasons=new Set();' _site/bear/preview-v3/name-flow.js
+          grep -Fq "return foldingPanel('troops'" _site/bear/preview-v3/name-flow.js
+          grep -Fq "foldingPanel('baseStats'" _site/bear/preview-v3/name-flow.js
+          grep -Fq "foldingPanel('ministers'" _site/bear/preview-v3/name-flow.js
+          grep -Fq "foldingPanel('pets'" _site/bear/preview-v3/name-flow.js
+          ! grep -Fq "const overall=el('div','bear-name-util-track')" _site/bear/preview-v3/name-flow.js
           node --check _site/bear/preview-v3/formation-core.js
           node --check _site/bear/preview-v3/combat.js
           test -s _site/bear/preview-v3.html
