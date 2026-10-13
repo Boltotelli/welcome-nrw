@@ -26,6 +26,11 @@
  function remember(player){
   const item=clean(player),prior=recent().filter(x=>!same(item,x));
   write(HISTORY,[item,...prior].slice(0,30));
+  // Refresh stale avatars/names in bookmarked entries after a rename.
+  const starred=favorites();
+  if(starred.some(x=>same(x,item))&&item.id){
+   write(FAVORITES,starred.map(x=>same(x,item)?item:x));
+  }
  }
  function ordered(){
   const f=favorites(),r=recent();
