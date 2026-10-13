@@ -5,6 +5,25 @@
 'use strict';
 const table=[
 ['Deine Helden','Your heroes','Tes héros','Tus héroes'],
+['Ministerbuffs','Minister buffs','Bonus de ministres','Bonificaciones ministeriales'],
+['Ministerhof wählen: König oder Hochkönig','Choose ministers: King or High King','Choisir la cour : Roi ou Haut Roi','Elegir corte: Rey o Rey Supremo'],
+['König','King','Roi','Rey'],
+['Hochkönig','High King','Haut Roi','Rey Supremo'],
+['Schwadronskapazität','Squad capacity','Capacité d’escouade','Capacidad del escuadrón'],
+['Angriff','Attack','Attaque','Ataque'],
+['Tödlichkeit','Lethality','Létalité','Letalidad'],
+['Die eingetragenen Werte sind immer ungebufft. Ministerboni werden automatisch hinzugefügt.','Enter unbuffed values only. Minister bonuses are added automatically.','Entre uniquement les valeurs sans bonus. Les bonus ministériels sont ajoutés automatiquement.','Introduce solo valores sin bonificaciones. Los bonus ministeriales se añaden automáticamente.'],
+['Pet- und Valora-Boni werden zu den ungebufften Basiswerten addiert.','Pet and Valora bonuses are added to unbuffed base stats.','Les bonus des animaux et de Valora sont ajoutés aux stats sans bonus.','Las bonificaciones de mascotas y Valora se suman a los valores base sin bonus.'],
+['Bitte ausschließlich ungebuffte Grundwerte eintragen. Fehlende Werte bleiben offen.','Enter unbuffed base stats only. Missing values are left blank.','Entre uniquement les stats de base sans bonus. Les valeurs manquantes restent vides.','Introduce solo estadísticas base sin bonificaciones. Los valores desconocidos quedan vacíos.'],
+
+['Hochkönig FC · Tödlichkeit %','High King FC · Lethality %','Haut Roi FC · Létalité %','Rey Supremo FC · Letalidad %'],
+['Hochkönig M · Angriff %','High King M · Attack %','Haut Roi M · Attaque %','Rey Supremo M · Ataque %'],
+['Hochkönig M · Kapazität','High King M · Capacity','Haut Roi M · Capacité','Rey Supremo M · Capacidad'],
+['Hochkönigboni: Werte aus dem Spiel eintragen. Nicht bestätigte Werte werden nicht geschätzt.','High King bonuses: enter the in-game values. Unconfirmed amounts are not estimated.','Bonus Haut Roi : saisir les valeurs du jeu. Les montants non confirmés ne sont pas estimés.','Bonificaciones del Rey Supremo: introduce los valores del juego. No se estiman valores sin confirmar.'],
+['FC · Wert bestätigen','FC · Confirm value','FC · Confirmer la valeur','FC · Confirmar valor'],
+['M · Werte bestätigen','M · Confirm values','M · Confirmer les valeurs','M · Confirmar valores'],
+['Boni identischer Ministerposten werden nicht doppelt addiert.','The same minister bonuses are not counted twice.','Les mêmes bonus ministériels ne sont pas comptés deux fois.','No se suman dos veces las mismas bonificaciones ministeriales.'],
+
 ["Ministerbuffs · König und Hochkönig","Minister buffs · King and High King","Bonus des ministres · Roi et Grand Roi","Bonos ministeriales · Rey y Gran Rey"],
 ["Aktiviere nur Posten, die während der Bärenfalle wirklich gelten.","Select only appointments active during the Bear Trap.","Active uniquement les postes en vigueur durant le piège à ours.","Activa solo los cargos vigentes durante la Trampa del Oso."],
 ["König","King","Roi","Rey"],
