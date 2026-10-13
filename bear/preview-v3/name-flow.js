@@ -20,7 +20,18 @@ const box=el('div','bear-name-container'),status=el('p','bear-name-status');
 app.append(box,status);
 const title=(txt,tag='h2')=>el(tag,'',txt);
 const button=(txt,fn,cls='bear-name-btn')=>{const b=el('button',cls,txt);b.type='button';b.addEventListener('click',fn);return b;};
-function state(){const m=B.model();m.v2=m.v2||{};m.values=m.values||{};m.v2.manualHeroes=m.v2.manualHeroes||{};m.v2.scannedOwnedHeroes=m.v2.scannedOwnedHeroes||[];return m;}
+function state(){
+ const m=B.model();m.v2=m.v2||{};m.values=m.values||{};
+ m.v2.manualHeroes=m.v2.manualHeroes||{};
+ m.v2.scannedOwnedHeroes=m.v2.scannedOwnedHeroes||[];
+ // Migrate old two-court settings once. Read-only stats are always unbuffed;
+ // no separate "captured already" toggles can survive migration.
+ m.v2.ministers=window.NRW_BEAR_MINISTERS?.normalized?.(m.v2.ministers)||{court:'king',fc:false,m:false};
+ delete m.v2.ministerBuffCapturedInStats;
+ delete m.v2.ministerCapacityInBase;
+ m.v2.petBuffCapturedInStats=false;
+ return m;
+}
 function keyForName(value){return 'nrw_bear_name_edit_v1:'+value.normalize('NFKC').toLowerCase().trim();}
 let cachedFormationPlan=null;
 function currentFormationPlan(){
@@ -151,11 +162,10 @@ function pack(){
  }
  return {heroes,ownHeroes:v.ownHeroes||[],joinCount:v.joinCount||0,
   joinLeaderComparison:v.joinLeaderComparison||'similar',
-  ministers:v.ministers||{},ministerBuffCapturedInStats:!!v.ministerBuffCapturedInStats,
-  ministerCapacityInBase:!!v.ministerCapacityInBase,
+  ministers:window.NRW_BEAR_MINISTERS?.normalized?.(v.ministers)||{court:'king',fc:false,m:false},
   troopGroups:v.troopGroups||[],values:m.values||{},combatStatOrigin:v.combatStatOrigin||'combined-report',
   valoraTalent:v.valoraTalent||0,savageAdvantage:v.valora?.[3]||0,
-  petActive:v.petActive||{},petSkillRanks:v.petSkillRanks||{},petBuffCapturedInStats:!!v.petBuffCapturedInStats};
+  petActive:v.petActive||{},petSkillRanks:v.petSkillRanks||{}};
 }
 function unpack(d){
  const m=state(),v=m.v2;v.manualHeroes={};v.scannedOwnedHeroes=[];
@@ -169,12 +179,12 @@ function unpack(d){
  v.joinCount=Math.max(0,Math.min(6,Number(d.joinCount)||0));
  v.joinLeaderComparison=['weaker','similar','stronger'].includes(d.joinLeaderComparison)?
   d.joinLeaderComparison:'similar';
- v.ministers=d.ministers||{};
- v.ministerBuffCapturedInStats=!!d.ministerBuffCapturedInStats;
- v.ministerCapacityInBase=!!d.ministerCapacityInBase;
+ v.ministers=window.NRW_BEAR_MINISTERS?.normalized?.(d.ministers)||{court:'king',fc:false,m:false};
+ delete v.ministerBuffCapturedInStats;
+ delete v.ministerCapacityInBase;
  v.troopGroups=d.troopGroups||[];v.troopTiers=[{tier:10,tg:0},{tier:10,tg:0},{tier:10,tg:0}];
  v.valora=[0,0,0,Number(d.savageAdvantage)||0];v.valoraTalent=Number(d.valoraTalent)||0;
- v.petActive=d.petActive||{};v.petSkillRanks=d.petSkillRanks||{};v.petBuffCapturedInStats=!!d.petBuffCapturedInStats;
+ v.petActive=d.petActive||{};v.petSkillRanks=d.petSkillRanks||{};v.petBuffCapturedInStats=false;
  v.combatStatOrigin=d.combatStatOrigin||'combined-report';
  Object.assign(m.values,d.values||{});
  for(const [i,type] of CL.entries())m.values[['troopsI','troopsC','troopsA'][i]]=v.troopGroups.filter(g=>g.type===type).reduce((n,g)=>n+Number(g.count),0);
@@ -307,54 +317,61 @@ function rallyStrengthField(){
 }
 function ministerSection(){
  const v=state().v2,section=el('section','bear-name-ministers');
- v.ministers=v.ministers||{};
- section.append(title('Ministerbuffs · König und Hochkönig','h3'),
-  el('p','bear-name-muted','Aktiviere nur Posten, die während der Bärenfalle wirklich gelten.'));
- const groups=el('div','bear-name-minister-grid');
- for(const [key,caption] of [['king','König'],['highKing','Hochkönig']]){
-  const area=el('div','bear-name-minister-group');
-  area.append(el('strong','',caption));
-  const flags=v.ministers[key]||(v.ministers[key]={fc:false,m:false});
-  for(const [flag,text] of [['fc',key==='king'?'FC · +10 % Tödlichkeit':'FC · Wert bestätigen'],
-   ['m',key==='king'?'M · +5 % Angriff, +2.500 Kapazität':'M · Werte bestätigen']]){
-   const label=el('label','bear-name-minister-check'),input=el('input');
-   input.type='checkbox';input.checked=flags[flag]===true;
-   input.addEventListener('change',()=>{flags[flag]=input.checked;saveLocal();});
-   label.append(input,el('span','',text));area.append(label);
-  }
-  if(key==='highKing'){
-   const custom=v.ministers.highKingValues||(v.ministers.highKingValues={});
-   const fields=el('div','bear-name-stat-grid');
-   if(flags.fc)fields.append(numberField('Hochkönig FC · Tödlichkeit %',
-    custom.fcLethality,n=>{custom.fcLethality=n;saveLocal();},{min:0,max:100,step:1}));
-   if(flags.m){
-    fields.append(numberField('Hochkönig M · Angriff %',
-     custom.marshalAttack,n=>{custom.marshalAttack=n;saveLocal();},{min:0,max:100,step:1}));
-    fields.append(numberField('Hochkönig M · Kapazität',
-     custom.marshalCapacity,n=>{custom.marshalCapacity=n;saveLocal();},{min:0,max:100000,step:1}));
-   }
-   if(flags.fc||flags.m)area.append(fields,el('small','bear-name-muted',
-    'Hochkönigboni: Werte aus dem Spiel eintragen. Nicht bestätigte Werte werden nicht geschätzt.'));
-  }
-  groups.append(area);
+ const selected=v.ministers;
+ section.append(title('Ministerbuffs','h3'),
+  el('p','bear-name-muted','Die eingetragenen Werte sind immer ungebufft. Ministerboni werden automatisch hinzugefügt.'));
+ // Exactly one kingdom source: simple two-position slider.
+ const control=el('div','bear-name-court-switch'),left=el('span','', 'König'),
+  right=el('span','', 'Hochkönig');
+ const range=el('input','bear-name-court-range');
+ range.type='range';range.min='0';range.max='1';range.step='1';
+ range.value=selected.court==='highKing'?'1':'0';
+ range.setAttribute('aria-label',T('Ministerhof wählen: König oder Hochkönig'));
+ range.setAttribute('aria-valuetext',T(selected.court==='highKing'?'Hochkönig':'König'));
+ const setCourt=court=>{
+  if(selected.court===court)return;
+  selected.court=court;saveLocal();render();
+ };
+ range.addEventListener('input',()=>setCourt(range.value==='1'?'highKing':'king'));
+ left.addEventListener('click',()=>setCourt('king'));
+ right.addEventListener('click',()=>setCourt('highKing'));
+ left.classList.toggle('active',selected.court==='king');
+ right.classList.toggle('active',selected.court==='highKing');
+ control.append(left,range,right);section.append(control);
+ const buff=window.NRW_BEAR_MINISTERS?.metadata?.[selected.court]||
+  (selected.court==='king'?{fcLethality:10,marshalAttack:5,marshalCapacity:2500}:
+   {fcLethality:15,marshalAttack:8,marshalCapacity:3750});
+ const rows=el('div','bear-name-minister-roles');
+ for(const [role,titleText,bonus] of [
+  ['fc','FC','+'+buff.fcLethality+' % '+T('Tödlichkeit')],
+  ['m','M','+'+buff.marshalAttack+' % '+T('Angriff')+' · +'+num(buff.marshalCapacity)+' '+T('Schwadronskapazität')]
+ ]){
+  const label=el('label','bear-name-minister-role'),input=el('input');
+  input.type='checkbox';input.checked=selected[role]===true;
+  input.addEventListener('change',()=>{selected[role]=input.checked;saveLocal();
+   label.classList.toggle('selected',input.checked);
+  });
+  label.classList.toggle('selected',input.checked);
+  // Real game artwork is deliberately not fabricated or mislabelled.
+  // Game screenshot exports can be bundled as these exact assets.
+  const art=el('span','bear-name-minister-art'),image=el('img');
+  const fallback=el('span','bear-name-minister-art-placeholder',role.toUpperCase());
+  image.src='./assets/minister-'+(role==='fc'?'field-commander':'marshal')+'.webp';
+  image.alt=role==='fc'?'Field Commander':'Marshal';
+  image.loading='lazy';
+  image.addEventListener('load',()=>fallback.hidden=true);
+  image.addEventListener('error',()=>{image.hidden=true;fallback.hidden=false;});
+  art.append(image,fallback);
+  const copy=el('span','bear-name-minister-info');
+  copy.append(el('strong','',titleText),el('small','',bonus));
+  label.append(input,art,copy);rows.append(label);
  }
- section.append(groups);
- function option(field,caption){
-  const label=el('label','bear-name-minister-check bear-name-minister-meta'),input=el('input');
-  input.type='checkbox';input.checked=!!v[field];
-  input.addEventListener('change',()=>{v[field]=input.checked;saveLocal();});
-  label.append(input,el('span','',caption));return label;
- }
- section.append(
-  option('ministerBuffCapturedInStats','FC/M-Kampfboni sind bereits in meinen Basiswerten enthalten'),
-  option('ministerCapacityInBase','M-Kapazitätsbonus ist bereits in der eingegebenen Marschkapazität enthalten'),
-  el('p','bear-name-muted','Boni identischer Ministerposten werden nicht doppelt addiert.')
- );
+ section.append(rows);
  return section;
 }
 function scalarSection(){
  const m=state(),v=m.v2,section=el('section','bear-name-panel');
- section.append(title('Basiswerte & aktive Buffs'),el('p','bear-name-muted','Angriff und Tödlichkeit aller Truppentypen aus der Bonusübersicht. Fehlende Werte bleiben offen – keine stillen Schätzungen.'));
+ section.append(title('Basiswerte & aktive Buffs'),el('p','bear-name-muted','Bitte ausschließlich ungebuffte Grundwerte eintragen. Fehlende Werte bleiben offen.'));
  section.append(choose('Anzahl aller Märsche (inkl. eigener Rally)',Array.from({length:7},(_,i)=>[i+1,String(i+1)]),
   Number(v.joinCount||0)+1,x=>{v.joinCount=Number(x)-1;saveLocal();}));
  section.append(rallyStrengthField());
@@ -446,10 +463,7 @@ function scalarSection(){
  },{min:0,max:11}));
  skillRows.append(savage,hunter);skills.append(skillRows);petGrid.append(skills);
  section.append(petGrid);
- section.append(el('p','bear-name-muted','Aktive Buffs markieren. Die bereits eingetragenen Kampfwerte nicht doppelt erhöhen.'));
-
- const present=el('label','bear-name-pet-line'),ch=el('input');ch.type='checkbox';ch.checked=!!v.petBuffCapturedInStats;ch.onchange=()=>{v.petBuffCapturedInStats=ch.checked;saveLocal();};
- present.append(ch,document.createTextNode(' '+T('Aktive Pet-ATK/LET-Buffs sind bereits in diesen Werten enthalten')));section.append(present);
+ section.append(el('p','bear-name-muted','Pet- und Valora-Boni werden zu den ungebufften Basiswerten addiert.'));
  return section;
 }
 function starterGearSection(picked){
