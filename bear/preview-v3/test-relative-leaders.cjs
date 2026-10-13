@@ -171,7 +171,8 @@ for(let test=0;test<60;test++){
   assert(total<=caps[i]&&row.every(Number.isSafeInteger));
   assert(percent.every(Number.isInteger),'Whole percent selection only #'+test);
   const rounded=[Math.floor(total*percent[0]/100),
-   Math.floor(total*percent[1]/100)];
+   percent[2]===0?0:Math.floor(total*percent[1]/100)];
+  if(percent[2]===0)rounded[1]=total-rounded[0];
   rounded[2]=total-rounded[0]-rounded[1];
   assert.equal(row.join(','),rounded.join(','),
    'Game ratio must recreate exact troop counts #'+test);
