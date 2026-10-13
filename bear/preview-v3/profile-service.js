@@ -37,6 +37,11 @@
   return [...f,...r.filter(x=>!f.some(y=>same(x,y)))];
  }
  function keyFor(id){return EDIT_PREFIX+String(id);}
+ function oldKeyFor(id){return 'nrw_bear_edit_key_v2:'+String(id);}
+ function getLegacyEditKey(id){const value=localStorage.getItem(oldKeyFor(id))||'';
+  return /^[a-f0-9]{64}$/i.test(value)?value:'';}
+ function forgetLegacyEditKey(id){try{localStorage.removeItem(oldKeyFor(id));}catch{}}
+
  function getEditKey(id){return localStorage.getItem(keyFor(id))||'';}
  function storeEditKey(id,secret){
   if(!/^\d{4,6}$/.test(String(secret)))return false;
@@ -56,7 +61,10 @@
  function search(text){return request('?search='+encodeURIComponent(String(text||'').trim()));}
  function get(id){return request('?id='+encodeURIComponent(id));}
  function verify(id,editKey){return request('',{action:'check',id,editKey});}
+ function migratePin(id,legacyEditKey,pin,revision){
+  return request('',{action:'migrate',id,legacyEditKey,editKey:pin,revision});
+ }
  function save(id,editKey,revision,data){return request('',{action:'save',id,editKey,revision,data});}
- root.NRW_BEAR_PROFILES={search,get,verify,save,getEditKey,storeEditKey,
+ root.NRW_BEAR_PROFILES={search,get,verify,save,getEditKey,storeEditKey,getLegacyEditKey,forgetLegacyEditKey,migratePin,
   remember,ordered,favorites,isFavorite,toggleFavorite,endpoint:ENDPOINT};
 })(window);
