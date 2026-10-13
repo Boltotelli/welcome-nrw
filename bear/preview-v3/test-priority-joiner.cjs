@@ -17,7 +17,7 @@ const validate=(output,stock)=>{
   assert(p.every(Number.isInteger));
   assert.equal(p.reduce((a,b)=>a+b,0),n?100:0);
   assert.equal(r[0],Math.floor(n*p[0]/100));
-  assert.equal(r[1],Math.floor(n*p[1]/100));
+  assert.equal(r[1],p[2]===0?n-r[0]:Math.floor(n*p[1]/100));
   assert.equal(r[2],n-r[0]-r[1]);
  }
  for(let k=0;k<3;k++){
