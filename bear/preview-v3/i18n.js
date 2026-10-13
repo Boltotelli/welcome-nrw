@@ -5,6 +5,16 @@
 'use strict';
 const table=[
 ['Deine Helden','Your heroes','Tes héros','Tus héroes'],
+["Spielername suchen, ein gemeinsames Profil ansehen und eigene Favoriten speichern.","Search players, view shared profiles and save your favorites.","Recherche des joueurs, consulte des profils partagés et enregistre des favoris.","Busca jugadores, consulta perfiles compartidos y guarda favoritos."],
+["Profil öffnen →","Open profile →","Ouvrir le profil →","Abrir perfil →"],
+["⭐ Favoriten zuerst · zuletzt geöffnet","⭐ Favorites first · recently opened","⭐ Favoris d'abord · ouverts récemment","⭐ Favoritos primero · abiertos recientemente"],
+["Favorit entfernen","Remove favorite","Retirer des favoris","Quitar de favoritos"],
+["Als Favorit markieren","Mark as favorite","Ajouter aux favoris","Marcar como favorito"],
+["Jetzt speichern","Save now","Enregistrer","Guardar ahora"],
+["🔑 Bearbeitungscode kopieren","🔑 Copy edit code","🔑 Copier le code de modification","🔑 Copiar código de edición"],
+["🔒 Bearbeitung freischalten","🔒 Unlock editing","🔒 Déverrouiller la modification","🔒 Desbloquear edición"],
+["Gespeicherte Werte sind geräteübergreifend einsehbar. Favoriten sind lokal, Änderungen benötigen den Bearbeitungscode. OCR bleibt ausgeschaltet.","Shared values are visible on all devices. Favorites stay local; editing requires the code. OCR remains disabled.","Les valeurs sont partagées entre appareils. Les favoris restent locaux et la modification nécessite le code. La reconnaissance OCR reste désactivée.","Los valores se comparten entre dispositivos. Los favoritos quedan en este equipo y editar requiere el código. OCR sigue desactivado."],
+["Gemeinsame Profile können angesehen werden. Änderungen sind mit einem profilspezifischen Bearbeitungscode geschützt. Deine Favoriten bleiben nur auf diesem Gerät.","Shared profiles are readable. Editing is protected by a profile-specific code. Favorites stay on this device.","Les profils partagés sont consultables. Leur modification nécessite un code spécifique. Les favoris restent sur cet appareil.","Los perfiles compartidos se pueden consultar. Editar requiere un código específico del perfil. Los favoritos quedan en este dispositivo."],
 ['Basisstats','Base stats','Statistiques de base','Estadísticas base'],
 ['Ministerbuffs','Minister buffs','Bonus de ministres','Bonificaciones ministeriales'],
 ['Ministerhof wählen: König oder Hochkönig','Choose ministers: King or High King','Choisir la cour : Roi ou Haut Roi','Elegir corte: Rey o Rey Supremo'],
