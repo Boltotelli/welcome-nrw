@@ -281,12 +281,13 @@ jobs:
            highKing:{fc:true,m:true},highKingValues:{}});
           if(old.court!=='highKing'||old.fc!==true||old.m!==true)process.exit(13);
           const page=fs.readFileSync('_site/bear/preview-v3/name-flow.js','utf8');
-          if(!page.includes("range.type='range'")||
+          if(page.includes("range.type='range'")||
+             !page.includes("bear-name-court-option")||
              page.includes("option('ministerBuffCapturedInStats'")||
              page.includes("option('ministerCapacityInBase'")||
              page.includes('Aktive Pet-ATK/LET-Buffs sind bereits in diesen Werten enthalten'))
              process.exit(14);
-          console.log('King/High King slider, confirmed court bonuses, unbuffed-only inputs: PASS');
+          console.log('King/High King two-button slider, confirmed court bonuses, unbuffed-only inputs: PASS');
           NODE
           node --check _site/bear/preview-v3/name-flow.js
           grep -Fq 'Empfohlene Starter' _site/bear/preview-v3/name-flow.js
