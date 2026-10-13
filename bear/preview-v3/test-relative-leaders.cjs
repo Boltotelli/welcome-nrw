@@ -55,7 +55,9 @@ for(const comparison of ['weaker','similar','stronger']){
   assert(output.marches[i].ratio.every(p=>Number.isInteger(p)&&p>=0&&p<=100),
    'Only whole percentages can be selected in Kingshot');
   const p=output.marches[i].ratio,full=row.reduce((a,b)=>a+b,0);
-  const exact=[Math.floor(full*p[0]/100),Math.floor(full*p[1]/100),0];
+  const exact=[Math.floor(full*p[0]/100),
+   p[2]===0?0:Math.floor(full*p[1]/100),0];
+  if(p[2]===0)exact[1]=full-exact[0];
   exact[2]=full-exact[0]-exact[1];
   assert.equal(row.join('/'),exact.join('/'),
    'Displayed integer ratio must correspond to every exact troop quantity');
