@@ -320,24 +320,32 @@ function ministerSection(){
  const selected=v.ministers;
  section.append(title('Ministerbuffs','h3'),
   el('p','bear-name-muted','Die eingetragenen Werte sind immer ungebufft. Ministerboni werden automatisch hinzugefügt.'));
- // Exactly one kingdom source: simple two-position slider.
- const control=el('div','bear-name-court-switch'),left=el('span','', 'König'),
-  right=el('span','', 'Hochkönig');
- const range=el('input','bear-name-court-range');
- range.type='range';range.min='0';range.max='1';range.step='1';
- range.value=selected.court==='highKing'?'1':'0';
- range.setAttribute('aria-label',T('Ministerhof wählen: König oder Hochkönig'));
- range.setAttribute('aria-valuetext',T(selected.court==='highKing'?'Hochkönig':'König'));
+ // Tap/click and keyboard-friendly, two-position switch. Native range
+ // was previously re-rendered during its INPUT event, interrupting
+ // pointer dragging on mobile. Clickable buttons do not have that race.
+ const control=el('div','bear-name-court-switch');
+ control.setAttribute('role','group');
+ control.setAttribute('aria-label',T('Ministerhof wählen: König oder Hochkönig'));
+ const track=el('span','bear-name-court-thumb');
+ track.setAttribute('aria-hidden','true');
  const setCourt=court=>{
   if(selected.court===court)return;
-  selected.court=court;saveLocal();render();
+  selected.court=court;
+  saveLocal(); // invalidates the prior formations and saves this name
+  const replacement=ministerSection();
+  if(section.isConnected)section.replaceWith(replacement);
+  else render();
  };
- range.addEventListener('input',()=>setCourt(range.value==='1'?'highKing':'king'));
- left.addEventListener('click',()=>setCourt('king'));
- right.addEventListener('click',()=>setCourt('highKing'));
- left.classList.toggle('active',selected.court==='king');
- right.classList.toggle('active',selected.court==='highKing');
- control.append(left,range,right);section.append(control);
+ for(const [court,label] of [['king','König'],['highKing','Hochkönig']]){
+  const option=button(label,()=>setCourt(court),'bear-name-court-option');
+  option.setAttribute('aria-pressed',selected.court===court?'true':'false');
+  option.classList.toggle('active',selected.court===court);
+  option.dataset.court=court;
+  control.append(option);
+ }
+ control.append(track);
+ control.dataset.court=selected.court;
+ section.append(control);
  const buff=window.NRW_BEAR_MINISTERS?.metadata?.[selected.court]||
   (selected.court==='king'?{fcLethality:10,marshalAttack:5,marshalCapacity:2500}:
    {fcLethality:15,marshalAttack:8,marshalCapacity:3750});
@@ -348,20 +356,18 @@ function ministerSection(){
  ]){
   const label=el('label','bear-name-minister-role'),input=el('input');
   input.type='checkbox';input.checked=selected[role]===true;
-  input.addEventListener('change',()=>{selected[role]=input.checked;saveLocal();
+  input.addEventListener('change',()=>{
+   selected[role]=input.checked;
+   saveLocal();
    label.classList.toggle('selected',input.checked);
   });
   label.classList.toggle('selected',input.checked);
-  // Real game artwork is deliberately not fabricated or mislabelled.
-  // Game screenshot exports can be bundled as these exact assets.
   const art=el('span','bear-name-minister-art'),image=el('img');
-  const fallback=el('span','bear-name-minister-art-placeholder',role.toUpperCase());
-  image.src='./assets/minister-'+(role==='fc'?'field-commander':'marshal')+'.webp';
-  image.alt=role==='fc'?'Field Commander':'Marshal';
+  image.src=role==='fc'?'./assets/minister-field-commander.webp':
+   './assets/minister-marshal.webp';
+  image.alt=role==='fc'?T('FC · Schwerter'):T('M · Faust');
   image.loading='lazy';
-  image.addEventListener('load',()=>fallback.hidden=true);
-  image.addEventListener('error',()=>{image.hidden=true;fallback.hidden=false;});
-  art.append(image,fallback);
+  art.append(image);
   const copy=el('span','bear-name-minister-info');
   copy.append(el('strong','',titleText),el('small','',bonus));
   label.append(input,art,copy);rows.append(label);
