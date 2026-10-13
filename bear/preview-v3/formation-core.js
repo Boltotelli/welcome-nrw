@@ -352,14 +352,8 @@ function playableProjection(desired,stock,capacities,weights){
  const percents=desired.map((row,i)=>{
   const p=integerPercentages(row);
   if(!size[i])return p;
-  // 0.45% Infantry with 858 units is NOT a selectable 0.45% input.
-  // Use a 1% step when a troop type was positively selected, or
-  // allow a real 0% with zero units when inventory is insufficient.
-  for(let k=0;k<3;k++)if(row[k]>0&&p[k]===0){
-   const donors=[0,1,2].filter(j=>j!==k&&p[j]>1)
-    .sort((a,b)=>p[b]-p[a]||a-b);
-   if(donors.length){p[donors[0]]--;p[k]++;}
-  }
+  // Whole game percentages can round a tiny troop class to 0%.
+  // Never invent a mandatory 1% troop requirement.
   return p;
  });
  const make=(i,n=size[i],p=percents[i])=>composition(n,p[0],p[1]);
@@ -420,6 +414,43 @@ function playableProjection(desired,stock,capacities,weights){
   }
   if(!best)break;
   size[best.i]=best.low;rows[best.i]=best.next;used=expenditure();
+ }
+ // Post-projection one-point improvements and pairwise stock-safe
+ // exchanges remove avoidable losses from the integer-percentage grid.
+ for(let pass=0;pass<60;pass++){
+  let best=null;
+  const moves=rows.map((row,i)=>{
+   if(size[i]===0)return [];
+   const candidates=[];
+   for(let from=0;from<3;from++)if(percents[i][from]>0)
+    for(let to=0;to<3;to++)if(to!==from&&percents[i][to]<100){
+     const p=percents[i].slice();p[from]--;p[to]++;
+     candidates.push({p,row:make(i,size[i],p)});
+    }
+   return candidates;
+  });
+  function consider(indices,moved){
+   const totals=used.slice();
+   let gain=0;
+   for(let a=0;a<indices.length;a++){
+    const i=indices[a],r=moved[a].row;
+    gain+=scoreFor(r,weights[i])-scoreFor(rows[i],weights[i]);
+    for(let k=0;k<3;k++)totals[k]+=r[k]-rows[i][k];
+   }
+   if(gain<=1e-8||totals.some((n,k)=>n>stock[k]))return;
+   if(!best||gain>best.gain+1e-8)best={indices,moved,totals,gain};
+  }
+  for(let i=0;i<moves.length;i++)for(const candidate of moves[i])
+   consider([i],[candidate]);
+  for(let i=0;i<moves.length;i++)for(let j=i+1;j<moves.length;j++)
+   for(const c1 of moves[i])for(const c2 of moves[j])
+    consider([i,j],[c1,c2]);
+  if(!best)break;
+  for(let a=0;a<best.indices.length;a++){
+   const i=best.indices[a],next=best.moved[a];
+   rows[i]=next.row;percents[i]=next.p;
+  }
+  used=best.totals;
  }
  for(let i=0;i<rows.length;i++){
   const p=percents[i],r=rows[i];
