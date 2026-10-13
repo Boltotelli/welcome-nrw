@@ -326,6 +326,7 @@ jobs:
           node --check _site/bear/preview-v3/test-priority-joiner.cjs
           node _site/bear/preview-v3/test-priority-joiner.cjs
           grep -Fq 'JOIN_STANDARD=Object.freeze([5,15,80])' _site/bear/preview-v3/formation-core.js
+          grep -Fq 'needsPinMigration=remote.profile.pinSetupRequired===true' _site/bear/preview-v3/name-flow.js
           grep -Fq 'function requestNumericPin(create)' _site/bear/preview-v3/name-flow.js
           grep -Fq 'playableProjection(rows,inventory,caps,weights,{preserveAllocation:true})' _site/bear/preview-v3/formation-core.js
           grep -Fq 'profile-service.js?v=20261013-priority-pin-2' _site/bear/preview-v3.html
