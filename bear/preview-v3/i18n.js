@@ -5,6 +5,17 @@
 'use strict';
 const table=[
 ['Deine Helden','Your heroes','Tes héros','Tus héroes'],
+['Ministerbuffs','Minister buffs','Bonus de ministres','Bonificaciones ministeriales'],
+['Ministerhof wählen: König oder Hochkönig','Choose ministers: King or High King','Choisir la cour : Roi ou Haut Roi','Elegir corte: Rey o Rey Supremo'],
+['König','King','Roi','Rey'],
+['Hochkönig','High King','Haut Roi','Rey Supremo'],
+['Schwadronskapazität','Squad capacity','Capacité d’escouade','Capacidad del escuadrón'],
+['Angriff','Attack','Attaque','Ataque'],
+['Tödlichkeit','Lethality','Létalité','Letalidad'],
+['Die eingetragenen Werte sind immer ungebufft. Ministerboni werden automatisch hinzugefügt.','Enter unbuffed values only. Minister bonuses are added automatically.','Entre uniquement les valeurs sans bonus. Les bonus ministériels sont ajoutés automatiquement.','Introduce solo valores sin bonificaciones. Los bonus ministeriales se añaden automáticamente.'],
+['Pet- und Valora-Boni werden zu den ungebufften Basiswerten addiert.','Pet and Valora bonuses are added to unbuffed base stats.','Les bonus des animaux et de Valora sont ajoutés aux stats sans bonus.','Las bonificaciones de mascotas y Valora se suman a los valores base sin bonus.'],
+['Bitte ausschließlich ungebuffte Grundwerte eintragen. Fehlende Werte bleiben offen.','Enter unbuffed base stats only. Missing values are left blank.','Entre uniquement les stats de base sans bonus. Les valeurs manquantes restent vides.','Introduce solo estadísticas base sin bonificaciones. Los valores desconocidos quedan vacíos.'],
+
 ['Hochkönig FC · Tödlichkeit %','High King FC · Lethality %','Haut Roi FC · Létalité %','Rey Supremo FC · Letalidad %'],
 ['Hochkönig M · Angriff %','High King M · Attack %','Haut Roi M · Attaque %','Rey Supremo M · Ataque %'],
 ['Hochkönig M · Kapazität','High King M · Capacity','Haut Roi M · Capacité','Rey Supremo M · Capacidad'],
