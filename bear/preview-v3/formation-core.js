@@ -377,6 +377,27 @@ function playableProjection(desired,stock,capacities,weights,options={}){
       Math.max(1,Math.ceil((used[k]-stock[k])*100/percents[i][k])));
     consider(i,size[i]-dec,percents[i]);
    }
+  if(!choice&&options.preserveAllocation){
+   // The initial inventory allocation may be too small to express with
+   // whole game percentages. If no 1%-point swap stays within its reserved
+   // Archer quota, shorten the march by the smallest necessary quantity.
+   // Binary search works because every troop count is monotone with size.
+   for(let i=0;i<size.length;i++)if(size[i]>0){
+    const other=used.map((v,k)=>v-rows[i][k]);
+    const legal=n=>{
+     const next=make(i,n,percents[i]);
+     return next[2]<=desired[i][2]&&
+      shortage(other.map((v,k)=>v+next[k]))<currentShort;
+    };
+    if(!legal(0))continue;
+    let lo=0,hi=size[i]-1;
+    while(lo<hi){
+     const mid=Math.floor((lo+hi+1)/2);
+     if(legal(mid))lo=mid;else hi=mid-1;
+    }
+    consider(i,lo,percents[i]);
+   }
+  }
   if(!choice)throw Error('Cannot fit integer percentages to shared inventory');
   size[choice.i]=choice.newSize;percents[choice.i]=choice.p;
   rows[choice.i]=choice.next;used=choice.nextUsed;currentShort=choice.smaller;
