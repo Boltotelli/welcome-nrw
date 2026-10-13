@@ -265,3 +265,13 @@ body.bear-name-mode>*:not(#bearNewApp){display:none!important}
 .bear-name-history-open{flex:1}
 .bear-name-history-row .bear-name-favorite-btn{flex:none}
 @media(max-width:530px){.bear-name-top{gap:7px}.bear-name-identity{flex-basis:60%}.bear-name-identity h2{font-size:20px}.bear-name-search-item{flex-wrap:wrap}}
+
+/* Owner-chosen masked 4–6-digit editing PIN. */
+.bear-name-pin-backdrop{position:fixed;inset:0;z-index:9000;display:grid;place-items:center;padding:16px;background:rgba(4,10,18,.83)}
+.bear-name-pin-dialog{width:min(100%,410px);padding:22px;border:1px solid #e4b978;border-radius:18px;display:grid;gap:13px;background:#20334b;color:#f5eee0;box-shadow:0 25px 70px #0009}
+.bear-name-pin-dialog h3{margin:0;color:#ffd78c;font-size:20px}
+.bear-name-pin-dialog .bear-name-muted{margin:0}
+.bear-name-pin-input{width:100%;max-width:100%;font:inherit;font-size:22px!important;letter-spacing:.12em;border:1px solid #8191ad;border-radius:12px;padding:13px;background:#111e30;color:#fff}
+.bear-name-pin-input:focus-visible{outline:2px solid #ffd78c}
+.bear-name-pin-error{margin:0;min-height:18px;color:#ffbcae;font-size:13px}
+.bear-name-pin-actions{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
