@@ -247,3 +247,21 @@ body.bear-name-mode>*:not(#bearNewApp){display:none!important}
 @media(prefers-reduced-motion:reduce){
  .bear-name-court-thumb,.bear-name-court-option{transition:none}
 }
+
+/* Player avatars from cached API identity; locally bookmarked profiles. */
+.bear-name-identity{display:flex;align-items:center;gap:9px;min-width:0;flex:1}
+.bear-name-identity h2{margin:0;overflow-wrap:anywhere}
+.bear-name-profile-image{width:42px;height:42px;border:1px solid #8e7959;border-radius:11px;object-fit:cover;background:#132238;flex:none}
+.bear-name-profile-image[hidden]{display:none!important}
+.bear-name-favorite-btn{font-size:23px!important;color:#a8b8cd;background:#192b41!important;border:1px solid #5e718a!important;border-radius:11px;min-width:42px;min-height:40px;padding:4px 10px!important;line-height:1}
+.bear-name-favorite-btn.selected{color:#ffcb61!important;border-color:#d19d41!important}
+.bear-name-code-btn{border:1px solid #58708c!important;background:#1b2d43!important;color:#ecdbbd!important;border-radius:9px;padding:9px 12px;font-weight:700}
+.bear-name-search-results{display:grid;gap:5px;max-height:255px;overflow-y:auto}
+.bear-name-search-item,.bear-name-history-open{display:flex;align-items:center;gap:10px;min-width:0;width:100%;text-align:left;background:#20364f;color:#f3e8d6;border:1px solid #4b6480;border-radius:12px;padding:8px 10px}
+.bear-name-search-item .bear-name-profile-image,.bear-name-history-open .bear-name-profile-image{width:36px;height:36px}
+.bear-name-search-item span,.bear-name-history-open span{min-width:0;overflow-wrap:anywhere;flex:1}
+.bear-name-search-item small{color:#afcbe5}
+.bear-name-history-row{display:flex;gap:9px;margin:7px 0;align-items:center}
+.bear-name-history-open{flex:1}
+.bear-name-history-row .bear-name-favorite-btn{flex:none}
+@media(max-width:530px){.bear-name-top{gap:7px}.bear-name-identity{flex-basis:60%}.bear-name-identity h2{font-size:20px}.bear-name-search-item{flex-wrap:wrap}}
