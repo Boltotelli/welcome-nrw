@@ -322,7 +322,7 @@ jobs:
           node _site/bear/preview-v3/test-profile-service.cjs
           grep -Fq 'profile-service.js?v=20261013-profiles-2' _site/bear/preview-v3.html
           grep -Fq 'PROFILES.save' _site/bear/preview-v3/name-flow.js
-          grep -Fq 'PROFILES.toggleFavorite' _site/bear/preview-v3/name-flow.js
+          grep -Fq 'PROFILES?.toggleFavorite' _site/bear/preview-v3/name-flow.js
           grep -Fq 'playerPicture(activePlayer)' _site/bear/preview-v3/name-flow.js
           ! grep -Fq '/api/bear-players' _site/bear/preview-v3/name-flow.js
           grep -Fq 'hero-advisor.js?v=20261013-math1' _site/bear/preview-v3.html
