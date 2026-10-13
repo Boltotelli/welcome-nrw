@@ -50,7 +50,7 @@ function saveLocal(){
  document.getElementById('bearAdvancedResult')?.remove();
  lastResult=null;
  clearTimeout(syncTimer);if(canEdit&&!localOnly)syncTimer=setTimeout(push,1600);
- else if(activePlayer)showStatus('Lokale Änderung – für gemeinsames Speichern wird der Bearbeitungscode benötigt.');
+ else if(activePlayer)showStatus('Lokale Änderung – für gemeinsames Speichern wird deine PIN benötigt.');
 }
 function showStatus(s,error=false){status.textContent=T(s);status.classList.toggle('error',error);}
 function numberField(label,value,onChange,options={}){
@@ -269,11 +269,13 @@ async function openProfile(value){
    if(remote.profile){
     unpack(remote.profile.data);version=remote.profile.revision;
     if(editKey){
-     const permission=await PROFILES.verify(player.id,editKey);
-     canEdit=Boolean(permission.canEdit);
+     try{
+      const permission=await PROFILES.verify(player.id,editKey);
+      canEdit=Boolean(permission.canEdit);
+     }catch(_){canEdit=false;}
     }
     showStatus(canEdit?'Gemeinsames Profil geladen · Bearbeitung erlaubt.':
-     'Gemeinsames Profil geladen · schreibgeschützt. Bearbeitungscode zum Ändern erforderlich.');
+     'Gemeinsames Profil geladen · schreibgeschützt. PIN zum Ändern erforderlich.');
    }else{
     version=null;canEdit=false;editKey=null;
     showStatus('Neues gemeinsames Profil: Bitte eine eigene vier- bis sechsstellige Zahlen-PIN festlegen.');
