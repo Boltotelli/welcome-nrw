@@ -1,4 +1,4 @@
-/* Joiner ratio is an average KINGSHOT generation baseline, not an
+/* Joiner ratio is an explicit NRW 5/15/80 preset, not an
  * optimization of unobservable foreign rally-leader combat stats. */
 const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
 const root={window:{},Math,console};root.window.window=root.window;
@@ -11,13 +11,13 @@ const catalog={heroes:[...Array.from({length:16},(_,i)=>({name:'old'+i})),
  ...Array.from({length:18},(_,i)=>({name:'new'+i}))]};
 const age=(names,kingdomGeneration)=>f.joinerBaseline({
  v2:{scannedOwnedHeroes:names,kingdomGeneration}},catalog).proportions;
-assert.equal(age(['old1']).join('/'),'1/10/89',
+assert.equal(age(['old1']).join('/'),'5/15/80',
  'Old-generation mini-account must not force a Gen1 joiner ratio on modern #1044');
-assert.equal(age(['new15']).join('/'),'1/10/89');
-assert.equal(age([],1).join('/'),'10/30/60');
-assert.equal(age([],2).join('/'),'10/20/70');
-assert.equal(age([],3).join('/'),'10/10/80');
-assert.equal(age([],8).join('/'),'1/10/89');
+assert.equal(age(['new15']).join('/'),'5/15/80');
+assert.equal(age([],1).join('/'),'5/15/80');
+assert.equal(age([],2).join('/'),'5/15/80');
+assert.equal(age([],3).join('/'),'5/15/80');
+assert.equal(age([],8).join('/'),'5/15/80');
 const targets=Array(7).fill(180000),base=age(['new6']);
 const allocate=(stock,t=targets)=>{
  const ratios=t.map(x=>f.ratioForTarget(x,base));
@@ -30,14 +30,14 @@ const allocate=(stock,t=targets)=>{
  return rows;
 };
 const full=allocate([400000,400000,1400000]);
-assert.equal(f.integerPercentages(full[1]).join('/'),'1/10/89',
- 'Gen4+ baseline is 1/10/89; no unverified 5k attacker Infantry requirement');
+assert.equal(f.integerPercentages(full[1]).join('/'),'5/15/80',
+ 'Configured NRW Joiner baseline is 5/15/80; no forced 5k infantry');
 assert.equal(f.ratioForTarget(190810,[1,10,89])[0] < 2,true,
  'Do not reinterpret the 5k defending Bear troops as an attacker minimum');
 const scarce=allocate([650000,650000,450000]);
 const joinsArchers=scarce.slice(1).reduce((n,row)=>n+row[2],0);
 assert(joinsArchers>=scarce[0][2],'Archer scarcity must favor joins');
-assert(scarce.slice(1).some(r=>f.integerPercentages(r)[2]!==89),
+assert(scarce.slice(1).some(r=>f.integerPercentages(r)[2]!==80),
  'Not enough archers to keep baseline on all joins');
 allocate([700000,700000,0],Array(3).fill(180000));
 allocate([100000,150000,800000],[180000]);
