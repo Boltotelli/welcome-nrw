@@ -4,7 +4,11 @@
   "rewrites": [
     {
       "source": "/bear",
-      "destination": "/bear/index.html"
+      "destination": "/bear/preview-v3.html"
+    },
+    {
+      "source": "/bear/",
+      "destination": "/bear/preview-v3.html"
     },
     {
       "source": "/bear/examples/:file",
