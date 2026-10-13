@@ -348,6 +348,10 @@ function playableProjection(desired,stock,capacities,weights,options={}){
   let choice=null;
   function consider(i,newSize,p){
    const next=make(i,newSize,p);
+   // A fixed 5/15/80 Joiner reservation must not be undermined during
+   // percentage fitting: a lower-priority Starter cannot receive any
+   // Archer units originally reserved for the Joiners.
+   if(options.preserveAllocation && next[2]>desired[i][2])return;
    const nextUsed=used.map((v,k)=>v-rows[i][k]+next[k]);
    const smaller=shortage(nextUsed);
    const benefit=currentShort-smaller;
