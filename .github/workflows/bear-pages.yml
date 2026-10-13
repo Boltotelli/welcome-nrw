@@ -249,23 +249,36 @@ jobs:
           grep -Fq "bear-name-languages" _site/bear/preview-v3/name-flow.js
           grep -Fq "nrw_page_lang" _site/bear/preview-v3/i18n.js
           node --check _site/bear/minister-buffs.js
-          grep -Fq '<script src="./minister-buffs.js?v=20261013-1"></script>' _site/bear/preview-v3.html
+          grep -Fq '<script src="./minister-buffs.js?v=20261013-2"></script>' _site/bear/preview-v3.html
           grep -Fq 'function ministerSection()' _site/bear/preview-v3/name-flow.js
           grep -Fq 'function troopUtilization(plan)' _site/bear/preview-v3/name-flow.js
           node - <<'NODE'
           const fs=require('node:fs'),vm=require('node:vm');
           const w={};
           vm.runInNewContext(fs.readFileSync('_site/bear/minister-buffs.js','utf8'),{window:w});
-          const f=w.NRW_BEAR_MINISTERS;
-          const mk=(king,highKing,highKingValues)=>({v2:{ministers:{king,highKing,highKingValues}}});
-          const king=f.derived(mk({fc:true,m:true},{},{}));
-          if(king.attack!==5||king.lethality!==10||king.capacity!==2500)process.exit(10);
-          const unknown=f.derived(mk({},{fc:true,m:true},{}));
-          if(!unknown.unconfirmedHighKing||unknown.attack||unknown.lethality||unknown.capacity)process.exit(11);
-          const high=f.derived(mk({fc:true,m:true},{fc:true,m:true},
-           {fcLethality:15,marshalAttack:10,marshalCapacity:3500}));
-          if(high.attack!==10||high.lethality!==15||high.capacity!==3500)process.exit(12);
-          console.log('Minister King/High King FC/M and no-double-count: PASS');
+          const module=w.NRW_BEAR_MINISTERS;
+          const expectation={king:[10,5,2500],highKing:[15,8,3750]};
+          for(const court of ['king','highKing']){
+           for(const fc of [false,true])for(const m of [false,true]){
+            const model={v2:{ministers:{court,fc,m}}};
+            const buff=module.derived(model),[lethality,attack,cap]=expectation[court];
+            if(buff.lethality!==(fc?lethality:0)||
+               buff.attack!==(m?attack:0)||buff.capacity!==(m?cap:0))
+               process.exit(11);
+            const a=module.applyStats(model,{iAtk:100,iLet:200,cAtk:300,cLet:400,aAtk:500,aLet:600});
+            if(a.aLet!==600+buff.lethality||a.cAtk!==300+buff.attack)process.exit(12);
+           }
+          }
+          const old=module.normalized({king:{fc:false,m:false},
+           highKing:{fc:true,m:true},highKingValues:{}});
+          if(old.court!=='highKing'||old.fc!==true||old.m!==true)process.exit(13);
+          const page=fs.readFileSync('_site/bear/preview-v3/name-flow.js','utf8');
+          if(!page.includes("range.type='range'")||
+             page.includes("option('ministerBuffCapturedInStats'")||
+             page.includes("option('ministerCapacityInBase'")||
+             page.includes('Aktive Pet-ATK/LET-Buffs sind bereits in diesen Werten enthalten'))
+             process.exit(14);
+          console.log('King/High King slider, confirmed court bonuses, unbuffed-only inputs: PASS');
           NODE
           node --check _site/bear/preview-v3/name-flow.js
           grep -Fq 'Empfohlene Starter' _site/bear/preview-v3/name-flow.js
@@ -297,7 +310,7 @@ jobs:
           echo 'Validated: two views share one computed plan, all ratios game-selectable whole percentages, no forced 5000 Infantry.'
           grep -Fq 'preview-v3/joiner-skills.js' _site/bear/preview-v3.html
           grep -Fq 'formation-core.js?v=20261012-24' _site/bear/preview-v3.html
-          grep -Fq 'name-flow.js?v=20261013-1' _site/bear/preview-v3.html
+          grep -Fq 'name-flow.js?v=20261013-2' _site/bear/preview-v3.html
           node --check _site/bear/preview-v3/formation-core.js
           node --check _site/bear/preview-v3/combat.js
           test -s _site/bear/preview-v3.html
