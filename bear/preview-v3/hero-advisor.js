@@ -92,47 +92,65 @@ function skillToEffect(skill,skillLevel){
  }else return {unknown:true,name:skill.name,reason:kind};
  return {...effect,name:skill.name,skillLevel,expected:chance!==1};
 }
-function modelContext(model,combat){
- const v=model?.values||{},ext=model?.v2||{};
- const levels=combat?.configure?.(ext);
- const stat={};
- for(const k of ['iAtk','iLet','cAtk','cLet','aAtk','aLet'])stat[k]=valid(v[k],0,10000);
+// Starter hero ranking uses the same per-class attack/lethality context as
+// the formation optimizer, never an embedded 5/18/77 ratio prior.
+function modelContext(model,combat,ratioOverride){
+ const v=root.NRW_BEAR_OWN_BASELINE?.currentStats?.(model)||model?.values||{},
+  ext=model?.v2||{},levels=combat?.configure?.(ext),stat={};
+ for(const k of ['iAtk','iLet','cAtk','cLet','aAtk','aLet'])
+  stat[k]=valid(v[k],0,10000);
+ const knownStats=Object.values(stat).every(n=>n!==null);
+ const tierAttack=classes.map((type,i)=>{
+  const lvl=levels?.[i],groups=lvl?.groups;
+  if(Array.isArray(groups)&&groups.length){
+   const total=groups.reduce((n,g)=>n+Number(g.count||0),0);
+   if(total>0){
+    const mean=groups.reduce((n,g)=>n+Number(g.count||0)*
+     (combat?.troopAttack?.(type,g.tier,g.tg)||0),0)/total;
+    if(mean>0)return mean;
+   }
+  }
+  return combat?.troopAttack?.(type,lvl?.tier,lvl?.tg)||
+   combat?.troopAttack?.(type,10,0)||[472,1416,1888][i];
+ });
+ const attackKeys=['iAtk','cAtk','aAtk'],lethalityKeys=['iLet','cLet','aLet'];
+ const coeff=tierAttack.map((base,i)=>base*(i===2?1.10:1)*
+  (1+((knownStats?stat[attackKeys[i]]:0)+25)/100)*
+  (1+(knownStats?stat[lethalityKeys[i]]:0)/100));
+ const pow=coeff.map(x=>x*x),totalPow=pow.reduce((n,x)=>n+x,0);
+ const validOverride=Array.isArray(ratioOverride)&&ratioOverride.length===3&&
+  ratioOverride.every(x=>Number.isFinite(Number(x))&&Number(x)>=0)&&
+  ratioOverride.reduce((n,x)=>n+Number(x),0)>0;
+ const proportions=validOverride?ratioOverride.map(Number):pow.map(x=>100*x/totalPow);
+ const ratioTotal=proportions.reduce((n,x)=>n+x,0);
+ const portions=proportions.map(x=>x/ratioTotal);
  let weights=null,attack=null,lethality=null,mode='illustrative';
- const knownStats=Object.values(stat).every(x=>x!==null);
  if(knownStats&&combat?.ready?.(stat,levels)){
-  // The choice precedes the final formation step. Rank using the published
-  // default 5/18/77 starter candidate, not the inventory stock ratio.
   const total=100000;
-  let counts=[.05,.18,.77].map(r=>Math.round(total*r));
+  let counts=portions.map(r=>Math.round(total*r));
   const stocks=['troopsI','troopsC','troopsA'].map(k=>valid(v[k],0,999999999));
   if(stocks.every(x=>x!==null)){
    counts=counts.map((n,i)=>Math.min(n,stocks[i]));
-   if(counts.every(x=>x===0))counts=[5000,18000,77000];
+   if(counts.every(x=>x===0))counts=portions.map(r=>Math.round(total*r));
   }
   const breakdown=combat.breakdown?.(counts,stat,levels,5);
   if(breakdown?.totalTenRounds>0){
    weights=breakdown.types.map(t=>t.damageTenRounds/breakdown.totalTenRounds);
    attack=breakdown.types.map(t=>t.appliedAttackPct);
    lethality=breakdown.types.map(t=>t.lethalityPct);
-   mode='measured-class-stats-provisional-5-18-77';
+   mode='measured-class-stats-dynamic-ratio';
   }
  }
- // Honest fallback if the import lacks T/TG or combat bonuses:
- // no undocumented hero skill priorities, but say the ratio is provisional.
  if(!weights){
-  const troopAttack=combat?.troopAttack;
-  const proxy=[.05,.18,.77].map((ratio,i)=>{
-   const power=typeof troopAttack==='function'?
-    troopAttack(classes[i],10,0):[472,1416,1888][i];
-   return Math.sqrt(ratio)*(power??[472,1416,1888][i])*(i===2?1.1:1);
-  });
-  const sum=proxy.reduce((a,b)=>a+b,0);
+  const proxy=portions.map((portion,i)=>Math.sqrt(Math.max(0,portion))*
+   tierAttack[i]*(i===2?1.10:1));
+  const sum=proxy.reduce((a,b)=>a+b,0)||1;
   weights=proxy.map(n=>n/sum);
-  attack=['iAtk','cAtk','aAtk'].map(k=>stat[k]??0);
-  lethality=['iLet','cLet','aLet'].map(k=>stat[k]??0);
+  attack=attackKeys.map(k=>stat[k]??0);
+  lethality=lethalityKeys.map(k=>stat[k]??0);
  }
  return {weights,attack,lethality,mode,
-  ratio:[5,18,77],fromStats:mode!=='illustrative'};
+  ratio:proportions,fromStats:mode!=='illustrative'};
 }
 function evaluate(hero,type,priorities,referenceGet,widgetGet,context){
  const stars=valid(hero.stars,0,5),tier=valid(hero.tier,0,5);
