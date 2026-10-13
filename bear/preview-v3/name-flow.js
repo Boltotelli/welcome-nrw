@@ -230,7 +230,7 @@ function legacyNameId(value){
 }
 async function openProfile(value){
  const sequence=++opening;
- clearTimeout(syncTimer);cachedFormationPlan=null;dirty=false;canEdit=false;
+ clearTimeout(syncTimer);cachedFormationPlan=null;dirty=false;canEdit=false;version=null;
  let player=typeof value==='object'&&value?value:null;
  const requested=(player?.name||String(value||'')).trim().replace(/\s+/g,' ');
  if(!valid(requested)){showStatus('Bitte einen Namen mit mindestens zwei Zeichen eingeben.',true);return;}
@@ -275,10 +275,8 @@ async function openProfile(value){
     showStatus(canEdit?'Gemeinsames Profil geladen · Bearbeitung erlaubt.':
      'Gemeinsames Profil geladen · schreibgeschützt. Bearbeitungscode zum Ändern erforderlich.');
    }else{
-    version=null;canEdit=true;
-    editKey=editKey||PROFILES.newEditKey();
-    PROFILES.storeEditKey(player.id,editKey);
-    showStatus('Neues gemeinsames Profil: Deine Änderungen werden mit einem lokalen Bearbeitungscode geschützt.');
+    version=null;canEdit=false;editKey=null;
+    showStatus('Neues gemeinsames Profil: Bitte eine eigene vier- bis sechsstellige Zahlen-PIN festlegen.');
    }
    PROFILES.remember(activePlayer);
   }catch(_){
@@ -302,28 +300,83 @@ async function push(){
    showStatus('✓ Gemeinsam gespeichert · Version '+version);
   }
  }catch(err){
-  if(err?.status===403){canEdit=false;showStatus('Bearbeitungscode ungültig. Änderungen bleiben lokal.',true);}
+  if(err?.status===403){canEdit=false;showStatus('PIN nicht gültig. Änderungen bleiben lokal.',true);}
+  else if(err?.status===429){canEdit=false;showStatus('Zu viele Fehlversuche. Bitte nach Ablauf der PIN-Sperre erneut versuchen.',true);}
   else if(err?.status===409)showStatus('Profil wurde inzwischen auf einem anderen Gerät aktualisiert. Bitte neu öffnen und Änderungen vergleichen.',true);
   else showStatus('Online-Speicherung fehlgeschlagen. Änderungen bleiben lokal.',true);
  }finally{syncInFlight=false;}
 }
+// Masked PIN setup/unlock UI: a leading zero is meaningful.
+function requestNumericPin(create){
+ return new Promise(resolve=>{
+  const overlay=el('div','bear-name-pin-backdrop');
+  const panel=el('form','bear-name-pin-dialog');
+  panel.setAttribute('role','dialog');panel.setAttribute('aria-modal','true');
+  panel.setAttribute('aria-label',create?'PIN festlegen':'PIN eingeben');
+  panel.append(title(create?'Bearbeitungs-PIN festlegen':'Bearbeitungs-PIN eingeben','h3'),
+   el('p','bear-name-muted','4 bis 6 Ziffern. Die PIN wird für dieses Spielerprofil verwendet und darf nicht weitergegeben werden.'));
+  const secret=el('input','bear-name-pin-input');
+  secret.type='password';secret.inputMode='numeric';secret.pattern='[0-9]{4,6}';
+  secret.minLength=4;secret.maxLength=6;secret.autocomplete='off';
+  secret.placeholder='••••';secret.required=true;
+  secret.setAttribute('aria-label','4 bis 6 Ziffern');
+  panel.append(secret);
+  let repeat=null;
+  if(create){
+   repeat=el('input','bear-name-pin-input');repeat.type='password';
+   repeat.inputMode='numeric';repeat.pattern='[0-9]{4,6}';
+   repeat.minLength=4;repeat.maxLength=6;repeat.autocomplete='off';
+   repeat.placeholder='PIN wiederholen';repeat.required=true;
+   repeat.setAttribute('aria-label','PIN wiederholen');
+   panel.append(repeat);
+  }
+  const message=el('p','bear-name-pin-error');
+  message.setAttribute('aria-live','polite');panel.append(message);
+  const actions=el('div','bear-name-pin-actions');
+  const cancel=button('Abbrechen',()=>finish(null));
+  cancel.type='button';
+  const confirm=button(create?'PIN festlegen':'Freischalten',()=>{},'bear-name-btn primary');
+  confirm.type='submit';
+  actions.append(cancel,confirm);panel.append(actions);
+  const finish=value=>{
+   document.removeEventListener('keydown',escape);
+   overlay.remove();resolve(value);
+  };
+  const escape=e=>{if(e.key==='Escape'){e.preventDefault();finish(null);}};
+  panel.addEventListener('submit',e=>{
+   e.preventDefault();
+   const pin=secret.value;
+   if(!/^\d{4,6}$/.test(pin)){message.textContent='Nur 4 bis 6 Ziffern erlaubt.';return;}
+   if(create&&repeat.value!==pin){message.textContent='Die beiden PINs stimmen nicht überein.';return;}
+   finish(pin);
+  });
+  overlay.append(panel);app.append(overlay);
+  document.addEventListener('keydown',escape);
+  secret.focus();
+ });
+}
 async function unlockProfile(){
  if(!activePlayer?.id||!PROFILES)return;
- const code=window.prompt('64-stelligen Bearbeitungscode für '+name+' eingeben:');
- if(code===null)return;
- if(!/^[a-f0-9]{64}$/i.test(code.trim())){showStatus('Ungültiger Bearbeitungscode.',true);return;}
+ const profileId=activePlayer.id,isNew=version===null;
+ const pin=await requestNumericPin(isNew);
+ if(pin===null||activePlayer?.id!==profileId)return;
  try{
-  const r=await PROFILES.verify(activePlayer.id,code.trim());
-  if(!r.canEdit){showStatus('Dieser Bearbeitungscode ist nicht gültig.',true);return;}
-  editKey=code.trim().toLowerCase();PROFILES.storeEditKey(activePlayer.id,editKey);
-  canEdit=true;render();showStatus('Bearbeitung freigeschaltet. Änderungen werden gemeinsam gespeichert.');
- }catch(_){showStatus('Berechtigung konnte nicht geprüft werden.',true);}
-}
-async function copyEditCode(){
- if(!canEdit||!editKey||!activePlayer?.id)return;
- try{await navigator.clipboard.writeText(editKey);
-  showStatus('Bearbeitungscode kopiert. Nur mit vertrauenswürdigen Mitspielern teilen.');
- }catch(_){showStatus('Kopieren im Browser nicht verfügbar. Bitte sichere Clipboard-Berechtigung prüfen.',true);}
+  if(!isNew){
+   const r=await PROFILES.verify(profileId,pin);
+   if(!r.canEdit){showStatus('Falsche PIN.',true);return;}
+  }
+  editKey=pin;PROFILES.storeEditKey(profileId,pin);
+  canEdit=true;render();
+  if(isNew){
+   // Claim the profile once, even if the owner has made no edits yet.
+   dirty=true;editCount++;await push();
+  }else showStatus('✓ Profil mit deiner PIN freigeschaltet.');
+ }catch(err){
+  if(err?.status===429){
+   const minutes=Math.max(1,Math.ceil(Number(err.retryAfterSeconds||1800)/60));
+   showStatus('Nach fünf falschen PIN-Versuchen vorübergehend gesperrt ('+minutes+' Min.).',true);
+  }else showStatus('PIN-Prüfung fehlgeschlagen. Änderungen bleiben lokal.',true);
+ }
 }
 async function leaveProfile(){
  clearTimeout(syncTimer);
@@ -958,7 +1011,7 @@ function landing(){
   if(valid(input.value))openProfile(input.value);
   else showStatus('Bitte einen Namen mit mindestens zwei Zeichen eingeben.',true);
  },'bear-name-btn primary'));
- head.append(el('p','bear-name-muted','Gemeinsame Profile können angesehen werden. Änderungen sind mit einem profilspezifischen Bearbeitungscode geschützt. Deine Favoriten bleiben nur auf diesem Gerät.'));
+ head.append(el('p','bear-name-muted','Gemeinsame Profile sind einsehbar. Bearbeiten kannst du sie mit einer selbst gewählten 4- bis 6-stelligen Zahlen-PIN. Favoriten bleiben lokal.'));
  head.prepend(languageSwitcher());box.append(head);
  const saved=PROFILES?.ordered()||[];
  const legacy=(()=>{
@@ -1002,10 +1055,10 @@ function render(){
  star.setAttribute('aria-label',starred?'Favorit entfernen':'Als Favorit markieren');
  bar.append(star,languageSwitcher());
  if(canEdit&&!localOnly){
-  bar.append(button('Jetzt speichern',async()=>{dirty=true;await push();}),
-   button('🔑 Bearbeitungscode kopieren',copyEditCode,'bear-name-code-btn'));
+  bar.append(button('Jetzt speichern',async()=>{dirty=true;await push();}));
  }else if(activePlayer?.id&&!localOnly)
-  bar.append(button('🔒 Bearbeitung freischalten',unlockProfile,'bear-name-code-btn'));
+  bar.append(button(version===null?'🔐 PIN festlegen':'🔒 PIN eingeben',
+   unlockProfile,'bear-name-code-btn'));
 
  box.append(bar);
  if(!mode){
@@ -1013,7 +1066,7 @@ function render(){
   options.append(title('Was möchtest du optimieren?'),
    button('⚔️ Nur Starter-/Joiner-Helden',()=>{mode='quick';render();},'bear-name-btn primary'),
    button('📈 Erweiterte Schadensoptimierung',()=>{mode='advanced';render();},'bear-name-btn'),
-   el('p','bear-name-muted','Gespeicherte Werte sind geräteübergreifend einsehbar. Favoriten sind lokal, Änderungen benötigen den Bearbeitungscode. OCR bleibt ausgeschaltet.'));
+   el('p','bear-name-muted','Gemeinsame Werte sind geräteübergreifend lesbar. Favoriten bleiben lokal, Änderungen benötigen deine selbst gewählte 4- bis 6-stellige PIN. OCR bleibt ausgeschaltet.'));
   box.append(options);return;
  }
  box.append(button('← Modus wählen',()=>{mode='';render();}));
