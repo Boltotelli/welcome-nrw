@@ -20,7 +20,18 @@ const box=el('div','bear-name-container'),status=el('p','bear-name-status');
 app.append(box,status);
 const title=(txt,tag='h2')=>el(tag,'',txt);
 const button=(txt,fn,cls='bear-name-btn')=>{const b=el('button',cls,txt);b.type='button';b.addEventListener('click',fn);return b;};
-function state(){const m=B.model();m.v2=m.v2||{};m.values=m.values||{};m.v2.manualHeroes=m.v2.manualHeroes||{};m.v2.scannedOwnedHeroes=m.v2.scannedOwnedHeroes||[];return m;}
+function state(){
+ const m=B.model();m.v2=m.v2||{};m.values=m.values||{};
+ m.v2.manualHeroes=m.v2.manualHeroes||{};
+ m.v2.scannedOwnedHeroes=m.v2.scannedOwnedHeroes||[];
+ // Migrate old two-court settings once. Read-only stats are always unbuffed;
+ // no separate "captured already" toggles can survive migration.
+ m.v2.ministers=window.NRW_BEAR_MINISTERS?.normalized?.(m.v2.ministers)||{court:'king',fc:false,m:false};
+ delete m.v2.ministerBuffCapturedInStats;
+ delete m.v2.ministerCapacityInBase;
+ m.v2.petBuffCapturedInStats=false;
+ return m;
+}
 function keyForName(value){return 'nrw_bear_name_edit_v1:'+value.normalize('NFKC').toLowerCase().trim();}
 let cachedFormationPlan=null;
 function currentFormationPlan(){
@@ -151,9 +162,10 @@ function pack(){
  }
  return {heroes,ownHeroes:v.ownHeroes||[],joinCount:v.joinCount||0,
   joinLeaderComparison:v.joinLeaderComparison||'similar',
+  ministers:window.NRW_BEAR_MINISTERS?.normalized?.(v.ministers)||{court:'king',fc:false,m:false},
   troopGroups:v.troopGroups||[],values:m.values||{},combatStatOrigin:v.combatStatOrigin||'combined-report',
   valoraTalent:v.valoraTalent||0,savageAdvantage:v.valora?.[3]||0,
-  petActive:v.petActive||{},petSkillRanks:v.petSkillRanks||{},petBuffCapturedInStats:!!v.petBuffCapturedInStats};
+  petActive:v.petActive||{},petSkillRanks:v.petSkillRanks||{}};
 }
 function unpack(d){
  const m=state(),v=m.v2;v.manualHeroes={};v.scannedOwnedHeroes=[];
@@ -167,9 +179,12 @@ function unpack(d){
  v.joinCount=Math.max(0,Math.min(6,Number(d.joinCount)||0));
  v.joinLeaderComparison=['weaker','similar','stronger'].includes(d.joinLeaderComparison)?
   d.joinLeaderComparison:'similar';
+ v.ministers=window.NRW_BEAR_MINISTERS?.normalized?.(d.ministers)||{court:'king',fc:false,m:false};
+ delete v.ministerBuffCapturedInStats;
+ delete v.ministerCapacityInBase;
  v.troopGroups=d.troopGroups||[];v.troopTiers=[{tier:10,tg:0},{tier:10,tg:0},{tier:10,tg:0}];
  v.valora=[0,0,0,Number(d.savageAdvantage)||0];v.valoraTalent=Number(d.valoraTalent)||0;
- v.petActive=d.petActive||{};v.petSkillRanks=d.petSkillRanks||{};v.petBuffCapturedInStats=!!d.petBuffCapturedInStats;
+ v.petActive=d.petActive||{};v.petSkillRanks=d.petSkillRanks||{};v.petBuffCapturedInStats=false;
  v.combatStatOrigin=d.combatStatOrigin||'combined-report';
  Object.assign(m.values,d.values||{});
  for(const [i,type] of CL.entries())m.values[['troopsI','troopsC','troopsA'][i]]=v.troopGroups.filter(g=>g.type===type).reduce((n,g)=>n+Number(g.count),0);
@@ -300,9 +315,63 @@ function rallyStrengthField(){
    saveLocal();
   });
 }
+function ministerSection(){
+ const v=state().v2,section=el('section','bear-name-ministers');
+ const selected=v.ministers;
+ section.append(title('Ministerbuffs','h3'),
+  el('p','bear-name-muted','Die eingetragenen Werte sind immer ungebufft. Ministerboni werden automatisch hinzugefügt.'));
+ // Exactly one kingdom source: simple two-position slider.
+ const control=el('div','bear-name-court-switch'),left=el('span','', 'König'),
+  right=el('span','', 'Hochkönig');
+ const range=el('input','bear-name-court-range');
+ range.type='range';range.min='0';range.max='1';range.step='1';
+ range.value=selected.court==='highKing'?'1':'0';
+ range.setAttribute('aria-label',T('Ministerhof wählen: König oder Hochkönig'));
+ range.setAttribute('aria-valuetext',T(selected.court==='highKing'?'Hochkönig':'König'));
+ const setCourt=court=>{
+  if(selected.court===court)return;
+  selected.court=court;saveLocal();render();
+ };
+ range.addEventListener('input',()=>setCourt(range.value==='1'?'highKing':'king'));
+ left.addEventListener('click',()=>setCourt('king'));
+ right.addEventListener('click',()=>setCourt('highKing'));
+ left.classList.toggle('active',selected.court==='king');
+ right.classList.toggle('active',selected.court==='highKing');
+ control.append(left,range,right);section.append(control);
+ const buff=window.NRW_BEAR_MINISTERS?.metadata?.[selected.court]||
+  (selected.court==='king'?{fcLethality:10,marshalAttack:5,marshalCapacity:2500}:
+   {fcLethality:15,marshalAttack:8,marshalCapacity:3750});
+ const rows=el('div','bear-name-minister-roles');
+ for(const [role,titleText,bonus] of [
+  ['fc','FC','+'+buff.fcLethality+' % '+T('Tödlichkeit')],
+  ['m','M','+'+buff.marshalAttack+' % '+T('Angriff')+' · +'+num(buff.marshalCapacity)+' '+T('Schwadronskapazität')]
+ ]){
+  const label=el('label','bear-name-minister-role'),input=el('input');
+  input.type='checkbox';input.checked=selected[role]===true;
+  input.addEventListener('change',()=>{selected[role]=input.checked;saveLocal();
+   label.classList.toggle('selected',input.checked);
+  });
+  label.classList.toggle('selected',input.checked);
+  // Real game artwork is deliberately not fabricated or mislabelled.
+  // Game screenshot exports can be bundled as these exact assets.
+  const art=el('span','bear-name-minister-art'),image=el('img');
+  const fallback=el('span','bear-name-minister-art-placeholder',role.toUpperCase());
+  image.src='./assets/minister-'+(role==='fc'?'field-commander':'marshal')+'.webp';
+  image.alt=role==='fc'?'Field Commander':'Marshal';
+  image.loading='lazy';
+  image.addEventListener('load',()=>fallback.hidden=true);
+  image.addEventListener('error',()=>{image.hidden=true;fallback.hidden=false;});
+  art.append(image,fallback);
+  const copy=el('span','bear-name-minister-info');
+  copy.append(el('strong','',titleText),el('small','',bonus));
+  label.append(input,art,copy);rows.append(label);
+ }
+ section.append(rows);
+ return section;
+}
 function scalarSection(){
  const m=state(),v=m.v2,section=el('section','bear-name-panel');
- section.append(title('Basiswerte & aktive Buffs'),el('p','bear-name-muted','Angriff und Tödlichkeit aller Truppentypen aus der Bonusübersicht. Fehlende Werte bleiben offen – keine stillen Schätzungen.'));
+ section.append(title('Basiswerte & aktive Buffs'),el('p','bear-name-muted','Bitte ausschließlich ungebuffte Grundwerte eintragen. Fehlende Werte bleiben offen.'));
  section.append(choose('Anzahl aller Märsche (inkl. eigener Rally)',Array.from({length:7},(_,i)=>[i+1,String(i+1)]),
   Number(v.joinCount||0)+1,x=>{v.joinCount=Number(x)-1;saveLocal();}));
  section.append(rallyStrengthField());
@@ -324,7 +393,7 @@ function scalarSection(){
    },{step:0.1,max:10000}));
   section.append(gr);
  }
- section.append(title('Pets & Valora','h3'));
+ section.append(ministerSection(),title('Pets & Valora','h3'));
  const petGrid=el('div','bear-name-pet-grid');
  v.petActive=v.petActive||{};v.petSkillRanks=v.petSkillRanks||{};
  const assetImg=(url,label)=>{
@@ -394,10 +463,7 @@ function scalarSection(){
  },{min:0,max:11}));
  skillRows.append(savage,hunter);skills.append(skillRows);petGrid.append(skills);
  section.append(petGrid);
- section.append(el('p','bear-name-muted','Aktive Buffs markieren. Die bereits eingetragenen Kampfwerte nicht doppelt erhöhen.'));
-
- const present=el('label','bear-name-pet-line'),ch=el('input');ch.type='checkbox';ch.checked=!!v.petBuffCapturedInStats;ch.onchange=()=>{v.petBuffCapturedInStats=ch.checked;saveLocal();};
- present.append(ch,document.createTextNode(' '+T('Aktive Pet-ATK/LET-Buffs sind bereits in diesen Werten enthalten')));section.append(present);
+ section.append(el('p','bear-name-muted','Pet- und Valora-Boni werden zu den ungebufften Basiswerten addiert.'));
  return section;
 }
 function starterGearSection(picked){
@@ -419,6 +485,34 @@ function starterGearSection(picked){
 }
 // Show complete owned hero portraits and physically feasible troop mixes.
 // The beginner mode can suggest safe ratios without asking for combat stats.
+function troopUtilization(plan){
+ const section=el('section','bear-name-utilization');
+ section.append(title('Truppenauslastung','h3'));
+ const types=['Infanterie','Kavallerie','Bogenschützen'];
+ const total=plan.stock.reduce((a,b)=>a+b,0),used=plan.used.reduce((a,b)=>a+b,0);
+ section.append(el('p','bear-name-util-total',
+  num(used)+' / '+num(total)+' '+T('Truppen eingesetzt')));
+ const overall=el('div','bear-name-util-track');
+ const fill=el('span','bear-name-util-fill');
+ fill.style.width=(total?used/total*100:0).toFixed(2)+'%';
+ overall.append(fill);section.append(overall);
+ const legend=el('div','bear-name-util-legend');
+ legend.append(el('span','',T('Eingesetzt')+' · '+(total?Math.round(used/total*100):0)+' %'),
+  el('span','',T('Restbestand')+' · '+num(total-used)));
+ section.append(legend);
+ for(let k=0;k<3;k++){
+  const available=plan.stock[k],spent=plan.used[k],remain=plan.leftover[k],
+   percent=available?spent/available*100:0;
+  const row=el('div','bear-name-util-row');
+  const head=el('div','bear-name-util-legend');
+  head.append(el('strong','',T(types[k])),el('span','',
+    num(spent)+' / '+num(available)+' · '+T('Rest')+': '+num(remain)));
+  const track=el('div','bear-name-util-track bear-name-util-type-'+k);
+  const bar=el('span','bear-name-util-fill');bar.style.width=percent.toFixed(2)+'%';
+  track.append(bar);row.append(head,track);section.append(row);
+ }
+ return section;
+}
 function formationCards(){
  const section=el('section','bear-name-panel bear-name-formation-result');
  section.id='bearFormationResult';
@@ -478,6 +572,7 @@ function formationCards(){
   article.append(mix);cards.append(article);
  }
  section.append(cards);
+ if(validCap)section.append(troopUtilization(plan));
  if(!validCap){
   section.append(el('p','bear-name-muted',
    capMissing?'Marschkapazität und Truppenbestand ergänzen, damit wir die Formation berechnen können.':
