@@ -32,6 +32,10 @@ function state(){
  delete m.v2.ministerBuffCapturedInStats;
  delete m.v2.ministerCapacityInBase;
  m.v2.petBuffCapturedInStats=false;
+ // NRW V3 always accepts independent Bonus Overview class, squad and hero
+ // values. No user-facing combined/separate toggle: it was too easy to
+ // apply additional skills to already aggregated values.
+ m.v2.combatStatOrigin='separate-overview';
  return m;
 }
 function keyForName(value){return 'nrw_bear_name_edit_v1:'+value.normalize('NFKC').toLowerCase().trim();}
@@ -186,7 +190,7 @@ function pack(){
  return {heroes,ownHeroes:v.ownHeroes||[],joinCount:v.joinCount||0,
   joinLeaderComparison:v.joinLeaderComparison||'similar',
   ministers:window.NRW_BEAR_MINISTERS?.normalized?.(v.ministers)||{court:'king',fc:false,m:false},
-  troopGroups:v.troopGroups||[],values:m.values||{},combatStatOrigin:v.combatStatOrigin||'combined-report',
+  troopGroups:v.troopGroups||[],values:m.values||{},combatStatOrigin:'separate-overview',
   valoraTalent:v.valoraTalent||0,savageAdvantage:v.valora?.[3]||0,
   petActive:v.petActive||{},petSkillRanks:v.petSkillRanks||{}};
 }
@@ -208,7 +212,7 @@ function unpack(d){
  v.troopGroups=d.troopGroups||[];v.troopTiers=[{tier:10,tg:0},{tier:10,tg:0},{tier:10,tg:0}];
  v.valora=[0,0,0,Number(d.savageAdvantage)||0];v.valoraTalent=Number(d.valoraTalent)||0;
  v.petActive=d.petActive||{};v.petSkillRanks=d.petSkillRanks||{};v.petBuffCapturedInStats=false;
- v.combatStatOrigin=d.combatStatOrigin||'combined-report';
+ v.combatStatOrigin='separate-overview';
  // A shared profile is authoritative: do not retain stale local fields
  // when its remote snapshot has intentionally omitted a value.
  m.values={...(d.values||{})};
@@ -571,19 +575,19 @@ function scalarSection(){
    saveLocal();
   },{step:0.1,max:10000}));
  }
- section.append(grid,choose('Herkunft dieser Werte',[['combined-report','Bereits kombinierte Kampfwerte'],['separate-overview','Separate Werte aus Bonusübersicht']],
-  v.combatStatOrigin||'combined-report',x=>{v.combatStatOrigin=x;saveLocal();}));
- if(v.combatStatOrigin==='separate-overview'){
-  const gr=el('div','bear-name-stat-grid');for(const k of ['squadAtk','squadLet'])
-   gr.append(numberField(k==='squadAtk'?'Schwadron Angriff %':'Schwadron Tödlichkeit %',m.values[k],x=>{
-    if(x===null)delete m.values[k];else m.values[k]=x;saveLocal();
-   },{step:0.1,max:10000}));
-  section.append(gr);
- }
+ // The source is permanently "separate-overview". Keep actual squad bonus
+ // inputs visible, but do not show a selector that can misinterpret stats.
+ section.append(grid);
+ const gr=el('div','bear-name-stat-grid');
+ for(const k of ['squadAtk','squadLet'])
+  gr.append(numberField(k==='squadAtk'?'Schwadron Angriff %':'Schwadron Tödlichkeit %',m.values[k],x=>{
+   if(x===null)delete m.values[k];else m.values[k]=x;saveLocal();
+  },{step:0.1,max:10000}));
+ section.append(gr);
  const statsFilled=Number(m.values.cap)>0&&['iAtk','iLet','cAtk','cLet','aAtk','aLet'].every(k=>
   m.values[k]!==null&&m.values[k]!==undefined&&m.values[k]!==''&&Number.isFinite(Number(m.values[k])))&&
-  (v.combatStatOrigin!=='separate-overview'||['squadAtk','squadLet'].every(k=>
-   m.values[k]!==null&&m.values[k]!==undefined&&m.values[k]!==''&&Number.isFinite(Number(m.values[k]))));
+  ['squadAtk','squadLet'].every(k=>
+   m.values[k]!==null&&m.values[k]!==undefined&&m.values[k]!==''&&Number.isFinite(Number(m.values[k])));
  const settings=el('div','bear-name-settings');
  settings.append(foldingPanel('baseStats','Basisstats',section,!statsFilled));
  const petSection=el('div','bear-name-fold-body');
