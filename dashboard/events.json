@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "kingdom": 1044,
   "timezone": "UTC",
-  "updatedAt": "2026-10-13T00:13:16Z",
+  "updatedAt": "2026-10-14T00:15:19Z",
   "events": [
     {
       "id": "golden-glaives-prep-2026-09-20",
@@ -1364,92 +1364,6 @@
       "sourceUrl": "https://centurygames.helpshift.com/hc/en/140-kingshot/section/1501-merchant-empire/"
     },
     {
-      "id": "armament-competition-type1-2026-10-12",
-      "start": "2026-10-12",
-      "end": "2026-10-13",
-      "icon": "🛡️",
-      "iconUrl": "https://kingshotdata.com/uploads/2025/04/city-development-event-icon.webp",
-      "confidence": "public-timeline",
-      "name": {
-        "de": "Rüstungswettbewerb · Handwerkervision",
-        "en": "Armament Competition · Artisan’s Vision",
-        "fr": "Compétition d’armement · Vision d’artisan"
-      },
-      "dailyPlans": {
-        "2026-10-12": {
-          "points": {
-            "de": "Ausrüstung +1: 3 · Truegold: 100 · Truegoldstaub: 50 · Gehärtetes Truegold: 1.500 · Splitter mythisch/episch/selten: 125/50/15 · Meisteremblem: 200 · Manuskript: 2 · 1 Min. Beschleuniger: 1",
-            "en": "Gear +1: 3 · Truegold: 100 · Truegold Dust: 50 · Tempered Truegold: 1,500 · mythic/epic/rare shard: 125/50/15 · Master Emblem: 200 · Manuscript: 2 · 1 min speedup: 1",
-            "fr": "Équipement +1 : 3 · Or véritable : 100 · Poussière : 50 · Or trempé : 1 500 · fragment mythique/épique/rare : 125/50/15 · Emblème : 200 · Manuscrit : 2 · 1 min d’accélération : 1"
-          },
-          "steps": {
-            "de": [
-              "Dieses Event kann vollständig ausgelassen werden; die Belohnungen rechtfertigen den Einsatz von KvK-Ressourcen nicht.",
-              "Truegold, Gehärtetes Truegold, Splitter, Meistermaterialien und Beschleuniger für die KvK-Vorbereitung sparen.",
-              "Wenn du trotzdem Punkte machst, ausschließlich ohnehin geplante Aktionen nutzen und spätestens bei insgesamt 60.000 Punkten stoppen.",
-              "60.000 Punkte sind die strikte 3×-Gesamtgrenze und ausdrücklich keine Empfehlung."
-            ],
-            "en": [
-              "This event can be skipped completely; the rewards do not justify spending KvK resources.",
-              "Save Truegold, Tempered Truegold, shards, Master materials and speedups for KvK preparation.",
-              "If you score anyway, use only actions you already planned and stop at 60,000 total points at the latest.",
-              "60,000 points is the strict 3× total limit and explicitly not a recommendation."
-            ],
-            "fr": [
-              "Cet événement peut être entièrement ignoré ; les récompenses ne justifient pas l’utilisation de ressources KvK.",
-              "Conserve l’Or véritable, l’Or trempé, les fragments, les matériaux de Maître et les accélérateurs pour la préparation KvK.",
-              "Si tu marques malgré tout, utilise uniquement des actions déjà prévues et arrête-toi au plus tard à 60 000 points au total.",
-              "60 000 points constituent la limite totale stricte de 3× et ne sont explicitement pas une recommandation."
-            ]
-          },
-          "limits": {
-            "hardCap": 60000,
-            "note": {
-              "de": "60.000 Punkte sind die strikte 3×-Gesamtgrenze – keine Empfehlung.",
-              "en": "60,000 points is the strict 3× total limit, not a recommendation.",
-              "fr": "60 000 points constituent la limite totale stricte de 3×, pas une recommandation."
-            }
-          }
-        },
-        "2026-10-13": {
-          "points": {
-            "de": "Ausrüstung +1: 3 · Truegold: 100 · Truegoldstaub: 50 · Gehärtetes Truegold: 1.500 · Splitter mythisch/episch/selten: 125/50/15 · Meisteremblem: 200 · Manuskript: 2 · 1 Min. Beschleuniger: 1",
-            "en": "Gear +1: 3 · Truegold: 100 · Truegold Dust: 50 · Tempered Truegold: 1,500 · mythic/epic/rare shard: 125/50/15 · Master Emblem: 200 · Manuscript: 2 · 1 min speedup: 1",
-            "fr": "Équipement +1 : 3 · Or véritable : 100 · Poussière : 50 · Or trempé : 1 500 · fragment mythique/épique/rare : 125/50/15 · Emblème : 200 · Manuscrit : 2 · 1 min d’accélération : 1"
-          },
-          "steps": {
-            "de": [
-              "Dieses Event kann vollständig ausgelassen werden; die Belohnungen rechtfertigen den Einsatz von KvK-Ressourcen nicht.",
-              "Truegold, Gehärtetes Truegold, Splitter, Meistermaterialien und Beschleuniger für die KvK-Vorbereitung sparen.",
-              "Wenn du trotzdem Punkte machst, ausschließlich ohnehin geplante Aktionen nutzen und spätestens bei insgesamt 60.000 Punkten stoppen.",
-              "60.000 Punkte sind die strikte 3×-Gesamtgrenze und ausdrücklich keine Empfehlung."
-            ],
-            "en": [
-              "This event can be skipped completely; the rewards do not justify spending KvK resources.",
-              "Save Truegold, Tempered Truegold, shards, Master materials and speedups for KvK preparation.",
-              "If you score anyway, use only actions you already planned and stop at 60,000 total points at the latest.",
-              "60,000 points is the strict 3× total limit and explicitly not a recommendation."
-            ],
-            "fr": [
-              "Cet événement peut être entièrement ignoré ; les récompenses ne justifient pas l’utilisation de ressources KvK.",
-              "Conserve l’Or véritable, l’Or trempé, les fragments, les matériaux de Maître et les accélérateurs pour la préparation KvK.",
-              "Si tu marques malgré tout, utilise uniquement des actions déjà prévues et arrête-toi au plus tard à 60 000 points au total.",
-              "60 000 points constituent la limite totale stricte de 3× et ne sont explicitement pas une recommandation."
-            ]
-          },
-          "limits": {
-            "hardCap": 60000,
-            "note": {
-              "de": "60.000 Punkte sind die strikte 3×-Gesamtgrenze – keine Empfehlung.",
-              "en": "60,000 points is the strict 3× total limit, not a recommendation.",
-              "fr": "60 000 points constituent la limite totale stricte de 3×, pas une recommandation."
-            }
-          }
-        }
-      },
-      "sourceUrl": "https://kingshotdata.com/events/armament-competition/"
-    },
-    {
       "id": "officer-project-forgehammers-2026-10-14",
       "start": "2026-10-14",
       "end": "2026-10-15",
@@ -1706,6 +1620,365 @@
         }
       },
       "sourceUrl": "https://kingshotdata.com/events/officer-project-event/"
+    },
+    {
+      "id": "golden-glaives-prep-2026-10-18",
+      "start": "2026-10-18",
+      "end": "2026-10-18",
+      "icon": "⚔️",
+      "iconUrl": "https://kingshotdata.com/uploads/2025/05/golden-glaives-event-icon.webp",
+      "confidence": "public-timeline",
+      "name": {
+        "de": "Golden Glaives · Vorbereitung",
+        "en": "Golden Glaives · Preparation",
+        "fr": "Golden Glaives · Préparation"
+      },
+      "dailyPlans": {
+        "2026-10-18": {
+          "points": {
+            "de": "Intel-Missionen für den Start am 19.10. vorbereiten",
+            "en": "Prepare Intel Missions for the 19 Oct start",
+            "fr": "Préparer les missions de renseignement pour le début du 19 octobre"
+          },
+          "steps": {
+            "de": [
+              "00:00 UTC: Intel-Missionen abschließen und Belohnungen abholen.",
+              "08:00 UTC: Intel-Missionen abschließen, Belohnungen aber NICHT abholen.",
+              "16:00 UTC: Intel-Missionen weder abschließen noch abholen. Danach Pans zusätzliche Intel-Mission aktivieren und ebenfalls offen lassen.",
+              "Vor dem Reset nichts von den zurückgehaltenen Missionen abholen. Nach dem Reset zuerst die 08:00-Belohnungen abholen, danach die 16:00- und Pan-Missionen abschließen und abholen."
+            ],
+            "en": [
+              "00:00 UTC: complete Intel Missions and claim rewards.",
+              "08:00 UTC: complete Intel Missions, but do NOT claim rewards.",
+              "16:00 UTC: neither complete nor claim Intel Missions. Then activate Pan’s extra Intel Mission and leave it unfinished as well.",
+              "Do not claim held missions before reset. After reset, first claim the 08:00 rewards, then complete and claim the 16:00 and Pan missions."
+            ],
+            "fr": [
+              "00:00 UTC : termine les missions de renseignement et récupère les récompenses.",
+              "08:00 UTC : termine les missions, mais NE récupère PAS les récompenses.",
+              "16:00 UTC : ne termine ni ne récupère les missions. Active ensuite la mission supplémentaire de Pan et laisse-la également inachevée.",
+              "Ne récupère aucune mission conservée avant le reset. Après le reset, récupère d’abord les récompenses de 08:00, puis termine et récupère les missions de 16:00 et de Pan."
+            ]
+          }
+        }
+      },
+      "sourceUrl": "https://kingshotdata.com/events/golden-glaives-event/"
+    },
+    {
+      "id": "golden-glaives-2026-10-19",
+      "start": "2026-10-19",
+      "end": "2026-10-21",
+      "icon": "⚔️",
+      "iconUrl": "https://kingshotdata.com/uploads/2025/05/golden-glaives-event-icon.webp",
+      "confidence": "public-timeline",
+      "name": {
+        "de": "Golden Glaives",
+        "en": "Golden Glaives",
+        "fr": "Golden Glaives"
+      },
+      "dailyPlans": {
+        "2026-10-19": {
+          "points": {
+            "de": "1 matter Goldstein je regulärer Intel-Mission · 10 je Golden Glaive",
+            "en": "1 Dim Goldstone per regular Intel Mission · 10 per Golden Glaive",
+            "fr": "1 Pierre d’or terne par mission de renseignement · 10 par Golden Glaive"
+          },
+          "steps": {
+            "de": [
+              "Nach dem Reset zuerst die zurückgehaltenen Belohnungen der 08:00-UTC-Missionen abholen.",
+              "Danach die offenen 16:00-UTC-Missionen und Pans zusätzliche Mission abschließen und abholen.",
+              "Anschließend die neuen Intel-Missionen erledigen und Golden Glaives jagen.",
+              "KvK-Ressourcen nur über ohnehin geplante Aktionen einsetzen; NRW-/Discord-Absprachen haben Vorrang."
+            ],
+            "en": [
+              "After reset, first claim the held rewards from the 08:00 UTC missions.",
+              "Then complete and claim the unfinished 16:00 UTC missions and Pan’s extra mission.",
+              "Complete the new Intel Missions afterwards and hunt Golden Glaives.",
+              "Use KvK resources only through actions already planned; NRW/Discord coordination takes priority."
+            ],
+            "fr": [
+              "Après le reset, récupère d’abord les récompenses conservées des missions de 08:00 UTC.",
+              "Termine ensuite les missions de 16:00 UTC et la mission supplémentaire de Pan, puis récupère leurs récompenses.",
+              "Effectue ensuite les nouvelles missions de renseignement et chasse les Golden Glaives.",
+              "N’utilise les ressources KvK que pour des actions déjà prévues ; les consignes NRW/Discord sont prioritaires."
+            ]
+          }
+        },
+        "2026-10-20": {
+          "points": {
+            "de": "Letzter Sammeltag · 1 matter Goldstein je Intel-Mission · 10 je Golden Glaive",
+            "en": "Final collection day · 1 Dim Goldstone per Intel Mission · 10 per Golden Glaive",
+            "fr": "Dernier jour de collecte · 1 Pierre d’or terne par mission · 10 par Golden Glaive"
+          },
+          "steps": {
+            "de": [
+              "Alle neuen Intel-Missionen abschließen und Belohnungen abholen.",
+              "Golden Glaives jagen, solange der Sammeltag aktiv ist.",
+              "Vor dem Reset prüfen, ob noch offene Missionen oder Golden-Glaive-Jagden erledigt werden können.",
+              "Goldsteine noch nicht automatisch verfallen lassen; morgen ist der Einlösetag."
+            ],
+            "en": [
+              "Complete all new Intel Missions and claim their rewards.",
+              "Hunt Golden Glaives while the collection day is active.",
+              "Before reset, check for any unfinished missions or Golden Glaive hunts.",
+              "Do not leave Goldstones unused; tomorrow is the redemption day."
+            ],
+            "fr": [
+              "Termine toutes les nouvelles missions de renseignement et récupère leurs récompenses.",
+              "Chasse les Golden Glaives tant que la collecte est active.",
+              "Avant le reset, vérifie s’il reste des missions ou des chasses à terminer.",
+              "Ne laisse pas les Pierres d’or inutilisées ; demain est le jour d’échange."
+            ]
+          }
+        },
+        "2026-10-21": {
+          "points": {
+            "de": "Einlösetag · keine neuen matten Goldsteine",
+            "en": "Redemption day · no new Dim Goldstones",
+            "fr": "Jour d’échange · aucune nouvelle Pierre d’or terne"
+          },
+          "steps": {
+            "de": [
+              "Keine neuen matten Goldsteine mehr sammeln.",
+              "Verbliebene Goldsteine im Eventshop gegen die gewünschten Belohnungen eintauschen.",
+              "Vor Eventende den Restbestand prüfen; nicht eingelöste Goldsteine werden automatisch in Brot umgewandelt."
+            ],
+            "en": [
+              "No new Dim Goldstones can be collected.",
+              "Exchange all remaining Goldstones for the rewards you want in the event shop.",
+              "Check the balance before the event ends; unused Goldstones are automatically converted into Bread."
+            ],
+            "fr": [
+              "Aucune nouvelle Pierre d’or terne ne peut être collectée.",
+              "Échange toutes les Pierres restantes contre les récompenses souhaitées dans la boutique.",
+              "Vérifie le solde avant la fin ; les Pierres inutilisées sont automatiquement converties en Pain."
+            ]
+          }
+        }
+      },
+      "sourceUrl": "https://kingshotdata.com/events/golden-glaives-event/"
+    },
+    {
+      "id": "strongest-governor-2026-10-19",
+      "start": "2026-10-19",
+      "end": "2026-10-25",
+      "icon": "👑",
+      "iconUrl": "https://kingshotdata.com/uploads/2025/06/strongest-governor-event-icon.webp",
+      "confidence": "public-timeline",
+      "name": {
+        "de": "Stärkster Gouverneur",
+        "en": "Strongest Governor",
+        "fr": "Gouverneur le plus puissant"
+      },
+      "tips": {
+        "de": [
+          "NRW priorisiert die beiden Truppentage sowie einen weiteren, per Discord festgelegten Tag – nicht Tag 1.",
+          "Die angekündigte Obergrenze ist eine strikte Grenze und ausdrücklich kein Ziel.",
+          "NRW-/Discord-Absprachen haben immer Vorrang vor der allgemeinen Tagesempfehlung."
+        ],
+        "en": [
+          "NRW prioritizes both troop-training days plus one additional day chosen on Discord—not Day 1.",
+          "The announced cap is a strict limit and explicitly not a target.",
+          "NRW/Discord coordination always takes priority over the general daily recommendation."
+        ],
+        "fr": [
+          "NRW donne la priorité aux deux jours d’entraînement et à un jour supplémentaire choisi sur Discord — pas le Jour 1.",
+          "La limite annoncée est stricte et n’est explicitement pas un objectif.",
+          "Les consignes NRW/Discord sont toujours prioritaires sur la recommandation générale."
+        ]
+      },
+      "dailyPlans": {
+        "2026-10-19": {
+          "points": {
+            "de": "Tag 1 · Stadtbau: Amulettwert +1: 70 · Truegold: 2.000 · Truegoldstaub: 1.000 · Gehärtetes Truegold: 30.000 · 1 Min. Beschleuniger: 30",
+            "en": "Day 1 · City Construction: Charm score +1: 70 · Truegold: 2,000 · Truegold Dust: 1,000 · Tempered Truegold: 30,000 · 1 min speedup: 30",
+            "fr": "Jour 1 · Construction : score d’Amulette +1 : 70 · Or véritable : 2 000 · Poussière : 1 000 · Or trempé : 30 000 · 1 min d’accélération : 30"
+          },
+          "steps": {
+            "de": [
+              "Vor dem Reset keine Bau-/Forschungsabschlüsse, Amulettverbesserungen oder Truegold-Ausgaben vorziehen.",
+              "Nach dem Reset zuerst bereits geplante Bau- und Forschungsabschlüsse durchführen.",
+              "Truegold, Staub, gehärtetes Truegold und Beschleuniger nur entsprechend NRW-/Discord-Plan einsetzen.",
+              "Tag 1 ist kein NRW-Fokustag: kein unnötiges Pushen nur für Ranglistenpunkte."
+            ],
+            "en": [
+              "Before reset, do not finish construction/research or spend Charms and Truegold early.",
+              "After reset, complete construction and research already planned first.",
+              "Use Truegold, Dust, Tempered Truegold and speedups only according to the NRW/Discord plan.",
+              "Day 1 is not an NRW focus day: do not push unnecessarily for ranking points."
+            ],
+            "fr": [
+              "Avant le reset, ne termine pas de construction/recherche et ne dépense pas d’Amulettes ou d’Or véritable à l’avance.",
+              "Après le reset, termine d’abord les constructions et recherches déjà prévues.",
+              "Utilise l’Or véritable, la Poussière, l’Or trempé et les accélérateurs uniquement selon le plan NRW/Discord.",
+              "Le Jour 1 n’est pas un jour prioritaire NRW : ne pousse pas inutilement pour le classement."
+            ]
+          }
+        },
+        "2026-10-20": {
+          "points": {
+            "de": "Tag 2 · Heldenentwicklung: Truegold 2.000 · Staub 1.000 · Gehärtetes Truegold 30.000 · Meisteremblem 6.000 · Manuskript 60 · Roulette 8.000 · Splitter selten/episch/mythisch 350/1.220/3.040 · Hammer 4.000 · Widget 8.000 · Mithril 40.000 · 1 Min. Beschleuniger 30",
+            "en": "Day 2 · Hero Development: Truegold 2,000 · Dust 1,000 · Tempered Truegold 30,000 · Master Emblem 6,000 · Manuscript 60 · Roulette 8,000 · rare/epic/mythic shard 350/1,220/3,040 · Forgehammer 4,000 · Widget 8,000 · Mithril 40,000 · 1 min speedup 30",
+            "fr": "Jour 2 · Héros : Or véritable 2 000 · Poussière 1 000 · Or trempé 30 000 · Emblème 6 000 · Manuscrit 60 · Roulette 8 000 · fragment rare/épique/mythique 350/1 220/3 040 · Marteau 4 000 · Widget 8 000 · Mithril 40 000 · 1 min d’accélération 30"
+          },
+          "steps": {
+            "de": [
+              "Vor dem Reset Heldensplitter, Roulette, Meistermaterialien, Schmiedehämmer, Widgets und Mithril zurückhalten.",
+              "Nach dem Reset nur die für NRW oder deinen geplanten Meilenstein vorgesehenen Heldenaktionen ausführen.",
+              "Überlappungen mit Golden Glaives zuerst nutzen, ohne zusätzliche KvK-Ressourcen auszugeben.",
+              "Keine Ranglistenjagd ohne ausdrückliche NRW-Abstimmung."
+            ],
+            "en": [
+              "Before reset, hold Hero Shards, Roulette, Master materials, Forgehammers, Widgets and Mithril.",
+              "After reset, perform only hero actions planned for NRW or your intended milestone.",
+              "Use overlaps with Golden Glaives first without spending extra KvK resources.",
+              "Do not chase rankings without explicit NRW coordination."
+            ],
+            "fr": [
+              "Avant le reset, conserve les fragments, la Roulette, les matériaux de Maître, Marteaux, Widgets et Mithril.",
+              "Après le reset, effectue uniquement les actions de héros prévues pour NRW ou ton palier.",
+              "Profite d’abord des chevauchements avec Golden Glaives sans dépenser de ressources KvK supplémentaires.",
+              "Ne vise pas le classement sans coordination NRW explicite."
+            ]
+          }
+        },
+        "2026-10-21": {
+          "points": {
+            "de": "Tag 3 · Grundfähigkeiten: Pet-Fortschritt +1: 50 · Zähmungsmarke fortgeschritten/gewöhnlich: 15.000/1.150 · Meisteremblem 6.000 · Manuskript 60 · Amulettwert +1: 70 · Roulette 8.000 · Splitter selten/episch/mythisch 350/1.220/3.040",
+            "en": "Day 3 · Basic Skill Up: Pet Advancement +1: 50 · Advanced/Common Taming Mark: 15,000/1,150 · Master Emblem 6,000 · Manuscript 60 · Charm score +1: 70 · Roulette 8,000 · rare/epic/mythic shard 350/1,220/3,040",
+            "fr": "Jour 3 · Compétences : progression de familier +1 : 50 · marque avancée/ordinaire : 15 000/1 150 · Emblème 6 000 · Manuscrit 60 · score d’Amulette +1 : 70 · Roulette 8 000 · fragment rare/épique/mythique 350/1 220/3 040"
+          },
+          "steps": {
+            "de": [
+              "Vor dem Reset Pet-Fortschritt, Zähmungsmarken, Meistermaterialien, Amulette, Roulette und Heldensplitter zurückhalten.",
+              "Nach dem Reset zuerst kostenlose bzw. ohnehin geplante Aktionen nutzen.",
+              "Pet- und Meistermaterialien nur einsetzen, wenn der NRW-Plan oder ein lohnender persönlicher Meilenstein dies vorsieht.",
+              "Keine Ressourcen allein für einen Ranglistenplatz verbrauchen."
+            ],
+            "en": [
+              "Before reset, hold Pet Advancement, Taming Marks, Master materials, Charms, Roulette and Hero Shards.",
+              "After reset, use free or already planned actions first.",
+              "Spend Pet and Master materials only when required by the NRW plan or a worthwhile personal milestone.",
+              "Do not consume resources solely for a ranking position."
+            ],
+            "fr": [
+              "Avant le reset, conserve la progression de familier, les marques, matériaux de Maître, Amulettes, Roulette et fragments.",
+              "Après le reset, utilise d’abord les actions gratuites ou déjà prévues.",
+              "Dépense les matériaux de familier et de Maître uniquement selon le plan NRW ou un palier personnel rentable.",
+              "Ne consomme aucune ressource uniquement pour une place au classement."
+            ]
+          }
+        },
+        "2026-10-22": {
+          "points": {
+            "de": "Tag 4 · Truppentraining: Amulettwert +1: 70 · Hammer 4.000 · Widget 8.000 · Mithril 40.000 · Truppen T11–T1: 49/39/30/23/16/11/7/5/3/2/1",
+            "en": "Day 4 · Combat Training: Charm score +1: 70 · Forgehammer 4,000 · Widget 8,000 · Mithril 40,000 · troops T11–T1: 49/39/30/23/16/11/7/5/3/2/1",
+            "fr": "Jour 4 · Entraînement : score d’Amulette +1 : 70 · Marteau 4 000 · Widget 8 000 · Mithril 40 000 · troupes T11–T1 : 49/39/30/23/16/11/7/5/3/2/1"
+          },
+          "steps": {
+            "de": [
+              "Truppen so vorbereiten, dass sie erst nach dem Reset abgeschlossen werden.",
+              "Ministerposten „Edler Berater“ rechtzeitig reservieren und bei geplanter Ausbildung mit dem 3.000-Edelstein-Trainingsbonus kombinieren.",
+              "Nach dem Reset vorbereitete Truppen abschließen, danach neue Trainingsserien starten.",
+              "Dies ist ein NRW-Fokustag; Discord-Vorgaben zu Ziel und Timing haben Vorrang."
+            ],
+            "en": [
+              "Prepare troop batches so they finish only after reset.",
+              "Reserve the Noble Advisor minister post in time and combine it with the 3,000-gem training boost when training is planned.",
+              "After reset, finish prepared troops first, then start new training batches.",
+              "This is an NRW focus day; Discord targets and timing take priority."
+            ],
+            "fr": [
+              "Prépare les troupes afin qu’elles se terminent seulement après le reset.",
+              "Réserve à temps le poste de Conseiller noble et combine-le avec le bonus d’entraînement à 3 000 gemmes si prévu.",
+              "Après le reset, termine d’abord les troupes préparées, puis lance de nouvelles séries.",
+              "C’est un jour prioritaire NRW ; les objectifs et horaires Discord sont prioritaires."
+            ]
+          }
+        },
+        "2026-10-23": {
+          "points": {
+            "de": "Tag 5 · Grundfähigkeiten: Hammer 4.000 · Widget 8.000 · Mithril 40.000 · Truegold 2.000 · Staub 1.000 · Gehärtetes Truegold 30.000 · 1 Min. Beschleuniger 30",
+            "en": "Day 5 · Basic Skill Up: Forgehammer 4,000 · Widget 8,000 · Mithril 40,000 · Truegold 2,000 · Dust 1,000 · Tempered Truegold 30,000 · 1 min speedup 30",
+            "fr": "Jour 5 · Compétences : Marteau 4 000 · Widget 8 000 · Mithril 40 000 · Or véritable 2 000 · Poussière 1 000 · Or trempé 30 000 · 1 min d’accélération 30"
+          },
+          "steps": {
+            "de": [
+              "Vor dem Reset Schmiedehämmer, Widgets, Mithril, Truegold und Beschleuniger zurückhalten.",
+              "Nach dem Reset zuerst die von NRW ausgewählten Aktionen und bereits geplanten Upgrades durchführen.",
+              "Nur bis zum angekündigten Ziel spielen; die zulässige Obergrenze ist ausdrücklich kein Ziel.",
+              "Discord-Absprachen bestimmen, ob Tag 5 der zusätzliche NRW-Fokustag ist."
+            ],
+            "en": [
+              "Before reset, hold Forgehammers, Widgets, Mithril, Truegold and speedups.",
+              "After reset, perform NRW-selected actions and upgrades already planned first.",
+              "Play only to the announced target; the permitted cap is explicitly not a target.",
+              "Discord coordination determines whether Day 5 is the additional NRW focus day."
+            ],
+            "fr": [
+              "Avant le reset, conserve Marteaux, Widgets, Mithril, Or véritable et accélérateurs.",
+              "Après le reset, effectue d’abord les actions choisies par NRW et les améliorations déjà prévues.",
+              "Joue uniquement jusqu’à l’objectif annoncé ; la limite autorisée n’est explicitement pas un objectif.",
+              "La coordination Discord détermine si le Jour 5 est le jour prioritaire supplémentaire."
+            ]
+          }
+        },
+        "2026-10-24": {
+          "points": {
+            "de": "Tag 6 · Truppentraining: Ausrüstungswert +1: 36 · Truppen T11–T1: 49/39/30/23/16/11/7/5/3/2/1",
+            "en": "Day 6 · Combat Training: Gear score +1: 36 · troops T11–T1: 49/39/30/23/16/11/7/5/3/2/1",
+            "fr": "Jour 6 · Entraînement : score d’Équipement +1 : 36 · troupes T11–T1 : 49/39/30/23/16/11/7/5/3/2/1"
+          },
+          "steps": {
+            "de": [
+              "Truppen so vorbereiten, dass sie erst nach dem Reset abgeschlossen werden.",
+              "Ministerposten und Trainingsbonus wie an Tag 4 nur für geplante Ausbildung kombinieren.",
+              "Nach dem Reset vorbereitete Truppen abschließen und anschließend weitere Trainingsserien starten.",
+              "Dies ist ein NRW-Fokustag; vor dem Tagesende zusätzlich lange Sammler für Tag 7 losschicken und Bison während des Sammelns aktivieren."
+            ],
+            "en": [
+              "Prepare troop batches so they finish only after reset.",
+              "Combine the minister post and training boost as on Day 4, but only for planned training.",
+              "After reset, finish prepared troops and then start further training batches.",
+              "This is an NRW focus day; before the day ends, send long gathering marches for Day 7 and activate Bison while they gather."
+            ],
+            "fr": [
+              "Prépare les troupes afin qu’elles se terminent seulement après le reset.",
+              "Combine le poste ministériel et le bonus comme au Jour 4, uniquement pour un entraînement prévu.",
+              "Après le reset, termine les troupes préparées puis lance d’autres séries.",
+              "C’est un jour prioritaire NRW ; avant la fin, envoie de longues collectes pour le Jour 7 et active le Bison pendant la collecte."
+            ]
+          }
+        },
+        "2026-10-25": {
+          "points": {
+            "de": "Tag 7 · Heldenentwicklung: Pet-Fortschritt +1: 50 · Zähmungsmarke fortgeschritten/gewöhnlich 15.000/1.150 · Ausrüstungswert +1: 36 · Truegold 2.000 · Staub 1.000 · Gehärtetes Truegold 30.000 · 1 Min. Beschleuniger 30 · Splitter selten/episch/mythisch 350/1.220/3.040 · Sammeln 3 Punkte je 2.500 Brot/Holz, 500 Stein oder 100 Eisen",
+            "en": "Day 7 · Hero Development: Pet Advancement +1: 50 · Advanced/Common Taming Mark 15,000/1,150 · Gear score +1: 36 · Truegold 2,000 · Dust 1,000 · Tempered Truegold 30,000 · 1 min speedup 30 · rare/epic/mythic shard 350/1,220/3,040 · gathering 3 points per 2,500 Bread/Wood, 500 Stone or 100 Iron",
+            "fr": "Jour 7 · Héros : progression de familier +1 : 50 · marque avancée/ordinaire 15 000/1 150 · score d’Équipement +1 : 36 · Or véritable 2 000 · Poussière 1 000 · Or trempé 30 000 · 1 min d’accélération 30 · fragment rare/épique/mythique 350/1 220/3 040 · collecte 3 points pour 2 500 Pain/Bois, 500 Pierre ou 100 Fer"
+          },
+          "steps": {
+            "de": [
+              "Die vor dem Reset gestarteten Sammler erst nach dem Reset zurückkehren lassen.",
+              "Danach einen neuen Sammelmarsch senden: Die vorbereitete Bison-Fähigkeit lässt ihn sofort vollständig gesammelt zurückkehren.",
+              "Nach Ablauf des tatsächlichen Bison-Cooldowns Bison erneut für eine weitere Sofort-Sammlung nutzen.",
+              "Weitere Helden-, Pet-, Gear- und Truegold-Aktionen nur nach NRW-/Discord-Plan durchführen."
+            ],
+            "en": [
+              "Let gathering marches sent before reset return only after reset.",
+              "Then send a new gathering march: the prepared Bison ability makes it return immediately with a full load.",
+              "After Bison’s actual cooldown ends, use Bison again for another instant collection.",
+              "Perform further Hero, Pet, Gear and Truegold actions only according to the NRW/Discord plan."
+            ],
+            "fr": [
+              "Laisse les collecteurs envoyés avant le reset revenir uniquement après le reset.",
+              "Envoie ensuite une nouvelle collecte : la compétence préparée du Bison la fait revenir immédiatement avec une charge complète.",
+              "Après le véritable temps de recharge, utilise de nouveau le Bison pour une autre collecte instantanée.",
+              "Effectue les autres actions de Héros, Familier, Équipement et Or véritable uniquement selon le plan NRW/Discord."
+            ]
+          }
+        }
+      },
+      "sourceUrl": "https://kingshotdata.com/events/strongest-governor-event/"
     }
   ]
 }
