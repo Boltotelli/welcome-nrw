@@ -14,7 +14,7 @@ const el=(tag,cls='',txt)=>{const node=document.createElement(tag);if(cls)node.c
 const num=x=>Number(x||0).toLocaleString(document.documentElement.lang==='de'?'de-DE':document.documentElement.lang==='fr'?'fr-FR':document.documentElement.lang==='es'?'es-ES':'en-GB',{maximumFractionDigits:1});
 const valid=x=>typeof x==='string'&&x.trim().length>=2&&x.trim().length<=50;
 let name='',mode='',version=null,editKey=null,syncTimer=null,syncInFlight=false,dirty=false,heroInfoCache={},lastResult=null;
-let activePlayer=null,canEdit=false,localOnly=false,editCount=0,opening=0,needsPinMigration=false;
+let activePlayer=null,canEdit=false,localOnly=false,editCount=0,opening=0,needsPinMigration=false,legacyCombinedStats=false;
 // Preserve expanded generations when hero tiles refresh.
 const expandedSeasons=new Set();
 const app=el('main','bear-name-app');app.id='bearNewApp';document.body.prepend(app);document.body.classList.add('bear-name-mode');
@@ -195,7 +195,9 @@ function pack(){
   petActive:v.petActive||{},petSkillRanks:v.petSkillRanks||{}};
 }
 function unpack(d){
- const m=state(),v=m.v2;v.manualHeroes={};v.scannedOwnedHeroes=[];
+ const m=state(),v=m.v2;
+ legacyCombinedStats=d.combatStatOrigin==='combined-report';
+ v.manualHeroes={};v.scannedOwnedHeroes=[];
  for(const [n,h] of Object.entries(d.heroes||{})){
   if(!heroNames.has(n))continue;
   v.scannedOwnedHeroes.push(n);v.manualHeroes[n]={name:n,level:80,stars:Number(h.stars)||0,tier:Number(h.tier)||0,
@@ -303,6 +305,7 @@ async function push(){
  try{
   const result=await PROFILES.save(playerId,code,savedVersion,payload);
   if(activePlayer?.id===playerId){
+   legacyCombinedStats=false;
    version=result.revision;
    if(editCount===serial)dirty=false;
    else syncTimer=setTimeout(push,250);
@@ -399,7 +402,7 @@ async function unlockProfile(){
 async function leaveProfile(){
  clearTimeout(syncTimer);
  if(dirty&&canEdit&&!localOnly){await push();if(dirty){showStatus('Nicht online gespeichert. Lokale Daten bleiben erhalten.',true);return;}}
- name='';mode='';activePlayer=null;editKey=null;canEdit=false;localOnly=false;version=null;needsPinMigration=false;
+ name='';mode='';activePlayer=null;editKey=null;canEdit=false;localOnly=false;version=null;needsPinMigration=false;legacyCombinedStats=false;
  render();
 }
 function rosterSection(){
@@ -563,6 +566,8 @@ function ministerSection(){
 function scalarSection(){
  const m=state(),v=m.v2,section=el('div','bear-name-fold-body');
  section.append(el('p','bear-name-muted','Bitte ausschließlich ungebuffte Grundwerte eintragen. Fehlende Werte bleiben offen.'));
+ if(legacyCombinedStats)
+  section.append(el('p','bear-name-warning','Dieses ältere Profil wurde bislang als „kombiniert“ gespeichert. Bitte prüfen, ob die eingetragenen Truppenwerte wirklich einzeln aus der Bonusübersicht stammen. Separate Heldenboni werden nun zusätzlich berücksichtigt.'));
  section.append(choose('Anzahl aller Märsche (inkl. eigener Rally)',Array.from({length:7},(_,i)=>[i+1,String(i+1)]),
   Number(v.joinCount||0)+1,x=>{v.joinCount=Number(x)-1;saveLocal();}));
  section.append(rallyStrengthField());
