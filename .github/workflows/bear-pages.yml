@@ -325,7 +325,7 @@ jobs:
           node --check _site/bear/preview-v3/help-ui.js
           node --check _site/bear/preview-v3/test-security-help.cjs
           node _site/bear/preview-v3/test-security-help.cjs
-          grep -Fq 'help-ui.js?v=20261016-security-help-2' _site/bear/preview-v3.html
+          grep -Fq 'help-ui.js?v=20261016-security-help-3' _site/bear/preview-v3.html
           grep -Fq 'function markReadOnly(root)' _site/bear/preview-v3/name-flow.js
           ! grep -Fq "choose('Herkunft dieser Werte'" _site/bear/preview-v3/name-flow.js
           grep -Fq "m.v2.combatStatOrigin='separate-overview'" _site/bear/preview-v3/name-flow.js
