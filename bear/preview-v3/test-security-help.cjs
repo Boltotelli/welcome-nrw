@@ -8,7 +8,7 @@ const ui=read('name-flow.js'),help=read('help-ui.js'),css=read('name-flow.css'),
  html=read('../preview-v3.html');
 assert(html.includes('help-ui.js?v=20261016-security-help-3'));
 assert(html.indexOf('help-ui.js?v=20261016-security-help-2')<
- html.indexOf('name-flow.js?v=20261016-security-help-1'),
+ html.indexOf('name-flow.js?v=20261016-security-help-2'),
  'Help functions must exist before the deferred form script');
 assert(ui.includes("if(!localOnly&&version===null&&activePlayer?.id)void unlockProfile();"),
  'PIN dialog must open for a new shared profile');
@@ -23,6 +23,7 @@ assert(ui.includes('if(isNew&&activePlayer?.id===profileId)await leaveProfile()'
 assert(ui.includes('if(err?.status===409&&isNew)'),
  'Simultaneous registration must not overwrite an existing profile');
 assert(ui.includes('markReadOnly(main)'),'Other profiles must be view-only');
+assert(ui.includes('markReadOnly(updatedGear)'), 'Async gear refresh must not re-enable editing in other profiles');
 assert(ui.includes('button:not(.bear-name-help-trigger):not(.bear-name-action-btn)'),
  'Help and read-only calculations must remain available');
 assert(ui.includes('🔴 PIN fehlt – Profil noch nicht gesichert'));
