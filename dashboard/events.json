@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "kingdom": 1044,
   "timezone": "UTC",
-  "updatedAt": "2026-10-15T00:13:25Z",
+  "updatedAt": "2026-10-16T00:13:19Z",
   "events": [
     {
       "id": "golden-glaives-prep-2026-09-20",
@@ -1364,92 +1364,6 @@
       "sourceUrl": "https://centurygames.helpshift.com/hc/en/140-kingshot/section/1501-merchant-empire/"
     },
     {
-      "id": "officer-project-forgehammers-2026-10-14",
-      "start": "2026-10-14",
-      "end": "2026-10-15",
-      "icon": "🎖️",
-      "iconUrl": "https://kingshotdata.com/uploads/2025/03/power-up-event-icon.webp",
-      "confidence": "public-timeline",
-      "name": {
-        "de": "Offiziersprojekt · Schmiedehämmer",
-        "en": "Officer Project · Forgehammers",
-        "fr": "Projet d’officier · Marteaux de forge"
-      },
-      "dailyPlans": {
-        "2026-10-14": {
-          "points": {
-            "de": "Amulette +1: 70 · Schmiedehammer: 6.000 · Mithril: 60.000 · Widget: 12.000 · Truppen T11–T1: 37/30/22/17/12/9/6/4/3/2/1",
-            "en": "Charm +1: 70 · Forgehammer: 6,000 · Mithril: 60,000 · Widget: 12,000 · troops T11–T1: 37/30/22/17/12/9/6/4/3/2/1",
-            "fr": "Amulette +1 : 70 · Marteau : 6 000 · Mithril : 60 000 · Widget : 12 000 · troupes T11–T1 : 37/30/22/17/12/9/6/4/3/2/1"
-          },
-          "steps": {
-            "de": [
-              "Die Belohnung sind Schmiedehämmer; Punkte entstehen durch Amulette, Mithril, Widgets, Schmiedehämmer und Truppen.",
-              "Mithril, Widgets, Schmiedehämmer und Amulettmaterialien möglichst vollständig für KvK Tag 4/5 sparen.",
-              "Truppen nur normal weitertrainieren; keinen zusätzlichen KvK-Vorrat ausschließlich für dieses Event verbrauchen.",
-              "Wenn du ein lohnendes persönliches Ziel abschließt, spätestens bei insgesamt 930.000 Punkten stoppen. Das ist die strikte 3×-Grenze, keine Empfehlung."
-            ],
-            "en": [
-              "The reward is Forgehammers; points come from Charms, Mithril, Widgets, Forgehammers and troops.",
-              "Save Mithril, Widgets, Forgehammers and Charm materials for KvK Day 4/5 whenever possible.",
-              "Train troops normally; do not consume extra KvK stock solely for this event.",
-              "If you complete a worthwhile personal milestone, stop at 930,000 total points at the latest. This is the strict 3× limit, not a recommendation."
-            ],
-            "fr": [
-              "La récompense est constituée de Marteaux ; les points viennent des Amulettes, du Mithril, des Widgets, des Marteaux et des troupes.",
-              "Conserve autant que possible le Mithril, les Widgets, les Marteaux et les matériaux d’Amulette pour les Jours KvK 4/5.",
-              "Entraîne les troupes normalement ; ne consomme pas de réserve KvK supplémentaire uniquement pour cet événement.",
-              "Si tu atteins un palier personnel rentable, arrête-toi au plus tard à 930 000 points au total. C’est la limite stricte de 3×, pas une recommandation."
-            ]
-          },
-          "limits": {
-            "hardCap": 930000,
-            "note": {
-              "de": "930.000 Punkte sind die strikte 3×-Gesamtgrenze – keine Empfehlung.",
-              "en": "930,000 points is the strict 3× total limit, not a recommendation.",
-              "fr": "930 000 points constituent la limite totale stricte de 3×, pas une recommandation."
-            }
-          }
-        },
-        "2026-10-15": {
-          "points": {
-            "de": "Amulette +1: 70 · Schmiedehammer: 6.000 · Mithril: 60.000 · Widget: 12.000 · Truppen T11–T1: 37/30/22/17/12/9/6/4/3/2/1",
-            "en": "Charm +1: 70 · Forgehammer: 6,000 · Mithril: 60,000 · Widget: 12,000 · troops T11–T1: 37/30/22/17/12/9/6/4/3/2/1",
-            "fr": "Amulette +1 : 70 · Marteau : 6 000 · Mithril : 60 000 · Widget : 12 000 · troupes T11–T1 : 37/30/22/17/12/9/6/4/3/2/1"
-          },
-          "steps": {
-            "de": [
-              "Die Belohnung sind Schmiedehämmer; Punkte entstehen durch Amulette, Mithril, Widgets, Schmiedehämmer und Truppen.",
-              "Mithril, Widgets, Schmiedehämmer und Amulettmaterialien möglichst vollständig für KvK Tag 4/5 sparen.",
-              "Truppen nur normal weitertrainieren; keinen zusätzlichen KvK-Vorrat ausschließlich für dieses Event verbrauchen.",
-              "Wenn du ein lohnendes persönliches Ziel abschließt, spätestens bei insgesamt 930.000 Punkten stoppen. Das ist die strikte 3×-Grenze, keine Empfehlung."
-            ],
-            "en": [
-              "The reward is Forgehammers; points come from Charms, Mithril, Widgets, Forgehammers and troops.",
-              "Save Mithril, Widgets, Forgehammers and Charm materials for KvK Day 4/5 whenever possible.",
-              "Train troops normally; do not consume extra KvK stock solely for this event.",
-              "If you complete a worthwhile personal milestone, stop at 930,000 total points at the latest. This is the strict 3× limit, not a recommendation."
-            ],
-            "fr": [
-              "La récompense est constituée de Marteaux ; les points viennent des Amulettes, du Mithril, des Widgets, des Marteaux et des troupes.",
-              "Conserve autant que possible le Mithril, les Widgets, les Marteaux et les matériaux d’Amulette pour les Jours KvK 4/5.",
-              "Entraîne les troupes normalement ; ne consomme pas de réserve KvK supplémentaire uniquement pour cet événement.",
-              "Si tu atteins un palier personnel rentable, arrête-toi au plus tard à 930 000 points au total. C’est la limite stricte de 3×, pas une recommandation."
-            ]
-          },
-          "limits": {
-            "hardCap": 930000,
-            "note": {
-              "de": "930.000 Punkte sind die strikte 3×-Gesamtgrenze – keine Empfehlung.",
-              "en": "930,000 points is the strict 3× total limit, not a recommendation.",
-              "fr": "930 000 points constituent la limite totale stricte de 3×, pas une recommandation."
-            }
-          }
-        }
-      },
-      "sourceUrl": "https://kingshotdata.com/events/officer-project-event/"
-    },
-    {
       "id": "armament-competition-type2-2026-10-16",
       "start": "2026-10-16",
       "end": "2026-10-17",
@@ -2065,6 +1979,96 @@
         }
       },
       "sourceUrl": "https://ks-toolkit.com/data/events/vikings-vengeance/"
+    },
+    {
+      "id": "all-out-2026-10-23",
+      "start": "2026-10-23",
+      "end": "2026-10-24",
+      "icon": "⚔️",
+      "iconUrl": "https://kingshotdata.com/uploads/2025/03/all-out-event-icon.webp",
+      "confidence": "public-timeline",
+      "name": {
+        "de": "All Out · Kill Event",
+        "en": "All Out · Kill Event",
+        "fr": "All Out · Événement d’élimination"
+      },
+      "tips": {
+        "de": [
+          "NRW-Serverregel: Angriffe auf Städte sind verboten. Ausnahmen sind Städte ohne Allianz, Allianzen mit nur einem Mitglied und die KOK-Allianz.",
+          "Angriffe auf Sammler sind erlaubt. Während des Kill Events nicht sammeln; innerhalb des Allianz-Hubs besteht der einzige geschützte Sammelbereich.",
+          "Aufgrund der Serverregeln ist kein Schutzschild erforderlich, solange du nicht sammelst und keine Ausnahme-Stadt führst.",
+          "Lazarett vor dem Event leeren und NRW-/Discord-Ansagen beachten."
+        ],
+        "en": [
+          "NRW server rule: city attacks are prohibited. Exceptions are cities without an alliance, one-member alliances and the KOK alliance.",
+          "Gatherer attacks are allowed. Do not gather during the Kill Event; the Alliance Hub is the only protected gathering area.",
+          "Server laws mean no shield is required as long as you do not gather and are not running an exception city.",
+          "Clear your Infirmary before the event and follow NRW/Discord announcements."
+        ],
+        "fr": [
+          "Règle du serveur NRW : les attaques de villes sont interdites. Exceptions : villes sans alliance, alliances d’un seul membre et alliance KOK.",
+          "Les attaques de collecteurs sont autorisées. Ne collecte pas pendant le Kill Event ; le Hub d’alliance est la seule zone de collecte protégée.",
+          "Grâce aux lois du serveur, aucun bouclier n’est nécessaire tant que tu ne collectes pas et que ta ville ne fait pas partie des exceptions.",
+          "Vide l’Infirmerie avant l’événement et suis les annonces NRW/Discord."
+        ]
+      },
+      "dailyPlans": {
+        "2026-10-23": {
+          "points": {
+            "de": "Feindliche Truppen besiegen oder schwer verwunden · T1–T10: 1/1/2/3/4/5/7/9/11/13 Punkte je Truppe",
+            "en": "Defeat or severely wound enemy troops · T1–T10: 1/1/2/3/4/5/7/9/11/13 points per troop",
+            "fr": "Vaincre ou blesser gravement des troupes ennemies · T1–T10 : 1/1/2/3/4/5/7/9/11/13 points par troupe"
+          },
+          "steps": {
+            "de": [
+              "Vor dem Reset alle Sammler zurückrufen und das Lazarett möglichst leeren.",
+              "Während des Events nicht sammeln. Sammler dürfen serverweit angegriffen werden.",
+              "Keine Städte angreifen, außer ohne Allianz, in einer Ein-Mitglied-Allianz oder in KOK.",
+              "Punkte nur über erlaubte Ziele, Verteidigung oder koordinierte Kämpfe erzielen; NRW-/Discord-Absprachen haben Vorrang."
+            ],
+            "en": [
+              "Before reset, recall all gatherers and clear as much Infirmary space as possible.",
+              "Do not gather during the event. Gatherers may be attacked across the server.",
+              "Do not attack cities except those without an alliance, in a one-member alliance or in KOK.",
+              "Score only through permitted targets, defense or coordinated fights; NRW/Discord coordination takes priority."
+            ],
+            "fr": [
+              "Avant le reset, rappelle tous les collecteurs et libère autant de place que possible dans l’Infirmerie.",
+              "Ne collecte pas pendant l’événement. Les collecteurs peuvent être attaqués sur tout le serveur.",
+              "N’attaque aucune ville, sauf sans alliance, dans une alliance d’un seul membre ou dans KOK.",
+              "Marque uniquement sur les cibles autorisées, en défense ou lors de combats coordonnés ; les consignes NRW/Discord sont prioritaires."
+            ]
+          }
+        },
+        "2026-10-24": {
+          "points": {
+            "de": "Feindliche Truppen besiegen oder schwer verwunden · T1–T10: 1/1/2/3/4/5/7/9/11/13 Punkte je Truppe",
+            "en": "Defeat or severely wound enemy troops · T1–T10: 1/1/2/3/4/5/7/9/11/13 points per troop",
+            "fr": "Vaincre ou blesser gravement des troupes ennemies · T1–T10 : 1/1/2/3/4/5/7/9/11/13 points par troupe"
+          },
+          "steps": {
+            "de": [
+              "Vor Kampfbeginn Lazarettkapazität prüfen und Sammler zurückholen.",
+              "Die Burgschlacht für Kill-Event-Punkte nutzen; nur nach NRW-/Discord-Plan kämpfen.",
+              "Stadtangriffsverbot und die drei bekannten Ausnahmen bleiben bestehen.",
+              "Nach Ende der Burgschlacht kann gemäß NRW-Ansage wieder sicher gesammelt werden."
+            ],
+            "en": [
+              "Before fighting begins, check Infirmary capacity and recall gatherers.",
+              "Use the Castle Battle for Kill Event points; fight only according to the NRW/Discord plan.",
+              "The city-attack ban and its three known exceptions remain in force.",
+              "After the Castle Battle ends, gathering is safe again according to the NRW announcement."
+            ],
+            "fr": [
+              "Avant le début des combats, vérifie la capacité de l’Infirmerie et rappelle les collecteurs.",
+              "Utilise la Bataille du Château pour marquer au Kill Event ; combats uniquement selon le plan NRW/Discord.",
+              "L’interdiction d’attaquer les villes et ses trois exceptions restent en vigueur.",
+              "Après la fin de la Bataille du Château, la collecte redevient sûre selon l’annonce NRW."
+            ]
+          }
+        }
+      },
+      "sourceUrl": "https://kingshotdata.com/events/all-out-event/"
     }
   ]
 }
