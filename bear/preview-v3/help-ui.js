@@ -28,7 +28,7 @@
   if(/TG|^T$|^Typ$/.test(s))return 'tier';
   if(/^Anzahl$/.test(s))return 'troops';
   if(/^Fähigkeitslevel$/.test(s))return 'pets';
-  if(/Kapazität/.test(s))return 'capacity';
+  if(/kapazität/i.test(s))return 'capacity';
   if(/Schwadron.*(Angriff|Tödlichkeit)/.test(s))return 'squad';
   if(/Expeditions-/.test(s))return 'expedition';
   if(/Angriff|Tödlichkeit/.test(s))return 'stats';
