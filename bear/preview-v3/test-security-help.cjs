@@ -6,9 +6,9 @@ const fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
 const read=n=>fs.readFileSync(path.join(__dirname,n),'utf8');
 const ui=read('name-flow.js'),help=read('help-ui.js'),css=read('name-flow.css'),
  html=read('../preview-v3.html');
-assert(html.includes('help-ui.js?v=20261016-focused-help-2'));
-assert(html.indexOf('help-ui.js?v=20261016-focused-help-2')>=0);
-assert(html.indexOf('help-ui.js?v=20261016-focused-help-2')<
+assert(html.includes('help-ui.js?v=20261016-pages-approved-vercel-1'));
+assert(html.indexOf('help-ui.js?v=20261016-pages-approved-vercel-1')>=0);
+assert(html.indexOf('help-ui.js?v=20261016-pages-approved-vercel-1')<
  html.indexOf('name-flow.js?v=20261016-help-layout-1'), 'Help functions must exist before the deferred form script');
 assert(ui.includes("if(!localOnly&&version===null&&activePlayer?.id)void unlockProfile();"),
  'PIN dialog must open for a new shared profile');

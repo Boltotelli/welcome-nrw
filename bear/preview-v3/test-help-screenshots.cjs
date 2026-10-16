@@ -60,9 +60,9 @@ assert(api.GUIDE_CROPS.troops[0][3]===350,
  'First troop screenshot must show only the top of city; no 2048px scrolling');
 const troop=api.GUIDES.troops.steps[2];
 assert.deepEqual(Array.from(troop.marks.find(m=>m.text.startsWith('T-Level')).rect),
- [119,537,162,585],'T-Level marker must frame the Roman X below troop icon');
+ [125,540,178,581],'T-Level marker must frame the Roman X below troop icon');
 assert.deepEqual(Array.from(troop.marks.find(m=>m.text.startsWith('TG-Level')).rect),
- [157,461,207,515],'TG marker must frame golden troop generation number');
+ [149,461,205,510],'TG marker must frame golden troop generation number');
 assert(api.GUIDE_CROPS.troops[2][3]===765,
  'Troop preview should include all three troop types in one compact image');
 assert(markers>=25,'Field-specific marks expected on supplied images');
