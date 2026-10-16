@@ -6,9 +6,9 @@ const fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
 const read=n=>fs.readFileSync(path.join(__dirname,n),'utf8');
 const ui=read('name-flow.js'),help=read('help-ui.js'),css=read('name-flow.css'),
  html=read('../preview-v3.html');
-assert(html.includes('help-ui.js?v=20261016-visible-overlay-1'));
-assert(html.indexOf('help-ui.js?v=20261016-visible-overlay-1')>=0);
-assert(html.indexOf('help-ui.js?v=20261016-visible-overlay-1')<
+assert(html.includes('help-ui.js?v=20261016-focused-help-2'));
+assert(html.indexOf('help-ui.js?v=20261016-focused-help-2')>=0);
+assert(html.indexOf('help-ui.js?v=20261016-focused-help-2')<
  html.indexOf('name-flow.js?v=20261016-help-layout-1'), 'Help functions must exist before the deferred form script');
 assert(ui.includes("if(!localOnly&&version===null&&activePlayer?.id)void unlockProfile();"),
  'PIN dialog must open for a new shared profile');
@@ -43,6 +43,8 @@ assert(css.includes('@keyframes bear-pin-shake'));
 assert(css.includes('@keyframes bear-pin-glow'));
 assert(css.includes('prefers-reduced-motion:reduce'));
 assert(css.includes('.bear-name-help-backdrop'));
+assert(css.includes('display:flex;flex-direction:column;overflow:hidden;max-height:min(94dvh,840px)'),
+ 'Guide navigation must stay visible without full page scroll');
 assert(help.includes('imgSource=')&&help.includes('root.NRW_BEAR_HELP_IMAGES'),
  'Original screenshots must load only when requested');
 assert(html.includes('help-image-pack.js')===false,
