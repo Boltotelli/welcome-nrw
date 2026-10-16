@@ -204,8 +204,13 @@
   });
   pane.append(canvas);
   const zoom=node('button','bear-name-help-zoom','🔍 Bild vergrößern');zoom.type='button';
+  const originalWidth=canvas.style.width;
   zoom.addEventListener('click',()=>{
    const expanded=pane.classList.toggle('zoomed');
+   // Width must be changed inline: a CSS rule cannot override the inline
+   // compact-size setting. All marker coordinates scale together with img.
+   canvas.style.width=expanded?
+    Math.max(520,Math.round(width/height*maxImageHeight*1.8))+'px':originalWidth;
    zoom.textContent=expanded?'Bild verkleinern':'🔍 Bild vergrößern';
   });
   const group=node('div','bear-name-help-visual');group.append(pane,zoom,legend);
