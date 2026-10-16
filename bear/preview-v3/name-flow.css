@@ -324,3 +324,29 @@ body.bear-name-mode>*:not(#bearNewApp){display:none!important}
 .bear-name-field-heading label{display:block;min-width:0;overflow-wrap:anywhere}
 .bear-name-field-heading{align-items:center}
 @media(max-width:530px){.bear-name-help-heading{gap:6px}.bear-name-help-heading h2{font-size:clamp(18px,5vw,23px)}}
+
+
+/* Freigegebene Kingshot-Originals: image-relative frames are anchored to
+   screenshot pixels; zoom enlarges the image AND all overlays together. */
+.bear-name-help-visual{margin-top:12px;min-width:0}
+.bear-name-help-photo-scroll{overflow:auto;max-height:none;border-radius:12px;border:1px solid #75899f;background:#131e2c;overscroll-behavior:contain}
+.bear-name-help-photo{position:relative;width:100%;min-width:0;margin:auto;transition:width .16s ease}
+.bear-name-help-photo-scroll.zoomed .bear-name-help-photo{width:160%}
+.bear-name-help-photo .bear-name-help-image{display:block;width:100%;max-height:none;height:auto;border-radius:0;object-fit:fill;cursor:default}
+.bear-name-help-marker{position:absolute;z-index:1;pointer-events:none;border:3px solid #ffdf62;border-radius:8px;background:rgba(255,207,66,.12);box-shadow:0 0 0 1px #171717,0 0 12px rgba(255,223,98,.4)}
+.bear-name-help-marker-green{border-color:#38ecaa;background:rgba(29,219,126,.09);box-shadow:0 0 0 1px #202020,0 0 9px #2dcc9280}
+.bear-name-help-marker-blue{border-color:#4dd6ff;background:rgba(35,180,255,.09);box-shadow:0 0 0 1px #161616,0 0 9px #54baff80}
+.bear-name-help-marker-orange{border-color:#ff9163;background:rgba(255,123,55,.10);box-shadow:0 0 0 1px #161616,0 0 9px #e88d4c88}
+.bear-name-help-marker-number{position:absolute;top:-15px;left:-11px;display:grid;place-items:center;min-width:26px;height:26px;padding:0 5px;border-radius:50%;background:#ffda78;color:#221912;font-size:14px;font-weight:1000;box-shadow:0 1px 5px #000a}
+.bear-name-help-marker-green .bear-name-help-marker-number{background:#55efae}
+.bear-name-help-marker-blue .bear-name-help-marker-number{background:#80ddff}
+.bear-name-help-marker-orange .bear-name-help-marker-number{background:#ffa877}
+.bear-name-help-zoom{display:block;min-height:36px;margin:8px 0!important;border:1px solid #7999ae!important;background:#1d334a!important;border-radius:10px!important;color:#e1f4ff!important;padding:5px 12px!important;font-size:13px!important}
+.bear-name-help-legend{display:grid;gap:7px;margin:9px 0 4px}
+.bear-name-help-legend-item{display:flex;align-items:flex-start;gap:9px;min-width:0;font-size:13px;line-height:1.35;color:#dce9f7}
+.bear-name-help-legend-number{display:grid;place-items:center;flex:none;height:23px;min-width:23px;padding:0 3px;border-radius:50%;color:#211913;background:#ffda78;font-weight:900}
+.bear-name-help-legend-green{background:#55efae}
+.bear-name-help-legend-blue{background:#80ddff}
+.bear-name-help-legend-orange{background:#ffa877}
+.bear-name-help-photo-scroll.zoomed{scrollbar-width:thin}
+@media(prefers-reduced-motion:reduce){.bear-name-help-photo{transition:none}}
