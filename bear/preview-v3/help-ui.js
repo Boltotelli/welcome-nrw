@@ -229,7 +229,14 @@
   done.addEventListener('click',close);
   nav.append(back,counter,next,done);panel.append(contents,nav);overlay.append(panel);
   overlay.addEventListener('click',e=>{if(e.target===overlay)close();});
-  document.body.append(overlay);dialog=overlay;
+  // The V3 shell hides every direct <body> child except #bearNewApp.
+  // Append modals INSIDE the visible app root or clicks appear to do nothing.
+  const appRoot=document.getElementById('bearNewApp');
+  if(!appRoot){
+   console.error('[Bear Help] Visible app root missing; cannot open help dialog.');
+   return;
+  }
+  appRoot.append(overlay);dialog=overlay;
   document.addEventListener('keydown',onKey);draw();closeButton.focus();
  }
  function icon(key){
