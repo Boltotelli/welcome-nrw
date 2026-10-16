@@ -3,41 +3,39 @@
 (function(root){
  'use strict';
  const CONTENT={
-  troops:{title:'Truppenbestand',steps:['Öffne die Truppenübersicht deiner Stadt. Erfasse jede vorhandene Infanterie-, Kavallerie- und Bogenschützenstufe getrennt.','Die Anzahl jeder Einheit sowie ihre T- und TG-Stufe müssen genau zur ausgewählten Zeile passen.']},
-  tier:{title:'T-Level und TG-Level',steps:['T steht für die Grundstufe der Einheit (z. B. T10). TG steht für die zusätzliche Truppengeneration/-verbesserung.','Lies beide Angaben direkt an der jeweiligen Truppeneinheit ab; unterschiedliche Stufen bitte als eigene Zeile erfassen.']},
-  capacity:{title:'Basis-Marschkapazität',steps:['Suche im Spiel die Marschkapazität ohne die zusätzlich vom Rechner erfassten Helden- und temporären Kapazitätsboni.','Helden, aktive Bison-Fähigkeit, Valora und gegebenenfalls Marschall werden separat hinzugerechnet.']},
-  stats:{title:'Angriff und Tödlichkeit',steps:['Öffne die Bonusübersicht im Spiel und suche die Werte für Infanterie, Kavallerie und Bogenschützen.','Trage Angriff und Tödlichkeit je Truppentyp separat ein. Keine zuvor zusammengerechneten Gesamtwerte verwenden.']},
-  squad:{title:'Schwadron-Boni',steps:['In der Bonusübersicht findest du die allgemeinen Boni für Schwadron-Angriff und Schwadron-Tödlichkeit.','Diese Werte getrennt von den Truppentyp-Boni eintragen. Der Rechner addiert die Ebenen selbst.']},
-  heroes:{title:'Helden auswählen',steps:['Markiere nur die Helden, die dein Account besitzt. Nicht ausgewählte Helden bleiben grau.','Stelle bei jedem ausgewählten Helden die Sterne und den T-Fortschritt ein. Alle Helden gelten hier als Level 80.']},
-  stars:{title:'Sterne und T-Fortschritt',steps:['Öffne den jeweiligen Helden und lies Sterne sowie die T-Stufe vom Heldendetail ab.','Die fünf Blumen und die Zwischenschritte werden getrennt berücksichtigt.']},
-  widget:{title:'Helden-Widget',steps:['Öffne bei einem goldenen Helden seine Widget-/exklusive Ausrüstungsansicht.','Trage das angezeigte Widget-Level ein; nicht jeder Held besitzt ein Widget.']},
-  expedition:{title:'Expeditionsboni der Starter',steps:['Öffne die Detailansicht des ausgewählten Starterhelden und suche seine Expeditionseigenschaften.','Nur die einzeln ausgewiesenen Expeditionswerte eingeben, wenn sie nicht bereits in einem anderen eingegebenen Gesamtwert enthalten sind.']},
-  march:{title:'Anzahl der Märsche',steps:['Ein eigener Startermarsch plus die Märsche, mit denen du fremden Rallys beitrittst.','Sechs Joiner entsprechen beispielsweise insgesamt sieben Märschen.']},
-  leaders:{title:'Stärke fremder Rallyleader',steps:['Wähle, ob die Rallyleader, denen du beitrittst, im Durchschnitt schwächer, gleich stark oder stärker als du sind.','Das bestimmt die Priorität bei knappen Bogenschützen: eigene Rally oder Joiner zuerst.']},
-  ministers:{title:'Ministerboni',steps:['Wähle König oder Hochkönig und aktiviere FC und/oder Marschall nur dann, wenn dieser Bonus tatsächlich auf deinen Marsch wirkt.','Ministerboni werden auf die ungebufften Ausgangswerte addiert.']},
-  pets:{title:'Pet-Fähigkeiten',steps:['Öffne das Pet-Menü und prüfe, welche der relevanten Fähigkeiten aktiv sind.','Trage deren Fähigkeitenlevel ein. Nur aktive Boni werden berücksichtigt.']},
-  valora:{title:'Valora-Fähigkeiten',steps:['Öffne Valoras Meisteransicht und die Ansicht der relevanten Fähigkeiten.','Stelle das Level nach den Fähigkeitsbildern ein. Die eingetragenen Grundwerte müssen ungebufft sein.']}
+  heroes:{title:'Heldenübersicht: Besitz, Sterne und Widget',steps:[
+   'Markiere in der Heldenübersicht alle Helden, die du besitzt. Ausgewählte Porträts werden farbig, nicht ausgewählte bleiben grau.',
+   'Öffne im Spiel die jeweilige Heldenseite. Übertrage Sterne und die T-Zwischenstufe (Blütenblätter); der Rechner nimmt für alle Helden Level 80 an.',
+   'Goldene Helden besitzen unter Umständen ein Widget. Öffne dessen Ausrüstungsansicht und stelle das angezeigte Widget-Level ein.']},
+  troops:{title:'Truppenbestand: Anzahl, T und TG',steps:[
+   'Öffne die Truppenübersicht deiner Stadt. Erfasse Infanterie, Kavallerie und Bogenschützen einschließlich aller vorhandenen unterschiedlichen Stufen.',
+   'Lies pro Einheit die T-Stufe und – falls vorhanden – die zusätzliche TG-Stufe ab. Verwende für jede T-/TG-Kombination eine eigene Truppenzeile.',
+   'Trage die jeweilige Truppenanzahl ein. Der Rechner bildet daraus die Summen, ohne verschiedene Stufen zu vermischen.']},
+  march:{title:'Anzahl aller Märsche – eigenen Starter mitzählen',steps:[
+   'Wichtig: Der eigene Rally-Starter zählt immer zur Gesamtzahl der Märsche dazu.',
+   'Beispiel: Du startest 1 Rally und trittst 6 fremden Rallys bei. Dann wählst du insgesamt 7 Märsche (1 Starter + 6 Joiner).']},
+  capacity:{title:'Basis-Marschkapazität ohne Helden',steps:[
+   'Suche im Spiel die Marschkapazität ohne die vom Rechner separat hinzugerechneten Helden und aktivierten Kapazitätsboni.',
+   'Heldenkapazität, aktiver Pet-Buff, Valora und gegebenenfalls Marschall werden im Optimierer zusätzlich berücksichtigt – diese Werte nicht in die Basiskapazität einrechnen.']},
+  combatStats:{title:'Infanterie-, Kavallerie-, Bogenschützen- und Schwadronwerte',steps:[
+   'Öffne die Bonusübersicht im Spiel und notiere für Infanterie, Kavallerie und Bogenschützen jeweils Angriff und Tödlichkeit.',
+   'Notiere zusätzlich die separat ausgewiesenen Werte für Schwadron-Angriff und Schwadron-Tödlichkeit.',
+   'Trage die Werte separat und ungebufft ein. Die Kampfstufen und Boni werden im Rechner addiert; keine bereits zusammengerechneten Gesamtwerte eingeben.']},
+  expedition:{title:'Heldenausrüstung der drei Starter',steps:[
+   'Ziehe deine beste passende Heldenausrüstung zunächst auf die drei vorgeschlagenen Starterhelden um.',
+   'Öffne danach deren Helden-/Expeditionsdetailansichten und übertrage die tatsächlichen Werte für Expeditions-Angriff und Expeditions-Tödlichkeit. Die Werte dürfen nicht doppelt in anderen Feldern enthalten sein.']},
+  pets:{title:'Pet-Buffs – gemeinsamer Überblick',steps:[
+   'Öffne das Pet-Menü. Prüfe, welche der relevanten Pet-Fähigkeiten aktuell aktiv sind.',
+   'Markiere nur die tatsächlich aktiven Boni und trage die jeweiligen Fähigkeitslevel ein. Die Boni werden nicht bei inaktiven Pets angewendet.']},
+  valora:{title:'Valora – Meisterfähigkeiten',steps:[
+   'Öffne Valoras Meisterübersicht und anschließend die Fähigkeitsansicht.',
+   'Übertrage die Werte von Savage Advantage und Hunter Instinct getrennt. Die Grundwerte müssen weiterhin ungebufft sein.']}
  };
  // Screenshots will be supplied by the owner. Add {url,alt} entries here
  // only after original Kingshot images have been provided and verified.
  const HELP_ASSETS=Object.create(null);
  let dialog=null,previousFocus=null,fieldId=0;
  const node=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n;};
- function resolveField(label){
-  const s=String(label);
-  if(/TG|^T$|^Typ$/.test(s))return 'tier';
-  if(/^Anzahl$/.test(s))return 'troops';
-  if(/^Fähigkeitslevel$/.test(s))return 'pets';
-  if(/kapazität/i.test(s))return 'capacity';
-  if(/Schwadron.*(Angriff|Tödlichkeit)/.test(s))return 'squad';
-  if(/Expeditions-/.test(s))return 'expedition';
-  if(/Angriff|Tödlichkeit/.test(s))return 'stats';
-  if(/Widget/.test(s))return 'widget';
-  if(/Märsche/.test(s))return 'march';
-  if(/Rallyleader/.test(s))return 'leaders';
-  if(/Valora|Savage|Dance of the Hunt/.test(s))return 'valora';
-  return null;
- }
  function close(){
   if(!dialog)return;
   document.removeEventListener('keydown',onKey);
@@ -102,8 +100,10 @@
   b.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();open(key);});
   return b;
  }
- function decorateField(wrapper,label){
-  const key=resolveField(label);if(!key)return wrapper;
+ function decorateField(wrapper,label,key){
+  // Explicit opt-in only: no automatic buttons on each hero, troop
+  // row, Pet skill, Rallyleader selector or minister setting.
+  if(!key||!CONTENT[key])return wrapper;
   const field=wrapper.querySelector('input,select');
   const originalTitle=wrapper.querySelector('span');
   if(!field||!originalTitle)return wrapper;
@@ -118,5 +118,5 @@
   container.append(heading,field);
   return container;
  }
- root.NRW_BEAR_HELP={icon,decorateField,open,resolveField};
+ root.NRW_BEAR_HELP={icon,decorateField,open};
 })(window);
