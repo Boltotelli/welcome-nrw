@@ -84,12 +84,13 @@ function numberField(label,value,onChange,options={}){
  input.addEventListener('change',()=>{const n=input.value===''?null:Number(input.value);
   if(n!==null&&(!Number.isFinite(n)||n<Number(input.min)||n>Number(input.max)))return input.setCustomValidity('Ungültiger Wert');
   input.setCustomValidity('');onChange(n);});
- wrap.append(span,input);return HELP?.decorateField?.(wrap,label)||wrap;
+ wrap.append(span,input);return options.helpKey?HELP?.decorateField?.(wrap,label,options.helpKey)||wrap:wrap;
 }
-function choose(label,values,value,onChange){
+function choose(label,values,value,onChange,helpKey=null){
  const w=el('label','bear-name-field'),caption=el('span','',label),s=el('select');
  for(const [id,title] of values){const o=el('option','',title);o.value=String(id);s.append(o)}s.value=String(value??'');
- s.addEventListener('change',()=>onChange(s.value));w.append(caption,s);return HELP?.decorateField?.(w,label)||w;
+ s.addEventListener('change',()=>onChange(s.value));w.append(caption,s);
+ return helpKey?HELP?.decorateField?.(w,label,helpKey)||w:w;
 }
 // Kingshot uses five flowers with SIX progress petals each (0..30).
 // Touch a flower to set complete stars, use +/- for one petal / T step.
@@ -97,7 +98,6 @@ let bearFlowerSequence=0;
 function starProgressField(heroName){
  const ns='http://www.w3.org/2000/svg',wrap=el('div','bear-name-star-field');
  const row=el('div','bear-name-star-controls');
- const sh=HELP?.icon('stars');if(sh)row.append(sh);
  const minus=button('−',()=>changeStep(currentStep-1),'bear-name-star-step');
  const plus=button('+',()=>changeStep(currentStep+1),'bear-name-star-step');
  const flowers=el('div','bear-name-star-flowers');
@@ -457,10 +457,16 @@ async function leaveProfile(){
  name='';mode='';activePlayer=null;editKey=null;canEdit=false;localOnly=false;version=null;needsPinMigration=false;legacyCombinedStats=false;pinPending=false;
  render();
 }
+function helpHeading(text,key,tag='h3'){
+ const row=el('div','bear-name-help-heading');
+ row.append(title(text,tag));
+ const icon=HELP?.icon?.(key);if(icon)row.append(icon);
+ return row;
+}
 function rosterSection(){
- const section=el('section','bear-name-panel'),head=title('Deine Helden');
- section.append(head,el('p','bear-name-muted','Anklicken = im Besitz. Alle Helden gelten als Level 80. Sterne/Tier und bei goldenen Helden Widget einstellen.'));
- const heroHelp=HELP?.icon('heroes');if(heroHelp)section.append(heroHelp);
+ const section=el('section','bear-name-panel');
+ section.append(helpHeading('Deine Helden','heroes','h2'),
+  el('p','bear-name-muted','Anklicken = im Besitz. Alle Helden gelten als Level 80. Sterne/Tier und bei goldenen Helden Widget einstellen.'));
  const selected=state().v2.scannedOwnedHeroes;
  const groups=new Map();
  heroList.forEach((h,i)=>{const season=i<16?1:Math.min(8,Math.floor((i-16)/3)+2);if(!groups.has(season))groups.set(season,[]);groups.get(season).push(h);});
@@ -512,7 +518,7 @@ function foldingPanel(key,label,content,defaultOpen=false){
  const details=el('details','bear-name-panel bear-name-fold');
  details.open=openPanels.has(key)?openPanels.get(key):defaultOpen;
  const heading=el('summary','bear-name-fold-heading',label);
- const helpKey={troops:'troops',baseStats:'stats',ministers:'ministers',pets:'pets'}[key];
+ const helpKey=key==='troops'?'troops':null;
  const info=helpKey?HELP?.icon(helpKey):null;
  if(info)heading.append(info);
  details.append(heading,content);
@@ -543,7 +549,7 @@ function troopsSection(required){
  if(!required)section.append(
   numberField('Marschkapazität ohne Helden (optional)',m.values.cap,x=>{
    if(x===null)delete m.values.cap;else m.values.cap=x;saveLocal();
-  },{min:1,max:1000000}),
+  },{min:1,max:1000000,helpKey:'capacity'}),
   el('p','bear-name-muted','Mit Marschkapazität und Truppenbestand werden genaue Stückzahlen pro Marsch berechnet.')
  );
  const filled=CL.every(type=>(v.troopGroups||[]).some(g=>g.type===type&&
@@ -626,10 +632,13 @@ function scalarSection(){
  if(legacyCombinedStats)
   section.append(el('p','bear-name-warning','Dieses ältere Profil wurde bislang als „kombiniert“ gespeichert. Bitte prüfen, ob die eingetragenen Truppenwerte wirklich einzeln aus der Bonusübersicht stammen. Separate Heldenboni werden nun zusätzlich berücksichtigt.'));
  section.append(choose('Anzahl aller Märsche (inkl. eigener Rally)',Array.from({length:7},(_,i)=>[i+1,String(i+1)]),
-  Number(v.joinCount||0)+1,x=>{v.joinCount=Number(x)-1;saveLocal();}));
+  Number(v.joinCount||0)+1,x=>{v.joinCount=Number(x)-1;saveLocal();},'march'));
  section.append(rallyStrengthField());
+ section.append(numberField('Basis-Marschkapazität ohne Helden',m.values.cap,x=>{
+  m.values.cap=x;saveLocal();
+ },{max:1000000,helpKey:'capacity'}));
+ section.append(helpHeading('Infanterie, Kavallerie, Bogenschützen & Schwadron','combatStats'));
  const grid=el('div','bear-name-stat-grid');
- grid.append(numberField('Basis-Marschkapazität ohne Helden',m.values.cap,x=>{m.values.cap=x;saveLocal();},{max:1000000}));
  for(const [i,cl] of CL.entries())for(const [field,label] of [['Atk','Angriff %'],['Let','Tödlichkeit %']]){
   const k=['i','c','a'][i]+field;
   grid.append(numberField(LABEL[i]+' · '+label,m.values[k],x=>{
@@ -653,6 +662,7 @@ function scalarSection(){
  const settings=el('div','bear-name-settings');
  settings.append(foldingPanel('baseStats','Basisstats',section,!statsFilled));
  const petSection=el('div','bear-name-fold-body');
+ petSection.append(helpHeading('Pets','pets'));
  const petGrid=el('div','bear-name-pet-grid');
  v.petActive=v.petActive||{};v.petSkillRanks=v.petSkillRanks||{};
  const assetImg=(url,label)=>{
@@ -706,7 +716,9 @@ function scalarSection(){
  }
  const skills=el('div','bear-name-buff-card bear-name-valora'),valoraSkill=(C.valora||[]).find(x=>x.name==='Savage Advantage');
  const valoraPicture=gameIcon('Valora');
- const valoraTitle=el('div','bear-name-buff-title');valoraTitle.append(valoraPicture,el('strong','','Valora'));
+ const valoraTitle=el('div','bear-name-buff-title');
+ valoraTitle.append(valoraPicture,el('strong','','Valora'));
+ const valoraHelp=HELP?.icon?.('valora');if(valoraHelp)valoraTitle.append(valoraHelp);
  skills.append(valoraTitle);
  const skillRows=el('div','bear-name-valora-skills');
  const savage=el('div','bear-name-buff-skill');
@@ -720,8 +732,8 @@ function scalarSection(){
  hunter.append(hunterImg,numberField('Hunter Instinct',v.valoraTalent,x=>{
   v.valoraTalent=x||0;saveLocal();
  },{min:0,max:11}));
- skillRows.append(savage,hunter);skills.append(skillRows);petGrid.append(skills);
- petSection.append(petGrid);
+ skillRows.append(savage,hunter);skills.append(skillRows);
+ petSection.append(petGrid,skills);
  petSection.append(el('p','bear-name-muted','Pet- und Valora-Boni werden zu den ungebufften Basiswerten addiert.'));
  settings.append(foldingPanel('ministers','Ministerbuffs',ministerSection(),false),
   foldingPanel('pets','Pets & Valora',petSection,false));
@@ -730,7 +742,8 @@ function scalarSection(){
 function starterGearSection(picked){
  const v=state().v2,section=el('section','bear-name-panel');
  section.id='bearStarterGear';
- section.append(title('Heldenausrüstung nach dem Umziehen prüfen'),el('p','bear-name-muted','Ziehe zuerst deine beste Heldenausrüstung auf die drei empfohlenen Starter um. Trage DANACH ihre tatsächlichen Expeditionsboni für Angriff und Tödlichkeit ein. Nichts wird doppelt addiert.'));
+ section.append(helpHeading('Heldenausrüstung nach dem Umziehen prüfen','expedition','h2'),
+  el('p','bear-name-muted','Ziehe zuerst deine beste Heldenausrüstung auf die drei empfohlenen Starter um. Trage DANACH ihre tatsächlichen Expeditionsboni für Angriff und Tödlichkeit ein. Nichts wird doppelt addiert.'));
  const list=el('div','bear-name-stat-grid');
  picked.forEach((n,i)=>{
   if(!n)return;const h=v.manualHeroes[n]||(v.manualHeroes[n]={name:n,level:80}),stats=h.expeditionStats||(h.expeditionStats={});
@@ -1183,7 +1196,7 @@ function render(){
   const main=el('div','bear-name-two-columns'),left=el('div'),right=el('div');
   const v=state().v2;
   left.append(choose('Märsche insgesamt',Array.from({length:7},(_,i)=>[i+1,String(i+1)]),
-   Number(v.joinCount||0)+1,x=>{v.joinCount=Number(x)-1;saveLocal();render();}),rallyStrengthField(),rosterSection());
+   Number(v.joinCount||0)+1,x=>{v.joinCount=Number(x)-1;saveLocal();render();},'march'),rallyStrengthField(),rosterSection());
   left.append(troopsSection(false));
   right.append(summaryHeroes().section,actionButtons(false));main.append(left,right);box.append(main);markReadOnly(main);
  }else{
