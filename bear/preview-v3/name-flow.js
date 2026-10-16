@@ -5,7 +5,7 @@
 'use strict';
 const B=window.NRW_BEAR_BRIDGE,C=window.NRW_BEAR_CATALOG;
 const I18N=window.NRW_BEAR_I18N;
-const PROFILES=window.NRW_BEAR_PROFILES;
+const PROFILES=window.NRW_BEAR_PROFILES,HELP=window.NRW_BEAR_HELP;
 const T=text=>I18N?.tr?.(text)??text;
 if(!B||!C)return;
 const CL=['infantry','cavalry','archer'],LABEL=['Infanterie','Kavallerie','Bogenschützen'];
@@ -14,7 +14,7 @@ const el=(tag,cls='',txt)=>{const node=document.createElement(tag);if(cls)node.c
 const num=x=>Number(x||0).toLocaleString(document.documentElement.lang==='de'?'de-DE':document.documentElement.lang==='fr'?'fr-FR':document.documentElement.lang==='es'?'es-ES':'en-GB',{maximumFractionDigits:1});
 const valid=x=>typeof x==='string'&&x.trim().length>=2&&x.trim().length<=50;
 let name='',mode='',version=null,editKey=null,syncTimer=null,syncInFlight=false,dirty=false,heroInfoCache={},lastResult=null;
-let activePlayer=null,canEdit=false,localOnly=false,editCount=0,opening=0,needsPinMigration=false,legacyCombinedStats=false;
+let activePlayer=null,canEdit=false,localOnly=false,editCount=0,opening=0,needsPinMigration=false,legacyCombinedStats=false,pinPending=false;
 // Preserve expanded generations when hero tiles refresh.
 const expandedSeasons=new Set();
 const app=el('main','bear-name-app');app.id='bearNewApp';document.body.prepend(app);document.body.classList.add('bear-name-mode');
@@ -56,7 +56,27 @@ function saveLocal(){
  clearTimeout(syncTimer);if(canEdit&&!localOnly)syncTimer=setTimeout(push,1600);
  else if(activePlayer)showStatus('Lokale Änderung – für gemeinsames Speichern wird deine PIN benötigt.');
 }
-function showStatus(s,error=false){status.textContent=T(s);status.classList.toggle('error',error);}
+function showStatus(s,error=false){
+ status.textContent=T(s);status.classList.toggle('error',error);refreshSecurityStatus();
+}
+function securityState(){
+ if(!activePlayer?.id||localOnly)return {kind:'local',text:'⚪ Nur lokal gespeichert'};
+ if(version===null)return {kind:'missing',text:pinPending?'🟡 PIN wird eingerichtet …':'🔴 PIN fehlt – Profil noch nicht gesichert'};
+ if(needsPinMigration)return {kind:'missing',text:'🔴 Noch keine persönliche Zahlen-PIN'};
+ if(!canEdit)return {kind:'locked',text:'🔒 Profil gesichert · nur ansehen'};
+ if(dirty||syncInFlight)return {kind:'pending',text:'🟡 Änderungen noch nicht gespeichert'};
+ return {kind:'saved',text:'🟢 Profil gesichert · alle Änderungen gespeichert'};
+}
+function refreshSecurityStatus(){
+ const x=box.querySelector('[data-bear-security]');
+ if(!x)return;const v=securityState();
+ x.className='bear-name-security bear-name-security-'+v.kind;x.textContent=T(v.text);
+}
+function markReadOnly(root){
+ if(canEdit||localOnly)return;
+ root.querySelectorAll('input,select,textarea').forEach(el=>el.disabled=true);
+ root.querySelectorAll('button:not(.bear-name-help-trigger):not(.bear-name-action-btn)').forEach(el=>el.disabled=true);
+}
 function numberField(label,value,onChange,options={}){
  const wrap=el('label','bear-name-field'),span=el('span','',label),input=el('input');
  input.type='number';input.min=options.min??0;input.max=options.max??100000000;input.step=options.step??1;
@@ -64,12 +84,12 @@ function numberField(label,value,onChange,options={}){
  input.addEventListener('change',()=>{const n=input.value===''?null:Number(input.value);
   if(n!==null&&(!Number.isFinite(n)||n<Number(input.min)||n>Number(input.max)))return input.setCustomValidity('Ungültiger Wert');
   input.setCustomValidity('');onChange(n);});
- wrap.append(span,input);return wrap;
+ wrap.append(span,input);return HELP?.decorateField?.(wrap,label)||wrap;
 }
 function choose(label,values,value,onChange){
  const w=el('label','bear-name-field'),caption=el('span','',label),s=el('select');
  for(const [id,title] of values){const o=el('option','',title);o.value=String(id);s.append(o)}s.value=String(value??'');
- s.addEventListener('change',()=>onChange(s.value));w.append(caption,s);return w;
+ s.addEventListener('change',()=>onChange(s.value));w.append(caption,s);return HELP?.decorateField?.(w,label)||w;
 }
 // Kingshot uses five flowers with SIX progress petals each (0..30).
 // Touch a flower to set complete stars, use +/- for one petal / T step.
@@ -77,6 +97,7 @@ let bearFlowerSequence=0;
 function starProgressField(heroName){
  const ns='http://www.w3.org/2000/svg',wrap=el('div','bear-name-star-field');
  const row=el('div','bear-name-star-controls');
+ const sh=HELP?.icon('stars');if(sh)row.append(sh);
  const minus=button('−',()=>changeStep(currentStep-1),'bear-name-star-step');
  const plus=button('+',()=>changeStep(currentStep+1),'bear-name-star-step');
  const flowers=el('div','bear-name-star-flowers');
@@ -178,7 +199,7 @@ function rankAndSelect(){
   result=next;
  }
  v.ownHeroes=result.picked;
- B.save();
+ if(canEdit||localOnly)B.save();
  return result;
 }
 function pack(){
@@ -236,7 +257,7 @@ function legacyNameId(value){
 }
 async function openProfile(value){
  const sequence=++opening;
- clearTimeout(syncTimer);cachedFormationPlan=null;dirty=false;canEdit=false;version=null;needsPinMigration=false;
+ clearTimeout(syncTimer);cachedFormationPlan=null;dirty=false;canEdit=false;version=null;needsPinMigration=false;pinPending=false;
  let player=typeof value==='object'&&value?value:null;
  const requested=(player?.name||String(value||'')).trim().replace(/\s+/g,' ');
  if(!valid(requested)){showStatus('Bitte einen Namen mit mindestens zwei Zeichen eingeben.',true);return;}
@@ -296,12 +317,13 @@ async function openProfile(value){
   }
  }
  mode='';render();
+ if(!localOnly&&version===null&&activePlayer?.id)void unlockProfile();
 }
 async function push(){
  if(!name||syncInFlight||!dirty||!activePlayer?.id||!canEdit||!editKey||localOnly)return;
  const playerId=activePlayer.id,code=editKey,savedVersion=version,
   payload=pack(),serial=editCount;
- syncInFlight=true;clearTimeout(syncTimer);
+ syncInFlight=true;clearTimeout(syncTimer);refreshSecurityStatus();
  try{
   const result=await PROFILES.save(playerId,code,savedVersion,payload);
   if(activePlayer?.id===playerId){
@@ -316,12 +338,13 @@ async function push(){
   else if(err?.status===429){canEdit=false;showStatus('Zu viele Fehlversuche. Bitte nach Ablauf der PIN-Sperre erneut versuchen.',true);}
   else if(err?.status===409)showStatus('Profil wurde inzwischen auf einem anderen Gerät aktualisiert. Bitte neu öffnen und Änderungen vergleichen.',true);
   else showStatus('Online-Speicherung fehlgeschlagen. Änderungen bleiben lokal.',true);
- }finally{syncInFlight=false;}
+ }finally{syncInFlight=false;refreshSecurityStatus();}
 }
 // Masked PIN setup/unlock UI: a leading zero is meaningful.
 function requestNumericPin(create){
  return new Promise(resolve=>{
   const overlay=el('div','bear-name-pin-backdrop');
+  const previousFocus=document.activeElement;
   const panel=el('form','bear-name-pin-dialog');
   panel.setAttribute('role','dialog');panel.setAttribute('aria-modal','true');
   panel.setAttribute('aria-label',create?'PIN festlegen':'PIN eingeben');
@@ -352,9 +375,17 @@ function requestNumericPin(create){
   actions.append(cancel,confirm);panel.append(actions);
   const finish=value=>{
    document.removeEventListener('keydown',escape);
-   overlay.remove();resolve(value);
+   overlay.remove();if(previousFocus?.isConnected)previousFocus.focus();resolve(value);
   };
-  const escape=e=>{if(e.key==='Escape'){e.preventDefault();finish(null);}};
+  const escape=e=>{
+    if(e.key==='Escape'){e.preventDefault();finish(null);return;}
+    if(e.key==='Tab'){
+     const items=[...panel.querySelectorAll('input,button:not([disabled])')];
+     const first=items[0],last=items[items.length-1];
+     if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}
+     else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}
+    }
+   };
   panel.addEventListener('submit',e=>{
    e.preventDefault();
    const pin=secret.value;
