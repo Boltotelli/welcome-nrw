@@ -20,12 +20,12 @@
  // and no scroll through a full 2048px city screen just to tap an icon.
  const GUIDE_CROPS={
   troops:[[0,0,680,350],[0,1450,955,2048],[0,0,885,765]],
-  capacity:[[0,0,680,350],[65,330,1020,790]],
+  capacity:[[0,0,680,350],[68,376,1010,725]],
   combatStats:[[0,0,680,350],[65,850,1020,1450],[65,335,1020,1640]],
-  heroes:[[0,1590,955,2048],[25,110,930,1155],[210,1000,1080,1920]],
+  heroes:[[0,1590,955,2048],[20,100,935,890],[210,1000,1080,1920]],
   expedition:[[0,855,955,2048],[0,855,955,2048]],
-  pets:[[60,295,910,1180],[60,1030,1030,1650]],
-  valora:[[200,795,825,1280],[25,920,920,2048],[20,1060,935,2048]]
+  pets:[[60,320,910,1095],[65,1155,1010,1555]],
+  valora:[[200,795,825,1280],[28,1040,911,1940],[20,1240,935,2048]]
  };
  // Markers: x1,y1,x2,y2 in ORIGINAL screenshots.
  const box=(rect,text,color='gold')=>({rect,text,color});
@@ -53,8 +53,8 @@
     image:'city',marks:[box([117,68,376,135],'Persönliche Kraft')]},
    {text:'Scrolle in der „Bonus Overview“ zu „Military“. Übertrage „Deployment Capacity“ (hier: 112.100). „March Queue“ ist lediglich die Anzahl möglicher Märsche und NICHT die Truppenkapazität. Zusätzliche Helden-, Pet-, Valora- und Marschall-Boni nicht selbst hinzurechnen.',
     image:'bonus',marks:[
-     box([75,335,855,411],'Military','blue'),
-     box([79,499,852,589],'Deployment Capacity: 112.100','green')
+     box([92,396,988,483],'Military','blue'),
+     box([92,577,988,686],'Deployment Capacity: 112.100','green')
     ]}
   ]},
   combatStats:{title:'Schwadron, Infanterie, Kavallerie und Bogenschützen',steps:[
@@ -80,9 +80,9 @@
     image:'city',marks:[box([170,1900,332,2044],'Heroes öffnen')]},
    {text:'Markiere im Optimierer alle Helden, die du besitzt. Lies ihre Sternstufe und den Fortschritt anhand der Blumen unter jedem Porträt ab. Alle Helden gelten im Rechner als Level 80. Wichtig: „S4“, „S5“ usw. oben rechts bezeichnen die Heldengeneration, NICHT die Anzahl Sterne.',
     image:'heroes',marks:[
-     box([215,115,417,426],'Besessener Held','green'),
-     box([232,381,416,427],'Blumen = Sternfortschritt','gold'),
-     box([369,118,407,162],'S5 = Generation, nicht Sterne','blue')
+     box([270,193,463,438],'Besessener Held','green'),
+     box([264,443,465,491],'Blumen = Sternfortschritt','gold'),
+     box([410,134,467,184],'S5 = Generation, nicht Sterne','blue')
     ]},
    {text:'Tippe bei einem goldenen Helden auf sein Porträt, öffne „Gear“ und suche unten das exklusive Widget. Beim gezeigten Long Fei beträgt „Immortal’s Flask +5“ das Widget-Level 5. Die Ausrüstung links und rechts vom Helden ist NICHT das Widget.',
     image:'widget',marks:[
@@ -105,14 +105,14 @@
   pets:{title:'Pet-Buffs: Fähigkeiten und Level',steps:[
    {text:'Öffne „Pet Skill“. Die gekreuzten Schwerter kennzeichnen Kampffähigkeiten; das „Lv.“ auf jedem Symbol zeigt das Fähigkeitslevel. Tippe die relevante Fähigkeit an, um ihren Namen und ihre tatsächliche Wirkung zu überprüfen.',
     image:'pets',marks:[
-     box([79,565,157,652],'Kampf-Symbol','orange'),
-     box([101,685,245,782],'Level unter dem Pet-Symbol','green'),
-     box([85,577,245,787],'Beispiel-Fähigkeit öffnen','gold')
+     box([88,696,147,752],'Kampf-Symbol','orange'),
+     box([163,823,251,872],'Level unter dem Pet-Symbol','green'),
+     box([148,755,255,820],'Beispiel-Fähigkeit öffnen','gold')
     ]},
    {text:'In den Details stehen Fähigkeitsname, Level, Wirkungsdauer und Cooldown. Beispiel: „Antler Impact Lv. 5“ gibt 100.000 RALLY-Kapazität für 2 Stunden – das ist NICHT deine persönliche Marschkapazität. Aktiviere im Optimierer nur Pet-Buffs, die während der Bärenfalle tatsächlich wirken. Ein Cooldown allein beweist keinen aktiven Bonus.',
     image:'petDetail',marks:[
-     box([72,1151,691,1221],'Antler Impact Lv. 5','gold'),
-     box([86,1260,900,1379],'+100.000 Rally Capacity, nicht March Capacity','green')
+     box([96,1184,574,1257],'Antler Impact Lv. 5','gold'),
+     box([96,1255,895,1390],'+100.000 Rally Capacity, nicht March Capacity','green')
     ]}
   ]},
   valora:{title:'Valora: Hunter Instinct und Savage Advantage',steps:[
@@ -120,14 +120,16 @@
     image:'valoraBuilding',marks:[box([304,931,709,1260],'Meistergebäude öffnen')]},
    {text:'Öffne Valoras „Stats“ und tippe auf das Fähigkeitssymbol unten links. „Hunter Instinct Lv. 9“ gibt hier +24 % eigene Bear Hunt Damage Points. Der „Next Level Bonus“ (+27 %) gilt noch NICHT. Die Beziehungsstufe „Close 2“ oben links ist ebenfalls kein Fähigkeitslevel.',
     image:'valoraHunter',marks:[
-     box([48,1510,214,1680],'Hunter Instinct Level 9','gold'),
-     box([52,958,632,1445],'Current Bonus: +24 %','green')
+     box([65,1064,469,1155],'Hunter Instinct Level 9','gold'),
+     box([505,1272,615,1350],'Current Bonus: +24 %','green'),
+     box([54,1756,170,1898],'Hunter-Instinct-Symbol unten links','blue')
     ]},
    {text:'Wechsle zu „Skills“ und tippe unten rechts auf „Savage Advantage“. Das gezeigte Level 10 bringt +30.000 Bear Hunt Squad Capacity. WICHTIG: Hunter Instinct und Savage Advantage haben UNABHÄNGIGE Fähigkeitslevel; keinesfalls automatisch für beide denselben Wert eintragen.',
     image:'valoraSavage',marks:[
-     box([635,1400,923,1650],'Savage Advantage Level 10','gold'),
-     box([43,1134,898,1444],'+30.000 Bear Hunt Squad Capacity','green'),
-     box([418,1835,918,2048],'Skills','blue')
+     box([73,1327,639,1452],'Savage Advantage Level 10','gold'),
+     box([74,1453,918,1575],'+30.000 Bear Hunt Squad Capacity','green'),
+     box([735,1658,931,1886],'Savage Advantage – Fähigkeit unten rechts','orange'),
+     box([474,1920,935,2048],'Skills','blue')
     ]}
   ]}
  };
