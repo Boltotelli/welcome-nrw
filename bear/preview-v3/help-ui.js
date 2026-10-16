@@ -63,7 +63,7 @@
     ]}
   ]},
   heroes:{title:'Heldenübersicht, Sterne und Widget',steps:[
-   {text:'Tippe in der Stadtansicht unten auf „Heroes“.',
+   {text:'Tippe in der Stadtansicht unten in der Menüleiste auf „Heroes“, um deine gesamte Heldenübersicht zu öffnen.',
     image:'city',marks:[box([170,1900,332,2044],'Heroes öffnen')]},
    {text:'Markiere im Optimierer alle Helden, die du besitzt. Lies ihre Sternstufe und den Fortschritt anhand der Blumen unter jedem Porträt ab. Alle Helden gelten im Rechner als Level 80. Wichtig: „S4“, „S5“ usw. oben rechts bezeichnen die Heldengeneration, NICHT die Anzahl Sterne.',
     image:'heroes',marks:[
