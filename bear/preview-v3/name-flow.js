@@ -460,6 +460,7 @@ async function leaveProfile(){
 function rosterSection(){
  const section=el('section','bear-name-panel'),head=title('Deine Helden');
  section.append(head,el('p','bear-name-muted','Anklicken = im Besitz. Alle Helden gelten als Level 80. Sterne/Tier und bei goldenen Helden Widget einstellen.'));
+ const heroHelp=HELP?.icon('heroes');if(heroHelp)section.append(heroHelp);
  const selected=state().v2.scannedOwnedHeroes;
  const groups=new Map();
  heroList.forEach((h,i)=>{const season=i<16?1:Math.min(8,Math.floor((i-16)/3)+2);if(!groups.has(season))groups.set(season,[]);groups.get(season).push(h);});
@@ -510,7 +511,11 @@ const openPanels=new Map();
 function foldingPanel(key,label,content,defaultOpen=false){
  const details=el('details','bear-name-panel bear-name-fold');
  details.open=openPanels.has(key)?openPanels.get(key):defaultOpen;
- details.append(el('summary','bear-name-fold-heading',label),content);
+ const heading=el('summary','bear-name-fold-heading',label);
+ const helpKey={troops:'troops',baseStats:'stats',ministers:'ministers',pets:'pets'}[key];
+ const info=helpKey?HELP?.icon(helpKey):null;
+ if(info)heading.append(info);
+ details.append(heading,content);
  details.addEventListener('toggle',()=>{
   if(details.isConnected)openPanels.set(key,details.open);
  });
@@ -1147,6 +1152,22 @@ function render(){
    unlockProfile,'bear-name-code-btn'));
 
  box.append(bar);
+ const security=el('div','bear-name-security');
+ security.dataset.bearSecurity='true';
+ const securityInfo=securityState();security.classList.add('bear-name-security-'+securityInfo.kind);
+ security.textContent=T(securityInfo.text);
+ box.append(security);
+ if(activePlayer?.id&&!localOnly&&(version===null||needsPinMigration)){
+  const panel=el('section','bear-name-pin-urgent');
+  panel.append(title('🔐 WICHTIG: PROFIL MIT PIN SICHERN!','h3'),
+   el('p','',version===null?
+    'Bevor du Werte eingeben kannst, muss dein Profil mit einer persönlichen 4- bis 6-stelligen Zahlen-PIN geschützt werden.':
+    'Für dieses bestehende Profil ist eine Umstellung auf die persönliche Zahlen-PIN erforderlich.'));
+  const btn=button(version===null?'🔐 JETZT PIN FESTLEGEN':'🔐 EIGENE PIN EINRICHTEN',
+   unlockProfile,'bear-name-pin-urgent-btn');
+  btn.disabled=pinPending;panel.append(btn);box.append(panel);
+  if(version===null)return; // no editable forms before successful PIN claim
+ }
  if(!mode){
   const options=el('section','bear-name-choice');
   options.append(title('Was möchtest du optimieren?'),
@@ -1162,15 +1183,16 @@ function render(){
   left.append(choose('Märsche insgesamt',Array.from({length:7},(_,i)=>[i+1,String(i+1)]),
    Number(v.joinCount||0)+1,x=>{v.joinCount=Number(x)-1;saveLocal();render();}),rallyStrengthField(),rosterSection());
   left.append(troopsSection(false));
-  right.append(summaryHeroes().section,actionButtons(false));main.append(left,right);box.append(main);
+  right.append(summaryHeroes().section,actionButtons(false));main.append(left,right);box.append(main);markReadOnly(main);
  }else{
   const main=el('div','bear-name-two-columns'),left=el('div'),right=el('div');
   left.append(rosterSection(),troopsSection(true),scalarSection());
   const r=summaryHeroes();right.append(r.section,starterGearSection(r.picked),actionButtons(true));
-  main.append(left,right);box.append(main);
+  main.append(left,right);box.append(main);markReadOnly(main);
  }
  // Recent profile ordering is managed separately from saved model values.
  if(activePlayer)PROFILES?.remember(activePlayer);
+ refreshSecurityStatus();
 }
 render();
 // The public reference loads asynchronously. Update a visible recommendation
