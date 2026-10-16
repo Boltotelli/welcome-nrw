@@ -349,7 +349,7 @@ jobs:
           echo 'Validated: physical coefficients, audited hero coupling, scenario weighting, deterministic shared inventory, stock-safe integer percent, no infantry floor.'
           grep -Fq 'preview-v3/joiner-skills.js' _site/bear/preview-v3.html
           grep -Fq 'formation-core.js?v=20261013-priority-2' _site/bear/preview-v3.html
-          grep -Fq 'name-flow.js?v=20261016-security-help-1' _site/bear/preview-v3.html
+          grep -Fq 'name-flow.js?v=20261016-security-help-2' _site/bear/preview-v3.html
           grep -Fq 'name-flow.css?v=20261016-security-help-1' _site/bear/preview-v3.html
           grep -Fq 'i18n.js?v=20261013-priority-pin-2' _site/bear/preview-v3.html
           grep -Fq 'const expandedSeasons=new Set();' _site/bear/preview-v3/name-flow.js
