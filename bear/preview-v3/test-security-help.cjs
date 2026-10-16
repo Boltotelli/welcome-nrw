@@ -6,7 +6,7 @@ const fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
 const read=n=>fs.readFileSync(path.join(__dirname,n),'utf8');
 const ui=read('name-flow.js'),help=read('help-ui.js'),css=read('name-flow.css'),
  html=read('../preview-v3.html');
-assert(html.includes('help-ui.js?v=20261016-security-help-2'));
+assert(html.includes('help-ui.js?v=20261016-security-help-3'));
 assert(html.indexOf('help-ui.js?v=20261016-security-help-2')<
  html.indexOf('name-flow.js?v=20261016-security-help-1'),
  'Help functions must exist before the deferred form script');
