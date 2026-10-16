@@ -15,20 +15,32 @@
   valoraBuilding:[0,360,955,1560],
   valoraHunter:[0,900,955,2048],valoraSavage:[0,855,955,2048]
  };
+ // The pack holds genuine screenshots at their original crop aspect ratios.
+ // Crop again IN THE VIEWER to show only the relevant area: no extra images
+ // and no scroll through a full 2048px city screen just to tap an icon.
+ const GUIDE_CROPS={
+  troops:[[0,0,680,350],[0,1450,955,2048],[0,0,955,765]],
+  capacity:[[0,0,680,350],[65,330,1020,790]],
+  combatStats:[[0,0,680,350],[65,850,1020,1450],[65,335,1020,1640]],
+  heroes:[[0,1590,955,2048],[25,110,930,1155],[210,1000,1080,1920]],
+  expedition:[[0,855,955,2048],[0,855,955,2048]],
+  pets:[[60,295,910,1180],[60,1030,1030,1650]],
+  valora:[[200,795,825,1280],[25,920,920,2048],[20,1060,935,2048]]
+ };
  // Markers: x1,y1,x2,y2 in ORIGINAL screenshots.
  const box=(rect,text,color='gold')=>({rect,text,color});
  const GUIDES={
   troops:{title:'Truppen: Anzahl, T-Level und TG-Level',steps:[
    {text:'Tippe oben links auf dein Profilbild, um dein Gouverneursprofil zu öffnen.',
-    image:'city',marks:[box([0,0,121,120],'Profilbild oben links')]},
+    image:'city',marks:[box([0,0,115,114],'Profilbild oben links')]},
    {text:'Im Gouverneursprofil findest du unten den Button „Squad“. Tippe darauf, um die vollständige Truppenübersicht zu öffnen.',
-    image:'governor',marks:[box([235,1890,477,2046],'Squad öffnen')]},
+    image:'governor',marks:[box([245,1900,478,2042],'Squad öffnen')]},
    {text:'Wähle „All“, damit auch Truppen außerhalb der Stadt erfasst werden. Übertrage jeden Truppentyp, seine Anzahl, die römische T-Stufe unter dem Symbol und die goldene TG-Stufe oben rechts. Für verschiedene T-/TG-Stufen desselben Truppentyps jeweils eine eigene Zeile anlegen.',
     image:'troops',marks:[
-     box([30,103,285,229],'„All“ – alle Truppen','gold'),
-     box([170,420,407,502],'Name und Anzahl','green'),
-     box([105,480,146,518],'T-Level: X = T10','blue'),
-     box([155,401,184,450],'TG-Level: 6 = TG6','orange')
+     box([30,120,324,235],'„All“ – alle Truppen','gold'),
+     box([202,476,427,563],'Name und Anzahl','green'),
+     box([119,537,162,585],'T-Level: X = T10','blue'),
+     box([157,461,207,515],'TG-Level: 6 = TG6','orange')
     ]}
   ]},
   march:{title:'Anzahl aller Märsche',steps:[
@@ -49,17 +61,17 @@
     image:'city',marks:[box([115,66,376,135],'Persönliche Kraft')]},
    {text:'Im Bereich „Military“ findest du „Squads’ Attack“ und „Squads’ Lethality“. Hier sind es 276,3 % Angriff und 60,1 % Tödlichkeit. Defense und Health werden nicht abgefragt.',
     image:'bonus',marks:[
-     box([80,934,853,1024],'Squads’ Attack: 276,3 %','green'),
-     box([80,1107,853,1195],'Squads’ Lethality: 60,1 %','gold')
+     box([80,1080,853,1185],'Squads’ Attack: 276,3 %','green'),
+     box([80,1290,853,1395],'Squads’ Lethality: 60,1 %','gold')
     ]},
    {text:'Scrolle weiter nach unten. Notiere je Truppentyp die Werte „Attack“ und „Lethality“: Infanterie 184,4 / 276,5 %, Kavallerie 174,9 / 250,7 %, Bogenschützen 252,9 / 318,8 %. Defense und Health ignorieren. Nur getrennte, nicht schon zusammengerechnete Werte ohne temporäre aktive Boni eintragen.',
     image:'combat',marks:[
-     box([80,344,847,431],'Infanterie Angriff','green'),
-     box([80,612,847,698],'Infanterie Tödlichkeit','green'),
-     box([80,699,847,787],'Kavallerie Angriff','gold'),
-     box([80,962,847,1055],'Kavallerie Tödlichkeit','gold'),
-     box([80,1056,847,1145],'Bogenschützen Angriff','blue'),
-     box([80,1322,847,1411],'Bogenschützen Tödlichkeit','blue')
+     box([80,400,847,500],'Infanterie Angriff','green'),
+     box([80,700,847,797],'Infanterie Tödlichkeit','green'),
+     box([80,800,847,899],'Kavallerie Angriff','gold'),
+     box([80,1100,847,1198],'Kavallerie Tödlichkeit','gold'),
+     box([80,1200,847,1298],'Bogenschützen Angriff','blue'),
+     box([80,1500,847,1600],'Bogenschützen Tödlichkeit','blue')
     ]}
   ]},
   heroes:{title:'Heldenübersicht, Sterne und Widget',steps:[
@@ -147,41 +159,56 @@
    else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}
   }
  }
- function photo(step){
+ function photo(step,guideKey,stepIndex){
   const source=root.NRW_BEAR_HELP_IMAGES?.[step.image];
   if(!source)return node('p','bear-name-help-pending','📷 Bild lädt …');
-  const pane=node('div','bear-name-help-photo-scroll');
-  const canvas=node('div','bear-name-help-photo');
+  const sourceRect=CROPS[step.image],focusRect=GUIDE_CROPS[guideKey]?.[stepIndex]||sourceRect;
+  const [ox,oy,or,ob]=sourceRect,[x,y,r,b]=focusRect;
+  const srcWidth=or-ox,srcHeight=ob-oy;
+  const width=r-x,height=b-y;
+  if(x<ox||y<oy||r>or||b>ob||width<=0||height<=0){
+   console.error('[Bear Help] Invalid crop bounds',guideKey,stepIndex);
+   return node('p','bear-name-help-pending','Bildbereich vorübergehend nicht verfügbar.');
+  }
+  const pane=node('div','bear-name-help-photo-scroll'),canvas=node('div','bear-name-help-photo');
+  canvas.style.aspectRatio=width+' / '+height;
+  // Scale the screenshot so its ORIGINAL pixel coordinates still map 1:1
+  // to the focused viewport, even if the WebP was resized at build time.
+  const maxImageHeight=Math.max(205,Math.min(400,Math.round((window.visualViewport?.height||window.innerHeight||780)*0.44)));
+  canvas.style.width='min(100%, '+Math.round(width/height*maxImageHeight)+'px)';
   const img=node('img','bear-name-help-image');img.src=source;
-  img.alt='Original Kingshot-Screenshot: '+step.image;img.loading='eager';
-  img.draggable=false;canvas.append(img);
-  const crop=CROPS[step.image],width=crop[2]-crop[0],height=crop[3]-crop[1];
+  img.alt='Original Kingshot-Screenshot: '+step.image;img.loading='eager';img.draggable=false;
+  img.style.position='absolute';
+  img.style.width=(srcWidth/width*100)+'%';
+  img.style.height=(srcHeight/height*100)+'%';
+  img.style.left=(-(x-ox)/width*100)+'%';
+  img.style.top=(-(y-oy)/height*100)+'%';
+  canvas.append(img);
   const legend=node('div','bear-name-help-legend');
   (step.marks||[]).forEach((mark,index)=>{
-   let [l,t,r,b]=mark.rect;
-   l=Math.max(crop[0],l);r=Math.min(crop[2],r);
-   t=Math.max(crop[1],t);b=Math.min(crop[3],b);
-   if(r<=l||b<=t)return;
+   let [left,top,right,bottom]=mark.rect;
+   left=Math.max(x,left);right=Math.min(r,right);
+   top=Math.max(y,top);bottom=Math.min(b,bottom);
+   if(right<=left||bottom<=top)return;
    const frame=node('span','bear-name-help-marker bear-name-help-marker-'+mark.color);
-   frame.style.left=((l-crop[0])/width*100).toFixed(3)+'%';
-   frame.style.top=((t-crop[1])/height*100).toFixed(3)+'%';
-   frame.style.width=((r-l)/width*100).toFixed(3)+'%';
-   frame.style.height=((b-t)/height*100).toFixed(3)+'%';
-   const number=node('span','bear-name-help-marker-number',String(index+1));
-   frame.append(number);canvas.append(frame);
+   frame.style.left=((left-x)/width*100).toFixed(3)+'%';
+   frame.style.top=((top-y)/height*100).toFixed(3)+'%';
+   frame.style.width=((right-left)/width*100).toFixed(3)+'%';
+   frame.style.height=((bottom-top)/height*100).toFixed(3)+'%';
+   frame.append(node('span','bear-name-help-marker-number',String(index+1)));
+   canvas.append(frame);
    const label=node('div','bear-name-help-legend-item');
    label.append(node('span','bear-name-help-legend-number bear-name-help-legend-'+mark.color,String(index+1)),
     node('span','',mark.text));
    legend.append(label);
   });
   pane.append(canvas);
-  const zoom=node('button','bear-name-help-zoom','🔍 Bild vergrößern');
-  zoom.type='button';zoom.addEventListener('click',()=>{
+  const zoom=node('button','bear-name-help-zoom','🔍 Bild vergrößern');zoom.type='button';
+  zoom.addEventListener('click',()=>{
    const expanded=pane.classList.toggle('zoomed');
    zoom.textContent=expanded?'Bild verkleinern':'🔍 Bild vergrößern';
   });
-  const group=node('div','bear-name-help-visual');
-  group.append(pane,zoom,legend);
+  const group=node('div','bear-name-help-visual');group.append(pane,zoom,legend);
   return group;
  }
  function open(key){
@@ -208,7 +235,7 @@
    const step=guide.steps[index];contents.replaceChildren();
    const note=node('p','bear-name-help-explainer',step.text);contents.append(note);
    if(step.image){
-    if(root.NRW_BEAR_HELP_IMAGES?.[step.image])contents.append(photo(step));
+    if(root.NRW_BEAR_HELP_IMAGES?.[step.image])contents.append(photo(step,key,index));
     else{
      contents.append(node('p','bear-name-help-pending','📷 Screenshot wird geladen …'));
      void loadImages().then(ok=>{
@@ -259,5 +286,5 @@
   return container;
  }
  decorateField.count=0;
- root.NRW_BEAR_HELP={icon,decorateField,open,GUIDES,CROPS};
+ root.NRW_BEAR_HELP={icon,decorateField,open,GUIDES,CROPS,GUIDE_CROPS};
 })(window);
