@@ -21,7 +21,7 @@
   troops:{title:'Truppen: Anzahl, T-Level und TG-Level',steps:[
    {text:'Tippe oben links auf dein Profilbild, um dein Gouverneursprofil zu öffnen.',
     image:'city',marks:[box([0,0,121,120],'Profilbild oben links')]},
-   {text:'Tippe unten auf „Squad“, um die Truppenübersicht zu öffnen.',
+   {text:'Im Gouverneursprofil findest du unten den Button „Squad“. Tippe darauf, um die vollständige Truppenübersicht zu öffnen.',
     image:'governor',marks:[box([235,1890,477,2046],'Squad öffnen')]},
    {text:'Wähle „All“, damit auch Truppen außerhalb der Stadt erfasst werden. Übertrage jeden Truppentyp, seine Anzahl, die römische T-Stufe unter dem Symbol und die goldene TG-Stufe oben rechts. Für verschiedene T-/TG-Stufen desselben Truppentyps jeweils eine eigene Zeile anlegen.',
     image:'troops',marks:[
