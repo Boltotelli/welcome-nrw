@@ -314,3 +314,13 @@ body.bear-name-mode>*:not(#bearNewApp){display:none!important}
 .bear-name-help-counter{color:#b9cddd;font-size:13px}
 @media(prefers-reduced-motion:reduce){.bear-name-pin-urgent-btn:not(:disabled){animation:none!important}.bear-name-help-dialog,.bear-name-pin-dialog{scroll-behavior:auto}}
 @media(max-width:450px){.bear-name-pin-urgent{padding:13px}.bear-name-pin-urgent-btn{font-size:15px!important}.bear-name-help-dialog{padding:13px}.bear-name-help-explainer{font-size:15px}}
+
+/* One contextual info action per heading/section, never per individual hero
+ * or unit row. Aligned with the title in both desktop and narrow view. */
+.bear-name-help-heading{display:flex;flex-wrap:wrap;align-items:center;gap:9px;margin:4px 0 12px;min-width:0}
+.bear-name-help-heading h2,.bear-name-help-heading h3{margin:0;line-height:1.3;min-width:0}
+.bear-name-help-heading .bear-name-help-trigger{flex:none}
+.bear-name-buff-title>.bear-name-help-trigger{margin-left:auto;flex:none}
+.bear-name-field-heading label{display:block;min-width:0;overflow-wrap:anywhere}
+.bear-name-field-heading{align-items:center}
+@media(max-width:530px){.bear-name-help-heading{gap:6px}.bear-name-help-heading h2{font-size:clamp(18px,5vw,23px)}}
