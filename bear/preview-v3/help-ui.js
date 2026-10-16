@@ -19,7 +19,7 @@
  // Crop again IN THE VIEWER to show only the relevant area: no extra images
  // and no scroll through a full 2048px city screen just to tap an icon.
  const GUIDE_CROPS={
-  troops:[[0,0,680,350],[0,1450,955,2048],[0,0,885,665]],
+  troops:[[0,0,680,350],[0,1450,955,2048],[0,0,885,765]],
   capacity:[[0,0,680,350],[65,330,1020,790]],
   combatStats:[[0,0,680,350],[65,850,1020,1450],[65,335,1020,1640]],
   heroes:[[0,1590,955,2048],[25,110,930,1155],[210,1000,1080,1920]],
@@ -38,10 +38,10 @@
    {text:'Wähle „All“, damit auch Truppen außerhalb der Stadt erfasst werden. Bei jedem Truppentyp findest du die Anzahl unter dem Namen, das T-Level als römische Zahl unter dem Symbol (X = T10) und das TG-Level als goldene Zahl oben rechts (6 = TG6). Unterschiedliche Stufen desselben Typs als eigene Zeilen eintragen.',
     image:'troops',marks:[
      box([26,106,283,205],'„All“ – alle Truppen','gold'),
-     box([173,426,367,455],'Typ: Apex Infantry','green'),
-     box([171,461,327,497],'Anzahl: 637.997','green'),
-     box([108,475,144,512],'T-Level: X = T10','blue'),
-     box([141,405,181,446],'TG-Level: goldene 6 = TG6','orange')
+     box([207,490,411,525],'Typ: Apex Infantry','green'),
+     box([207,526,347,568],'Anzahl: 637.997','green'),
+     box([125,540,178,581],'T-Level: X = T10','blue'),
+     box([149,461,205,510],'TG-Level: goldene 6 = TG6','orange')
     ]}
   ]},
   march:{title:'Anzahl aller Märsche',steps:[
