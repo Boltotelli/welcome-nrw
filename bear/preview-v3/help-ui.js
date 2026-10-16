@@ -21,12 +21,13 @@
  // Screenshots will be supplied by the owner. Add {url,alt} entries here
  // only after original Kingshot images have been provided and verified.
  const HELP_ASSETS=Object.create(null);
- let dialog=null,previousFocus=null;
+ let dialog=null,previousFocus=null,fieldId=0;
  const node=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n;};
  function resolveField(label){
   const s=String(label);
   if(/TG|^T$|^Typ$/.test(s))return 'tier';
   if(/^Anzahl$/.test(s))return 'troops';
+  if(/^Fähigkeitslevel$/.test(s))return 'pets';
   if(/Kapazität/.test(s))return 'capacity';
   if(/Schwadron.*(Angriff|Tödlichkeit)/.test(s))return 'squad';
   if(/Expeditions-/.test(s))return 'expedition';
@@ -102,13 +103,20 @@
   return b;
  }
  function decorateField(wrapper,label){
-  const key=resolveField(label);
-  if(!key)return wrapper;
-  const span=wrapper.querySelector('span');
-  if(!span)return wrapper;
-  const row=node('span','bear-name-field-heading');
-  span.replaceWith(row);row.append(span,icon(key));
-  return wrapper;
+  const key=resolveField(label);if(!key)return wrapper;
+  const field=wrapper.querySelector('input,select');
+  const originalTitle=wrapper.querySelector('span');
+  if(!field||!originalTitle)return wrapper;
+  // Never put an interactive button inside a <label>: screen readers and
+  // browsers must still associate the caption with the actual form control.
+  const container=node('div','bear-name-field');
+  const heading=node('div','bear-name-field-heading');
+  const caption=node('label');
+  const id='nrw-bear-help-field-'+(++fieldId);
+  field.id=id;caption.htmlFor=id;caption.append(originalTitle);
+  heading.append(caption,icon(key));
+  container.append(heading,field);
+  return container;
  }
  root.NRW_BEAR_HELP={icon,decorateField,open,resolveField};
 })(window);
