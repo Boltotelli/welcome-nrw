@@ -982,7 +982,9 @@ function refreshHeroRecommendations(){
   // Rebuild the equipment inputs ONLY when actual recommended starter
   // identities change. Other input values/focus remain undisturbed.
   if(gear&&previous.join('\u0000')!==result.picked.join('\u0000')){
-   gear.replaceWith(starterGearSection(result.picked));
+   const updatedGear=starterGearSection(result.picked);
+   markReadOnly(updatedGear);
+   gear.replaceWith(updatedGear);
   }
   // Any previously calculated damage result no longer reflects the edited hero.
   document.getElementById('bearAdvancedResult')?.remove();
