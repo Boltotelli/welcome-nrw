@@ -275,3 +275,42 @@ body.bear-name-mode>*:not(#bearNewApp){display:none!important}
 .bear-name-pin-input:focus-visible{outline:2px solid #ffd78c}
 .bear-name-pin-error{margin:0;min-height:18px;color:#ffbcae;font-size:13px}
 .bear-name-pin-actions{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+
+
+/* PIN security: unmistakable without hijacking navigation or accessibility. */
+.bear-name-security{padding:11px 14px;border-radius:12px;border:1px solid #5b6e81;background:#1d2d42;color:#dfedf9;font-weight:800;margin:8px 0 14px}
+.bear-name-security-missing{border-color:#ee835c;background:#492a25;color:#ffe5bf}
+.bear-name-security-pending{border-color:#ebc36e;background:#443821;color:#fff0bd}
+.bear-name-security-saved{border-color:#65b99b;background:#1c4437;color:#c3f8dc}
+.bear-name-security-locked{border-color:#607d9f;background:#23344b;color:#d1e5fb}
+.bear-name-pin-urgent{border:2px solid #ffd178;border-radius:18px;background:linear-gradient(135deg,#4b281e,#4a3924 60%,#2b3441);padding:18px;margin:15px 0 20px;color:#fff2d4;box-shadow:0 0 0 3px #d8ab4d3b}
+.bear-name-pin-urgent h3{color:#ffe19d;font-weight:900;margin:0 0 8px;font-size:clamp(19px,4vw,26px);line-height:1.3}
+.bear-name-pin-urgent p{margin:6px 0 13px;line-height:1.55}
+.bear-name-pin-urgent-btn{border:2px solid #fff3bb!important;background:linear-gradient(120deg,#ffd872,#fb8727)!important;color:#332009!important;border-radius:13px!important;padding:13px 18px!important;min-height:54px;font-size:17px!important;font-weight:1000!important;width:min(100%,500px);box-shadow:0 0 0 4px #ffb7424f,0 0 24px #fdac485e}
+.bear-name-pin-urgent-btn:focus-visible{outline:3px solid #fff;outline-offset:4px}
+.bear-name-pin-urgent-btn:disabled{opacity:.6;animation:none}
+@keyframes bear-pin-shake{0%,7%,14%,100%{transform:rotate(0)}2%,6%{transform:rotate(-5deg)}4%,9%{transform:rotate(5deg)}11%{transform:rotate(-3deg)}}
+@keyframes bear-pin-glow{0%,100%{box-shadow:0 0 0 3px #ffa33033,0 0 10px #ffb64c88}50%{box-shadow:0 0 0 7px #ffa33088,0 0 26px #ffb64c}}
+.bear-name-pin-urgent-btn:not(:disabled){animation:bear-pin-shake 2.8s ease-in-out infinite,bear-pin-glow 1.3s ease-in-out infinite}
+.bear-name-pin-urgent-btn:hover{filter:brightness(1.15)}
+.bear-name-app button:disabled,.bear-name-app select:disabled,.bear-name-app input:disabled{cursor:not-allowed}
+.bear-name-field-heading{display:flex;align-items:center;gap:6px;justify-content:space-between;min-width:0}
+.bear-name-field-heading>span:first-child{min-width:0;overflow-wrap:anywhere}
+.bear-name-help-trigger{display:inline-grid;place-items:center;vertical-align:middle;flex:none;border:1px solid #92bfd6!important;border-radius:50%!important;background:#19384a!important;color:#e7f9ff!important;font-size:15px!important;font-weight:900!important;font-family:Georgia,serif!important;font-style:italic!important;width:30px!important;height:30px!important;padding:0!important;line-height:1}
+.bear-name-help-trigger:focus-visible{outline:3px solid #ffe0a5;outline-offset:3px}
+.bear-name-fold-heading .bear-name-help-trigger{margin-left:8px}
+.bear-name-help-backdrop{position:fixed;inset:0;z-index:9500;display:grid;place-items:center;padding:16px;background:#060d17df}
+.bear-name-help-dialog{width:min(100%,580px);max-height:90%;overflow:auto;padding:18px;border-radius:16px;border:1px solid #8daac5;background:#20344c;color:#edf3f8;box-shadow:0 20px 80px #000b}
+.bear-name-help-top{display:flex;gap:10px;align-items:flex-start;justify-content:space-between}
+.bear-name-help-top h3{margin:0;color:#ffdfa1;font-size:21px}
+.bear-name-help-close{color:#fff!important;background:#314a64!important;border-radius:10px!important;border:1px solid #627a91!important;font-size:25px!important;min-width:44px;min-height:44px}
+.bear-name-help-content{padding:8px 0 14px;line-height:1.55}
+.bear-name-help-explainer{font-size:16px}
+.bear-name-help-pending{padding:15px;border:1px dashed #7b95a9;background:#17283a;border-radius:10px;color:#c8d9e7;font-size:13px}
+.bear-name-help-image{width:100%;max-height:410px;object-fit:contain;border-radius:12px;cursor:zoom-in}
+.bear-name-help-image.expanded{max-height:none}
+.bear-name-help-nav{display:flex;align-items:center;gap:9px;justify-content:space-between;flex-wrap:wrap}
+.bear-name-help-nav button[hidden]{display:none!important}
+.bear-name-help-counter{color:#b9cddd;font-size:13px}
+@media(prefers-reduced-motion:reduce){.bear-name-pin-urgent-btn:not(:disabled){animation:none!important}.bear-name-help-dialog,.bear-name-pin-dialog{scroll-behavior:auto}}
+@media(max-width:450px){.bear-name-pin-urgent{padding:13px}.bear-name-pin-urgent-btn{font-size:15px!important}.bear-name-help-dialog{padding:13px}.bear-name-help-explainer{font-size:15px}}
