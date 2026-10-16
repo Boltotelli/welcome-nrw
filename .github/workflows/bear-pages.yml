@@ -325,10 +325,12 @@ jobs:
           node --check _site/bear/preview-v3/help-ui.js
           node --check _site/bear/preview-v3/test-security-help.cjs
           node _site/bear/preview-v3/test-security-help.cjs
+          node --check _site/bear/preview-v3/test-help-overlay.cjs
+          node _site/bear/preview-v3/test-help-overlay.cjs
           node --check _site/bear/preview-v3/help-image-pack.js
           node --check _site/bear/preview-v3/test-help-screenshots.cjs
           node _site/bear/preview-v3/test-help-screenshots.cjs
-          grep -Fq 'help-ui.js?v=20261016-final-guides-1' _site/bear/preview-v3.html
+          grep -Fq 'help-ui.js?v=20261016-visible-overlay-1' _site/bear/preview-v3.html
           grep -Fq 'vollständige Truppenübersicht' _site/bear/preview-v3/help-ui.js
           grep -Fq "help-image-pack.js?v=20261016-final-guides-1" _site/bear/preview-v3/help-ui.js
           test -s _site/bear/preview-v3/help-image-pack.js
@@ -338,7 +340,7 @@ jobs:
           grep -Fq "helpHeading('Pets','pets')" _site/bear/preview-v3/name-flow.js
           ! grep -Fq "icon('stars')" _site/bear/preview-v3/name-flow.js
           ! grep -Fq 'function resolveField(label)' _site/bear/preview-v3/help-ui.js
-          grep -Fq 'help-ui.js?v=20261016-final-guides-1' _site/bear/preview-v3.html
+          grep -Fq 'help-ui.js?v=20261016-visible-overlay-1' _site/bear/preview-v3.html
           grep -Fq 'function markReadOnly(root)' _site/bear/preview-v3/name-flow.js
           ! grep -Fq "choose('Herkunft dieser Werte'" _site/bear/preview-v3/name-flow.js
           grep -Fq "m.v2.combatStatOrigin='separate-overview'" _site/bear/preview-v3/name-flow.js
