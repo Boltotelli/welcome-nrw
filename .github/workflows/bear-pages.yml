@@ -382,6 +382,29 @@ jobs:
           grep -Fq '<base href="./">' _site/bear/preview-v3.html
           echo 'Published GitHub Pages V3 at /bear/preview-v3.html'
           # UI update: KAC provider details are now internal-only (2026-10-12).
+      # IMPORTANT: Only the feature branch and GitHub Pages are modified.
+      # Vercel production is built from main; do not commit help experiments there.
+      - name: Apply Pages-only Troops help overlay
+        run: |
+          set -euo pipefail
+          node --check bear/preview-v3/help-ui.js
+          node --check bear/preview-v3/test-pages-troop-help.cjs
+          node bear/preview-v3/test-pages-troop-help.cjs
+          cp bear/preview-v3/help-ui.js _site/bear/preview-v3/help-ui.js
+          node bear/preview-v3/test-pages-troop-help.cjs _site/bear/preview-v3/help-ui.js
+          python3 - <<'PY'
+          from pathlib import Path
+          page=Path('_site/bear/preview-v3.html')
+          text=page.read_text()
+          before='help-ui.js?v=20261016-focused-help-2'
+          after='help-ui.js?v=20261016-pages-troops-1'
+          assert text.count(before)==1, 'Unexpected script version in upstream V3 HTML'
+          page.write_text(text.replace(before,after))
+          print('Pages preview uses the isolated corrected help script')
+          PY
+          grep -Fq 'help-ui.js?v=20261016-pages-troops-1' _site/bear/preview-v3.html
+          grep -Fq "frame.style.background='transparent'" _site/bear/preview-v3/help-ui.js
+          echo 'Pages-only help passed; no changes to main or Vercel.'
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site
