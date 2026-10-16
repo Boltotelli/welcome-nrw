@@ -35,17 +35,36 @@ for(const [key,guide] of Object.entries(api.GUIDES)){
   if(!step.image)continue;
   assert(images[step.image],key+':'+index+' references image without an uploaded original');
   const c=api.CROPS[step.image];assert(c);
+  const focus=api.GUIDE_CROPS[key]?.[index]||c;
+  assert(focus[0]>=c[0]&&focus[1]>=c[1]&&focus[2]<=c[2]&&focus[3]<=c[3],
+   key+':'+index+' focused crop must stay within original source image');
+  assert(focus[2]>focus[0]&&focus[3]>focus[1]);
+  assert((focus[2]-focus[0])/(focus[3]-focus[1])>0.4,
+   key+':'+index+' absurdly narrow screenshot');
+
   references++;
   for(const mark of step.marks||[]){
    const [x1,y1,x2,y2]=mark.rect;
    assert(x1>=c[0]&&x2<=c[2]&&y1>=c[1]&&y2<=c[3]&&x1<x2&&y1<y2,
      'Invalid field marker '+key+':'+index+' '+step.image+' '+mark.text);
    assert(['gold','green','blue','orange'].includes(mark.color));
+   assert(mark.rect[0]>=focus[0]&&mark.rect[1]>=focus[1]&&
+    mark.rect[2]<=focus[2]&&mark.rect[3]<=focus[3],
+    'Highlight clipped by focused image: '+key+':'+index+' '+mark.text);
    markers++;
   }
  }
 }
 assert(references>=17,'Most guide steps must use actual screenshot evidence');
+assert(api.GUIDE_CROPS.troops[0][3]===350,
+ 'First troop screenshot must show only the top of city; no 2048px scrolling');
+const troop=api.GUIDES.troops.steps[2];
+assert.deepEqual(Array.from(troop.marks.find(m=>m.text.startsWith('T-Level')).rect),
+ [119,537,162,585],'T-Level marker must frame the Roman X below troop icon');
+assert.deepEqual(Array.from(troop.marks.find(m=>m.text.startsWith('TG-Level')).rect),
+ [157,461,207,515],'TG marker must frame golden troop generation number');
+assert(api.GUIDE_CROPS.troops[2][3]===765,
+ 'Troop preview should include all three troop types in one compact image');
 assert(markers>=25,'Field-specific marks expected on supplied images');
 assert(!api.GUIDES.march.steps.some(x=>x.image),'March explanation intentionally needs no screenshot');
 assert(api.GUIDES.capacity.steps.some(x=>x.text.includes('March Queue')));
