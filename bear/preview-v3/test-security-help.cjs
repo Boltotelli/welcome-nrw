@@ -43,8 +43,10 @@ assert(css.includes('@keyframes bear-pin-shake'));
 assert(css.includes('@keyframes bear-pin-glow'));
 assert(css.includes('prefers-reduced-motion:reduce'));
 assert(css.includes('.bear-name-help-backdrop'));
-assert(help.includes('const HELP_ASSETS=Object.create(null)'),
- 'Never fabricate screenshot sources');
+assert(help.includes('imgSource=')&&help.includes('root.NRW_BEAR_HELP_IMAGES'),
+ 'Original screenshots must load only when requested');
+assert(html.includes('help-image-pack.js')===false,
+ 'The 13-image pack must be lazy, not loaded on every visit');
 const context={window:{}};
 vm.runInNewContext(help,context,{filename:'help-ui.js'});
 const api=context.window.NRW_BEAR_HELP;
@@ -53,5 +55,9 @@ assert.equal(api.decorateField(mockWrapper,'Rallyleader, denen du beitrittst'),m
 assert.equal(api.decorateField(mockWrapper,'Infanterie · Angriff %'),mockWrapper);
 assert.equal(api.decorateField(mockWrapper,'Widget'),mockWrapper);
 assert.equal(api.icon('ministers'),null);
-assert(help.includes('1 Starter + 6 Joiner'));
+const guide=api.GUIDES;
+assert(guide.march.steps[1].text.includes('1 eigene Starter-Rally + 6 Joiner = 7 Märsche'));
+assert(guide.pets.steps[1].text.includes('NICHT deine persönliche Marschkapazität'));
+assert(guide.valora.steps[2].text.includes('UNABHÄNGIGE Fähigkeitslevel'));
+assert(guide.expedition.steps[1].text.includes('Expedition'));
 console.log('PASS: hard PIN gate, user-selected consolidated [i] help, no per-field automatic clutter, accessible screenshot placeholders');
