@@ -399,41 +399,62 @@ function requestNumericPin(create){
  });
 }
 async function unlockProfile(){
- if(!activePlayer?.id||!PROFILES)return;
+ if(!activePlayer?.id||!PROFILES||pinPending)return;
  const profileId=activePlayer.id,isNew=version===null,migrating=needsPinMigration;
  const oldEditKey=migrating?PROFILES.getLegacyEditKey(profileId):null;
  if(migrating&&!oldEditKey){
-  showStatus('Für die einmalige Umstellung wird der alte Bearbeitungscode aus dem ursprünglichen Browser benötigt.',true);
+  showStatus('Für die Umstellung wird der alte Bearbeitungscode aus dem ursprünglichen Browser benötigt.',true);
   return;
  }
  const pin=await requestNumericPin(isNew||migrating);
- if(pin===null||activePlayer?.id!==profileId)return;
+ if(pin===null){
+  if(isNew&&activePlayer?.id===profileId)await leaveProfile();
+  return;
+ }
+ if(activePlayer?.id!==profileId)return;
+ pinPending=true;render();refreshSecurityStatus();
  try{
-  if(migrating){
+  if(isNew){
+   // PIN creation is server-confirmed before inputs become editable.
+   // A profile created concurrently by another device fails with HTTP 409.
+   const result=await PROFILES.save(profileId,pin,null,pack());
+   if(activePlayer?.id!==profileId)return;
+   version=result.revision;dirty=false;needsPinMigration=false;
+  }else if(migrating){
    const result=await PROFILES.migratePin(profileId,oldEditKey,pin,version);
+   if(activePlayer?.id!==profileId)return;
    version=result.revision;needsPinMigration=false;
    PROFILES.forgetLegacyEditKey(profileId);
-  }else if(!isNew){
-   const r=await PROFILES.verify(profileId,pin);
-   if(!r.canEdit){showStatus('Falsche PIN.',true);return;}
+  }else{
+   const permission=await PROFILES.verify(profileId,pin);
+   if(!permission.canEdit){showStatus('Falsche PIN.',true);return;}
   }
   editKey=pin;PROFILES.storeEditKey(profileId,pin);
-  canEdit=true;render();
-  if(isNew){
-   // Claim the profile once, even if the owner has made no edits yet.
-   dirty=true;editCount++;await push();
-  }else showStatus(migrating?'✓ Bestehendes Profil ohne Datenverlust auf deine neue PIN umgestellt.':'✓ Profil mit deiner PIN freigeschaltet.');
+  canEdit=true;
+  showStatus(isNew?'✓ Profil mit deiner PIN gesichert.':
+   migrating?'✓ Profil ohne Datenverlust auf deine PIN umgestellt.':
+   '✓ Profil mit deiner PIN freigeschaltet.');
  }catch(err){
+  if(activePlayer?.id!==profileId)return;
+  canEdit=false;
   if(err?.status===429){
-   const minutes=Math.max(1,Math.ceil(Number(err.retryAfterSeconds||1800)/60));
-   showStatus('Nach fünf falschen PIN-Versuchen vorübergehend gesperrt ('+minutes+' Min.).',true);
-  }else showStatus('PIN-Prüfung fehlgeschlagen. Änderungen bleiben lokal.',true);
+   const mins=Math.max(1,Math.ceil(Number(err.retryAfterSeconds||1800)/60));
+   showStatus('Zu viele PIN-Versuche. Bitte nach '+mins+' Minuten erneut versuchen.',true);
+  }else if(err?.status===409&&isNew){
+   showStatus('Das Profil wurde zwischenzeitlich eingerichtet. Bitte erneut öffnen.',true);
+   pinPending=false;
+   await openProfile(activePlayer);
+   return;
+  }else showStatus('PIN konnte nicht sicher gespeichert werden. Erneut versuchen.',true);
+ }finally{
+  pinPending=false;
+  if(activePlayer?.id===profileId)render();
  }
 }
 async function leaveProfile(){
  clearTimeout(syncTimer);
  if(dirty&&canEdit&&!localOnly){await push();if(dirty){showStatus('Nicht online gespeichert. Lokale Daten bleiben erhalten.',true);return;}}
- name='';mode='';activePlayer=null;editKey=null;canEdit=false;localOnly=false;version=null;needsPinMigration=false;legacyCombinedStats=false;
+ name='';mode='';activePlayer=null;editKey=null;canEdit=false;localOnly=false;version=null;needsPinMigration=false;legacyCombinedStats=false;pinPending=false;
  render();
 }
 function rosterSection(){
