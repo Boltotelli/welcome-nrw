@@ -56,3 +56,31 @@
 ## Verification notes
 
 Completed: inspected production GitHub source, database schema, row-security posture, migration history, preexisting NRW roster count, and Vercel production deployment status. Static frontend JS syntax verified with a JavaScript parser. **Not yet verified**: a real R5 browser session, sign-in, CRUD flows, or full visual browser rendering. A READY Vercel deployment and ACTIVE Supabase Edge Function are not an end-to-end proof.
+
+## Phase 1 implementation (18 October 2026)
+
+**Purpose:** Make the NRW pilot a real administration tool without duplicating or editing existing Tracker player records.
+
+- Source roster remains the existing `players` table (read-only), enhanced by existing cached avatar/TC, optional power cache and Discord onboarding links. Data quality is never guessed.
+- Each known roster Game-ID can be edited in the `Spielerakte`: manually maintained member status, Discord-ID, membership date, responsibilities, private leadership notes and multiple spoken languages, persisted only to `aos_member_notes`.
+- Spoken languages are deliberately independent of UI locale. DE/EN/FR/ES/TR plus free-form additional languages are supported, preserving values already present in `players.languages`. UI site defaults are configured separately.
+- Each player dossier includes linked kingdom transfer plans and existing intra-1044 alliance movements. From an active player dossier a kingdom-outbound transfer can be prefilled.
+- The primary transfer planner is for **kingdom-to-kingdom**, inbound to kingdom 1044 / outbound from 1044, with **origin and destination kingdom** fields, planned windows, priority, invitation type, status, power, alliance and private notes. Entries are stored in `aos_transfers`. Status "completed" is set manually; the UI separately shows whether an incoming player is currently observed in the NRW roster. Do not claim that manual completion is verified arrival.
+- The secondary read-only section shows **historical in-kingdom transfers involving NRW** from existing `player_alliance_transfers` and `players`. These do not become `aos_transfers` entries and cannot affect the Tracker's confirmation workflow. At migration time there were 75 existing moves involving NRW (53 from NRW, 22 to NRW).
+- No NAP/Tracker table was altered; all new writes remain scoped to R4/R5-authorized `aos_*` records and audited.
+- The NRW pilot is **free and advertising-free**; the advertising control is hidden in the UI and permanently disabled on the server for alliance `NRW`. Billing has not been activated.
+
+### Existing event sources inventoried for Phase 2 (do not duplicate!)
+
+- `dashboard/events.json`: 20 manually tracked events/entries as of 16 October 2026, with localized names, tips, daily plans, dates and confirmed sources.
+- `dashboard/event-guides.json`: 18 full event guides, 33 catalog-only types, 29 actions and 13 cited sources. This is the event knowledge layer, NOT an alternative date store.
+- `dashboard/app.js`: official runtime event rotation/cycle calculation, day-specific tasks, Bear Trap rhythms and the UI event coach; not all derived events are materialized in `events.json`.
+- Existing `aos_events` currently contains separately managed manually published records, not yet merged into the established event engine.
+- **Next:** expose the full existing runtime-derived and manual event calendar in leadership, include all existing guide content and ingame text templates, use one editable event record source, and add a copy button validating **512 alliance-chat / 300 alliance-note characters**. Do not create parallel event guides, and do not modify the existing Bear Buff scheduling bot.
+
+### Verification and known caveats
+
+- Database migration applied and checked; new `aos_*` tables keep RLS enabled with no anon/authenticated table access. Supabase Edge Function version 7+ deployed and ACTIVE.
+- Frontend source verified as parseable JavaScript, and production builds observed READY in Vercel.
+- No authenticated browser R5 end-to-end user-input/write/reload test has been performed in this execution environment. This remains a necessary hands-on smoke test. When a player is not in the source roster or has no numeric Game-ID, dossier editing is unavailable by design.
+- The existing Welcome public self-service language-saving endpoint remains disabled, so manually maintained dossier language overlays **do not yet flow back** to that public Welcome profile. Do not call the on-site spoken-language editing end-to-end synced.
