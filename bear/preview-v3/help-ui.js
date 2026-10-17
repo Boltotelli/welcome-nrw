@@ -133,6 +133,28 @@
     ]}
   ]}
  };
+ // Resolve translations when a guide is opened: the same icon reflects the
+ // currently selected DE/EN/FR/ES language without altering screenshots.
+ const LOCALES=root.NRW_BEAR_HELP_LOCALES||{};
+ function currentLanguage(){
+  const value=root.NRW_BEAR_I18N?.language?.()||document.documentElement.lang||'de';
+  return ['de','en','fr','es'].includes(value)?value:'de';
+ }
+ function uiText(value){
+  return LOCALES.ui?.[currentLanguage()]?.[value]||value;
+ }
+ function localizedGuide(key){
+  const original=GUIDES[key];
+  if(!original)return null;
+  const translated=LOCALES.guides?.[currentLanguage()]?.[key];
+  if(!translated)return original;
+  return {title:translated.title||original.title,
+   steps:original.steps.map((step,i)=>{
+    const row=translated.steps?.[i];
+    return {...step,text:row?.[0]||step.text,
+     marks:(step.marks||[]).map((mark,j)=>({...mark,text:row?.[1]?.[j]||mark.text}))};
+   })};
+ }
  let dialog=null,previousFocus=null,imagePromise=null;
  const node=(tag,cls,txt)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(txt!==undefined)n.textContent=txt;return n;};
  function loadImages(){
@@ -164,14 +186,14 @@
  }
  function photo(step,guideKey,stepIndex){
   const source=root.NRW_BEAR_HELP_IMAGES?.[step.image];
-  if(!source)return node('p','bear-name-help-pending','📷 Bild lädt …');
+  if(!source)return node('p','bear-name-help-pending',uiText('📷 Bild lädt …'));
   const sourceRect=CROPS[step.image],focusRect=GUIDE_CROPS[guideKey]?.[stepIndex]||sourceRect;
   const [ox,oy,or,ob]=sourceRect,[x,y,r,b]=focusRect;
   const srcWidth=or-ox,srcHeight=ob-oy;
   const width=r-x,height=b-y;
   if(x<ox||y<oy||r>or||b>ob||width<=0||height<=0){
    console.error('[Bear Help] Invalid crop bounds',guideKey,stepIndex);
-   return node('p','bear-name-help-pending','Bildbereich vorübergehend nicht verfügbar.');
+   return node('p','bear-name-help-pending',uiText('Bildbereich vorübergehend nicht verfügbar.'));
   }
   const pane=node('div','bear-name-help-photo-scroll'),canvas=node('div','bear-name-help-photo');
   canvas.style.aspectRatio=width+' / '+height;
@@ -180,7 +202,7 @@
   const maxImageHeight=Math.max(205,Math.min(400,Math.round((window.visualViewport?.height||window.innerHeight||780)*0.44)));
   canvas.style.width='min(100%, '+Math.round(width/height*maxImageHeight)+'px)';
   const img=node('img','bear-name-help-image');img.src=source;
-  img.alt='Original Kingshot-Screenshot: '+step.image;img.loading='eager';img.draggable=false;
+  img.alt=uiText('Original Kingshot-Screenshot: ')+step.image;img.loading='eager';img.draggable=false;
   img.style.position='absolute';
   img.style.width=(srcWidth/width*100)+'%';
   img.style.height=(srcHeight/height*100)+'%';
@@ -213,7 +235,7 @@
    legend.append(label);
   });
   pane.append(canvas);
-  const zoom=node('button','bear-name-help-zoom','🔍 Bild vergrößern');zoom.type='button';
+  const zoom=node('button','bear-name-help-zoom',uiText('🔍 Bild vergrößern'));zoom.type='button';
   const originalWidth=canvas.style.width;
   zoom.addEventListener('click',()=>{
    const expanded=pane.classList.toggle('zoomed');
@@ -221,13 +243,13 @@
    // compact-size setting. All marker coordinates scale together with img.
    canvas.style.width=expanded?
     Math.max(520,Math.round(width/height*maxImageHeight*1.8))+'px':originalWidth;
-   zoom.textContent=expanded?'Bild verkleinern':'🔍 Bild vergrößern';
+   zoom.textContent=expanded?uiText('Bild verkleinern'):uiText('🔍 Bild vergrößern');
   });
   const group=node('div','bear-name-help-visual');group.append(pane,zoom,legend);
   return group;
  }
  function open(key){
-  const guide=GUIDES[key];if(!guide)return;
+  const guide=localizedGuide(key);if(!guide)return;
   close();previousFocus=document.activeElement;
   const overlay=node('div','bear-name-help-backdrop');
   const panel=node('section','bear-name-help-dialog');
@@ -235,14 +257,14 @@
   const id='bear-help-heading';panel.setAttribute('aria-labelledby',id);
   const heading=node('h3','',guide.title);heading.id=id;
   const closeButton=node('button','bear-name-help-close','×');closeButton.type='button';
-  closeButton.setAttribute('aria-label','Hilfe schließen');closeButton.addEventListener('click',close);
+  closeButton.setAttribute('aria-label',uiText('Hilfe schließen'));closeButton.addEventListener('click',close);
   const top=node('div','bear-name-help-top');top.append(heading,closeButton);panel.append(top);
   let index=0;
   const contents=node('div','bear-name-help-content');
   const nav=node('div','bear-name-help-nav');
-  const back=node('button','bear-name-btn','← Zurück');
-  const next=node('button','bear-name-btn primary','Weiter →');
-  const done=node('button','bear-name-btn primary','Verstanden ✓');
+  const back=node('button','bear-name-btn',uiText('← Zurück'));
+  const next=node('button','bear-name-btn primary',uiText('Weiter →'));
+  const done=node('button','bear-name-btn primary',uiText('Verstanden ✓'));
   for(const b of [back,next,done])b.type='button';
   const counter=node('span','bear-name-help-counter','');
   function draw(){
@@ -252,12 +274,12 @@
    if(step.image){
     if(root.NRW_BEAR_HELP_IMAGES?.[step.image])contents.append(photo(step,key,index));
     else{
-     contents.append(node('p','bear-name-help-pending','📷 Screenshot wird geladen …'));
+     contents.append(node('p','bear-name-help-pending',uiText('📷 Screenshot wird geladen …')));
      void loadImages().then(ok=>{
       if(dialog===overlay&&guide.steps[index]===step){
        if(ok)draw();
        else contents.querySelector('.bear-name-help-pending').textContent=
-        'Screenshot konnte nicht geladen werden. Die Anleitung bleibt lesbar.';
+        uiText('Screenshot konnte nicht geladen werden. Die Anleitung bleibt lesbar.');
       }
      });
     }
@@ -284,8 +306,8 @@
  function icon(key){
   if(!GUIDES[key])return null;
   const b=node('button','bear-name-help-trigger','i');b.type='button';
-  b.setAttribute('aria-label','Hilfe: '+GUIDES[key].title);
-  b.title='Wo finde ich diesen Wert?';
+  b.setAttribute('aria-label',uiText('Hilfe: ')+localizedGuide(key).title);
+  b.title=uiText('Wo finde ich diesen Wert?');
   b.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();open(key);});
   return b;
  }
@@ -301,5 +323,5 @@
   return container;
  }
  decorateField.count=0;
- root.NRW_BEAR_HELP={icon,decorateField,open,GUIDES,CROPS,GUIDE_CROPS};
+ root.NRW_BEAR_HELP={icon,decorateField,open,GUIDES,localizedGuide,uiText,CROPS,GUIDE_CROPS};
 })(window);
