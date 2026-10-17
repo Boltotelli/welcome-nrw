@@ -8,3 +8,14 @@
 .staff-list{display:grid;gap:7px;margin:16px 0;max-height:240px;overflow-y:auto}
 .staff-row{width:100%;display:flex;align-items:center;justify-content:space-between;text-align:left;border:1px solid var(--border);border-radius:10px;background:var(--panel);padding:10px 12px;color:var(--text)}
 .staff-row:hover{border-color:var(--accent)}.staff-row b,.staff-row small{display:block}.staff-row b{font-size:12px;overflow-wrap:anywhere}.staff-row small{color:var(--muted);font-size:10px;margin-top:4px}.staff-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.staff-grid label{font-size:11px;margin:0;min-width:0}.staff-grid input{margin-right:5px}#staffControls{padding:5px 0 15px}#staffControls[hidden]{display:none}@media(max-width:750px){.staff-grid{grid-template-columns:1fr}}
+
+/* AllianceOS pilot: private player dossier and historical transfer list */
+.dossier-info{display:grid;grid-template-columns:minmax(0,2fr) repeat(2,minmax(0,1fr));gap:12px;background:var(--card,#14202f);border:1px solid var(--line,#334155);border-radius:12px;padding:14px;margin-bottom:12px}
+.dossier-info>div{display:flex;flex-direction:column;gap:4px;min-width:0}
+.dossier-info b{font-size:1.05rem;overflow-wrap:anywhere}
+.dossier-info small{opacity:.75;overflow-wrap:anywhere}
+.language-options{display:flex;flex-wrap:wrap;gap:8px 18px;padding:8px 0}
+.language-options .check{display:inline-flex;align-items:center;gap:8px;margin:0;cursor:pointer}
+.language-options input{width:18px;height:18px;accent-color:var(--accent,#f1c40f)}
+.history-item{padding:10px 12px;margin:6px 0;border:1px solid var(--line,#334155);border-radius:9px;overflow-wrap:anywhere}
+@media(max-width:600px){.dossier-info{grid-template-columns:minmax(0,2fr) minmax(0,1fr)}.dossier-info>div:first-child{grid-column:1 / -1}}
