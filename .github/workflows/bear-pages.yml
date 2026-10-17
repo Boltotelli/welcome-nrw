@@ -397,6 +397,7 @@ jobs:
           node _site/bear/preview-v3/test-help-locales.cjs
           grep -Fq "const GUIDE_CROPS=" _site/bear/preview-v3/help-ui.js
           grep -Fq "frame.style.background='transparent'" _site/bear/preview-v3/help-ui.js
+          grep -Fq 'help-locales.js?v=20261017-all-guides-1' _site/bear/preview-v3.html
           echo 'DE/EN/FR/ES help guides verified from main.'
       - uses: actions/upload-pages-artifact@v3
         with:
