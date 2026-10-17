@@ -100,3 +100,15 @@ AllianceOS Event tab now provides:
 **Not yet connected:** the user's local Windows Messaging Queue Excel and already sent messages, since that local controller isn't hosted in this repo. Also no automatic Discord bot posting or game posting has been added. Before sending any auto-composed text, leaders should check the current Law14 exceptions and Discord decisions, which may have changed since static guides were written. Guide contents are source material, not independently validated current event rules.
 
 **Verification performed:** extracted rhythm script simulated for multiple 2026 UTC calendar dates; existing dashboard JS and leadership JS parsed successfully after the refactor; event library simulated with the real 20 event records and 18+33 guide records (52 upcoming event records in the sample period and 51 catalog entries, may vary by current date); clipboard text generation returned <=512/<=300 characters; simulated save payload preserved language, source ID and UTC day. Authenticated R5 browser smoke test of the production write/save/reload remains outstanding.
+
+## Phase 2b · Central published leadership event instructions (18 October 2026)
+
+In the Event Hub's existing event/day detail view, an R5 or R4 with `events` permissions can now prepare (draft) or publish an additional **NRW leadership instruction**, stored by original source event ID, UTC event day, and locale.
+
+- Published instructions appear directly as a highlighted top step in the **existing Player Dashboard event coach** on that same event/day, without modifying or copying the canonical guide or timetable. This supplies a real one-edit-to-player-visible workflow.
+- Drafts remain exclusively in the leadership console. The new unauthenticated `public-guidance` API mode publishes only the `source_key`, `day`, `notes` and update timestamp of explicitly published rows. It never exposes staff notes, private ingame message drafts, player details or transfers.
+- The public dashboard will pick up a published instruction on a new load; the original event steps remain intact underneath. The dashboard degrades gracefully if the additional public fetch fails.
+- Only events resolved through the original manual/28-day calendar support this editorial overlay. Guide-only reference records and additional custom AllianceOS events are not falsely advertised as feeding the same day-specific coach.
+- All internal writes use isolated `aos_event_guidance` with RLS enabled and no anon/authenticated grants; access is checked by the Edge Function against `aos_staff` events feature permission.
+
+Verified through a simulated UI save and day-scoped data overlay and a simulated Player Dashboard event coach render. Authenticated production browser tests are still pending.
