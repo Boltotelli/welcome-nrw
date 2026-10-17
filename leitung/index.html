@@ -105,6 +105,13 @@
         <section class="tab-page" data-page="events" hidden>
           <div class="page-heading"><div><span class="eyebrow">EVENT HUB</span><h2 data-i18n="events">Eventplanung</h2><p data-i18n="eventsDesc">Alle Zeiten werden in UTC gespeichert und für Spieler lokal angezeigt.</p></div><button class="primary" data-create="event" data-permission="events" data-i18n="addEvent">+ Event planen</button></div>
           <div class="notice"><b data-i18n="eventSyncStatus">Ausspielung</b><p data-i18n="eventSyncNotice">Öffentlich veröffentlichte Termine können von den Webseiten geladen werden. Discord-Ankündigungen und Erinnerungen benötigen noch den künftigen Event-Bot.</p></div>
+          <div class="card" style="margin-bottom:20px">
+            <div class="filters"><div><h3 data-i18n="canonicalEvents">Bestehender Eventkalender &amp; Guides</h3><p class="muted" data-i18n="canonicalNote">Direkt aus dem Player Dashboard · keine doppelte Datenpflege.</p></div><span class="counter" id="eventLibraryCount">–</span></div>
+            <div class="filters"><input id="eventLibrarySearch" class="control search" type="search" autocomplete="off" data-placeholder="eventSearch" placeholder="Event oder Guide suchen …">
+              <select id="eventLibraryFilter" class="control"><option value="upcoming" data-i18n="eventUpcoming">Aktuell / Nächste 8 Wochen</option><option value="past" data-i18n="eventPast">Vergangene Termine</option><option value="guides" data-i18n="eventGuideCatalog">Event-Guide-Bibliothek</option><option value="all" data-i18n="eventAll">Alle bekannten Termine</option></select></div>
+            <div id="eventLibraryList" class="event-source-list"><p class="muted">Eventquellen werden geladen …</p></div>
+          </div>
+          <div class="page-heading"><div><h3 data-i18n="customEvents">Zusätzliche Allianztermine</h3><p class="muted" data-i18n="customEventsNote">Für Termine, die nicht im bestehenden NRW-Kalender vorkommen.</p></div></div>
           <div id="eventList" class="stack"></div>
         </section>
         <section class="tab-page" data-page="settings" hidden>
@@ -156,5 +163,23 @@
   <div class="modal-body" id="modalFields"></div>
   <div class="modal-actions"><button type="button" class="ghost" id="cancelDialog" data-i18n="cancel">Abbrechen</button><button type="submit" class="primary" id="submitDialog" data-i18n="save">Speichern</button></div>
 </form></dialog>
-<script type="module" src="/leitung/app.js?v=4"></script>
+<dialog id="eventLibraryDialog" class="modal event-library-modal" aria-labelledby="libraryModalTitle">
+  <div class="modal-top"><div><span class="eyebrow" id="libraryModalSource">PLAYER DASHBOARD</span><h2 id="libraryModalTitle"></h2></div><button type="button" class="close" id="closeLibraryDialog" aria-label="Schließen">×</button></div>
+  <div class="modal-body">
+    <label class="field"><span data-i18n="libraryDay">Tag / Eventphase</span><select id="libraryDay" class="control"></select></label>
+    <div id="libraryDetails" class="library-details"></div>
+    <div class="library-messages">
+      <div class="msg-heading"><h3 data-i18n="ingameChat">Allianzchat · max. 512 Zeichen</h3><span id="chatCount">0 / 512</span></div>
+      <textarea id="libraryChat" class="control" maxlength="512" rows="6" spellcheck="true"></textarea>
+      <button type="button" class="ghost" id="copyLibraryChat" data-i18n="copyChat">📋 Allianzchat kopieren</button>
+      <div class="msg-heading"><h3 data-i18n="ingameNotice">Allianznotiz · max. 300 Zeichen</h3><span id="noteCount">0 / 300</span></div>
+      <textarea id="libraryNote" class="control" maxlength="300" rows="4" spellcheck="true"></textarea>
+      <button type="button" class="ghost" id="copyLibraryNote" data-i18n="copyNote">📋 Allianznotiz kopieren</button>
+      <p class="small-note" id="libraryMessageState" role="status"></p>
+      <button type="button" class="primary" id="saveLibraryMessages" data-i18n="saveMessages">Nachrichten für diesen Tag speichern</button>
+    </div>
+  </div>
+</dialog>
+<script src="/dashboard/event-rhythm.js?v=1"></script>
+<script type="module" src="/leitung/app.js?v=5"></script>
 </body></html>
