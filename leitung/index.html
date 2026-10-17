@@ -168,6 +168,14 @@
   <div class="modal-body">
     <label class="field"><span data-i18n="libraryDay">Tag / Eventphase</span><select id="libraryDay" class="control"></select></label>
     <div id="libraryDetails" class="library-details"></div>
+    <div class="library-guidance">
+      <h3 data-i18n="leadershipGuidance">NRW-Leitungsanweisung im Player Dashboard</h3>
+      <p class="small-note" data-i18n="guidanceInfo">Ergänzt den bestehenden Event-Guide am ausgewählten Tag. Veröffentlichte Hinweise werden direkt im Player Dashboard angezeigt.</p>
+      <textarea class="control" id="libraryGuidance" rows="3" maxlength="1200" placeholder="Zusätzliche NRW-Anweisung für diesen Eventtag"></textarea>
+      <div class="guidance-toolbar"><select class="control" id="libraryGuidanceStatus"><option value="draft" data-i18n="draft">Entwurf</option><option value="published" data-i18n="published">Veröffentlicht</option></select>
+      <button type="button" class="primary" id="saveLibraryGuidance" data-i18n="saveGuidance">Hinweis speichern / veröffentlichen</button></div>
+      <p id="libraryGuidanceInfo" class="small-note" role="status"></p>
+    </div>
     <div class="library-messages">
       <div class="msg-heading"><h3 data-i18n="ingameChat">Allianzchat · max. 512 Zeichen</h3><span id="chatCount">0 / 512</span></div>
       <textarea id="libraryChat" class="control" maxlength="512" rows="6" spellcheck="true"></textarea>
@@ -181,5 +189,5 @@
   </div>
 </dialog>
 <script src="/dashboard/event-rhythm.js?v=1"></script>
-<script type="module" src="/leitung/app.js?v=6"></script>
+<script type="module" src="/leitung/app.js?v=7"></script>
 </body></html>
