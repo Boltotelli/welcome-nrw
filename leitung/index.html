@@ -106,13 +106,12 @@
           <div class="page-heading"><div><span class="eyebrow">EVENT HUB</span><h2 data-i18n="events">Eventplanung</h2><p data-i18n="eventsDesc">Alle Zeiten werden in UTC gespeichert und für Spieler lokal angezeigt.</p></div><button class="primary" data-create="event" data-permission="events" data-i18n="addEvent">+ Event planen</button></div>
           <div class="notice"><b data-i18n="eventSyncStatus">Ausspielung</b><p data-i18n="eventSyncNotice">Öffentlich veröffentlichte Termine können von den Webseiten geladen werden. Discord-Ankündigungen und Erinnerungen benötigen noch den künftigen Event-Bot.</p></div>
           <div class="card" style="margin-bottom:20px">
-            <div class="filters"><div><h3 data-i18n="canonicalEvents">Bestehender Eventkalender &amp; Guides</h3><p class="muted" data-i18n="canonicalNote">Direkt aus dem Player Dashboard · keine doppelte Datenpflege.</p></div><span class="counter" id="eventLibraryCount">–</span></div>
+            <div class="filters"><div><h3 data-i18n="canonicalEvents">Events, Turnus und Tagesplanung</h3><p class="muted" data-i18n="canonicalNote">Jedes Event einmal. Darunter seine Tage und der wiederkehrende Turnus.</p></div><span class="counter" id="eventLibraryCount">–</span></div>
             <div class="filters"><input id="eventLibrarySearch" class="control search" type="search" autocomplete="off" data-placeholder="eventSearch" placeholder="Event oder Guide suchen …">
-              <select id="eventLibraryFilter" class="control"><option value="upcoming" data-i18n="eventUpcoming">Aktuell / Nächste 8 Wochen</option><option value="past" data-i18n="eventPast">Vergangene Termine</option><option value="guides" data-i18n="eventGuideCatalog">Event-Guide-Bibliothek</option><option value="all" data-i18n="eventAll">Alle bekannten Termine</option></select></div>
+              <select id="eventLibraryFilter" class="control"><option value="all" data-i18n="eventAll">Alle Eventtypen</option><option value="upcoming" data-i18n="eventUpcoming">In den nächsten 8 Wochen</option><option value="guides" data-i18n="eventGuideCatalog">Mit Guide</option></select></div>
             <div id="eventLibraryList" class="event-source-list"><p class="muted">Eventquellen werden geladen …</p></div>
           </div>
-          <div class="page-heading"><div><h3 data-i18n="customEvents">Zusätzliche Allianztermine</h3><p class="muted" data-i18n="customEventsNote">Für Termine, die nicht im bestehenden NRW-Kalender vorkommen.</p></div></div>
-          <div id="eventList" class="stack"></div>
+          <div id="eventList" hidden></div>
         </section>
         <section class="tab-page" data-page="settings" hidden>
           <div class="page-heading"><div><span class="eyebrow">ALLIANCE SETTINGS</span><h2 data-i18n="settings">Allianz &amp; Rechte</h2><p data-i18n="settingsDesc">Stammdaten, Kapazitäten, Freigaben und Plattformmodule.</p></div></div>
@@ -166,6 +165,29 @@
 <dialog id="eventLibraryDialog" class="modal event-library-modal" aria-labelledby="libraryModalTitle">
   <div class="modal-top"><div><span class="eyebrow" id="libraryModalSource">PLAYER DASHBOARD</span><h2 id="libraryModalTitle"></h2></div><button type="button" class="close" id="closeLibraryDialog" aria-label="Schließen">×</button></div>
   <div class="modal-body">
+    <section class="library-cycle">
+      <div class="library-subhead"><h3 data-i18n="cycleHeading">Wiederholung und Eventtage</h3><p data-i18n="cycleHint">Der Turnus wird nur einmal pro Event festgelegt.</p></div>
+      <div class="form-grid">
+        <label class="field"><span data-i18n="cycleAnchor">Beginn einer Wiederholung</span><input id="cycleAnchor" class="control" type="date"></label>
+        <label class="field"><span data-i18n="cycleEvery">Wiederholen alle (Tage)</span><input id="cycleEvery" class="control" type="number" min="1" max="365"></label>
+        <label class="field"><span data-i18n="cycleLength">Kalendertage inkl. Abschluss</span><input id="cycleLength" class="control" type="number" min="1" max="14"></label>
+        <label class="field"><span data-i18n="cyclePhases">Bearbeitbare Eventtage</span><input id="cyclePhases" class="control" type="number" min="1" max="14"></label>
+      </div>
+      <div class="library-cycle-bar"><span id="cycleSummary" class="muted"></span><button type="button" class="primary" id="saveCycle" data-i18n="cycleSave">Turnus speichern</button></div>
+    </section>
+    <section class="library-phase-editor">
+      <label class="field"><span data-i18n="phaseSelect">Eventtag bearbeiten</span><select id="libraryPhase" class="control"></select></label>
+      <label class="field"><span data-i18n="phaseInstructions">Anweisungen für diesen Eventtag (jede Wiederholung)</span><textarea id="phaseInstructions" class="control" rows="5" maxlength="1200"></textarea></label>
+      <div class="msg-heading"><h3 data-i18n="ingameChat">Allianzchat · max. 512 Zeichen</h3><span id="phaseChatCount">0 / 512</span></div>
+      <textarea id="phaseChat" class="control" rows="4" maxlength="512"></textarea>
+      <button type="button" id="copyPhaseChat" class="ghost" data-i18n="copyChat">📋 Chat kopieren</button>
+      <div class="msg-heading"><h3 data-i18n="ingameNotice">Allianznotiz · max. 300 Zeichen</h3><span id="phaseNoteCount">0 / 300</span></div>
+      <textarea id="phaseNote" class="control" rows="3" maxlength="300"></textarea>
+      <button type="button" id="copyPhaseNote" class="ghost" data-i18n="copyNote">📋 Notiz kopieren</button>
+      <div class="library-cycle-bar"><select class="control" id="phaseStatus"><option value="draft" data-i18n="draft">Entwurf</option><option value="published" data-i18n="published">Veröffentlicht</option></select><button type="button" id="savePhase" class="primary" data-i18n="phaseSave">Tagesvorlage speichern</button></div>
+      <p id="phaseInfo" class="small-note" role="status"></p>
+    </section>
+    <details class="library-oneoff"><summary data-i18n="oneoffTitle">Einzeltermin und vollständige Originalinformationen</summary>
     <label class="field"><span data-i18n="libraryDay">Tag / Eventphase</span><select id="libraryDay" class="control"></select></label>
     <div id="libraryDetails" class="library-details"></div>
     <div class="library-guidance">
@@ -186,8 +208,9 @@
       <p class="small-note" id="libraryMessageState" role="status"></p>
       <button type="button" class="primary" id="saveLibraryMessages" data-i18n="saveMessages">Nachrichten für diesen Tag speichern</button>
     </div>
+    </details>
   </div>
 </dialog>
-<script src="/dashboard/event-rhythm.js?v=1"></script>
-<script type="module" src="/leitung/app.js?v=8"></script>
+<script src="/dashboard/event-rhythm.js?v=2"></script>
+<script type="module" src="/leitung/app.js?v=9"></script>
 </body></html>
