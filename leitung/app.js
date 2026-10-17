@@ -158,7 +158,7 @@ function dateForInput(raw){
  const local=new Date(d.getTime()-d.getTimezoneOffset()*60000);
  return local.toISOString().slice(0,16);
 }
-function openEdit(entity,id=null){
+function openEdit(entity,id=null,sourcePlayer=null){
  const models={transfer:"transfers",law:"laws",event:"events"};
  const record=entity==="member"?state.players.find(p=>String(p.game_id)===String(id)):id?state[models[entity]]?.find(x=>String(x.id)===String(id)):null;
  const feature=entity==="member"?"members":models[entity];
@@ -167,17 +167,20 @@ function openEdit(entity,id=null){
  $("modalTitle").textContent=t((id?"edit":"new")+(entity==="member"?"Player":entity.charAt(0).toUpperCase()+entity.slice(1)));
  let h="";
  if(entity==="transfer"){
-   const s=record||{direction:"incoming",status:"interested",target_alliance:"NRW"};
+   const s=record||{direction:sourcePlayer?"outgoing":"incoming",status:"interested",target_alliance:"NRW",game_id:sourcePlayer?.game_id||"",player_name:sourcePlayer?.name||"",origin_kingdom:sourcePlayer?state.alliance.kingdom_id:"",power:sourcePlayer?.power||""};
    h='<div class="form-grid">'+control(t("playerId"),"game_id",s.game_id||"","text",{required:"required",pattern:"[0-9]+",maxlength:20})+control(t("playerName"),"player_name",s.player_name||"","text",{maxlength:100})+
      select(t("direction"),"direction",s.direction,[["incoming",t("directionIncoming")],["outgoing",t("directionOutgoing")]])+
      select(t("status"),"status",s.status,[["interested",t("interested")],["shortlisted",t("shortlisted")],["confirmed",t("confirmed")],["waitlist",t("waitlist")],["completed",t("completed")],["cancelled",t("cancelled")]])+
-     control(t("originKingdom"),"origin_kingdom",s.origin_kingdom||"","number",{min:1})+
+     control(t("originKingdom"),"origin_kingdom",s.origin_kingdom||"","number",{min:1,max:99999})+
+      control(t("targetKingdom"),"target_kingdom",s.target_kingdom||state.alliance.kingdom_id,"number",{min:1,max:99999})+
      control(t("previousAlliance"),"previous_alliance",s.previous_alliance||"")+
      control(t("targetAlliance"),"target_alliance",s.target_alliance||"NRW")+
      control(t("power"),"power",s.power||"","number",{min:0})+
+      select(t("priority"),"priority",String(s.priority||2),[["1",t("high")],["2",t("normal")],["3",t("low")]])+
+      select(t("invitation"),"invitation_type",s.invitation_type||"not_assigned",[["not_assigned",t("inviteOpen")],["ordinary",t("inviteNormal")],["special",t("inviteSpecial")]])+
      control(t("from"),"window_start",s.window_start||"","date")+
      control(t("to"),"window_end",s.window_end||"","date")+'</div>'+
-     textarea(t("notes"),"notes",s.notes||"")+'<label class="field check"><input type="checkbox" name="share_approved" '+(s.share_approved?"checked":"")+'> '+esc(t("allowShare"))+'</label>';
+     '<p class="small-note">'+esc(t("externalNote"))+'</p>'+textarea(t("notes"),"notes",s.notes||"")+'<label class="field check"><input type="checkbox" name="share_approved" '+(s.share_approved?"checked":"")+'> '+esc(t("allowShare"))+'</label>';
  }else if(entity==="law"){
    const s=record||{scope:"alliance",status:"draft",title:{},body:{}};
    h='<div class="form-grid">'+select(t("scope"),"scope",s.scope,[["alliance",t("allianceLaw")],["kingdom",t("kingdom")]])+
@@ -194,11 +197,24 @@ function openEdit(entity,id=null){
     control(t("reminders"),"reminder_minutes",(s.reminder_minutes||[]).join(","),"text",{placeholder:"60, 15"});
    h+=LANGS.map(l=>'<hr class="form-break"><span class="eyebrow">'+esc(NAMES[l])+'</span>'+control(t("eventTitle"),"title_"+l,s.title?.[l]||"")+textarea(t("eventText"),"description_"+l,s.description?.[l]||"")).join("");
  }else if(entity==="member"&&record){
-   h='<p><strong>'+esc(record.name)+'</strong> · '+esc(record.game_id)+'</p>'+
+    const external=state.transfers.filter(x=>x.game_id===record.game_id);
+    const internal=(state.internalMoves||[]).filter(x=>x.game_id===record.game_id);
+    h='<div class="dossier-info"><div><b>'+esc(record.name)+'</b><small>Game-ID '+esc(record.game_id)+' · '+esc(record.rank?"R"+record.rank:"—")+'</small></div>'+
+      '<div><small>TC</small><b>'+esc(record.tc_level??"—")+'</b></div>'+
+      '<div><small>'+esc(t("strength"))+'</small><b>'+esc(record.power==null?t("noPower"):fmtInt(record.power))+'</b></div></div>'+
+      '<p class="small-note">'+esc(t("sourceNote"))+'</p>'+
       select(t("memberStatus"),"member_status",record.member_status,[["active",t("active")],["planned",t("planned")],["left",t("left")]])+
-      control("Discord ID","discord_user_id",record.discord_user_id||"")+
+      '<div class="form-grid">'+control("Discord ID","discord_user_id",record.discord_user_id||"")+
+      control(t("joined"),"joined_on",record.joined_on||"","date")+'</div>'+
+      '<div class="field"><span>'+esc(t("spoken"))+'</span><div class="language-options">'+LANGS.map(l=>'<label class="check"><input type="checkbox" name="spoken_languages" value="'+l+'" '+((record.languages||[]).includes(l)?"checked":"")+'> '+esc(NAMES[l])+'</label>').join("")+'</div></div>'+
+      textarea(t("responsibilities"),"responsibilities",record.responsibilities||"")+
       textarea(t("notes"),"notes",record.notes||"")+
-      '<p><a class="ghost" href="/bear" target="_blank" rel="noopener">'+esc(t("profileLink"))+' ↗</a></p>';
+      '<hr class="form-break"><h3>'+esc(t("worldTransfers"))+'</h3>'+
+      (external.length?external.map(x=>'<div class="history-item"><b>#'+esc(x.origin_kingdom)+' → #'+esc(x.target_kingdom||state.alliance.kingdom_id)+'</b> · '+esc(t(x.status))+' · '+esc(x.window_start||"—")+'</div>').join(""):'<p class="muted">'+esc(t("noHistory"))+'</p>')+
+      '<h3>'+esc(t("serverMoves"))+'</h3>'+
+      (internal.length?internal.map(x=>'<div class="history-item">'+esc(dateText(x.moved_at))+' · '+esc(x.from_alliance||"—")+' → '+esc(x.to_alliance||"—")+'</div>').join(""):'<p class="muted">'+esc(t("noHistory"))+'</p>')+
+      '<p><a class="ghost" href="/bear" target="_blank" rel="noopener">'+esc(t("profileLink"))+' ↗</a></p>'+
+      (can("transfers")?'<button type="button" class="ghost" data-plan-player="'+esc(record.game_id)+'">'+esc(t("serverTransfer"))+' →</button>':"");
  }else return;
  $("modalFields").innerHTML=h;
  $("editDialog").showModal();
@@ -219,7 +235,7 @@ async function saveDialog(event){
    }
  }
  if(entity==="transfer")data.share_approved=fd.has("share_approved");
- if(entity==="member")data.game_id=record.game_id;
+ if(entity==="member"){data.game_id=record.game_id;data.spoken_languages=fd.getAll("spoken_languages");}
  $("submitDialog").disabled=true;
  try{
    await request("bootstrap",{action:"save",entity,id,data});
@@ -237,6 +253,7 @@ $("rosterSort").addEventListener("change",()=>state&&renderRoster());
 $("transferFilter").addEventListener("change",()=>state&&renderTransfers());
 q("[data-create]").forEach(el=>el.addEventListener("click",()=>openEdit(el.dataset.create)));
 document.addEventListener("click",e=>{
+  const plan=e.target.closest("[data-plan-player]");if(plan){const p=state.players.find(x=>x.game_id===plan.dataset.planPlayer);if(p){$("editDialog").close();openEdit("transfer",null,p);}return;}
  const member=e.target.closest("[data-edit-member]");if(member)openEdit("member",member.dataset.editMember);
  const edit=e.target.closest("[data-edit]");if(edit)openEdit(edit.dataset.edit,edit.dataset.id);
 });
