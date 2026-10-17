@@ -5,6 +5,7 @@
 'use strict';
 const table=[
 ['Deine Helden','Your heroes','Tes héros','Tus héroes'],
+['Infanterie, Kavallerie, Bogenschützen & Schwadron','Infantry, Cavalry, Archers & Squad','Infanterie, cavalerie, archers et escouade','Infantería, caballería, arqueros y escuadrón'],
 ["🔐 Eigene PIN einrichten","🔐 Set your PIN","🔐 Définir ton PIN","🔐 Configurar tu PIN"],
 ["Bestehendes Profil geladen. Jetzt mit dem bisherigen Code eine eigene Zahlen-PIN einrichten.","Existing profile loaded. Use your previous editing code to set your own numeric PIN.","Profil existant chargé. Utilise ton ancien code de modification pour définir ton code PIN.","Perfil existente cargado. Usa tu código anterior para establecer un PIN numérico."],
 ["Für die einmalige Umstellung wird der alte Bearbeitungscode aus dem ursprünglichen Browser benötigt.","To migrate this existing profile, you need its original edit code from the browser used before.","Pour migrer ce profil, il faut l’ancien code depuis le navigateur d’origine.","Para migrar el perfil necesitas el código anterior del navegador original."],
