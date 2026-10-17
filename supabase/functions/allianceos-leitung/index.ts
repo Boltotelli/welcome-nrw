@@ -280,7 +280,7 @@ async function save(req: Request, alliance: string, userId: string, staff: any, 
       if(!own)throw new HttpError("player_not_in_alliance",403);
       if(!["active","planned","left"].includes(data.member_status))throw new HttpError("invalid_member_state",400);
       const spoken=Array.isArray(data.spoken_languages)?[...new Set(data.spoken_languages)]:null;
-      if(spoken!==null && spoken.some((x:any)=>!langs.includes(x)))throw new HttpError("invalid_spoken_languages",400);
+      if(spoken!==null && (spoken.length>12 || spoken.some((x:any)=>typeof x!=="string" || !/^[\p{L}0-9 _-]{2,30}$/u.test(x))))throw new HttpError("invalid_spoken_languages",400);
       patch={...patch,game_id:str(data.game_id,20),member_status:data.member_status,
         discord_user_id:str(data.discord_user_id,32)||null,notes:str(data.notes,3000),
         spoken_languages:spoken,joined_on:validateDate(data.joined_on),
