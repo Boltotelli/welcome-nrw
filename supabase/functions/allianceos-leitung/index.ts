@@ -76,7 +76,7 @@ async function audit(alliance: string, user: string, entity: string, id: string,
 async function publicInfo(req: Request, alliance: string, mode: string) {
   if(mode==="public-schedule"){
     const [cycles,phases]=await Promise.all([
-      checked<any[]>(db.from("aos_event_cycles").select("group_key,anchor_date,interval_days,duration_days,phase_count,enabled,title")
+      checked<any[]>(db.from("aos_event_cycles").select("group_key,anchor_date,interval_days,duration_days,phase_count,enabled,title,override_schedule")
        .eq("alliance_code",alliance).eq("enabled",true).limit(200)),
       checked<any[]>(db.from("aos_event_day_templates").select("group_key,day_number,instructions")
        .eq("alliance_code",alliance).eq("status","published").limit(300))
@@ -223,7 +223,7 @@ async function saveEventCycle(req:Request,alliance:string,userId:string,staff:an
      !Number.isInteger(phase_count)||phase_count<1||phase_count>duration_days)throw new HttpError("invalid_cycle",400);
   const cycle=await checked<any>(db.from("aos_event_cycles").upsert({
     alliance_code:alliance,group_key,anchor_date,interval_days,duration_days,phase_count,
-    enabled:payload.enabled!==false,title:localized(payload.title,120),updated_at:new Date().toISOString(),updated_by:userId
+    enabled:payload.enabled!==false,override_schedule:true,title:localized(payload.title,120),updated_at:new Date().toISOString(),updated_by:userId
   },{onConflict:"alliance_code,group_key"}).select("*").single());
   await audit(alliance,userId,"event_cycle",group_key,"save");
   return json(req,{ok:true,item:cycle});
