@@ -479,6 +479,17 @@ export function createEventHub({request,flash,esc,t}) {
   $("copyPhaseChat").addEventListener("click",()=>copyPhase("chat"));
   $("copyPhaseNote").addEventListener("click",()=>copyPhase("note"));
  }
+ function stats(){
+   if(!sources)return null;
+   buildGroups();
+   const today=dayKey(new Date());
+   const upcoming=groups.map(g=>{
+     const cycle=cycleFor(g),date=cycle?.enabled!==false&&cycle?nextOccurrence(cycle):
+       g.instances.flatMap(x=>x.days||[]).filter(d=>d>=today).sort()[0];
+     return date?{title:groupName(g),date}:null;
+   }).filter(Boolean).sort((a,b)=>a.date.localeCompare(b.date)||a.title.localeCompare(b.title)).slice(0,3);
+   return {count:groups.length,upcoming};
+ }
  attach();
- return {load,render};
+ return {load,render,stats};
 }
