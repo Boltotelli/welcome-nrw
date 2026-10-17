@@ -94,7 +94,7 @@
             <div class="check-grid" id="activeLanguages"><label><input type="checkbox" value="de"> Deutsch</label><label><input type="checkbox" value="en"> English</label><label><input type="checkbox" value="fr"> Français</label><label><input type="checkbox" value="es"> Español</label></div>
             <label class="field"><span data-i18n="defaultLang">Standardsprache</span><select id="defaultLanguage" class="control"><option value="de">Deutsch</option><option value="en">English</option><option value="fr">Français</option><option value="es">Español</option></select></label>
             <button class="primary" id="saveLanguages" data-permission="settings" data-i18n="save">Speichern</button></div>
-            <div class="card"><h3 data-i18n="translationFlow">Übersetzungsworkflow</h3><div class="steps"><div><b>01</b><span data-i18n="translationStep1">Originaltext schreiben</span></div><div><b>02</b><span data-i18n="translationStep2">Aktive Übersetzungen ergänzen und prüfen</span></div><div><b>03</b><span data-i18n="translationStep3">Gemeinsam veröffentlichen</span></div></div><p class="notice-inline" data-i18n="translationWarning">Eine automatische KI-Übersetzung ist noch nicht angeschlossen. Veröffentlichungen nutzen derzeit die manuell eingegebenen Texte.</p></div>
+            <div class="card"><h3 data-i18n="spokenSeparateTitle">Spielersprachen sind eigene Daten</h3><p data-i18n="spokenSeparateText">Welche Sprachen ein Spieler spricht, wird ausschließlich in seiner Spielerakte gepflegt. Hier legst du nur die Standardsprache und verfügbaren Seitensprachen fest.</p><button type="button" class="ghost" data-jump="roster" data-i18n="toDossiers">→ Spielerakten öffnen</button><p class="notice-inline" data-i18n="pageLanguageNote">Die Spracheinstellung wird gespeichert. Die bestehende öffentliche Sprachwahl bleibt bis zur zentralen Verknüpfung unverändert.</p></div>
           </div>
         </section>
         <section class="tab-page" data-page="laws" hidden>
@@ -156,5 +156,5 @@
   <div class="modal-body" id="modalFields"></div>
   <div class="modal-actions"><button type="button" class="ghost" id="cancelDialog" data-i18n="cancel">Abbrechen</button><button type="submit" class="primary" id="submitDialog" data-i18n="save">Speichern</button></div>
 </form></dialog>
-<script type="module" src="/leitung/app.js?v=3"></script>
+<script type="module" src="/leitung/app.js?v=4"></script>
 </body></html>
