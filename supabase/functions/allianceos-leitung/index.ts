@@ -151,12 +151,13 @@ async function internalMovesFor(alliance:string) {
 }
 async function bootstrap(req: Request, alliance: string, staff: any) {
   const config=await checked<any>(db.from("aos_alliances").select("*").eq("code",alliance).single());
-  const [players, transfers, laws, events, internalMoves]=await Promise.all([
+  const [players, transfers, laws, events, internalMoves, eventMessages]=await Promise.all([
     rosterFor(alliance,config.kingdom_id),
     checked<any[]>(db.from("aos_transfers").select("*").eq("alliance_code",alliance).order("updated_at",{ascending:false}).limit(500)),
     checked<any[]>(db.from("aos_laws").select("*").eq("alliance_code",alliance).order("updated_at",{ascending:false}).limit(300)),
     checked<any[]>(db.from("aos_events").select("*").eq("alliance_code",alliance).order("start_at",{ascending:true}).limit(300)),
-    internalMovesFor(alliance)
+    internalMovesFor(alliance),
+    checked<any[]>(db.from("aos_event_messages").select("source_key,day,chat_text,note_text,updated_at").eq("alliance_code",alliance).order("day",{ascending:false}).limit(500))
   ]);
   let staffMembers:any[]=[];
   if(staff.rank==="R5"){
@@ -168,7 +169,7 @@ async function bootstrap(req: Request, alliance: string, staff: any) {
         permissions:entry.permissions,enabled:entry.enabled};
     }));
   }
-  return json(req,{alliance:config,staff:{rank:staff.rank,permissions:staff.permissions},staffMembers,players,transfers,internalMoves,laws,events});
+  return json(req,{alliance:config,staff:{rank:staff.rank,permissions:staff.permissions},staffMembers,players,transfers,internalMoves,laws,events,eventMessages});
 }
 async function saveStaff(req:Request,alliance:string,userId:string,staff:any,payload:any){
   if(staff.rank!=="R5")throw new HttpError("permission_denied",403);
@@ -191,6 +192,33 @@ async function saveStaff(req:Request,alliance:string,userId:string,staff:any,pay
   },{onConflict:"user_id,alliance_code"}).select("user_id,rank,enabled,permissions").single());
   await audit(alliance,userId,"staff",user.id,existing?"update_r4":"grant_r4");
   return json(req,{ok:true,item:{...item,email}});
+}
+async function saveEventMessage(req:Request,alliance:string,userId:string,staff:any,payload:any) {
+  if(!permission(staff,"events"))throw new HttpError("permission_denied",403);
+  const source_key=str(payload.source_key,160),day=str(payload.day,10);
+  if(!/^[A-Za-z0-9_-]{2,160}$/.test(source_key))throw new HttpError("invalid_source_key",400);
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(day)||Number.isNaN(Date.parse(day+"T00:00:00Z")))
+    throw new HttpError("invalid_date",400);
+  const messages:any={};
+  for(const field of ["chat_text","note_text"]){
+    const raw=payload[field];
+    if(!raw||typeof raw!=="object"||Array.isArray(raw))throw new HttpError("invalid_messages",400);
+    const max=field==="chat_text"?512:300,localizedTexts:any={};
+    for(const locale of langs){
+      if(raw[locale]!=null){
+        const value=String(raw[locale]).trim();
+        if(value.length>max)throw new HttpError(field==="chat_text"?"chat_too_long":"note_too_long",400);
+        if(value)localizedTexts[locale]=value;
+      }
+    }
+    messages[field]=localizedTexts;
+  }
+  const result=await checked<any>(db.from("aos_event_messages").upsert({
+    alliance_code:alliance,source_key,day,...messages,updated_by:userId,updated_at:new Date().toISOString()
+  },{onConflict:"alliance_code,source_key,day"})
+    .select("source_key,day,chat_text,note_text,updated_at").single());
+  await audit(alliance,userId,"event_message",source_key+":"+day,"upsert");
+  return json(req,{ok:true,item:result});
 }
 async function save(req: Request, alliance: string, userId: string, staff: any, payload:any) {
   const entity = str(payload.entity,25), data = payload.data || {};
@@ -313,6 +341,7 @@ Deno.serve(async(req: Request)=>{
     if(Number(req.headers.get("content-length")||"0")>200000)throw new HttpError("payload_too_large",413);
     const body=await req.json().catch(()=>{throw new HttpError("invalid_json",400)});
     if(body?.action==="staff")return await saveStaff(req,alliance,userId,staff,body);
+    if(body?.action==="event_message")return await saveEventMessage(req,alliance,userId,staff,body);
     if(body?.action!=="save")throw new HttpError("unknown_action",400);
     return await save(req,alliance,userId,staff,body);
   }catch(e){
