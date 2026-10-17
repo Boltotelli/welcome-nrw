@@ -218,6 +218,20 @@ function openEdit(entity,id=null,sourcePlayer=null){
       (can("transfers")?'<button type="button" class="ghost" data-plan-player="'+esc(record.game_id)+'">'+esc(t("serverTransfer"))+' →</button>':"");
  }else return;
  $("modalFields").innerHTML=h;
+ if(entity==="transfer"){
+   const form=$("editForm"),from=form.elements.origin_kingdom,to=form.elements.target_kingdom;
+   form.elements.direction.addEventListener("change",event=>{
+     if(event.target.value==="incoming"){to.value=state.alliance.kingdom_id;if(Number(from.value)===Number(state.alliance.kingdom_id))from.value="";}
+     else{from.value=state.alliance.kingdom_id;if(Number(to.value)===Number(state.alliance.kingdom_id))to.value="";}
+   });
+   form.elements.game_id.addEventListener("change",event=>{
+     const player=state.players.find(p=>p.game_id===event.target.value.trim());
+     if(player){
+       if(!form.elements.player_name.value.trim())form.elements.player_name.value=player.name||"";
+       if(!form.elements.power.value&&player.power!=null)form.elements.power.value=player.power;
+     }
+   });
+ }
  $("editDialog").showModal();
 }
 async function saveDialog(event){
