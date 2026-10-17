@@ -84,3 +84,19 @@ Completed: inspected production GitHub source, database schema, row-security pos
 - Frontend source verified as parseable JavaScript, and production builds observed READY in Vercel.
 - No authenticated browser R5 end-to-end user-input/write/reload test has been performed in this execution environment. This remains a necessary hands-on smoke test. When a player is not in the source roster or has no numeric Game-ID, dossier editing is unavailable by design.
 - The existing Welcome public self-service language-saving endpoint remains disabled, so manually maintained dossier language overlays **do not yet flow back** to that public Welcome profile. Do not call the on-site spoken-language editing end-to-end synced.
+
+## Phase 2 · Event calendar and ingame message tools (18 October 2026)
+
+**Source of truth preserved:** existing manually entered events in `dashboard/events.json`, the complete guide database `dashboard/event-guides.json`, and the 28-day official rotation algorithm from `dashboard/app.js`. The rotation algorithm was moved **without changing its calculations** to `dashboard/event-rhythm.js` and is now loaded by both the Player Dashboard and AllianceOS; there is no second independently maintained rotation.
+
+AllianceOS Event tab now provides:
+- One combined searchable **existing events** browser including past entries, currently active and next eight weeks, projected 28-day rotation, and custom AllianceOS events.
+- Full guide catalog: 18 detailed guides and 33 additional catalog entries from the existing `dashboard/event-guides.json`. All original structured guide information remains inspectable via an expand/collapse view; day-specific plans and scoring instructions come directly from the source.
+- Per-event **day selection**, with the relevant original daily plan, scoring notes, original guide, projected day-specific rhythm and provenance/forecast tags.
+- Automatically composed, editable **512-character alliance chat** and **300-character alliance notice** plain-text messages. Copy buttons work independently for each channel; clipboard fallback selects text if permission is denied.
+- Permissioned R4/R5 save for the selected event, day and UI language. User-specific messages persist in `aos_event_messages` (isolated, RLS enabled, anon/authenticated table access denied); backend validates limits and checks `events` staff permissions. These messages do not change the original guides or NAP tracker.
+- Additional manually created AllianceOS events remain in `aos_events` and can be edited/published as before; the library surfaces them too.
+
+**Not yet connected:** the user's local Windows Messaging Queue Excel and already sent messages, since that local controller isn't hosted in this repo. Also no automatic Discord bot posting or game posting has been added. Before sending any auto-composed text, leaders should check the current Law14 exceptions and Discord decisions, which may have changed since static guides were written. Guide contents are source material, not independently validated current event rules.
+
+**Verification performed:** extracted rhythm script simulated for multiple 2026 UTC calendar dates; existing dashboard JS and leadership JS parsed successfully after the refactor; event library simulated with the real 20 event records and 18+33 guide records (52 upcoming event records in the sample period and 51 catalog entries, may vary by current date); clipboard text generation returned <=512/<=300 characters; simulated save payload preserved language, source ID and UTC day. Authenticated R5 browser smoke test of the production write/save/reload remains outstanding.
