@@ -94,7 +94,7 @@ async function rosterFor(alliance: string, kingdom: number) {
     .select("id,game_id,name,alliance_code,alliance_rank,active,languages,provider_seen_at")
     .eq("alliance_code",alliance).order("name",{ascending:true}).limit(500));
   const notes = await checked<any[]>(db.from("aos_member_notes")
-    .select("id,game_id,member_status,discord_user_id,notes,updated_at")
+    .select("id,game_id,member_status,discord_user_id,notes,spoken_languages,joined_on,responsibilities,updated_at")
     .eq("alliance_code",alliance).limit(500));
   const cacheIds=players.map(p=>p.game_id).filter(isId);
   let images:any[]=[];
@@ -124,7 +124,8 @@ async function rosterFor(alliance: string, kingdom: number) {
       alliance:p.alliance_code, active:p.active,
       member_status:overlay.member_status||(p.active?"active":"left"),
       note_id:overlay.id||null, notes:overlay.notes||null,
-      languages:p.languages||[], avatar_url:cache.avatar_url||null,
+      languages:overlay.spoken_languages??p.languages??[], source_languages:p.languages||[], joined_on:overlay.joined_on||null,
+      responsibilities:overlay.responsibilities||"", avatar_url:cache.avatar_url||null,
       tc_level:cache.tc_level??null,
       power:power.power==null?null:Number(power.power),
       power_observed_at:power.fetched_at||null,
@@ -133,13 +134,29 @@ async function rosterFor(alliance: string, kingdom: number) {
     };
   });
 }
+// Historical intra-kingdom movements are strictly read-only from the existing tracker.
+async function internalMovesFor(alliance:string) {
+  const moves=await checked<any[]>(db.from("player_alliance_transfers")
+    .select("id,player_id,from_alliance,to_alliance,moved_at")
+    .or("from_alliance.eq."+alliance+",to_alliance.eq."+alliance)
+    .order("moved_at",{ascending:false}).limit(250));
+  const ids=[...new Set(moves.map(x=>x.player_id).filter(Boolean))];
+  const names=ids.length?await checked<any[]>(db.from("players")
+    .select("id,game_id,name").in("id",ids).limit(250)):[];
+  const known=new Map(names.map(p=>[p.id,p]));
+  return moves.map(m=>({
+    id:m.id, moved_at:m.moved_at,from_alliance:m.from_alliance,to_alliance:m.to_alliance,
+    game_id:known.get(m.player_id)?.game_id||null,player_name:known.get(m.player_id)?.name||null
+  }));
+}
 async function bootstrap(req: Request, alliance: string, staff: any) {
   const config=await checked<any>(db.from("aos_alliances").select("*").eq("code",alliance).single());
-  const [players, transfers, laws, events]=await Promise.all([
+  const [players, transfers, laws, events, internalMoves]=await Promise.all([
     rosterFor(alliance,config.kingdom_id),
     checked<any[]>(db.from("aos_transfers").select("*").eq("alliance_code",alliance).order("updated_at",{ascending:false}).limit(500)),
     checked<any[]>(db.from("aos_laws").select("*").eq("alliance_code",alliance).order("updated_at",{ascending:false}).limit(300)),
-    checked<any[]>(db.from("aos_events").select("*").eq("alliance_code",alliance).order("start_at",{ascending:true}).limit(300))
+    checked<any[]>(db.from("aos_events").select("*").eq("alliance_code",alliance).order("start_at",{ascending:true}).limit(300)),
+    internalMovesFor(alliance)
   ]);
   let staffMembers:any[]=[];
   if(staff.rank==="R5"){
@@ -151,7 +168,7 @@ async function bootstrap(req: Request, alliance: string, staff: any) {
         permissions:entry.permissions,enabled:entry.enabled};
     }));
   }
-  return json(req,{alliance:config,staff:{rank:staff.rank,permissions:staff.permissions},staffMembers,players,transfers,laws,events});
+  return json(req,{alliance:config,staff:{rank:staff.rank,permissions:staff.permissions},staffMembers,players,transfers,internalMoves,laws,events});
 }
 async function saveStaff(req:Request,alliance:string,userId:string,staff:any,payload:any){
   if(staff.rank!=="R5")throw new HttpError("permission_denied",403);
@@ -215,12 +232,23 @@ async function save(req: Request, alliance: string, userId: string, staff: any, 
     let patch:any={alliance_code:alliance,updated_at:now};
     if (entity==="transfer") {
       if(!isId(data.game_id)) throw new HttpError("invalid_player_id",400);
-      const status=str(data.status,20), direction=str(data.direction,20);
-      if(!["incoming","outgoing"].includes(direction) || !["interested","shortlisted","confirmed","waitlist","completed","cancelled"].includes(status)) throw new HttpError("invalid_transfer_state",400);
+      const status=str(data.status,20),direction=str(data.direction,20);
+      if(!["incoming","outgoing"].includes(direction) || !["interested","shortlisted","confirmed","waitlist","completed","cancelled"].includes(status))
+        throw new HttpError("invalid_transfer_state",400);
+      const config=await checked<any>(db.from("aos_alliances").select("kingdom_id").eq("code",alliance).single());
+      const origin=direction==="outgoing"?Number(config.kingdom_id):Number(data.origin_kingdom);
+      const target=direction==="incoming"?Number(config.kingdom_id):Number(data.target_kingdom);
+      if(!Number.isInteger(origin)||!Number.isInteger(target)||origin<1||target<1||origin>99999||target>99999||origin===target)
+        throw new HttpError("invalid_kingdom_route",400);
+      const priority=Number(data.priority??2),invitation_type=str(data.invitation_type||"not_assigned",20);
+      if(![1,2,3].includes(priority)||!["not_assigned","ordinary","special"].includes(invitation_type))
+        throw new HttpError("invalid_transfer_priority",400);
+      if(!str(data.player_name,100))throw new HttpError("missing_player_name",400);
       patch={...patch,game_id:str(data.game_id,20),direction,status,
-        player_name:str(data.player_name,100),origin_kingdom:data.origin_kingdom?Number(data.origin_kingdom):null,
-        previous_alliance:str(data.previous_alliance,50),target_alliance:str(data.target_alliance,50)||alliance,
-        power:data.power && Number.isFinite(Number(data.power)) ? Math.max(0,Math.floor(Number(data.power))):null,
+        player_name:str(data.player_name,100),origin_kingdom:origin,target_kingdom:target,
+        priority,invitation_type,previous_alliance:str(data.previous_alliance,50),
+        target_alliance:str(data.target_alliance,50)||alliance,
+        power:data.power && Number.isSafeInteger(Number(data.power)) && Number(data.power)>=0?Number(data.power):null,
         window_start:validateDate(data.window_start),window_end:validateDate(data.window_end),
         notes:str(data.notes,3000),share_approved:Boolean(data.share_approved)};
       if (patch.window_start&&patch.window_end&&patch.window_end<patch.window_start)throw new HttpError("invalid_window",400);
@@ -251,8 +279,12 @@ async function save(req: Request, alliance: string, userId: string, staff: any, 
         .eq("alliance_code",alliance).eq("game_id",str(data.game_id,20)).maybeSingle());
       if(!own)throw new HttpError("player_not_in_alliance",403);
       if(!["active","planned","left"].includes(data.member_status))throw new HttpError("invalid_member_state",400);
+      const spoken=Array.isArray(data.spoken_languages)?[...new Set(data.spoken_languages)]:null;
+      if(spoken!==null && spoken.some((x:any)=>!langs.includes(x)))throw new HttpError("invalid_spoken_languages",400);
       patch={...patch,game_id:str(data.game_id,20),member_status:data.member_status,
-        discord_user_id:str(data.discord_user_id,32)||null,notes:str(data.notes,3000)};
+        discord_user_id:str(data.discord_user_id,32)||null,notes:str(data.notes,3000),
+        spoken_languages:spoken,joined_on:validateDate(data.joined_on),
+        responsibilities:str(data.responsibilities,500)};
     }
     result=await checked<any>(existing
       ? db.from(entry.table).update(patch).eq("id",id).eq("alliance_code",alliance).select("*").single()
