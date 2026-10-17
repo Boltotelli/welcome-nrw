@@ -1,4 +1,5 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.58.0/+esm";
+import {createEventHub} from "/leitung/event-library.js?v=1";
 
 // Private AllianceOS pilot. Data is NEVER stored in localStorage; only auth session is.
 // All records and permissions are issued by the authenticated Edge Function.
@@ -64,6 +65,7 @@ async function request(mode="bootstrap",payload=null){
 }
 function can(feature){return state?.staff?.rank==="R5"||state?.staff?.permissions?.[feature]===true;}
 function grantButtons(){q("[data-permission]").forEach(el=>{el.disabled=!can(el.dataset.permission);el.title=el.disabled?t("permissionDenied"):"";});}
+const eventHub=createEventHub({request,flash,esc,t});
 function showLogin(message=""){
  $("liveArea").hidden=true;$("loginArea").hidden=false;$("logoutBtn").hidden=true;
  $("roleChip").textContent="R4 / R5";$("loginError").textContent=message;
@@ -76,6 +78,7 @@ async function refresh(){
  const data=await request();
  if(!data?.alliance||!data?.staff)throw new Error("not_authorized");
  state=data;showLive();
+  eventHub.load().then(()=>state&&eventHub.render(state,lang,can("events"))).catch(e=>flash(t("genericError")+" (events: "+e.message+")",true));
 }
 const fmtInt=n=>Number(n||0).toLocaleString({de:"de-DE",en:"en-GB",fr:"fr-FR",es:"es-ES"}[lang]);
 const dateText=d=>!d?"—":new Intl.DateTimeFormat({de:"de-DE",en:"en-GB",fr:"fr-FR",es:"es-ES"}[lang],{day:"2-digit",month:"short",year:"numeric"}).format(new Date(d));
@@ -141,7 +144,7 @@ function renderSettings(){
  $("staffList").innerHTML=members.length?'<p class="eyebrow">'+esc(t("staffList"))+'</p>'+members.map(m=>
  '<button type="button" class="staff-row" data-staff-email="'+esc(m.email)+'"><span><b>'+esc(m.email)+'</b><small>'+esc(m.rank)+(m.enabled?'':' · '+esc(t("r4Disabled")))+'</small></span><span>→</span></button>').join(""):"";
 }
-function render(){patchTranslations();counts();renderRoster();renderTransfers();renderLaws();renderEvents();renderSettings();}
+function render(){patchTranslations();counts();renderRoster();renderTransfers();renderLaws();renderEvents();renderSettings();eventHub.render(state,lang,can("events"));}
 function control(label,name,value="",type="text",opts={}){
  const attr=Object.entries(opts).map(([k,v])=>' '+k+'="'+esc(v)+'"').join("");
  return '<label class="field"><span>'+esc(label)+'</span><input class="control" name="'+esc(name)+'" type="'+esc(type)+'" value="'+esc(value??"")+'"'+attr+'></label>';
