@@ -101,6 +101,13 @@ async function rosterFor(alliance: string, kingdom: number) {
   if(cacheIds.length) images=await checked<any[]>(db.from("kingshot_player_cache")
     .select("player_id,avatar_url,tc_level,profile_updated_at,alliance")
     .eq("kingdom_id",kingdom).in("player_id",cacheIds).limit(500));
+  // Optional power values from the Bear Buff cache, restricted by BOTH alliance and roster IDs.
+  // Empty/unavailable records remain null; no made-up strength estimates.
+  let powers:any[]=[];
+  if(cacheIds.length) powers=await checked<any[]>(db.from("discord_bear_buff_power")
+    .select("game_id,power,fetched_at").eq("alliance_code",alliance)
+    .in("game_id",cacheIds).limit(500));
+  const byPower=new Map(powers.map(x=>[x.game_id,x]));
   const dbIds=players.map(p=>p.id).filter(Boolean);
   let discord:any[]=[];
   if(dbIds.length) discord=await checked<any[]>(db.from("discord_onboarding_members")
@@ -111,7 +118,7 @@ async function rosterFor(alliance: string, kingdom: number) {
   const byImg=new Map(images.map(p=>[p.player_id,p]));
   const byDiscord=new Map(discord.map(p=>[p.matched_player_id,p]));
   return players.map(p=>{
-    const overlay=byNote.get(p.game_id)||{}, cache=byImg.get(p.game_id)||{}, match=byDiscord.get(p.id)||{};
+    const overlay=byNote.get(p.game_id)||{}, cache=byImg.get(p.game_id)||{}, match=byDiscord.get(p.id)||{}, power=byPower.get(p.game_id)||{};
     return {
       game_id:p.game_id, name:p.name, rank:p.alliance_rank || null,
       alliance:p.alliance_code, active:p.active,
@@ -119,7 +126,8 @@ async function rosterFor(alliance: string, kingdom: number) {
       note_id:overlay.id||null, notes:overlay.notes||null,
       languages:p.languages||[], avatar_url:cache.avatar_url||null,
       tc_level:cache.tc_level??null,
-      power:null, // No reliable player-power column exists in the reused tables.
+      power:power.power==null?null:Number(power.power),
+      power_observed_at:power.fetched_at||null,
       discord_user_id:overlay.discord_user_id||match.discord_user_id||null,
       source_seen_at:p.provider_seen_at||cache.profile_updated_at||null
     };
