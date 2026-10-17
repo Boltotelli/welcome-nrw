@@ -5,7 +5,7 @@ export function createEventHub({request,flash,esc,t}) {
  const $=id=>document.getElementById(id);
  const localeName={de:"de-DE",en:"en-GB",fr:"fr-FR",es:"es-ES"};
  const guideIds={brawl:"alliance-brawl",kvk:"kingdom-of-power-prep",strongest:"strongest-governor",armament:"armament-competition",officer:"officer-project",golden:"golden-glaives",merchant:"merchant-empire",fishing:"fishing-tournament",viking:"viking-vengeance",eternity:"eternitys-reach",cesare:"cesares-fury",championship:"alliance-championship",kill:"kill-event",bear:"bear-trap",transfer:"kingdom-transfer",champagne:"champagne-fair",roulette:"hero-roulette"};
- let sources=null,loading=null,items=[],extraEvents=[],state=null,language="de",canEdit=false,selected=null,rhythmByDay=new Map();
+ let sources=null,loading=null,items=[],extraEvents=[],groups=[],state=null,language="de",canEdit=false,selected=null,rhythmByDay=new Map();
  const lk=(value,lang=language)=>typeof value==="string"?value:Array.isArray(value)?value:(value?.[lang]||value?.en||value?.de||value?.fr||value?.es||"");
  const dayKey=d=>new Date(d).toISOString().slice(0,10);
  const dateRange=(start,end,max=90)=>{
@@ -15,6 +15,8 @@ export function createEventHub({request,flash,esc,t}) {
  };
  const offset=(base,n)=>dayKey(Date.parse(base+"T00:00:00Z")+n*86400000);
  const kind=e=>{
+   if(e.aos_group)return e.aos_group;
+   const automatic=window.NRW_EVENT_RHYTHM?.groupKey(e);if(automatic)return automatic;
    const x=(String(e.id||"")+" "+String(lk(e.name,"en"))).toLowerCase();
    if(x.includes("alliance-brawl")||x.includes("alliance brawl"))return "brawl";
    if(x.includes("kingdom-of-power")||x.includes("kvk"))return "kvk";
@@ -76,33 +78,115 @@ export function createEventHub({request,flash,esc,t}) {
   items=[...dict.values()].sort((a,b)=>a.record.start.localeCompare(b.record.start)||name(a).localeCompare(name(b)));
 
  }
- function list(){
-  const search=$("eventLibrarySearch").value.trim().toLowerCase(),filter=$("eventLibraryFilter").value;
-  const today=dayKey(new Date()),eight=offset(today,56);
-  if(!sources){$("eventLibraryList").innerHTML='<p class="muted">'+esc(t("libraryLoadError"))+'</p>';return;}
-  if(filter==="guides"){
-    const all=[...(sources.guides.events||[]).map(g=>({key:"guide-"+g.id,source:"guide",record:g,days:[today],guide:g})),...(sources.guides.catalogOnly||[]).map((g,i)=>({key:"catalog-"+String(g.id||i),source:"catalog",record:g,days:[today],guide:g}))];
-    const shown=all.filter(item=>!search||((name(item)+" "+item.key).toLowerCase().includes(search)));
-    $("eventLibraryCount").textContent=String(shown.length);
-    $("eventLibraryList").innerHTML=shown.map(item=>itemCard(item)).join("")||'<p class="muted">'+esc(t("noEvents"))+'</p>';
-    return;
+ const groupName=group=>lk(group.guide?.names||group.guide?.name)||name(group.instances[0]);
+ const normalizeKey=raw=>String(raw||"").toLowerCase().replace(/[^a-z0-9-]+/g,"-").replace(/^-+|-+$/g,"").slice(0,70);
+ const keyForEntry=(x)=>{
+   if(x.source==="custom")return "custom-"+x.record.id;
+   const k=kind(x.record);
+   if(k!=="generic")return k;
+   const id=String(x.guide?.id||x.record?.id||"");
+   return normalizeKey(id.replace(/-20[0-9]{2}(?:-[0-9]{2}){0,2}.*$/,""))||"event";
+ };
+ function buildGroups(){
+  if(!sources)return;
+  const pool=[...items,...extraEvents],
+    lookup=new Map((sources.guides.events||[]).map(g=>[g.id,g]));
+  const map=new Map();
+  function add(entry){
+    const key=keyForEntry(entry);if(!key)return;
+    if(!map.has(key))map.set(key,{key,instances:[],guide:entry.guide||null});
+    const group=map.get(key);
+    group.instances.push(entry);
+    if(entry.guide&&!group.guide)group.guide=entry.guide;
   }
-  const shown=[...items,...extraEvents].filter(item=>{
-   if(search && !(name(item)+" "+item.key).toLowerCase().includes(search))return false;
-   const days=item.days;
-   if(filter==="past")return item.record.start<today;
-   if(filter==="upcoming")return days.some(d=>d>=today&&d<=eight);
-   return true;
-  }).sort((a,b)=>filter==="past"?b.record.start.localeCompare(a.record.start):a.record.start.localeCompare(b.record.start)).slice(0,180);
-  $("eventLibraryCount").textContent=String(shown.length);
-  $("eventLibraryList").innerHTML=shown.map(item=>itemCard(item)).join("")||'<p class="muted">'+esc(t("noEvents"))+'</p>';
+  pool.forEach(add);
+  for(const guide of sources.guides.events||[])add({source:"guide",key:"guide-"+guide.id,record:guide,guide,days:[]});
+  for(const cat of sources.guides.catalogOnly||[]){
+    const catalog={source:"catalog",key:"catalog-"+String(cat.id||cat.name||"unknown"),record:cat,guide:null,days:[]};
+    // Prefer an existing full guide or dated event with the same recognizable type/name.
+    const normalized=(name(catalog)||"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
+    const group=[...map.values()].find(g=>g.instances.some(item=>
+      name(item).toLowerCase().replace(/[^a-z0-9]+/g," ").trim()===normalized));
+    if(group)continue;
+    add(catalog);
+  }
+  for(const g of map.values()){
+    g.instances.sort((a,b)=>{
+      const quality=x=>(x.source==="manual"&&x.record.dailyPlans?10000:0)+
+        (x.source==="manual"?5000:x.source==="rhythm"?3000:x.source==="custom"?4000:0);
+      return quality(b)-quality(a)||String(b.record.start||"").localeCompare(String(a.record.start||""));
+    });
+    const full=lookup.get(g.key)||lookup.get(guideIds[g.key]);
+    if(full)g.guide=full;
+  }
+  groups=[...map.values()].sort((a,b)=>groupName(a).localeCompare(groupName(b),language));
  }
- function itemCard(item){
-  const k=item.source,tag=k==="manual"?t("manualSource"):k==="rhythm"?t("rhythmSource"):k==="custom"?t("customSource"):k==="guide"?t("guideSource"):t("catalogSource");
-  const dates=k==="guide"||k==="catalog"?t("guideOnly"):formatDate(item.record.start)+(item.record.end&&item.record.end!==item.record.start?" – "+formatDate(item.record.end):"");
-  const mark=item.record.confidence==="predicted"?' · '+t("notConfirmed"):"";
-  return '<article class="event-source-item"><div><span class="eyebrow">'+esc(tag+mark)+'</span><h3>'+esc(name(item))+'</h3><small>'+esc(dates)+'</small></div>'+
-   '<button type="button" class="ghost" data-library-key="'+esc(item.key)+'">'+esc(t("showEvent"))+' →</button></article>';
+ const cycleFor=g=>(state?.eventCycles||[]).find(c=>c.group_key===g.key)||null;
+ const cycleDefaults=g=>{
+   const options={
+     brawl:["2026-09-14",28,7,6],strongest:["2026-09-21",28,7,7],
+     kvk:["2026-10-05",28,5,5],mobilization:["2026-09-28",28,6,6],
+     merchant:["2026-09-14",28,7,7],golden:["2026-09-21",14,3,3],
+     championship:["2026-10-19",7,2,2],bear:["2026-09-13",2,1,1]
+   };
+   const baseline=options[g.key];if(baseline)return{anchor_date:baseline[0],interval_days:baseline[1],duration_days:baseline[2],phase_count:baseline[3]};
+   const instance=g.instances.find(e=>e.record.start);
+   const start=instance?.record.start||dayKey(new Date());
+   const phaseCount=Array.isArray(g.guide?.phases)?g.guide.phases.length:1;
+   return {anchor_date:start,interval_days:28,duration_days:Math.min(14,Math.max(phaseCount,1)),phase_count:Math.min(14,Math.max(phaseCount,1))};
+ };
+ const cycleOf=g=>cycleFor(g)||cycleDefaults(g);
+ const phaseCount=g=>Math.min(14,Number(cycleOf(g)?.phase_count||cycleOf(g)?.duration_days||1));
+ const periodLabel=cycle=>{
+   if(!cycle)return t("noCycle");
+   const n=Number(cycle.interval_days);
+   if(n===7)return t("everyWeek");
+   if(n===14)return t("everyTwoWeeks");
+   if(n===28)return t("everyFourWeeks");
+   if(n===1)return t("everyDay");
+   return t("everyN").replace("{n}",n);
+ };
+ function nextOccurrence(cycle){
+   const start=Date.parse(cycle.anchor_date+"T00:00:00Z"),now=Date.parse(dayKey(new Date())+"T00:00:00Z");
+   if(!Number.isFinite(start))return null;
+   const elapsed=Math.max(0,Math.floor((now-start)/86400000));
+   const runs=Math.max(0,Math.floor(elapsed/cycle.interval_days));
+   const candidate=start+runs*cycle.interval_days*86400000;
+   const end=candidate+(cycle.duration_days-1)*86400000;
+   return dayKey(end>=now?candidate:candidate+cycle.interval_days*86400000);
+ }
+ function list(){
+  if(!sources){$("eventLibraryList").innerHTML='<p class="muted">'+esc(t("libraryLoadError"))+'</p>';return;}
+  buildGroups();
+  const search=$("eventLibrarySearch").value.trim().toLowerCase(),filter=$("eventLibraryFilter").value,
+    today=dayKey(new Date()),limit=offset(today,56);
+  const shown=groups.filter(g=>{
+    if(search&&!((groupName(g)+" "+g.key+" "+g.instances.map(x=>name(x)).join(" ")).toLowerCase().includes(search)))return false;
+    if(filter==="guides"&&!g.guide)return false;
+    if(filter==="upcoming"){
+      const cycle=cycleFor(g);
+      if(cycle&&cycle.enabled!==false){const next=nextOccurrence(cycle);return next&&next<=limit;}
+      return g.instances.some(x=>x.days?.some(d=>d>=today&&d<=limit));
+    }
+    return true;
+  });
+  $("eventLibraryCount").textContent=String(shown.length);
+  $("eventLibraryList").innerHTML=shown.map(groupCard).join("")||'<p class="muted">'+esc(t("noEvents"))+'</p>';
+ }
+ function groupCard(g){
+   const cycle=cycleFor(g),effective=cycle||cycleDefaults(g),phases=phaseCount(g),recurring=periodLabel(cycle),
+    days=Array.from({length:phases},(_,i)=>{
+      const template=(state?.eventDayTemplates||[]).find(r=>r.group_key===g.key&&r.day_number===i+1);
+      const note=template?.instructions?.[language]||template?.instructions?.en||template?.instructions?.de||"";
+      return '<div class="event-phase-row"><span>'+esc(t("phaseN").replace("{n}",i+1))+'</span><small>'+esc(note.slice(0,130)||t("phaseEmpty"))+'</small>'+
+        '<button type="button" class="ghost" data-library-key="'+esc(g.key)+'" data-phase="'+(i+1)+'">'+esc(t("edit"))+'</button></div>';
+    }).join("");
+   const updated=cycle&&cycle.enabled!==false?nextOccurrence(cycle):null;
+   const badge=cycle?recurring:t("noCycle");
+   const desc=updated?t("nextOccurrence")+": "+formatDate(updated):g.instances.length+" "+t("existingSources");
+   return '<details class="event-group"><summary><span class="event-group-title"><b>'+esc(groupName(g))+'</b>'+
+      '<small>'+esc(badge)+' · '+esc(desc)+'</small></span><span class="event-group-count">'+esc(t("daysCount").replace("{n}",phases))+'</span></summary>'+
+      '<div class="event-group-body"><div class="event-group-actions"><span>'+esc(t("cycleInfo"))+'</span><button type="button" class="ghost" data-library-key="'+esc(g.key)+'" data-phase="1">'+esc(t("cycleSettings"))+'</button></div>'+days+'</div></details>';
  }
  function render(current,lang,allowed){
   state=current;language=lang;canEdit=allowed;
