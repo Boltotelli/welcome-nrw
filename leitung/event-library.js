@@ -302,15 +302,132 @@ export function createEventHub({request,flash,esc,t}) {
    const n=$(id).value.length;$(target).textContent=n+" / "+max;$(target).classList.toggle("too-long",n>max);
   }
  }
- function open(key){
-  selected=findItem(key);if(!selected)return;
-  $("libraryModalTitle").textContent=name(selected);
-  $("libraryModalSource").textContent=selected.source==="manual"?t("manualSource"):selected.source==="rhythm"?t("rhythmSource"):t("guideSource");
-  const dates=selected.days.length?selected.days:[dayKey(new Date())];
-  $("libraryDay").innerHTML=dates.map(d=>'<option value="'+esc(d)+'">'+esc(formatDate(d))+'</option>').join("");
-  const today=dayKey(new Date());if(dates.includes(today))$("libraryDay").value=today;
-  else if(dates.some(d=>d>today))$("libraryDay").value=dates.find(d=>d>today);
-  renderDetails();$("eventLibraryDialog").showModal();
+ function phaseRecord(){
+   return (state?.eventDayTemplates||[]).find(r=>r.group_key===selected?.group_key&&r.day_number===Number($("libraryPhase").value))||null;
+ }
+ function sourceForPhase(phase){
+   const g=groups.find(x=>x.key===selected?.group_key);if(!g)return null;
+   for(const x of g.instances){
+     const day=x.record.start&&offset(x.record.start,phase-1),plan=x.record.dailyPlans?.[day];
+     if(plan)return {day,plan,record:x.record};
+   }
+   return null;
+ }
+ function setPhaseOptions(preferred=1){
+   if(!selected?.group_key)return;
+   const group=groups.find(x=>x.key===selected.group_key);
+   const number=group?phaseCount(group):1;
+   $("libraryPhase").innerHTML=Array.from({length:number},(_,i)=>'<option value="'+(i+1)+'">'+esc(t("phaseN").replace("{n}",i+1))+'</option>').join("");
+   $("libraryPhase").value=String(Math.min(number,Math.max(1,Number(preferred)||1)));
+ }
+ function cycleFields(){
+   const g=groups.find(x=>x.key===selected?.group_key);if(!g)return;
+   const cycle=cycleOf(g);
+   $("cycleAnchor").value=cycle.anchor_date;
+   $("cycleEvery").value=cycle.interval_days;
+   $("cycleLength").value=cycle.duration_days;
+   $("cyclePhases").value=cycle.phase_count||cycle.duration_days;
+   $("cycleSummary").textContent=cycleFor(g)?periodLabel(cycleFor(g)):t("cycleUnconfigured");
+   for(const id of ["cycleAnchor","cycleEvery","cycleLength","cyclePhases"])$(id).disabled=!canEdit;
+   $("saveCycle").disabled=!canEdit;
+ }
+ function updatePhaseCounts(){
+   for(const [field,label,max] of [["phaseChat","phaseChatCount",512],["phaseNote","phaseNoteCount",300]]){
+     $(label).textContent=$(field).value.length+" / "+max;
+     $(label).classList.toggle("too-long",$(field).value.length>max);
+   }
+ }
+ function fillPhase(){
+   if(!selected?.group_key)return;
+   const n=Number($("libraryPhase").value)||1,r=phaseRecord(),source=sourceForPhase(n);
+   // Reuse original daily source instructions as a non-destructive editing starting point.
+   let original="";
+   if(source){
+     const plan=source.plan,values=[
+       lk(plan.points),...((plan.steps?.[language]||plan.steps?.en||[]).filter(Boolean))
+     ].filter(x=>typeof x==="string"&&x.trim());
+     original=values.join("\n").slice(0,1200);
+   }else{
+     const suggestions=selected?.guide?.nrwGuide?.[language]||selected?.guide?.nrwGuide?.en||[];
+     if(Array.isArray(suggestions))original=suggestions.join("\n").slice(0,1200);
+   }
+   $("phaseInstructions").value=r?.instructions?.[language]??original;
+   // Phase chat and note templates deliberately contain NO fixed date, so reuse works each cycle.
+   const intro=groupName(groups.find(g=>g.key===selected.group_key)||{instances:[selected]})+" · "+t("phaseN").replace("{n}",n);
+   const text=$("phaseInstructions").value.replace(/\s+/g," ").trim();
+   const sample=max=>{const capacity=Math.max(0,max-intro.length-1);return (intro+"\n"+text.slice(0,capacity)).trim().slice(0,max);};
+   $("phaseChat").value=r?.chat_text?.[language]??sample(512);
+   $("phaseNote").value=r?.note_text?.[language]??sample(300);
+   $("phaseStatus").value=r?.status||"draft";
+   const canSave=canEdit&&Boolean(cycleFor(groups.find(g=>g.key===selected.group_key)));
+   $("savePhase").disabled=!canSave;
+   for(const id of ["phaseInstructions","phaseChat","phaseNote"])$(id).readOnly=!canEdit;
+   $("phaseStatus").disabled=!canEdit;
+   $("phaseInfo").textContent=!canEdit?t("permissionDenied"):
+      !canSave?t("saveCycleFirst"):r?.status==="published"?t("templatePublished"):t("templateDraft");
+   updatePhaseCounts();
+   // In the original source detail, show this phase's stored scoring day if available.
+   const days=selected.days||[],match=source?.day;
+   if(match&&days.includes(match)){$("libraryDay").value=match;renderDetails();}
+ }
+ async function saveCycle(){
+   if(!selected?.group_key||!canEdit)return;
+   const anchor_date=$("cycleAnchor").value,interval_days=Number($("cycleEvery").value),
+     duration_days=Number($("cycleLength").value),phase_count=Number($("cyclePhases").value);
+   if(!/^\d{4}-\d{2}-\d{2}$/.test(anchor_date)||!Number.isInteger(interval_days)||interval_days<1||interval_days>365||
+      !Number.isInteger(duration_days)||duration_days<1||duration_days>14||duration_days>interval_days||
+      !Number.isInteger(phase_count)||phase_count<1||phase_count>duration_days){
+     flash(t("cycleInvalid"),true);return;
+   }
+   const id=$("saveCycle");id.disabled=true;
+   try{
+     const r=await request("bootstrap",{action:"event_cycle",group_key:selected.group_key,anchor_date,interval_days,duration_days,phase_count,enabled:true});
+     state.eventCycles=(state.eventCycles||[]).filter(c=>c.group_key!==selected.group_key);
+     state.eventCycles.push(r.item);
+     setPhaseOptions(Number($("libraryPhase").value));
+     cycleFields();fillPhase();list();flash(t("saved"));
+   }catch(e){flash(t("genericError")+" ("+e.message+")",true)}
+   finally{id.disabled=!canEdit;}
+ }
+ async function savePhase(){
+   if(!selected?.group_key||!canEdit)return;
+   const day_number=Number($("libraryPhase").value),r=phaseRecord(),status=$("phaseStatus").value;
+   const instructions={...(r?.instructions||{}),[language]:$("phaseInstructions").value.trim()},
+     chat_text={...(r?.chat_text||{}),[language]:$("phaseChat").value.trim()},
+     note_text={...(r?.note_text||{}),[language]:$("phaseNote").value.trim()};
+   if(instructions[language].length>1200||chat_text[language].length>512||note_text[language].length>300){
+     flash(t("invalidMessage"),true);return;
+   }
+   const button=$("savePhase");button.disabled=true;
+   try{
+     const result=await request("bootstrap",{action:"event_day_template",group_key:selected.group_key,day_number,status,instructions,chat_text,note_text});
+     state.eventDayTemplates=(state.eventDayTemplates||[]).filter(v=>!(v.group_key===selected.group_key&&v.day_number===day_number));
+     state.eventDayTemplates.push(result.item);
+     fillPhase();list();flash(t("saved"));
+   }catch(e){flash(t("genericError")+" ("+e.message+")",true)}
+   finally{button.disabled=!canEdit&&Boolean(cycleFor(groups.find(g=>g.key===selected.group_key)));}
+ }
+ async function copyPhase(which){
+   const el=$(which==="chat"?"phaseChat":"phaseNote"),limit=which==="chat"?512:300;
+   if(!el.value||el.value.length>limit){flash(t("invalidMessage"),true);return;}
+   try{await navigator.clipboard.writeText(el.value);flash(t("copiedText"));}
+   catch{el.focus();el.select();flash(t("copySelect"));}
+ }
+ function open(key,phase=1){
+   const group=groups.find(x=>x.key===key);
+   if(!group)return;
+   const original=group.instances.find(x=>x.record.dailyPlans)||group.instances.find(x=>x.source==="rhythm")||group.instances[0];
+   selected={...original,group_key:group.key,guide:group.guide||original.guide};
+   $("libraryModalTitle").textContent=groupName(group);
+   $("libraryModalSource").textContent=t("oneEvent");
+   const dates=selected.days?.length?selected.days:[dayKey(new Date())];
+   $("libraryDay").innerHTML=dates.map(d=>'<option value="'+esc(d)+'">'+esc(formatDate(d))+'</option>').join("");
+   $("libraryDay").value=dates[0];
+   cycleFields();
+   setPhaseOptions(phase);
+   renderDetails();
+   fillPhase();
+   $("eventLibraryDialog").showModal();
  }
  async function copyText(kind){
   const el=$(kind==="chat"?"libraryChat":"libraryNote"),max=kind==="chat"?512:300;
@@ -340,7 +457,7 @@ export function createEventHub({request,flash,esc,t}) {
  function attach(){
   $("eventLibrarySearch").addEventListener("input",list);
   $("eventLibraryFilter").addEventListener("change",list);
-  $("eventLibraryList").addEventListener("click",e=>{const btn=e.target.closest("[data-library-key]");if(btn)open(btn.dataset.libraryKey);});
+  $("eventLibraryList").addEventListener("click",e=>{const btn=e.target.closest("[data-library-key]");if(btn)open(btn.dataset.libraryKey,Number(btn.dataset.phase||1));});
   $("closeLibraryDialog").addEventListener("click",()=>$("eventLibraryDialog").close());
   $("libraryDay").addEventListener("change",renderDetails);
   $("libraryChat").addEventListener("input",updateCounters);
@@ -349,6 +466,13 @@ export function createEventHub({request,flash,esc,t}) {
   $("copyLibraryNote").addEventListener("click",()=>copyText("note"));
   $("saveLibraryMessages").addEventListener("click",saveTexts);
   $("saveLibraryGuidance").addEventListener("click",saveGuidance);
+  $("libraryPhase").addEventListener("change",fillPhase);
+  $("saveCycle").addEventListener("click",saveCycle);
+  $("savePhase").addEventListener("click",savePhase);
+  $("phaseChat").addEventListener("input",updatePhaseCounts);
+  $("phaseNote").addEventListener("input",updatePhaseCounts);
+  $("copyPhaseChat").addEventListener("click",()=>copyPhase("chat"));
+  $("copyPhaseNote").addEventListener("click",()=>copyPhase("note"));
  }
  attach();
  return {load,render};
