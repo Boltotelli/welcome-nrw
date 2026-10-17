@@ -84,7 +84,7 @@ async function publicInfo(req: Request, alliance: string, mode: string) {
   }
   const laws = await checked<any[]>(db.from("aos_laws")
     .select("id,scope,number,title,body,version,published_at,updated_at")
-    .eq("alliance_code",alliance).eq("status","published")
+    .eq("alliance_code",alliance).eq("status","published").eq("scope","alliance")
     .order("number",{ascending:true}).limit(100));
   return json(req,{laws});
 }
@@ -116,6 +116,7 @@ async function rosterFor(alliance: string, kingdom: number) {
       game_id:p.game_id, name:p.name, rank:p.alliance_rank || null,
       alliance:p.alliance_code, active:p.active,
       member_status:overlay.member_status||(p.active?"active":"left"),
+      note_id:overlay.id||null, notes:overlay.notes||null,
       languages:p.languages||[], avatar_url:cache.avatar_url||null,
       tc_level:cache.tc_level??null,
       power:null, // No reliable player-power column exists in the reused tables.
@@ -198,6 +199,7 @@ async function save(req: Request, alliance: string, userId: string, staff: any, 
       const scope=str(data.scope,20),number=str(data.number,30),status=str(data.status,20);
       if(!["kingdom","alliance"].includes(scope)||!number||!["draft","published"].includes(status))throw new HttpError("invalid_law",400);
       const title=localized(data.title,150),body=localized(data.body,12000);
+      if(status==="published" && scope==="kingdom")throw new HttpError("kingdom_approval_required",403);
       if(status==="published"&&(!Object.values(title).some(Boolean)||!Object.values(body).some(Boolean)))throw new HttpError("incomplete_law",400);
       if(existing && Number(data.expected_version)!==Number(existing.version))throw new HttpError("version_conflict",409);
       patch={...patch,scope,number,title,body,status,version:existing?existing.version+1:1,
