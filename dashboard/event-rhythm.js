@@ -270,7 +270,7 @@
       const mod=diff%c.interval_days;
       if(mod>=c.duration_days)continue;
       const start=dateKey(new Date(dayMs-mod*day)),end=dateKey(new Date(dayMs+(c.duration_days-mod-1)*day));
-      const name=groupLabels[c.group_key]||{de:c.group_key,en:c.group_key,fr:c.group_key};
+      const name=(c.title&&Object.keys(c.title).length?c.title:null)||groupLabels[c.group_key]||{de:c.group_key,en:c.group_key,fr:c.group_key};
       result.push({id:"rhythm-"+c.group_key+"-"+start,start,end,name,icon:"📅",confidence:"alliance-schedule",aos_group:c.group_key,aos_phase:mod+1});
     }
     return result;
