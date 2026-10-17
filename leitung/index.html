@@ -69,7 +69,7 @@
           <div class="card"><div class="filters">
             <input class="control search" id="rosterSearch" type="search" autocomplete="off" data-placeholder="searchPlayers" placeholder="Name oder Spieler-ID suchen …">
             <select class="control" id="rosterStatus"><option value="all" data-i18n="allStatuses">Alle Status</option><option value="active" data-i18n="active">Aktiv</option><option value="planned" data-i18n="planned">Geplant</option><option value="left" data-i18n="left">Ausgetreten</option></select>
-            <select class="control" id="rosterSort"><option value="name" data-i18n="sortName">Name A–Z</option><option value="rank" data-i18n="sortRank">Rang absteigend</option><option value="id" data-i18n="sortId">Spieler-ID</option></select>
+            <select class="control" id="rosterSort"><option value="name" data-i18n="sortName">Name A–Z</option><option value="rank" data-i18n="sortRank">Rang absteigend</option><option value="power" data-i18n="sortPower">Spielerstärke ↓</option><option value="id" data-i18n="sortId">Spieler-ID</option></select>
             <span class="counter" id="rosterCount">–</span>
           </div><div class="table-scroll"><table><thead><tr><th data-i18n="player">Spieler</th><th data-i18n="rank">Rang</th><th data-i18n="strength">Stärke</th><th data-i18n="language">Sprache</th><th>Discord</th><th data-i18n="memberStatus">Mitgliedschaft</th><th></th></tr></thead><tbody id="rosterRows"></tbody></table></div></div>
         </section>
@@ -113,7 +113,22 @@
               <label class="field check"><input type="checkbox" name="advertising_enabled"> <span data-i18n="adsEnable">Werbung vormerken (noch nicht aktiv)</span></label>
               <button class="primary" data-permission="settings" data-i18n="save">Speichern</button>
             </form><div class="card"><h3 data-i18n="permissions">Berechtigungen</h3><div class="permission-matrix" id="permissionTable"></div>
-              <p class="notice-inline" data-i18n="rolesFuture">R4-Rechte sind einzeln vorgesehen. Die sichere Einladungs- und Rollenvergabe wird als nächster Schritt freigeschaltet; vorhandene NAP-Zugänge werden nicht automatisch zu AllianceOS-R4.</p>
+              <div id="staffControls" hidden>
+                <p class="notice-inline" data-i18n="rolesFuture">R5 kann vorhandene Konten als AllianceOS-R4 freischalten. Ohne ausdrückliche Freigabe erhält niemand Zugriff.</p>
+                <div id="staffList" class="staff-list"></div>
+                <form id="r4Form">
+                  <label class="field"><span data-i18n="r4Email">E-Mail eines bestehenden Benutzerkontos</span><input class="control" type="email" name="email" autocomplete="off" required></label>
+                  <div class="check-grid staff-grid">
+                    <label><input type="checkbox" name="members"> <span data-i18n="roster">Spielerverwaltung</span></label>
+                    <label><input type="checkbox" name="transfers"> <span data-i18n="transfers">Transferplanung</span></label>
+                    <label><input type="checkbox" name="laws"> <span data-i18n="laws">Laws-Verwaltung</span></label>
+                    <label><input type="checkbox" name="events"> <span data-i18n="events">Eventplanung</span></label>
+                    <label><input type="checkbox" name="settings"> <span data-i18n="settings">Allianz &amp; Rechte</span></label>
+                    <label><input type="checkbox" name="enabled" checked> <span data-i18n="r4Enabled">R4-Zugang aktiviert</span></label>
+                  </div>
+                  <button class="primary" type="submit" data-i18n="saveR4">R4-Freigabe speichern</button>
+                </form>
+              </div>
               <h3 data-i18n="subscription">Abonnement</h3><div class="status-line"><span data-i18n="notConfigured">Noch nicht eingerichtet</span><strong>–</strong></div></div></div>
         </section>
       </div>
