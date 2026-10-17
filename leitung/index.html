@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="de" data-theme="dark">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0c1428">
+<title>AllianceOS · NRW Leitungszentrale</title>
+<meta name="description" content="Geschützte Leitungszentrale für Allianzverwaltung, Transfers, Laws und Events.">
+<link rel="icon" href="/assets/nrw-dashboard-icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/leitung/styles.css?v=1">
+<script defer src="/_vercel/insights/script.js"></script>
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar">
+    <a class="side-brand" href="/"><img src="/assets/nrw-banner.svg" alt="NRW">
+      <span><strong>Alliance<span class="accent">OS</span></strong><small>NRW · KINGDOM 1044</small></span></a>
+    <p class="side-label" data-i18n="workplace">LEITUNGSZENTRALE</p>
+    <nav id="sideNav" aria-label="Module">
+      <button class="nav-item active" data-tab="overview"><i>▦</i><span data-i18n="overview">Übersicht</span></button>
+      <button class="nav-item" data-tab="roster"><i>♙</i><span data-i18n="roster">Spielerverwaltung</span></button>
+      <button class="nav-item" data-tab="transfers"><i>⇄</i><span data-i18n="transfers">Transferplanung</span></button>
+      <button class="nav-item" data-tab="languages"><i>◈</i><span data-i18n="languages">Sprachen</span></button>
+      <button class="nav-item" data-tab="laws"><i>⚖</i><span data-i18n="laws">Laws-Verwaltung</span></button>
+      <button class="nav-item" data-tab="events"><i>▣</i><span data-i18n="events">Eventplanung</span></button>
+      <button class="nav-item" data-tab="settings"><i>⚙</i><span data-i18n="settings">Allianz &amp; Rechte</span></button>
+    </nav>
+    <div class="side-foot"><div class="security-dot">● <span data-i18n="private">Geschützter Bereich</span></div>
+      <p data-i18n="scopeNotice">Nur Daten deiner eigenen Allianz. Keine öffentlichen Spielerlisten.</p>
+      <a href="/" data-i18n="backHome">← Zurück zur Willkommensseite</a>
+    </div>
+  </aside>
+  <div class="workspace">
+    <header class="topbar">
+      <div class="mobile-brand">Alliance<span class="accent">OS</span> <small>· NRW</small></div>
+      <div class="breadcrumb"><span data-i18n="workplace">LEITUNGSZENTRALE</span> <b>/</b> <strong id="pageLabel">Übersicht</strong></div>
+      <div class="bar-actions"><select id="language" aria-label="Sprache"><option value="de">DE</option><option value="en">EN</option><option value="fr">FR</option><option value="es">ES</option></select>
+        <button class="icon-action" id="themeToggle" type="button" aria-label="Theme">☾</button>
+        <span class="user-role" id="roleChip">R4 / R5</span>
+        <button class="text-action" id="logoutBtn" hidden data-i18n="logout">Abmelden</button>
+      </div>
+    </header>
+    <main>
+      <div id="liveArea" hidden>
+        <section class="hero">
+          <div><div class="eyebrow"><span class="pulse"></span><span data-i18n="securePilot">ALLIANCEOS · GESCHÜTZTER PILOT</span></div>
+            <h1><span data-i18n="leadership">Deine Allianz.</span><br><em data-i18n="underControl">Alles im Blick.</em></h1>
+            <p data-i18n="heroText">Spieler, Transfers, Regeln und Termine zentral verwalten. Änderungen bleiben auf NRW beschränkt.</p>
+          </div>
+          <div class="hero-badge"><img src="/assets/nrw-banner.svg" alt="NRW Wappen"><div><strong id="heroAlliance">[NRW]United</strong><small id="heroKingdom">KINGDOM 1044</small></div></div>
+        </section>
+        <div id="flash" class="flash" role="status" hidden></div>
+        <section class="tab-page" data-page="overview">
+          <div class="stat-grid">
+            <article class="stat"><span data-i18n="activePlayers">Aktive Spieler</span><strong id="statPlayers">–</strong><small data-i18n="fromRoster">Aus dem Allianzregister</small></article>
+            <article class="stat"><span data-i18n="incoming">Eingehende Transfers</span><strong id="statIncoming">–</strong><small data-i18n="plannedAndConfirmed">In Planung / bestätigt</small></article>
+            <article class="stat"><span data-i18n="seatsAvailable">Freie Plätze (geplant)</span><strong id="statFree">–</strong><small data-i18n="afterReservations">Nach bestätigten Wechseln</small></article>
+            <article class="stat"><span data-i18n="publishedEvents">Veröffentlichte Events</span><strong id="statEvents">–</strong><small data-i18n="fromPlanner">Aus der Eventplanung</small></article>
+          </div>
+          <div class="two-col">
+            <article class="card"><div class="card-heading"><span class="icon-circle">⇄</span><div><h2 data-i18n="transferHub">Transfermanager</h2><p data-i18n="transferHubDesc">Interessenten bis zur Aufnahme begleiten</p></div><button data-jump="transfers" class="ghost" data-i18n="open">Öffnen →</button></div>
+              <div class="mini-metrics" id="transferMini"></div></article>
+            <article class="card"><div class="card-heading"><span class="icon-circle">▣</span><div><h2 data-i18n="nextEvents">Anstehende Termine</h2><p data-i18n="nextEventsDesc">Einmal planen, überall aktuell halten</p></div><button data-jump="events" class="ghost" data-i18n="open">Öffnen →</button></div>
+              <div id="nextEventList" class="simple-list"></div></article>
+          </div>
+          <div class="notice"><b data-i18n="pilotLabel">Pilotstatus</b><p data-i18n="pilotInfo">Spieler werden aus vorhandenen Daten gelesen. Event-Bot, automatische KI-Übersetzungen, bezahlte Abonnements und Discord-Einladungen sind noch nicht angeschlossen. Es werden dafür keine fiktiven Ergebnisse angezeigt.</p></div>
+        </section>
+        <section class="tab-page" data-page="roster" hidden>
+          <div class="page-heading"><div><span class="eyebrow" data-i18n="rosterEyebrow">MITGLIEDER</span><h2 data-i18n="roster">Spielerverwaltung</h2><p data-i18n="rosterDesc">Nur deine Allianz. Spielerdaten sind auf den letzten bekannten Stand begrenzt.</p></div></div>
+          <div class="card"><div class="filters">
+            <input class="control search" id="rosterSearch" type="search" autocomplete="off" data-placeholder="searchPlayers" placeholder="Name oder Spieler-ID suchen …">
+            <select class="control" id="rosterStatus"><option value="all" data-i18n="allStatuses">Alle Status</option><option value="active" data-i18n="active">Aktiv</option><option value="planned" data-i18n="planned">Geplant</option><option value="left" data-i18n="left">Ausgetreten</option></select>
+            <select class="control" id="rosterSort"><option value="name" data-i18n="sortName">Name A–Z</option><option value="rank" data-i18n="sortRank">Rang absteigend</option><option value="id" data-i18n="sortId">Spieler-ID</option></select>
+            <span class="counter" id="rosterCount">–</span>
+          </div><div class="table-scroll"><table><thead><tr><th data-i18n="player">Spieler</th><th data-i18n="rank">Rang</th><th data-i18n="strength">Stärke</th><th data-i18n="language">Sprache</th><th>Discord</th><th data-i18n="memberStatus">Mitgliedschaft</th><th></th></tr></thead><tbody id="rosterRows"></tbody></table></div></div>
+        </section>
+        <section class="tab-page" data-page="transfers" hidden>
+          <div class="page-heading"><div><span class="eyebrow">TRANSFER CENTER</span><h2 data-i18n="transfers">Transferplanung</h2><p data-i18n="transfersDesc">Bewerbungen, Reservierungen, Wartelisten und abgeschlossene Wechsel.</p></div><button class="primary" data-create="transfer" data-permission="transfers" data-i18n="addTransfer">+ Transfer planen</button></div>
+          <div class="stat-grid small">
+            <article class="stat"><span data-i18n="interested">Interessenten</span><strong id="tInterested">0</strong></article>
+            <article class="stat"><span data-i18n="shortlisted">Vorgemerkt</span><strong id="tShortlisted">0</strong></article>
+            <article class="stat"><span data-i18n="confirmed">Bestätigt</span><strong id="tConfirmed">0</strong></article>
+            <article class="stat"><span data-i18n="waiting">Warteliste</span><strong id="tWaitlist">0</strong></article>
+          </div>
+          <div class="card"><div class="filters"><select class="control" id="transferFilter"><option value="all" data-i18n="allTransfers">Alle Transfers</option><option value="incoming" data-i18n="incoming">Eingehende Transfers</option><option value="outgoing" data-i18n="outgoing">Ausgehende Transfers</option></select><span class="counter" id="transferCount"></span></div>
+            <div class="table-scroll"><table><thead><tr><th data-i18n="player">Spieler</th><th data-i18n="direction">Richtung</th><th data-i18n="origin">Herkunft</th><th data-i18n="destination">Ziel</th><th data-i18n="window">Zeitraum</th><th data-i18n="status">Status</th><th></th></tr></thead><tbody id="transferRows"></tbody></table></div></div>
+        </section>
+        <section class="tab-page" data-page="languages" hidden>
+          <div class="page-heading"><div><span class="eyebrow">LANGUAGE CENTER</span><h2 data-i18n="languages">Sprachen</h2><p data-i18n="languagesDesc">Gemeinsame Spracheinstellungen für Willkommen, Leitungsseite und zukünftige Bots.</p></div></div>
+          <div class="two-col"><div class="card"><h3 data-i18n="supportedLanguages">Unterstützte Sprachen</h3><p class="muted" data-i18n="languageAccess">Änderungen an Spracheinstellungen sind für R5 und berechtigte R4 möglich.</p>
+            <div class="check-grid" id="activeLanguages"><label><input type="checkbox" value="de"> Deutsch</label><label><input type="checkbox" value="en"> English</label><label><input type="checkbox" value="fr"> Français</label><label><input type="checkbox" value="es"> Español</label></div>
+            <label class="field"><span data-i18n="defaultLang">Standardsprache</span><select id="defaultLanguage" class="control"><option value="de">Deutsch</option><option value="en">English</option><option value="fr">Français</option><option value="es">Español</option></select></label>
+            <button class="primary" id="saveLanguages" data-permission="settings" data-i18n="save">Speichern</button></div>
+            <div class="card"><h3 data-i18n="translationFlow">Übersetzungsworkflow</h3><div class="steps"><div><b>01</b><span data-i18n="translationStep1">Originaltext schreiben</span></div><div><b>02</b><span data-i18n="translationStep2">Aktive Übersetzungen ergänzen und prüfen</span></div><div><b>03</b><span data-i18n="translationStep3">Gemeinsam veröffentlichen</span></div></div><p class="notice-inline" data-i18n="translationWarning">Eine automatische KI-Übersetzung ist noch nicht angeschlossen. Veröffentlichungen nutzen derzeit die manuell eingegebenen Texte.</p></div>
+          </div>
+        </section>
+        <section class="tab-page" data-page="laws" hidden>
+          <div class="page-heading"><div><span class="eyebrow">LAW STUDIO</span><h2 data-i18n="laws">Laws-Verwaltung</h2><p data-i18n="lawsDesc">Entwürfe und veröffentlichte Fassungen mit Versionen; getrennt nach Königreich und Allianz.</p></div><button class="primary" data-create="law" data-permission="laws" data-i18n="addLaw">+ Neue Regel</button></div>
+          <div class="notice"><b data-i18n="publicRuleNoticeTitle">Veröffentlichungshinweis</b><p data-i18n="publicRuleNotice">Hier erstellte Laws gelten als AllianceOS-Fassung. Bestehende NAP-Gesetze werden nicht überschrieben. Königreichsgesetze erfordern eine gesonderte gemeinsame Freigabe.</p></div>
+          <div id="lawList" class="stack"></div>
+        </section>
+        <section class="tab-page" data-page="events" hidden>
+          <div class="page-heading"><div><span class="eyebrow">EVENT HUB</span><h2 data-i18n="events">Eventplanung</h2><p data-i18n="eventsDesc">Alle Zeiten werden in UTC gespeichert und für Spieler lokal angezeigt.</p></div><button class="primary" data-create="event" data-permission="events" data-i18n="addEvent">+ Event planen</button></div>
+          <div class="notice"><b data-i18n="eventSyncStatus">Ausspielung</b><p data-i18n="eventSyncNotice">Öffentlich veröffentlichte Termine können von den Webseiten geladen werden. Discord-Ankündigungen und Erinnerungen benötigen noch den künftigen Event-Bot.</p></div>
+          <div id="eventList" class="stack"></div>
+        </section>
+        <section class="tab-page" data-page="settings" hidden>
+          <div class="page-heading"><div><span class="eyebrow">ALLIANCE SETTINGS</span><h2 data-i18n="settings">Allianz &amp; Rechte</h2><p data-i18n="settingsDesc">Stammdaten, Kapazitäten, Freigaben und Plattformmodule.</p></div></div>
+          <div class="two-col"><form class="card" id="settingsForm"><h3 data-i18n="allianceConfig">Allianzkonfiguration</h3>
+              <label class="field"><span data-i18n="allianceName">Allianzname</span><input class="control" name="name" required maxlength="100"></label>
+              <label class="field"><span data-i18n="capacity">Maximale Mitglieder</span><input class="control" name="capacity" type="number" min="1" max="500"></label>
+              <label class="field"><span data-i18n="logoUrl">Logo-URL (optional)</span><input class="control" name="logo_url" type="url" maxlength="400"></label>
+              <label class="field"><span data-i18n="discordGuild">Discord Server-ID</span><input class="control" name="discord_guild_id" maxlength="40"></label>
+              <label class="field check"><input type="checkbox" name="advertising_enabled"> <span data-i18n="adsEnable">Werbung vormerken (noch nicht aktiv)</span></label>
+              <button class="primary" data-permission="settings" data-i18n="save">Speichern</button>
+            </form><div class="card"><h3 data-i18n="permissions">Berechtigungen</h3><div class="permission-matrix" id="permissionTable"></div>
+              <p class="notice-inline" data-i18n="rolesFuture">R4-Rechte sind einzeln vorgesehen. Die sichere Einladungs- und Rollenvergabe wird als nächster Schritt freigeschaltet; vorhandene NAP-Zugänge werden nicht automatisch zu AllianceOS-R4.</p>
+              <h3 data-i18n="subscription">Abonnement</h3><div class="status-line"><span data-i18n="notConfigured">Noch nicht eingerichtet</span><strong>–</strong></div></div></div>
+        </section>
+      </div>
+      <section id="loginArea" class="login-area">
+        <div class="login-card">
+          <div class="lock-symbol">♜</div><span class="eyebrow">ALLIANCEOS · R4 / R5</span>
+          <h1 data-i18n="loginTitle">Zugang zur Leitungszentrale</h1>
+          <p data-i18n="loginText">Die Spielerlisten und internen Planungen sind geschützt. Melde dich mit einem bereits freigeschalteten Konto an.</p>
+          <form id="loginForm"><label class="field"><span>E-Mail</span><input type="email" id="email" class="control" autocomplete="username" required></label>
+          <label class="field"><span data-i18n="password">Passwort</span><input type="password" id="password" class="control" autocomplete="current-password" required></label>
+          <button class="primary full" type="submit" data-i18n="login">Anmelden</button></form>
+          <p id="loginError" class="login-error" role="alert"></p>
+          <p class="login-foot" data-i18n="loginNote">Es werden keine Konten automatisch angelegt. Zugriff erst nach Freigabe durch den AllianceOS-R5.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+<dialog id="editDialog" class="modal"><form id="editForm" method="dialog">
+  <div class="modal-top"><div><span class="eyebrow" id="modalOverline">ALLIANCEOS</span><h2 id="modalTitle"></h2></div><button type="button" class="close" id="closeDialog" aria-label="Schließen">×</button></div>
+  <div class="modal-body" id="modalFields"></div>
+  <div class="modal-actions"><button type="button" class="ghost" id="cancelDialog" data-i18n="cancel">Abbrechen</button><button type="submit" class="primary" id="submitDialog" data-i18n="save">Speichern</button></div>
+</form></dialog>
+<script type="module" src="/leitung/app.js?v=1"></script>
+</body></html>
