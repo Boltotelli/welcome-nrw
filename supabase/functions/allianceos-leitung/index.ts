@@ -216,7 +216,7 @@ async function save(req: Request, alliance: string, userId: string, staff: any, 
       languages,
       logo_url:str(data.logo_url,400)||null,
       discord_guild_id:str(data.discord_guild_id,40)||null,
-      advertising_enabled:Boolean(data.advertising_enabled),
+      advertising_enabled:alliance==="NRW"?false:Boolean(data.advertising_enabled),
       updated_at:new Date().toISOString()
     };
     result=await checked<any>(db.from(entry.table).update(patch).eq("code",alliance).select("*").single());
