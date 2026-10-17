@@ -141,7 +141,39 @@ async function bootstrap(req: Request, alliance: string, staff: any) {
     checked<any[]>(db.from("aos_laws").select("*").eq("alliance_code",alliance).order("updated_at",{ascending:false}).limit(300)),
     checked<any[]>(db.from("aos_events").select("*").eq("alliance_code",alliance).order("start_at",{ascending:true}).limit(300))
   ]);
-  return json(req,{alliance:config,staff:{rank:staff.rank,permissions:staff.permissions},players,transfers,laws,events});
+  let staffMembers:any[]=[];
+  if(staff.rank==="R5"){
+    const assigned=await checked<any[]>(db.from("aos_staff")
+      .select("user_id,rank,permissions,enabled").eq("alliance_code",alliance).limit(100));
+    staffMembers=await Promise.all(assigned.map(async (entry:any)=>{
+      const {data,error}=await db.auth.admin.getUserById(entry.user_id);
+      return {email:error?"":data?.user?.email||"",rank:entry.rank,
+        permissions:entry.permissions,enabled:entry.enabled};
+    }));
+  }
+  return json(req,{alliance:config,staff:{rank:staff.rank,permissions:staff.permissions},staffMembers,players,transfers,laws,events});
+}
+async function saveStaff(req:Request,alliance:string,userId:string,staff:any,payload:any){
+  if(staff.rank!=="R5")throw new HttpError("permission_denied",403);
+  const email=str(payload.email,255).toLowerCase(),enabled=payload.enabled!==false;
+  if(!/^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$/.test(email))throw new HttpError("invalid_email",400);
+  const {data,error}=await db.auth.admin.listUsers({page:1,perPage:1000});
+  if(error)throw new HttpError("user_lookup_failed",500);
+  const user=data?.users?.find((u:any)=>u.email?.toLowerCase()===email);
+  if(!user)throw new HttpError("account_not_found",404);
+  if(user.id===userId)throw new HttpError("cannot_edit_self",403);
+  const existing=await checked<any>(db.from("aos_staff").select("rank")
+    .eq("user_id",user.id).eq("alliance_code",alliance).maybeSingle());
+  if(existing?.rank==="R5")throw new HttpError("cannot_demote_r5",403);
+  const incoming=payload.permissions||{};
+  const granted=Object.fromEntries(["members","transfers","laws","events","settings"]
+    .map(feature=>[feature,incoming[feature]===true]));
+  const item=await checked<any>(db.from("aos_staff").upsert({
+    user_id:user.id,alliance_code:alliance,rank:"R4",
+    enabled,permissions:granted
+  },{onConflict:"user_id,alliance_code"}).select("user_id,rank,enabled,permissions").single());
+  await audit(alliance,userId,"staff",user.id,existing?"update_r4":"grant_r4");
+  return json(req,{ok:true,item:{...item,email}});
 }
 async function save(req: Request, alliance: string, userId: string, staff: any, payload:any) {
   const entity = str(payload.entity,25), data = payload.data || {};
@@ -248,6 +280,7 @@ Deno.serve(async(req: Request)=>{
     if(req.method==="GET")return await bootstrap(req,alliance,staff);
     if(Number(req.headers.get("content-length")||"0")>200000)throw new HttpError("payload_too_large",413);
     const body=await req.json().catch(()=>{throw new HttpError("invalid_json",400)});
+    if(body?.action==="staff")return await saveStaff(req,alliance,userId,staff,body);
     if(body?.action!=="save")throw new HttpError("unknown_action",400);
     return await save(req,alliance,userId,staff,body);
   }catch(e){
