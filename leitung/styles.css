@@ -19,3 +19,24 @@
 .language-options input{width:18px;height:18px;accent-color:var(--accent,#f1c40f)}
 .history-item{padding:10px 12px;margin:6px 0;border:1px solid var(--border);border-radius:9px;overflow-wrap:anywhere}
 @media(max-width:600px){.dossier-info{grid-template-columns:minmax(0,2fr) minmax(0,1fr)}.dossier-info>div:first-child{grid-column:1 / -1}}
+
+/* Event source explorer: canonical guides, source timeline, editable ingame messages */
+.event-source-list{display:grid;gap:10px;margin-top:14px}
+.event-source-item{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid var(--border);border-radius:12px;padding:13px 16px;background:var(--panel)}
+.event-source-item>div{min-width:0}.event-source-item h3{font-size:15px;margin:4px 0 3px;overflow-wrap:anywhere}.event-source-item small{color:var(--muted)}
+.event-source-item .ghost{flex:none;white-space:nowrap}
+.event-library-modal{width:min(880px,calc(100% - 24px));max-height:90vh;overflow-y:auto}
+.event-library-modal .modal-body{max-height:none}
+.library-facts{display:grid;gap:9px;margin:14px 0}
+.library-fact{border:1px solid var(--border);background:var(--panel);border-radius:10px;padding:12px 14px;overflow-wrap:anywhere}
+.library-fact>span{font-size:11px;letter-spacing:.4px;font-weight:800;color:var(--accent)}.library-fact p{white-space:pre-line;margin:5px 0 0}
+.library-details details{border:1px solid var(--border);border-radius:9px;margin:8px 0;padding:10px}
+.library-details summary{cursor:pointer;color:var(--accent);font-weight:700}
+.library-details pre{font-size:12px;max-width:100%;max-height:380px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;color:var(--text)}
+.library-messages{border-top:1px solid var(--border);margin-top:20px;padding-top:12px}
+.library-messages textarea{width:100%;min-height:100px;display:block;resize:vertical;margin:8px 0}
+.library-messages .ghost{margin-bottom:10px}
+.msg-heading{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-top:14px}
+.msg-heading h3{font-size:15px;margin:0}.msg-heading span{font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--muted);font-size:12px}
+.msg-heading span.too-long{color:var(--red);font-weight:800}
+@media(max-width:600px){.event-source-item{align-items:flex-start;flex-direction:column}.event-library-modal{width:calc(100% - 12px);padding:0}.event-library-modal .modal-body{padding:16px}}
