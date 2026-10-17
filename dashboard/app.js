@@ -21,7 +21,7 @@
   const eventIcon=e=>e.iconUrl?`<img class="event-icon${e.iconFit==='cover'?' event-icon-cover':''}" src="${safe(e.iconUrl)}" alt="">`:`<span>${safe(e.icon||'📅')}</span>`;
   const isRelease=e=>e.display==='timeline-only'||['new-master-2026-09-14','isnor-master-2026-09-14','hero-generation-6-1044'].includes(e.id);
   const eventsFor=date=>{
-     const configured=new Set(eventCycles.filter(c=>c.enabled!==false).map(c=>c.group_key));
+     const configured=new Set(eventCycles.filter(c=>c.enabled!==false&&c.override_schedule===true).map(c=>c.group_key));
      const listed=eventFeed.filter(e=>!isRelease(e)&&!guideSuppresses(e)&&e.start<=date&&(!e.end||e.end>=date)&&!configured.has(window.NRW_EVENT_RHYTHM?.groupKey(e))),
        kinds=new Set(listed.map(eventKind));
      return listed.concat(officialRhythmFor(date).filter(e=>!guideSuppresses(e)&&!kinds.has(eventKind(e))));
