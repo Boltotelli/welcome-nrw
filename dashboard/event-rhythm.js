@@ -257,7 +257,7 @@
   function withCycles(date,cycles){
     const normal=officialRhythmFor(date);
     if(!Array.isArray(cycles)||!cycles.length)return normal;
-    const overrides=cycles.filter(c=>c&&c.enabled!==false&&/^[a-z0-9-]{2,70}$/.test(c.group_key||"") &&
+    const overrides=cycles.filter(c=>c&&c.enabled!==false&&c.override_schedule===true&&/^[a-z0-9-]{2,70}$/.test(c.group_key||"") &&
       /^\d{4}-\d{2}-\d{2}$/.test(c.anchor_date||"")&&Number.isInteger(c.interval_days)&&c.interval_days>=1&&
       Number.isInteger(c.duration_days)&&c.duration_days>=1&&c.duration_days<=14&&c.duration_days<=c.interval_days);
     if(!overrides.length)return normal;
