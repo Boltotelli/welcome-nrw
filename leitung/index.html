@@ -114,7 +114,7 @@
               <label class="field"><span data-i18n="capacity">Maximale Mitglieder</span><input class="control" name="capacity" type="number" min="1" max="500"></label>
               <label class="field"><span data-i18n="logoUrl">Logo-URL (optional)</span><input class="control" name="logo_url" type="url" maxlength="400"></label>
               <label class="field"><span data-i18n="discordGuild">Discord Server-ID</span><input class="control" name="discord_guild_id" maxlength="40"></label>
-              <label class="field check"><input type="checkbox" name="advertising_enabled"> <span data-i18n="adsEnable">Werbung vormerken (noch nicht aktiv)</span></label>
+              <input type="checkbox" name="advertising_enabled" hidden disabled>
               <button class="primary" data-permission="settings" data-i18n="save">Speichern</button>
             </form><div class="card"><h3 data-i18n="permissions">Berechtigungen</h3><div class="permission-matrix" id="permissionTable"></div>
               <div id="staffControls" hidden>
@@ -133,7 +133,7 @@
                   <button class="primary" type="submit" data-i18n="saveR4">R4-Freigabe speichern</button>
                 </form>
               </div>
-              <h3 data-i18n="subscription">Abonnement</h3><div class="status-line"><span data-i18n="notConfigured">Noch nicht eingerichtet</span><strong>–</strong></div></div></div>
+              <h3 data-i18n="pilotLabel">Pilotprojekt</h3><div class="status-line"><span data-i18n="pilotFree">NRW bleibt kostenlos und werbefrei.</span><strong>✓</strong></div></div></div>
         </section>
       </div>
       <section id="loginArea" class="login-area">
@@ -156,5 +156,5 @@
   <div class="modal-body" id="modalFields"></div>
   <div class="modal-actions"><button type="button" class="ghost" id="cancelDialog" data-i18n="cancel">Abbrechen</button><button type="submit" class="primary" id="submitDialog" data-i18n="save">Speichern</button></div>
 </form></dialog>
-<script type="module" src="/leitung/app.js?v=2"></script>
+<script type="module" src="/leitung/app.js?v=3"></script>
 </body></html>
