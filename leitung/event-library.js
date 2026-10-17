@@ -174,10 +174,13 @@ export function createEventHub({request,flash,esc,t}) {
   $("eventLibraryList").innerHTML=shown.map(groupCard).join("")||'<p class="muted">'+esc(t("noEvents"))+'</p>';
  }
  function groupCard(g){
-   const cycle=cycleFor(g),effective=cycle||cycleDefaults(g),phases=phaseCount(g),recurring=periodLabel(cycle),
+   const cycle=cycleFor(g),phases=phaseCount(g),recurring=periodLabel(cycle),
     days=Array.from({length:phases},(_,i)=>{
       const template=(state?.eventDayTemplates||[]).find(r=>r.group_key===g.key&&r.day_number===i+1);
-      const note=template?.instructions?.[language]||template?.instructions?.en||template?.instructions?.de||"";
+      const source=g.instances.find(x=>x.record.start&&x.record.dailyPlans?.[offset(x.record.start,i)]);
+      const plan=source?.record.dailyPlans?.[offset(source.record.start,i)];
+      const existing=plan?.steps?.[language]?.[0]||plan?.steps?.en?.[0]||lk(plan?.points)||"";
+      const note=template?.instructions?.[language]||template?.instructions?.en||template?.instructions?.de||existing;
       return '<div class="event-phase-row"><span>'+esc(t("phaseN").replace("{n}",i+1))+'</span><small>'+esc(note.slice(0,130)||t("phaseEmpty"))+'</small>'+
         '<button type="button" class="ghost" data-library-key="'+esc(g.key)+'" data-phase="'+(i+1)+'">'+esc(t("edit"))+'</button></div>';
     }).join("");
@@ -186,7 +189,7 @@ export function createEventHub({request,flash,esc,t}) {
    const desc=updated?t("nextOccurrence")+": "+formatDate(updated):g.instances.length+" "+t("existingSources");
    return '<details class="event-group"><summary><span class="event-group-title"><b>'+esc(groupName(g))+'</b>'+
       '<small>'+esc(badge)+' · '+esc(desc)+'</small></span><span class="event-group-count">'+esc(t("daysCount").replace("{n}",phases))+'</span></summary>'+
-      '<div class="event-group-body"><div class="event-group-actions"><span>'+esc(t("cycleInfo"))+'</span><button type="button" class="ghost" data-library-key="'+esc(g.key)+'" data-phase="1">'+esc(t("cycleSettings"))+'</button></div>'+days+'</div></details>';
+      '<div class="event-group-body"><div class="event-group-actions"><span>'+esc(t("cycleInfo"))+'</span><button type="button" class="ghost" data-library-key="'+esc(g.key)+'" data-phase="1">'+esc(t("cycleSettings"))+'</button>'+((g.instances.find(x=>x.source==="custom")?.record?.id&&canEdit)?'<button class="ghost" type="button" data-edit="event" data-id="'+esc(g.instances.find(x=>x.source==="custom").record.id)+'">'+esc(t("edit"))+'</button>':"")+'</div>'+days+'</div></details>';
  }
  function render(current,lang,allowed){
   state=current;language=lang;canEdit=allowed;
@@ -381,7 +384,9 @@ export function createEventHub({request,flash,esc,t}) {
    }
    const id=$("saveCycle");id.disabled=true;
    try{
-     const r=await request("bootstrap",{action:"event_cycle",group_key:selected.group_key,anchor_date,interval_days,duration_days,phase_count,enabled:true});
+     const group=groups.find(g=>g.key===selected.group_key),original=group?.guide?.names||group?.record?.name||selected.guide?.names||selected.record?.name;
+     const title=original&&typeof original==="object"&&!Array.isArray(original)?original:{de:groupName(group),en:groupName(group)};
+     const r=await request("bootstrap",{action:"event_cycle",group_key:selected.group_key,anchor_date,interval_days,duration_days,phase_count,enabled:true,title});
      state.eventCycles=(state.eventCycles||[]).filter(c=>c.group_key!==selected.group_key);
      state.eventCycles.push(r.item);
      setPhaseOptions(Number($("libraryPhase").value));
@@ -405,7 +410,7 @@ export function createEventHub({request,flash,esc,t}) {
      state.eventDayTemplates.push(result.item);
      fillPhase();list();flash(t("saved"));
    }catch(e){flash(t("genericError")+" ("+e.message+")",true)}
-   finally{button.disabled=!canEdit&&Boolean(cycleFor(groups.find(g=>g.key===selected.group_key)));}
+   finally{button.disabled=!canEdit||!Boolean(cycleFor(groups.find(g=>g.key===selected.group_key)));}
  }
  async function copyPhase(which){
    const el=$(which==="chat"?"phaseChat":"phaseNote"),limit=which==="chat"?512:300;
