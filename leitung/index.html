@@ -83,6 +83,10 @@
           </div>
           <div class="card"><div class="filters"><select class="control" id="transferFilter"><option value="all" data-i18n="allTransfers">Alle Transfers</option><option value="incoming" data-i18n="incoming">Eingehende Transfers</option><option value="outgoing" data-i18n="outgoing">Ausgehende Transfers</option></select><span class="counter" id="transferCount"></span></div>
             <div class="table-scroll"><table><thead><tr><th data-i18n="player">Spieler</th><th data-i18n="direction">Richtung</th><th data-i18n="origin">Herkunft</th><th data-i18n="destination">Ziel</th><th data-i18n="window">Zeitraum</th><th data-i18n="status">Status</th><th></th></tr></thead><tbody id="transferRows"></tbody></table></div></div>
+          <div class="card" style="margin-top:16px">
+            <div class="filters"><div><h3 data-i18n="serverMoves">Allianzwechsel in 1044 (bestehendes Protokoll)</h3><p class="muted" data-i18n="internalHistoryNote">Protokollierte interne Wechsel mit NRW-Beteiligung, unverändert aus dem Tracker.</p></div><span class="counter" id="internalMoveCount">–</span></div>
+            <div class="table-scroll"><table><thead><tr><th data-i18n="from">Datum</th><th data-i18n="player">Spieler</th><th data-i18n="origin">Von</th><th></th><th data-i18n="destination">Nach</th></tr></thead><tbody id="internalMoveRows"></tbody></table></div>
+          </div>
         </section>
         <section class="tab-page" data-page="languages" hidden>
           <div class="page-heading"><div><span class="eyebrow">LANGUAGE CENTER</span><h2 data-i18n="languages">Sprachen</h2><p data-i18n="languagesDesc">Gemeinsame Spracheinstellungen für Willkommen, Leitungsseite und zukünftige Bots.</p></div></div>
@@ -152,5 +156,5 @@
   <div class="modal-body" id="modalFields"></div>
   <div class="modal-actions"><button type="button" class="ghost" id="cancelDialog" data-i18n="cancel">Abbrechen</button><button type="submit" class="primary" id="submitDialog" data-i18n="save">Speichern</button></div>
 </form></dialog>
-<script type="module" src="/leitung/app.js?v=1"></script>
+<script type="module" src="/leitung/app.js?v=2"></script>
 </body></html>
