@@ -156,7 +156,7 @@ async function bootstrap(req: Request, alliance: string, staff: any) {
 async function saveStaff(req:Request,alliance:string,userId:string,staff:any,payload:any){
   if(staff.rank!=="R5")throw new HttpError("permission_denied",403);
   const email=str(payload.email,255).toLowerCase(),enabled=payload.enabled!==false;
-  if(!/^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$/.test(email))throw new HttpError("invalid_email",400);
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))throw new HttpError("invalid_email",400);
   const {data,error}=await db.auth.admin.listUsers({page:1,perPage:1000});
   if(error)throw new HttpError("user_lookup_failed",500);
   const user=data?.users?.find((u:any)=>u.email?.toLowerCase()===email);
