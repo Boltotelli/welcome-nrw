@@ -228,5 +228,52 @@
   }
 
 
-  root.NRW_EVENT_RHYTHM=Object.freeze({forDate:officialRhythmFor});
+  // Optional published AllianceOS recurrence override. The original 28-day generator stays intact.
+  const keyFor=e=>{
+    const x=String(e?.id||"").toLowerCase();
+    for(const [needle,key] of [["alliance-brawl","brawl"],["strongest-governor","strongest"],["kingdom-of-power-prep","kvk"],["alliance-mobilization","mobilization"],["merchant-empire","merchant"],["golden-glaives","golden"],["officer-project","officer"],["armament-competition","armament"],["rhythm-officer","officer"],["rhythm-armament","armament"],["viking","viking"],["fishing","fishing"],["eternity","eternity"],["champagne","champagne"],["bear-trap","bear"],["hero-roulette","roulette"],["alliance-championship","championship"],["kill-event","kill"]]){
+      if(x.includes(needle))return key;
+    }
+    return "";
+  };
+  const groupLabels={
+    brawl:{de:"Allianzgemenge",en:"Alliance Brawl",fr:"Alliance Brawl"},
+    strongest:{de:"Stärkster Gouverneur",en:"Strongest Governor",fr:"Strongest Governor"},
+    kvk:{de:"KvK-Vorbereitung",en:"KvK Preparation",fr:"Préparation KvK"},
+    mobilization:{de:"Allianz-Mobilisierung",en:"Alliance Mobilization",fr:"Mobilisation d’alliance"},
+    merchant:{de:"Handelsimperium",en:"Merchant Empire",fr:"Empire commercial"},
+    golden:{de:"Golden Glaives",en:"Golden Glaives",fr:"Golden Glaives"},
+    officer:{de:"Offiziersprojekt",en:"Officer Project",fr:"Projet d’officier"},
+    armament:{de:"Rüstungswettbewerb",en:"Armament Competition",fr:"Compétition d’armement"},
+    viking:{de:"Wikinger-Vergeltung",en:"Viking Vengeance",fr:"Viking Vengeance"},
+    fishing:{de:"Fischerturnier",en:"Fishing Tournament",fr:"Tournoi de pêche"},
+    bear:{de:"Bärenfalle",en:"Bear Trap",fr:"Piège à ours"},
+    eternity:{de:"Eternity’s Reach",en:"Eternity’s Reach",fr:"Eternity’s Reach"},
+    champagne:{de:"Champagne Fair",en:"Champagne Fair",fr:"Champagne Fair"},
+    roulette:{de:"Heldenroulette",en:"Hero Roulette",fr:"Roulette des héros"},
+    championship:{de:"Allianzmeisterschaft",en:"Alliance Championship",fr:"Championnat d’alliance"},
+    kill:{de:"Kill Event",en:"Kill Event",fr:"Kill Event"}
+  };
+  function withCycles(date,cycles){
+    const normal=officialRhythmFor(date);
+    if(!Array.isArray(cycles)||!cycles.length)return normal;
+    const overrides=cycles.filter(c=>c&&c.enabled!==false&&/^[a-z0-9-]{2,70}$/.test(c.group_key||"") &&
+      /^\d{4}-\d{2}-\d{2}$/.test(c.anchor_date||"")&&Number.isInteger(c.interval_days)&&c.interval_days>=1&&
+      Number.isInteger(c.duration_days)&&c.duration_days>=1&&c.duration_days<=14&&c.duration_days<=c.interval_days);
+    if(!overrides.length)return normal;
+    const replaced=new Set(overrides.map(c=>c.group_key));
+    const result=normal.filter(e=>!replaced.has(keyFor(e)));
+    const dayMs=Date.parse(date+"T00:00:00Z");
+    for(const c of overrides){
+      const diff=Math.round((dayMs-Date.parse(c.anchor_date+"T00:00:00Z"))/day);
+      if(!Number.isFinite(diff)||diff<0)continue;
+      const mod=diff%c.interval_days;
+      if(mod>=c.duration_days)continue;
+      const start=dateKey(new Date(dayMs-mod*day)),end=dateKey(new Date(dayMs+(c.duration_days-mod-1)*day));
+      const name=groupLabels[c.group_key]||{de:c.group_key,en:c.group_key,fr:c.group_key};
+      result.push({id:"rhythm-"+c.group_key+"-"+start,start,end,name,icon:"📅",confidence:"alliance-schedule",aos_group:c.group_key,aos_phase:mod+1});
+    }
+    return result;
+  }
+  root.NRW_EVENT_RHYTHM=Object.freeze({forDate:withCycles,baseForDate:officialRhythmFor,groupKey:keyFor,groupLabels});
 })(window);
