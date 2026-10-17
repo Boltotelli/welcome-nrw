@@ -1,6 +1,6 @@
 (function(){
   const body=document.body,root=document.documentElement,day=86400000;
-  let eventFeed=[],eventGuideDb={events:[],catalogOnly:[],sources:{}},expandedCards=new Set();
+  let eventFeed=[],eventGuideDb={events:[],catalogOnly:[],sources:{}},expandedCards=new Set(),eventGuidance=new Map();
   const savedLang=localStorage.getItem('nrw_page_lang')||'en';
   const savedTheme=localStorage.getItem('nrw_theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
   body.dataset.lang=savedLang;root.lang=savedLang;root.dataset.theme=savedTheme;
@@ -106,7 +106,7 @@
     }
   };
   function planFromFeed(e,date,lang){const plan=e.dailyPlans?.[date];if(!plan)return null;return{points:localized(plan.points,lang),steps:plan.steps?.[lang]||plan.steps?.en||[],prepare:plan.prepare?{title:localized(plan.prepare.title,lang),steps:plan.prepare.steps?.[lang]||plan.prepare.steps?.en||[]}:null,details:plan.note?[localized(plan.note,lang)]:[],limits:plan.limits||null}}
-  function coachFor(e,date,lang){const kind=eventKind(e),manual=kind==='brawl'?brawlPlan(e,date,lang):(guides[kind]?.[lang]||null),feed=planFromFeed(e,date,lang),rhythm=e.rhythmCoach?.[lang]||e.rhythmCoach?.en,tips=e.tips?.[lang]||e.tips?.en||[],knowledge=knowledgeCoachFor(e,lang),selected=(kind==='golden'?(feed||rhythm||manual||{steps:tips.slice(0,3),details:tips.slice(3)}):(manual||feed||rhythm||{steps:tips.slice(0,3),details:tips.slice(3)})),chosen={...selected,steps:[...(selected.steps||[])],details:[...(selected.details||[])]};if(feed&&manual){chosen.prepare=feed.prepare||chosen.prepare;if(feed.points&&!chosen.points)chosen.points=feed.points}if(knowledge){if(!chosen.steps.length)chosen.steps=[...knowledge.steps];const additions=[...(knowledge.details||[])];for(const detail of additions){if(detail&&!chosen.details.includes(detail))chosen.details.push(detail)}}return chosen}
+  function coachFor(e,date,lang){const kind=eventKind(e),manual=kind==='brawl'?brawlPlan(e,date,lang):(guides[kind]?.[lang]||null),feed=planFromFeed(e,date,lang),rhythm=e.rhythmCoach?.[lang]||e.rhythmCoach?.en,tips=e.tips?.[lang]||e.tips?.en||[],knowledge=knowledgeCoachFor(e,lang),selected=(kind==='golden'?(feed||rhythm||manual||{steps:tips.slice(0,3),details:tips.slice(3)}):(manual||feed||rhythm||{steps:tips.slice(0,3),details:tips.slice(3)})),chosen={...selected,steps:[...(selected.steps||[])],details:[...(selected.details||[])]};if(feed&&manual){chosen.prepare=feed.prepare||chosen.prepare;if(feed.points&&!chosen.points)chosen.points=feed.points}if(knowledge){if(!chosen.steps.length)chosen.steps=[...knowledge.steps];const additions=[...(knowledge.details||[])];for(const detail of additions){if(detail&&!chosen.details.includes(detail))chosen.details.push(detail)}}const extra=eventGuidance.get(String(e.id)+"|"+date),nrwNote=extra&&(extra[lang]||extra.en||extra.de||extra.fr||"");if(nrwNote){chosen.steps.unshift("📣 NRW: "+nrwNote);chosen.details.unshift(nrwNote)}return chosen}
   const whyText={
     de:{
       bison:'Der Cooldown läuft bereits, während deine vorbereiteten Truppen sammeln. So verlierst du am Punktetag keine Wartezeit: Nach ihrer Rückkehr kannst du Bison früher für eine Sofort-Sammlung und nach dem nächsten Cooldown erneut nutzen.',
@@ -203,6 +203,6 @@
       status.textContent=data.queued?m.queued:m.saved;status.className='success';
     }catch(e){status.textContent=m.error;status.className='error'}finally{button.disabled=false}
   });
-  Promise.allSettled([fetch('/dashboard/events.json',{cache:'no-store'}).then(r=>r.ok?r.json():Promise.reject()),fetch('/dashboard/event-guides.json',{cache:'no-store'}).then(r=>r.ok?r.json():Promise.reject())]).then(([feedResult,guideResult])=>{if(feedResult.status==='fulfilled')eventFeed=Array.isArray(feedResult.value.events)?feedResult.value.events:[];if(guideResult.status==='fulfilled')eventGuideDb=guideResult.value||eventGuideDb;renderDynamic()});
+  Promise.allSettled([fetch('/dashboard/events.json',{cache:'no-store'}).then(r=>r.ok?r.json():Promise.reject()),fetch('/dashboard/event-guides.json',{cache:'no-store'}).then(r=>r.ok?r.json():Promise.reject()),fetch('https://bdzlgirowutasrsycjfj.supabase.co/functions/v1/allianceos-leitung?alliance=NRW&mode=public-guidance',{cache:'no-store'}).then(r=>r.ok?r.json():Promise.reject())]).then(([feedResult,guideResult,guidanceResult])=>{if(feedResult.status==='fulfilled')eventFeed=Array.isArray(feedResult.value.events)?feedResult.value.events:[];if(guideResult.status==='fulfilled')eventGuideDb=guideResult.value||eventGuideDb;if(guidanceResult.status==='fulfilled'){eventGuidance=new Map((guidanceResult.value.guidance||[]).map(row=>[row.source_key+"|"+row.day,row.notes]));}renderDynamic()});
   renderDynamic();tick();setInterval(tick,1000);setInterval(renderDynamic,60000);
 })();
