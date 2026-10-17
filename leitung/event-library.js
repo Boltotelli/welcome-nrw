@@ -150,6 +150,7 @@ export function createEventHub({request,flash,esc,t}) {
     '<details><summary>'+esc(t("rawSource"))+'</summary><pre>'+esc(raw)+'</pre></details>'+
     (detail.plan?'<details><summary>'+esc(t("rawDaily"))+'</summary><pre>'+esc(JSON.stringify(detail.plan,null,2))+'</pre></details>':"");
   fillMessages();
+  fillGuidance();
  }
  function buildText(limit){
   const d=detailFor(),head='['+formatDate(d.day)+'] '+name(selected),lines=[head];
@@ -170,6 +171,36 @@ export function createEventHub({request,flash,esc,t}) {
   }
   if(lines[0].length>limit)lines[0]=lines[0].slice(0,limit);
   return lines.join("\n");
+ }
+ function guidanceStored(){
+  return state?.eventGuidance?.find(x=>x.source_key===selected?.key&&x.day===activeDay())||null;
+ }
+ function fillGuidance(){
+  const row=guidanceStored(),enabled=canEdit&&["manual","rhythm"].includes(selected?.source);
+  $("libraryGuidance").value=row?.notes?.[language]||"";
+  $("libraryGuidanceStatus").value=row?.status||"draft";
+  $("libraryGuidance").readOnly=!enabled;
+  $("libraryGuidanceStatus").disabled=!enabled;
+  $("saveLibraryGuidance").disabled=!enabled;
+  $("libraryGuidanceInfo").textContent=enabled?
+    (row?.status==="published"?t("guidancePublished"):t("guidanceDraft")):t("guidanceNotSupported");
+ }
+ async function saveGuidance(){
+  if(!selected||!canEdit||!["manual","rhythm"].includes(selected.source))return;
+  const note=$("libraryGuidance").value.trim(),status=$("libraryGuidanceStatus").value;
+  const row=guidanceStored(),notes={...(row?.notes||{}),[language]:note};
+  if(note.length>1200||status==="published"&&!Object.values(notes).some(v=>String(v).trim())){
+   flash(t("invalidMessage"),true);return;
+  }
+  const btn=$("saveLibraryGuidance");btn.disabled=true;
+  try{
+   const result=await request("bootstrap",{action:"event_guidance",source_key:selected.key,
+     day:activeDay(),notes,status});
+   state.eventGuidance=(state.eventGuidance||[]).filter(x=>!(x.source_key===selected.key&&x.day===activeDay()));
+   state.eventGuidance.unshift(result.item);
+   fillGuidance();flash(t("saved"));
+  }catch(e){flash(t("genericError")+" ("+e.message+")",true)}
+  finally{btn.disabled=!canEdit;}
  }
  function stored(){
   return state?.eventMessages?.find(x=>x.source_key===selected?.key&&x.day===activeDay())||null;
@@ -233,6 +264,7 @@ export function createEventHub({request,flash,esc,t}) {
   $("copyLibraryChat").addEventListener("click",()=>copyText("chat"));
   $("copyLibraryNote").addEventListener("click",()=>copyText("note"));
   $("saveLibraryMessages").addEventListener("click",saveTexts);
+  $("saveLibraryGuidance").addEventListener("click",saveGuidance);
  }
  attach();
  return {load,render};
