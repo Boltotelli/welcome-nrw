@@ -5,7 +5,7 @@ export function createEventHub({request,flash,esc,t}) {
  const $=id=>document.getElementById(id);
  const localeName={de:"de-DE",en:"en-GB",fr:"fr-FR",es:"es-ES"};
  const guideIds={brawl:"alliance-brawl",kvk:"kingdom-of-power-prep",strongest:"strongest-governor",armament:"armament-competition",officer:"officer-project",golden:"golden-glaives",merchant:"merchant-empire",fishing:"fishing-tournament",viking:"viking-vengeance",eternity:"eternitys-reach",cesare:"cesares-fury",championship:"alliance-championship",kill:"kill-event",bear:"bear-trap",transfer:"kingdom-transfer",champagne:"champagne-fair",roulette:"hero-roulette"};
- let sources=null,loading=null,items=[],state=null,language="de",canEdit=false,selected=null,guideIndex=new Map(),rhythmByDay=new Map();
+ let sources=null,loading=null,items=[],extraEvents=[],state=null,language="de",canEdit=false,selected=null,rhythmByDay=new Map();
  const lk=(value,lang=language)=>typeof value==="string"?value:Array.isArray(value)?value:(value?.[lang]||value?.en||value?.de||value?.fr||value?.es||"");
  const dayKey=d=>new Date(d).toISOString().slice(0,10);
  const dateRange=(start,end,max=90)=>{
@@ -74,7 +74,7 @@ export function createEventHub({request,flash,esc,t}) {
     }
   }
   items=[...dict.values()].sort((a,b)=>a.record.start.localeCompare(b.record.start)||name(a).localeCompare(name(b)));
-  guideIndex=new Map((sources.guides.events||[]).map(g=>[g.id,g]));
+
  }
  function list(){
   const search=$("eventLibrarySearch").value.trim().toLowerCase(),filter=$("eventLibraryFilter").value;
@@ -87,7 +87,7 @@ export function createEventHub({request,flash,esc,t}) {
     $("eventLibraryList").innerHTML=shown.map(item=>itemCard(item)).join("")||'<p class="muted">'+esc(t("noEvents"))+'</p>';
     return;
   }
-  const shown=items.filter(item=>{
+  const shown=[...items,...extraEvents].filter(item=>{
    if(search && !(name(item)+" "+item.key).toLowerCase().includes(search))return false;
    const days=item.days;
    if(filter==="past")return item.record.start<today;
@@ -98,7 +98,7 @@ export function createEventHub({request,flash,esc,t}) {
   $("eventLibraryList").innerHTML=shown.map(item=>itemCard(item)).join("")||'<p class="muted">'+esc(t("noEvents"))+'</p>';
  }
  function itemCard(item){
-  const k=item.source,tag=k==="manual"?t("manualSource"):k==="rhythm"?t("rhythmSource"):k==="guide"?t("guideSource"):t("catalogSource");
+  const k=item.source,tag=k==="manual"?t("manualSource"):k==="rhythm"?t("rhythmSource"):k==="custom"?t("customSource"):k==="guide"?t("guideSource"):t("catalogSource");
   const dates=k==="guide"||k==="catalog"?t("guideOnly"):formatDate(item.record.start)+(item.record.end&&item.record.end!==item.record.start?" – "+formatDate(item.record.end):"");
   const mark=item.record.confidence==="predicted"?' · '+t("notConfirmed"):"";
   return '<article class="event-source-item"><div><span class="eyebrow">'+esc(tag+mark)+'</span><h3>'+esc(name(item))+'</h3><small>'+esc(dates)+'</small></div>'+
@@ -106,15 +106,19 @@ export function createEventHub({request,flash,esc,t}) {
  }
  function render(current,lang,allowed){
   state=current;language=lang;canEdit=allowed;
+  extraEvents=(current?.events||[]).filter(e=>e.id&&e.start_at).map(e=>({
+    key:"aos-"+e.id,source:"custom",record:{...e,id:e.id,name:e.title,start:e.start_at.slice(0,10),end:(e.end_at||e.start_at).slice(0,10),tips:e.description},
+    days:dateRange(e.start_at.slice(0,10),(e.end_at||e.start_at).slice(0,10),90),guide:null
+  }));
   if(sources)list();
  }
- function findItem(key){return items.find(x=>x.key===key)||[...(sources?.guides.events||[]).map(g=>({key:"guide-"+g.id,source:"guide",record:g,days:[dayKey(new Date())],guide:g})),...(sources?.guides.catalogOnly||[]).map((g,i)=>({key:"catalog-"+String(g.id||i),source:"catalog",record:g,days:[dayKey(new Date())],guide:g}))].find(x=>x.key===key);}
+ function findItem(key){return [...items,...extraEvents].find(x=>x.key===key)||[...(sources?.guides.events||[]).map(g=>({key:"guide-"+g.id,source:"guide",record:g,days:[dayKey(new Date())],guide:g})),...(sources?.guides.catalogOnly||[]).map((g,i)=>({key:"catalog-"+String(g.id||i),source:"catalog",record:g,days:[dayKey(new Date())],guide:g}))].find(x=>x.key===key);}
  function activeDay(){return $("libraryDay").value||selected?.days?.[0]||dayKey(new Date());}
  function detailFor(){
   if(!selected)return null;
   const rec=selected.record,day=activeDay(),g=selected.guide,plan=rec.dailyPlans?.[day]||null,coach=rec.rhythmCoach?.[language]||rec.rhythmCoach?.en||null;
   const implied=rhythmByDay.get(day)?.find(x=>kind(x)===kind(rec));
-  const rhythmic=coach||implied?.rhythmCoach?.[language]||implied?.rhythmCoach?.en||null;
+  const rhythmic=(selected.source==="rhythm"?(implied?.rhythmCoach?.[language]||implied?.rhythmCoach?.en||coach):coach||implied?.rhythmCoach?.[language]||implied?.rhythmCoach?.en)||null;
   const lines=[];
   const push=(heading,value)=>{
     if(value==null)return;
@@ -125,10 +129,10 @@ export function createEventHub({request,flash,esc,t}) {
   push(t("dailyPoints"),plan?.points||rhythmic?.points);
   push(t("dailySteps"),plan?.steps||rhythmic?.steps);
   push(t("eventNote"),plan?.note);
+  push(t("eventTips"),rec.tips);
   push(t("eventPrepare"),plan?.prepare?.title);
   push(t("eventPrepare"),plan?.prepare?.steps);
   push(t("dailyDetails"),rhythmic?.details);
-  push(t("eventTips"),rec.tips);
   if(!plan && !rhythmic){push(t("guideObjective"),g?.objective);push(t("guideNrwRule"),g?.nrwRule);push(t("guideNrwRule"),g?.globalNrwRules);push(t("dailySteps"),g?.nrwGuide);}
   const limits=plan?.limits||rhythmic?.limits;
   if(limits)push(t("eventLimits"),limits.note||limits);
