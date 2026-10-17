@@ -233,7 +233,7 @@ async function save(req: Request, alliance: string, userId: string, staff: any, 
     if (entity==="transfer") {
       if(!isId(data.game_id)) throw new HttpError("invalid_player_id",400);
       const status=str(data.status,20),direction=str(data.direction,20);
-      if(!["incoming","outgoing"].includes(direction) || !["interested","shortlisted","confirmed","waitlist","completed","cancelled"].includes(status))
+      if(!["incoming","outgoing"].includes(direction) || !["interested","shortlisted","invited","confirmed","waitlist","completed","cancelled"].includes(status))
         throw new HttpError("invalid_transfer_state",400);
       const config=await checked<any>(db.from("aos_alliances").select("kingdom_id").eq("code",alliance).single());
       const origin=direction==="outgoing"?Number(config.kingdom_id):Number(data.origin_kingdom);
