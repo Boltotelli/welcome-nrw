@@ -74,6 +74,15 @@ async function audit(alliance: string, user: string, entity: string, id: string,
   if (error) console.error("AllianceOS audit:",error.code);
 }
 async function publicInfo(req: Request, alliance: string, mode: string) {
+  if(mode==="public-schedule"){
+    const [cycles,phases]=await Promise.all([
+      checked<any[]>(db.from("aos_event_cycles").select("group_key,anchor_date,interval_days,duration_days,phase_count,enabled")
+       .eq("alliance_code",alliance).eq("enabled",true).limit(200)),
+      checked<any[]>(db.from("aos_event_day_templates").select("group_key,day_number,instructions")
+       .eq("alliance_code",alliance).eq("status","published").limit(300))
+    ]);
+    return json(req,{cycles,phases});
+  }
   if (mode === "public-guidance") {
     const rows=await checked<any[]>(db.from("aos_event_guidance")
       .select("source_key,day,notes,updated_at").eq("alliance_code",alliance)
@@ -158,14 +167,16 @@ async function internalMovesFor(alliance:string) {
 }
 async function bootstrap(req: Request, alliance: string, staff: any) {
   const config=await checked<any>(db.from("aos_alliances").select("*").eq("code",alliance).single());
-  const [players, transfers, laws, events, internalMoves, eventMessages, eventGuidance]=await Promise.all([
+  const [players, transfers, laws, events, internalMoves, eventMessages, eventGuidance, eventCycles, eventDayTemplates]=await Promise.all([
     rosterFor(alliance,config.kingdom_id),
     checked<any[]>(db.from("aos_transfers").select("*").eq("alliance_code",alliance).order("updated_at",{ascending:false}).limit(500)),
     checked<any[]>(db.from("aos_laws").select("*").eq("alliance_code",alliance).order("updated_at",{ascending:false}).limit(300)),
     checked<any[]>(db.from("aos_events").select("*").eq("alliance_code",alliance).order("start_at",{ascending:true}).limit(300)),
     internalMovesFor(alliance),
     checked<any[]>(db.from("aos_event_messages").select("source_key,day,chat_text,note_text,updated_at").eq("alliance_code",alliance).order("day",{ascending:false}).limit(500)),
-    checked<any[]>(db.from("aos_event_guidance").select("source_key,day,notes,status,updated_at").eq("alliance_code",alliance).order("day",{ascending:false}).limit(500))
+    checked<any[]>(db.from("aos_event_guidance").select("source_key,day,notes,status,updated_at").eq("alliance_code",alliance).order("day",{ascending:false}).limit(500)),
+    checked<any[]>(db.from("aos_event_cycles").select("*").eq("alliance_code",alliance).limit(200)),
+    checked<any[]>(db.from("aos_event_day_templates").select("*").eq("alliance_code",alliance).limit(300))
   ]);
   let staffMembers:any[]=[];
   if(staff.rank==="R5"){
@@ -177,7 +188,7 @@ async function bootstrap(req: Request, alliance: string, staff: any) {
         permissions:entry.permissions,enabled:entry.enabled};
     }));
   }
-  return json(req,{alliance:config,staff:{rank:staff.rank,permissions:staff.permissions},staffMembers,players,transfers,internalMoves,laws,events,eventMessages,eventGuidance});
+  return json(req,{alliance:config,staff:{rank:staff.rank,permissions:staff.permissions},staffMembers,players,transfers,internalMoves,laws,events,eventMessages,eventGuidance,eventCycles,eventDayTemplates});
 }
 async function saveStaff(req:Request,alliance:string,userId:string,staff:any,payload:any){
   if(staff.rank!=="R5")throw new HttpError("permission_denied",403);
@@ -200,6 +211,44 @@ async function saveStaff(req:Request,alliance:string,userId:string,staff:any,pay
   },{onConflict:"user_id,alliance_code"}).select("user_id,rank,enabled,permissions").single());
   await audit(alliance,userId,"staff",user.id,existing?"update_r4":"grant_r4");
   return json(req,{ok:true,item:{...item,email}});
+}
+const groupKey=(v:unknown)=>{const key=str(v,70);if(!/^[a-z0-9-]{2,70}$/.test(key))throw new HttpError("invalid_event_group",400);return key;};
+async function saveEventCycle(req:Request,alliance:string,userId:string,staff:any,payload:any){
+  if(!permission(staff,"events"))throw new HttpError("permission_denied",403);
+  const group_key=groupKey(payload.group_key),anchor_date=validateDate(payload.anchor_date,false);
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(anchor_date||""))throw new HttpError("invalid_anchor",400);
+  const interval_days=Number(payload.interval_days),duration_days=Number(payload.duration_days),phase_count=Number(payload.phase_count);
+  if(!Number.isInteger(interval_days)||interval_days<1||interval_days>365||
+     !Number.isInteger(duration_days)||duration_days<1||duration_days>14||duration_days>interval_days||
+     !Number.isInteger(phase_count)||phase_count<1||phase_count>duration_days)throw new HttpError("invalid_cycle",400);
+  const cycle=await checked<any>(db.from("aos_event_cycles").upsert({
+    alliance_code:alliance,group_key,anchor_date,interval_days,duration_days,phase_count,
+    enabled:payload.enabled!==false,updated_at:new Date().toISOString(),updated_by:userId
+  },{onConflict:"alliance_code,group_key"}).select("*").single());
+  await audit(alliance,userId,"event_cycle",group_key,"save");
+  return json(req,{ok:true,item:cycle});
+}
+async function saveEventDayTemplate(req:Request,alliance:string,userId:string,staff:any,payload:any){
+  if(!permission(staff,"events"))throw new HttpError("permission_denied",403);
+  const group_key=groupKey(payload.group_key),day_number=Number(payload.day_number),status=str(payload.status,20);
+  if(!Number.isInteger(day_number)||day_number<1||day_number>14||!["draft","published"].includes(status))throw new HttpError("invalid_day_template",400);
+  const row=await checked<any>(db.from("aos_event_cycles").select("phase_count,duration_days").eq("alliance_code",alliance).eq("group_key",group_key).maybeSingle());
+  if(!row||day_number>Number(row.phase_count||row.duration_days))throw new HttpError("cycle_required",400);
+  const localizedRecord=(value:any,max:number)=>{
+    if(value===null||typeof value!=="object"||Array.isArray(value))throw new HttpError("invalid_localized_content",400);
+    const output:Record<string,string>={};
+    for(const lang of langs){if(value[lang]!==undefined){const v=String(value[lang]).trim();if(v.length>max)throw new HttpError("text_too_long",400);if(v)output[lang]=v;}}
+    return output;
+  };
+  const instructions=localizedRecord(payload.instructions,1200),
+    chat_text=localizedRecord(payload.chat_text,512),
+    note_text=localizedRecord(payload.note_text,300);
+  const item=await checked<any>(db.from("aos_event_day_templates").upsert({
+    alliance_code:alliance,group_key,day_number,instructions,chat_text,note_text,status,
+    updated_at:new Date().toISOString(),updated_by:userId
+  },{onConflict:"alliance_code,group_key,day_number"}).select("*").single());
+  await audit(alliance,userId,"event_day_template",group_key+":"+day_number,status);
+  return json(req,{ok:true,item});
 }
 async function saveEventGuidance(req:Request,alliance:string,userId:string,staff:any,payload:any) {
   if(!permission(staff,"events"))throw new HttpError("permission_denied",403);
@@ -365,7 +414,7 @@ Deno.serve(async(req: Request)=>{
     if(!["GET","POST"].includes(req.method))throw new HttpError("method_not_allowed",405);
     const u=new URL(req.url),alliance=str(u.searchParams.get("alliance")||"NRW",16);
     if(!/^[A-Za-z0-9_-]{2,16}$/.test(alliance))throw new HttpError("invalid_alliance",400);
-    if(req.method==="GET"&&["public-events","public-laws","public-guidance"].includes(u.searchParams.get("mode")||""))
+    if(req.method==="GET"&&["public-events","public-laws","public-guidance","public-schedule"].includes(u.searchParams.get("mode")||""))
       return await publicInfo(req,alliance,u.searchParams.get("mode")||"");
     const {userId,staff}=await staffFor(req,alliance);
     if(req.method==="GET")return await bootstrap(req,alliance,staff);
@@ -374,6 +423,8 @@ Deno.serve(async(req: Request)=>{
     if(body?.action==="staff")return await saveStaff(req,alliance,userId,staff,body);
     if(body?.action==="event_message")return await saveEventMessage(req,alliance,userId,staff,body);
     if(body?.action==="event_guidance")return await saveEventGuidance(req,alliance,userId,staff,body);
+    if(body?.action==="event_cycle")return await saveEventCycle(req,alliance,userId,staff,body);
+    if(body?.action==="event_day_template")return await saveEventDayTemplate(req,alliance,userId,staff,body);
     if(body?.action!=="save")throw new HttpError("unknown_action",400);
     return await save(req,alliance,userId,staff,body);
   }catch(e){
