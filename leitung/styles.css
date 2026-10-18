@@ -118,3 +118,25 @@
 #powerSyncStatus{min-height:1em;margin:7px 0 12px;overflow-wrap:anywhere}
 .rank-and-tg{display:inline-flex;align-items:baseline;gap:5px;white-space:nowrap}
 .rank-and-tg .level{font-size:12px;color:var(--muted)}
+
+/* Transfer v2: API-confirmed phase cards, optional manual reservations and compact history. */
+#apiTransferPhases{grid-template-columns:repeat(auto-fit,minmax(220px,1fr));margin:12px 0}
+.api-phase{min-height:110px;align-items:start;padding:16px}
+.api-phase>div{gap:7px}
+.api-phase .eyebrow{font-size:11px}
+.ops-manual-windows{border-top:1px solid var(--border);padding:12px 2px 2px;margin-top:10px}
+.ops-manual-windows>summary,.ops-moves-details>summary{cursor:pointer;font-weight:750;line-height:1.6}
+.ops-manual-windows>p{font-size:12px;margin:8px 0}
+.ops-manual-windows>button{margin:8px 0}
+.ops-moves-details>summary{display:flex;align-items:center;gap:12px;justify-content:space-between;list-style:none}
+.ops-moves-details>summary::-webkit-details-marker{display:none}
+.ops-moves-details>summary::after{content:"⌄";color:var(--accent);font-size:21px}
+.ops-moves-details[open]>summary{border-bottom:1px solid var(--border);margin-bottom:12px;padding-bottom:10px}
+.ops-moves-details .filters{margin:12px 0}
+.ops-moves-details #internalMoveSearch{min-width:170px;flex:1}
+.transfer-id-row{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap}
+.transfer-id-row>.field{flex:1;min-width:180px}
+.transfer-id-row>button{margin-bottom:1px;min-height:44px}
+#transferLookupStatus{display:block;margin:9px 0}
+.transfer-profile-preview[hidden]{display:none}
+@media(max-width:600px){.transfer-id-row>button{width:100%}}
