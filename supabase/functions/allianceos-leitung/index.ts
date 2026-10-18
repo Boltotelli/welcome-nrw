@@ -120,6 +120,7 @@ async function publicInfo(req: Request, alliance: string, mode: string) {
   return json(req,{laws});
 }
 async function publicLeaders(req:Request,alliance:string){
+ if(alliance!=="NRW")throw new HttpError("not_found",404);
  const leaders=await checked<any[]>(db.from("players")
    .select("game_id,name,alliance_rank").eq("alliance_code",alliance)
    .eq("active",true).in("alliance_rank",[4,5]).order("name",{ascending:true}).limit(50));
@@ -127,6 +128,7 @@ async function publicLeaders(req:Request,alliance:string){
    .map(x=>({game_id:x.game_id,name:x.name,rank:"R"+x.alliance_rank}))});
 }
 async function provisionLeaders(req:Request,alliance:string,userId:string,staff:any){
+ if(alliance!=="NRW")throw new HttpError("not_found",404);
  if(!staff.is_owner)throw new HttpError("permission_denied",403);
  const leaders=await checked<any[]>(db.from("players")
    .select("game_id,name,alliance_rank").eq("alliance_code",alliance)
@@ -170,6 +172,7 @@ async function provisionLeaders(req:Request,alliance:string,userId:string,staff:
  return json(req,{ok:true,created,skipped,errors});
 }
 async function rotateLeaderPassword(req:Request,alliance:string,userId:string,staff:any,body:any){
+ if(alliance!=="NRW")throw new HttpError("not_found",404);
  if(!staff.is_owner)throw new HttpError("permission_denied",403);
  const id=str(body.game_id,20);if(!/^[0-9]{5,20}$/.test(id))throw new HttpError("invalid_player_id",400);
  const leaders=await checked<any>(db.from("players").select("alliance_rank,active")
