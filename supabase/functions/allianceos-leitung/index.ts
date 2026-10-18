@@ -207,7 +207,7 @@ async function saveTransferWindow(req:Request,alliance:string,userId:string,staf
  const id=str(payload.id,36),data=payload.data;
  if(!data||typeof data!=="object"||Array.isArray(data))throw new HttpError("invalid_data",400);
  const start_date=str(data.start_date,10),end_date=str(data.end_date,10),status=str(data.status||"planning",20);
- if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(start_date)||!/^\\d{4}-\\d{2}-\\d{2}$/.test(end_date)||
+ if(!/^\d{4}-\d{2}-\d{2}$/.test(start_date)||!/^\d{4}-\d{2}-\d{2}$/.test(end_date)||
  !Number.isFinite(Date.parse(start_date))||!Number.isFinite(Date.parse(end_date))||end_date<start_date)throw new HttpError("invalid_window_dates",400);
  if(!["planning","open","closed"].includes(status))throw new HttpError("invalid_status",400);
  const cap=(v:any)=>{if(v===""||v===null||v===undefined)return null;const n=Number(v);if(!Number.isInteger(n)||n<0||n>500)throw new HttpError("invalid_capacity",400);return n;};
@@ -257,7 +257,7 @@ async function restoreLawDraft(req:Request,alliance:string,userId:string,staff:a
 async function inviteR4(req:Request,alliance:string,userId:string,staff:any,payload:any){
   if(staff.rank!=="R5")throw new HttpError("permission_denied",403);
   const email=str(payload.email,255).toLowerCase();
-  if(!/^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$/.test(email))throw new HttpError("invalid_email",400);
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))throw new HttpError("invalid_email",400);
   const {data:list,error:listError}=await db.auth.admin.listUsers({page:1,perPage:1000});
   if(listError)throw new HttpError("user_lookup_failed",500);
   if(list?.users?.some((u:any)=>u.email?.toLowerCase()===email))throw new HttpError("account_exists_assign_access",409);
@@ -493,6 +493,7 @@ async function save(req: Request, alliance: string, userId: string, staff: any, 
       const title=localized(data.title,150),body=localized(data.body,12000);
       if(status==="published" && scope==="kingdom")throw new HttpError("kingdom_approval_required",403);
       if(status==="published"&&(!Object.values(title).some(Boolean)||!Object.values(body).some(Boolean)))throw new HttpError("incomplete_law",400);
+      if(existing?.scope==="kingdom" || scope==="kingdom")throw new HttpError("kingdom_approval_required",403);
       if(existing && Number(data.expected_version)!==Number(existing.version))throw new HttpError("version_conflict",409);
       patch={...patch,scope,number,title,body,status,version:existing?existing.version+1:1,
         published_at:status==="published"?now:null};
@@ -514,9 +515,6 @@ async function save(req: Request, alliance: string, userId: string, staff: any, 
       ? db.from(entry.table).update(patch).eq("id",id).eq("alliance_code",alliance).select("*").single()
       : db.from(entry.table).insert(patch).select("*").single());
     if(entity==="law"){
-      // Kingdom-wide Laws are references only. NRW leadership cannot publish, modify or relabel them.
-      if(existing?.scope==="kingdom"||patch.scope==="kingdom")throw new HttpError("kingdom_approval_required",403);
-
       await checked<any>(db.from("aos_law_versions").insert({
         law_id:result.id, alliance_code:alliance,version:result.version,
         snapshot:{scope:result.scope,number:result.number,title:result.title,body:result.body,status:result.status},
