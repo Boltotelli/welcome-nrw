@@ -140,3 +140,31 @@
 #transferLookupStatus{display:block;margin:9px 0}
 .transfer-profile-preview[hidden]{display:none}
 @media(max-width:600px){.transfer-id-row>button{width:100%}}
+
+/* Align the Game-ID input and provider-lookup button on the same baseline. */
+.transfer-id-row{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) max-content;
+  align-items:end;
+  column-gap:10px;
+  row-gap:10px;
+}
+.transfer-id-row>.field{
+  min-width:0;
+  margin:0;
+}
+.transfer-id-row>.field>.control{height:43px;min-height:43px}
+.transfer-id-row>button{
+  align-self:end;
+  height:43px;
+  min-height:43px;
+  margin:0;
+  display:inline-flex;
+  justify-content:center;
+  align-items:center;
+  white-space:nowrap;
+}
+@media(max-width:540px){
+  .transfer-id-row{grid-template-columns:minmax(0,1fr)}
+  .transfer-id-row>button{width:100%}
+}
