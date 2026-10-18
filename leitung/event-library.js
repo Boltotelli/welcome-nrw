@@ -81,7 +81,7 @@ export function createEventHub({request,flash,esc,t}) {
  const groupName=group=>lk(group.guide?.names||group.guide?.name)||name(group.instances[0]);
  const normalizeKey=raw=>String(raw||"").toLowerCase().replace(/[^a-z0-9-]+/g,"-").replace(/^-+|-+$/g,"").slice(0,70);
  const keyForEntry=(x)=>{
-   if(x.source==="custom")return "custom-"+x.record.id;
+   if(x.source==="custom"){const recognized=kind(x.record);return recognized!=="generic"?recognized:"custom-"+x.record.id;}
    const k=kind(x.record);
    if(k!=="generic")return k;
    const id=String(x.guide?.id||x.record?.id||"");
