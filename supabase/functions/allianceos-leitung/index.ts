@@ -581,7 +581,7 @@ async function save(req: Request, alliance: string, userId: string, staff: any, 
       if(result.status==="published"){
         await checked<any>(db.from("aos_law_publications").upsert({
           law_id:result.id,alliance_code:alliance,scope:result.scope,number:result.number,
-          title:result.title,body:result.body,version:result.version,scope:result.scope,published_at:now
+          title:result.title,body:result.body,version:result.version,published_at:now
         },{onConflict:"law_id"}).select("law_id").single());
       }
     }
