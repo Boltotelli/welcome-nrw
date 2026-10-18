@@ -8,6 +8,55 @@ export function createOperations({getState,request,flash,esc,t,can,refresh}){
    return (getState()?.transfers||[]).filter(x=>x.transfer_window_id===window.id&&x.direction==="incoming"&&
      statuses.has(x.status)&&x.invitation_type===kind).length;
  }
+ let providerPhases=null,providerProblem="",phaseLoading=null;
+ const phaseNames={1:"transferPre",2:"transferInvite",3:"transferOpen"};
+ function paintPhases(){
+  const el=$("apiTransferPhases"),status=$("apiTransferStatus");
+  if(!el||!status)return;
+  if(providerProblem){
+    status.textContent=t(providerProblem);
+    el.innerHTML='<p class="muted">'+esc(t("noVerifiedTransferDates"))+'</p>';
+    return;
+  }
+  if(providerPhases===null){
+    status.textContent=t("phaseLoading");
+    el.innerHTML='<p class="muted">'+esc(t("phaseLoading"))+'</p>';
+    return;
+  }
+  status.textContent=providerPhases.length?t("phaseVerified"):"";
+  el.innerHTML=providerPhases.length?providerPhases.slice(0,3).map(p=>{
+    const start=new Date(p.start_at),end=new Date(p.end_at);
+    if(!Number.isFinite(start.valueOf())||!Number.isFinite(end.valueOf()))return "";
+    const format=v=>new Intl.DateTimeFormat("de-DE",{timeZone:"UTC",day:"2-digit",month:"short",year:"numeric"}).format(v);
+    const lastDay=new Date(end.valueOf()-1000);
+    return '<article class="ops-window api-phase"><div><span class="eyebrow">Phase '+esc(p.phase)+'</span>'+
+      '<b>'+esc(t(phaseNames[p.phase]||"transferEvent"))+'</b>'+
+      '<small>'+esc(format(start))+' – '+esc(format(lastDay))+' UTC</small>'+
+      '<small>'+esc(p.source==="derived_from_api_window"?t("phaseDerivedFromApi"):t("phaseApiConfirmed"))+'</small></div></article>';
+  }).join(""):'<p class="muted">'+esc(t("noVerifiedTransferDates"))+'</p>';
+ }
+ async function loadPhases(force=false){
+   if(!can("transfers"))return;
+   if(phaseLoading)return phaseLoading;
+   const btn=$("reloadTransferPhases");
+   if(btn)btn.disabled=true;
+   providerProblem="";
+   if(providerPhases===null)paintPhases();
+   phaseLoading=(async()=>{
+    try{
+      const data=await request("bootstrap",{action:"transfer_phases",force});
+      providerPhases=Array.isArray(data.phases)?data.phases:[];
+    }catch(e){
+      const code=String(e.message||"");
+      providerProblem=code.includes("mighty_required")?"phaseMightyRequired":
+        code.includes("rate_limited")?"phaseRateLimited":"phaseFetchError";
+      providerPhases=[];
+    }finally{
+      phaseLoading=null;if(btn)btn.disabled=!can("transfers");paintPhases();
+    }
+   })();
+   return phaseLoading;
+ }
  function windows(){
    const state=getState();if(!state)return;
    const target=$("transferWindowsList");if(!target)return;
@@ -90,6 +139,7 @@ export function createOperations({getState,request,flash,esc,t,can,refresh}){
  }
  function attach(){
    $("newTransferWindow")?.addEventListener("click",()=>openWindow());
+   $("reloadTransferPhases")?.addEventListener("click",()=>loadPhases(true));
    $("transferWindowForm")?.addEventListener("submit",saveWindow);
    for(const id of ["twCancel","twCancelTop"])$(id)?.addEventListener("click",()=>$("transferWindowDialog").close());
    $("lawHistoryClose")?.addEventListener("click",()=>$("lawHistoryDialog").close());
@@ -104,5 +154,5 @@ export function createOperations({getState,request,flash,esc,t,can,refresh}){
    });
  }
  attach();
- return {render(){windows();renderAudit()}};
+ return {render(){windows();renderAudit();paintPhases();if(providerPhases===null&&!phaseLoading&&can("transfers"))loadPhases(false);},loadPhases};
 }
