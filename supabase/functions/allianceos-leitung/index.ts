@@ -167,7 +167,7 @@ async function internalMovesFor(alliance:string) {
 }
 async function bootstrap(req: Request, alliance: string, staff: any) {
   const config=await checked<any>(db.from("aos_alliances").select("*").eq("code",alliance).single());
-  const [players, transfers, laws, events, internalMoves, eventMessages, eventGuidance, eventCycles, eventDayTemplates]=await Promise.all([
+  const [players, transfers, laws, events, internalMoves, eventMessages, eventGuidance, eventCycles, eventDayTemplates, transferWindows, lawVersions, auditTrail]=await Promise.all([
     rosterFor(alliance,config.kingdom_id),
     checked<any[]>(db.from("aos_transfers").select("*").eq("alliance_code",alliance).order("updated_at",{ascending:false}).limit(500)),
     checked<any[]>(db.from("aos_laws").select("*").eq("alliance_code",alliance).order("updated_at",{ascending:false}).limit(300)),
@@ -176,7 +176,10 @@ async function bootstrap(req: Request, alliance: string, staff: any) {
     checked<any[]>(db.from("aos_event_messages").select("source_key,day,chat_text,note_text,updated_at").eq("alliance_code",alliance).order("day",{ascending:false}).limit(500)),
     checked<any[]>(db.from("aos_event_guidance").select("source_key,day,notes,status,updated_at").eq("alliance_code",alliance).order("day",{ascending:false}).limit(500)),
     checked<any[]>(db.from("aos_event_cycles").select("*").eq("alliance_code",alliance).limit(200)),
-    checked<any[]>(db.from("aos_event_day_templates").select("*").eq("alliance_code",alliance).limit(300))
+    checked<any[]>(db.from("aos_event_day_templates").select("*").eq("alliance_code",alliance).limit(300)),
+    checked<any[]>(db.from("aos_transfer_windows").select("*").eq("alliance_code",alliance).order("start_date",{ascending:false}).limit(150)),
+    permission(staff,"laws")?checked<any[]>(db.from("aos_law_versions").select("law_id,version,snapshot,changed_at,changed_by").eq("alliance_code",alliance).order("changed_at",{ascending:false}).limit(250)):Promise.resolve([]),
+    staff.rank==="R5"?checked<any[]>(db.from("aos_audit").select("entity,entity_id,action,actor_id,created_at").eq("alliance_code",alliance).order("created_at",{ascending:false}).limit(60)):Promise.resolve([])
   ]);
   let staffMembers:any[]=[];
   if(staff.rank==="R5"){
@@ -188,7 +191,68 @@ async function bootstrap(req: Request, alliance: string, staff: any) {
         permissions:entry.permissions,enabled:entry.enabled};
     }));
   }
-  return json(req,{alliance:config,staff:{rank:staff.rank,permissions:staff.permissions},staffMembers,players,transfers,internalMoves,laws,events,eventMessages,eventGuidance,eventCycles,eventDayTemplates});
+  return json(req,{alliance:config,staff:{rank:staff.rank,permissions:staff.permissions},staffMembers,
+    players:permission(staff,"members")?players:[],transfers:permission(staff,"transfers")?transfers:[],
+    internalMoves:permission(staff,"transfers")?internalMoves:[],
+    laws:permission(staff,"laws")?laws:[],events:permission(staff,"events")?events:[],
+    eventMessages:permission(staff,"events")?eventMessages:[],
+    eventGuidance:permission(staff,"events")?eventGuidance:[],
+    eventCycles:permission(staff,"events")?eventCycles:[],
+    eventDayTemplates:permission(staff,"events")?eventDayTemplates:[],
+    transferWindows:permission(staff,"transfers")?transferWindows:[],
+    lawVersions,auditTrail});
+}
+async function saveTransferWindow(req:Request,alliance:string,userId:string,staff:any,payload:any){
+ if(!permission(staff,"transfers"))throw new HttpError("permission_denied",403);
+ const id=str(payload.id,36),data=payload.data;
+ if(!data||typeof data!=="object"||Array.isArray(data))throw new HttpError("invalid_data",400);
+ const start_date=str(data.start_date,10),end_date=str(data.end_date,10),status=str(data.status||"planning",20);
+ if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(start_date)||!/^\\d{4}-\\d{2}-\\d{2}$/.test(end_date)||
+ !Number.isFinite(Date.parse(start_date))||!Number.isFinite(Date.parse(end_date))||end_date<start_date)throw new HttpError("invalid_window_dates",400);
+ if(!["planning","open","closed"].includes(status))throw new HttpError("invalid_status",400);
+ const cap=(v:any)=>{if(v===""||v===null||v===undefined)return null;const n=Number(v);if(!Number.isInteger(n)||n<0||n>500)throw new HttpError("invalid_capacity",400);return n;};
+ const patch={alliance_code:alliance,label:str(data.label,100),start_date,end_date,
+ ordinary_capacity:cap(data.ordinary_capacity),special_capacity:cap(data.special_capacity),
+ status,notes:str(data.notes,1500),updated_at:new Date().toISOString()};
+ if(!patch.label)throw new HttpError("missing_window_label",400);
+ if(id){
+  const existing=await checked<any>(db.from("aos_transfer_windows").select("id").eq("id",id).eq("alliance_code",alliance).maybeSingle());
+  if(!existing)throw new HttpError("not_found",404);
+ }
+ const item=await checked<any>(id?db.from("aos_transfer_windows").update(patch).eq("id",id).eq("alliance_code",alliance).select("*").single():
+   db.from("aos_transfer_windows").insert(patch).select("*").single());
+ await audit(alliance,userId,"transfer_window",item.id,id?"update":"create");
+ return json(req,{ok:true,item});
+}
+async function getLawHistory(req:Request,alliance:string,staff:any,id:string){
+ if(!permission(staff,"laws"))throw new HttpError("permission_denied",403);
+ const law=await checked<any>(db.from("aos_laws").select("id,scope,number").eq("alliance_code",alliance).eq("id",id).maybeSingle());
+ if(!law)throw new HttpError("not_found",404);
+ const revisions=await checked<any[]>(db.from("aos_law_versions").select("version,snapshot,changed_at").eq("alliance_code",alliance).eq("law_id",id).order("version",{ascending:false}).limit(60));
+ return json(req,{ok:true,law,revisions});
+}
+async function restoreLawDraft(req:Request,alliance:string,userId:string,staff:any,payload:any){
+ if(!permission(staff,"laws"))throw new HttpError("permission_denied",403);
+ const id=str(payload.id,36),version=Number(payload.restore_version),expected=Number(payload.expected_version);
+ if(!Number.isInteger(version)||version<1)throw new HttpError("invalid_version",400);
+ const law=await checked<any>(db.from("aos_laws").select("*").eq("alliance_code",alliance).eq("id",id).maybeSingle());
+ if(!law)throw new HttpError("not_found",404);
+ if(expected!==Number(law.version))throw new HttpError("version_conflict",409);
+ // This intentionally creates a DRAFT, never republishes an old law automatically.
+ if(law.scope==="kingdom")throw new HttpError("kingdom_approval_required",403);
+ const history=await checked<any>(db.from("aos_law_versions").select("snapshot").eq("alliance_code",alliance).eq("law_id",id).eq("version",version).maybeSingle());
+ if(!history)throw new HttpError("version_not_found",404);
+ const restored=await checked<any>(db.from("aos_laws").update({
+   title:history.snapshot?.title||{},body:history.snapshot?.body||{},status:"draft",published_at:null,
+   version:law.version+1,updated_at:new Date().toISOString()
+ }).eq("id",id).eq("alliance_code",alliance).eq("version",expected).select("*").maybeSingle());
+ if(!restored)throw new HttpError("version_conflict",409);
+ await checked<any>(db.from("aos_law_versions").insert({
+   law_id:id,alliance_code:alliance,version:restored.version,
+   snapshot:{scope:restored.scope,number:restored.number,title:restored.title,body:restored.body,status:"draft"},changed_by:userId
+ }).select("id").single());
+ await audit(alliance,userId,"law",id,"restore_draft_v"+version);
+ return json(req,{ok:true,item:restored});
 }
 async function saveStaff(req:Request,alliance:string,userId:string,staff:any,payload:any){
   if(staff.rank!=="R5")throw new HttpError("permission_denied",403);
@@ -421,6 +485,9 @@ Deno.serve(async(req: Request)=>{
     if(Number(req.headers.get("content-length")||"0")>200000)throw new HttpError("payload_too_large",413);
     const body=await req.json().catch(()=>{throw new HttpError("invalid_json",400)});
     if(body?.action==="staff")return await saveStaff(req,alliance,userId,staff,body);
+    if(body?.action==="transfer_window")return await saveTransferWindow(req,alliance,userId,staff,body);
+    if(body?.action==="law_history")return await getLawHistory(req,alliance,staff,str(body.id,36));
+    if(body?.action==="law_restore")return await restoreLawDraft(req,alliance,userId,staff,body);
     if(body?.action==="event_message")return await saveEventMessage(req,alliance,userId,staff,body);
     if(body?.action==="event_guidance")return await saveEventGuidance(req,alliance,userId,staff,body);
     if(body?.action==="event_cycle")return await saveEventCycle(req,alliance,userId,staff,body);
