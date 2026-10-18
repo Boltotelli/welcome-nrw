@@ -172,11 +172,16 @@ function renderSettings(){
  q("#activeLanguages input").forEach(x=>x.checked=(config.languages||[]).includes(x.value));
  $("defaultLanguage").value=config.default_language;
  const options=[["members",t("roster")],["transfers",t("transfers")],["laws",t("laws")],["events",t("events")],["settings",t("settings")]];
- $("permissionTable").innerHTML='<div><strong></strong><b>R5</b><b>R4</b></div>'+options.map(([feature,label])=>'<div><span>'+esc(label)+'</span><b>✓</b><b>'+esc(state.staff.rank==="R4"&&can(feature)?"✓":"*")+'</b></div>').join("")+'<p class="small-note">* '+esc(t("r4Access"))+'</p>';
+ const grants=(state.staffMembers||[]).filter(x=>x.rank==="R4");
+ $("permissionTable").innerHTML='<div><strong>'+esc(t("permissions"))+'</strong><b>R5</b><b>'+esc(t("r4"))+'</b></div>'+
+   options.map(([feature,label])=>'<div><span>'+esc(label)+'</span><b>✓</b><b>'+
+     esc(state.staff.rank==="R4"?(can(feature)?"✓":"—"):grants.filter(x=>x.enabled&&x.permissions?.[feature]).length+" / "+grants.length)+'</b></div>').join("")+
+   '<p class="small-note">'+esc(t("r4Access"))+'</p>';
  $("staffControls").hidden=state.staff.rank!=="R5";
  const members=(state.staffMembers||[]).filter(x=>x.email);
  $("staffList").innerHTML=members.length?'<p class="eyebrow">'+esc(t("staffList"))+'</p>'+members.map(m=>
- '<button type="button" class="staff-row" data-staff-email="'+esc(m.email)+'"><span><b>'+esc(m.email)+'</b><small>'+esc(m.rank)+(m.enabled?'':' · '+esc(t("r4Disabled")))+'</small></span><span>→</span></button>').join(""):"";
+ '<button type="button" class="staff-row" data-staff-email="'+esc(m.email)+'"><span><b>'+esc(m.email)+'</b><small>'+esc(m.rank)+(m.enabled?'':' · '+esc(t("r4Disabled")))+
+    (m.rank==="R4"?' · '+esc(Object.keys(m.permissions||{}).filter(k=>m.permissions[k]===true).join(", ")||"—"):"")+'</small></span><span>→</span></button>').join(""):"";
 }
 function render(){patchTranslations();counts();renderRoster();renderTransfers();renderLaws();renderEvents();renderSettings();eventHub.render(state,lang,can("events"));operations.render();}
 function control(label,name,value="",type="text",opts={}){
