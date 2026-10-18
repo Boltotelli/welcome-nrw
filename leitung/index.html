@@ -35,7 +35,8 @@
       <div class="breadcrumb"><span data-i18n="workplace">LEITUNGSZENTRALE</span> <b>/</b> <strong id="pageLabel">Übersicht</strong></div>
       <div class="bar-actions"><select id="language" aria-label="Sprache"><option value="de">DE</option><option value="en">EN</option><option value="fr">FR</option><option value="es">ES</option></select>
         <button class="icon-action" id="themeToggle" type="button" aria-label="Theme">☾</button>
-        <span class="user-role" id="roleChip">R4 / R5</span>
+        <button class="text-action" id="changePasswordBtn" type="button" hidden data-i18n="changePassword">Passwort ändern</button>
+         <span class="user-role" id="roleChip">R4 / R5</span>
         <button class="text-action" id="logoutBtn" hidden data-i18n="logout">Abmelden</button>
       </div>
     </header>
@@ -241,6 +242,14 @@
   </form>
 </dialog>
 <dialog id="lawHistoryDialog" class="modal" aria-labelledby="lawHistoryTitle"><div class="modal-top"><h2 id="lawHistoryTitle" data-i18n="lawHistory">Versionsverlauf</h2><button type="button" class="close" id="lawHistoryClose">×</button></div><div class="modal-body" id="lawHistoryItems"></div></dialog>
+<dialog id="changePasswordDialog" class="modal"><form id="changePasswordForm">
+  <div class="modal-top"><h2 data-i18n="changePassword">Passwort ändern</h2><button type="button" class="close" id="pwCancelTop">×</button></div>
+  <div class="modal-body"><p class="small-note" data-i18n="passwordSetupHint">Für eingeladene R4-Konten hier ein eigenes Passwort festlegen.</p>
+    <label class="field"><span data-i18n="newPassword">Neues Passwort (mindestens 10 Zeichen)</span><input name="password" type="password" autocomplete="new-password" minlength="10" maxlength="128" required class="control"></label>
+    <label class="field"><span data-i18n="repeatPassword">Passwort wiederholen</span><input name="password_repeat" type="password" autocomplete="new-password" minlength="10" maxlength="128" required class="control"></label>
+  </div>
+  <div class="modal-actions"><button type="button" class="ghost" id="pwCancel" data-i18n="cancel">Abbrechen</button><button type="submit" class="primary" data-i18n="savePassword">Neues Passwort speichern</button></div>
+</form></dialog>
 <script src="/dashboard/event-rhythm.js?v=4"></script>
 <script type="module" src="/leitung/app.js?v=15"></script>
 </body></html>
