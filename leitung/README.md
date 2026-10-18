@@ -151,3 +151,7 @@ User-required mental model: **one Event type -> editable recurrence -> one edito
 
 ### Verification boundaries
 - Isolated database tables/columns were verified using SQL, and Supabase Edge Function deployed ACTIVE. Static browser JS syntax and integration hooks were checked. No R5-authenticated manual write + reload flow has been run as the user in a browser. Live Auth invitation delivery and actual email configuration have not been tested. No fake transfer window or candidate was inserted into production.
+
+### Deployment limitation encountered in this pass
+
+Supabase Edge Function `allianceos-leitung` v15 was deployed ACTIVE and migration DDL validated. GitHub `main` has all frontend changes, and the new R4 invite-account password setup is included. **Vercel refused a fresh production deployment with HTTP 402, `api-deployments-free-per-day` (over 100 deployments in the daily free quota); the last confirmed READY deployment did not yet include this whole pass.** An explicit production deploy attempt using GitHub `main` returned that limit. Container fallback has Git but not an authenticated Vercel CLI / checkout. Do not claim these new UI features are live on the Vercel domain until the current commit deploys and is verified; keep this deployment caveat in handoff. The backend will accept prior clients throughout the delayed frontend release.
