@@ -177,7 +177,7 @@ function renderSettings(){
  q("#activeLanguages input").forEach(x=>x.checked=(config.languages||[]).includes(x.value));
  $("defaultLanguage").value=config.default_language;
  const options=[["members",t("roster")],["transfers",t("transfers")],["laws",t("laws")],["events",t("events")],["settings",t("settings")]];
- const grants=(state.staffMembers||[]).filter(x=>/^leader-[0-9]+@accounts\\.allianceos\\.invalid$/i.test(x.email||""));
+ const grants=(state.staffMembers||[]).filter(x=>/^leader-[0-9]+@accounts\.allianceos\.invalid$/i.test(x.email||""));
  $("permissionTable").innerHTML='<div><strong>'+esc(t("permissions"))+'</strong><b>R4/R5</b></div>'+
    options.map(([feature,label])=>'<div><span>'+esc(label)+'</span><b>'+
      esc(state.staff.is_owner?(grants.filter(x=>x.enabled&&x.permissions?.[feature]).length+" / "+grants.length):(can(feature)?"✓":"—"))+
@@ -185,7 +185,7 @@ function renderSettings(){
  $("staffControls").hidden=!state.staff.is_owner;
  const members=(state.staffMembers||[]).filter(x=>x.email);
  const lookupName=email=>{
-    const m=/^leader-([0-9]+)@accounts\\.allianceos\\.invalid$/i.exec(email||"");
+    const m=/^leader-([0-9]+)@accounts\.allianceos\.invalid$/i.exec(email||"");
     const p=m&&state.players.find(x=>String(x.game_id)===m[1]);
     return p?String(p.name)+(p.rank?" · R"+p.rank:""):t("legacyAdmin");
  };
@@ -464,7 +464,7 @@ $("provisionLeaders").addEventListener("click",async()=>{
 });
 $("resetLeaderPassword").addEventListener("click",async()=>{
  if(!state?.staff?.is_owner)return;
- const value=$("staffAccountSelect").value,match=/^leader-([0-9]+)@accounts\\.allianceos\\.invalid$/i.exec(value);
+ const value=$("staffAccountSelect").value,match=/^leader-([0-9]+)@accounts\.allianceos\.invalid$/i.exec(value);
  if(!match){flash(t("noLeaderSelected"),true);return;}
  if(!window.confirm(t("resetConfirm")))return;
  const b=$("resetLeaderPassword");b.disabled=true;
