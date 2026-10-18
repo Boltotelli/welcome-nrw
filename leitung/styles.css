@@ -110,3 +110,11 @@
 .discord-presence.connected{background:#184b32;color:#bef4d4}
 .discord-presence.unlinked{background:#363941;color:#e0e3e8}
 .dossier-info .discord-presence{margin:5px 0}
+
+/* Country-flag images instead of Windows-dependent emoji glyphs. */
+.player-language{display:inline-flex;vertical-align:middle;align-items:center;min-height:18px;font-size:13px;line-height:1.2}
+.player-language img{display:block;width:24px;height:18px;object-fit:cover;border-radius:2px;box-shadow:0 0 0 1px rgba(255,255,255,.16)}
+.player-language abbr{font-size:11px;text-decoration:none;letter-spacing:.04em}
+#powerSyncStatus{min-height:1em;margin:7px 0 12px;overflow-wrap:anywhere}
+.rank-and-tg{display:inline-flex;align-items:baseline;gap:5px;white-space:nowrap}
+.rank-and-tg .level{font-size:12px;color:var(--muted)}
