@@ -41,8 +41,15 @@ function localized(raw: unknown, max = 10000) {
   return Object.fromEntries(langs.map(l => [l, str(obj[l], max)]).filter(([,v]) => v));
 }
 function permission(staff: any, feature: string) {
-  return staff?.rank === "R5" || (staff?.rank === "R4" && staff.permissions?.[feature] === true);
+  return staff?.is_owner===true || staff?.permissions?.[feature]===true;
 }
+const loginEmail=(id:string)=>"leader-"+id+"@accounts.allianceos.invalid";
+function temporaryPassword(){
+ const alphabet="ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%";
+ const bits=crypto.getRandomValues(new Uint32Array(22));
+ return Array.from(bits,n=>alphabet[n%alphabet.length]).join("");
+}
+
 function validateDate(value: unknown, nullable = true) {
   if (!value && nullable) return null;
   const input = str(value,40);
@@ -65,6 +72,15 @@ async function staffFor(req: Request, alliance: string) {
     .select("rank,permissions,enabled").eq("user_id",who.user.id)
     .eq("alliance_code",alliance).maybeSingle());
   if (!staff?.enabled || !["R4","R5"].includes(staff.rank)) throw new HttpError("not_authorized",403);
+  // Ownership is tied to a verified, pre-existing Auth identity, NEVER user metadata.
+  staff.is_owner=staff.rank==="R5"&&who.user.email?.toLowerCase()==="admin@nap-tracker.invalid";
+  const match=/^leader-([0-9]{5,20})@accounts\.allianceos\.invalid$/i.exec(who.user.email||"");
+  if(match){
+    const member=await checked<any>(db.from("players").select("alliance_rank,active")
+      .eq("alliance_code",alliance).eq("game_id",match[1]).maybeSingle());
+    if(!member?.active||![4,5].includes(Number(member.alliance_rank)))throw new HttpError("leader_no_longer_active",403);
+    staff.rank="R"+member.alliance_rank;
+  }
   return {userId: who.user.id, staff};
 }
 async function audit(alliance: string, user: string, entity: string, id: string, action: string) {
@@ -102,6 +118,72 @@ async function publicInfo(req: Request, alliance: string, mode: string) {
     .select("law_id,scope,number,title,body,version,published_at")
     .eq("alliance_code",alliance).eq("scope","kingdom").order("number",{ascending:true}).limit(100));
   return json(req,{laws});
+}
+async function publicLeaders(req:Request,alliance:string){
+ const leaders=await checked<any[]>(db.from("players")
+   .select("game_id,name,alliance_rank").eq("alliance_code",alliance)
+   .eq("active",true).in("alliance_rank",[4,5]).order("name",{ascending:true}).limit(50));
+ return json(req,{leaders:leaders.filter(x=>/^[0-9]{5,20}$/.test(x.game_id||""))
+   .map(x=>({game_id:x.game_id,name:x.name,rank:"R"+x.alliance_rank}))});
+}
+async function provisionLeaders(req:Request,alliance:string,userId:string,staff:any){
+ if(!staff.is_owner)throw new HttpError("permission_denied",403);
+ const leaders=await checked<any[]>(db.from("players")
+   .select("game_id,name,alliance_rank").eq("alliance_code",alliance)
+   .eq("active",true).in("alliance_rank",[4,5]).order("name",{ascending:true}).limit(50));
+ const previous=await checked<any[]>(db.from("aos_staff")
+   .select("user_id,rank").eq("alliance_code",alliance).limit(120));
+ const ids=new Set(previous.map(x=>x.user_id));
+ const created:any[]=[],skipped:any[]=[],errors:any[]=[];
+ for(const member of leaders){
+  const id=str(member.game_id,20);if(!/^[0-9]{5,20}$/.test(id))continue;
+  const email=loginEmail(id),rank="R"+member.alliance_rank;
+  // Do not reset an existing account or reveal its old password on repeated calls.
+  const {data:listed,error:lookupError}=await db.auth.admin.listUsers({page:1,perPage:1000});
+  if(lookupError){errors.push({name:member.name,reason:"auth_lookup_failed"});continue;}
+  const existing=listed?.users?.find((x:any)=>x.email?.toLowerCase()===email);
+  if(existing){
+    if(ids.has(existing.id))skipped.push({name:member.name,rank});
+    else errors.push({name:member.name,reason:"existing_unassigned_identity"});
+    continue;
+  }
+  const password=temporaryPassword();
+  const {data:made,error:authError}=await db.auth.admin.createUser({
+    email,password,email_confirm:true,app_metadata:{source:"allianceos_leadership_pilot"}
+  });
+  if(authError||!made?.user){errors.push({name:member.name,reason:"account_creation_failed"});continue;}
+  const assigned=await db.from("aos_staff").insert({
+    user_id:made.user.id,alliance_code:alliance,rank,
+    enabled:true,permissions:{members:false,transfers:false,laws:false,events:false,settings:false}
+  }).select("user_id").single();
+  if(assigned.error){
+    await db.auth.admin.deleteUser(made.user.id).catch(()=>{});
+    errors.push({name:member.name,reason:"staff_assignment_failed"});
+    continue;
+  }
+  ids.add(made.user.id);
+  created.push({game_id:id,name:member.name,rank,password});
+  await audit(alliance,userId,"leader_account",made.user.id,"provision");
+ }
+ // Initial credentials appear in this single authenticated POST response only.
+ // No temporary passwords are stored in SQL, logs, audit or frontend storage.
+ return json(req,{ok:true,created,skipped,errors});
+}
+async function rotateLeaderPassword(req:Request,alliance:string,userId:string,staff:any,body:any){
+ if(!staff.is_owner)throw new HttpError("permission_denied",403);
+ const id=str(body.game_id,20);if(!/^[0-9]{5,20}$/.test(id))throw new HttpError("invalid_player_id",400);
+ const leaders=await checked<any>(db.from("players").select("alliance_rank,active")
+   .eq("alliance_code",alliance).eq("game_id",id).maybeSingle());
+ if(!leaders?.active||![4,5].includes(Number(leaders.alliance_rank)))throw new HttpError("leader_not_active",403);
+ const {data:list,error:err}=await db.auth.admin.listUsers({page:1,perPage:1000});
+ if(err)throw new HttpError("auth_lookup_failed",500);
+ const existing=list?.users?.find((x:any)=>x.email?.toLowerCase()===loginEmail(id));
+ if(!existing)throw new HttpError("leader_account_missing",404);
+ const password=temporaryPassword();
+ const {error:changed}=await db.auth.admin.updateUserById(existing.id,{password});
+ if(changed)throw new HttpError("password_reset_failed",500);
+ await audit(alliance,userId,"leader_account",existing.id,"reset_password");
+ return json(req,{ok:true,password});
 }
 async function rosterFor(alliance: string, kingdom: number) {
   // Read-only reuse of NAP's cached records. No NAP table or law is modified.
@@ -178,10 +260,10 @@ async function bootstrap(req: Request, alliance: string, staff: any) {
     checked<any[]>(db.from("aos_event_day_templates").select("*").eq("alliance_code",alliance).limit(300)),
     checked<any[]>(db.from("aos_transfer_windows").select("*").eq("alliance_code",alliance).order("start_date",{ascending:false}).limit(150)),
     permission(staff,"laws")?checked<any[]>(db.from("aos_law_versions").select("law_id,version,snapshot,changed_at,changed_by").eq("alliance_code",alliance).order("changed_at",{ascending:false}).limit(250)):Promise.resolve([]),
-    staff.rank==="R5"?checked<any[]>(db.from("aos_audit").select("entity,entity_id,action,actor_id,created_at").eq("alliance_code",alliance).order("created_at",{ascending:false}).limit(60)):Promise.resolve([])
+    staff.is_owner?checked<any[]>(db.from("aos_audit").select("entity,entity_id,action,actor_id,created_at").eq("alliance_code",alliance).order("created_at",{ascending:false}).limit(60)):Promise.resolve([])
   ]);
   let staffMembers:any[]=[];
-  if(staff.rank==="R5"){
+  if(staff.is_owner){
     const assigned=await checked<any[]>(db.from("aos_staff")
       .select("user_id,rank,permissions,enabled").eq("alliance_code",alliance).limit(100));
     staffMembers=await Promise.all(assigned.map(async (entry:any)=>{
@@ -200,7 +282,7 @@ async function bootstrap(req: Request, alliance: string, staff: any) {
         label:error?"":(data?.user?.email||"")};
     }));
   }
-  return json(req,{alliance:config,staff:{rank:staff.rank,permissions:staff.permissions},staffMembers,transferContacts,
+  return json(req,{alliance:config,staff:{rank:staff.rank,permissions:staff.permissions,is_owner:staff.is_owner},staffMembers,transferContacts,
     players:permission(staff,"members")?players:[],transfers:permission(staff,"transfers")?transfers:[],
     internalMoves:permission(staff,"transfers")?internalMoves:[],
     laws:permission(staff,"laws")?laws:[],events:permission(staff,"events")?events:[],
@@ -305,7 +387,7 @@ async function restoreLawDraft(req:Request,alliance:string,userId:string,staff:a
  return json(req,{ok:true,item:restored});
 }
 async function inviteR4(req:Request,alliance:string,userId:string,staff:any,payload:any){
-  if(staff.rank!=="R5")throw new HttpError("permission_denied",403);
+  if(!staff.is_owner)throw new HttpError("permission_denied",403);
   const email=str(payload.email,255).toLowerCase();
   if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))throw new HttpError("invalid_email",400);
   const {data:list,error:listError}=await db.auth.admin.listUsers({page:1,perPage:1000});
@@ -323,7 +405,7 @@ async function inviteR4(req:Request,alliance:string,userId:string,staff:any,payl
   return json(req,{ok:true,item:{...item,email},invitation_sent:true});
 }
 async function saveStaff(req:Request,alliance:string,userId:string,staff:any,payload:any){
-  if(staff.rank!=="R5")throw new HttpError("permission_denied",403);
+  if(!staff.is_owner)throw new HttpError("permission_denied",403);
   const email=str(payload.email,255).toLowerCase(),enabled=payload.enabled!==false;
   if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))throw new HttpError("invalid_email",400);
   const {data,error}=await db.auth.admin.listUsers({page:1,perPage:1000});
@@ -333,12 +415,21 @@ async function saveStaff(req:Request,alliance:string,userId:string,staff:any,pay
   if(user.id===userId)throw new HttpError("cannot_edit_self",403);
   const existing=await checked<any>(db.from("aos_staff").select("rank")
     .eq("user_id",user.id).eq("alliance_code",alliance).maybeSingle());
-  if(existing?.rank==="R5")throw new HttpError("cannot_demote_r5",403);
+  if(user.email?.toLowerCase()==="admin@nap-tracker.invalid")throw new HttpError("cannot_edit_owner",403);
+  if(existing?.rank==="R5"&&!/^leader-[0-9]{5,20}@accounts\.allianceos\.invalid$/i.test(email))throw new HttpError("cannot_edit_legacy_r5",403);
+  let rank="R4";
+  const match=/^leader-([0-9]{5,20})@accounts\.allianceos\.invalid$/i.exec(email);
+  if(match){
+    const member=await checked<any>(db.from("players").select("alliance_rank,active")
+      .eq("alliance_code",alliance).eq("game_id",match[1]).maybeSingle());
+    if(!member?.active||![4,5].includes(Number(member.alliance_rank)))throw new HttpError("leader_not_active",403);
+    rank="R"+member.alliance_rank;
+  }
   const incoming=payload.permissions||{};
   const granted=Object.fromEntries(["members","transfers","laws","events","settings"]
     .map(feature=>[feature,incoming[feature]===true]));
   const item=await checked<any>(db.from("aos_staff").upsert({
-    user_id:user.id,alliance_code:alliance,rank:"R4",
+    user_id:user.id,alliance_code:alliance,rank,
     enabled,permissions:granted
   },{onConflict:"user_id,alliance_code"}).select("user_id,rank,enabled,permissions").single());
   await audit(alliance,userId,"staff",user.id,existing?"update_r4":"grant_r4");
@@ -597,11 +688,14 @@ Deno.serve(async(req: Request)=>{
     if(!/^[A-Za-z0-9_-]{2,16}$/.test(alliance))throw new HttpError("invalid_alliance",400);
     if(req.method==="GET"&&["public-events","public-laws","public-guidance","public-schedule"].includes(u.searchParams.get("mode")||""))
       return await publicInfo(req,alliance,u.searchParams.get("mode")||"");
+    if(req.method==="GET"&&u.searchParams.get("mode")==="public-leaders")return await publicLeaders(req,alliance);
     const {userId,staff}=await staffFor(req,alliance);
     if(req.method==="GET")return await bootstrap(req,alliance,staff);
     if(Number(req.headers.get("content-length")||"0")>200000)throw new HttpError("payload_too_large",413);
     const body=await req.json().catch(()=>{throw new HttpError("invalid_json",400)});
     if(body?.action==="staff")return await saveStaff(req,alliance,userId,staff,body);
+    if(body?.action==="provision_leaders")return await provisionLeaders(req,alliance,userId,staff);
+    if(body?.action==="reset_leader_password")return await rotateLeaderPassword(req,alliance,userId,staff,body);
     if(body?.action==="player_lookup")return await lookupTransferPlayer(req,alliance,staff,body);
     if(body?.action==="staff_invite")return await inviteR4(req,alliance,userId,staff,body);
     if(body?.action==="transfer_window")return await saveTransferWindow(req,alliance,userId,staff,body);
