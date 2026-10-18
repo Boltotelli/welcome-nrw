@@ -135,7 +135,12 @@ function renderRoster(){
  }).join(""):empty(t("noPlayers"));
 }
 function renderTransfers(){
- const kind=$("transferFilter").value,list=state.transfers.filter(x=>kind==="all"||x.direction===kind);
+ const filterEl=$("transferWindowFilter");
+ const phase=filterEl.value||"all";
+ filterEl.innerHTML='<option value="all">'+esc(t("allWindows"))+'</option>'+
+   (state.transferWindows||[]).map(w=>'<option value="'+esc(w.id)+'">'+esc(w.label)+'</option>').join("");
+ filterEl.value=phase==="all"||(state.transferWindows||[]).some(w=>w.id===phase)?phase:"all";
+ const kind=$("transferFilter").value,list=state.transfers.filter(x=>(kind==="all"||x.direction===kind)&&(filterEl.value==="all"||x.transfer_window_id===filterEl.value));
  $("transferCount").textContent=fmtInt(list.length);
  $("transferRows").innerHTML=list.length?list.map(x=>{
   const destination=["#"+(x.target_kingdom||state.alliance.kingdom_id),x.target_alliance||""].filter(Boolean).join(" · ");
@@ -199,6 +204,8 @@ function openEdit(entity,id=null,sourcePlayer=null){
      select(t("status"),"status",s.status,[["interested",t("interested")],["shortlisted",t("shortlisted")],["invited",t("invited")],["confirmed",t("confirmed")],["waitlist",t("waitlist")],["completed",t("completed")],["cancelled",t("cancelled")]])+
      control(t("originKingdom"),"origin_kingdom",s.origin_kingdom||"","number",{min:1,max:99999})+
       control(t("targetKingdom"),"target_kingdom",s.target_kingdom||(s.direction==="incoming"?state.alliance.kingdom_id:""),"number",{min:1,max:99999})+
+     select(t("transferWindow"),"transfer_window_id",s.transfer_window_id||"",[["",t("unassignedWindow")],...(state.transferWindows||[]).map(w=>[w.id,w.label+" · "+w.start_date+" – "+w.end_date])])+
+     select(t("invitationStatus"),"invitation_status",s.invitation_status||"not_sent",[["not_sent",t("inviteNotSent")],["sent",t("inviteSent")],["accepted",t("inviteAccepted")],["declined",t("inviteDeclined")]])+
      control(t("previousAlliance"),"previous_alliance",s.previous_alliance||"")+
      control(t("targetAlliance"),"target_alliance",s.target_alliance||"NRW")+
      control(t("power"),"power",s.power||"","number",{min:0})+
@@ -275,7 +282,10 @@ async function saveDialog(event){
      data.reminder_minutes=String(fd.get("reminder_minutes")||"").split(",").map(s=>Number(s.trim())).filter(Number.isInteger);
    }
  }
- if(entity==="transfer")data.share_approved=fd.has("share_approved");
+ if(entity==="transfer"){
+    data.share_approved=fd.has("share_approved");
+    data.confirm_arrival=fd.has("confirm_arrival");
+  }
  if(entity==="member"){
     data.game_id=record.game_id;
     const other=String(fd.get("other_spoken")||"").split(/[,;]/).map(v=>v.trim()).filter(Boolean);
@@ -296,6 +306,7 @@ $("rosterSearch").addEventListener("input",()=>state&&renderRoster());
 $("rosterStatus").addEventListener("change",()=>state&&renderRoster());
 $("rosterSort").addEventListener("change",()=>state&&renderRoster());
 $("transferFilter").addEventListener("change",()=>state&&renderTransfers());
+$("transferWindowFilter").addEventListener("change",()=>state&&renderTransfers());
 q("[data-create]").forEach(el=>el.addEventListener("click",()=>openEdit(el.dataset.create)));
 document.addEventListener("click",e=>{
   const plan=e.target.closest("[data-plan-player]");if(plan){const p=state.players.find(x=>x.game_id===plan.dataset.planPlayer);if(p){$("editDialog").close();openEdit("transfer",null,p);}return;}
