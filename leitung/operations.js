@@ -9,6 +9,16 @@ export function createOperations({getState,request,flash,esc,t,can,refresh}){
      statuses.has(x.status)&&x.invitation_type===kind).length;
  }
  let providerPhases=null,providerProblem="",phaseLoading=null;
+ let portraitsChecked=false;
+ async function hydratePortraits(){
+   if(portraitsChecked||!can("transfers"))return;
+   portraitsChecked=true;
+   try{
+     const r=await request("bootstrap",{action:"transfer_portraits"});
+     if(r?.filled>0)await refresh();
+   }catch{/* no externally confirmed image: retain neutral avatar instead */}
+ }
+
  const phaseNames={1:"transferPre",2:"transferInvite",3:"transferOpen"};
  function paintPhases(){
   const el=$("apiTransferPhases"),status=$("apiTransferStatus");
@@ -154,5 +164,5 @@ export function createOperations({getState,request,flash,esc,t,can,refresh}){
    });
  }
  attach();
- return {render(){windows();renderAudit();paintPhases();if(providerPhases===null&&!phaseLoading&&can("transfers"))loadPhases(false);},loadPhases};
+ return {render(){windows();renderAudit();paintPhases();if(providerPhases===null&&!phaseLoading&&can("transfers"))loadPhases(false);if(!portraitsChecked&&can("transfers"))hydratePortraits();},loadPhases};
 }
