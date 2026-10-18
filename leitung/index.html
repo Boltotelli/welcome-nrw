@@ -6,7 +6,7 @@
 <title>AllianceOS · NRW Leitungszentrale</title>
 <meta name="description" content="Geschützte Leitungszentrale für Allianzverwaltung, Transfers, Laws und Events.">
 <link rel="icon" href="../assets/nrw-dashboard-icon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="./styles.css?v=pages-1">
+<link rel="stylesheet" href="./styles.css?v=pages-3">
 
 </head>
 <body>
@@ -19,7 +19,7 @@
       <button class="nav-item active" data-tab="overview"><i>▦</i><span data-i18n="overview">Übersicht</span></button>
       <button class="nav-item" data-tab="roster"><i>♙</i><span data-i18n="roster">Spielerverwaltung</span></button>
       <button class="nav-item" data-tab="transfers"><i>⇄</i><span data-i18n="transfers">Transferplanung</span></button>
-      <button class="nav-item" data-tab="languages"><i>◈</i><span data-i18n="languages">Sprachen</span></button>
+
       <button class="nav-item" data-tab="laws"><i>⚖</i><span data-i18n="laws">Laws-Verwaltung</span></button>
       <button class="nav-item" data-tab="events"><i>▣</i><span data-i18n="events">Eventplanung</span></button>
       <button class="nav-item" data-tab="settings"><i>⚙</i><span data-i18n="settings">Allianz &amp; Rechte</span></button>
@@ -93,19 +93,10 @@
             <div class="table-scroll"><table><thead><tr><th data-i18n="from">Datum</th><th data-i18n="player">Spieler</th><th data-i18n="origin">Von</th><th></th><th data-i18n="destination">Nach</th></tr></thead><tbody id="internalMoveRows"></tbody></table></div>
           </div>
         </section>
-        <section class="tab-page" data-page="languages" hidden>
-          <div class="page-heading"><div><span class="eyebrow">LANGUAGE CENTER</span><h2 data-i18n="languages">Sprachen</h2><p data-i18n="languagesDesc">Gemeinsame Spracheinstellungen für Willkommen, Leitungsseite und zukünftige Bots.</p></div></div>
-          <div class="two-col"><div class="card"><h3 data-i18n="supportedLanguages">Unterstützte Sprachen</h3><p class="muted" data-i18n="languageAccess">Änderungen an Spracheinstellungen sind für R5 und berechtigte R4 möglich.</p>
-            <div class="check-grid" id="activeLanguages"><label><input type="checkbox" value="de"> Deutsch</label><label><input type="checkbox" value="en"> English</label><label><input type="checkbox" value="fr"> Français</label><label><input type="checkbox" value="es"> Español</label></div>
-            <label class="field"><span data-i18n="defaultLang">Standardsprache</span><select id="defaultLanguage" class="control"><option value="de">Deutsch</option><option value="en">English</option><option value="fr">Français</option><option value="es">Español</option></select></label>
-            <button class="primary" id="saveLanguages" data-permission="settings" data-i18n="save">Speichern</button></div>
-            <div class="card"><h3 data-i18n="spokenSeparateTitle">Spielersprachen sind eigene Daten</h3><p data-i18n="spokenSeparateText">Welche Sprachen ein Spieler spricht, wird ausschließlich in seiner Spielerakte gepflegt. Hier legst du nur die Standardsprache und verfügbaren Seitensprachen fest.</p><button type="button" class="ghost" data-jump="roster" data-i18n="toDossiers">→ Spielerakten öffnen</button><p class="notice-inline" data-i18n="pageLanguageNote">Die Spracheinstellung wird gespeichert. Die bestehende öffentliche Sprachwahl bleibt bis zur zentralen Verknüpfung unverändert.</p></div>
-          </div>
-        </section>
         <section class="tab-page" data-page="laws" hidden>
-          <div class="page-heading"><div><span class="eyebrow">LAW STUDIO</span><h2 data-i18n="laws">Laws-Verwaltung</h2><p data-i18n="lawsDesc">Entwürfe und veröffentlichte Fassungen mit Versionen; getrennt nach Königreich und Allianz.</p></div><button class="primary" data-create="law" data-permission="laws" data-i18n="addLaw">+ Neue Regel</button></div>
-          <div class="notice"><b data-i18n="publicRuleNoticeTitle">Veröffentlichungshinweis</b><p data-i18n="publicRuleNotice">Hier erstellte Laws gelten als AllianceOS-Fassung. Bestehende NAP-Gesetze werden nicht überschrieben. Königreichsgesetze erfordern eine gesonderte gemeinsame Freigabe.</p></div>
-          <div class="notice-inline" data-i18n="lawsLiveInfo">Nur Allianzregeln dürfen hier veröffentlicht werden. Veröffentlichte Fassungen erscheinen bereits auf unserer Laws-Seite.</div>
+          <div class="page-heading"><div><span class="eyebrow">LAW STUDIO</span><h2 data-i18n="laws">Laws-Verwaltung</h2><p data-i18n="lawsDesc">Hier eingegebene und veröffentlichte Servergesetze werden auf der Laws-Seite angezeigt.</p></div><button class="primary" data-create="law" data-permission="laws" data-i18n="addLaw">+ Neue Regel</button></div>
+          <div class="notice"><b data-i18n="publicRuleNoticeTitle">Veröffentlichungshinweis</b><p data-i18n="publicRuleNotice">Nur hier ausdrücklich veröffentlichte Server-Laws erscheinen auf der Laws-Seite. Entwürfe bleiben intern. Der NAP-Tracker wird nicht geändert.</p></div>
+          <div class="notice-inline" data-i18n="lawsLiveInfo">Die öffentliche Laws-Seite zeigt ausschließlich deine hier veröffentlichten Server-Laws.</div>
           <p><a href="../laws.html" target="_blank" rel="noopener" class="ghost" data-i18n="viewPublicLaws">↗ Öffentliche Laws-Seite ansehen</a></p>
           <div id="lawList" class="stack"></div>
         </section>
@@ -127,7 +118,11 @@
               <label class="field"><span data-i18n="capacity">Maximale Mitglieder</span><input class="control" name="capacity" type="number" min="1" max="500"></label>
               <label class="field"><span data-i18n="logoUrl">Logo-URL (optional)</span><input class="control" name="logo_url" type="url" maxlength="400"></label>
               <label class="field"><span data-i18n="discordGuild">Discord Server-ID</span><input class="control" name="discord_guild_id" maxlength="40"></label>
-              <input type="checkbox" name="advertising_enabled" hidden disabled>
+              <div class="settings-languages"><h3 data-i18n="pageLanguageSettings">Seitensprachen</h3>
+<label class="field"><span data-i18n="defaultLang">Standardsprache</span><select id="defaultLanguage" class="control">
+<option value="de">Deutsch</option><option value="en">English</option><option value="fr">Français</option><option value="es">Español</option></select></label>
+<p class="muted" data-i18n="availableSiteLanguages">Verfügbare Seitensprachen</p>
+<div class="check-grid" id="activeLanguages"><label><input type="checkbox" value="de"> Deutsch</label><label><input type="checkbox" value="en"> English</label><label><input type="checkbox" value="fr"> Français</label><label><input type="checkbox" value="es"> Español</label></div></div><input type="checkbox" name="advertising_enabled" hidden disabled>
               <button class="primary" data-permission="settings" data-i18n="save">Speichern</button>
             </form><div class="card"><h3 data-i18n="permissions">Berechtigungen</h3><div class="permission-matrix" id="permissionTable"></div>
               <div id="staffControls" hidden>
@@ -251,5 +246,5 @@
   <div class="modal-actions"><button type="button" class="ghost" id="pwCancel" data-i18n="cancel">Abbrechen</button><button type="submit" class="primary" data-i18n="savePassword">Neues Passwort speichern</button></div>
 </form></dialog>
 <script src="../dashboard/event-rhythm.js?v=pages-1"></script>
-<script type="module" src="./app.js?v=pages-1"></script>
+<script type="module" src="./app.js?v=pages-3"></script>
 </body></html>

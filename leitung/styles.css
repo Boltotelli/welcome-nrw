@@ -93,3 +93,12 @@
 .ops-audit-entry:first-child{margin-top:10px}.ops-audit-entry span{color:var(--muted);overflow-wrap:anywhere}
 #transferWindowDialog .modal-body textarea{width:100%;min-height:96px}
 @media(max-width:560px){.ops-window{align-items:flex-start;flex-direction:column}.ops-audit-entry{flex-direction:column}}
+
+/* Site languages live inside alliance settings; portraits displayed in dossier. */
+.settings-languages{margin:12px 0;padding:14px;border:1px solid var(--border);border-radius:12px;background:var(--panel)}
+.settings-languages h3{margin:0 0 8px}.settings-languages .muted{font-size:13px}
+.dossier-avatar{width:82px;height:82px;object-fit:cover;aspect-ratio:1;border-radius:18px;background:var(--panel);border:2px solid var(--accent)}
+.dossier-avatar-initial{display:grid;place-items:center;font-weight:800;font-size:30px}
+.transfer-profile-preview{display:flex;gap:14px;align-items:center;margin:10px 0;padding:14px;border:1px solid var(--border);border-radius:12px;background:var(--panel)}
+.transfer-profile-preview img{width:70px;height:70px;border-radius:12px;object-fit:cover}
+.transfer-profile-preview small{display:block;color:var(--muted)}
