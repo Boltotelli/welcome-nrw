@@ -254,6 +254,24 @@ async function restoreLawDraft(req:Request,alliance:string,userId:string,staff:a
  await audit(alliance,userId,"law",id,"restore_draft_v"+version);
  return json(req,{ok:true,item:restored});
 }
+async function inviteR4(req:Request,alliance:string,userId:string,staff:any,payload:any){
+  if(staff.rank!=="R5")throw new HttpError("permission_denied",403);
+  const email=str(payload.email,255).toLowerCase();
+  if(!/^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$/.test(email))throw new HttpError("invalid_email",400);
+  const {data:list,error:listError}=await db.auth.admin.listUsers({page:1,perPage:1000});
+  if(listError)throw new HttpError("user_lookup_failed",500);
+  if(list?.users?.some((u:any)=>u.email?.toLowerCase()===email))throw new HttpError("account_exists_assign_access",409);
+  const perms=payload.permissions||{};
+  const permissions=Object.fromEntries(["members","transfers","laws","events","settings"].map(x=>[x,perms[x]===true]));
+  if(!Object.values(permissions).some(Boolean))throw new HttpError("no_permissions_selected",400);
+  const {data,error}=await db.auth.admin.inviteUserByEmail(email,{redirectTo:"https://welcome-nrw.vercel.app/leitung/"});
+  if(error||!data?.user){console.error("R4 invitation",error?.code);throw new HttpError("invitation_failed",502);}
+  const item=await checked<any>(db.from("aos_staff").upsert({
+    user_id:data.user.id,alliance_code:alliance,rank:"R4",enabled:true,permissions
+  },{onConflict:"user_id,alliance_code"}).select("user_id,rank,enabled,permissions").single());
+  await audit(alliance,userId,"staff",data.user.id,"invite_r4");
+  return json(req,{ok:true,item:{...item,email},invitation_sent:true});
+}
 async function saveStaff(req:Request,alliance:string,userId:string,staff:any,payload:any){
   if(staff.rank!=="R5")throw new HttpError("permission_denied",403);
   const email=str(payload.email,255).toLowerCase(),enabled=payload.enabled!==false;
@@ -522,6 +540,7 @@ Deno.serve(async(req: Request)=>{
     if(Number(req.headers.get("content-length")||"0")>200000)throw new HttpError("payload_too_large",413);
     const body=await req.json().catch(()=>{throw new HttpError("invalid_json",400)});
     if(body?.action==="staff")return await saveStaff(req,alliance,userId,staff,body);
+    if(body?.action==="staff_invite")return await inviteR4(req,alliance,userId,staff,body);
     if(body?.action==="transfer_window")return await saveTransferWindow(req,alliance,userId,staff,body);
     if(body?.action==="law_history")return await getLawHistory(req,alliance,staff,str(body.id,36));
     if(body?.action==="law_restore")return await restoreLawDraft(req,alliance,userId,staff,body);
