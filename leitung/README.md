@@ -155,3 +155,13 @@ User-required mental model: **one Event type -> editable recurrence -> one edito
 ### Deployment limitation encountered in this pass
 
 Supabase Edge Function `allianceos-leitung` v15 was deployed ACTIVE and migration DDL validated. GitHub `main` has all frontend changes, and the new R4 invite-account password setup is included. **Vercel refused a fresh production deployment with HTTP 402, `api-deployments-free-per-day` (over 100 deployments in the daily free quota); the last confirmed READY deployment did not yet include this whole pass.** An explicit production deploy attempt using GitHub `main` returned that limit. Container fallback has Git but not an authenticated Vercel CLI / checkout. Do not claim these new UI features are live on the Vercel domain until the current commit deploys and is verified; keep this deployment caveat in handoff. The backend will accept prior clients throughout the delayed frontend release.
+
+## Update 2026-10-18 · Manual server Laws, site language, player portraits, recruitment contacts
+
+- The public Laws page now displays ONLY explicitly published kingdom-scope AllianceOS rules. Hardcoded legacy Laws content was removed from laws.js, never copied into the new editor. With no newly published Laws, the public page shows an honest empty state. No NAP Tracker law data is modified.
+- The top-level Sprachen tab is removed. Site language configuration is in Allianz & Rechte, whereas spoken-player languages remain in player dossiers.
+- NRW dossiers show cached player portraits (66 out of 66 currently cached active NRW players have a portrait URL), with a neutral fallback when absent.
+- The Transfer editor has a permissioned, on-demand provider lookup for arbitrary Game IDs across kingdoms. The MightPulse integration runs server-side with an existing Supabase secret. Only fetched data are shown; the user must explicitly request lookup. No production NAP cache is overwritten.
+- An optional transfer contact is assigned from the currently enabled R4/R5 staff in NRW. The backend verifies the contact is enabled and belongs to the same alliance. The candidate list shows the chosen contact.
+- Site publish route is GitHub Pages via the existing Bear Pages Action, NOT Vercel. Supabase Edge Function version 17 is active.
+- Authenticated R5 manual save/reload test and a live external-provider lookup test are still outstanding. Do not claim that they have passed.
