@@ -181,9 +181,16 @@ export function createEventHub({request,flash,esc,t}) {
       return '<div class="event-phase-row"><span>'+esc(t("phaseN").replace("{n}",i+1))+'</span><small>'+esc(note.slice(0,130)||t("phaseEmpty"))+'</small>'+
         '<button type="button" class="ghost" data-library-key="'+esc(g.key)+'" data-phase="'+(i+1)+'">'+esc(t("edit"))+'</button></div>';
     }).join("");
-   const updated=cycle&&cycle.enabled!==false?nextOccurrence(cycle):null;
+   const today=dayKey(new Date());
+   // If no custom cycle is saved, use the existing NRW calendar instead of listing old occurrences.
+   const futureDates=g.instances
+     .map(x=>x.record?.start)
+     .filter(d=>typeof d==="string"&&/^\d{4}-\d{2}-\d{2}$/.test(d)&&d>=today)
+     .sort();
+   const upcoming=cycle&&cycle.enabled!==false?nextOccurrence(cycle):futureDates[0]||null;
+   const difference=upcoming?Math.round((Date.parse(upcoming+"T00:00:00Z")-Date.parse(today+"T00:00:00Z"))/86400000):null;
    const badge=cycle?recurring:t("noCycle");
-   const desc=updated?t("nextOccurrence")+": "+formatDate(updated):g.instances.length+" "+t("existingSources");
+   const desc=difference===null?t("nextUnknown"):difference===0?t("nextToday"):difference===1?t("nextTomorrow"):t("nextInDays").replace("{n}",difference);
    return '<details class="event-group"><summary><span class="event-group-title"><b>'+esc(groupName(g))+'</b>'+
       '<small>'+esc(badge)+' · '+esc(desc)+'</small></span><span class="event-group-count">'+esc(t("daysCount").replace("{n}",phases))+'</span></summary>'+
       '<div class="event-group-body"><div class="event-group-actions"><span>'+esc(t("cycleInfo"))+'</span><button type="button" class="ghost" data-library-key="'+esc(g.key)+'" data-phase="1">'+esc(t("cycleSettings"))+'</button>'+((g.instances.find(x=>x.source==="custom")?.record?.id&&canEdit)?'<button class="ghost" type="button" data-edit="event" data-id="'+esc(g.instances.find(x=>x.source==="custom").record.id)+'">'+esc(t("edit"))+'</button>':"")+'</div>'+days+'</div></details>';
