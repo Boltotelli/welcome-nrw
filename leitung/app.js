@@ -54,7 +54,8 @@ const opsUI={
  es:{changePassword:"Cambiar contraseña",passwordSetupHint:"Los nuevos R4 pueden definir su contraseña tras aceptar la invitación.",newPassword:"Nueva contraseña (mínimo 10 caracteres)",repeatPassword:"Repetir",savePassword:"Guardar",passwordMismatch:"Contraseñas distintas o muy cortas.",passwordSaved:"Contraseña actualizada.",transferWindowsTitle:"Fases de transferencia entre reinos",transferWindowsInfo:"Gestionar fechas, invitaciones y plazas.",newTransferWindow:"+ Fase",editTransferWindow:"Editar fase",windowLabel:"Nombre",startDate:"Inicio",endDate:"Fin",ordinarySlots:"Invitaciones normales",specialSlots:"Invitaciones especiales",phaseStatusLabel:"Fase",phase_planning:"Planificación",phase_open:"Abierto",phase_closed:"Cerrado",openPhase:"Abierto",closedPhase:"Cerrado",planning:"Planificación",unknownSlotsInfo:"Campo vacío = capacidad desconocida.",noTransferWindows:"No hay fases aún.",transferWindow:"Fase",unassignedWindow:"Sin asignar",allWindows:"Todas las fases",invitationStatus:"Estado de invitación",inviteNotSent:"No enviada",inviteSent:"Enviada",inviteAccepted:"Aceptada",inviteDeclined:"Rechazada",confirmObservedArrival:"Confirmar llegada (miembro activo NRW)",lawsLiveInfo:"Normas publicadas aparecen en Laws. Leyes del reino protegidas.",viewPublicLaws:"↗ Normas públicas",lawHistory:"Historial de versiones",restoreAsDraft:"Restaurar como borrador",restoreConfirm:"¿Restaurar esta versión como nuevo borrador?",noVersions:"Sin versiones",loading:"Cargando …",r4AccessInfo:"R4 solo accede a los módulos permitidos.",accessAudit:"Últimos cambios",noAudit:"Sin cambios.",inviteR4:"✉ Invitar nuevo R4",inviteConfirm:"¿Enviar invitación R4 a {email}?",invitedUser:"Se solicitó invitación R4.",missingStaffData:"Introduce correo y al menos un permiso."}
 };
 const latestModuleCopy={"de":{"serverLawsIntro":"Nur hier veröffentlichte Server-Laws werden auf der Laws-Seite gezeigt.","serverLawNotice":"Nur ausdrücklich veröffentlichte Servergesetze sind öffentlich. Entwürfe bleiben intern; der NAP-Tracker wird nicht verändert.","serverLawsOnly":"Die öffentliche Laws-Seite zeigt ausschließlich hier veröffentlichte Server-Laws.","pageLanguageSettings":"Seitensprachen","availableSiteLanguages":"Verfügbare Seitensprachen","contactOwner":"Kontaktperson aus NRW (R4/R5)","noneAssigned":"Noch keine Kontaktperson","lookupPlayer":"🔎 Spieler-ID über API abrufen","lookupPending":"Spielerdaten werden abgerufen …","lookupFailed":"Spielerabruf fehlgeschlagen","lookupFilled":"Spielerdaten übernommen · Quelle MightPulse","providerNoPlayer":"Spielerprofil nicht gefunden","providerSource":"Live-API · geprüft","photoUnavailable":"Spielerbild nicht verfügbar"},"en":{"serverLawsIntro":"Only the server laws published here appear on the Laws page.","serverLawNotice":"Only published server laws are public. Drafts stay private; the NAP tracker is unchanged.","serverLawsOnly":"The public Laws page shows only server laws published here.","pageLanguageSettings":"Site languages","availableSiteLanguages":"Available site languages","contactOwner":"NRW contact (R4/R5)","noneAssigned":"No assigned contact","lookupPlayer":"🔎 Look up player ID via API","lookupPending":"Loading player profile …","lookupFailed":"Player lookup failed","lookupFilled":"Profile retrieved · MightPulse","providerNoPlayer":"Player not found","providerSource":"Live API","photoUnavailable":"Player picture unavailable"},"fr":{"serverLawsIntro":"Seules les lois du serveur publiées ici apparaissent sur la page Laws.","serverLawNotice":"Seules les lois publiées sont publiques. Les brouillons restent privés et le NAP Tracker reste inchangé.","serverLawsOnly":"La page affiche uniquement les lois du serveur publiées ici.","pageLanguageSettings":"Langues du site","availableSiteLanguages":"Langues disponibles","contactOwner":"Responsable NRW (R4/R5)","noneAssigned":"Aucun responsable","lookupPlayer":"🔎 Rechercher l'ID via API","lookupPending":"Chargement du profil …","lookupFailed":"Échec de la recherche","lookupFilled":"Profil trouvé · MightPulse","providerNoPlayer":"Profil introuvable","providerSource":"API en direct","photoUnavailable":"Photo indisponible"},"es":{"serverLawsIntro":"Solo las leyes del servidor publicadas aquí aparecen en Laws.","serverLawNotice":"Solo las leyes publicadas son públicas. Los borradores son privados y el NAP Tracker no cambia.","serverLawsOnly":"Solo se muestran las leyes del servidor publicadas aquí.","pageLanguageSettings":"Idiomas del sitio","availableSiteLanguages":"Idiomas disponibles","contactOwner":"Responsable NRW (R4/R5)","noneAssigned":"Sin responsable","lookupPlayer":"🔎 Buscar ID por API","lookupPending":"Consultando perfil …","lookupFailed":"Error de búsqueda","lookupFilled":"Perfil consultado · MightPulse","providerNoPlayer":"Perfil no encontrado","providerSource":"API en directo","photoUnavailable":"Imagen no disponible"}};
-const t=k=>latestModuleCopy[lang]?.[k]||opsUI[lang]?.[k]||groupUI[lang]?.[k]||eventLabels[lang]?.[k]||phase1Labels[lang]?.[k]||staffExtra[lang]?.[k]||copy[lang]?.[k]||latestModuleCopy.de[k]||opsUI.de[k]||groupUI.de[k]||eventLabels.de[k]||phase1Labels.de[k]||staffExtra.de[k]||copy.de[k]||k;
+const leaderUiCopy={"de":{"chooseLeader":"Spielernamen auswählen","loadingLeaders":"R4/R5 werden geladen …","legacyEmail":"Bestehender Admin-Zugang (E-Mail)","legacySignIn":"Bestehenden Admin-Zugang verwenden","normalSignIn":"Mit Spielernamen anmelden","staffUser":"R4/R5-Spieler","provisionLeaders":"Alle R4/R5-Konten erstellen","resetLeaderPassword":"Passwort für ausgewählten Spieler neu erstellen","credentialsNote":"Die Passwörter werden nur einmal angezeigt. Bei Verlust ein neues Passwort ausstellen.","credentialTitle":"Einmalige Zugangsdaten","credentialsWarning":"Nur jetzt sichtbar. Bitte vertraulich behandeln und nicht öffentlich teilen.","copyCredentials":"Zugangsdaten kopieren","closeCredentials":"Schließen & Anzeige löschen","leaderUnprovisioned":"Dieser Spieler hat noch keinen Zugang. Bitte von der Leitung einrichten lassen.","leaderAccountsCreated":"Neue Zugänge erstellt","noNewLeaders":"Alle vorhandenen Konten wurden beibehalten.","credentialReset":"Passwort neu ausgestellt","credentialSkipped":"Bereits vorhanden","credentialFailed":"Nicht angelegt","noLeaderSelected":"Bitte einen Spieler auswählen.","resetConfirm":"Soll das Passwort dieses Spielers neu erstellt werden? Sein bisheriges Passwort funktioniert anschließend nicht mehr.","setupConfirm":"Für alle aktuell aktiven R4/R5 neue Zugänge anlegen? Bestehende Konten und Passwörter bleiben erhalten. Neue Passwörter werden einmal angezeigt.","individualRights":"Berechtigungen je Spieler (R4 und R5) separat einstellbar. Nur die Leitung vergibt Zugriffe.","legacyAdmin":"Systemadministrator (bestehender Zugang)","staffNoAccounts":"Bitte zuerst die R4/R5-Zugänge anlegen."},"en":{"chooseLeader":"Choose in-game player name","loadingLeaders":"Loading R4/R5 …","legacyEmail":"Existing admin account (email)","legacySignIn":"Use existing admin account","normalSignIn":"Log in with player name","staffUser":"R4/R5 player","provisionLeaders":"Create all R4/R5 accounts","resetLeaderPassword":"Issue new password for selected player","credentialsNote":"Passwords are shown once only. You can issue a replacement if lost.","credentialTitle":"One-time credentials","credentialsWarning":"Shown only now. Keep these passwords private.","copyCredentials":"Copy credentials","closeCredentials":"Close & clear credentials","leaderUnprovisioned":"This player doesn't have an account yet. Ask leadership to create it.","leaderAccountsCreated":"Accounts created","noNewLeaders":"No new accounts; existing credentials left unchanged.","credentialReset":"Replacement password issued","credentialSkipped":"Already exists","credentialFailed":"Not created","noLeaderSelected":"Choose a player.","resetConfirm":"Replace this player's password? The previous password will stop working.","setupConfirm":"Create accounts for all active R4/R5? Existing accounts and passwords are kept unchanged. New passwords appear once.","individualRights":"Assign module permissions separately for each R4/R5. Only the administrator manages access.","legacyAdmin":"Administrator (existing account)","staffNoAccounts":"Create player accounts first."},"fr":{"chooseLeader":"Choisir le nom du joueur","loadingLeaders":"Chargement des R4/R5 …","legacyEmail":"Compte administrateur existant (e-mail)","legacySignIn":"Compte administrateur existant","normalSignIn":"Connexion par nom de joueur","staffUser":"Joueur R4/R5","provisionLeaders":"Créer tous les comptes R4/R5","resetLeaderPassword":"Changer le mot de passe du joueur","credentialsNote":"Les mots de passe ne sont affichés qu'une fois.","credentialTitle":"Identifiants uniques","credentialsWarning":"Copiez-les maintenant et gardez-les privés.","copyCredentials":"Copier les identifiants","closeCredentials":"Fermer et effacer","leaderUnprovisioned":"Compte non créé.","leaderAccountsCreated":"Comptes créés","noNewLeaders":"Aucun nouveau compte.","credentialReset":"Nouveau mot de passe créé","credentialSkipped":"Déjà existant","credentialFailed":"Non créé","noLeaderSelected":"Choisir un joueur.","resetConfirm":"Remplacer le mot de passe du joueur ?","setupConfirm":"Créer les comptes pour tous les R4/R5 actifs ?","individualRights":"Droits distincts pour chaque joueur R4/R5.","legacyAdmin":"Administrateur (compte existant)","staffNoAccounts":"Créer les comptes d'abord."},"es":{"chooseLeader":"Elegir nombre del jugador","loadingLeaders":"Cargando R4/R5 …","legacyEmail":"Cuenta de administrador (correo)","legacySignIn":"Usar administrador existente","normalSignIn":"Entrar con nombre del jugador","staffUser":"Jugador R4/R5","provisionLeaders":"Crear todas las cuentas R4/R5","resetLeaderPassword":"Crear nueva contraseña para el jugador","credentialsNote":"Las contraseñas se muestran una sola vez.","credentialTitle":"Credenciales únicas","credentialsWarning":"Solo se muestran ahora. Mantenlas privadas.","copyCredentials":"Copiar credenciales","closeCredentials":"Cerrar y borrar","leaderUnprovisioned":"Este jugador aún no tiene una cuenta.","leaderAccountsCreated":"Cuentas creadas","noNewLeaders":"No se crearon cuentas nuevas.","credentialReset":"Contraseña renovada","credentialSkipped":"Ya existe","credentialFailed":"No creada","noLeaderSelected":"Elige un jugador.","resetConfirm":"¿Crear nueva contraseña? La anterior dejará de funcionar.","setupConfirm":"¿Crear cuentas para todos los R4/R5 activos?","individualRights":"Permisos separados para cada R4/R5.","legacyAdmin":"Administrador (cuenta existente)","staffNoAccounts":"Crea primero las cuentas."}};
+const t=k=>leaderUiCopy[lang]?.[k]||latestModuleCopy[lang]?.[k]||opsUI[lang]?.[k]||groupUI[lang]?.[k]||eventLabels[lang]?.[k]||phase1Labels[lang]?.[k]||staffExtra[lang]?.[k]||copy[lang]?.[k]||leaderUiCopy.de[k]||latestModuleCopy.de[k]||opsUI.de[k]||groupUI.de[k]||eventLabels.de[k]||phase1Labels.de[k]||staffExtra.de[k]||copy.de[k]||k;
 const locale={de:"de-DE",en:"en-GB",fr:"fr-FR",es:"es-ES"}[lang];
 function txt(obj){return typeof obj==="string"?obj:(obj?.[lang]||obj?.[state?.alliance?.default_language]||obj?.de||obj?.en||"");}
 function patchTranslations(){
@@ -87,7 +88,7 @@ async function request(mode="bootstrap",payload=null){
  if(!response.ok)throw new Error(value.error||"http_"+response.status);
  return value;
 }
-function can(feature){return state?.staff?.rank==="R5"||state?.staff?.permissions?.[feature]===true;}
+function can(feature){return state?.staff?.is_owner===true||state?.staff?.permissions?.[feature]===true;}
 function grantButtons(){
  q("[data-permission]").forEach(el=>{el.disabled=!can(el.dataset.permission);el.title=el.disabled?t("permissionDenied"):"";});
  for(const el of q(".nav-item[data-tab]")){
@@ -176,16 +177,28 @@ function renderSettings(){
  q("#activeLanguages input").forEach(x=>x.checked=(config.languages||[]).includes(x.value));
  $("defaultLanguage").value=config.default_language;
  const options=[["members",t("roster")],["transfers",t("transfers")],["laws",t("laws")],["events",t("events")],["settings",t("settings")]];
- const grants=(state.staffMembers||[]).filter(x=>x.rank==="R4");
- $("permissionTable").innerHTML='<div><strong>'+esc(t("permissions"))+'</strong><b>R5</b><b>'+esc(t("r4"))+'</b></div>'+
-   options.map(([feature,label])=>'<div><span>'+esc(label)+'</span><b>✓</b><b>'+
-     esc(state.staff.rank==="R4"?(can(feature)?"✓":"—"):grants.filter(x=>x.enabled&&x.permissions?.[feature]).length+" / "+grants.length)+'</b></div>').join("")+
-   '<p class="small-note">'+esc(t("r4Access"))+'</p>';
- $("staffControls").hidden=state.staff.rank!=="R5";
+ const grants=(state.staffMembers||[]).filter(x=>/^leader-[0-9]+@accounts\\.allianceos\\.invalid$/i.test(x.email||""));
+ $("permissionTable").innerHTML='<div><strong>'+esc(t("permissions"))+'</strong><b>R4/R5</b></div>'+
+   options.map(([feature,label])=>'<div><span>'+esc(label)+'</span><b>'+
+     esc(state.staff.is_owner?(grants.filter(x=>x.enabled&&x.permissions?.[feature]).length+" / "+grants.length):(can(feature)?"✓":"—"))+
+     '</b></div>').join("")+'<p class="small-note">'+esc(t("individualRights"))+'</p>';
+ $("staffControls").hidden=!state.staff.is_owner;
  const members=(state.staffMembers||[]).filter(x=>x.email);
- $("staffList").innerHTML=members.length?'<p class="eyebrow">'+esc(t("staffList"))+'</p>'+members.map(m=>
- '<button type="button" class="staff-row" data-staff-email="'+esc(m.email)+'"><span><b>'+esc(m.email)+'</b><small>'+esc(m.rank)+(m.enabled?'':' · '+esc(t("r4Disabled")))+
-    (m.rank==="R4"?' · '+esc(Object.keys(m.permissions||{}).filter(k=>m.permissions[k]===true).join(", ")||"—"):"")+'</small></span><span>→</span></button>').join(""):"";
+ const lookupName=email=>{
+    const m=/^leader-([0-9]+)@accounts\\.allianceos\\.invalid$/i.exec(email||"");
+    const p=m&&state.players.find(x=>String(x.game_id)===m[1]);
+    return p?String(p.name)+(p.rank?" · R"+p.rank:""):t("legacyAdmin");
+ };
+ $("staffList").innerHTML=members.length?'<p class="eyebrow">'+esc(t("staffList"))+'</p>'+
+ members.map(m=>'<button type="button" class="staff-row" data-staff-email="'+esc(m.email)+'" '+
+   (!/^leader-/.test(m.email)?"disabled":"")+'><span><b>'+esc(lookupName(m.email))+'</b><small>'+esc(m.rank)+
+   (m.enabled?"":" · "+esc(t("r4Disabled")))+" · "+esc(Object.keys(m.permissions||{}).filter(k=>m.permissions[k]===true).join(", ")||"—")+
+   '</small></span><span>→</span></button>').join(""):"";
+ const sel=$("staffAccountSelect"),original=sel.value;
+ sel.innerHTML='<option value="">'+esc(t("chooseLeader"))+'</option>'+
+ members.filter(x=>/^leader-/.test(x.email||"")).map(x=>
+   '<option value="'+esc(x.email)+'">'+esc(lookupName(x.email))+'</option>').join("");
+ if([...sel.options].some(x=>x.value===original))sel.value=original;
 }
 function render(){patchTranslations();counts();renderRoster();renderTransfers();renderLaws();renderEvents();renderSettings();eventHub.render(state,lang,can("events"));operations.render();}
 function control(label,name,value="",type="text",opts={}){
@@ -337,7 +350,7 @@ async function saveDialog(event){
 }
 q(".nav-item").forEach(el=>el.addEventListener("click",()=>setTab(el.dataset.tab)));
 q("[data-jump]").forEach(el=>el.addEventListener("click",()=>setTab(el.dataset.jump)));
-$("language").addEventListener("change",e=>{lang=e.target.value;localStorage.setItem("nrw_page_lang",lang);if(state)render();else patchTranslations();});
+$("language").addEventListener("change",e=>{lang=e.target.value;localStorage.setItem("nrw_page_lang",lang);if(state)render();else{patchTranslations();loadLeaderList();$("toggleLegacyLogin").textContent=t(legacyLogin?"normalSignIn":"legacySignIn");}});
 $("themeToggle").addEventListener("click",()=>{const next=document.documentElement.dataset.theme==="dark"?"light":"dark";document.documentElement.dataset.theme=next;localStorage.setItem("nrw_theme",next);});
 $("rosterSearch").addEventListener("input",()=>state&&renderRoster());
 $("rosterStatus").addEventListener("change",()=>state&&renderRoster());
@@ -357,7 +370,7 @@ $("staffList").addEventListener("click",e=>{
  const item=e.target.closest("[data-staff-email]");
  if(!item)return;
  const member=(state.staffMembers||[]).find(x=>x.email===item.dataset.staffEmail);
- if(!member||member.rank!=="R4")return;
+ if(!member||!/^leader-/.test(member.email||""))return;
  const form=$("r4Form");
  form.elements.email.value=member.email;
  for(const feature of ["members","transfers","laws","events","settings"])form.elements[feature].checked=member.permissions?.[feature]===true;
@@ -366,7 +379,7 @@ $("staffList").addEventListener("click",e=>{
 });
 $("r4Form").addEventListener("submit",async e=>{
  e.preventDefault();
- if(state?.staff?.rank!=="R5")return;
+ if(!state?.staff?.is_owner)return;
  const form=e.currentTarget,fd=new FormData(form);
  const email=String(fd.get("email")||"").trim(),permissions={};
  for(const feature of ["members","transfers","laws","events","settings"])permissions[feature]=fd.has(feature);
@@ -388,10 +401,89 @@ $("settingsForm").addEventListener("submit",async(e)=>{
  try{await request("bootstrap",{action:"save",entity:"settings",data:payload});await refresh();flash(t("saved"));}
  catch(e){flash(t("genericError")+" ("+e.message+")",true);}
 });
+let legacyLogin=false;
+async function loadLeaderList(){
+ const sel=$("leaderSelect");
+ try{
+  const r=await fetch(FUNCTION+"?alliance=NRW&mode=public-leaders",{cache:"no-store",headers:{Accept:"application/json"}});
+  if(!r.ok)throw new Error("leader_lookup_failed");
+  const data=await r.json();
+  const leaders=Array.isArray(data.leaders)?data.leaders:[];
+  const previous=sel.value;
+  sel.innerHTML='<option value="">'+esc(t("chooseLeader"))+'</option>'+leaders.map(x=>
+    '<option value="'+esc(x.game_id)+'">'+esc(x.name)+' · '+esc(x.rank)+'</option>').join("");
+  if([...sel.options].some(x=>x.value===previous))sel.value=previous;
+ }catch{
+  sel.innerHTML='<option value="">'+esc(t("loadingLeaders"))+'</option>';
+  $("loginError").textContent=t("genericError")+" (leader list)";
+ }
+}
+$("toggleLegacyLogin").addEventListener("click",()=>{
+ legacyLogin=!legacyLogin;
+ $("legacyEmailField").hidden=!legacyLogin;
+ $("leaderPickerField").hidden=legacyLogin;
+ $("leaderSelect").required=!legacyLogin;
+ $("email").required=legacyLogin;
+ $("toggleLegacyLogin").textContent=t(legacyLogin?"normalSignIn":"legacySignIn");
+ $("loginError").textContent="";
+});
+function showCredentials(lines,report){
+ const dialog=$("leaderCredentialsDialog");
+ $("leaderCredentialsOutput").value=lines.join("\n");
+ $("leaderCredentialReport").textContent=report||"";
+ dialog.showModal();
+}
+function closeCredentials(){
+ $("leaderCredentialsOutput").value="";
+ $("leaderCredentialReport").textContent="";
+ $("leaderCredentialsDialog").close();
+}
+$("leaderCredentialsClose").addEventListener("click",closeCredentials);
+$("leaderCredentialsCloseTop").addEventListener("click",closeCredentials);
+$("leaderCredentialsDialog").addEventListener("close",()=>{
+ $("leaderCredentialsOutput").value="";
+ $("leaderCredentialReport").textContent="";
+});
+$("copyLeaderCredentials").addEventListener("click",async()=>{
+ try{await navigator.clipboard.writeText($("leaderCredentialsOutput").value);flash(t("copied"));}
+ catch{ $("leaderCredentialsOutput").focus();$("leaderCredentialsOutput").select(); }
+});
+$("provisionLeaders").addEventListener("click",async()=>{
+ if(!state?.staff?.is_owner||!window.confirm(t("setupConfirm")))return;
+ const btn=$("provisionLeaders");btn.disabled=true;
+ try{
+   const result=await request("bootstrap",{action:"provision_leaders"});
+   const lines=(result.created||[]).map(x=>x.name+" ("+x.rank+") | "+x.password);
+   const report=t("leaderAccountsCreated")+": "+(result.created?.length||0)+" · "+t("credentialSkipped")+
+      ": "+(result.skipped?.length||0)+" · "+t("credentialFailed")+": "+(result.errors?.length||0);
+   if(lines.length)showCredentials(lines,report);
+   else flash(t("noNewLeaders")+" "+report);
+   await refresh();setTab("settings");
+ }catch(e){flash(t("genericError")+" ("+e.message+")",true)}
+ finally{btn.disabled=false;}
+});
+$("resetLeaderPassword").addEventListener("click",async()=>{
+ if(!state?.staff?.is_owner)return;
+ const value=$("staffAccountSelect").value,match=/^leader-([0-9]+)@accounts\\.allianceos\\.invalid$/i.exec(value);
+ if(!match){flash(t("noLeaderSelected"),true);return;}
+ if(!window.confirm(t("resetConfirm")))return;
+ const b=$("resetLeaderPassword");b.disabled=true;
+ try{
+  const result=await request("bootstrap",{action:"reset_leader_password",game_id:match[1]});
+  const label=$("staffAccountSelect").selectedOptions[0]?.textContent||match[1];
+  showCredentials([label+" | "+result.password],t("credentialReset"));
+ }catch(e){flash(t("genericError")+" ("+e.message+")",true)}
+ finally{b.disabled=false;}
+});
+
 $("loginForm").addEventListener("submit",async(e)=>{
  e.preventDefault();
  const button=e.currentTarget.querySelector("button");button.disabled=true;$("loginError").textContent="";
- const email=$("email").value.trim(),password=$("password").value;
+ const email=$("legacyEmailField").hidden?
+   ($("leaderSelect").value?"leader-"+$("leaderSelect").value+"@accounts.allianceos.invalid":""):
+   $("email").value.trim();
+ const password=$("password").value;
+ if(!email){$("loginError").textContent=t("noLeaderSelected");button.disabled=false;return;}
  try{
    const {error}=await supabase.auth.signInWithPassword({email,password});
    if(error)throw error;
@@ -420,6 +512,7 @@ $("changePasswordForm").addEventListener("submit",async e=>{
 $("logoutBtn").addEventListener("click",async()=>{await supabase.auth.signOut();state=null;showLogin();});
 document.documentElement.dataset.theme=localStorage.getItem("nrw_theme")||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");
 patchTranslations();
+loadLeaderList();
 try{
  const {data:{session}}=await supabase.auth.getSession();
  if(session){try{await refresh();setTab(new URLSearchParams(location.search).get("tab")||"overview");}
