@@ -1,6 +1,6 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.58.0/+esm";
 import {createEventHub} from "./event-library.js?v=pages-1";
-import {createOperations} from "./operations.js?v=pages-1";
+import {createOperations} from "./operations.js?v=pages-2";
 
 // Private AllianceOS pilot. Data is NEVER stored in localStorage; only auth session is.
 // All records and permissions are issued by the authenticated Edge Function.
