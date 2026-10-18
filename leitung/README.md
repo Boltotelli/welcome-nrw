@@ -126,3 +126,28 @@ User-required mental model: **one Event type -> editable recurrence -> one edito
 - The Overview counter uses the deduplicated event types rather than only newly authored `aos_events` records. Empty phases are not populated with invented entries; legacy daily plans are previewed.
 - Additional event types can define their own recurrence and phase counts, but events with multiple variants inside the existing 28-day rotation should be reviewed by NRW leadership before changing their schedule.
 - Verification used the actual 20 dashboard records + 18 detailed and 33 catalog guides in a simulated DOM: **23 distinct groups**, **one Brawl** with **six phase rows**, event-cycle and phase-save payloads validated; schedule override simulation confirmed existing rhythm unchanged while override is inactive, changed when explicitly enabled. No authenticated R5 browser write/reload smoke test is claimed.
+
+## Phases 4, 6 and 7 – consolidated functional pass (18 October 2026)
+
+### 4. Alliance laws (without replacing kingdom/NAP Laws)
+- Existing private editor saves localized DE/EN/FR/ES alliance rules, drafts, publishes and records every version in `aos_law_versions`.
+- The revision-history button fetches earlier snapshots on demand and restores any alliance-law version as a NEW, unpublished draft after checking its current version. Kingdom laws are not editable in this module, even if the input is tampered with. This is enforced on the server **before** any write.
+- `aos_law_publications` preserves the most recent explicitly published alliance-law snapshot while a new revision or restoration remains a draft. The existing `/laws.html` page already reads the `public-laws` API and renders these snapshots; NAP-tracker laws are never written or shadowed.
+- The editor contains a link to the public laws page. R4 requires the `laws` permission; only law-related payloads are returned to the relevant R4.
+
+### 6. Kingdom transfer planning (real planning, not actual game invitations)
+- New `aos_transfer_windows` allows a start/end date, phase status, internal notes, **optional** ordinary/special invitation capacities, and a label; none are made up. Blank capacity means unknown.
+- Candidates in existing `aos_transfers` can be assigned to a window and given a separate manual invitation-status field (not sent/sent/accepted/declined), without issuing any Kingshot invite. Filters by window, and live counts of reserved inbound invited/confirmed/completed ordinary and special slots are shown.
+- Server verifies the window belongs to the alliance, prevents new reservations in a closed window, and rejects over-capacity reservations for a known slot type where a finite limit was actually entered. Waitlisted and non-reserved candidates do not consume capacity.
+- Inbound **observed arrival** confirmation is possible only after the game ID exists as an active member of NRW in the existing roster. The manual transfer status alone never constitutes proof.
+- Existing read-only 1044 intra-kingdom alliance moves remain separate and are not copied into the transfer planner.
+
+### 7. Roles/access
+- The R5 can assign or update permissions of *existing* Supabase-authenticated accounts as AllianceOS R4, enable/disable access, and explicitly request an invitation to a new account by email. An actual invitation email is sent only if the R5 presses the corresponding button; delivery requires Supabase Auth email configuration.
+- The staff overview shows enabled status and permitted modules, with a live grant matrix and the latest authorized `aos_audit` actions. R5 staff changes are recorded.
+- Backend redacts unauthorized module records on R4 bootstrap; saving mutations is separately gated by each module. UI hides navigation entries for unauthorized modules. R4 cannot manage R5 or grant themselves higher privileges.
+- `aos_transfer_windows` and `aos_law_publications` have RLS enabled with no direct anon/authenticated read or write privileges. The Edge Function uses a validated Supabase access token + alliance-specific `aos_staff` grants.
+- NRW remains an advertising-free pilot. No subscription service, messaging/game bot or automated Kingshot game invitation was created.
+
+### Verification boundaries
+- Isolated database tables/columns were verified using SQL, and Supabase Edge Function deployed ACTIVE. Static browser JS syntax and integration hooks were checked. No R5-authenticated manual write + reload flow has been run as the user in a browser. Live Auth invitation delivery and actual email configuration have not been tested. No fake transfer window or candidate was inserted into production.
