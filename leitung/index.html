@@ -6,7 +6,7 @@
 <title>AllianceOS · NRW Leitungszentrale</title>
 <meta name="description" content="Geschützte Leitungszentrale für Allianzverwaltung, Transfers, Laws und Events.">
 <link rel="icon" href="../assets/nrw-dashboard-icon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="./styles.css?v=pages-5">
+<link rel="stylesheet" href="./styles.css?v=pages-6">
 
 </head>
 <body>
@@ -78,8 +78,14 @@
         <section class="tab-page" data-page="transfers" hidden>
           <div class="page-heading"><div><span class="eyebrow">TRANSFER CENTER</span><h2 data-i18n="transfers">Transferplanung</h2><p data-i18n="transfersDesc">Bewerbungen, Reservierungen, Wartelisten und abgeschlossene Wechsel.</p></div><button class="primary" data-create="transfer" data-permission="transfers" data-i18n="addTransfer">+ Transfer planen</button></div>
           <div class="card" style="margin-bottom:16px">
-            <div class="filters"><div><h3 data-i18n="transferWindowsTitle">Königreich-Transferphasen</h3><p class="muted" data-i18n="transferWindowsInfo">Zeitfenster, Einladungen und verfügbare Plätze zentral planen.</p></div><button class="primary" type="button" id="newTransferWindow" data-permission="transfers" data-i18n="newTransferWindow">+ Transferphase erstellen</button></div>
-            <div id="transferWindowsList" class="transfer-windows"></div>
+            <div class="filters"><div><h3 data-i18n="transferWindowsTitle">Nächste 3 Transferphasen</h3><p class="muted" data-i18n="transferApiDescription">Bestätigte Termine für Königreich 1044 aus der API, ohne erfundene Wiederholungen.</p></div><button class="ghost" type="button" id="reloadTransferPhases" data-permission="transfers" data-i18n="phaseRefresh">↻ API aktualisieren</button></div>
+            <p id="apiTransferStatus" class="small-note" role="status" aria-live="polite"></p>
+            <div id="apiTransferPhases" class="transfer-windows"></div>
+            <details class="ops-manual-windows"><summary data-i18n="manualTransferPlanning">Eigene Planung / Reservierungen (optional)</summary>
+              <p class="muted" data-i18n="manualTransferPlanningHint">Nur für manuelle Platz- und Einladungsplanung; keine offiziellen Eventtermine.</p>
+              <button class="ghost" type="button" id="newTransferWindow" data-permission="transfers" data-i18n="newTransferWindow">+ Manuelle Planungsphase</button>
+              <div id="transferWindowsList" class="transfer-windows"></div>
+            </details>
           </div>
           <div class="stat-grid small">
             <article class="stat"><span data-i18n="interested">Interessenten</span><strong id="tInterested">0</strong></article>
@@ -89,10 +95,17 @@
           </div>
           <div class="card"><div class="filters"><select class="control" id="transferFilter"><option value="all" data-i18n="allTransfers">Alle Transfers</option><option value="incoming" data-i18n="incoming">Eingehende Transfers</option><option value="outgoing" data-i18n="outgoing">Ausgehende Transfers</option></select><select id="transferWindowFilter" class="control"><option value="all" data-i18n="allWindows">Alle Transferphasen</option></select><span class="counter" id="transferCount"></span></div>
             <div class="table-scroll"><table><thead><tr><th data-i18n="player">Spieler</th><th data-i18n="direction">Richtung</th><th data-i18n="origin">Herkunft</th><th data-i18n="destination">Ziel</th><th data-i18n="window">Zeitraum</th><th data-i18n="status">Status</th><th></th></tr></thead><tbody id="transferRows"></tbody></table></div></div>
-          <div class="card" style="margin-top:16px">
-            <div class="filters"><div><h3 data-i18n="serverMoves">Allianzwechsel in 1044 (bestehendes Protokoll)</h3><p class="muted" data-i18n="internalHistoryNote">Protokollierte interne Wechsel mit NRW-Beteiligung, unverändert aus dem Tracker.</p></div><span class="counter" id="internalMoveCount">–</span></div>
+          <details class="card ops-moves-details" style="margin-top:16px">
+            <summary><strong data-i18n="serverMoves">Allianzwechsel in 1044</strong> <span class="counter" id="internalMoveCount">–</span></summary>
+            <p class="muted" data-i18n="internalHistoryNote">Protokollierte interne Wechsel mit NRW-Beteiligung.</p>
+            <div class="filters">
+              <input id="internalMoveSearch" class="control" type="search" data-placeholder="moveSearch" placeholder="Spieler oder Game-ID …">
+              <select id="internalMoveDirection" class="control"><option value="all" data-i18n="allMoves">Alle Richtungen</option><option value="in" data-i18n="movesInto">Zu NRW</option><option value="out" data-i18n="movesOut">Von NRW</option></select>
+              <select id="internalMovePeriod" class="control"><option value="30">30 Tage</option><option value="90">90 Tage</option><option value="all" data-i18n="allTime">Gesamtzeitraum</option></select>
+              <span class="counter" id="internalMoveShown"></span>
+            </div>
             <div class="table-scroll"><table><thead><tr><th data-i18n="from">Datum</th><th data-i18n="player">Spieler</th><th data-i18n="origin">Von</th><th></th><th data-i18n="destination">Nach</th></tr></thead><tbody id="internalMoveRows"></tbody></table></div>
-          </div>
+          </details>
         </section>
         <section class="tab-page" data-page="laws" hidden>
           <div class="page-heading"><div><span class="eyebrow">LAW STUDIO</span><h2 data-i18n="laws">Laws-Verwaltung</h2><p data-i18n="lawsDesc">Hier eingegebene und veröffentlichte Servergesetze werden auf der Laws-Seite angezeigt.</p></div><button class="primary" data-create="law" data-permission="laws" data-i18n="addLaw">+ Neue Regel</button></div>
@@ -259,5 +272,5 @@
  <div class="modal-actions"><button type="button" class="ghost" id="copyLeaderCredentials" data-i18n="copyCredentials">Einmalig kopieren</button><button type="button" class="primary" id="leaderCredentialsClose" data-i18n="closeCredentials">Schließen & Anzeige löschen</button></div>
 </dialog>
 <script src="../dashboard/event-rhythm.js?v=pages-1"></script>
-<script type="module" src="./app.js?v=pages-7"></script>
+<script type="module" src="./app.js?v=pages-8"></script>
 </body></html>
