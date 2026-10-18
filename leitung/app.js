@@ -1,5 +1,6 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.58.0/+esm";
 import {createEventHub} from "/leitung/event-library.js?v=7";
+import {createOperations} from "/leitung/operations.js?v=1";
 
 // Private AllianceOS pilot. Data is NEVER stored in localStorage; only auth session is.
 // All records and permissions are issued by the authenticated Edge Function.
@@ -56,6 +57,8 @@ function patchTranslations(){
 }
 function setTab(name){
  if(!["overview","roster","transfers","languages","laws","events","settings"].includes(name))return;
+ const required=name==="roster"?"members":name==="languages"?"settings":["transfers","laws","events","settings"].includes(name)?name:null;
+ if(required&&state&&!can(required))name="overview";
  tab=name;q(".tab-page").forEach(p=>p.hidden=p.dataset.page!==name);
  q(".nav-item").forEach(b=>b.classList.toggle("active",b.dataset.tab===name));
  $("pageLabel").textContent=t(name);
@@ -76,8 +79,15 @@ async function request(mode="bootstrap",payload=null){
  return value;
 }
 function can(feature){return state?.staff?.rank==="R5"||state?.staff?.permissions?.[feature]===true;}
-function grantButtons(){q("[data-permission]").forEach(el=>{el.disabled=!can(el.dataset.permission);el.title=el.disabled?t("permissionDenied"):"";});}
+function grantButtons(){
+ q("[data-permission]").forEach(el=>{el.disabled=!can(el.dataset.permission);el.title=el.disabled?t("permissionDenied"):"";});
+ for(const el of q(".nav-item[data-tab]")){
+  const required=el.dataset.tab==="roster"?"members":el.dataset.tab==="languages"?"settings":["transfers","laws","events","settings"].includes(el.dataset.tab)?el.dataset.tab:null;
+  el.hidden=Boolean(required&&!can(required));
+ }
+}
 const eventHub=createEventHub({request,flash,esc,t});
+const operations=createOperations({getState:()=>state,request,flash,esc,t,can,refresh});
 function showLogin(message=""){
  $("liveArea").hidden=true;$("loginArea").hidden=false;$("logoutBtn").hidden=true;
  $("roleChip").textContent="R4 / R5";$("loginError").textContent=message;
@@ -138,7 +148,7 @@ function renderTransfers(){
 }
 function renderLaws(){
  const list=state.laws.slice().sort((a,b)=>a.scope.localeCompare(b.scope)||a.number.localeCompare(b.number,lang));
- $("lawList").innerHTML=list.length?list.map(x=>'<article class="list-card"><div><span class="eyebrow">'+esc(x.scope==="kingdom"?t("kingdom"):t("allianceLaw"))+' · '+esc(x.number)+'</span><h3>'+esc(txt(x.title)||t("lawTitle"))+'</h3><p>'+esc(t("version"))+' '+esc(x.version)+' · '+esc(dateText(x.updated_at))+'</p></div><div class="card-actions">'+badge(x.status)+'<button data-edit="law" data-id="'+esc(x.id)+'" class="ghost" '+(!can("laws")?"disabled":"")+'>'+esc(t("edit"))+'</button></div></article>').join(""):'<div class="card empty">'+esc(t("noLaws"))+'</div>';
+ $("lawList").innerHTML=list.length?list.map(x=>'<article class="list-card"><div><span class="eyebrow">'+esc(x.scope==="kingdom"?t("kingdom"):t("allianceLaw"))+' · '+esc(x.number)+'</span><h3>'+esc(txt(x.title)||t("lawTitle"))+'</h3><p>'+esc(t("version"))+' '+esc(x.version)+' · '+esc(dateText(x.updated_at))+'</p></div><div class="card-actions">'+badge(x.status)+'<button data-edit="law" data-id="'+esc(x.id)+'" class="ghost" '+(!can("laws")||x.scope==="kingdom"?"disabled":"")+'>'+esc(t("edit"))+'</button><button type="button" class="ghost" data-law-history="'+esc(x.id)+'" '+(!can("laws")?"disabled":"")+'>'+esc(t("lawHistory"))+'</button></div></article>').join(""):'<div class="card empty">'+esc(t("noLaws"))+'</div>';
 }
 function renderEvents(){
  const list=state.events.slice().sort((a,b)=>Date.parse(a.start_at)-Date.parse(b.start_at));
@@ -157,7 +167,7 @@ function renderSettings(){
  $("staffList").innerHTML=members.length?'<p class="eyebrow">'+esc(t("staffList"))+'</p>'+members.map(m=>
  '<button type="button" class="staff-row" data-staff-email="'+esc(m.email)+'"><span><b>'+esc(m.email)+'</b><small>'+esc(m.rank)+(m.enabled?'':' · '+esc(t("r4Disabled")))+'</small></span><span>→</span></button>').join(""):"";
 }
-function render(){patchTranslations();counts();renderRoster();renderTransfers();renderLaws();renderEvents();renderSettings();eventHub.render(state,lang,can("events"));}
+function render(){patchTranslations();counts();renderRoster();renderTransfers();renderLaws();renderEvents();renderSettings();eventHub.render(state,lang,can("events"));operations.render();}
 function control(label,name,value="",type="text",opts={}){
  const attr=Object.entries(opts).map(([k,v])=>' '+k+'="'+esc(v)+'"').join("");
  return '<label class="field"><span>'+esc(label)+'</span><input class="control" name="'+esc(name)+'" type="'+esc(type)+'" value="'+esc(value??"")+'"'+attr+'></label>';
