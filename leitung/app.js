@@ -187,7 +187,7 @@ function renderSettings(){
  const lookupName=email=>{
     const m=/^leader-([0-9]+)@accounts\.allianceos\.invalid$/i.exec(email||"");
     const p=m&&state.players.find(x=>String(x.game_id)===m[1]);
-    return p?String(p.name)+(p.rank?" · R"+p.rank:""):t("legacyAdmin");
+    return p?String(p.name):t("legacyAdmin");
  };
  $("staffList").innerHTML=members.length?'<p class="eyebrow">'+esc(t("staffList"))+'</p>'+
  members.map(m=>'<button type="button" class="staff-row" data-staff-email="'+esc(m.email)+'" '+
@@ -411,7 +411,7 @@ async function loadLeaderList(){
   const leaders=Array.isArray(data.leaders)?data.leaders:[];
   const previous=sel.value;
   sel.innerHTML='<option value="">'+esc(t("chooseLeader"))+'</option>'+leaders.map(x=>
-    '<option value="'+esc(x.game_id)+'">'+esc(x.name)+' · '+esc(x.rank)+'</option>').join("");
+    '<option value="'+esc(x.game_id)+'">'+esc(x.name)+'</option>').join("");
   if([...sel.options].some(x=>x.value===previous))sel.value=previous;
  }catch{
   sel.innerHTML='<option value="">'+esc(t("loadingLeaders"))+'</option>';
