@@ -401,6 +401,43 @@ async function lookupTransferPlayer(req:Request,alliance:string,staff:any,body:a
 // Transfer phase dates come from the announced kingdom calendar, never an invented
 // four- or eight-week rhythm. Pre / Invitation / Open are 3/2/2 days if the API
 // announces a complete 7-day transfer event without individual phase entries.
+// Private NRW-only portrait refresh for recruitment records already on the board.
+// Uses the same Kingshot API as Game-ID lookup; never touches NAP source records.
+async function refreshTransferPortraits(req:Request,alliance:string,staff:any){
+ if(!permission(staff,"transfers"))throw new HttpError("permission_denied",403);
+ const key=Deno.env.get("KINGSHOTSTATS_API_KEY")||"";
+ if(!key)throw new HttpError("player_provider_unconfigured",503);
+ const expire=new Date(Date.now()-24*3600000).toISOString();
+ const rows=await checked<any[]>(db.from("aos_transfers")
+   .select("id,game_id,avatar_url,avatar_checked_at").eq("alliance_code",alliance)
+   .is("avatar_url",null).order("avatar_checked_at",{ascending:true,nullsFirst:true}).limit(50));
+ const candidates=rows.filter(x=>!x.avatar_checked_at||x.avatar_checked_at<expire)
+   .filter(x=>/^[0-9]{5,20}$/.test(String(x.game_id||""))).slice(0,8);
+ let filled=0;
+ for(let i=0;i<candidates.length;i+=2){
+   await Promise.all(candidates.slice(i,i+2).map(async row=>{
+     const now=new Date().toISOString();
+     try{
+       const r=await fetch("https://api.mightpulse.com/v1/players/"+encodeURIComponent(row.game_id)+"?include=base",{
+         headers:{Accept:"application/json",Authorization:"Bearer "+key},
+         signal:AbortSignal.timeout(12000)
+       });
+       if(r.status===429)return;
+       const data=r.ok?await r.json().catch(()=>null):null,p=data?.player??data?.data?.player;
+       const avatar=profileAvatar(p?.avatar_url??p?.avatar?.url,p?.upload_image??p?.avatar?.upload_image);
+       if(avatar){
+         await checked<any>(db.from("aos_transfers").update({avatar_url:avatar,avatar_checked_at:now})
+           .eq("alliance_code",alliance).eq("id",row.id).select("id"));
+         filled++;
+       }else{
+         await checked<any>(db.from("aos_transfers").update({avatar_checked_at:now})
+           .eq("alliance_code",alliance).eq("id",row.id).select("id"));
+       }
+     }catch{/* No provider result: never invent a candidate avatar. */}
+   }));
+ }
+ return json(req,{ok:true,attempted:candidates.length,filled});
+}
 async function transferPhases(req:Request,alliance:string,staff:any,force=false){
  if(!permission(staff,"transfers"))throw new HttpError("permission_denied",403);
  const cfg=await checked<any>(db.from("aos_alliances").select("kingdom_id").eq("code",alliance).single());
@@ -841,6 +878,7 @@ Deno.serve(async(req: Request)=>{
     if(body?.action==="staff_invite")return await inviteR4(req,alliance,userId,staff,body);
     if(body?.action==="transfer_window")return await saveTransferWindow(req,alliance,userId,staff,body);
     if(body?.action==="transfer_phases")return await transferPhases(req,alliance,staff,body?.force===true);
+    if(body?.action==="transfer_portraits")return await refreshTransferPortraits(req,alliance,staff);
     if(body?.action==="law_history")return await getLawHistory(req,alliance,staff,str(body.id,36));
     if(body?.action==="law_restore")return await restoreLawDraft(req,alliance,userId,staff,body);
     if(body?.action==="event_message")return await saveEventMessage(req,alliance,userId,staff,body);
