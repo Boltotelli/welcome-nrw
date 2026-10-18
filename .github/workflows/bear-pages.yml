@@ -427,6 +427,13 @@ jobs:
           grep -Fq 'src="./app.js?v=pages-1"' _site/leitung/index.html
           grep -Fq 'src="../dashboard/event-rhythm.js?v=pages-1"' _site/leitung/index.html
           grep -Fq 'const opsUI=' _site/leitung/app.js
+          grep -Fq 'id="defaultLanguage"' _site/leitung/index.html
+          ! grep -Fq 'data-tab="languages"' _site/leitung/index.html
+          grep -Fq 'lookupTransferPlayer' _site/leitung/app.js
+          grep -Fq 'contact_staff_user_id' _site/leitung/app.js
+          test -s _site/laws.js
+          ! grep -Fq 'const LAWS=' _site/laws.js
+          grep -Fq 'data-allianceos="laws"' _site/laws.html
           grep -Fq 'new URL("../dashboard/events.json",import.meta.url)' _site/leitung/event-library.js
           grep -Fq 'public-laws' _site/leitung/public-feed.js
           node --input-type=module --check < _site/leitung/app.js
