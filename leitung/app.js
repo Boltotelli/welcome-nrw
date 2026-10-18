@@ -53,7 +53,8 @@ const opsUI={
  fr:{changePassword:"Changer le mot de passe",passwordSetupHint:"Après invitation, les nouveaux R4 définissent ici leur mot de passe.",newPassword:"Nouveau mot de passe (10 caractères min.)",repeatPassword:"Répéter",savePassword:"Enregistrer",passwordMismatch:"Mots de passe différents ou trop courts.",passwordSaved:"Mot de passe modifié.",transferWindowsTitle:"Phases de transfert inter-royaumes",transferWindowsInfo:"Gérer les dates, invitations et places disponibles.",newTransferWindow:"+ Phase",editTransferWindow:"Modifier la phase",windowLabel:"Libellé",startDate:"Début",endDate:"Fin",ordinarySlots:"Invitations normales",specialSlots:"Invitations spéciales",phaseStatusLabel:"Phase",phase_planning:"Préparation",phase_open:"Ouvert",phase_closed:"Fermé",openPhase:"Ouvert",closedPhase:"Fermé",planning:"Préparation",unknownSlotsInfo:"Champ vide = capacité inconnue.",noTransferWindows:"Aucune phase créée.",transferWindow:"Phase de transfert",unassignedWindow:"Non attribué",allWindows:"Toutes les phases",invitationStatus:"Statut invitation",inviteNotSent:"Non envoyée",inviteSent:"Envoyée",inviteAccepted:"Acceptée",inviteDeclined:"Refusée",confirmObservedArrival:"Confirmer l'arrivée (joueur actif dans NRW)",lawsLiveInfo:"Les règles d'alliance publiées apparaissent sur la page Laws. Les lois du royaume sont protégées.",viewPublicLaws:"↗ Règles publiques",lawHistory:"Historique des versions",restoreAsDraft:"Restaurer en brouillon",restoreConfirm:"Restaurer cette version comme nouveau brouillon ?",noVersions:"Aucune version",loading:"Chargement …",r4AccessInfo:"R4 accède uniquement aux modules autorisés.",accessAudit:"Historique des modifications",noAudit:"Aucune modification.",inviteR4:"✉ Inviter un R4",inviteConfirm:"Envoyer une invitation R4 à {email} ?",invitedUser:"Invitation R4 demandée.",missingStaffData:"Saisir une adresse et un droit."},
  es:{changePassword:"Cambiar contraseña",passwordSetupHint:"Los nuevos R4 pueden definir su contraseña tras aceptar la invitación.",newPassword:"Nueva contraseña (mínimo 10 caracteres)",repeatPassword:"Repetir",savePassword:"Guardar",passwordMismatch:"Contraseñas distintas o muy cortas.",passwordSaved:"Contraseña actualizada.",transferWindowsTitle:"Fases de transferencia entre reinos",transferWindowsInfo:"Gestionar fechas, invitaciones y plazas.",newTransferWindow:"+ Fase",editTransferWindow:"Editar fase",windowLabel:"Nombre",startDate:"Inicio",endDate:"Fin",ordinarySlots:"Invitaciones normales",specialSlots:"Invitaciones especiales",phaseStatusLabel:"Fase",phase_planning:"Planificación",phase_open:"Abierto",phase_closed:"Cerrado",openPhase:"Abierto",closedPhase:"Cerrado",planning:"Planificación",unknownSlotsInfo:"Campo vacío = capacidad desconocida.",noTransferWindows:"No hay fases aún.",transferWindow:"Fase",unassignedWindow:"Sin asignar",allWindows:"Todas las fases",invitationStatus:"Estado de invitación",inviteNotSent:"No enviada",inviteSent:"Enviada",inviteAccepted:"Aceptada",inviteDeclined:"Rechazada",confirmObservedArrival:"Confirmar llegada (miembro activo NRW)",lawsLiveInfo:"Normas publicadas aparecen en Laws. Leyes del reino protegidas.",viewPublicLaws:"↗ Normas públicas",lawHistory:"Historial de versiones",restoreAsDraft:"Restaurar como borrador",restoreConfirm:"¿Restaurar esta versión como nuevo borrador?",noVersions:"Sin versiones",loading:"Cargando …",r4AccessInfo:"R4 solo accede a los módulos permitidos.",accessAudit:"Últimos cambios",noAudit:"Sin cambios.",inviteR4:"✉ Invitar nuevo R4",inviteConfirm:"¿Enviar invitación R4 a {email}?",invitedUser:"Se solicitó invitación R4.",missingStaffData:"Introduce correo y al menos un permiso."}
 };
-const t=k=>opsUI[lang]?.[k]||groupUI[lang]?.[k]||eventLabels[lang]?.[k]||phase1Labels[lang]?.[k]||staffExtra[lang]?.[k]||copy[lang]?.[k]||opsUI.de[k]||groupUI.de[k]||eventLabels.de[k]||phase1Labels.de[k]||staffExtra.de[k]||copy.de[k]||k;
+const latestModuleCopy={"de":{"serverLawsIntro":"Nur hier veröffentlichte Server-Laws werden auf der Laws-Seite gezeigt.","serverLawNotice":"Nur ausdrücklich veröffentlichte Servergesetze sind öffentlich. Entwürfe bleiben intern; der NAP-Tracker wird nicht verändert.","serverLawsOnly":"Die öffentliche Laws-Seite zeigt ausschließlich hier veröffentlichte Server-Laws.","pageLanguageSettings":"Seitensprachen","availableSiteLanguages":"Verfügbare Seitensprachen","contactOwner":"Kontaktperson aus NRW (R4/R5)","noneAssigned":"Noch keine Kontaktperson","lookupPlayer":"🔎 Spieler-ID über API abrufen","lookupPending":"Spielerdaten werden abgerufen …","lookupFailed":"Spielerabruf fehlgeschlagen","lookupFilled":"Spielerdaten übernommen · Quelle MightPulse","providerNoPlayer":"Spielerprofil nicht gefunden","providerSource":"Live-API · geprüft","photoUnavailable":"Spielerbild nicht verfügbar"},"en":{"serverLawsIntro":"Only the server laws published here appear on the Laws page.","serverLawNotice":"Only published server laws are public. Drafts stay private; the NAP tracker is unchanged.","serverLawsOnly":"The public Laws page shows only server laws published here.","pageLanguageSettings":"Site languages","availableSiteLanguages":"Available site languages","contactOwner":"NRW contact (R4/R5)","noneAssigned":"No assigned contact","lookupPlayer":"🔎 Look up player ID via API","lookupPending":"Loading player profile …","lookupFailed":"Player lookup failed","lookupFilled":"Profile retrieved · MightPulse","providerNoPlayer":"Player not found","providerSource":"Live API","photoUnavailable":"Player picture unavailable"},"fr":{"serverLawsIntro":"Seules les lois du serveur publiées ici apparaissent sur la page Laws.","serverLawNotice":"Seules les lois publiées sont publiques. Les brouillons restent privés et le NAP Tracker reste inchangé.","serverLawsOnly":"La page affiche uniquement les lois du serveur publiées ici.","pageLanguageSettings":"Langues du site","availableSiteLanguages":"Langues disponibles","contactOwner":"Responsable NRW (R4/R5)","noneAssigned":"Aucun responsable","lookupPlayer":"🔎 Rechercher l'ID via API","lookupPending":"Chargement du profil …","lookupFailed":"Échec de la recherche","lookupFilled":"Profil trouvé · MightPulse","providerNoPlayer":"Profil introuvable","providerSource":"API en direct","photoUnavailable":"Photo indisponible"},"es":{"serverLawsIntro":"Solo las leyes del servidor publicadas aquí aparecen en Laws.","serverLawNotice":"Solo las leyes publicadas son públicas. Los borradores son privados y el NAP Tracker no cambia.","serverLawsOnly":"Solo se muestran las leyes del servidor publicadas aquí.","pageLanguageSettings":"Idiomas del sitio","availableSiteLanguages":"Idiomas disponibles","contactOwner":"Responsable NRW (R4/R5)","noneAssigned":"Sin responsable","lookupPlayer":"🔎 Buscar ID por API","lookupPending":"Consultando perfil …","lookupFailed":"Error de búsqueda","lookupFilled":"Perfil consultado · MightPulse","providerNoPlayer":"Perfil no encontrado","providerSource":"API en directo","photoUnavailable":"Imagen no disponible"}};
+const t=k=>latestModuleCopy[lang]?.[k]||opsUI[lang]?.[k]||groupUI[lang]?.[k]||eventLabels[lang]?.[k]||phase1Labels[lang]?.[k]||staffExtra[lang]?.[k]||copy[lang]?.[k]||latestModuleCopy.de[k]||opsUI.de[k]||groupUI.de[k]||eventLabels.de[k]||phase1Labels.de[k]||staffExtra.de[k]||copy.de[k]||k;
 const locale={de:"de-DE",en:"en-GB",fr:"fr-FR",es:"es-ES"}[lang];
 function txt(obj){return typeof obj==="string"?obj:(obj?.[lang]||obj?.[state?.alliance?.default_language]||obj?.de||obj?.en||"");}
 function patchTranslations(){
@@ -64,8 +65,8 @@ function patchTranslations(){
  $("pageLabel").textContent=t(tab);
 }
 function setTab(name){
- if(!["overview","roster","transfers","languages","laws","events","settings"].includes(name))return;
- const required=name==="roster"?"members":name==="languages"?"settings":["transfers","laws","events","settings"].includes(name)?name:null;
+ if(!["overview","roster","transfers","laws","events","settings"].includes(name))return;
+ const required=name==="roster"?"members":["transfers","laws","events","settings"].includes(name)?name:null;
  if(required&&state&&!can(required))name="overview";
  tab=name;q(".tab-page").forEach(p=>p.hidden=p.dataset.page!==name);
  q(".nav-item").forEach(b=>b.classList.toggle("active",b.dataset.tab===name));
@@ -90,7 +91,7 @@ function can(feature){return state?.staff?.rank==="R5"||state?.staff?.permission
 function grantButtons(){
  q("[data-permission]").forEach(el=>{el.disabled=!can(el.dataset.permission);el.title=el.disabled?t("permissionDenied"):"";});
  for(const el of q(".nav-item[data-tab]")){
-  const required=el.dataset.tab==="roster"?"members":el.dataset.tab==="languages"?"settings":["transfers","laws","events","settings"].includes(el.dataset.tab)?el.dataset.tab:null;
+  const required=el.dataset.tab==="roster"?"members":["transfers","laws","events","settings"].includes(el.dataset.tab)?el.dataset.tab:null;
   el.hidden=Boolean(required&&!can(required));
  }
 }
@@ -153,14 +154,15 @@ function renderTransfers(){
  $("transferRows").innerHTML=list.length?list.map(x=>{
   const destination=["#"+(x.target_kingdom||state.alliance.kingdom_id),x.target_alliance||""].filter(Boolean).join(" · ");
   const verified=x.direction==="incoming"&&x.status==="completed"?'<small>'+esc(state.players.some(p=>p.game_id===x.game_id&&p.active)?t("arrived"):t("notArrived"))+'</small>':"";
-  return '<tr><td><strong>'+esc(x.player_name||"—")+'</strong><small>'+esc(x.game_id)+' · '+esc(t("priority"))+': '+esc(x.priority===1?t("high"):x.priority===3?t("low"):t("normal"))+(x.invitation_type==="special"?" · "+esc(t("inviteSpecial")):"")+'</small></td><td>'+badge(x.direction,x.direction==="incoming"?t("directionIncoming"):t("directionOutgoing"))+'</td><td>'+esc([x.origin_kingdom?"#"+x.origin_kingdom:"",x.previous_alliance||""].filter(Boolean).join(" · ")||"—")+'</td><td>'+esc(destination)+'</td><td>'+esc([x.window_start,x.window_end].filter(Boolean).map(dateText).join(" → ")||"—")+'</td><td>'+badge(x.status)+verified+'</td><td><button class="action-link" data-edit="transfer" data-id="'+esc(x.id)+'" '+(!can("transfers")?"disabled":"")+'>'+esc(t("edit"))+'</button></td></tr>';
+  return '<tr><td><strong>'+esc(x.player_name||"—")+'</strong><small>'+esc(x.game_id)+' · '+esc(t("priority"))+': '+esc(x.priority===1?t("high"):x.priority===3?t("low"):t("normal"))+(x.invitation_type==="special"?" · "+esc(t("inviteSpecial")):"")+
+   (x.contact_staff_user_id?" · "+esc(t("contactOwner"))+": "+esc((state.transferContacts||[]).find(p=>p.user_id===x.contact_staff_user_id)?.label||"—"):"")+'</small></td><td>'+badge(x.direction,x.direction==="incoming"?t("directionIncoming"):t("directionOutgoing"))+'</td><td>'+esc([x.origin_kingdom?"#"+x.origin_kingdom:"",x.previous_alliance||""].filter(Boolean).join(" · ")||"—")+'</td><td>'+esc(destination)+'</td><td>'+esc([x.window_start,x.window_end].filter(Boolean).map(dateText).join(" → ")||"—")+'</td><td>'+badge(x.status)+verified+'</td><td><button class="action-link" data-edit="transfer" data-id="'+esc(x.id)+'" '+(!can("transfers")?"disabled":"")+'>'+esc(t("edit"))+'</button></td></tr>';
  }).join(""):empty(t("noTransfers"));
  const moves=state.internalMoves||[];
  $("internalMoveCount").textContent=fmtInt(moves.length);
  $("internalMoveRows").innerHTML=moves.length?moves.map(m=>'<tr><td>'+esc(dateText(m.moved_at))+'</td><td><b>'+esc(m.player_name||"—")+'</b><small>'+esc(m.game_id||"—")+'</small></td><td>'+esc(m.from_alliance||"—")+'</td><td>→</td><td>'+esc(m.to_alliance||"—")+'</td></tr>').join(""):'<tr><td colspan="5" class="empty">'+esc(t("noMoves"))+'</td></tr>';
 }
 function renderLaws(){
- const list=state.laws.slice().sort((a,b)=>a.scope.localeCompare(b.scope)||a.number.localeCompare(b.number,lang));
+ const list=state.laws.filter(x=>x.scope==="kingdom").slice().sort((a,b)=>a.scope.localeCompare(b.scope)||a.number.localeCompare(b.number,lang));
  $("lawList").innerHTML=list.length?list.map(x=>'<article class="list-card"><div><span class="eyebrow">'+esc(x.scope==="kingdom"?t("kingdom"):t("allianceLaw"))+' · '+esc(x.number)+'</span><h3>'+esc(txt(x.title)||t("lawTitle"))+'</h3><p>'+esc(t("version"))+' '+esc(x.version)+' · '+esc(dateText(x.updated_at))+'</p></div><div class="card-actions">'+badge(x.status)+'<button data-edit="law" data-id="'+esc(x.id)+'" class="ghost" '+(!can("laws")||x.scope==="kingdom"?"disabled":"")+'>'+esc(t("edit"))+'</button><button type="button" class="ghost" data-law-history="'+esc(x.id)+'" '+(!can("laws")?"disabled":"")+'>'+esc(t("lawHistory"))+'</button></div></article>').join(""):'<div class="card empty">'+esc(t("noLaws"))+'</div>';
 }
 function renderEvents(){
@@ -219,19 +221,20 @@ function openEdit(entity,id=null,sourcePlayer=null){
       control(t("targetKingdom"),"target_kingdom",s.target_kingdom||(s.direction==="incoming"?state.alliance.kingdom_id:""),"number",{min:1,max:99999})+
      select(t("transferWindow"),"transfer_window_id",s.transfer_window_id||"",[["",t("unassignedWindow")],...(state.transferWindows||[]).map(w=>[w.id,w.label+" · "+w.start_date+" – "+w.end_date])])+
      select(t("invitationStatus"),"invitation_status",s.invitation_status||"not_sent",[["not_sent",t("inviteNotSent")],["sent",t("inviteSent")],["accepted",t("inviteAccepted")],["declined",t("inviteDeclined")]])+
+     select(t("contactOwner"),"contact_staff_user_id",s.contact_staff_user_id||"",[["",t("noneAssigned")],...(state.transferContacts||[]).map(x=>[x.user_id,x.rank+" · "+(x.label||x.user_id.slice(0,8))])])+
      control(t("previousAlliance"),"previous_alliance",s.previous_alliance||"")+
      control(t("targetAlliance"),"target_alliance",s.target_alliance||"NRW")+
      control(t("power"),"power",s.power||"","number",{min:0})+
       select(t("priority"),"priority",String(s.priority||2),[["1",t("high")],["2",t("normal")],["3",t("low")]])+
       select(t("invitation"),"invitation_type",s.invitation_type||"not_assigned",[["not_assigned",t("inviteOpen")],["ordinary",t("inviteNormal")],["special",t("inviteSpecial")]])+
      control(t("from"),"window_start",s.window_start||"","date")+
-     control(t("to"),"window_end",s.window_end||"","date")+'</div>'+
+     control(t("to"),"window_end",s.window_end||"","date")+'</div><div class="transfer-search-toolbar"><button type="button" class="ghost" id="lookupTransferPlayer">'+esc(t("lookupPlayer"))+'</button><span id="transferLookupStatus" class="small-note" aria-live="polite"></span></div><div class="transfer-profile-preview" id="transferProfilePreview" hidden></div>'+
      '<p class="small-note">'+esc(t("externalNote"))+'</p>'+textarea(t("notes"),"notes",s.notes||"")+
      (s.direction==="incoming"&&s.status==="completed"?'<label class="field check"><input type="checkbox" name="confirm_arrival" '+(s.arrival_confirmed_at?"checked disabled":"")+' > '+esc(t("confirmObservedArrival"))+'</label>':"")+
      '<label class="field check"><input type="checkbox" name="share_approved" '+(s.share_approved?"checked":"")+'> '+esc(t("allowShare"))+'</label>';
  }else if(entity==="law"){
-   const s=record||{scope:"alliance",status:"draft",title:{},body:{}};
-   h='<div class="form-grid">'+select(t("scope"),"scope",s.scope,[["alliance",t("allianceLaw")],["kingdom",t("kingdom")]])+
+   const s=record||{scope:"kingdom",status:"draft",title:{},body:{}};
+   h='<div class="form-grid">'+select(t("scope"),"scope","kingdom",[["kingdom",t("kingdom")]])+
       control(t("lawNumber"),"number",s.number||"","text",{required:"required",maxlength:30})+
       select(t("status"),"status",s.status,[["draft",t("draft")],["published",t("published")]])+'</div>';
    h+=LANGS.map(l=>'<hr class="form-break"><span class="eyebrow">'+esc(NAMES[l])+'</span>'+control(t("lawTitle"),"title_"+l,s.title?.[l]||"")+textarea(t("lawText"),"body_"+l,s.body?.[l]||"")).join("");
@@ -247,7 +250,7 @@ function openEdit(entity,id=null,sourcePlayer=null){
  }else if(entity==="member"&&record){
     const external=state.transfers.filter(x=>x.game_id===record.game_id);
     const internal=(state.internalMoves||[]).filter(x=>x.game_id===record.game_id);
-    h='<div class="dossier-info"><div><b>'+esc(record.name)+'</b><small>Game-ID '+esc(record.game_id)+' · '+esc(record.rank?"R"+record.rank:"—")+'</small></div>'+
+    h='<div class="dossier-info"><div>'+(record.avatar_url&&/^https:\/\//i.test(record.avatar_url)?'<img class="dossier-avatar" src="'+esc(record.avatar_url)+'" alt="'+esc(t("photoUnavailable"))+'" loading="lazy" referrerpolicy="no-referrer">':'<span class="dossier-avatar dossier-avatar-initial" aria-label="'+esc(t("photoUnavailable"))+'">'+esc((record.name||"?").slice(0,1))+'</span>')+'<b>'+esc(record.name)+'</b><small>Game-ID '+esc(record.game_id)+' · '+esc(record.rank?"R"+record.rank:"—")+'</small></div>'+
       '<div><small>TC</small><b>'+esc(record.tc_level??"—")+'</b></div>'+
       '<div><small>'+esc(t("strength"))+'</small><b>'+esc(record.power==null?t("noPower"):fmtInt(record.power))+'</b></div></div>'+
       '<p class="small-note">'+esc(t("sourceNote"))+'</p>'+
@@ -279,6 +282,25 @@ function openEdit(entity,id=null,sourcePlayer=null){
        if(!form.elements.power.value&&player.power!=null)form.elements.power.value=player.power;
      }
    });
+   const lookupBtn=$("lookupTransferPlayer"),lookupStatus=$("transferLookupStatus"),preview=$("transferProfilePreview");
+   lookupBtn.addEventListener("click",async()=>{
+     const gameId=String(form.elements.game_id.value||"").trim();
+     if(!/^[0-9]{5,20}$/.test(gameId)){lookupStatus.textContent=t("providerNoPlayer");return;}
+     lookupBtn.disabled=true;lookupStatus.textContent=t("lookupPending");preview.hidden=true;
+     try{
+       const reply=await request("bootstrap",{action:"player_lookup",game_id:gameId}),p=reply?.player;
+       if(!p||form.elements.game_id.value.trim()!==gameId)return;
+       if(p.name)form.elements.player_name.value=p.name;
+       if(p.alliance)form.elements.previous_alliance.value=p.alliance;
+       if(p.power!=null)form.elements.power.value=p.power;
+       if(p.kingdom_id&&form.elements.direction.value==="incoming")form.elements.origin_kingdom.value=p.kingdom_id;
+       const image=p.avatar_url&&/^https:\/\//i.test(p.avatar_url)?'<img src="'+esc(p.avatar_url)+'" referrerpolicy="no-referrer" alt="">':"";
+       preview.innerHTML=image+'<div><strong>'+esc(p.name||gameId)+'</strong><small>Game-ID '+esc(gameId)+(p.kingdom_id?' · #'+esc(p.kingdom_id):'')+'</small><small>'+esc(p.alliance||"—")+' · TC '+esc(p.tc_level??"—")+'</small><small>'+esc(t("providerSource"))+'</small></div>';
+       preview.hidden=false;lookupStatus.textContent=t("lookupFilled");
+     }catch(e){lookupStatus.textContent=t("lookupFailed")+" ("+String(e.message||"")+")";}
+     finally{lookupBtn.disabled=false;}
+   });
+
  }
  $("editDialog").showModal();
 }
@@ -331,14 +353,6 @@ document.addEventListener("click",e=>{
 $("closeDialog").addEventListener("click",()=>$("editDialog").close());
 $("cancelDialog").addEventListener("click",()=>$("editDialog").close());
 $("editForm").addEventListener("submit",saveDialog);
-$("saveLanguages").addEventListener("click",async()=>{
- const config=state.alliance;
- const languages=q("#activeLanguages input:checked").map(x=>x.value),default_language=$("defaultLanguage").value;
- if(!languages.includes(default_language)){flash(t("genericError"),true);return;}
- try{await request("bootstrap",{action:"save",entity:"settings",data:{...config,languages,default_language}});
-  await refresh();flash(t("saved"));
- }catch(e){flash(t("genericError")+" ("+e.message+")",true);}
-});
 $("staffList").addEventListener("click",e=>{
  const item=e.target.closest("[data-staff-email]");
  if(!item)return;
@@ -368,7 +382,9 @@ $("r4Form").addEventListener("submit",async e=>{
 $("settingsForm").addEventListener("submit",async(e)=>{
  e.preventDefault();if(!can("settings"))return;
  const fd=new FormData(e.currentTarget),values=Object.fromEntries(fd.entries());
- const payload={...state.alliance,...values,advertising_enabled:fd.has("advertising_enabled")};
+ const languages=q("#activeLanguages input:checked").map(x=>x.value),default_language=$("defaultLanguage").value;
+  if(!languages.includes(default_language)){flash(t("genericError"),true);return;}
+  const payload={...state.alliance,...values,languages,default_language,advertising_enabled:fd.has("advertising_enabled")};
  try{await request("bootstrap",{action:"save",entity:"settings",data:payload});await refresh();flash(t("saved"));}
  catch(e){flash(t("genericError")+" ("+e.message+")",true);}
 });
