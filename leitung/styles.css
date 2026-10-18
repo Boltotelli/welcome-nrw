@@ -78,3 +78,18 @@
 .library-oneoff>summary{cursor:pointer;font-weight:750;color:var(--accent)}
 .library-oneoff[open]>summary{margin-bottom:14px}
 @media(max-width:640px){.event-phase-row{grid-template-columns:62px minmax(0,1fr);gap:8px}.event-phase-row>button{grid-column:1/-1;justify-self:end}.event-group>summary{padding:13px}.library-cycle-bar>button{width:100%}}
+
+/* AllianceOS operations: private transfer windows, law revision history and access logs */
+.transfer-windows{display:grid;gap:12px;margin-top:14px}
+.ops-window{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px;border:1px solid var(--border);border-radius:12px;background:var(--panel)}
+.ops-window>div{display:flex;flex-direction:column;gap:5px;min-width:0}.ops-window b{overflow-wrap:anywhere}.ops-window small{color:var(--muted)}
+.ops-slots{display:flex;gap:8px 16px;flex-wrap:wrap}.ops-slot{font-size:12px;color:var(--muted)}.ops-slot b{color:var(--text)}
+.ops-history{border:1px solid var(--border);border-radius:10px;padding:12px;margin:10px 0}
+.ops-history>div{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}.ops-history small{color:var(--muted)}
+.ops-history p{overflow-wrap:anywhere;white-space:pre-line}
+.ops-audit{border:1px solid var(--border);border-radius:10px;margin:18px 0;padding:12px}
+.ops-audit summary{font-weight:700;cursor:pointer}
+.ops-audit-entry{padding:8px 2px;display:flex;justify-content:space-between;gap:8px;border-top:1px solid var(--border);font-size:12px}
+.ops-audit-entry:first-child{margin-top:10px}.ops-audit-entry span{color:var(--muted);overflow-wrap:anywhere}
+#transferWindowDialog .modal-body textarea{width:100%;min-height:96px}
+@media(max-width:560px){.ops-window{align-items:flex-start;flex-direction:column}.ops-audit-entry{flex-direction:column}}
