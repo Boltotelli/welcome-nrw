@@ -98,10 +98,9 @@ async function publicInfo(req: Request, alliance: string, mode: string) {
       .order("start_at",{ascending:true}).limit(100));
     return json(req,{events:items});
   }
-  const laws = await checked<any[]>(db.from("aos_laws")
-    .select("id,scope,number,title,body,version,published_at,updated_at")
-    .eq("alliance_code",alliance).eq("status","published").eq("scope","alliance")
-    .order("number",{ascending:true}).limit(100));
+  const laws = await checked<any[]>(db.from("aos_law_publications")
+    .select("law_id,scope,number,title,body,version,published_at")
+    .eq("alliance_code",alliance).order("number",{ascending:true}).limit(100));
   return json(req,{laws});
 }
 async function rosterFor(alliance: string, kingdom: number) {
@@ -520,6 +519,13 @@ async function save(req: Request, alliance: string, userId: string, staff: any, 
         snapshot:{scope:result.scope,number:result.number,title:result.title,body:result.body,status:result.status},
         changed_by:userId
       }).select("id").single());
+      // A draft edit or restoration never takes the last published version offline.
+      if(result.status==="published"){
+        await checked<any>(db.from("aos_law_publications").upsert({
+          law_id:result.id,alliance_code:alliance,scope:"alliance",number:result.number,
+          title:result.title,body:result.body,version:result.version,published_at:now
+        },{onConflict:"law_id"}).select("law_id").single());
+      }
     }
   }
   await audit(alliance,userId,entity,String(result.id||alliance),payload.id?"update":"create");
