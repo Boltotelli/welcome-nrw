@@ -434,6 +434,9 @@ jobs:
           test -s _site/laws.js
           ! grep -Fq 'const LAWS=' _site/laws.js
           grep -Fq 'data-allianceos="laws"' _site/laws.html
+          grep -Fq 'Server-Laws · Königreich 1044' _site/leitung/public-feed.js
+          grep -Fq 'Server-Laws' _site/laws.html
+          ! grep -Fq 'href="index.html" target="_top"' _site/laws.html
           grep -Fq 'new URL("../dashboard/events.json",import.meta.url)' _site/leitung/event-library.js
           grep -Fq 'public-laws' _site/leitung/public-feed.js
           node --input-type=module --check < _site/leitung/app.js
