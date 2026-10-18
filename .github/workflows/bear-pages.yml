@@ -399,6 +399,59 @@ jobs:
           grep -Fq "frame.style.background='transparent'" _site/bear/preview-v3/help-ui.js
           grep -Fq 'help-locales.js?v=20261017-all-guides-1' _site/bear/preview-v3.html
           echo 'DE/EN/FR/ES help guides verified from main.'
+      # Publish the COMPLETE AllianceOS leadership app from main alongside the
+      # existing standalone Bear optimizer preview. Never replace Pages root.
+      - name: Add AllianceOS Leitung from current main
+        run: |
+          set -euo pipefail
+          test -s v3-latest/leitung/index.html
+          mkdir -p _site/leitung _site/dashboard _site/assets
+          cp -a v3-latest/leitung/. _site/leitung/
+          cp v3-latest/dashboard/events.json v3-latest/dashboard/event-guides.json v3-latest/dashboard/event-rhythm.js _site/dashboard/
+          cp v3-latest/assets/nrw-dashboard-icon.svg _site/assets/
+          # Public alliance Laws are part of the Leitung workflow.
+          cp v3-latest/laws.html v3-latest/laws.js v3-latest/laws.css _site/
+          # Host-only publishing: the protected R4/R5 API stays in Supabase.
+          # The full guide data and all current editor modules ship as files.
+          test -s _site/leitung/index.html
+          test -s _site/leitung/app.js
+          test -s _site/leitung/event-library.js
+          test -s _site/leitung/operations.js
+          test -s _site/leitung/styles.css
+          test -s _site/leitung/public-feed.js
+          test -s _site/leitung/public-feed.css
+          test -s _site/dashboard/events.json
+          test -s _site/dashboard/event-guides.json
+          test -s _site/dashboard/event-rhythm.js
+          grep -Fq 'href="./styles.css?v=pages-1"' _site/leitung/index.html
+          grep -Fq 'src="./app.js?v=pages-1"' _site/leitung/index.html
+          grep -Fq 'src="../dashboard/event-rhythm.js?v=pages-1"' _site/leitung/index.html
+          grep -Fq 'const opsUI=' _site/leitung/app.js
+          grep -Fq 'new URL("../dashboard/events.json",import.meta.url)' _site/leitung/event-library.js
+          grep -Fq 'public-laws' _site/leitung/public-feed.js
+          node --input-type=module --check < _site/leitung/app.js
+          node --input-type=module --check < _site/leitung/event-library.js
+          node --input-type=module --check < _site/leitung/operations.js
+          node --check _site/dashboard/event-rhythm.js
+          node - <<'NODE'
+          const fs=require('node:fs');
+          const path=require('node:path');
+          const root=path.resolve('_site/leitung');
+          for(const file of ['index.html','app.js','event-library.js','operations.js','styles.css','public-feed.js']){
+            if(!fs.statSync(path.join(root,file)).size)process.exit(2);
+          }
+          const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
+          for(const ref of ['./app.js?v=pages-1','./styles.css?v=pages-1','../dashboard/event-rhythm.js?v=pages-1','../assets/nrw-banner.svg']){
+            const clean=ref.split('?')[0];
+            if(!fs.existsSync(path.resolve(root,clean))){console.error('Missing Pages asset:',clean);process.exit(3);}
+            if(!html.includes(ref)){console.error('HTML missing expected reference:',ref);process.exit(4);}
+          }
+          const app=fs.readFileSync(path.join(root,'app.js'),'utf8');
+          if(app.includes('"/leitung/')||app.includes('"/dashboard/'))process.exit(5);
+          console.log('AllianceOS GitHub Pages asset dependencies verified');
+          NODE
+          echo 'Published AllianceOS Leitung: /welcome-nrw/leitung/'
+          echo 'Published public alliance Laws: /welcome-nrw/laws.html'
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site
