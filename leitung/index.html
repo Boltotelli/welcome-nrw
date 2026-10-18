@@ -130,7 +130,7 @@
                 <div id="staffList" class="staff-list"></div>
                   <div class="notice-inline" data-i18n="r4AccessInfo">R4-Zugriffe gelten nur für die ausgewählten Module. Deaktivierte Zugänge bleiben gesperrt.</div>
                 <form id="r4Form">
-                  <label class="field"><span data-i18n="r4Email">E-Mail eines bestehenden Benutzerkontos</span><input class="control" type="email" name="email" autocomplete="off" required></label>
+                  <label class="field"><span data-i18n="staffUser">R4/R5 auswählen</span><select class="control" name="email" id="staffAccountSelect" required><option value="" data-i18n="chooseLeader">Spielernamen auswählen</option></select></label>
                   <div class="check-grid staff-grid">
                     <label><input type="checkbox" name="members"> <span data-i18n="roster">Spielerverwaltung</span></label>
                     <label><input type="checkbox" name="transfers"> <span data-i18n="transfers">Transferplanung</span></label>
@@ -140,7 +140,9 @@
                     <label><input type="checkbox" name="enabled" checked> <span data-i18n="r4Enabled">R4-Zugang aktiviert</span></label>
                   </div>
                   <button class="primary" type="submit" data-i18n="saveR4">R4-Freigabe speichern</button>
-                  <button type="button" class="ghost" id="inviteR4" data-i18n="inviteR4">✉ Neuen R4 per E-Mail einladen</button>
+                  <button type="button" class="ghost" id="provisionLeaders" data-i18n="provisionLeaders">Alle R4/R5-Konten erstellen</button>
+<button type="button" class="ghost" id="resetLeaderPassword" data-i18n="resetLeaderPassword">Initialpasswort neu ausstellen</button>
+<p class="small-note" data-i18n="credentialsNote">Neue Passwörter werden nur einmal angezeigt. Bitte vorher sicher aufbewahren.</p>
                   <p id="staffFormInfo" class="small-note" role="status"></p>
                 </form>
                 <details class="ops-audit"><summary data-i18n="accessAudit">Letzte Änderungen / Rechteprotokoll</summary><div id="accessAuditRows"></div></details>
@@ -153,11 +155,12 @@
           <div class="lock-symbol">♜</div><span class="eyebrow">ALLIANCEOS · R4 / R5</span>
           <h1 data-i18n="loginTitle">Zugang zur Leitungszentrale</h1>
           <p data-i18n="loginText">Die Spielerlisten und internen Planungen sind geschützt. Melde dich mit einem bereits freigeschalteten Konto an.</p>
-          <form id="loginForm"><label class="field"><span>E-Mail</span><input type="email" id="email" class="control" autocomplete="username" required></label>
+          <form id="loginForm"><label class="field" id="leaderPickerField"><span data-i18n="chooseLeader">Spielernamen auswählen</span><select id="leaderSelect" class="control" required><option value="" data-i18n="loadingLeaders">R4/R5 werden geladen …</option></select></label>
+          <label class="field" id="legacyEmailField" hidden><span data-i18n="legacyEmail">Bestehender Admin-Zugang (E-Mail)</span><input type="email" id="email" class="control" autocomplete="username"></label>
           <label class="field"><span data-i18n="password">Passwort</span><input type="password" id="password" class="control" autocomplete="current-password" required></label>
           <button class="primary full" type="submit" data-i18n="login">Anmelden</button></form>
-          <p id="loginError" class="login-error" role="alert"></p>
-          <p class="login-foot" data-i18n="loginNote">Es werden keine Konten automatisch angelegt. Zugriff erst nach Freigabe durch den AllianceOS-R5.</p>
+          <p id="loginError" class="login-error" role="alert"></p><button class="text-action" type="button" id="toggleLegacyLogin" data-i18n="legacySignIn">Bestehenden Admin-Zugang verwenden</button>
+          <p class="login-foot" data-i18n="loginNote">R4/R5-Accounts werden durch die Leitung freigeschaltet. Die Berechtigungen werden einzeln vergeben.</p>
         </div>
       </section>
     </main>
@@ -245,6 +248,15 @@
   </div>
   <div class="modal-actions"><button type="button" class="ghost" id="pwCancel" data-i18n="cancel">Abbrechen</button><button type="submit" class="primary" data-i18n="savePassword">Neues Passwort speichern</button></div>
 </form></dialog>
+<dialog id="leaderCredentialsDialog" class="modal" aria-labelledby="leaderCredentialsTitle">
+ <div class="modal-top"><h2 id="leaderCredentialsTitle" data-i18n="credentialTitle">Einmalige Zugangsdaten</h2><button type="button" class="close" id="leaderCredentialsCloseTop">×</button></div>
+ <div class="modal-body">
+  <p class="notice-inline" data-i18n="credentialsWarning">Diese Passwörter werden nur jetzt angezeigt und danach nicht mehr gespeichert oder angezeigt. Nicht öffentlich teilen.</p>
+  <textarea id="leaderCredentialsOutput" class="control" readonly rows="12" aria-label="Einmalige Zugangsdaten"></textarea>
+  <p id="leaderCredentialReport" role="status"></p>
+ </div>
+ <div class="modal-actions"><button type="button" class="ghost" id="copyLeaderCredentials" data-i18n="copyCredentials">Einmalig kopieren</button><button type="button" class="primary" id="leaderCredentialsClose" data-i18n="closeCredentials">Schließen & Anzeige löschen</button></div>
+</dialog>
 <script src="../dashboard/event-rhythm.js?v=pages-1"></script>
-<script type="module" src="./app.js?v=pages-3"></script>
+<script type="module" src="./app.js?v=pages-4"></script>
 </body></html>
