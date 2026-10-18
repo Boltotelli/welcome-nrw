@@ -415,10 +415,44 @@ async function save(req: Request, alliance: string, userId: string, staff: any, 
       const priority=Number(data.priority??2),invitation_type=str(data.invitation_type||"not_assigned",20);
       if(![1,2,3].includes(priority)||!["not_assigned","ordinary","special"].includes(invitation_type))
         throw new HttpError("invalid_transfer_priority",400);
+      const windowId=str(data.transfer_window_id||"",36),invitation_status=str(data.invitation_status||"not_sent",20);
+      if(!["not_sent","sent","accepted","declined"].includes(invitation_status))throw new HttpError("invalid_invitation_status",400);
+      let transferWindow:any=null;
+      if(windowId){
+        transferWindow=await checked<any>(db.from("aos_transfer_windows").select("*").eq("alliance_code",alliance).eq("id",windowId).maybeSingle());
+        if(!transferWindow)throw new HttpError("invalid_transfer_window",400);
+        if(transferWindow.status==="closed"&&["invited","confirmed"].includes(status))
+          throw new HttpError("transfer_window_closed",409);
+      }
+      if(invitation_status==="accepted"&&!["invited","confirmed","completed"].includes(status))
+        throw new HttpError("invalid_invitation_flow",400);
+      // Capacity counts only inbound reserved slots. Missing capacity is unknown, NOT unlimited.
+      if(transferWindow && direction==="incoming"&&["invited","confirmed","completed"].includes(status)
+        && ["ordinary","special"].includes(invitation_type)){
+        const col=invitation_type==="ordinary"?"ordinary_capacity":"special_capacity";
+        const limit=transferWindow[col];
+        if(limit!==null){
+          const others=await checked<any[]>(db.from("aos_transfers").select("id,direction,status,invitation_type")
+            .eq("alliance_code",alliance).eq("transfer_window_id",windowId).eq("direction","incoming")
+            .eq("invitation_type",invitation_type).in("status",["invited","confirmed","completed"]).limit(500));
+          const occupied=others.filter(x=>x.id!==existing?.id).length;
+          if(occupied>=Number(limit))throw new HttpError("transfer_capacity_full",409);
+        }
+      }
+      let arrival_confirmed_at=existing?.arrival_confirmed_at||null;
+      if(data.confirm_arrival===true){
+        if(direction!=="incoming"||status!=="completed")throw new HttpError("invalid_arrival_confirmation",400);
+        const observed=await checked<any>(db.from("players").select("id").eq("alliance_code",alliance).eq("game_id",str(data.game_id,20)).eq("active",true).maybeSingle());
+        if(!observed)throw new HttpError("arrival_not_observed",409);
+        arrival_confirmed_at=new Date().toISOString();
+      }
+      if(direction==="outgoing"||status!=="completed")arrival_confirmed_at=null;
       if(!str(data.player_name,100))throw new HttpError("missing_player_name",400);
       patch={...patch,game_id:str(data.game_id,20),direction,status,
         player_name:str(data.player_name,100),origin_kingdom:origin,target_kingdom:target,
-        priority,invitation_type,previous_alliance:str(data.previous_alliance,50),
+        priority,invitation_type,invitation_status,transfer_window_id:windowId||null,
+        invitation_sent_at:invitation_status!=="not_sent"?(existing?.invitation_sent_at||now):null,
+        arrival_confirmed_at,previous_alliance:str(data.previous_alliance,50),
         target_alliance:str(data.target_alliance,50)||alliance,
         power:data.power && Number.isSafeInteger(Number(data.power)) && Number(data.power)>=0?Number(data.power):null,
         window_start:validateDate(data.window_start),window_end:validateDate(data.window_end),
@@ -462,6 +496,9 @@ async function save(req: Request, alliance: string, userId: string, staff: any, 
       ? db.from(entry.table).update(patch).eq("id",id).eq("alliance_code",alliance).select("*").single()
       : db.from(entry.table).insert(patch).select("*").single());
     if(entity==="law"){
+      // Kingdom-wide Laws are references only. NRW leadership cannot publish, modify or relabel them.
+      if(existing?.scope==="kingdom"||patch.scope==="kingdom")throw new HttpError("kingdom_approval_required",403);
+
       await checked<any>(db.from("aos_law_versions").insert({
         law_id:result.id, alliance_code:alliance,version:result.version,
         snapshot:{scope:result.scope,number:result.number,title:result.title,body:result.body,status:result.status},
