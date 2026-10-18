@@ -219,7 +219,9 @@ function openEdit(entity,id=null,sourcePlayer=null){
       select(t("invitation"),"invitation_type",s.invitation_type||"not_assigned",[["not_assigned",t("inviteOpen")],["ordinary",t("inviteNormal")],["special",t("inviteSpecial")]])+
      control(t("from"),"window_start",s.window_start||"","date")+
      control(t("to"),"window_end",s.window_end||"","date")+'</div>'+
-     '<p class="small-note">'+esc(t("externalNote"))+'</p>'+textarea(t("notes"),"notes",s.notes||"")+'<label class="field check"><input type="checkbox" name="share_approved" '+(s.share_approved?"checked":"")+'> '+esc(t("allowShare"))+'</label>';
+     '<p class="small-note">'+esc(t("externalNote"))+'</p>'+textarea(t("notes"),"notes",s.notes||"")+
+     (s.direction==="incoming"&&s.status==="completed"?'<label class="field check"><input type="checkbox" name="confirm_arrival" '+(s.arrival_confirmed_at?"checked disabled":"")+' > '+esc(t("confirmObservedArrival"))+'</label>':"")+
+     '<label class="field check"><input type="checkbox" name="share_approved" '+(s.share_approved?"checked":"")+'> '+esc(t("allowShare"))+'</label>';
  }else if(entity==="law"){
    const s=record||{scope:"alliance",status:"draft",title:{},body:{}};
    h='<div class="form-grid">'+select(t("scope"),"scope",s.scope,[["alliance",t("allianceLaw")],["kingdom",t("kingdom")]])+
