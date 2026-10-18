@@ -112,3 +112,17 @@ In the Event Hub's existing event/day detail view, an R5 or R4 with `events` per
 - All internal writes use isolated `aos_event_guidance` with RLS enabled and no anon/authenticated grants; access is checked by the Edge Function against `aos_staff` events feature permission.
 
 Verified through a simulated UI save and day-scoped data overlay and a simulated Player Dashboard event coach render. Authenticated production browser tests are still pending.
+
+## Phase 2c – group once / recurring event / editable day phases (18 October 2026)
+
+User-required mental model: **one Event type -> editable recurrence -> one editor per event day**, rather than a list of dozens of dated event instances. The Event Hub now deduplicates existing dashboard manual entries, 28-day rotation instances, full guides, catalog-only records and additional alliance custom events by event category. Open the accordion for a category to see its individual phases; clicking one opens the day editor.
+
+- NRW **Alliance Brawl** is initialized with anchor 2026-09-14 UTC, a repeat period of 28 days, a 7-calendar-day event window and 6 editable phase days. This preserves the one-week calendar span including the last day while meeting the requested six daily records.
+- `aos_event_cycles` stores the per-alliance recurrence settings: group, anchor, interval (1–365 days), full duration (1–14 days), editable phase count, localized name and enabled flag. To protect the original Dashboard calendar, the seeded Brawl cycle has `override_schedule=false`; only an explicit save by leadership sets it true.
+- `aos_event_day_templates` stores recurring **day 1–6 etc** instructions (up to 1200 characters), chat text (512), notice text (300), translations and draft/published status by event type and phase, not by calendar date. Original daily plans are used as an editable starting point but never rewritten in place.
+- Server permission checks use the existing `aos_staff.events` authorization. Only published phase instructions and enabled cycle settings are served via the new public `public-schedule` API; private chat/notice texts and drafts remain staff-only.
+- The shared event generator reads public recurrence settings and applies edited dates only after `override_schedule=true`. The Dashboard consumes the exact same published schedule and overlays published phase notes on the relevant day of every occurrence.
+- Old date-specific notes remain accessible under the collapsible **Single occurrence / original guide** section, so no previous messages are lost. The old second "additional events" list is hidden; custom events join the consolidated event list.
+- The Overview counter uses the deduplicated event types rather than only newly authored `aos_events` records. Empty phases are not populated with invented entries; legacy daily plans are previewed.
+- Additional event types can define their own recurrence and phase counts, but events with multiple variants inside the existing 28-day rotation should be reviewed by NRW leadership before changing their schedule.
+- Verification used the actual 20 dashboard records + 18 detailed and 33 catalog guides in a simulated DOM: **23 distinct groups**, **one Brawl** with **six phase rows**, event-cycle and phase-save payloads validated; schedule override simulation confirmed existing rhythm unchanged while override is inactive, changed when explicitly enabled. No authenticated R5 browser write/reload smoke test is claimed.
