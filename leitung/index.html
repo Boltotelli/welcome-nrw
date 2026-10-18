@@ -6,7 +6,7 @@
 <title>AllianceOS · NRW Leitungszentrale</title>
 <meta name="description" content="Geschützte Leitungszentrale für Allianzverwaltung, Transfers, Laws und Events.">
 <link rel="icon" href="../assets/nrw-dashboard-icon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="./styles.css?v=pages-7">
+<link rel="stylesheet" href="./styles.css?v=pages-8">
 
 </head>
 <body>
@@ -78,14 +78,10 @@
         <section class="tab-page" data-page="transfers" hidden>
           <div class="page-heading"><div><span class="eyebrow">TRANSFER CENTER</span><h2 data-i18n="transfers">Transferplanung</h2><p data-i18n="transfersDesc">Bewerbungen, Reservierungen, Wartelisten und abgeschlossene Wechsel.</p></div><button class="primary" data-create="transfer" data-permission="transfers" data-i18n="addTransfer">+ Transfer planen</button></div>
           <div class="card" style="margin-bottom:16px">
-            <div class="filters"><div><h3 data-i18n="transferWindowsTitle">Nächste 3 Transferphasen</h3><p class="muted" data-i18n="transferApiDescription">Bestätigte Termine für Königreich 1044 aus der API, ohne erfundene Wiederholungen.</p></div><button class="ghost" type="button" id="reloadTransferPhases" data-permission="transfers" data-i18n="phaseRefresh">↻ API aktualisieren</button></div>
-            <p id="apiTransferStatus" class="small-note" role="status" aria-live="polite"></p>
-            <div id="apiTransferPhases" class="transfer-windows"></div>
-            <details class="ops-manual-windows"><summary data-i18n="manualTransferPlanning">Eigene Planung / Reservierungen (optional)</summary>
-              <p class="muted" data-i18n="manualTransferPlanningHint">Nur für manuelle Platz- und Einladungsplanung; keine offiziellen Eventtermine.</p>
-              <button class="ghost" type="button" id="newTransferWindow" data-permission="transfers" data-i18n="newTransferWindow">+ Manuelle Planungsphase</button>
-              <div id="transferWindowsList" class="transfer-windows"></div>
-            </details>
+            <div class="filters"><div><h3 data-i18n="transferWindowsTitle">Nächste Transferphasen</h3>
+              <p class="muted" data-i18n="transferManualInfo">Der API-Eventkalender benötigt ein kostenpflichtiges Mighty-Abonnement. Hier werden nur selbst erfasste Termine angezeigt.</p>
+            </div><button type="button" class="ghost" id="newTransferWindow" data-permission="transfers" data-i18n="newTransferWindow">+ Transferphase eintragen</button></div>
+            <div id="transferWindowsList" class="transfer-windows"></div>
           </div>
           <div class="stat-grid small">
             <article class="stat"><span data-i18n="interested">Interessenten</span><strong id="tInterested">0</strong></article>
@@ -272,5 +268,5 @@
  <div class="modal-actions"><button type="button" class="ghost" id="copyLeaderCredentials" data-i18n="copyCredentials">Einmalig kopieren</button><button type="button" class="primary" id="leaderCredentialsClose" data-i18n="closeCredentials">Schließen & Anzeige löschen</button></div>
 </dialog>
 <script src="../dashboard/event-rhythm.js?v=pages-1"></script>
-<script type="module" src="./app.js?v=pages-10"></script>
+<script type="module" src="./app.js?v=pages-11"></script>
 </body></html>
