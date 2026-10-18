@@ -149,11 +149,8 @@ export function createEventHub({request,flash,esc,t}) {
  function nextOccurrence(cycle){
    const start=Date.parse(cycle.anchor_date+"T00:00:00Z"),now=Date.parse(dayKey(new Date())+"T00:00:00Z");
    if(!Number.isFinite(start))return null;
-   const elapsed=Math.max(0,Math.floor((now-start)/86400000));
-   const runs=Math.max(0,Math.floor(elapsed/cycle.interval_days));
-   const candidate=start+runs*cycle.interval_days*86400000;
-   const end=candidate+(cycle.duration_days-1)*86400000;
-   return dayKey(end>=now?candidate:candidate+cycle.interval_days*86400000);
+   const runs=Math.max(0,Math.ceil((now-start)/(cycle.interval_days*86400000)));
+   return dayKey(start+runs*cycle.interval_days*86400000);
  }
  function list(){
   if(!sources){$("eventLibraryList").innerHTML='<p class="muted">'+esc(t("libraryLoadError"))+'</p>';return;}
