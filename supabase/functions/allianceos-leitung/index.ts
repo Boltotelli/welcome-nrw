@@ -194,7 +194,7 @@ async function rosterFor(alliance: string, kingdom: number) {
     .select("id,game_id,name,alliance_code,alliance_rank,active,languages,provider_seen_at")
     .eq("alliance_code",alliance).order("name",{ascending:true}).limit(500));
   const notes = await checked<any[]>(db.from("aos_member_notes")
-    .select("id,game_id,member_status,discord_user_id,notes,spoken_languages,joined_on,responsibilities,updated_at")
+    .select("id,game_id,member_status,discord_user_id,notes,spoken_languages,joined_on,responsibilities,power_override,power_override_at,updated_at")
     .eq("alliance_code",alliance).limit(500));
   const cacheIds=players.map(p=>p.game_id).filter(isId);
   let images:any[]=[];
@@ -227,8 +227,13 @@ async function rosterFor(alliance: string, kingdom: number) {
       languages:overlay.spoken_languages??p.languages??[], source_languages:p.languages||[], joined_on:overlay.joined_on||null,
       responsibilities:overlay.responsibilities||"", avatar_url:cache.avatar_url||null,
       tc_level:cache.tc_level??null,
-      power:power.power==null?null:Number(power.power),
-      power_observed_at:power.fetched_at||null,
+      power:power.power!=null?Number(power.power):overlay.power_override!=null?Number(overlay.power_override):null,
+      power_source:power.power!=null?"bear_buff":overlay.power_override!=null?"manual":null,
+      power_override:overlay.power_override??null,
+      power_observed_at:power.fetched_at||overlay.power_override_at||null,
+      // Existing NRW onboarding and manually linked IDs are compared by immutable roster player ID.
+      discord_connected:Boolean(overlay.discord_user_id||match.discord_user_id),
+      discord_source:overlay.discord_user_id?"manual":match.discord_user_id?"onboarding":null,
       discord_user_id:overlay.discord_user_id||match.discord_user_id||null,
       source_seen_at:p.provider_seen_at||cache.profile_updated_at||null
     };
@@ -657,7 +662,14 @@ async function save(req: Request, alliance: string, userId: string, staff: any, 
       if(!["active","planned","left"].includes(data.member_status))throw new HttpError("invalid_member_state",400);
       const spoken=Array.isArray(data.spoken_languages)?[...new Set(data.spoken_languages)]:null;
       if(spoken!==null && (spoken.length>12 || spoken.some((x:any)=>typeof x!=="string" || !/^[\p{L}0-9 _-]{2,30}$/u.test(x))))throw new HttpError("invalid_spoken_languages",400);
-      patch={...patch,game_id:str(data.game_id,20),member_status:data.member_status,
+      const rawPower=data.power_override;
+      const powerOverride=(rawPower===""||rawPower===null||rawPower===undefined)?null:Number(rawPower);
+      if(powerOverride!==null && (!Number.isSafeInteger(powerOverride)||powerOverride<0||powerOverride>9999999999999))
+        throw new HttpError("invalid_player_power",400);
+      const previousPower=existing?.power_override==null?null:Number(existing.power_override);
+      patch={...patch,power_override:powerOverride,
+        power_override_at:powerOverride===null?null:previousPower===powerOverride?existing?.power_override_at||now:now,
+        game_id:str(data.game_id,20),member_status:data.member_status,
         discord_user_id:str(data.discord_user_id,32)||null,notes:str(data.notes,3000),
         spoken_languages:spoken,joined_on:validateDate(data.joined_on),
         responsibilities:str(data.responsibilities,500)};
