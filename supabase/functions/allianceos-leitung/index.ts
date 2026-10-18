@@ -398,6 +398,74 @@ async function lookupTransferPlayer(req:Request,alliance:string,staff:any,body:a
  }});
 }
 
+// Transfer phase dates come from the announced kingdom calendar, never an invented
+// four- or eight-week rhythm. Pre / Invitation / Open are 3/2/2 days if the API
+// announces a complete 7-day transfer event without individual phase entries.
+async function transferPhases(req:Request,alliance:string,staff:any,force=false){
+ if(!permission(staff,"transfers"))throw new HttpError("permission_denied",403);
+ const cfg=await checked<any>(db.from("aos_alliances").select("kingdom_id").eq("code",alliance).single());
+ const today=Date.now(),cached=await checked<any>(db.from("aos_transfer_phase_feed")
+   .select("*").eq("alliance_code",alliance).maybeSingle());
+ const old=Date.parse(cached?.fetched_at||"");
+ if(!force&&cached&&Number.isFinite(old)&&today-old<30*60*1000)
+   return json(req,{ok:true,phases:(cached.phases||[]).filter((x:any)=>Date.parse(x.end_at)>today).slice(0,3),
+     fetched_at:cached.fetched_at,source:cached.source,from_cache:true});
+ const key=Deno.env.get("KINGSHOTSTATS_API_KEY")||"";
+ if(!key)throw new HttpError("transfer_calendar_api_unconfigured",503);
+ let response:Response;
+ try{
+   response=await fetch("https://api.mightpulse.com/v1/kingdoms/"+
+     encodeURIComponent(String(cfg.kingdom_id))+"/events",{
+       headers:{Accept:"application/json",Authorization:"Bearer "+key},
+       signal:AbortSignal.timeout(18000)
+     });
+ }catch{throw new HttpError("transfer_calendar_api_unreachable",503);}
+ if(!response.ok){
+   if(response.status===403)throw new HttpError("transfer_calendar_mighty_required",403);
+   if(response.status===429)throw new HttpError("provider_rate_limited",429);
+   throw new HttpError("transfer_calendar_unavailable",503);
+ }
+ const raw=await response.json().catch(()=>null);
+ const sources=Array.isArray(raw?.categories)?raw.categories.flatMap((c:any)=>
+   Array.isArray(c.events)?c.events.map((e:any)=>({...e,category:e.category||c.name})):[]):[];
+ const matches=sources.filter((x:any)=>/transfer|migration|transfert|移民|перенос|跨王国/i.test(
+   String(x.name||"")+" "+String(x.category||"")));
+ const toMs=(input:any)=>Number.isFinite(Number(input))?Number(input)*1000:NaN;
+ const addDays=(t:number,d:number)=>new Date(t+d*86400000).toISOString();
+ const phaseNames=["Pre-transfer","Invitation transfer","Open transfer"];
+ const seen=new Set<string>(),found:any[]=[];
+ for(const evt of matches){
+   const start=toMs(evt.begin_ts),inclusive=toMs(evt.end_ts);
+   if(!Number.isFinite(start)||!Number.isFinite(inclusive)||inclusive<start)continue;
+   const end=inclusive+1000,name=String(evt.name||"");
+   if(!/(pre.?transfer|invit|open.?transfer|phase\s*[123i]|transfer|migration)/i.test(name))continue;
+   const explicitPhase=/pre.?transfer|before.?transfer|prepar|phase\s*(?:1|i)\b/i.test(name)?0:
+     /invitat|invit|phase\s*(?:2|ii)\b/i.test(name)?1:
+     /open.?transfer|free.?transfer|phase\s*(?:3|iii)\b/i.test(name)?2:-1;
+   const span=Math.round((end-start)/86400000);
+   const add=(kind:number,begin:number,finish:number,source:string)=>{
+     if(finish<=today||!Number.isFinite(begin)||!Number.isFinite(finish))return;
+     const start_at=new Date(begin).toISOString(),end_at=new Date(finish).toISOString();
+     const key=kind+"|"+start_at;if(seen.has(key))return;seen.add(key);
+     found.push({phase:kind+1,label:phaseNames[kind],start_at,end_at,source});
+   };
+   if(explicitPhase>=0){add(explicitPhase,start,end,"api");}
+   // A full 7-day transfer window gives exact day boundaries for known 3/2/2 phases.
+   else if(span===7){
+     add(0,start,start+3*86400000,"derived_from_api_window");
+     add(1,start+3*86400000,start+5*86400000,"derived_from_api_window");
+     add(2,start+5*86400000,start+7*86400000,"derived_from_api_window");
+   }
+ }
+ found.sort((a,b)=>a.start_at.localeCompare(b.start_at));
+ const phases=found.slice(0,3),fetched_at=new Date().toISOString();
+ await checked<any>(db.from("aos_transfer_phase_feed").upsert({
+   alliance_code:alliance,kingdom_id:cfg.kingdom_id,phases,
+   source:"mightpulse_kingdom_events",provider_count:matches.length,fetched_at
+ },{onConflict:"alliance_code"}).select("alliance_code"));
+ return json(req,{ok:true,phases,fetched_at,source:"mightpulse_kingdom_events",provider_count:matches.length,from_cache:false});
+}
+
 async function saveTransferWindow(req:Request,alliance:string,userId:string,staff:any,payload:any){
  if(!permission(staff,"transfers"))throw new HttpError("permission_denied",403);
  const id=str(payload.id,36),data=payload.data;
@@ -686,7 +754,8 @@ async function save(req: Request, alliance: string, userId: string, staff: any, 
         target_alliance:str(data.target_alliance,50)||alliance,
         power:data.power && Number.isSafeInteger(Number(data.power)) && Number(data.power)>=0?Number(data.power):null,
         window_start:validateDate(data.window_start),window_end:validateDate(data.window_end),
-        notes:str(data.notes,3000),share_approved:Boolean(data.share_approved)};
+        notes:str(data.notes,3000),share_approved:existing?.share_approved??false,
+        avatar_url:profileAvatar(data.avatar_url,null)||existing?.avatar_url||null};
       if (patch.window_start&&patch.window_end&&patch.window_end<patch.window_start)throw new HttpError("invalid_window",400);
     } else if(entity==="event"){
       const title=localized(data.title,150),description=localized(data.description,3000);
@@ -771,6 +840,7 @@ Deno.serve(async(req: Request)=>{
     if(body?.action==="power_sync")return await syncRosterPower(req,alliance,staff);
     if(body?.action==="staff_invite")return await inviteR4(req,alliance,userId,staff,body);
     if(body?.action==="transfer_window")return await saveTransferWindow(req,alliance,userId,staff,body);
+    if(body?.action==="transfer_phases")return await transferPhases(req,alliance,staff,body?.force===true);
     if(body?.action==="law_history")return await getLawHistory(req,alliance,staff,str(body.id,36));
     if(body?.action==="law_restore")return await restoreLawDraft(req,alliance,userId,staff,body);
     if(body?.action==="event_message")return await saveEventMessage(req,alliance,userId,staff,body);
