@@ -227,10 +227,10 @@ async function rosterFor(alliance: string, kingdom: number) {
       languages:overlay.spoken_languages??p.languages??[], source_languages:p.languages||[], joined_on:overlay.joined_on||null,
       responsibilities:overlay.responsibilities||"", avatar_url:cache.avatar_url||null,
       tc_level:cache.tc_level??null,
-      power:power.power!=null?Number(power.power):overlay.power_override!=null?Number(overlay.power_override):null,
-      power_source:power.power!=null?"bear_buff":overlay.power_override!=null?"manual":null,
+      power:overlay.power_override!=null?Number(overlay.power_override):power.power!=null?Number(power.power):null,
+      power_source:overlay.power_override!=null?"manual":power.power!=null?"bear_buff":null,
       power_override:overlay.power_override??null,
-      power_observed_at:power.fetched_at||overlay.power_override_at||null,
+      power_observed_at:overlay.power_override!=null?overlay.power_override_at||null:power.fetched_at||null,
       // Existing NRW onboarding and manually linked IDs are compared by immutable roster player ID.
       discord_connected:Boolean(overlay.discord_user_id||match.discord_user_id),
       discord_source:overlay.discord_user_id?"manual":match.discord_user_id?"onboarding":null,
@@ -670,7 +670,7 @@ async function save(req: Request, alliance: string, userId: string, staff: any, 
       patch={...patch,power_override:powerOverride,
         power_override_at:powerOverride===null?null:previousPower===powerOverride?existing?.power_override_at||now:now,
         game_id:str(data.game_id,20),member_status:data.member_status,
-        discord_user_id:str(data.discord_user_id,32)||null,notes:str(data.notes,3000),
+        discord_user_id:existing?.discord_user_id??null,notes:str(data.notes,3000),
         spoken_languages:spoken,joined_on:validateDate(data.joined_on),
         responsibilities:str(data.responsibilities,500)};
     }
