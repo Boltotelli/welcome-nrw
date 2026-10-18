@@ -1,9 +1,11 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.58.0/+esm";
-import {createEventHub} from "/leitung/event-library.js?v=7";
-import {createOperations} from "/leitung/operations.js?v=1";
+import {createEventHub} from "./event-library.js?v=pages-1";
+import {createOperations} from "./operations.js?v=pages-1";
 
 // Private AllianceOS pilot. Data is NEVER stored in localStorage; only auth session is.
 // All records and permissions are issued by the authenticated Edge Function.
+const LEITUNG_PATH=new URL("./",import.meta.url).pathname;
+const SITE_PATH=new URL("../",import.meta.url).pathname;
 const BASE="https://bdzlgirowutasrsycjfj.supabase.co";
 const FUNCTION=BASE+"/functions/v1/allianceos-leitung";
 const supabase=createClient(BASE,"sb_publishable_8i1ismeQtj9WM-xVN_Vm0w_Tj7AvVtL",{
@@ -68,7 +70,7 @@ function setTab(name){
  tab=name;q(".tab-page").forEach(p=>p.hidden=p.dataset.page!==name);
  q(".nav-item").forEach(b=>b.classList.toggle("active",b.dataset.tab===name));
  $("pageLabel").textContent=t(name);
- history.replaceState(null,"",name==="overview"?"/leitung/":"/leitung/?tab="+encodeURIComponent(name));
+ history.replaceState(null,"",LEITUNG_PATH+(name==="overview"?"":"?tab="+encodeURIComponent(name)));
 }
 function flash(message,error=false){
  const el=$("flash");el.textContent=message;el.classList.toggle("error",error);el.hidden=false;
@@ -260,7 +262,7 @@ function openEdit(entity,id=null,sourcePlayer=null){
       (external.length?external.map(x=>'<div class="history-item"><b>#'+esc(x.origin_kingdom)+' → #'+esc(x.target_kingdom||state.alliance.kingdom_id)+'</b> · '+esc(t(x.status))+' · '+esc(x.window_start||"—")+'</div>').join(""):'<p class="muted">'+esc(t("noHistory"))+'</p>')+
       '<h3>'+esc(t("serverMoves"))+'</h3>'+
       (internal.length?internal.map(x=>'<div class="history-item">'+esc(dateText(x.moved_at))+' · '+esc(x.from_alliance||"—")+' → '+esc(x.to_alliance||"—")+'</div>').join(""):'<p class="muted">'+esc(t("noHistory"))+'</p>')+
-      '<p><a class="ghost" href="/bear" target="_blank" rel="noopener">'+esc(t("profileLink"))+' ↗</a></p>'+
+      '<p><a class="ghost" href="'+esc(SITE_PATH+"bear/preview-v3.html")+'" target="_blank" rel="noopener">'+esc(t("profileLink"))+' ↗</a></p>'+
       (can("transfers")?'<button type="button" class="ghost" data-plan-player="'+esc(record.game_id)+'">'+esc(t("serverTransfer"))+' →</button>':"");
  }else return;
  $("modalFields").innerHTML=h;

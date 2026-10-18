@@ -263,7 +263,7 @@ async function inviteR4(req:Request,alliance:string,userId:string,staff:any,payl
   const perms=payload.permissions||{};
   const permissions=Object.fromEntries(["members","transfers","laws","events","settings"].map(x=>[x,perms[x]===true]));
   if(!Object.values(permissions).some(Boolean))throw new HttpError("no_permissions_selected",400);
-  const {data,error}=await db.auth.admin.inviteUserByEmail(email,{redirectTo:"https://welcome-nrw.vercel.app/leitung/"});
+  const {data,error}=await db.auth.admin.inviteUserByEmail(email,{redirectTo:"https://boltotelli.github.io/welcome-nrw/leitung/"});
   if(error||!data?.user){console.error("R4 invitation",error?.code);throw new HttpError("invitation_failed",502);}
   const item=await checked<any>(db.from("aos_staff").upsert({
     user_id:data.user.id,alliance_code:alliance,rank:"R4",enabled:true,permissions

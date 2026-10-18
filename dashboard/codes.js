@@ -220,7 +220,7 @@
   async function loadEventFeed(){
     if(eventFeedCache)return eventFeedCache;
     try{
-      const response=await fetch('/dashboard/events.json',{cache:'no-store'});
+      const response=await fetch('./events.json',{cache:'no-store'});
       if(!response.ok)throw new Error(`events ${response.status}`);
       const data=await response.json();
       eventFeedCache=Array.isArray(data?.events)?data.events:[];

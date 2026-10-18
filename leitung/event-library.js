@@ -47,8 +47,8 @@ export function createEventHub({request,flash,esc,t}) {
  async function load(){
   if(sources)return sources;
   if(!loading)loading=Promise.all([
-    fetch("/dashboard/events.json",{cache:"no-store"}).then(r=>r.ok?r.json():Promise.reject(new Error("events_source_unavailable"))),
-    fetch("/dashboard/event-guides.json",{cache:"no-store"}).then(r=>r.ok?r.json():Promise.reject(new Error("guides_source_unavailable")))
+    fetch(new URL("../dashboard/events.json",import.meta.url),{cache:"no-store"}).then(r=>r.ok?r.json():Promise.reject(new Error("events_source_unavailable"))),
+    fetch(new URL("../dashboard/event-guides.json",import.meta.url),{cache:"no-store"}).then(r=>r.ok?r.json():Promise.reject(new Error("guides_source_unavailable")))
   ]).then(([schedule,guides])=>{sources={schedule,guides};assemble();return sources;}).catch(e=>{loading=null;throw e;});
   return loading;
  }
