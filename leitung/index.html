@@ -6,7 +6,7 @@
 <title>AllianceOS · NRW Leitungszentrale</title>
 <meta name="description" content="Geschützte Leitungszentrale für Allianzverwaltung, Transfers, Laws und Events.">
 <link rel="icon" href="../assets/nrw-dashboard-icon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="./styles.css?v=pages-4">
+<link rel="stylesheet" href="./styles.css?v=pages-5">
 
 </head>
 <body>
@@ -71,8 +71,9 @@
             <input class="control search" id="rosterSearch" type="search" autocomplete="off" data-placeholder="searchPlayers" placeholder="Name oder Spieler-ID suchen …">
             <select class="control" id="rosterStatus"><option value="all" data-i18n="allStatuses">Alle Status</option><option value="active" data-i18n="active">Aktiv</option><option value="planned" data-i18n="planned">Geplant</option><option value="left" data-i18n="left">Ausgetreten</option></select>
             <select class="control" id="rosterSort"><option value="name" data-i18n="sortName">Name A–Z</option><option value="rank" data-i18n="sortRank">Rang absteigend</option><option value="power" data-i18n="sortPower">Spielerstärke ↓</option><option value="id" data-i18n="sortId">Spieler-ID</option></select>
+            <button type="button" class="ghost" id="syncPlayerPower" data-permission="members" data-i18n="syncPower">↻ Stärke aus API abrufen</button>
             <span class="counter" id="rosterCount">–</span>
-          </div><div class="table-scroll"><table><thead><tr><th data-i18n="player">Spieler</th><th data-i18n="rank">Rang</th><th data-i18n="strength">Stärke</th><th data-i18n="language">Sprache</th><th>Discord</th><th data-i18n="memberStatus">Mitgliedschaft</th><th></th></tr></thead><tbody id="rosterRows"></tbody></table></div></div>
+          </div><p class="small-note" id="powerSyncStatus" role="status" aria-live="polite"></p><div class="table-scroll"><table><thead><tr><th data-i18n="player">Spieler</th><th data-i18n="rank">Rang</th><th data-i18n="strength">Stärke</th><th data-i18n="language">Sprache</th><th>Discord</th><th data-i18n="memberStatus">Mitgliedschaft</th><th></th></tr></thead><tbody id="rosterRows"></tbody></table></div></div>
         </section>
         <section class="tab-page" data-page="transfers" hidden>
           <div class="page-heading"><div><span class="eyebrow">TRANSFER CENTER</span><h2 data-i18n="transfers">Transferplanung</h2><p data-i18n="transfersDesc">Bewerbungen, Reservierungen, Wartelisten und abgeschlossene Wechsel.</p></div><button class="primary" data-create="transfer" data-permission="transfers" data-i18n="addTransfer">+ Transfer planen</button></div>
@@ -258,5 +259,5 @@
  <div class="modal-actions"><button type="button" class="ghost" id="copyLeaderCredentials" data-i18n="copyCredentials">Einmalig kopieren</button><button type="button" class="primary" id="leaderCredentialsClose" data-i18n="closeCredentials">Schließen & Anzeige löschen</button></div>
 </dialog>
 <script src="../dashboard/event-rhythm.js?v=pages-1"></script>
-<script type="module" src="./app.js?v=pages-6"></script>
+<script type="module" src="./app.js?v=pages-7"></script>
 </body></html>
