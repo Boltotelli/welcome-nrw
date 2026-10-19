@@ -232,3 +232,20 @@
 .discord-rule-dialog .modal-body{max-height:min(78vh,750px);overflow-y:auto}
 @media(max-width:1060px){.discord-bot-layout{grid-template-columns:1fr}.discord-bot-catalog{position:static}.discord-bot-events{max-height:260px}}
 @media(max-width:700px){.discord-bot-channel-grid,.discord-bot-anchor{grid-template-columns:1fr}.discord-rule-times,.discord-rule-locales{grid-template-columns:1fr}.discord-bot-rule{flex-wrap:wrap}.discord-rule-actions{width:100%;justify-content:flex-start}}
+
+
+/* Multi-day Discord schedules: each day is an independent message and time plan. */
+.discord-bot-day-header{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:16px 0 8px}
+.discord-bot-day-header h4{margin:0;font-size:1.02rem}
+.discord-bot-days{display:flex;gap:6px;overflow-x:auto;padding:4px 2px 10px;scrollbar-width:thin;flex-wrap:wrap}
+.discord-day-tab{min-width:70px;display:inline-flex;gap:9px;align-items:center;justify-content:space-between;border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:9px;padding:8px 10px;cursor:pointer;font:inherit;white-space:nowrap}
+.discord-day-tab small{background:var(--panel);border-radius:20px;min-width:24px;text-align:center;color:var(--muted);padding:2px 4px}
+.discord-day-tab:hover,.discord-day-tab.active{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--text)}
+.discord-day-info{border:1px solid var(--border);background:var(--panel);border-radius:12px;padding:12px 14px;margin:7px 0 15px}
+.discord-day-info strong{display:block;font-size:1rem}
+.discord-day-info p{margin:4px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.5}
+.discord-anchor-buttons{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.discord-anchor-buttons button{grid-column:auto}
+.discord-preset-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.discord-preset-actions [hidden]{display:none!important}
+@media(max-width:700px){.discord-bot-days{flex-wrap:nowrap}.discord-day-tab{flex-shrink:0}.discord-anchor-buttons{flex-direction:column;align-items:stretch}.discord-anchor-buttons button{width:100%}}
