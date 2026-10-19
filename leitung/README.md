@@ -165,3 +165,16 @@ Supabase Edge Function `allianceos-leitung` v15 was deployed ACTIVE and migratio
 - An optional transfer contact is assigned from the currently enabled R4/R5 staff in NRW. The backend verifies the contact is enabled and belongs to the same alliance. The candidate list shows the chosen contact.
 - Site publish route is GitHub Pages via the existing Bear Pages Action, NOT Vercel. Supabase Edge Function version 17 is active.
 - Authenticated R5 manual save/reload test and a live external-provider lookup test are still outstanding. Do not claim that they have passed.
+
+## Phase 3 · Fully editable NRW server Laws (2026-10-19)
+
+The kingdom-scoped Law editor now supports real creation, editing, drafts, publishing and history restore for NRW leadership accounts with the `laws` permission. This intentionally **supersedes earlier documentation that called these records non-editable**. The protected production NAP Tracker laws remain entirely separate and are not mutated.
+
+- Root cause fixed: the Laws list had disabled its Edit button for **all** `scope=kingdom` records. The new list enables permitted editors, indicates the actually published snapshot version separately from newer private draft versions, and sorts Law numbers naturally.
+- Editor: only Kingdom is offered; German title and text must exist for publishing; DE/EN/FR/ES versions may be authored. Save a draft without changing the published snapshot. Any public publish requires explicit browser confirmation. Duplicate law numbers show an actionable error, and concurrent updates check the old version.
+- Versions can be opened and restored as **new unpublished drafts**. A specific `Withdraw` button can remove the published snapshot while retaining the internal draft/version history. Withdrawal requires explicit confirmation and the same `laws` permission.
+- `public-laws` serves only `aos_law_publications` filtered to `scope=kingdom`; a new draft never leaks. Public `laws.html` sorts numerically (2 before 10), preserves text paragraphs and supports Spanish in addition to DE/EN/FR.
+- A production-DB transaction test successfully exercised draft insert, version-history row, publish, edit draft while snapshot stays public, withdrawal, and rollback. Follow-up SQL verified zero test rows remain. No user-authenticated browser save/publish test was performed; don't claim that it was.
+- GitHub Pages production is updated via `.github/workflows/bear-pages.yml` on the existing feature branch and takes latest `main` static content. Supabase `allianceos-leitung` Edge Function v24 contains the API changes; Vercel is not used for this publish.
+
+**Important:** No actual NRW server laws were auto-created. Leadership must enter and explicitly publish the approved texts; the public Laws page remains empty until then.
