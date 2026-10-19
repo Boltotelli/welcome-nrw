@@ -259,7 +259,7 @@ async function internalMovesFor(alliance:string) {
 }
 async function bootstrap(req: Request, alliance: string, staff: any) {
   const config=await checked<any>(db.from("aos_alliances").select("*").eq("code",alliance).single());
-  const [players, transfers, laws, events, internalMoves, eventMessages, eventGuidance, eventCycles, eventDayTemplates, transferWindows, lawVersions, auditTrail]=await Promise.all([
+  const [players, transfers, laws, events, internalMoves, eventMessages, eventGuidance, eventCycles, eventDayTemplates, transferWindows, lawVersions, lawPublications, auditTrail]=await Promise.all([
     rosterFor(alliance,config.kingdom_id),
     checked<any[]>(db.from("aos_transfers").select("*").eq("alliance_code",alliance).order("updated_at",{ascending:false}).limit(500)),
     checked<any[]>(db.from("aos_laws").select("*").eq("alliance_code",alliance).order("updated_at",{ascending:false}).limit(300)),
@@ -271,6 +271,7 @@ async function bootstrap(req: Request, alliance: string, staff: any) {
     checked<any[]>(db.from("aos_event_day_templates").select("*").eq("alliance_code",alliance).limit(300)),
     checked<any[]>(db.from("aos_transfer_windows").select("*").eq("alliance_code",alliance).order("start_date",{ascending:false}).limit(150)),
     permission(staff,"laws")?checked<any[]>(db.from("aos_law_versions").select("law_id,version,snapshot,changed_at,changed_by").eq("alliance_code",alliance).order("changed_at",{ascending:false}).limit(250)):Promise.resolve([]),
+    permission(staff,"laws")?checked<any[]>(db.from("aos_law_publications").select("law_id,scope,version,published_at").eq("alliance_code",alliance).eq("scope","kingdom").limit(250)):Promise.resolve([]),
     staff.is_owner?checked<any[]>(db.from("aos_audit").select("entity,entity_id,action,actor_id,created_at").eq("alliance_code",alliance).order("created_at",{ascending:false}).limit(60)):Promise.resolve([])
   ]);
   let staffMembers:any[]=[];
@@ -302,7 +303,7 @@ async function bootstrap(req: Request, alliance: string, staff: any) {
     eventCycles:permission(staff,"events")?eventCycles:[],
     eventDayTemplates:permission(staff,"events")?eventDayTemplates:[],
     transferWindows:permission(staff,"transfers")?transferWindows:[],
-    lawVersions,auditTrail});
+    lawVersions,lawPublications,auditTrail});
 }
 
 function profileAvatar(raw:any,upload:any):string|null{
@@ -419,6 +420,34 @@ async function saveTransferWindow(req:Request,alliance:string,userId:string,staf
    db.from("aos_transfer_windows").insert(patch).select("*").single());
  await audit(alliance,userId,"transfer_window",item.id,id?"update":"create");
  return json(req,{ok:true,item});
+}
+async function unpublishServerLaw(req:Request,alliance:string,userId:string,staff:any,payload:any){
+ if(!permission(staff,"laws"))throw new HttpError("permission_denied",403);
+ const id=str(payload.id,36),expected=Number(payload.expected_version);
+ if(!id||!Number.isInteger(expected)||expected<1)throw new HttpError("invalid_version",400);
+ const law=await checked<any>(db.from("aos_laws").select("*").eq("alliance_code",alliance)
+   .eq("id",id).eq("scope","kingdom").maybeSingle());
+ if(!law)throw new HttpError("not_found",404);
+ if(law.version!==expected)throw new HttpError("version_conflict",409);
+ const publication=await checked<any>(db.from("aos_law_publications").select("law_id")
+   .eq("alliance_code",alliance).eq("scope","kingdom").eq("law_id",id).maybeSingle());
+ if(!publication)throw new HttpError("law_not_published",409);
+ // Withdraw the public snapshot first so it cannot linger after an explicit withdrawal.
+ const removed=await db.from("aos_law_publications").delete().eq("law_id",id)
+   .eq("alliance_code",alliance).eq("scope","kingdom").select("law_id");
+ if(removed.error||!removed.data?.length)throw new HttpError("unpublish_failed",500);
+ const now=new Date().toISOString();
+ const updated=await checked<any>(db.from("aos_laws").update({
+    status:"draft",published_at:null,version:law.version+1,updated_at:now
+ }).eq("id",id).eq("alliance_code",alliance).eq("version",expected).select("*").maybeSingle());
+ if(!updated)throw new HttpError("version_conflict",409);
+ await checked<any>(db.from("aos_law_versions").insert({
+   law_id:id,alliance_code:alliance,version:updated.version,
+   snapshot:{scope:updated.scope,number:updated.number,title:updated.title,body:updated.body,status:"draft"},
+   changed_by:userId
+ }).select("id").single());
+ await audit(alliance,userId,"law",id,"unpublish");
+ return json(req,{ok:true,item:updated});
 }
 async function getLawHistory(req:Request,alliance:string,staff:any,id:string){
  if(!permission(staff,"laws"))throw new HttpError("permission_denied",403);
@@ -705,8 +734,12 @@ async function save(req: Request, alliance: string, userId: string, staff: any, 
       if(!["kingdom","alliance"].includes(scope)||!number||!["draft","published"].includes(status))throw new HttpError("invalid_law",400);
       const title=localized(data.title,150),body=localized(data.body,12000);
       // Explicit editor publication is the only source of public server Laws.
-      if(status==="published"&&(!Object.values(title).some(Boolean)||!Object.values(body).some(Boolean)))throw new HttpError("incomplete_law",400);
+      if(status==="published"&&(!title.de||!body.de))throw new HttpError("law_requires_german",400);
+      if(scope==="kingdom"&&alliance!=="NRW")throw new HttpError("kingdom_editor_nrw_only",403);
       if(existing && existing.scope!==scope)throw new HttpError("law_scope_change_forbidden",403);
+      const collision=await checked<any>(db.from("aos_laws").select("id")
+        .eq("alliance_code",alliance).eq("scope",scope).eq("number",number).maybeSingle());
+      if(collision?.id&&collision.id!==existing?.id)throw new HttpError("law_number_exists",409);
       if(existing && Number(data.expected_version)!==Number(existing.version))throw new HttpError("version_conflict",409);
       patch={...patch,scope,number,title,body,status,version:existing?existing.version+1:1,
         published_at:status==="published"?now:null};
@@ -774,6 +807,7 @@ Deno.serve(async(req: Request)=>{
     if(body?.action==="transfer_window")return await saveTransferWindow(req,alliance,userId,staff,body);
     if(body?.action==="transfer_portraits")return await refreshTransferPortraits(req,alliance,staff);
     if(body?.action==="law_history")return await getLawHistory(req,alliance,staff,str(body.id,36));
+    if(body?.action==="law_unpublish")return await unpublishServerLaw(req,alliance,userId,staff,body);
     if(body?.action==="law_restore")return await restoreLawDraft(req,alliance,userId,staff,body);
     if(body?.action==="event_message")return await saveEventMessage(req,alliance,userId,staff,body);
     if(body?.action==="event_guidance")return await saveEventGuidance(req,alliance,userId,staff,body);
