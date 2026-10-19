@@ -33,6 +33,12 @@ export function createEventBotStatusPanel({supabase,can,flash,esc}){
  <button type="button" id="aosBotAlliancePause" class="ghost" hidden>Allianz pausieren</button>
  <button type="button" id="aosBotGlobalPause" class="ghost" hidden>🛑 Globaler Not-Aus</button>
  </div>
+ <div class="aos-bot-toolbar">
+  <button type="button" class="ghost" id="aosBotAllianceMentions">🔕 Sprachrollen NRW: AUS</button>
+  <button type="button" class="ghost" id="aosBotGlobalMentions" hidden>🔕 Sprachrollen global: AUS</button>
+ </div>
+ <details><summary>Sprachrollen-Erwähnungen pro Nachricht (standardmäßig AUS)</summary>
+  <div id="aosBotRoleRules" class="aos-bot-table"></div></details>
  <div id="aosBotWarnings"></div>
  <h4>📅 Nächste Nachrichten</h4><div id="aosBotPreview" class="aos-bot-table"></div>
  <h4>📜 Versandhistorie</h4>
@@ -108,6 +114,16 @@ export function createEventBotStatusPanel({supabase,can,flash,esc}){
   $("aosBotTest").disabled=!enabled||!connected;
   $("aosBotAlliancePause").hidden=!enabled||!l.sending_enabled;
   $("aosBotGlobalPause").hidden=!state.isOwner||!g.sending_enabled;
+  $("aosBotAllianceMentions").disabled=!enabled;
+  $("aosBotAllianceMentions").textContent=(l.role_mentions_enabled?"🔔":"🔕")+" Sprachrollen NRW: "+(l.role_mentions_enabled?"AN":"AUS");
+  $("aosBotGlobalMentions").hidden=!state.isOwner||!g.production_approved;
+  $("aosBotGlobalMentions").textContent=(g.role_mentions_enabled?"🔔":"🔕")+" Sprachrollen global: "+(g.role_mentions_enabled?"AN":"AUS");
+  const roleRules=state.roleRules||[];
+  $("aosBotRoleRules").innerHTML=roleRules.length?'<table><thead><tr><th>Event</th><th>Nachricht</th><th>Erwähnung</th></tr></thead><tbody>'+
+   roleRules.map(r=>'<tr><td>'+esc(r.event_key)+' · Tag '+esc(r.event_day)+'</td><td>'+esc(r.title)+'</td><td>'+
+   '<button type="button" class="ghost" data-bot-mention="'+esc(r.id)+'" '+(!state.canEvents?'disabled':'')+'>'+
+   (r.mention_role?'🔔 AN':'🔕 AUS')+'</button></td></tr>').join('')+'</tbody></table>':
+   '<p class="muted">Keine aktiven Nachrichtenregeln vorhanden.</p>';
  }
  async function refresh(){
   if(working)return;
@@ -136,5 +152,17 @@ export function createEventBotStatusPanel({supabase,can,flash,esc}){
    "Den automatischen Versand für NRW sofort pausieren?"));
  $("aosBotGlobalPause").addEventListener("click",()=>mutate({action:"pause_global"},
    "GLOBALER NOT-AUS: Event-Bot für ALLE Allianzen pausieren?"));
+ $("aosBotAllianceMentions").addEventListener("click",()=>mutate({action:"set_alliance_mentions",
+    enabled:!state?.local?.role_mentions_enabled},
+   "Sprachrollen-Erwähnungen für NRW "+(state?.local?.role_mentions_enabled?"deaktivieren":"vorbereiten")+"? Global bleibt bis Freigabe AUS."));
+ $("aosBotGlobalMentions").addEventListener("click",()=>mutate({action:"set_global_mentions",
+   enabled:!state?.global?.role_mentions_enabled},
+   "Globale Rollen-Erwähnungen "+(state?.global?.role_mentions_enabled?"deaktivieren":"aktivieren")+"?"));
+ root.addEventListener("click",e=>{
+   const btn=e.target.closest?.("[data-bot-mention]");
+   if(!btn||!state?.canEvents)return;
+   const rule=(state.roleRules||[]).find(x=>x.id===btn.dataset.botMention);
+   if(rule)mutate({action:"set_rule_mention",rule_id:rule.id,enabled:!rule.mention_role});
+ });
  return {refresh,reset(){state=null;$("aosBotProgress").textContent="Status nicht geladen.";}};
 }
