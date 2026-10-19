@@ -3,6 +3,7 @@ import {createEventHub} from "./event-library.js?v=step6-iteratorfix-1";
 import {createOperations} from "./operations.js?v=pages-4";
 import {createDiscordEventPlanner} from "./discord-events.js?v=eventbot-4lang-20261019";
 import {createEventBotStatusPanel} from "./event-bot-status.js?v=eventbot-4lang-20261019";
+import {createMemberRelationships} from "./member-relationships.js?v=phase1-20261019-1";
 
 // Private AllianceOS pilot. Data is NEVER stored in localStorage; only auth session is.
 // All records and permissions are issued by the authenticated Edge Function.
@@ -147,6 +148,7 @@ const eventHub=createEventHub({request,flash,esc,t});
  const discordPlanner=createDiscordEventPlanner({request,flash,esc,can,eventHub});
 const eventBotStatusPanel=createEventBotStatusPanel({supabase,flash,can,esc});
 const operations=createOperations({getState:()=>state,request,flash,esc,t,can,refresh});
+const relationships=createMemberRelationships({getState:()=>state,getLanguage:()=>lang,request,esc});
 function showLogin(message=""){
  $("liveArea").hidden=true;$("loginArea").hidden=false;$("logoutBtn").hidden=true;
  $("roleChip").textContent="R4 / R5";$("loginError").textContent=message;$("changePasswordBtn").hidden=true;
@@ -218,7 +220,7 @@ function renderRoster(){
  $("rosterCount").textContent=fmtInt(list.length);
  $("rosterRows").innerHTML=list.length?list.map(p=>{
   const id=esc(p.game_id||""),name=esc(p.name),avatar=/^https:\/\//i.test(p.avatar_url||"")?'<img class="avatar" src="'+esc(p.avatar_url)+'" alt="">':'<span class="avatar">'+esc((p.name||"?").slice(0,1))+'</span>';
-  return '<tr><td><div class="person">'+avatar+'<div><strong>'+name+'</strong><small>'+id+'</small></div></div></td><td>'+'<span class="rank-and-tg"><strong>'+esc(p.rank?"R"+p.rank:"—")+'</strong><span class="level">· '+esc(cityLevel(p.tc_level))+'</span></span>'+'</td><td>'+(p.power==null?'<span class="muted">'+esc(t("noPower"))+'</span>':'<strong title="'+esc(fmtInt(p.power))+'">'+esc(formattedPower(p.power))+'</strong><small title="'+esc(p.power_source||"")+'">'+esc(dateText(p.power_observed_at))+'</small>')+'</td><td>'+languageChips(p.languages)+'</td><td>'+'<span class="discord-presence '+(p.discord_connected?"connected":"unlinked")+'" title="'+esc(p.discord_connected?t("discordLinked"):t("discordUnlinked"))+'">'+esc(p.discord_connected?t("yes"):t("no"))+'</span>'+'</td><td>'+badge(p.member_status)+'</td><td><button type="button" class="action-link" data-edit-member="'+id+'" aria-label="'+esc(t("dossier"))+' · '+name+'" '+(!can("members")?"disabled":"")+'>'+esc(t("dossier"))+'</button></td></tr>';
+  return '<tr><td><div class="person">'+avatar+'<div><strong>'+name+'</strong><small>'+id+relationships.rowBadge(p)+'</small></div></div></td><td>'+'<span class="rank-and-tg"><strong>'+esc(p.rank?"R"+p.rank:"—")+'</strong><span class="level">· '+esc(cityLevel(p.tc_level))+'</span></span>'+'</td><td>'+(p.power==null?'<span class="muted">'+esc(t("noPower"))+'</span>':'<strong title="'+esc(fmtInt(p.power))+'">'+esc(formattedPower(p.power))+'</strong><small title="'+esc(p.power_source||"")+'">'+esc(dateText(p.power_observed_at))+'</small>')+'</td><td>'+languageChips(p.languages)+'</td><td>'+'<span class="discord-presence '+(p.discord_connected?"connected":"unlinked")+'" title="'+esc(p.discord_connected?t("discordLinked"):t("discordUnlinked"))+'">'+esc(p.discord_connected?t("yes"):t("no"))+'</span>'+'</td><td>'+badge(p.member_status)+'</td><td><button type="button" class="action-link" data-edit-member="'+id+'" aria-label="'+esc(t("dossier"))+' · '+name+'" '+(!can("members")?"disabled":"")+'>'+esc(t("dossier"))+'</button></td></tr>';
  }).join(""):empty(t("noPlayers"));
 }
 function renderTransfers(){
@@ -394,6 +396,7 @@ function openEdit(entity,id=null,sourcePlayer=null){
       '<div class="form-grid"><div class="field"><span>'+esc(t("discordPresence"))+'</span><p class="discord-presence '+(record.discord_connected?"connected":"unlinked")+'">'+esc(record.discord_connected?t("yes"):t("no"))+'</p><small>'+esc(record.discord_connected?t("discordLinked"):t("discordUnlinked"))+'</small></div>'+
       control(t("joined"),"joined_on",record.joined_on||"","date")+
       control(t("powerInput"),"power_override",record.power_override??"","number",{min:0,max:9999999999999,step:1})+'</div><p class="small-note">'+esc(t("powerHelp"))+'</p>'+
+      relationships.editorFields(record)+
       '<div class="field"><span>'+esc(t("spoken"))+'</span><div class="language-options">'+[...LANGS,"tr"].map(l=>'<label class="check"><input type="checkbox" name="spoken_languages" value="'+l+'" '+((record.languages||[]).includes(l)?"checked":"")+'> '+esc(playerLangNames[l]||l)+'</label>').join("")+'</div></div>'+
       control(t("otherSpoken"),"other_spoken",(record.languages||[]).filter(l=>![...LANGS,"tr"].includes(l)).join(", "),"text",{maxlength:400})+
       textarea(t("responsibilities"),"responsibilities",record.responsibilities||"")+
@@ -443,6 +446,7 @@ function openEdit(entity,id=null,sourcePlayer=null){
  const dialog=$("editDialog");
  if(dialog.open)dialog.close();
  dialog.showModal();
+ if(entity==="member"&&record)relationships.activate(record);
 }
 async function saveDialog(event){
  event.preventDefault();
@@ -473,6 +477,7 @@ async function saveDialog(event){
     data.game_id=record.game_id;
     const other=String(fd.get("other_spoken")||"").split(/[,;]/).map(v=>v.trim()).filter(Boolean);
     data.spoken_languages=[...new Set([...fd.getAll("spoken_languages"),...other])];
+    relationships.appendSaveData(data,fd);
   }
  $("submitDialog").disabled=true;
  try{
@@ -503,6 +508,15 @@ $("rosterRows").addEventListener("click",e=>{
    console.error("Player dossier failed to open",error);
    flash(t("genericError")+" ("+String(error?.message||error)+")",true);
  }
+});
+$("modalFields").addEventListener("click",event=>{
+  const button=event.target.closest("[data-related-player]");
+  if(!button||!state)return;
+  event.preventDefault();
+  const other=state.players.find(p=>String(p.game_id)===String(button.dataset.relatedPlayer));
+  if(!other)return;
+  $("editDialog").close();
+  openEdit("member",other.game_id);
 });
 $("transferFilter").addEventListener("change",()=>state&&renderTransfers());
 $("transferWindowFilter").addEventListener("change",()=>state&&renderTransfers());
