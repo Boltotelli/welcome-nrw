@@ -416,7 +416,7 @@ async function saveDiscordRule(req:Request,alliance:string,userId:string,staff:a
   messages[l]=value;
  }
  const enabled=body.enabled===true;
- if(enabled&&!["de","en","fr","es"].every(l=>Boolean(messages[l])))throw new HttpError("four_languages_required",400);
+ if(enabled&&!["de","en","fr"].every(l=>Boolean(messages[l])))throw new HttpError("three_languages_required",400);
  const patch={event_key,title,trigger_type,relative_to,offset_minutes,clock_utc:trigger_type==="clock"?clock_utc:null,day_number,enabled,messages,updated_at:new Date().toISOString(),updated_by:userId};
  const id=str(body.id,36),isExisting=Boolean(id);
  if(isExisting&&!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id))throw new HttpError("invalid_rule_id",400);
