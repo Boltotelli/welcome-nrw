@@ -506,6 +506,81 @@ $("settingsForm").addEventListener("submit",async(e)=>{
  try{await request("bootstrap",{action:"save",entity:"settings",data:payload});await refresh();flash(t("saved"));}
  catch(e){flash(t("genericError")+" ("+e.message+")",true);}
 });
+
+$("defaultLanguage").addEventListener("change",e=>{
+ const input=q("#activeLanguages input").find(x=>x.value===e.target.value);
+ if(input)input.checked=true;
+});
+q("#activeLanguages input").forEach(box=>box.addEventListener("change",()=>{
+ const current=$("defaultLanguage").value;
+ const enabled=q("#activeLanguages input:checked").map(x=>x.value);
+ if(!enabled.length){box.checked=true;return;}
+ if(!enabled.includes(current))$("defaultLanguage").value=enabled[0];
+}));
+function safeLogoType(file){
+ return ["image/png","image/jpeg","image/webp"].includes(file?.type)&&file.size>0&&file.size<=8*1024*1024;
+}
+async function optimizedLogo(file){
+ const source=await createImageBitmap(file);
+ try{
+  const canvas=document.createElement("canvas"),scale=Math.min(1,512/Math.max(source.width,source.height));
+  canvas.width=Math.max(1,Math.round(source.width*scale));
+  canvas.height=Math.max(1,Math.round(source.height*scale));
+  const ctx=canvas.getContext("2d");if(!ctx)throw Error("canvas_unsupported");
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.drawImage(source,0,0,canvas.width,canvas.height);
+  const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/webp",.84));
+  if(!blob)throw Error("image_processing_failed");
+  if(blob.size>1048576)throw Error("image_too_large");
+  return blob;
+ }finally{source.close?.();}
+}
+function asBase64(blob){
+ return new Promise((resolve,reject)=>{const reader=new FileReader();
+  reader.onload=()=>resolve(String(reader.result||"").split(",")[1]||"");
+  reader.onerror=()=>reject(Error("file_read_failed"));reader.readAsDataURL(blob);
+ });
+}
+let logoObjectUrl=null;
+$("allianceLogoFile").addEventListener("change",e=>{
+ if(logoObjectUrl)URL.revokeObjectURL(logoObjectUrl);
+ const file=e.target.files?.[0];$("logoUploadStatus").textContent="";
+ if(file&&safeLogoType(file)){
+  logoObjectUrl=URL.createObjectURL(file);$("logoPreview").src=logoObjectUrl;
+ }else{
+  if(file)$("logoUploadStatus").textContent=t("logoInvalid");
+  $("logoPreview").src=state?.alliance?.logo_url||"../assets/nrw-banner.svg";
+ }
+});
+$("uploadAllianceLogo").addEventListener("click",async()=>{
+ if(!can("settings"))return;
+ const file=$("allianceLogoFile").files?.[0],button=$("uploadAllianceLogo");
+ if(!file){$("logoUploadStatus").textContent=t("logoChoose");return;}
+ if(!safeLogoType(file)){$("logoUploadStatus").textContent=t("logoInvalid");return;}
+ button.disabled=true;$("logoUploadStatus").textContent=t("logoUploading");
+ try{
+  const blob=await optimizedLogo(file),base64=await asBase64(blob);
+  await request("bootstrap",{action:"alliance_logo_upload",mime_type:blob.type,base64});
+  if(logoObjectUrl){URL.revokeObjectURL(logoObjectUrl);logoObjectUrl=null;}
+  $("allianceLogoFile").value="";
+  await refresh();setTab("settings");
+  $("logoUploadStatus").textContent=t("logoUploaded");
+ }catch(err){
+  $("logoUploadStatus").textContent=(err.message==="image_too_large"?t("logoTooLarge"):t("logoUploadFailed")+" ("+err.message+")");
+ }finally{button.disabled=!can("settings");}
+});
+$("removeAllianceLogo").addEventListener("click",async()=>{
+ if(!can("settings"))return;
+ const button=$("removeAllianceLogo");button.disabled=true;
+ try{
+  await request("bootstrap",{action:"alliance_logo_remove"});
+  if(logoObjectUrl){URL.revokeObjectURL(logoObjectUrl);logoObjectUrl=null;}
+  $("allianceLogoFile").value="";
+  await refresh();setTab("settings");$("logoUploadStatus").textContent=t("logoRemoved");
+ }catch(e){$("logoUploadStatus").textContent=t("logoUploadFailed")+" ("+e.message+")";}
+ finally{button.disabled=!can("settings")||!state?.alliance?.logo_url;}
+});
+
 let legacyLogin=false;
 async function loadLeaderList(){
  const sel=$("leaderSelect");
