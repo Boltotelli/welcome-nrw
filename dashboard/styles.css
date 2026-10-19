@@ -115,3 +115,11 @@ main,footer{max-width:1320px;margin:0 auto;padding-left:28px;padding-right:28px}
 
 /* Preserve the native hidden state for optional Bear Trap slots in all layouts. */
 .trap-times > [hidden]{display:none!important}
+
+/* Dashboard nested-grid overflow guard: long localized labels, event text and
+   swipe cards must not force the whole page wider than the viewport. */
+.priority-grid{grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr)}
+.content-grid{grid-template-columns:minmax(0,1.38fr) minmax(0,.82fr)}
+.priority-grid>* , .content-grid>*, .profile-panel>*, .event-card{min-width:0}
+.event-card h3,.event-card-body,.focus-card,.trap-times{overflow-wrap:anywhere}
+@media(max-width:980px){.priority-grid,.content-grid,.profile-panel{grid-template-columns:minmax(0,1fr)}}
