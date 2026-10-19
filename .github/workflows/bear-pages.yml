@@ -423,10 +423,16 @@ jobs:
           test -s _site/dashboard/events.json
           test -s _site/dashboard/event-guides.json
           test -s _site/dashboard/event-rhythm.js
-          grep -Fq 'href="./styles.css?v=pages-9"' _site/leitung/index.html
-          grep -Fq 'src="./app.js?v=pages-13"' _site/leitung/index.html
-          grep -Fq 'src="../dashboard/event-rhythm.js?v=pages-1"' _site/leitung/index.html
+          grep -Fq 'href="./styles.css?v=pages-step4-1"' _site/leitung/index.html
+          grep -Fq 'src="./app.js?v=pages-step4-1"' _site/leitung/index.html
+          grep -Fq 'src="../dashboard/event-rhythm.js?v=pages-step4-1"' _site/leitung/index.html
           grep -Fq 'const opsUI=' _site/leitung/app.js
+          grep -Fq 'id="eventNameFields"' _site/leitung/index.html
+          grep -Fq 'id="cycleBearOptions"' _site/leitung/index.html
+          grep -Fq 'start_time_utc' _site/leitung/event-library.js
+          grep -Fq 'id="bt3Countdown"' _site/dashboard/index.html
+          grep -Fq 'src="./event-rhythm.js?v=step4-1"' _site/dashboard/index.html
+          grep -Fq 'src="./app.js?v=step4-1"' _site/dashboard/index.html
           grep -Fq 'id="defaultLanguage"' _site/leitung/index.html
           ! grep -Fq 'data-tab="languages"' _site/leitung/index.html
           grep -Fq 'lookupTransferPlayer' _site/leitung/app.js
@@ -475,7 +481,7 @@ jobs:
             if(!fs.statSync(path.join(root,file)).size)process.exit(2);
           }
           const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
-          for(const ref of ['./app.js?v=pages-13','./styles.css?v=pages-9','../dashboard/event-rhythm.js?v=pages-1','../assets/nrw-banner.svg']){
+          for(const ref of ['./app.js?v=pages-step4-1','./styles.css?v=pages-step4-1','../dashboard/event-rhythm.js?v=pages-step4-1','../assets/nrw-banner.svg']){
             const clean=ref.split('?')[0];
             if(!fs.existsSync(path.resolve(root,clean))){console.error('Missing Pages asset:',clean);process.exit(3);}
             if(!html.includes(ref)){console.error('HTML missing expected reference:',ref);process.exit(4);}
