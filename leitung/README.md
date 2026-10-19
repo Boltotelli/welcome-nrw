@@ -178,3 +178,14 @@ The kingdom-scoped Law editor now supports real creation, editing, drafts, publi
 - GitHub Pages production is updated via `.github/workflows/bear-pages.yml` on the existing feature branch and takes latest `main` static content. Supabase `allianceos-leitung` Edge Function v24 contains the API changes; Vercel is not used for this publish.
 
 **Important:** No actual NRW server laws were auto-created. Leadership must enter and explicitly publish the approved texts; the public Laws page remains empty until then.
+
+
+## Step 4 · Lokalized names and three separately configurable Bear Traps (19 October 2026)
+
+- The original `dashboard/events.json` / `dashboard/event-guides.json` and original 28-day rotation are still the event-data authorities. AllianceOS does not copy or replace the canonical guide content.
+- Each consolidated event type can now save `title` in **DE / EN / FR / ES**, with Kingshot guide names as defaults and English as fallback. A **title-only save** does not enable a new rhythm override or change the event dates. The official German term **Allianzmobilisierung** is used in leadership and the shared rhythm.
+- Three independently managed Bear Trap records use canonical keys `bear-1`, `bear-2`, `bear-3`. Each can be enabled/disabled, assigned a UTC start time, edited in each language, and have its own two-day default repetition/anchor/phase notes. **No slot is enabled automatically**: leadership confirms and saves its actual in-game time/date. The existing generic Bear Trap guide is a shared read-only reference, not a fourth trap.
+- `public.aos_event_cycles.start_time_utc` is an optional PostgreSQL `time` column, applied by migration on 2026-10-19; the authenticated `allianceos-leitung` Edge Function v26 validates `HH:mm`, enforces a maximum of three named Bear Trap slots, checks existing R4/R5 `events` permissions, and includes the time in `public-schedule`. Existing cycles remain unchanged.
+- The Dashboard consumes the same public cycles: localized event names appear without a second schedule; each enabled Bear Trap gets its own countdown. If leadership has not created any new trap slot, the existing two NRW legacy trap times stay visible. A disabled slot is hidden.
+- Discord bear-minister scheduling remains **untouched**; this work configures the NRW Player Dashboard and event guidance, not the separate Discord bot or local Messaging Queue.
+- Static runtime source tests cover all three simultaneous slots, repeating/off days, a disabled slot, name-only edits, and unchanged baseline events. Authenticated R4/R5 browser save-and-reload still requires a logged-in smoke test.
