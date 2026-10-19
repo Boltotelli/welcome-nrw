@@ -565,6 +565,64 @@ async function syncRosterPower(req:Request,alliance:string,staff:any){
  return json(req,{ok:true,source:"mightpulse_roster",matched:values.length,updated:values.length,
    requested:known.size,fetched_at:now});
 }
+// Read-only Phase 2 dashboard. Alliance staff authorization is enforced before
+// any data is collected. No NAP or performance source records are modified.
+async function performanceDashboard(req:Request,alliance:string,staff:any){
+  if(!permission(staff,"members"))throw new HttpError("permission_denied",403);
+  const since=new Date(Date.now()-89*86400000).toISOString().slice(0,10);
+  const history:any[]=[];
+  let truncated=false;
+  // Pagination avoids silently limiting the dashboard to the default 1000 rows.
+  for(let page=0;page<12;page++){
+    const chunk=await checked<any[]>(db.from("aos_member_power_history")
+      .select("game_id,observed_on,power,fetched_at,source")
+      .eq("alliance_code",alliance).gte("observed_on",since)
+      .order("observed_on",{ascending:true}).order("game_id",{ascending:true})
+      .range(page*1000,page*1000+999));
+    history.push(...chunk);
+    if(chunk.length<1000)break;
+    if(page===11)truncated=true;
+  }
+  const events=await checked<any[]>(db.from("performance_events")
+    .select("id,performance_type,event_name,label,period_start,period_end,finalized,updated_at")
+    .in("performance_type",["kvk_prep","alliance_mobilization"])
+    .order("period_start",{ascending:false}).limit(100));
+  const eventIds=events.map(e=>e.id);
+  const raw=eventIds.length?await checked<any[]>(db.from("player_performance_snapshots")
+    .select("performance_event_id,player_id,score,server_rank,recorded_at,source_type,metadata")
+    .eq("alliance_code",alliance).in("performance_event_id",eventIds)
+    .order("recorded_at",{ascending:false}).limit(4000)):[];
+  // Preserve the highest verified score per account/event, including the rank
+  // and source from that very observation. Multiple imported frames aren't additive.
+  const best=new Map<string,any>();
+  for(const item of raw){
+    if(!item.player_id||!item.performance_event_id)continue;
+    const key=item.performance_event_id+":"+item.player_id;
+    const old=best.get(key),score=Number(item.score),prior=Number(old?.score);
+    if(!Number.isSafeInteger(score)||score<0)continue;
+    if(!old||score>prior||(score===prior&&String(item.recorded_at)>String(old.recorded_at)))
+      best.set(key,item);
+  }
+  const chosen=[...best.values()];
+  const ids=[...new Set(chosen.map(r=>r.player_id))];
+  const names:any[]=[];
+  for(let i=0;i<ids.length;i+=200){
+    names.push(...await checked<any[]>(db.from("players").select("id,game_id,name")
+      .in("id",ids.slice(i,i+200)).limit(200)));
+  }
+  const people=new Map(names.map(p=>[p.id,p]));
+  const rankings=chosen.map(item=>{
+    const p=people.get(item.player_id);
+    return {event_id:item.performance_event_id,game_id:p?.game_id||null,
+      player_name:p?.name||str(item.metadata?.detected_name||"",100)||"—",
+      score:Number(item.score),server_rank:item.server_rank,
+      recorded_at:item.recorded_at,source:item.source_type};
+  });
+  return json(req,{ok:true,days:90,since,partial:truncated,
+    power:history.map(x=>({game_id:x.game_id,date:x.observed_on,
+      value:Number(x.power),observed_at:x.fetched_at})),
+    events,rankings,raw_count:raw.length});
+}
 async function memberPowerHistory(req:Request,alliance:string,staff:any,body:any){
  if(!permission(staff,"members"))throw new HttpError("permission_denied",403);
  const gameId=str(body?.game_id,20);
@@ -1066,6 +1124,7 @@ Deno.serve(async(req: Request)=>{
     if(body?.action==="player_lookup")return await lookupTransferPlayer(req,alliance,staff,body);
     if(body?.action==="power_sync")return await syncRosterPower(req,alliance,staff);
     if(body?.action==="power_history")return await memberPowerHistory(req,alliance,staff,body);
+    if(body?.action==="performance_dashboard")return await performanceDashboard(req,alliance,staff);
     if(body?.action==="staff_invite")return await inviteR4(req,alliance,userId,staff,body);
     if(body?.action==="transfer_window")return await saveTransferWindow(req,alliance,userId,staff,body);
     if(body?.action==="transfer_portraits")return await refreshTransferPortraits(req,alliance,staff);
