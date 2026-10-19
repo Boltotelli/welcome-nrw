@@ -153,7 +153,13 @@ export function createEventHub({request,flash,esc,t}) {
      merchant:["2026-09-14",28,7,7],golden:["2026-09-21",14,3,3],
      championship:["2026-10-19",7,2,2],bear:["2026-09-13",2,1,1]
    };
-   if(bearSlot(g.key))return{anchor_date:dayKey(new Date()),interval_days:2,duration_days:1,phase_count:1,start_time_utc:null,enabled:false};
+   if(bearSlot(g.key)){
+     const slot=Number(g.key.slice(-1));
+     // Historical NRW slots stay prefilled, but never become active without an explicit save.
+     return {anchor_date:slot<=2?"2026-09-13":dayKey(new Date()),
+       interval_days:2,duration_days:1,phase_count:1,
+       start_time_utc:slot===1?"17:00":slot===2?"18:30":null,enabled:false};
+   }
    const baseline=options[g.key];if(baseline)return{anchor_date:baseline[0],interval_days:baseline[1],duration_days:baseline[2],phase_count:baseline[3]};
    const instance=g.instances.find(e=>e.record.start);
    const start=instance?.record.start||dayKey(new Date());
