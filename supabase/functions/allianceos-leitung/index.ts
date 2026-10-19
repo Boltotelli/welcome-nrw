@@ -269,6 +269,9 @@ async function rosterFor(alliance: string, kingdom: number) {
   const notes = await checked<any[]>(db.from("aos_member_notes")
     .select("id,game_id,member_status,discord_user_id,notes,spoken_languages,joined_on,responsibilities,power_override,power_override_at,updated_at")
     .eq("alliance_code",alliance).limit(500));
+  const links=await checked<any[]>(db.from("aos_member_account_links")
+    .select("alt_game_id,main_game_id").eq("alliance_code",alliance).limit(500));
+  const byAlt=new Map(links.map(link=>[link.alt_game_id,link.main_game_id]));
   const cacheIds=players.map(p=>p.game_id).filter(isId);
   let images:any[]=[];
   if(cacheIds.length) images=await checked<any[]>(db.from("kingshot_player_cache")
@@ -297,6 +300,7 @@ async function rosterFor(alliance: string, kingdom: number) {
     const overlay=byNote.get(p.game_id)||{}, cache=byImg.get(p.game_id)||{}, match=byDiscord.get(p.id)||{}, power=byPower.get(p.game_id)||{}, api=byApiPower.get(p.game_id)||{};
     return {
       game_id:p.game_id, name:p.name, rank:p.alliance_rank || null,
+      main_game_id:byAlt.get(p.game_id)||null,
       alliance:p.alliance_code, active:p.active,
       member_status:overlay.member_status||(p.active?"active":"left"),
       note_id:overlay.id||null, notes:overlay.notes||null,
@@ -549,11 +553,29 @@ async function syncRosterPower(req:Request,alliance:string,staff:any){
  // Do not turn an API error or incomplete roster into zero-strength records.
  if(!values.length)throw new HttpError("power_roster_no_matches",502);
  for(let i=0;i<values.length;i+=100){
-   await checked<any>(db.from("aos_member_power_snapshot").upsert(values.slice(i,i+100),
+   const batch=values.slice(i,i+100);
+   await checked<any>(db.from("aos_member_power_snapshot").upsert(batch,
      {onConflict:"alliance_code,game_id"}).select("game_id"));
+   // The date represents the provider's actual UTC observation day.
+   // Repeated calls on the same day update the most recent real reading.
+   await checked<any>(db.from("aos_member_power_history").upsert(
+     batch.map(x=>({...x,observed_on:now.slice(0,10)})),
+     {onConflict:"alliance_code,game_id,observed_on"}).select("game_id"));
  }
  return json(req,{ok:true,source:"mightpulse_roster",matched:values.length,updated:values.length,
    requested:known.size,fetched_at:now});
+}
+async function memberPowerHistory(req:Request,alliance:string,staff:any,body:any){
+ if(!permission(staff,"members"))throw new HttpError("permission_denied",403);
+ const gameId=str(body?.game_id,20);
+ if(!isId(gameId))throw new HttpError("invalid_player_id",400);
+ const owns=await checked<any>(db.from("players").select("id").eq("alliance_code",alliance)
+   .eq("game_id",gameId).maybeSingle());
+ if(!owns)throw new HttpError("player_not_in_alliance",403);
+ const records=await checked<any[]>(db.from("aos_member_power_history")
+   .select("observed_on,power,fetched_at,source").eq("alliance_code",alliance)
+   .eq("game_id",gameId).order("observed_on",{ascending:false}).limit(120));
+ return json(req,{ok:true,game_id:gameId,snapshots:records.reverse()});
 }
 async function lookupTransferPlayer(req:Request,alliance:string,staff:any,body:any){
  if(!permission(staff,"transfers"))throw new HttpError("permission_denied",403);
@@ -851,6 +873,8 @@ async function save(req: Request, alliance: string, userId: string, staff: any, 
     }
     const now=new Date().toISOString();
     let patch:any={alliance_code:alliance,updated_at:now};
+    // No link update from older clients that do not submit this field.
+    let selectedMainId:string|undefined=undefined;
     if (entity==="transfer") {
       if(!isId(data.game_id)) throw new HttpError("invalid_player_id",400);
       const status=str(data.status,20),direction=str(data.direction,20);
@@ -952,6 +976,23 @@ async function save(req: Request, alliance: string, userId: string, staff: any, 
       if(!["active","planned","left"].includes(data.member_status))throw new HttpError("invalid_member_state",400);
       const spoken=Array.isArray(data.spoken_languages)?[...new Set(data.spoken_languages)]:null;
       if(spoken!==null && (spoken.length>12 || spoken.some((x:any)=>typeof x!=="string" || !/^[\p{L}0-9 _-]{2,30}$/u.test(x))))throw new HttpError("invalid_spoken_languages",400);
+      if(Object.prototype.hasOwnProperty.call(data,"main_game_id")){
+        selectedMainId=str(data.main_game_id||"",20);
+        if(selectedMainId){
+          if(!isId(selectedMainId)||selectedMainId===str(data.game_id,20))
+            throw new HttpError("invalid_main_account",400);
+          const main=await checked<any>(db.from("players").select("id")
+            .eq("alliance_code",alliance).eq("game_id",selectedMainId).maybeSingle());
+          if(!main)throw new HttpError("main_not_in_alliance",400);
+          const isAlt=await checked<any>(db.from("aos_member_account_links").select("alt_game_id")
+            .eq("alliance_code",alliance).eq("alt_game_id",selectedMainId).maybeSingle());
+          if(isAlt)throw new HttpError("main_is_already_alt",409);
+          const existingAlts=await checked<any[]>(db.from("aos_member_account_links")
+            .select("alt_game_id").eq("alliance_code",alliance)
+            .eq("main_game_id",str(data.game_id,20)).limit(1));
+          if(existingAlts.length)throw new HttpError("account_has_alts",409);
+        }
+      }
       const rawPower=data.power_override;
       const powerOverride=(rawPower===""||rawPower===null||rawPower===undefined)?null:Number(rawPower);
       if(powerOverride!==null && (!Number.isSafeInteger(powerOverride)||powerOverride<0||powerOverride>9999999999999))
@@ -973,6 +1014,17 @@ async function save(req: Request, alliance: string, userId: string, staff: any, 
       result=await checked<any>(existing
         ? db.from(entry.table).update(patch).eq("id",id).eq("alliance_code",alliance).select("*").single()
         : db.from(entry.table).insert(patch).select("*").single());
+    }
+    if(entity==="member" && selectedMainId!==undefined){
+      if(selectedMainId){
+        await checked<any>(db.from("aos_member_account_links").upsert({
+          alliance_code:alliance,alt_game_id:str(data.game_id,20),main_game_id:selectedMainId,
+          updated_at:now,updated_by:userId
+        },{onConflict:"alliance_code,alt_game_id"}).select("alt_game_id").single());
+      }else{
+        await checked<any>(db.from("aos_member_account_links").delete()
+          .eq("alliance_code",alliance).eq("alt_game_id",str(data.game_id,20)));
+      }
     }
     if(entity==="law"){
       await checked<any>(db.from("aos_law_versions").insert({
@@ -1013,6 +1065,7 @@ Deno.serve(async(req: Request)=>{
     if(body?.action==="reset_leader_password")return await rotateLeaderPassword(req,alliance,userId,staff,body);
     if(body?.action==="player_lookup")return await lookupTransferPlayer(req,alliance,staff,body);
     if(body?.action==="power_sync")return await syncRosterPower(req,alliance,staff);
+    if(body?.action==="power_history")return await memberPowerHistory(req,alliance,staff,body);
     if(body?.action==="staff_invite")return await inviteR4(req,alliance,userId,staff,body);
     if(body?.action==="transfer_window")return await saveTransferWindow(req,alliance,userId,staff,body);
     if(body?.action==="transfer_portraits")return await refreshTransferPortraits(req,alliance,staff);
