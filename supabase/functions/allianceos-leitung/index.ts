@@ -224,7 +224,7 @@ async function provisionLeaders(req:Request,alliance:string,userId:string,staff:
   if(authError||!made?.user){errors.push({name:member.name,reason:"account_creation_failed"});continue;}
   const assigned=await db.from("aos_staff").insert({
     user_id:made.user.id,alliance_code:alliance,rank,
-    enabled:true,permissions:{members:false,transfers:false,laws:false,events:false,settings:false}
+    enabled:true,permissions:{members:false,transfers:false,laws:false,events:false,event_bot:false,settings:false}
   }).select("user_id").single();
   if(assigned.error){
     await db.auth.admin.deleteUser(made.user.id).catch(()=>{});
@@ -341,7 +341,7 @@ const discordTime=(raw:unknown)=>{
  return v;
 };
 async function discordPlanner(req:Request,alliance:string,staff:any,page:number){
- if(!permission(staff,"events")&&!permission(staff,"settings"))throw new HttpError("permission_denied",403);
+ if(!permission(staff,"event_bot")&&!permission(staff,"event_bot"))throw new HttpError("permission_denied",403);
  if(!Number.isSafeInteger(page)||page<0||page>100000)throw new HttpError("invalid_page",400);
  const start=page*150;
  const [config,anchors,dayTimes,rules]=await Promise.all([
@@ -353,11 +353,11 @@ async function discordPlanner(req:Request,alliance:string,staff:any,page:number)
  return json(req,{config:config||{guild_id:"",channels:{}},anchors,dayTimes,rules,has_more:rules.length===150});
 }
 async function saveDiscordConfig(req:Request,alliance:string,userId:string,staff:any,body:any){
- if(!permission(staff,"settings"))throw new HttpError("permission_denied",403);
+ if(!permission(staff,"event_bot"))throw new HttpError("permission_denied",403);
  const guild_id=discordId(body.guild_id);
  if(!body.channels||typeof body.channels!=="object"||Array.isArray(body.channels))throw new HttpError("invalid_discord_channels",400);
  const channels:Record<string,string>={};
- for(const l of ["de","en","fr"])channels[l]=discordId(body.channels[l]);
+ for(const l of ["de","en","fr","es"])channels[l]=discordId(body.channels[l]);
  const supplied=Object.values(channels).filter(Boolean);
  if(new Set(supplied).size!==supplied.length)throw new HttpError("duplicate_discord_channel",400);
  const item=await checked<any>(db.from("aos_discord_bot_config").upsert({
@@ -367,7 +367,7 @@ async function saveDiscordConfig(req:Request,alliance:string,userId:string,staff
  return json(req,{ok:true,config:item});
 }
 async function saveDiscordAnchor(req:Request,alliance:string,userId:string,staff:any,body:any){
- if(!permission(staff,"events"))throw new HttpError("permission_denied",403);
+ if(!permission(staff,"event_bot"))throw new HttpError("permission_denied",403);
  const event_key=groupKey(body.event_key),start_time_utc=discordTime(body.start_time_utc),end_time_utc=discordTime(body.end_time_utc);
  if(!start_time_utc&&!end_time_utc){
   await checked<any>(db.from("aos_discord_event_anchors").delete().eq("alliance_code",alliance).eq("event_key",event_key).select("event_key"));
@@ -380,7 +380,7 @@ async function saveDiscordAnchor(req:Request,alliance:string,userId:string,staff
  return json(req,{ok:true});
 }
 async function saveDiscordEventDayTime(req:Request,alliance:string,userId:string,staff:any,body:any){
- if(!permission(staff,"events"))throw new HttpError("permission_denied",403);
+ if(!permission(staff,"event_bot"))throw new HttpError("permission_denied",403);
  const event_key=groupKey(body.event_key),day_number=Number(body.day_number);
  if(!Number.isInteger(day_number)||day_number<1||day_number>14)throw new HttpError("invalid_event_day",400);
  const start_time_utc=discordTime(body.start_time_utc),end_time_utc=discordTime(body.end_time_utc);
@@ -396,7 +396,7 @@ async function saveDiscordEventDayTime(req:Request,alliance:string,userId:string
  return json(req,{ok:true,item:{event_key,day_number,start_time_utc,end_time_utc}});
 }
 async function saveDiscordRule(req:Request,alliance:string,userId:string,staff:any,body:any){
- if(!permission(staff,"events"))throw new HttpError("permission_denied",403);
+ if(!permission(staff,"event_bot"))throw new HttpError("permission_denied",403);
  const event_key=groupKey(body.event_key),title=str(body.title,100).trim();
  if(!title)throw new HttpError("rule_title_required",400);
  const trigger_type=str(body.trigger_type,12),relative_to=str(body.relative_to,10);
@@ -409,14 +409,14 @@ async function saveDiscordRule(req:Request,alliance:string,userId:string,staff:a
  if(!Number.isInteger(day_number)||day_number<1||day_number>14)throw new HttpError("invalid_event_day",400);
  const messages:Record<string,string>={};
  if(!body.messages||typeof body.messages!=="object"||Array.isArray(body.messages))throw new HttpError("invalid_messages",400);
- for(const l of ["de","en","fr"]){
+ for(const l of ["de","en","fr","es"]){
   const value=String(body.messages[l]??"").trim();
   // Discord's message limit is 2000 characters, leaving headroom for future tokens.
   if(value.length>1800)throw new HttpError("discord_message_too_long",400);
   messages[l]=value;
  }
  const enabled=body.enabled===true;
- if(enabled&&!["de","en","fr"].every(l=>Boolean(messages[l])))throw new HttpError("three_languages_required",400);
+ if(enabled&&!["de","en","fr","es"].every(l=>Boolean(messages[l])))throw new HttpError("four_languages_required",400);
  const patch={event_key,title,trigger_type,relative_to,offset_minutes,clock_utc:trigger_type==="clock"?clock_utc:null,day_number,enabled,messages,updated_at:new Date().toISOString(),updated_by:userId};
  const id=str(body.id,36),isExisting=Boolean(id);
  if(isExisting&&!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id))throw new HttpError("invalid_rule_id",400);
@@ -428,7 +428,7 @@ async function saveDiscordRule(req:Request,alliance:string,userId:string,staff:a
  return json(req,{ok:true,item});
 }
 async function deleteDiscordRule(req:Request,alliance:string,userId:string,staff:any,body:any){
- if(!permission(staff,"events"))throw new HttpError("permission_denied",403);
+ if(!permission(staff,"event_bot"))throw new HttpError("permission_denied",403);
  const id=str(body.id,36);
  if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id))throw new HttpError("invalid_rule_id",400);
  const deleted=await checked<any>(db.from("aos_discord_message_rules").delete().eq("alliance_code",alliance).eq("id",id).select("id").maybeSingle());
@@ -667,7 +667,7 @@ async function inviteR4(req:Request,alliance:string,userId:string,staff:any,payl
   if(listError)throw new HttpError("user_lookup_failed",500);
   if(list?.users?.some((u:any)=>u.email?.toLowerCase()===email))throw new HttpError("account_exists_assign_access",409);
   const perms=payload.permissions||{};
-  const permissions=Object.fromEntries(["members","transfers","laws","events","settings"].map(x=>[x,perms[x]===true]));
+  const permissions=Object.fromEntries(["members","transfers","laws","events","event_bot","settings"].map(x=>[x,perms[x]===true]));
   if(!Object.values(permissions).some(Boolean))throw new HttpError("no_permissions_selected",400);
   const {data,error}=await db.auth.admin.inviteUserByEmail(email,{redirectTo:"https://boltotelli.github.io/welcome-nrw/leitung/"});
   if(error||!data?.user){console.error("R4 invitation",error?.code);throw new HttpError("invitation_failed",502);}
@@ -686,7 +686,7 @@ async function saveStaff(req:Request,alliance:string,userId:string,staff:any,pay
   const user=data?.users?.find((u:any)=>u.email?.toLowerCase()===email);
   if(!user)throw new HttpError("account_not_found",404);
   if(user.id===userId)throw new HttpError("cannot_edit_self",403);
-  const existing=await checked<any>(db.from("aos_staff").select("rank")
+  const existing=await checked<any>(db.from("aos_staff").select("rank,disabled_reason")
     .eq("user_id",user.id).eq("alliance_code",alliance).maybeSingle());
   if(user.email?.toLowerCase()==="admin@nap-tracker.invalid")throw new HttpError("cannot_edit_owner",403);
   if(existing?.rank==="R5"&&!/^leader-[0-9]{5,20}@accounts\.allianceos\.invalid$/i.test(email))throw new HttpError("cannot_edit_legacy_r5",403);
@@ -699,11 +699,11 @@ async function saveStaff(req:Request,alliance:string,userId:string,staff:any,pay
     rank="R"+member.alliance_rank;
   }
   const incoming=payload.permissions||{};
-  const granted=Object.fromEntries(["members","transfers","laws","events","settings"]
+  const granted=Object.fromEntries(["members","transfers","laws","events","event_bot","settings"]
     .map(feature=>[feature,incoming[feature]===true]));
   const item=await checked<any>(db.from("aos_staff").upsert({
     user_id:user.id,alliance_code:alliance,rank,
-    enabled,permissions:granted
+    enabled,permissions:granted,disabled_reason:enabled?null:"manual"
   },{onConflict:"user_id,alliance_code"}).select("user_id,rank,enabled,permissions").single());
   await audit(alliance,userId,"staff",user.id,existing?"update_r4":"grant_r4");
   return json(req,{ok:true,item:{...item,email}});

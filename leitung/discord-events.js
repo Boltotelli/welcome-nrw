@@ -4,10 +4,10 @@
 export function createDiscordEventPlanner({request,flash,esc,can,eventHub}){
  const $=id=>document.getElementById(id);
  const L={
-  de:{loading:"Konfiguration wird geladen …",notReady:"Bot noch nicht verbunden · kein Versand",notConfigured:"Keine UTC-Uhrzeit gespeichert – relative Nachrichten sind noch nicht ausführbar.",startAt:"Start: {time} UTC",notChosen:"Bitte Event auswählen.",noRules:"Noch keine gespeicherten Nachrichten. Lege eine Vorlage an oder erstelle eine eigene.",count:"{n} Nachrichten",ready:"Aktiv / für Bot vorbereitet",draft:"Entwurf",day:"Tag {n}",before:"{n} Min. vor {event}",after:"{n} Min. nach {event}",at:"{time} UTC",needThree:"Zum Aktivieren sind alle drei Texte (DE/EN/FR) erforderlich.",needsTitle:"Bitte einen Namen für die Nachricht eingeben.",needClock:"Bitte eine UTC-Uhrzeit eingeben.",saved:"Discord-Einstellungen gespeichert.",anchorSaved:"Eventzeiten gespeichert.",ruleSaved:"Nachricht gespeichert.",deleted:"Nachricht gelöscht.",confirmDelete:"Diese Discord-Nachricht wirklich löschen?",presetsSaved:"Vorlagen als Entwürfe gespeichert. Jede Nachricht ist separat bearbeitbar.",noSelection:"Noch kein Event gewählt.",choosePreset:"Standardvorlage hinzufügen",bearPreset:"3 Bärenfallen-Vorlagen (15 / 10 / 5 Minuten) hinzufügen",edit:"Bearbeiten",duplicate:"Duplizieren",delete:"Löschen",noSend:"Noch kein Versand",clockWarn:"Eine feste UTC-Uhrzeit gilt für den gewählten Eventtag. Das Eventdatum muss im Eventkalender feststehen.",unknown:"Termin ist noch nicht verbindlich geplant."},
+  de:{loading:"Konfiguration wird geladen …",notReady:"Bot noch nicht verbunden · kein Versand",notConfigured:"Keine UTC-Uhrzeit gespeichert – relative Nachrichten sind noch nicht ausführbar.",startAt:"Start: {time} UTC",notChosen:"Bitte Event auswählen.",noRules:"Noch keine gespeicherten Nachrichten. Lege eine Vorlage an oder erstelle eine eigene.",count:"{n} Nachrichten",ready:"Aktiv / für Bot vorbereitet",draft:"Entwurf",day:"Tag {n}",before:"{n} Min. vor {event}",after:"{n} Min. nach {event}",at:"{time} UTC",needThree:"Zum Aktivieren sind alle drei Texte (DE/EN/FR/ES) erforderlich.",needsTitle:"Bitte einen Namen für die Nachricht eingeben.",needClock:"Bitte eine UTC-Uhrzeit eingeben.",saved:"Discord-Einstellungen gespeichert.",anchorSaved:"Eventzeiten gespeichert.",ruleSaved:"Nachricht gespeichert.",deleted:"Nachricht gelöscht.",confirmDelete:"Diese Discord-Nachricht wirklich löschen?",presetsSaved:"Vorlagen als Entwürfe gespeichert. Jede Nachricht ist separat bearbeitbar.",noSelection:"Noch kein Event gewählt.",choosePreset:"Standardvorlage hinzufügen",bearPreset:"3 Bärenfallen-Vorlagen (15 / 10 / 5 Minuten) hinzufügen",edit:"Bearbeiten",duplicate:"Duplizieren",delete:"Löschen",noSend:"Noch kein Versand",clockWarn:"Eine feste UTC-Uhrzeit gilt für den gewählten Eventtag. Das Eventdatum muss im Eventkalender feststehen.",unknown:"Termin ist noch nicht verbindlich geplant."},
   en:{loading:"Loading configuration …",notReady:"Bot not connected · no messages sent",notConfigured:"No UTC start time configured – relative rules cannot run yet.",startAt:"Start: {time} UTC",notChosen:"Choose an event.",noRules:"No saved messages yet. Add a preset or create your own.",count:"{n} messages",ready:"Enabled / prepared",draft:"Draft",day:"Day {n}",before:"{n} min before {event}",after:"{n} min after {event}",at:"{time} UTC",needThree:"To enable, fill out all three language texts.",needsTitle:"Give this message a name.",needClock:"Enter a UTC time.",saved:"Discord configuration saved.",anchorSaved:"Event times saved.",ruleSaved:"Message saved.",deleted:"Message deleted.",confirmDelete:"Delete this Discord message?",presetsSaved:"Presets saved as drafts. Each message can be edited independently.",noSelection:"No event selected.",choosePreset:"Add default preset",bearPreset:"Add 3 Bear Trap presets (15 / 10 / 5 min)",edit:"Edit",duplicate:"Duplicate",delete:"Delete",noSend:"No delivery yet",clockWarn:"A fixed UTC time applies to the selected event day. The event date must be scheduled.",unknown:"Event date is not confirmed."},
   fr:{loading:"Chargement de la configuration …",notReady:"Bot non connecté · aucun envoi",notConfigured:"Aucune heure UTC – les messages relatifs ne peuvent pas être exécutés.",startAt:"Début : {time} UTC",notChosen:"Choisissez un événement.",noRules:"Aucun message enregistré. Ajoutez un modèle ou créez-en un.",count:"{n} messages",ready:"Actif / préparé",draft:"Brouillon",day:"Jour {n}",before:"{n} min avant {event}",after:"{n} min après {event}",at:"{time} UTC",needThree:"Remplissez DE, EN et FR avant d'activer.",needsTitle:"Indiquez un titre.",needClock:"Indiquez une heure UTC.",saved:"Configuration Discord enregistrée.",anchorSaved:"Heures de l'événement enregistrées.",ruleSaved:"Message enregistré.",deleted:"Message supprimé.",confirmDelete:"Supprimer ce message Discord ?",presetsSaved:"Modèles enregistrés comme brouillons, modifiables séparément.",noSelection:"Aucun événement.",choosePreset:"Ajouter un modèle",bearPreset:"Ajouter 3 modèles de piège à ours (15 / 10 / 5 min)",edit:"Modifier",duplicate:"Dupliquer",delete:"Supprimer",noSend:"Aucun envoi",clockWarn:"Heure UTC fixe pour le jour sélectionné. La date doit être connue.",unknown:"Date non confirmée."},
-  es:{loading:"Cargando configuración …",notReady:"Bot no conectado · sin envíos",notConfigured:"Sin hora UTC: los mensajes relativos no pueden ejecutarse.",startAt:"Inicio: {time} UTC",notChosen:"Elige un evento.",noRules:"No hay mensajes guardados. Añade una plantilla o crea una.",count:"{n} mensajes",ready:"Activo / preparado",draft:"Borrador",day:"Día {n}",before:"{n} min antes de {event}",after:"{n} min después de {event}",at:"{time} UTC",needThree:"Completa los tres textos (DE/EN/FR) para activar.",needsTitle:"Introduce un título.",needClock:"Introduce una hora UTC.",saved:"Configuración de Discord guardada.",anchorSaved:"Horas guardadas.",ruleSaved:"Mensaje guardado.",deleted:"Mensaje eliminado.",confirmDelete:"¿Eliminar este mensaje?",presetsSaved:"Plantillas guardadas como borradores, editables por separado.",noSelection:"Sin evento.",choosePreset:"Añadir plantilla",bearPreset:"Añadir 3 plantillas de oso (15 / 10 / 5 min)",edit:"Editar",duplicate:"Duplicar",delete:"Eliminar",noSend:"Sin envíos",clockWarn:"La hora UTC se aplica al día elegido. La fecha debe estar confirmada.",unknown:"Fecha no confirmada."}
+  es:{loading:"Cargando configuración …",notReady:"Bot no conectado · sin envíos",notConfigured:"Sin hora UTC: los mensajes relativos no pueden ejecutarse.",startAt:"Inicio: {time} UTC",notChosen:"Elige un evento.",noRules:"No hay mensajes guardados. Añade una plantilla o crea una.",count:"{n} mensajes",ready:"Activo / preparado",draft:"Borrador",day:"Día {n}",before:"{n} min antes de {event}",after:"{n} min después de {event}",at:"{time} UTC",needThree:"Completa los tres textos (DE/EN/FR/ES) para activar.",needsTitle:"Introduce un título.",needClock:"Introduce una hora UTC.",saved:"Configuración de Discord guardada.",anchorSaved:"Horas guardadas.",ruleSaved:"Mensaje guardado.",deleted:"Mensaje eliminado.",confirmDelete:"¿Eliminar este mensaje?",presetsSaved:"Plantillas guardadas como borradores, editables por separado.",noSelection:"Sin evento.",choosePreset:"Añadir plantilla",bearPreset:"Añadir 3 plantillas de oso (15 / 10 / 5 min)",edit:"Editar",duplicate:"Duplicar",delete:"Eliminar",noSend:"Sin envíos",clockWarn:"La hora UTC se aplica al día elegido. La fecha debe estar confirmada.",unknown:"Fecha no confirmada."}
  };
  const DAY_UI={
  de:{eventTotal:"Gesamtes Event: {n} Nachrichten",eventDays:"Eventtage",everyDay:"{n} Tage · jede Phase separat",phase:"Tagesphase",phaseUnknown:"Für diesen Tag ist noch keine Phasenbeschreibung hinterlegt.",guideDay:"Tageshinweise aus der Eventplanung",scoring:"Unter anderem gewertete Aktionen:",startTimeMissing:"Keine genaue Startzeit für diesen Tag erfasst.",dayStart:"Tagesbeginn: {time} UTC",savedDays:"Tageszeiten gespeichert.",allDaysSaved:"UTC-Zeiten für alle Eventtage gespeichert.",allTimesConfirm:"Die aktuellen UTC-Zeiten für alle Eventtage übernehmen? Vorhandene individuelle Tageszeiten werden überschrieben.",dayPreset:"Tagesvorlage für Tag {n} hinzufügen",allPresets:"Tagesvorlagen für alle {n} Tage anlegen",presetMissing:"Für alle Eventtage sind bereits Vorlagen vorhanden.",dayPresetTitle:"Tageshinweis · Tag {n}",dayReminder:"Erinnerung vor dem Tagesbeginn",phaseLine:"Tag {n}: {phase}",guideLine:"Bitte beachtet die aktuelle Tagesplanung und nutzt eure Ressourcen abgestimmt mit der Allianz.",dayMessage:"📣 {event} · Tag {n}{phase}\n{notes}",botTimesInfo:"Die Uhrzeiten gelten nur für Tag {n}. Vorher/nachher ist relativ zum Beginn oder Ende dieses Tages. Ohne Uhrzeit keine relative Ausführung.",dateLabel:"{date} · Tag {n}",unconfirmed:"Kein bestätigter Termin in der Eventplanung."},
@@ -41,13 +41,13 @@ export function createDiscordEventPlanner({request,flash,esc,can,eventHub}){
   return tx(r.offset_minutes<=0?"before":"after").replace("{n}",Math.abs(r.offset_minutes)).replace("{event}",r.relative_to==="end"?(language==="de"?"Ende":language==="fr"?"la fin":language==="es"?"el final":"end"):(language==="de"?"Start":language==="fr"?"le début":language==="es"?"el inicio":"start"));
  };
  const validId=s=>!s||/^\d{17,20}$/.test(s);
- const getChannelFields=()=>({de:$("discordChannelDe").value.trim(),en:$("discordChannelEn").value.trim(),fr:$("discordChannelFr").value.trim()});
+ const getChannelFields=()=>({de:$("discordChannelDe").value.trim(),en:$("discordChannelEn").value.trim(),fr:$("discordChannelFr").value.trim(),es:$("discordChannelEs").value.trim()});
  function renderChannels(){
   if(dirtySettings)return;
   $("discordGuild").value=config.guild_id||"";
-  for(const [lang,id] of Object.entries({de:"discordChannelDe",en:"discordChannelEn",fr:"discordChannelFr"}))$(id).value=config.channels?.[lang]||"";
-  for(const id of ["discordGuild","discordChannelDe","discordChannelEn","discordChannelFr"])$(id).disabled=!can("settings");
-  $("discordSettingsForm").querySelector('[type="submit"]').disabled=!can("settings");
+  for(const [lang,id] of Object.entries({de:"discordChannelDe",en:"discordChannelEn",fr:"discordChannelFr",es:"discordChannelEs"}))$(id).value=config.channels?.[lang]||"";
+  for(const id of ["discordGuild","discordChannelDe","discordChannelEn","discordChannelFr","discordChannelEs"])$(id).disabled=!can("event_bot");
+  $("discordSettingsForm").querySelector('[type="submit"]').disabled=!can("event_bot");
  }
  function renderEvents(){
   const search=$("discordEventSearch").value.trim().toLowerCase();
@@ -85,10 +85,10 @@ export function createDiscordEventPlanner({request,flash,esc,can,eventHub}){
   $("discordAnchorEnd").value=end;
   $("discordEventTimingHint").textContent=(start?tx("dayStart").replace("{time}",start):tx("startTimeMissing"))+
    " · "+tx("botTimesInfo").replace("{n}",selectedDay);
-  $("saveDiscordAnchor").disabled=!can("events");
-  $("saveDiscordAllAnchors").disabled=!can("events");
+  $("saveDiscordAnchor").disabled=!can("event_bot");
+  $("saveDiscordAllAnchors").disabled=!can("event_bot");
   $("saveDiscordAllAnchors").hidden=total===1;
-  for(const id of ["discordAnchorStart","discordAnchorEnd"])$(id).disabled=!can("events");
+  for(const id of ["discordAnchorStart","discordAnchorEnd"])$(id).disabled=!can("event_bot");
   const r=currentRules(),all=rules.filter(x=>x.event_key===selected).length;
   $("discordMessageCount").textContent=tx("day").replace("{n}",selectedDay)+": "+tx("count").replace("{n}",r.length)+
     " · "+tx("eventTotal").replace("{n}",all)+" · "+tx("noSend");
@@ -97,12 +97,12 @@ export function createDiscordEventPlanner({request,flash,esc,can,eventHub}){
    const status=item.enabled?tx("ready"):tx("draft");
    return '<article class="discord-bot-rule"><div><span class="eyebrow">'+esc(tx("day").replace("{n}",item.day_number))+' · '+esc(ruleTime(item))+'</span><h4>'+esc(item.title)+'</h4>'+
     '<p>'+esc(localeContent.slice(0,240)||"—")+'</p><small>'+esc(status)+' · 🇩🇪 '+(item.messages?.de?"✓":"–")+' · 🇬🇧 '+(item.messages?.en?"✓":"–")+' · 🇫🇷 '+(item.messages?.fr?"✓":"–")+'</small></div>'+
-    '<div class="discord-rule-actions"><button type="button" class="ghost" data-bot-edit="'+esc(item.id)+'" '+(!can("events")?"disabled":"")+'>'+esc(tx("edit"))+'</button>'+
-    '<button type="button" class="ghost" data-bot-copy="'+esc(item.id)+'" '+(!can("events")?"disabled":"")+'>'+esc(tx("duplicate"))+'</button></div></article>';
+    '<div class="discord-rule-actions"><button type="button" class="ghost" data-bot-edit="'+esc(item.id)+'" '+(!can("event_bot")?"disabled":"")+'>'+esc(tx("edit"))+'</button>'+
+    '<button type="button" class="ghost" data-bot-copy="'+esc(item.id)+'" '+(!can("event_bot")?"disabled":"")+'>'+esc(tx("duplicate"))+'</button></div></article>';
   }).join(""):'<p class="muted">'+esc(tx("noRules"))+'</p>';
-  $("discordAddRule").disabled=!can("events");
-  $("discordPreset").disabled=!can("events");
-  $("discordAllDaysPreset").disabled=!can("events");
+  $("discordAddRule").disabled=!can("event_bot");
+  $("discordPreset").disabled=!can("event_bot");
+  $("discordAllDaysPreset").disabled=!can("event_bot");
   $("discordAllDaysPreset").hidden=total===1;
   $("discordPreset").textContent=/^bear-[123]$/.test(selected)?tx("bearPreset"):tx("dayPreset").replace("{n}",selectedDay);
   $("discordAllDaysPreset").textContent=tx("allPresets").replace("{n}",total);
@@ -152,7 +152,7 @@ export function createDiscordEventPlanner({request,flash,esc,can,eventHub}){
    offset_minutes:(fd.get("direction")==="before"?-1:1)*amount,
    clock_utc:type==="clock"?fd.get("clock_utc"):"",
    day_number:Number(fd.get("day_number")),enabled:fd.has("enabled"),
-   messages:Object.fromEntries(["de","en","fr"].map(l=>[l,String(fd.get(l)||"")]))
+   messages:Object.fromEntries(["de","en","fr","es"].map(l=>[l,String(fd.get(l)||"")]))
   };
  };
  const makeDefault=(e,n=0,day=selectedDay)=>{
@@ -162,7 +162,8 @@ export function createDiscordEventPlanner({request,flash,esc,can,eventHub}){
    const detail={
      de:["Bitte Truppen, Märsche und Buffs vorbereiten.","Regeln: Abgesprochene Starter- und Joiner-Formationen verwenden; Rallyplätze freihalten.","Jetzt letzte Vorbereitungen abschließen und auf die Rallys achten."],
      en:["Prepare your troops, marches and buffs.","Rules: Use agreed starter and joiner formations; keep rally slots free.","Finish your preparations and watch for rallies."],
-     fr:["Préparez vos troupes, marches et bonus.","Règles : utilisez les formations convenues ; gardez les places libres.","Terminez vos préparatifs et surveillez les rallyes."]
+     fr:["Préparez vos troupes, marches et bonus.","Règles : utilisez les formations convenues ; gardez les places libres.","Terminez vos préparatifs et surveillez les rallyes."],
+     es:["Preparad vuestras tropas, marchas y bonificaciones.","Reglas: usad las formaciones acordadas e id dejando plazas libres.","Terminad los preparativos y prestad atención a las incursiones."]
    };
    return {id:null,event_key:e.key,
     title:["Erinnerung – 15 Minuten","Regeln – 10 Minuten","Letzte Infos – 5 Minuten"][n],
@@ -170,18 +171,19 @@ export function createDiscordEventPlanner({request,flash,esc,can,eventHub}){
     messages:{
      de:"⏰ "+name("de")+" beginnt in "+lead+" Minuten. "+detail.de[n],
      en:"⏰ "+name("en")+" starts in "+lead+" minutes. "+detail.en[n],
-     fr:"⏰ "+name("fr")+" commence dans "+lead+" minutes. "+detail.fr[n]
+     fr:"⏰ "+name("fr")+" commence dans "+lead+" minutes. "+detail.fr[n],
+     es:"⏰ "+name("es")+" comienza en "+lead+" minutos. "+detail.es[n]
     }};
   }
   const info=e.days?.find(d=>Number(d.number)===day)||{};
-  const texts=Object.fromEntries(["de","en","fr"].map(l=>{
+  const texts=Object.fromEntries(["de","en","fr","es"].map(l=>{
    const phase=info.names?.[l]||info.names?.en||"";
    const tip=String(info.tips?.[l]||"").trim();
    const score=info.scoring?.[l]||[];
    const fallback=score.length?(DAY_UI[l]?.scoring||DAY_UI.de.scoring)+" "+score.join(", ")+".":DAY_UI[l]?.guideLine||DAY_UI.de.guideLine;
    const notes=tip||fallback;
-   const prefix={de:"📣",en:"📣",fr:"📣"}[l];
-   return [l,[prefix+" "+name(l)+" · "+(l==="de"?"Tag":l==="fr"?"Jour":"Day")+" "+day+(phase?" – "+phase:""),notes].join("\n").slice(0,1800)];
+   const prefix={de:"📣",en:"📣",fr:"📣",es:"📣"}[l];
+   return [l,[prefix+" "+name(l)+" · "+(l==="de"?"Tag":l==="fr"?"Jour":l==="es"?"Día":"Day")+" "+day+(phase?" – "+phase:""),notes].join("\n").slice(0,1800)];
   }));
   return {id:null,event_key:e.key,
    title:tx("dayPresetTitle").replace("{n}",day),
@@ -195,10 +197,10 @@ export function createDiscordEventPlanner({request,flash,esc,can,eventHub}){
   botForm.elements.clock_utc.required=fixed;
  }
  function counts(){
-  for(const l of ["de","en","fr"])$("discord"+l[0].toUpperCase()+l.slice(1)+"Count").textContent=botForm.elements[l].value.length+" / 1800";
+  for(const l of ["de","en","fr","es"])$("discord"+l[0].toUpperCase()+l.slice(1)+"Count").textContent=botForm.elements[l].value.length+" / 1800";
  }
  function editRule(item){
-  if(!can("events")||!event())return;
+  if(!can("event_bot")||!event())return;
   editingId=item?.id||null;
   botForm.reset();
   botForm.elements.day_number.innerHTML=Array.from({length:daysCount()},(_,i)=>{
@@ -213,14 +215,14 @@ export function createDiscordEventPlanner({request,flash,esc,can,eventHub}){
   botForm.elements.direction.value=Number(item?.offset_minutes??-15)<0?"before":"after";
   botForm.elements.clock_utc.value=cleanTime(item?.clock_utc)||"";
   botForm.elements.enabled.checked=item?.enabled===true;
-  for(const l of ["de","en","fr"])botForm.elements[l].value=item?.messages?.[l]||"";
+  for(const l of ["de","en","fr","es"])botForm.elements[l].value=item?.messages?.[l]||"";
   $("discordRuleDelete").hidden=!editingId;
   $("discordRuleSave").disabled=false;
   toggleClock();counts();$("discordRuleDialog").showModal();
  }
  async function saveRule(ev){
   ev.preventDefault();
-  if(!can("events"))return;
+  if(!can("event_bot"))return;
   const rule=ruleFromForm();
   if(!rule.title){flash(tx("needsTitle"),true);return;}
   if(rule.trigger_type==="clock"&&!rule.clock_utc){flash(tx("needClock"),true);return;}
@@ -231,12 +233,12 @@ export function createDiscordEventPlanner({request,flash,esc,can,eventHub}){
   finally{btn.disabled=false;}
  }
  async function deleteRule(){
-  if(!editingId||!can("events")||!window.confirm(tx("confirmDelete")))return;
+  if(!editingId||!can("event_bot")||!window.confirm(tx("confirmDelete")))return;
   try{await request("bootstrap",{action:"discord_message_delete",id:editingId});$("discordRuleDialog").close();await reload();flash(tx("deleted"));}
   catch(e){flash(String(e.message),true);}
  }
  async function saveChannels(ev){
-  ev.preventDefault();if(!can("settings"))return;
+  ev.preventDefault();if(!can("event_bot"))return;
   const guild=$("discordGuild").value.trim(),channels=getChannelFields(),values=[guild,...Object.values(channels)];
   if(values.some(v=>!validId(v))){flash("Discord IDs: 17–20 digits",true);return;}
   const distinct=Object.values(channels).filter(Boolean);
@@ -244,10 +246,10 @@ export function createDiscordEventPlanner({request,flash,esc,can,eventHub}){
   const button=$("discordSettingsForm").querySelector('[type="submit"]');button.disabled=true;
   try{const response=await request("bootstrap",{action:"discord_bot_config",guild_id:guild,channels});config=response.config;dirtySettings=false;renderChannels();$("discordSettingsStatus").textContent=tx("saved");flash(tx("saved"));}
   catch(e){flash(String(e.message),true);}
-  finally{button.disabled=!can("settings");}
+  finally{button.disabled=!can("event_bot");}
  }
  async function saveAnchor(allDays=false){
-  if(!can("events")||!selected)return;
+  if(!can("event_bot")||!selected)return;
   const start_time_utc=$("discordAnchorStart").value,end_time_utc=$("discordAnchorEnd").value;
   const dayList=allDays?Array.from({length:daysCount()},(_,i)=>i+1):[selectedDay];
   if(allDays&&!window.confirm(tx("allTimesConfirm")))return;
@@ -261,10 +263,10 @@ export function createDiscordEventPlanner({request,flash,esc,can,eventHub}){
    }
    renderRuleList();flash(tx(allDays?"allDaysSaved":"anchorSaved"));
   }catch(e){renderRuleList();flash(String(e.message),true);}
-  finally{btn.disabled=!can("events");}
+  finally{btn.disabled=!can("event_bot");}
  }
  async function addPresets(allDays=false){
-  if(!can("events")||!event())return;
+  if(!can("event_bot")||!event())return;
   const e=event(),bear=/^bear-[123]$/.test(e.key),count=bear?3:1,btn=$(allDays?"discordAllDaysPreset":"discordPreset");
   const days=allDays?Array.from({length:daysCount()},(_,i)=>i+1):[selectedDay];
   const toAdd=[];
@@ -283,11 +285,11 @@ export function createDiscordEventPlanner({request,flash,esc,can,eventHub}){
    for(const item of toAdd)await request("bootstrap",{action:"discord_message_rule",...item});
    await reload();flash(tx("presetsSaved"));
   }catch(e){await reload().catch(()=>{});flash(String(e.message),true);}
-  finally{btn.disabled=!can("events");}
+  finally{btn.disabled=!can("event_bot");}
  }
  function attach(){
   $("discordSettingsForm").addEventListener("submit",saveChannels);
-  for(const id of ["discordGuild","discordChannelDe","discordChannelEn","discordChannelFr"])$(id).addEventListener("input",()=>dirtySettings=true);
+  for(const id of ["discordGuild","discordChannelDe","discordChannelEn","discordChannelFr","discordChannelEs"])$(id).addEventListener("input",()=>dirtySettings=true);
   $("discordEventSearch").addEventListener("input",renderEvents);
   $("discordEventList").addEventListener("click",ev=>{
    const btn=ev.target.closest("[data-bot-event]");if(!btn)return;
@@ -310,7 +312,7 @@ export function createDiscordEventPlanner({request,flash,esc,can,eventHub}){
    const r=rules.find(x=>x.id===id);if(r)editRule(copy?{...r,id:null,title:r.title+" (copy)"}:r);
   });
   botForm.elements.trigger_type.addEventListener("change",toggleClock);
-  for(const l of ["de","en","fr"])botForm.elements[l].addEventListener("input",counts);
+  for(const l of ["de","en","fr","es"])botForm.elements[l].addEventListener("input",counts);
   botForm.addEventListener("submit",saveRule);
   $("discordRuleDelete").addEventListener("click",deleteRule);
   $("discordRuleCancel").addEventListener("click",()=>$("discordRuleDialog").close());
