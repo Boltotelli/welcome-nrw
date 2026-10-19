@@ -464,6 +464,7 @@ jobs:
           grep -Fq 'id="discordRuleForm"' _site/leitung/index.html
           grep -Fq 'createDiscordEventPlanner' _site/leitung/app.js
           node --input-type=module --check < _site/leitung/discord-events.js
+          grep -Fq 'catalog=eventHub.catalog(language)' _site/leitung/discord-events.js
           node --input-type=module --check < _site/leitung/app.js
           node --input-type=module --check < _site/leitung/event-library.js
           node --input-type=module --check < _site/leitung/operations.js
