@@ -115,7 +115,7 @@ async function publicInfo(req: Request, alliance: string, mode: string) {
     return json(req,{events:items});
   }
   const laws = await checked<any[]>(db.from("aos_law_publications")
-    .select("law_id,scope,number,title,body,version,published_at")
+    .select("law_id,scope,number,category,title,body,version,published_at")
     .eq("alliance_code",alliance).eq("scope","kingdom").order("number",{ascending:true}).limit(100));
   return json(req,{laws});
 }
@@ -443,7 +443,7 @@ async function unpublishServerLaw(req:Request,alliance:string,userId:string,staf
  if(!updated)throw new HttpError("version_conflict",409);
  await checked<any>(db.from("aos_law_versions").insert({
    law_id:id,alliance_code:alliance,version:updated.version,
-   snapshot:{scope:updated.scope,number:updated.number,title:updated.title,body:updated.body,status:"draft"},
+   snapshot:{scope:updated.scope,number:updated.number,category:updated.category,title:updated.title,body:updated.body,status:"draft"},
    changed_by:userId
  }).select("id").single());
  await audit(alliance,userId,"law",id,"unpublish");
@@ -468,13 +468,13 @@ async function restoreLawDraft(req:Request,alliance:string,userId:string,staff:a
  const history=await checked<any>(db.from("aos_law_versions").select("snapshot").eq("alliance_code",alliance).eq("law_id",id).eq("version",version).maybeSingle());
  if(!history)throw new HttpError("version_not_found",404);
  const restored=await checked<any>(db.from("aos_laws").update({
-   title:history.snapshot?.title||{},body:history.snapshot?.body||{},status:"draft",published_at:null,
+   title:history.snapshot?.title||{},body:history.snapshot?.body||{},category:history.snapshot?.category||law.category||"other",status:"draft",published_at:null,
    version:law.version+1,updated_at:new Date().toISOString()
  }).eq("id",id).eq("alliance_code",alliance).eq("version",expected).select("*").maybeSingle());
  if(!restored)throw new HttpError("version_conflict",409);
  await checked<any>(db.from("aos_law_versions").insert({
    law_id:id,alliance_code:alliance,version:restored.version,
-   snapshot:{scope:restored.scope,number:restored.number,title:restored.title,body:restored.body,status:"draft"},changed_by:userId
+   snapshot:{scope:restored.scope,number:restored.number,category:restored.category,title:restored.title,body:restored.body,status:"draft"},changed_by:userId
  }).select("id").single());
  await audit(alliance,userId,"law",id,"restore_draft_v"+version);
  return json(req,{ok:true,item:restored});
@@ -733,6 +733,9 @@ async function save(req: Request, alliance: string, userId: string, staff: any, 
       const scope=str(data.scope,20),number=str(data.number,30),status=str(data.status,20);
       if(!["kingdom","alliance"].includes(scope)||!number||!["draft","published"].includes(status))throw new HttpError("invalid_law",400);
       const title=localized(data.title,150),body=localized(data.body,12000);
+      const validCategories=["protection","conduct","combat","alliance","buildings","governance","spending","other"];
+      const category=str(data.category||existing?.category||"other",30);
+      if(!validCategories.includes(category))throw new HttpError("invalid_law_category",400);
       // Explicit editor publication is the only source of public server Laws.
       if(status==="published"&&(!title.de||!body.de))throw new HttpError("law_requires_german",400);
       if(scope==="kingdom"&&alliance!=="NRW")throw new HttpError("kingdom_editor_nrw_only",403);
@@ -741,7 +744,7 @@ async function save(req: Request, alliance: string, userId: string, staff: any, 
         .eq("alliance_code",alliance).eq("scope",scope).eq("number",number).maybeSingle());
       if(collision?.id&&collision.id!==existing?.id)throw new HttpError("law_number_exists",409);
       if(existing && Number(data.expected_version)!==Number(existing.version))throw new HttpError("version_conflict",409);
-      patch={...patch,scope,number,title,body,status,version:existing?existing.version+1:1,
+      patch={...patch,scope,number,category,title,body,status,version:existing?existing.version+1:1,
         published_at:status==="published"?now:null};
     } else if(entity==="member"){
       if(!isId(data.game_id))throw new HttpError("invalid_player_id",400);
@@ -777,13 +780,13 @@ async function save(req: Request, alliance: string, userId: string, staff: any, 
     if(entity==="law"){
       await checked<any>(db.from("aos_law_versions").insert({
         law_id:result.id, alliance_code:alliance,version:result.version,
-        snapshot:{scope:result.scope,number:result.number,title:result.title,body:result.body,status:result.status},
+        snapshot:{scope:result.scope,number:result.number,category:result.category,title:result.title,body:result.body,status:result.status},
         changed_by:userId
       }).select("id").single());
       // A draft edit or restoration never takes the last published version offline.
       if(result.status==="published"){
         await checked<any>(db.from("aos_law_publications").upsert({
-          law_id:result.id,alliance_code:alliance,scope:result.scope,number:result.number,
+          law_id:result.id,alliance_code:alliance,scope:result.scope,number:result.number,category:result.category,
           title:result.title,body:result.body,version:result.version,published_at:now
         },{onConflict:"law_id"}).select("law_id").single());
       }
