@@ -155,22 +155,37 @@ export function createDiscordEventPlanner({request,flash,esc,can,eventHub}){
    messages:Object.fromEntries(["de","en","fr"].map(l=>[l,String(fd.get(l)||"")]))
   };
  };
- const makeDefault=(e,n=0)=>{
-  const bear=/^bear-[123]$/.test(e.key),lead=bear?[15,10,5][n]:15,
-   name=l=>e.names?.[l]||e.name,detail={
-    de:bear?["Bitte Truppen, Märsche und Buffs vorbereiten.","Regeln: Abgesprochene Starter- und Joiner-Formationen verwenden; Rallyplätze freihalten.","Jetzt letzte Vorbereitungen abschließen und auf die Rallys achten."][n]:"Bitte bereitet euch vor und beachtet die Eventregeln.",
-    en:bear?["Prepare your troops, marches and buffs.","Rules: Use the agreed starter and joiner formations; keep rally slots free.","Finish your preparations and watch for rallies."][n]:"Please prepare and follow the event rules.",
-    fr:bear?["Préparez vos troupes, marches et bonus.","Règles : utilisez les formations de départ et de renfort convenues ; gardez les places libres.","Terminez vos préparatifs et surveillez les rallyes."][n]:"Préparez-vous et respectez les règles de l'événement."
+ const makeDefault=(e,n=0,day=selectedDay)=>{
+  const bear=/^bear-[123]$/.test(e.key),lead=bear?[15,10,5][n]:15;
+  const name=l=>e.names?.[l]||e.name;
+  if(bear){
+   const detail={
+     de:["Bitte Truppen, Märsche und Buffs vorbereiten.","Regeln: Abgesprochene Starter- und Joiner-Formationen verwenden; Rallyplätze freihalten.","Jetzt letzte Vorbereitungen abschließen und auf die Rallys achten."],
+     en:["Prepare your troops, marches and buffs.","Rules: Use agreed starter and joiner formations; keep rally slots free.","Finish your preparations and watch for rallies."],
+     fr:["Préparez vos troupes, marches et bonus.","Règles : utilisez les formations convenues ; gardez les places libres.","Terminez vos préparatifs et surveillez les rallyes."]
    };
+   return {id:null,event_key:e.key,
+    title:["Erinnerung – 15 Minuten","Regeln – 10 Minuten","Letzte Infos – 5 Minuten"][n],
+    trigger_type:"relative",relative_to:"start",offset_minutes:-lead,clock_utc:null,day_number:day,enabled:false,
+    messages:{
+     de:"⏰ "+name("de")+" beginnt in "+lead+" Minuten. "+detail.de[n],
+     en:"⏰ "+name("en")+" starts in "+lead+" minutes. "+detail.en[n],
+     fr:"⏰ "+name("fr")+" commence dans "+lead+" minutes. "+detail.fr[n]
+    }};
+  }
+  const info=e.days?.find(d=>Number(d.number)===day)||{};
+  const texts=Object.fromEntries(["de","en","fr"].map(l=>{
+   const phase=info.names?.[l]||info.names?.en||"";
+   const tip=String(info.tips?.[l]||"").trim();
+   const score=info.scoring?.[l]||[];
+   const fallback=score.length?tx("scoring")+" "+score.join(", ")+".":DAY_UI[l]?.guideLine||DAY_UI.de.guideLine;
+   const notes=tip||fallback;
+   const prefix={de:"📣",en:"📣",fr:"📣"}[l];
+   return [prefix+" "+name(l)+" · "+(l==="de"?"Tag":l==="fr"?"Jour":"Day")+" "+day+(phase?" – "+phase:""),notes].join("\n").slice(0,1800);
+  }));
   return {id:null,event_key:e.key,
-   title:bear?["Erinnerung – 15 Minuten","Regeln – 10 Minuten","Letzte Infos – 5 Minuten"][n]:"Erinnerung – 15 Minuten",
-   trigger_type:"relative",relative_to:"start",offset_minutes:-lead,clock_utc:null,day_number:1,enabled:false,
-   messages:{
-    de:"⏰ "+name("de")+" beginnt in "+lead+" Minuten. "+detail.de,
-    en:"⏰ "+name("en")+" starts in "+lead+" minutes. "+detail.en,
-    fr:"⏰ "+name("fr")+" commence dans "+lead+" minutes. "+detail.fr
-   }
-  };
+   title:tx("dayPresetTitle").replace("{n}",day),
+   trigger_type:"relative",relative_to:"start",offset_minutes:-lead,clock_utc:null,day_number:day,enabled:false,messages:texts};
  };
  function toggleClock(){
   const fixed=botForm.elements.trigger_type.value==="clock";
@@ -239,14 +254,28 @@ export function createDiscordEventPlanner({request,flash,esc,can,eventHub}){
   }catch(e){flash(String(e.message),true);}
   finally{$("saveDiscordAnchor").disabled=!can("events");}
  }
- async function addPresets(){
+ async function addPresets(allDays=false){
   if(!can("events")||!event())return;
-  const e=event(),count=/^bear-[123]$/.test(e.key)?3:1,button=$("discordPreset");button.disabled=true;
+  const e=event(),bear=/^bear-[123]$/.test(e.key),count=bear?3:1,btn=$(allDays?"discordAllDaysPreset":"discordPreset");
+  const days=allDays?Array.from({length:daysCount()},(_,i)=>i+1):[selectedDay];
+  const toAdd=[];
+  for(const day of days)for(let n=0;n<count;n++){
+   const item=makeDefault(e,n,day);
+   // Re-clicking a preset must never insert duplicate reminders.
+   if(rules.some(r=>r.event_key===item.event_key&&Number(r.day_number)===day&&
+      r.trigger_type===item.trigger_type&&r.relative_to===item.relative_to&&
+      Number(r.offset_minutes)===item.offset_minutes&&r.title===item.title))continue;
+   // For all-days presets, preserve existing manually configured daily messages.
+   if(allDays&&rules.some(r=>r.event_key===item.event_key&&Number(r.day_number)===day))continue;
+   toAdd.push(item);
+  }
+  if(!toAdd.length){flash(tx("presetMissing"));return;}
+  btn.disabled=true;
   try{
-   for(let n=0;n<count;n++){const x=makeDefault(e,n);await request("bootstrap",{action:"discord_message_rule",...x});}
+   for(const item of toAdd)await request("bootstrap",{action:"discord_message_rule",...item});
    await reload();flash(tx("presetsSaved"));
   }catch(e){await reload().catch(()=>{});flash(String(e.message),true);}
-  finally{button.disabled=!can("events");}
+  finally{btn.disabled=!can("events");}
  }
  function attach(){
   $("discordSettingsForm").addEventListener("submit",saveChannels);
