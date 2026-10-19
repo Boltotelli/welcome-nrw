@@ -155,10 +155,10 @@ export function createEventHub({request,flash,esc,t}) {
    };
    if(bearSlot(g.key)){
      const slot=Number(g.key.slice(-1));
-     // Historical NRW slots stay prefilled, but never become active without an explicit save.
+     // NRW's first two Bear Traps are regular slots; the third is opt-in.
      return {anchor_date:slot<=2?"2026-09-13":dayKey(new Date()),
        interval_days:2,duration_days:1,phase_count:1,
-       start_time_utc:slot===1?"17:00":slot===2?"18:30":null,enabled:false};
+       start_time_utc:slot===1?"17:00":slot===2?"18:30":null,enabled:slot<=2};
    }
    const baseline=options[g.key];if(baseline)return{anchor_date:baseline[0],interval_days:baseline[1],duration_days:baseline[2],phase_count:baseline[3]};
    const instance=g.instances.find(e=>e.record.start);
@@ -218,10 +218,11 @@ export function createEventHub({request,flash,esc,t}) {
      .map(x=>x.record?.start)
      .filter(d=>typeof d==="string"&&/^\d{4}-\d{2}-\d{2}$/.test(d)&&d>=today)
      .sort();
-   const upcoming=bearSlot(g.key)&&(!cycle||cycle.enabled===false)?null:cycle&&cycle.enabled!==false?nextOccurrence(cycle):futureDates[0]||null;
+   const effective=bearSlot(g.key)?cycleOf(g):cycle;
+   const upcoming=bearSlot(g.key)&&effective.enabled===false?null:effective&&effective.enabled!==false?nextOccurrence(effective):futureDates[0]||null;
    const difference=upcoming?Math.round((Date.parse(upcoming+"T00:00:00Z")-Date.parse(today+"T00:00:00Z"))/86400000):null;
-   const badge=bearSlot(g.key)?(!cycle||cycle.enabled===false?tx("bearInactive"):recurring):cycle?recurring:t("noCycle");
-   const time=bearSlot(g.key)&&cycle?.enabled&&cycle.start_time_utc?" · "+esc(cycle.start_time_utc.slice(0,5))+" UTC":"";
+   const badge=bearSlot(g.key)?(effective.enabled===false?tx("bearInactive"):periodLabel(effective)):cycle?recurring:t("noCycle");
+   const time=bearSlot(g.key)&&effective?.enabled&&effective.start_time_utc?" · "+esc(effective.start_time_utc.slice(0,5))+" UTC":"";
    const desc=difference===null?t("nextUnknown"):difference===0?t("nextToday"):difference===1?t("nextTomorrow"):t("nextInDays").replace("{n}",difference);
    return '<details class="event-group"><summary><span class="event-group-title"><b>'+esc(groupName(g))+'</b>'+
       '<small>'+esc(badge)+' · '+esc(desc)+time+'</small></span><span class="event-group-count">'+esc(t("daysCount").replace("{n}",phases))+'</span></summary>'+
@@ -571,7 +572,7 @@ export function createEventHub({request,flash,esc,t}) {
    buildGroups();
    const today=dayKey(new Date());
    const upcoming=groups.map(g=>{
-     const cycle=cycleFor(g),date=cycle?.enabled!==false&&cycle?nextOccurrence(cycle):
+     const cycle=bearSlot(g.key)?cycleOf(g):cycleFor(g),date=cycle?.enabled===false?null:cycle?nextOccurrence(cycle):
        g.instances.flatMap(x=>x.days||[]).filter(d=>d>=today).sort()[0];
      return date?{title:groupName(g),date}:null;
    }).filter(Boolean).sort((a,b)=>a.date.localeCompare(b.date)||a.title.localeCompare(b.title)).slice(0,3);
