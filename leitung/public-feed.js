@@ -32,6 +32,8 @@ function render(){
 }
 fetch(ENDPOINT+"?alliance=NRW&mode="+mode,{cache:"no-store",headers:{Accept:"application/json"}}).then(r=>r.ok?r.json():Promise.reject()).then(data=>{
  records=mode==="public-events"?(Array.isArray(data.events)?data.events:[]):(Array.isArray(data.laws)?data.laws:[]);
+ if(mode==="public-laws")records=records.filter(x=>x&&x.scope==="kingdom"&&Number.isInteger(Number(x.version))).sort((a,b)=>
+   String(a.number||"").localeCompare(String(b.number||""),selected(),{numeric:true,sensitivity:"base"}));
  render();
 }).catch(()=>{if(mode==="public-laws"){loadError=true;records=[];render();}else root.hidden=true;});
 new MutationObserver(mutations=>{if(mutations.some(m=>m.attributeName==="data-lang"))render();}).observe(document.body,{attributes:true,attributeFilter:["data-lang"]});
