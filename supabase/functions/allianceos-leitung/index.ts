@@ -260,7 +260,12 @@ async function rosterFor(alliance: string, kingdom: number) {
   // Read-only reuse of NAP's cached records. No NAP table or law is modified.
   const players = await checked<any[]>(db.from("players")
     .select("id,game_id,name,alliance_code,alliance_rank,active,languages,provider_seen_at")
-    .eq("alliance_code",alliance).order("name",{ascending:true}).limit(500));
+    // Only verified game identities belong in player management. Historical
+    // placeholder/import rows without a game_id (including the distinct
+    // inactive "ONE", not the real player "OИE") must not enter dossiers.
+    // Preserve those source records in NAP/players for audit; do not delete.
+    .eq("alliance_code",alliance).not("game_id","is",null)
+    .order("name",{ascending:true}).limit(500));
   const notes = await checked<any[]>(db.from("aos_member_notes")
     .select("id,game_id,member_status,discord_user_id,notes,spoken_languages,joined_on,responsibilities,power_override,power_override_at,updated_at")
     .eq("alliance_code",alliance).limit(500));
