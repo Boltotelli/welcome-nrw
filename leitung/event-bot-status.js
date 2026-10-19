@@ -37,7 +37,7 @@ export function createEventBotStatusPanel({supabase,can,flash,esc}){
   <button type="button" class="ghost" id="aosBotAllianceMentions">🔕 Sprachrollen NRW: AUS</button>
   <button type="button" class="ghost" id="aosBotGlobalMentions" hidden>🔕 Sprachrollen global: AUS</button>
  </div>
- <details><summary>Sprachrollen-Erwähnungen pro Nachricht (standardmäßig AUS)</summary>
+ <details><summary>Sprachrollen-Erwähnungen pro Nachricht</summary>
   <div id="aosBotRoleRules" class="aos-bot-table"></div></details>
  <div id="aosBotWarnings"></div>
  <h4>📅 Nächste Nachrichten</h4><div id="aosBotPreview" class="aos-bot-table"></div>
@@ -48,7 +48,7 @@ export function createEventBotStatusPanel({supabase,can,flash,esc}){
    <option value="failed">Fehlgeschlagen</option><option value="skipped">Übersprungen</option>
    <option value="cancelled">Abgebrochen</option><option value="uncertain">Unklar – prüfen</option></select>
   <select class="control" id="aosBotLangFilter"><option value="">Alle Sprachen</option>
-   <option value="de">DE</option><option value="en">EN</option><option value="fr">FR</option></select>
+   <option value="de">DE</option><option value="en">EN</option><option value="fr">FR</option><option value="es">ES</option></select>
   <input class="control" id="aosBotEventFilter" placeholder="Event filtern…">
  </div>
  <div id="aosBotHistory" class="aos-bot-table"></div>
@@ -154,7 +154,7 @@ export function createEventBotStatusPanel({supabase,can,flash,esc}){
    "GLOBALER NOT-AUS: Event-Bot für ALLE Allianzen pausieren?"));
  $("aosBotAllianceMentions").addEventListener("click",()=>mutate({action:"set_alliance_mentions",
     enabled:!state?.local?.role_mentions_enabled},
-   "Sprachrollen-Erwähnungen für NRW "+(state?.local?.role_mentions_enabled?"deaktivieren":"vorbereiten")+"? Global bleibt bis Freigabe AUS."));
+   "Sprachrollen-Erwähnungen für NRW "+(state?.local?.role_mentions_enabled?"deaktivieren":"vorbereiten")+"? Die Einstellung gilt nur für NRW."));
  $("aosBotGlobalMentions").addEventListener("click",()=>mutate({action:"set_global_mentions",
    enabled:!state?.global?.role_mentions_enabled},
    "Globale Rollen-Erwähnungen "+(state?.global?.role_mentions_enabled?"deaktivieren":"aktivieren")+"?"));
