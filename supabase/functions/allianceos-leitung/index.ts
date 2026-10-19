@@ -344,12 +344,13 @@ async function discordPlanner(req:Request,alliance:string,staff:any,page:number)
  if(!permission(staff,"events")&&!permission(staff,"settings"))throw new HttpError("permission_denied",403);
  if(!Number.isSafeInteger(page)||page<0||page>100000)throw new HttpError("invalid_page",400);
  const start=page*150;
- const [config,anchors,rules]=await Promise.all([
+ const [config,anchors,dayTimes,rules]=await Promise.all([
   checked<any>(db.from("aos_discord_bot_config").select("guild_id,channels,updated_at").eq("alliance_code",alliance).maybeSingle()),
   checked<any[]>(db.from("aos_discord_event_anchors").select("event_key,start_time_utc,end_time_utc").eq("alliance_code",alliance).limit(500)),
+  checked<any[]>(db.from("aos_discord_event_day_times").select("event_key,day_number,start_time_utc,end_time_utc").eq("alliance_code",alliance).limit(2500)),
   checked<any[]>(db.from("aos_discord_message_rules").select("id,event_key,title,trigger_type,relative_to,offset_minutes,clock_utc,day_number,enabled,messages,updated_at").eq("alliance_code",alliance).order("event_key").order("day_number").order("id").range(start,start+149))
  ]);
- return json(req,{config:config||{guild_id:"",channels:{}},anchors,rules,has_more:rules.length===150});
+ return json(req,{config:config||{guild_id:"",channels:{}},anchors,dayTimes,rules,has_more:rules.length===150});
 }
 async function saveDiscordConfig(req:Request,alliance:string,userId:string,staff:any,body:any){
  if(!permission(staff,"settings"))throw new HttpError("permission_denied",403);
@@ -377,6 +378,22 @@ async function saveDiscordAnchor(req:Request,alliance:string,userId:string,staff
  }
  await audit(alliance,userId,"discord_event_anchor",event_key,"save");
  return json(req,{ok:true});
+}
+async function saveDiscordEventDayTime(req:Request,alliance:string,userId:string,staff:any,body:any){
+ if(!permission(staff,"events"))throw new HttpError("permission_denied",403);
+ const event_key=groupKey(body.event_key),day_number=Number(body.day_number);
+ if(!Number.isInteger(day_number)||day_number<1||day_number>14)throw new HttpError("invalid_event_day",400);
+ const start_time_utc=discordTime(body.start_time_utc),end_time_utc=discordTime(body.end_time_utc);
+ if(!start_time_utc&&!end_time_utc){
+  await checked<any>(db.from("aos_discord_event_day_times").delete()
+    .eq("alliance_code",alliance).eq("event_key",event_key).eq("day_number",day_number).select("day_number"));
+ }else{
+  await checked<any>(db.from("aos_discord_event_day_times").upsert({
+   alliance_code:alliance,event_key,day_number,start_time_utc,end_time_utc,updated_at:new Date().toISOString(),updated_by:userId
+  },{onConflict:"alliance_code,event_key,day_number"}).select("day_number"));
+ }
+ await audit(alliance,userId,"discord_event_day_time",event_key+":"+day_number,"save");
+ return json(req,{ok:true,item:{event_key,day_number,start_time_utc,end_time_utc}});
 }
 async function saveDiscordRule(req:Request,alliance:string,userId:string,staff:any,body:any){
  if(!permission(staff,"events"))throw new HttpError("permission_denied",403);
@@ -999,6 +1016,7 @@ Deno.serve(async(req: Request)=>{
     if(body?.action==="law_restore")return await restoreLawDraft(req,alliance,userId,staff,body);
     if(body?.action==="discord_bot_config")return await saveDiscordConfig(req,alliance,userId,staff,body);
      if(body?.action==="discord_event_anchor")return await saveDiscordAnchor(req,alliance,userId,staff,body);
+     if(body?.action==="discord_event_day_time")return await saveDiscordEventDayTime(req,alliance,userId,staff,body);
      if(body?.action==="discord_message_rule")return await saveDiscordRule(req,alliance,userId,staff,body);
      if(body?.action==="discord_message_delete")return await deleteDiscordRule(req,alliance,userId,staff,body);
      if(body?.action==="event_message")return await saveEventMessage(req,alliance,userId,staff,body);
