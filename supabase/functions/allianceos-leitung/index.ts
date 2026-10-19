@@ -89,15 +89,83 @@ async function audit(alliance: string, user: string, entity: string, id: string,
   });
   if (error) console.error("AllianceOS audit:",error.code);
 }
+
+function validDiscordInvite(raw: unknown){
+  const value=str(raw,230);
+  if(!value)return null;
+  try{
+    const u=new URL(value);
+    if(u.protocol!=="https:"||u.username||u.password||u.search||u.hash)throw new Error("bad_url");
+    if(!["discord.gg","discord.com","www.discord.com","discordapp.com","www.discordapp.com"].includes(u.hostname.toLowerCase()))throw new Error("bad_domain");
+    if(u.hostname==="discord.gg" && !/^\/[a-zA-Z0-9-]{2,64}\/?$/.test(u.pathname))throw new Error("bad_invite");
+    if(u.hostname!=="discord.gg" && !/^\/invite\/[a-zA-Z0-9-]{2,64}\/?$/.test(u.pathname))throw new Error("bad_invite");
+    return u.origin+u.pathname.replace(/\/$/,"");
+  }catch{throw new HttpError("invalid_discord_invite",400);}
+}
+function publicAllianceSettings(row:any){
+  const enabled=(Array.isArray(row.languages)?row.languages:["de","en","fr"]).filter((l:string)=>langs.includes(l));
+  return {code:row.code,name:row.name,kingdom_id:row.kingdom_id,
+    logo_url:row.logo_url||null,discord_invite_url:row.discord_invite_url||null,
+    default_language:enabled.includes(row.default_language)?row.default_language:enabled[0]||"de",
+    languages:enabled};
+}
+async function updateAllianceLogo(req:Request,alliance:string,userId:string,staff:any,payload:any){
+  if(!permission(staff,"settings"))throw new HttpError("permission_denied",403);
+  const cfg=await checked<any>(db.from("aos_alliances").select("logo_url").eq("code",alliance).single());
+  let nextUrl:string|null=null;
+  if(payload.action==="alliance_logo_upload"){
+    const mime=str(payload.mime_type,30);
+    if(!["image/png","image/jpeg","image/webp"].includes(mime))throw new HttpError("invalid_image_type",400);
+    const encoded=String(payload.base64||"");
+    if(!/^[A-Za-z0-9+/]+={0,2}$/.test(encoded)||encoded.length>1400000||encoded.length<32)throw new HttpError("invalid_image",400);
+    let binary:string;
+    try{binary=atob(encoded);}catch{throw new HttpError("invalid_image",400);}
+    if(binary.length>1048576)throw new HttpError("image_too_large",413);
+    const bytes=Uint8Array.from(binary,c=>c.charCodeAt(0));
+    const png=bytes.length>=8&&[137,80,78,71,13,10,26,10].every((x,i)=>bytes[i]===x);
+    const jpeg=bytes.length>=3&&bytes[0]===255&&bytes[1]===216&&bytes[2]===255;
+    const webp=bytes.length>=12&&String.fromCharCode(...bytes.slice(0,4))==="RIFF"&&
+      String.fromCharCode(...bytes.slice(8,12))==="WEBP";
+    if(!(mime==="image/png"&&png||mime==="image/jpeg"&&jpeg||mime==="image/webp"&&webp))throw new HttpError("image_signature_mismatch",400);
+    const ext=mime==="image/png"?"png":mime==="image/jpeg"?"jpg":"webp";
+    const path=alliance+"/"+crypto.randomUUID()+"."+ext;
+    const uploaded=await db.storage.from("allianceos-logos").upload(path,bytes,{contentType:mime,upsert:false,cacheControl:"3600"});
+    if(uploaded.error)throw new HttpError("logo_upload_failed",500);
+    nextUrl=db.storage.from("allianceos-logos").getPublicUrl(path).data.publicUrl;
+    try{
+      await checked<any>(db.from("aos_alliances").update({logo_url:nextUrl,updated_at:new Date().toISOString()}).eq("code",alliance).select("code").single());
+    }catch(e){
+      await db.storage.from("allianceos-logos").remove([path]);
+      throw e;
+    }
+  }else{
+    await checked<any>(db.from("aos_alliances").update({logo_url:null,updated_at:new Date().toISOString()}).eq("code",alliance).select("code").single());
+  }
+  // Remove only previous objects in our own dedicated bucket/alliance prefix.
+  const old=String(cfg.logo_url||"").split("/storage/v1/object/public/allianceos-logos/")[1];
+  if(old&&old.startsWith(alliance+"/")&&!old.includes(".."))await db.storage.from("allianceos-logos").remove([old]).catch(()=>{});
+  await audit(alliance,userId,"alliance_logo",alliance,payload.action==="alliance_logo_upload"?"upload":"remove");
+  return json(req,{ok:true,logo_url:nextUrl});
+}
+
 async function publicInfo(req: Request, alliance: string, mode: string) {
+  if(mode==="public-config"){
+    const row=await checked<any>(db.from("aos_alliances").select("code,name,kingdom_id,logo_url,discord_invite_url,default_language,languages").eq("code",alliance).single());
+    return json(req,{alliance:publicAllianceSettings(row)});
+  }
   if(mode==="public-schedule"){
     const [cycles,phases]=await Promise.all([
-      checked<any[]>(db.from("aos_event_cycles").select("group_key,anchor_date,interval_days,duration_days,phase_count,enabled,title,override_schedule")
-       .eq("alliance_code",alliance).eq("enabled",true).limit(200)),
+      checked<any[]>(db.from("aos_event_cycles").select("group_key,anchor_date,interval_days,duration_days,phase_count,enabled,title,override_schedule,start_time_utc")
+       .eq("alliance_code",alliance).limit(200)),
       checked<any[]>(db.from("aos_event_day_templates").select("group_key,day_number,instructions")
        .eq("alliance_code",alliance).eq("status","published").limit(300))
     ]);
-    return json(req,{cycles,phases});
+    // Publish only active schedules, plus minimal inactive Bear Trap slot markers.
+    // This lets the dashboard distinguish an explicitly disabled NRW slot from
+    // a slot that has never been configured, without exposing private settings.
+    const publicCycles=cycles.filter((c:any)=>c.enabled===true||/^bear-[123]$/.test(c.group_key||""))
+      .map((c:any)=>c.enabled===false?{group_key:c.group_key,enabled:false}:c);
+    return json(req,{cycles:publicCycles,phases});
   }
   if (mode === "public-guidance") {
     const rows=await checked<any[]>(db.from("aos_event_guidance")
@@ -531,17 +599,30 @@ async function saveStaff(req:Request,alliance:string,userId:string,staff:any,pay
 const groupKey=(v:unknown)=>{const key=str(v,70);if(!/^[a-z0-9-]{2,70}$/.test(key))throw new HttpError("invalid_event_group",400);return key;};
 async function saveEventCycle(req:Request,alliance:string,userId:string,staff:any,payload:any){
   if(!permission(staff,"events"))throw new HttpError("permission_denied",403);
-  const group_key=groupKey(payload.group_key),anchor_date=validateDate(payload.anchor_date,false);
+  const group_key=groupKey(payload.group_key),isBearSlot=/^bear-[123]$/.test(group_key);
+  if(/^bear-[0-9]+$/.test(group_key)&&!isBearSlot)throw new HttpError("bear_slot_limit",400);
+  const title_only=payload.title_only===true;
+  const previous=await checked<any>(db.from("aos_event_cycles").select("*").eq("alliance_code",alliance).eq("group_key",group_key).maybeSingle());
+  const anchor_date=title_only&&previous?previous.anchor_date:validateDate(payload.anchor_date,false);
   if(!/^\d{4}-\d{2}-\d{2}$/.test(anchor_date||""))throw new HttpError("invalid_anchor",400);
-  const interval_days=Number(payload.interval_days),duration_days=Number(payload.duration_days),phase_count=Number(payload.phase_count);
+  const interval_days=title_only&&previous?Number(previous.interval_days):Number(payload.interval_days);
+  const duration_days=title_only&&previous?Number(previous.duration_days):Number(payload.duration_days);
+  const phase_count=title_only&&previous?Number(previous.phase_count):Number(payload.phase_count);
   if(!Number.isInteger(interval_days)||interval_days<1||interval_days>365||
      !Number.isInteger(duration_days)||duration_days<1||duration_days>14||duration_days>interval_days||
      !Number.isInteger(phase_count)||phase_count<1||phase_count>duration_days)throw new HttpError("invalid_cycle",400);
+  const requestedTime=title_only&&previous?previous.start_time_utc:payload.start_time_utc;
+  const start_time_utc=requestedTime==null||requestedTime===""?null:str(requestedTime,8).slice(0,5);
+  if(start_time_utc&&!/^([01]\d|2[0-3]):[0-5]\d$/.test(start_time_utc))throw new HttpError("invalid_utc_time",400);
+  const enabled=title_only?(previous?.enabled??!isBearSlot):payload.enabled!==false;
+  if(isBearSlot&&enabled&&!start_time_utc&&!title_only)throw new HttpError("bear_time_required",400);
   const cycle=await checked<any>(db.from("aos_event_cycles").upsert({
     alliance_code:alliance,group_key,anchor_date,interval_days,duration_days,phase_count,
-    enabled:payload.enabled!==false,override_schedule:true,title:localized(payload.title,120),updated_at:new Date().toISOString(),updated_by:userId
+    enabled,override_schedule:title_only?(previous?.override_schedule===true):true,
+    start_time_utc:isBearSlot?start_time_utc:null,
+    title:localized(payload.title,120),updated_at:new Date().toISOString(),updated_by:userId
   },{onConflict:"alliance_code,group_key"}).select("*").single());
-  await audit(alliance,userId,"event_cycle",group_key,"save");
+  await audit(alliance,userId,title_only?"event_title":"event_cycle",group_key,"save");
   return json(req,{ok:true,item:cycle});
 }
 async function saveEventDayTemplate(req:Request,alliance:string,userId:string,staff:any,payload:any){
@@ -638,8 +719,7 @@ async function save(req: Request, alliance: string, userId: string, staff: any, 
       capacity:Math.max(1,Math.min(500,Number(data.capacity)||100)),
       default_language:data.default_language,
       languages,
-      logo_url:str(data.logo_url,400)||null,
-      discord_guild_id:str(data.discord_guild_id,40)||null,
+      discord_invite_url:validDiscordInvite(data.discord_invite_url),
       advertising_enabled:alliance==="NRW"?false:Boolean(data.advertising_enabled),
       updated_at:new Date().toISOString()
     };
@@ -801,13 +881,15 @@ Deno.serve(async(req: Request)=>{
     if(!["GET","POST"].includes(req.method))throw new HttpError("method_not_allowed",405);
     const u=new URL(req.url),alliance=str(u.searchParams.get("alliance")||"NRW",16);
     if(!/^[A-Za-z0-9_-]{2,16}$/.test(alliance))throw new HttpError("invalid_alliance",400);
-    if(req.method==="GET"&&["public-events","public-laws","public-guidance","public-schedule"].includes(u.searchParams.get("mode")||""))
+    if(req.method==="GET"&&["public-events","public-laws","public-guidance","public-schedule","public-config"].includes(u.searchParams.get("mode")||""))
       return await publicInfo(req,alliance,u.searchParams.get("mode")||"");
     if(req.method==="GET"&&u.searchParams.get("mode")==="public-leaders")return await publicLeaders(req,alliance);
     const {userId,staff}=await staffFor(req,alliance);
     if(req.method==="GET")return await bootstrap(req,alliance,staff);
-    if(Number(req.headers.get("content-length")||"0")>200000)throw new HttpError("payload_too_large",413);
+    if(Number(req.headers.get("content-length")||"0")>1600000)throw new HttpError("payload_too_large",413);
     const body=await req.json().catch(()=>{throw new HttpError("invalid_json",400)});
+    if(body?.action!=="alliance_logo_upload"&&Number(req.headers.get("content-length")||"0")>200000)throw new HttpError("payload_too_large",413);
+    if(body?.action==="alliance_logo_upload"||body?.action==="alliance_logo_remove")return await updateAllianceLogo(req,alliance,userId,staff,body);
     if(body?.action==="staff")return await saveStaff(req,alliance,userId,staff,body);
     if(body?.action==="provision_leaders")return await provisionLeaders(req,alliance,userId,staff);
     if(body?.action==="reset_leader_password")return await rotateLeaderPassword(req,alliance,userId,staff,body);
