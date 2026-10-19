@@ -167,8 +167,8 @@
       const key="bear-"+i,setting=stored.find(c=>c.group_key===key);
       if(setting?.enabled===false)return [];
       const configured=setting?.enabled===true&&setting?.override_schedule===true;
-      const valid=configured&&/^([01]\\d|2[0-3]):[0-5]\\d(:00)?$/.test(String(setting.start_time_utc||""))&&
-        /^\\d{4}-\\d{2}-\\d{2}$/.test(setting.anchor_date||"")&&
+      const valid=configured&&/^([01]\d|2[0-3]):[0-5]\d(:00)?$/.test(String(setting.start_time_utc||""))&&
+        /^\d{4}-\d{2}-\d{2}$/.test(setting.anchor_date||"")&&
         Number.isInteger(Number(setting.interval_days))&&Number(setting.interval_days)>=1;
       // Never display slot 3 without an explicitly enabled, valid schedule.
       if((configured&&!valid)||(i===3&&!valid))return [];
