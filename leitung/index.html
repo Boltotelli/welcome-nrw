@@ -3,10 +3,18 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0c1428">
+<base id="leitung-base" href="/leitung/">
+<script>
+  // Vercel serves /leitung and /leitung/; GitHub Pages has a /welcome-nrw prefix.
+  // Normalize relative CSS, JS, icon and navigation URLs before the browser loads them.
+  if (location.pathname.startsWith("/welcome-nrw/")) {
+    document.getElementById("leitung-base").setAttribute("href", "/welcome-nrw/leitung/");
+  }
+</script>
 <title>AllianceOS · NRW Leitungszentrale</title>
 <meta name="description" content="Geschützte Leitungszentrale für Allianzverwaltung, Transfers, Laws und Events.">
 <link rel="icon" href="../assets/nrw-dashboard-icon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="./styles.css?v=step6-days-1">
+<link rel="stylesheet" href="./styles.css?v=leitung-mobile-routefix-20261019">
 
 </head>
 <body>
@@ -390,5 +398,5 @@
  </form>
 </dialog>
 <script src="../dashboard/event-rhythm.js?v=pages-step4-1"></script>
-<script type="module" src="./app.js?v=eventbot-4lang-20261019"></script>
+<script type="module" src="./app.js?v=leitung-mobile-routefix-20261019"></script>
 </body></html>
