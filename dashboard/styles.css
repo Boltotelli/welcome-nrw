@@ -112,3 +112,6 @@ main,footer{max-width:1320px;margin:0 auto;padding-left:28px;padding-right:28px}
 .bear-optimizer-cta span:last-child{font-size:16px;color:var(--gold)}
 @media (min-width:681px) and (max-width:1210px){.topbar{gap:10px;grid-template-columns:auto minmax(0,1fr) auto}.topbar .bear-link{padding:0 10px}.topbar .bear-link b{display:none}.kvk-timer{max-width:450px}.topbar nav{gap:5px}}
 @media (max-width:680px){.topbar .bear-link{width:34px;height:34px;min-height:34px;padding:0;border-radius:10px}.topbar .bear-link b{display:none}.topbar .bear-link>span:first-child{font-size:16px}.bear-optimizer-cta{width:100%;margin-top:13px}}
+
+/* Preserve the native hidden state for optional Bear Trap slots in all layouts. */
+.trap-times > [hidden]{display:none!important}
