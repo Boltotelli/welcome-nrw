@@ -67,6 +67,7 @@ export function createDiscordEventPlanner({request,flash,esc,can,eventHub}){
  }
  function render(lang){
   language=lang||language;
+  if(catalog.length)catalog=eventHub.catalog(language);
   if(!loaded&& !loading)$("discordRuleList").innerHTML='<p class="muted">'+esc(tx("loading"))+'</p>';
   if(catalog.length&&!catalog.some(e=>e.key===selected))selected=catalog[0]?.key||null;
   renderChannels();renderEvents();renderRuleList();
