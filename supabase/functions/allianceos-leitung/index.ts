@@ -331,13 +331,13 @@ async function internalMovesFor(alliance:string) {
  * require an active alliance R4/R5 session and module permissions. */
 const discordId=(raw:unknown)=>{
  const id=str(raw,22).trim();
- if(id&&!/^\\d{17,20}$/.test(id))throw new HttpError("invalid_discord_snowflake",400);
+ if(id&&!/^\d{17,20}$/.test(id))throw new HttpError("invalid_discord_snowflake",400);
  return id;
 };
 const discordTime=(raw:unknown)=>{
  const v=str(raw,8).trim();
  if(!v)return null;
- if(!/^([01]\\d|2[0-3]):[0-5]\\d$/.test(v))throw new HttpError("invalid_utc_time",400);
+ if(!/^([01]\d|2[0-3]):[0-5]\d$/.test(v))throw new HttpError("invalid_utc_time",400);
  return v;
 };
 async function discordPlanner(req:Request,alliance:string,staff:any,page:number){
