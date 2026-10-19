@@ -178,7 +178,7 @@ export function createDiscordEventPlanner({request,flash,esc,can,eventHub}){
    const phase=info.names?.[l]||info.names?.en||"";
    const tip=String(info.tips?.[l]||"").trim();
    const score=info.scoring?.[l]||[];
-   const fallback=score.length?tx("scoring")+" "+score.join(", ")+".":DAY_UI[l]?.guideLine||DAY_UI.de.guideLine;
+   const fallback=score.length?(DAY_UI[l]?.scoring||DAY_UI.de.scoring)+" "+score.join(", ")+".":DAY_UI[l]?.guideLine||DAY_UI.de.guideLine;
    const notes=tip||fallback;
    const prefix={de:"📣",en:"📣",fr:"📣"}[l];
    return [prefix+" "+name(l)+" · "+(l==="de"?"Tag":l==="fr"?"Jour":"Day")+" "+day+(phase?" – "+phase:""),notes].join("\n").slice(0,1800);
@@ -201,8 +201,12 @@ export function createDiscordEventPlanner({request,flash,esc,can,eventHub}){
   if(!can("events")||!event())return;
   editingId=item?.id||null;
   botForm.reset();
+  botForm.elements.day_number.innerHTML=Array.from({length:daysCount()},(_,i)=>{
+    const n=i+1,phase=event()?.days?.find(d=>d.number===n)?.names?.[language]||"";
+    return '<option value="'+n+'">'+esc(tx("day").replace("{n}",n)+(phase?" · "+phase:""))+'</option>';
+  }).join("");
   botForm.elements.title.value=item?.title||"";
-  botForm.elements.day_number.value=item?.day_number||1;
+  botForm.elements.day_number.value=String(item?.day_number||selectedDay);
   botForm.elements.trigger_type.value=item?.trigger_type||"relative";
   botForm.elements.relative_to.value=item?.relative_to||"start";
   botForm.elements.offset_amount.value=Math.abs(Number(item?.offset_minutes??-15));
@@ -222,7 +226,7 @@ export function createDiscordEventPlanner({request,flash,esc,can,eventHub}){
   if(rule.trigger_type==="clock"&&!rule.clock_utc){flash(tx("needClock"),true);return;}
   if(rule.enabled&&!Object.values(rule.messages).every(v=>v.trim())){flash(tx("needThree"),true);return;}
   const btn=$("discordRuleSave");btn.disabled=true;
-  try{await request("bootstrap",rule);$("discordRuleDialog").close();await reload();flash(tx("ruleSaved"));}
+  try{await request("bootstrap",rule);$("discordRuleDialog").close();selectedDay=rule.day_number;await reload();flash(tx("ruleSaved"));}
   catch(e){flash(String(e.message),true);}
   finally{btn.disabled=false;}
  }
@@ -242,17 +246,22 @@ export function createDiscordEventPlanner({request,flash,esc,can,eventHub}){
   catch(e){flash(String(e.message),true);}
   finally{button.disabled=!can("settings");}
  }
- async function saveAnchor(){
+ async function saveAnchor(allDays=false){
   if(!can("events")||!selected)return;
-  $("saveDiscordAnchor").disabled=true;
+  const start_time_utc=$("discordAnchorStart").value,end_time_utc=$("discordAnchorEnd").value;
+  const dayList=allDays?Array.from({length:daysCount()},(_,i)=>i+1):[selectedDay];
+  if(allDays&&!window.confirm(tx("allTimesConfirm")))return;
+  const btn=$(allDays?"saveDiscordAllAnchors":"saveDiscordAnchor");btn.disabled=true;
   try{
-   const start_time_utc=$("discordAnchorStart").value,end_time_utc=$("discordAnchorEnd").value;
-   await request("bootstrap",{action:"discord_event_anchor",event_key:selected,start_time_utc,end_time_utc});
-   anchors=anchors.filter(a=>a.event_key!==selected);
-   if(start_time_utc||end_time_utc)anchors.push({event_key:selected,start_time_utc,end_time_utc});
-   renderRuleList();flash(tx("anchorSaved"));
-  }catch(e){flash(String(e.message),true);}
-  finally{$("saveDiscordAnchor").disabled=!can("events");}
+   for(const day_number of dayList){
+    const payload={action:"discord_event_day_time",event_key:selected,day_number,start_time_utc,end_time_utc};
+    await request("bootstrap",payload);
+    dayTimes=dayTimes.filter(a=>!(a.event_key===selected&&Number(a.day_number)===day_number));
+    if(start_time_utc||end_time_utc)dayTimes.push({event_key:selected,day_number,start_time_utc,end_time_utc});
+   }
+   renderRuleList();flash(tx(allDays?"allDaysSaved":"anchorSaved"));
+  }catch(e){renderRuleList();flash(String(e.message),true);}
+  finally{btn.disabled=!can("events");}
  }
  async function addPresets(allDays=false){
   if(!can("events")||!event())return;
@@ -283,11 +292,19 @@ export function createDiscordEventPlanner({request,flash,esc,can,eventHub}){
   $("discordEventSearch").addEventListener("input",renderEvents);
   $("discordEventList").addEventListener("click",ev=>{
    const btn=ev.target.closest("[data-bot-event]");if(!btn)return;
-   selected=btn.dataset.botEvent;renderEvents();renderRuleList();
+   selected=btn.dataset.botEvent;selectedDay=1;renderEvents();renderRuleList();
   });
-  $("saveDiscordAnchor").addEventListener("click",saveAnchor);
+  $("discordDayTabs").addEventListener("click",ev=>{
+   const day=ev.target.closest("[data-discord-day]");
+   if(!day)return;
+   const n=Number(day.dataset.discordDay);
+   if(Number.isInteger(n)&&n>=1&&n<=daysCount()){selectedDay=n;renderRuleList();}
+  });
+  $("saveDiscordAnchor").addEventListener("click",()=>saveAnchor(false));
+  $("saveDiscordAllAnchors").addEventListener("click",()=>saveAnchor(true));
   $("discordAddRule").addEventListener("click",()=>editRule(null));
-  $("discordPreset").addEventListener("click",addPresets);
+  $("discordPreset").addEventListener("click",()=>addPresets(false));
+  $("discordAllDaysPreset").addEventListener("click",()=>addPresets(true));
   $("discordRuleList").addEventListener("click",ev=>{
    const edit=ev.target.closest("[data-bot-edit]"),copy=ev.target.closest("[data-bot-copy]");
    const id=edit?.dataset.botEdit||copy?.dataset.botCopy;if(!id)return;
@@ -301,5 +318,5 @@ export function createDiscordEventPlanner({request,flash,esc,can,eventHub}){
   $("discordRuleCloseTop").addEventListener("click",()=>$("discordRuleDialog").close());
  }
  attach();
- return {open,render,reset(){loaded=false;config={guild_id:"",channels:{}};rules=[];anchors=[];catalog=[];selected=null;dirtySettings=false;}};
+ return {open,render,reset(){loaded=false;config={guild_id:"",channels:{}};rules=[];anchors=[];dayTimes=[];catalog=[];selected=null;selectedDay=1;dirtySettings=false;}};
 }
