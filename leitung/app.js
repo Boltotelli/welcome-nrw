@@ -152,7 +152,7 @@ function showLogin(message=""){
 }
 function showLive(){
  $("loginArea").hidden=true;$("liveArea").hidden=false;$("logoutBtn").hidden=false;
- $("roleChip").textContent=state.staff.rank;$("changePasswordBtn").hidden=false;grantButtons();render();
+ $("roleChip").textContent=state.staff.is_owner&&state.staff.rank!=="R5"?"Admin · "+state.staff.rank:state.staff.rank;$("changePasswordBtn").hidden=false;grantButtons();render();
 }
 async function refresh(){
  const data=await request();
