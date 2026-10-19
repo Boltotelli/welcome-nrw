@@ -2,6 +2,7 @@ import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 import {createEventHub} from "./event-library.js?v=step6-iteratorfix-1";
 import {createOperations} from "./operations.js?v=pages-4";
 import {createDiscordEventPlanner} from "./discord-events.js?v=step6-days-2";
+import {createEventBotStatusPanel} from "./event-bot-status.js?v=1";
 
 // Private AllianceOS pilot. Data is NEVER stored in localStorage; only auth session is.
 // All records and permissions are issued by the authenticated Edge Function.
@@ -84,7 +85,7 @@ function setTab(name){
  q(".nav-item").forEach(b=>b.classList.toggle("active",b.dataset.tab===name));
  $("pageLabel").textContent=t(name);
  history.replaceState(null,"",LEITUNG_PATH+(name==="overview"?"":"?tab="+encodeURIComponent(name)));
-  if(name==="discord"&&state)discordPlanner.open(lang).catch(e=>flash(String(e.message),true));
+  if(name==="discord"&&state)Promise.all([discordPlanner.open(lang),eventBotStatusPanel.refresh()]).catch(e=>flash(String(e.message),true));
 }
 function flash(message,error=false){
  const el=$("flash");el.textContent=message;el.classList.toggle("error",error);el.hidden=false;
@@ -126,6 +127,7 @@ async function syncPlayerPower(){
 }
 const eventHub=createEventHub({request,flash,esc,t});
  const discordPlanner=createDiscordEventPlanner({request,flash,esc,can,eventHub});
+const eventBotStatusPanel=createEventBotStatusPanel({supabase,flash,can,esc});
 const operations=createOperations({getState:()=>state,request,flash,esc,t,can,refresh});
 function showLogin(message=""){
  $("liveArea").hidden=true;$("loginArea").hidden=false;$("logoutBtn").hidden=true;
@@ -701,7 +703,7 @@ $("changePasswordForm").addEventListener("submit",async e=>{
  }catch(e){flash(t("genericError")+" ("+e.message+")",true);}
  finally{button.disabled=false;}
 });
-$("logoutBtn").addEventListener("click",async()=>{await supabase.auth.signOut();state=null;discordPlanner.reset();showLogin();});
+$("logoutBtn").addEventListener("click",async()=>{await supabase.auth.signOut();state=null;discordPlanner.reset();eventBotStatusPanel.reset();showLogin();});
 document.documentElement.dataset.theme=localStorage.getItem("nrw_theme")||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");
 patchTranslations();
 loadLeaderList();
