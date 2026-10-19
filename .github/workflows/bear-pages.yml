@@ -430,9 +430,11 @@ jobs:
           grep -Fq 'id="eventNameFields"' _site/leitung/index.html
           grep -Fq 'id="cycleBearOptions"' _site/leitung/index.html
           grep -Fq 'start_time_utc' _site/leitung/event-library.js
-          grep -Fq 'id="bt3Countdown"' _site/dashboard/index.html
-          grep -Fq 'src="./event-rhythm.js?v=step4-1"' _site/dashboard/index.html
-          grep -Fq 'src="./app.js?v=step4-1"' _site/dashboard/index.html
+          # The Player Dashboard is hosted on Vercel; inspect its main-branch source
+          # without accidentally publishing an incomplete dashboard to GitHub Pages.
+          grep -Fq 'id="bt3Countdown"' v3-latest/dashboard/index.html
+          grep -Fq 'src="./event-rhythm.js?v=step4-1"' v3-latest/dashboard/index.html
+          grep -Fq 'src="./app.js?v=step4-1"' v3-latest/dashboard/index.html
           grep -Fq 'id="defaultLanguage"' _site/leitung/index.html
           ! grep -Fq 'data-tab="languages"' _site/leitung/index.html
           grep -Fq 'lookupTransferPlayer' _site/leitung/app.js
