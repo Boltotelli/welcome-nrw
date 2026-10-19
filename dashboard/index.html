@@ -8,7 +8,7 @@
        both Vercel and GitHub Pages before the browser discovers any assets. -->
   <script>
     (function () {
-      var isProjectPages = /^\\/welcome-nrw(?:\\/|$)/i.test(location.pathname);
+      var isProjectPages = location.pathname === '/welcome-nrw' || location.pathname.indexOf('/welcome-nrw/') === 0;
       var base = document.createElement('base');
       base.href = (isProjectPages ? '/welcome-nrw' : '') + '/dashboard/';
       document.head.appendChild(base);
