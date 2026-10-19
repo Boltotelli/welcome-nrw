@@ -102,6 +102,7 @@ export function createEventHub({request,flash,esc,t}) {
    if(x.source==="custom"){const recognized=kind(x.record);return recognized!=="generic"?recognized:"custom-"+x.record.id;}
    const k=kind(x.record);
    if(k!=="generic")return k;
+   if(x.source==="catalog")return "catalog-"+normalizeKey(lk(x.record.name,"en")||x.record.name);
    const id=String(x.guide?.id||x.record?.id||"");
    return normalizeKey(id.replace(/-20[0-9]{2}(?:-[0-9]{2}){0,2}.*$/,""))||"event";
  };
@@ -578,6 +579,20 @@ export function createEventHub({request,flash,esc,t}) {
    }).filter(Boolean).sort((a,b)=>a.date.localeCompare(b.date)||a.title.localeCompare(b.title)).slice(0,3);
    return {count:groups.length,upcoming};
  }
+ function catalog(locale=language){
+   if(!sources)return [];
+   const previous=language;language=locale;
+   buildGroups();
+   const result=groups.map(g=>({
+     key:g.key,
+     name:groupName(g),
+     names:Object.fromEntries(["de","en","fr"].map(l=>[l,lk(cycleFor(g)?.title,l)||lk(baseNames(g),l)||groupName(g)])),
+     cycle:cycleFor(g)||null,
+     suggested_time_utc:cycleFor(g)?.start_time_utc||null
+   }));
+   language=previous;
+   return result;
+ }
  attach();
- return {load,render,stats};
+ return {load,render,stats,catalog};
 }
