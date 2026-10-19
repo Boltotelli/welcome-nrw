@@ -54,7 +54,7 @@ async function reconcile(){
   const entry=rights.get(user.id);if(!entry)continue;
   const player=byId.get(found[1]);
   const allowed=player?.active && (player.alliance_rank===4||player.alliance_rank===5);
-  if(!allowed && (entry.enabled||entry.disabled_reason!=="rank_lost")){
+  if(!allowed && (entry.enabled||(!entry.disabled_reason))){
    await load(db.from("aos_staff").update({enabled:false,disabled_reason:"rank_lost"}).eq("alliance_code",ALLIANCE).eq("user_id",user.id).select("user_id").single());
    result.disabled++;
   }
