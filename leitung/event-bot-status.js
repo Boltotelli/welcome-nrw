@@ -28,7 +28,7 @@ export function createEventBotStatusPanel({supabase,can,flash,esc}){
  <div id="aosBotSummary"></div>
  <div class="aos-bot-toolbar">
  <label class="field"><span>Testkanal</span><select id="aosBotTestLang" class="control">
- <option value="de">🇩🇪 DE</option><option value="en">🇬🇧 EN</option><option value="fr">🇫🇷 FR</option></select></label>
+ <option value="de">🇩🇪 DE</option><option value="en">🇬🇧 EN</option><option value="fr">🇫🇷 FR</option><option value="es">🇪🇸 ES</option></select></label>
  <button type="button" id="aosBotTest" class="ghost">🧪 Testnachricht senden</button>
  <button type="button" id="aosBotAlliancePause" class="ghost" hidden>Allianz pausieren</button>
  <button type="button" id="aosBotGlobalPause" class="ghost" hidden>🛑 Globaler Not-Aus</button>
