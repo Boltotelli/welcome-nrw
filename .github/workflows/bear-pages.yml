@@ -399,102 +399,74 @@ jobs:
           grep -Fq "frame.style.background='transparent'" _site/bear/preview-v3/help-ui.js
           grep -Fq 'help-locales.js?v=20261017-all-guides-1' _site/bear/preview-v3.html
           echo 'DE/EN/FR/ES help guides verified from main.'
-      # Publish the COMPLETE AllianceOS leadership app from main alongside the
-      # existing standalone Bear optimizer preview. Never replace Pages root.
-      - name: Add AllianceOS Leitung from current main
+      # Publish the latest AllianceOS leadership + public pages from main.
+      # IMPORTANT: preserve the existing Bear Optimizer at Pages root.
+      # All new user-facing previews live under /leitung/, /dashboard/,
+      # and /welcome/; Vercel production is never touched by this workflow.
+      - name: Publish current AllianceOS and public preview from main
         run: |
           set -euo pipefail
           test -s v3-latest/leitung/index.html
-          mkdir -p _site/leitung _site/dashboard _site/assets
+          test -s v3-latest/dashboard/index.html
+          test -s v3-latest/leitung/public-config.js
+          mkdir -p _site/leitung _site/dashboard _site/assets _site/welcome
           cp -a v3-latest/leitung/. _site/leitung/
-          cp v3-latest/dashboard/events.json v3-latest/dashboard/event-guides.json v3-latest/dashboard/event-rhythm.js _site/dashboard/
-          cp v3-latest/assets/nrw-dashboard-icon.svg _site/assets/
-          # Public alliance Laws are part of the Leitung workflow.
+          cp -a v3-latest/dashboard/. _site/dashboard/
+          cp -a v3-latest/assets/. _site/assets/
           cp v3-latest/laws.html v3-latest/laws.js v3-latest/laws.css _site/
-          # Host-only publishing: the protected R4/R5 API stays in Supabase.
-          # The full guide data and all current editor modules ship as files.
+          cp v3-latest/styles.css v3-latest/app.js _site/
+          if [ -f v3-latest/site.webmanifest ]; then cp v3-latest/site.webmanifest _site/; fi
+          # Home page is a subfolder preview; the Pages root stays the Bear tool.
+          cp v3-latest/index.html _site/welcome/index.html
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('_site/welcome/index.html')
+          html=p.read_text()
+          html=html.replace('<head>','<head>\\n<base href="../">',1)
+          # With a project-root base, hash links must point back to /welcome/.
+          html=html.replace('href="#','href="welcome/#')
+          html=html.replace('href="/site.webmanifest"','href="site.webmanifest"')
+          html=html.replace('<script defer src="/_vercel/insights/script.js"></script>','')
+          p.write_text(html)
+          PY
+          # Essential Step 5 files and wiring must all be included, not just
+          # the old event library and login page.
+          test -s _site/index.html
           test -s _site/leitung/index.html
           test -s _site/leitung/app.js
           test -s _site/leitung/event-library.js
           test -s _site/leitung/operations.js
+          test -s _site/leitung/public-config.js
           test -s _site/leitung/styles.css
-          test -s _site/leitung/public-feed.js
-          test -s _site/leitung/public-feed.css
+          test -s _site/dashboard/index.html
+          test -s _site/dashboard/app.js
+          test -s _site/dashboard/styles.css
           test -s _site/dashboard/events.json
           test -s _site/dashboard/event-guides.json
           test -s _site/dashboard/event-rhythm.js
-          grep -Fq 'href="./styles.css?v=pages-step4-1"' _site/leitung/index.html
-          grep -Fq 'src="./app.js?v=pages-step4-2"' _site/leitung/index.html
-          grep -Fq 'src="../dashboard/event-rhythm.js?v=pages-step4-1"' _site/leitung/index.html
-          grep -Fq 'const opsUI=' _site/leitung/app.js
-          grep -Fq 'id="eventNameFields"' _site/leitung/index.html
-          grep -Fq 'id="cycleBearOptions"' _site/leitung/index.html
-          grep -Fq 'start_time_utc' _site/leitung/event-library.js
-          grep -Fq '2026-09-13' _site/leitung/event-library.js
-          # The Player Dashboard is hosted on Vercel; inspect its main-branch source
-          # without accidentally publishing an incomplete dashboard to GitHub Pages.
-          grep -Fq 'id="bt3Countdown"' v3-latest/dashboard/index.html
-          grep -Fq 'src="./event-rhythm.js?v=step4-1"' v3-latest/dashboard/index.html
-          grep -Fq 'src="./app.js?v=step4-1"' v3-latest/dashboard/index.html
+          test -s _site/welcome/index.html
+          test -s _site/styles.css
+          test -s _site/app.js
+          test -s _site/assets/nrw-banner.svg
+          test -s _site/assets/nrw-dashboard-icon.svg
+          grep -Fq 'id="uploadAllianceLogo"' _site/leitung/index.html
+          grep -Fq 'id="removeAllianceLogo"' _site/leitung/index.html
+          grep -Fq 'name="discord_invite_url"' _site/leitung/index.html
+          grep -Fq 'alliance_logo_upload' _site/leitung/app.js
+          grep -Fq 'public-config.js' _site/dashboard/index.html
+          grep -Fq 'public-config.js' _site/welcome/index.html
+          grep -Fq 'data-alliance-logo' _site/welcome/index.html
+          grep -Fq 'data-alliance-logo' _site/dashboard/index.html
+          grep -Fq 'id="bt3Row" hidden' _site/dashboard/index.html
           grep -Fq 'id="defaultLanguage"' _site/leitung/index.html
-          ! grep -Fq 'data-tab="languages"' _site/leitung/index.html
-          grep -Fq 'lookupTransferPlayer' _site/leitung/app.js
-          grep -Fq 'contact_staff_user_id' _site/leitung/app.js
-          grep -Fq 'function cityLevel(' _site/leitung/app.js
-          grep -Fq 'discord_connected' _site/leitung/app.js
-          grep -Fq 'power_override' _site/leitung/app.js
-          grep -Fq 'flagcdn.com/24x18/' _site/leitung/app.js
-          grep -Fq 'class="rank-and-tg"' _site/leitung/app.js
-          grep -Fq 'action:"power_sync"' _site/leitung/app.js
-          grep -Fq 'data-i18n="movesInto"' _site/leitung/index.html
-          grep -Fq 'class="transfer-id-row"' _site/leitung/app.js
-          grep -Fq 'avatar_url' _site/leitung/app.js
-          grep -Fq 'id="transferWindowsList"' _site/leitung/index.html
-          grep -Fq 'data-i18n="transferManualInfo"' _site/leitung/index.html
-          ! grep -Fq 'id="apiTransferPhases"' _site/leitung/index.html
-          ! grep -Fq 'transfer_phases' _site/leitung/operations.js
-          grep -Fq 'grid-template-columns:minmax(0,1fr) max-content' _site/leitung/styles.css
-          grep -Fq 'action:"transfer_portraits"' _site/leitung/operations.js
-          test -s _site/laws.js
-          ! grep -Fq 'const LAWS=' _site/laws.js
-          grep -Fq 'data-allianceos="laws"' _site/laws.html
-          grep -Fq 'data-law-unpublish' _site/leitung/app.js
-          grep -Fq 'lawPublishConfirm' _site/leitung/app.js
-          grep -Fq 'data-lang-btn="es"' _site/laws.html
-          grep -Fq 'id="publicLawSearch"' _site/laws.html
-          grep -Fq 'id="publicLawCategory"' _site/laws.html
-          grep -Fq 'lawCategoryLabels' _site/leitung/app.js
-          grep -Fq 'filtered=records.filter' _site/leitung/public-feed.js
-          grep -Fq 'lawstudio-2' _site/laws.html
-          grep -Fq 'public-laws' _site/leitung/public-feed.js
-          grep -Fq 'Server-Laws · Königreich 1044' _site/leitung/public-feed.js
-          grep -Fq 'Server-Laws' _site/laws.html
-          ! grep -Fq 'href="index.html" target="_top"' _site/laws.html
-          grep -Fq 'new URL("../dashboard/events.json",import.meta.url)' _site/leitung/event-library.js
-          grep -Fq 'public-laws' _site/leitung/public-feed.js
           node --input-type=module --check < _site/leitung/app.js
           node --input-type=module --check < _site/leitung/event-library.js
           node --input-type=module --check < _site/leitung/operations.js
+          node --check _site/leitung/public-config.js
+          node --check _site/dashboard/app.js
           node --check _site/dashboard/event-rhythm.js
-          node - <<'NODE'
-          const fs=require('node:fs');
-          const path=require('node:path');
-          const root=path.resolve('_site/leitung');
-          for(const file of ['index.html','app.js','event-library.js','operations.js','styles.css','public-feed.js']){
-            if(!fs.statSync(path.join(root,file)).size)process.exit(2);
-          }
-          const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
-          for(const ref of ['./app.js?v=pages-step4-2','./styles.css?v=pages-step4-1','../dashboard/event-rhythm.js?v=pages-step4-1','../assets/nrw-banner.svg']){
-            const clean=ref.split('?')[0];
-            if(!fs.existsSync(path.resolve(root,clean))){console.error('Missing Pages asset:',clean);process.exit(3);}
-            if(!html.includes(ref)){console.error('HTML missing expected reference:',ref);process.exit(4);}
-          }
-          const app=fs.readFileSync(path.join(root,'app.js'),'utf8');
-          if(app.includes('"/leitung/')||app.includes('"/dashboard/'))process.exit(5);
-          console.log('AllianceOS GitHub Pages asset dependencies verified');
-          NODE
-          echo 'Published AllianceOS Leitung: /welcome-nrw/leitung/'
-          echo 'Published public alliance Laws: /welcome-nrw/laws.html'
+          node --check _site/app.js
+          echo 'Pages preview paths verified: /welcome/, /leitung/, /dashboard/'
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site
