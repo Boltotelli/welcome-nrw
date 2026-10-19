@@ -198,6 +198,8 @@ export function createPerformance({getState,getLanguage,request,esc,openPlayer})
  }
  function draw(){
    if(!root||!enabled)return;
+   const subtitle=document.getElementById("performanceSubtitle");
+   if(subtitle)subtitle.textContent=t("subtitle");
    if(error){root.innerHTML='<div class="notice"><p>'+esc(t("failed"))+' ('+esc(error)+')</p>'+
      '<button class="ghost" type="button" data-perf-refresh>'+esc(t("refreshed"))+'</button></div>';return;}
    if(!cache){root.textContent=t("loading");return;}
@@ -240,5 +242,6 @@ export function createPerformance({getState,getLanguage,request,esc,openPlayer})
      if(btn?.dataset.perfOpenPlayer)openPlayer(btn.dataset.perfOpenPlayer);
    });
  }
- return {enabled,open,render:draw};
+ function reset(){cache=null;loading=null;error="";eventId="";search="";selectedPower="all";if(root)root.textContent="";}
+ return {enabled,open,render:draw,reset};
 }
