@@ -83,7 +83,8 @@ Object.assign(step6Copy.es,{discordBotOffline:"Planificador integrado · Envío 
  botRuleEnabled:"Activar regla",
  botRuleEnableHint:"DE, EN, FR y ES obligatorioss. No habrá envíos automáticos sin autorización expresa."});
 const step6DaysCopy={"de":{"botEventDays":"Eventtage","saveAllEventTimes":"Zeiten für alle Tage übernehmen","botPresetAllDays":"Tagesvorlagen für alle Eventtage anlegen","botEventStart":"Tagesbeginn (UTC)","botEventEnd":"Tagesende (UTC, optional)","saveEventTimes":"Tageszeiten speichern","botAnchorHint":"Jeder Eventtag kann andere Zeiten und Texte besitzen. Relative Erinnerungen richten sich nach Beginn oder Ende des jeweiligen Tages. Alle Zeiten UTC; keine geschätzten Termine.","botUsePresets":"Vorlage für diesen Tag hinzufügen","botEventDay":"Nachricht am Eventtag","botRelative":"Relativ zum gewählten Eventtag","botStart":"Tagesbeginn","botEnd":"Tagesende","botTimingNote":"Alle Zeiten in UTC. Jeder Eventtag hat eigene Vorlagen und eigene Start-/Endzeiten. Ein Vorlauf vor 00:00 UTC kann am Vortag liegen."},"en":{"botEventDays":"Event days","saveAllEventTimes":"Apply times to all days","botPresetAllDays":"Create templates for every event day","botEventStart":"Day start (UTC)","botEventEnd":"Day end (UTC, optional)","saveEventTimes":"Save daily times","botAnchorHint":"Each event day can have its own texts and times. Relative reminders refer to the start/end of that particular day. UTC only; no estimated dates.","botUsePresets":"Add a template for this day","botEventDay":"Message on event day","botRelative":"Relative to selected event day","botStart":"Start of day","botEnd":"End of day","botTimingNote":"UTC only. Each event day has its own messages and start/end anchors. A reminder before 00:00 UTC may fall on the previous calendar day."},"fr":{"botEventDays":"Jours de l'événement","saveAllEventTimes":"Appliquer les heures à tous les jours","botPresetAllDays":"Créer les modèles de chaque journée","botEventStart":"Début du jour (UTC)","botEventEnd":"Fin du jour (UTC, facultatif)","saveEventTimes":"Enregistrer les horaires du jour","botAnchorHint":"Chaque journée peut avoir ses propres textes et horaires. Les rappels relatifs se réfèrent au début/à la fin de ce jour. Heures UTC, aucune estimation.","botUsePresets":"Ajouter un modèle pour ce jour","botEventDay":"Message le jour","botRelative":"Relatif à la journée choisie","botStart":"Début du jour","botEnd":"Fin du jour","botTimingNote":"Heures UTC. Chaque jour dispose de ses messages et horaires. Un rappel avant minuit UTC peut être envoyé la veille."},"es":{"botEventDays":"Días del evento","saveAllEventTimes":"Aplicar horarios a todos los días","botPresetAllDays":"Crear plantillas para todos los días","botEventStart":"Inicio del día (UTC)","botEventEnd":"Fin del día (UTC, opcional)","saveEventTimes":"Guardar horas del día","botAnchorHint":"Cada día puede tener horas y textos diferentes. Los recordatorios relativos usan el inicio/fin de ese día. Solo UTC, sin fechas estimadas.","botUsePresets":"Añadir plantilla para este día","botEventDay":"Mensaje del día","botRelative":"Relativo al día elegido","botStart":"Inicio del día","botEnd":"Fin del día","botTimingNote":"Solo UTC. Cada día tiene mensajes y horas propias. Un recordatorio anterior a las 00:00 puede enviarse el día anterior."}};
-const t=k=>step6DaysCopy[lang]?.[k]||step6DaysCopy.de[k]||step6Copy[lang]?.[k]||step6Copy.de[k]||step5Copy[lang]?.[k]||lawCategoryLabels[lang]?.[k]||lawUiCopy[lang]?.[k]||manualPhasesCopy[lang]?.[k]||transferUiCopy[lang]?.[k]||powerLabels[lang]?.[k]||rosterLabels[lang]?.[k]||leaderUiCopy[lang]?.[k]||latestModuleCopy[lang]?.[k]||opsUI[lang]?.[k]||groupUI[lang]?.[k]||eventLabels[lang]?.[k]||phase1Labels[lang]?.[k]||staffExtra[lang]?.[k]||copy[lang]?.[k]||lawCategoryLabels.de[k]||lawUiCopy.de[k]||manualPhasesCopy.de[k]||transferUiCopy.de[k]||powerLabels.de[k]||rosterLabels.de[k]||leaderUiCopy.de[k]||latestModuleCopy.de[k]||opsUI.de[k]||groupUI.de[k]||eventLabels.de[k]||phase1Labels.de[k]||staffExtra.de[k]||copy.de[k]||k;
+const rosterDossierError={de:{playerUnavailable:"Diese Spielerakte ist nicht verfügbar: Eine gültige Kingshot-Spieler-ID fehlt. Bitte Spielerzuordnung prüfen."},en:{playerUnavailable:"Player dossier unavailable: a valid Kingshot player ID is missing. Check the player record."},fr:{playerUnavailable:"Fiche indisponible : identifiant Kingshot valide manquant. Vérifiez le joueur."},es:{playerUnavailable:"Ficha no disponible: falta un ID Kingshot válido. Revisa el registro."}};
+const t=k=>rosterDossierError[lang]?.[k]||step6DaysCopy[lang]?.[k]||step6DaysCopy.de[k]||step6Copy[lang]?.[k]||step6Copy.de[k]||step5Copy[lang]?.[k]||lawCategoryLabels[lang]?.[k]||lawUiCopy[lang]?.[k]||manualPhasesCopy[lang]?.[k]||transferUiCopy[lang]?.[k]||powerLabels[lang]?.[k]||rosterLabels[lang]?.[k]||leaderUiCopy[lang]?.[k]||latestModuleCopy[lang]?.[k]||opsUI[lang]?.[k]||groupUI[lang]?.[k]||eventLabels[lang]?.[k]||phase1Labels[lang]?.[k]||staffExtra[lang]?.[k]||copy[lang]?.[k]||lawCategoryLabels.de[k]||lawUiCopy.de[k]||manualPhasesCopy.de[k]||transferUiCopy.de[k]||powerLabels.de[k]||rosterLabels.de[k]||leaderUiCopy.de[k]||latestModuleCopy.de[k]||opsUI.de[k]||groupUI.de[k]||eventLabels.de[k]||phase1Labels.de[k]||staffExtra.de[k]||copy.de[k]||k;
 const locale={de:"de-DE",en:"en-GB",fr:"fr-FR",es:"es-ES"}[lang];
 function txt(obj){return typeof obj==="string"?obj:(obj?.[lang]||obj?.[state?.alliance?.default_language]||obj?.de||obj?.en||"");}
 function patchTranslations(){
@@ -217,7 +218,7 @@ function renderRoster(){
  $("rosterCount").textContent=fmtInt(list.length);
  $("rosterRows").innerHTML=list.length?list.map(p=>{
   const id=esc(p.game_id||""),name=esc(p.name),avatar=/^https:\/\//i.test(p.avatar_url||"")?'<img class="avatar" src="'+esc(p.avatar_url)+'" alt="">':'<span class="avatar">'+esc((p.name||"?").slice(0,1))+'</span>';
-  return '<tr><td><div class="person">'+avatar+'<div><strong>'+name+'</strong><small>'+id+'</small></div></div></td><td>'+'<span class="rank-and-tg"><strong>'+esc(p.rank?"R"+p.rank:"—")+'</strong><span class="level">· '+esc(cityLevel(p.tc_level))+'</span></span>'+'</td><td>'+(p.power==null?'<span class="muted">'+esc(t("noPower"))+'</span>':'<strong title="'+esc(fmtInt(p.power))+'">'+esc(formattedPower(p.power))+'</strong><small title="'+esc(p.power_source||"")+'">'+esc(dateText(p.power_observed_at))+'</small>')+'</td><td>'+languageChips(p.languages)+'</td><td>'+'<span class="discord-presence '+(p.discord_connected?"connected":"unlinked")+'" title="'+esc(p.discord_connected?t("discordLinked"):t("discordUnlinked"))+'">'+esc(p.discord_connected?t("yes"):t("no"))+'</span>'+'</td><td>'+badge(p.member_status)+'</td><td><button class="action-link" data-edit-member="'+id+'" '+(!can("members")?"disabled":"")+'>'+esc(t("dossier"))+'</button></td></tr>';
+  return '<tr><td><div class="person">'+avatar+'<div><strong>'+name+'</strong><small>'+id+'</small></div></div></td><td>'+'<span class="rank-and-tg"><strong>'+esc(p.rank?"R"+p.rank:"—")+'</strong><span class="level">· '+esc(cityLevel(p.tc_level))+'</span></span>'+'</td><td>'+(p.power==null?'<span class="muted">'+esc(t("noPower"))+'</span>':'<strong title="'+esc(fmtInt(p.power))+'">'+esc(formattedPower(p.power))+'</strong><small title="'+esc(p.power_source||"")+'">'+esc(dateText(p.power_observed_at))+'</small>')+'</td><td>'+languageChips(p.languages)+'</td><td>'+'<span class="discord-presence '+(p.discord_connected?"connected":"unlinked")+'" title="'+esc(p.discord_connected?t("discordLinked"):t("discordUnlinked"))+'">'+esc(p.discord_connected?t("yes"):t("no"))+'</span>'+'</td><td>'+badge(p.member_status)+'</td><td><button type="button" class="action-link" data-edit-member="'+id+'" aria-label="'+esc(t("dossier"))+' · '+name+'" '+(!can("members")?"disabled":"")+'>'+esc(t("dossier"))+'</button></td></tr>';
  }).join(""):empty(t("noPlayers"));
 }
 function renderTransfers(){
@@ -330,6 +331,9 @@ function openEdit(entity,id=null,sourcePlayer=null){
  const record=entity==="member"?state.players.find(p=>String(p.game_id)===String(id)):id?state[models[entity]]?.find(x=>String(x.id)===String(id)):null;
  const feature=entity==="member"?"members":models[entity];
  if(!can(feature)){flash(t("permissionDenied"),true);return;}
+ // A dossier must resolve to one immutable game ID. Previously invalid rows
+ // with no ID silently returned here and appeared as unresponsive buttons.
+ if(entity==="member"&&!record){flash(t("playerUnavailable"),true);return;}
  editing={entity,id:entity==="member"?(record?.note_id||null):id,record};
  $("modalTitle").textContent=t((id?"edit":"new")+(entity==="member"?"Player":entity.charAt(0).toUpperCase()+entity.slice(1)));
  let h="";
@@ -436,7 +440,9 @@ function openEdit(entity,id=null,sourcePlayer=null){
    });
 
  }
- $("editDialog").showModal();
+ const dialog=$("editDialog");
+ if(dialog.open)dialog.close();
+ dialog.showModal();
 }
 async function saveDialog(event){
  event.preventDefault();
@@ -487,6 +493,17 @@ $("syncPlayerPower").addEventListener("click",syncPlayerPower);
 $("rosterSearch").addEventListener("input",()=>state&&renderRoster());
 $("rosterStatus").addEventListener("change",()=>state&&renderRoster());
 $("rosterSort").addEventListener("change",()=>state&&renderRoster());
+// Listen on the persistent table body: search/sort replace its rows every time.
+$("rosterRows").addEventListener("click",e=>{
+ const button=e.target.closest("[data-edit-member]");
+ if(!button||button.disabled)return;
+ e.preventDefault();
+ try{openEdit("member",button.dataset.editMember);}
+ catch(error){
+   console.error("Player dossier failed to open",error);
+   flash(t("genericError")+" ("+String(error?.message||error)+")",true);
+ }
+});
 $("transferFilter").addEventListener("change",()=>state&&renderTransfers());
 $("transferWindowFilter").addEventListener("change",()=>state&&renderTransfers());
  for(const id of ["internalMoveSearch","internalMoveDirection","internalMovePeriod"])
@@ -494,7 +511,6 @@ $("transferWindowFilter").addEventListener("change",()=>state&&renderTransfers()
 q("[data-create]").forEach(el=>el.addEventListener("click",()=>openEdit(el.dataset.create)));
 document.addEventListener("click",e=>{
   const plan=e.target.closest("[data-plan-player]");if(plan){const p=state.players.find(x=>x.game_id===plan.dataset.planPlayer);if(p){$("editDialog").close();openEdit("transfer",null,p);}return;}
- const member=e.target.closest("[data-edit-member]");if(member)openEdit("member",member.dataset.editMember);
  const edit=e.target.closest("[data-edit]");if(edit)openEdit(edit.dataset.edit,edit.dataset.id);
 });
 $("closeDialog").addEventListener("click",()=>$("editDialog").close());
