@@ -80,7 +80,7 @@ export function createPerformance({getState,getLanguage,request,esc,openPlayer})
  const compact=n=>new Intl.NumberFormat(locale(),{notation:"compact",maximumFractionDigits:2}).format(n);
  const safe=x=>Number.isSafeInteger(Number(x))&&Number(x)>=0;
  const fmtDate=d=>d?String(d).slice(0,10):"–";
- let cache=null,loading=null,error="",days=30,selectedPower="all",type="kvk_prep",eventId="",search="";
+ let cache=null,loading=null,error="",days=30,selectedPower="all",type="kvk_prep",eventId="",search="",generation=0;
  function powerRows(){
    if(!cache)return [];
    const utcCutoff=new Date(Date.now()-(days-1)*86400000).toISOString().slice(0,10);
@@ -210,11 +210,13 @@ export function createPerformance({getState,getLanguage,request,esc,openPlayer})
    if(cache&&!force){draw();return;}
    if(loading)return loading;
    error="";if(!cache)root.textContent=t("loading");
+   const ticket=generation;
    loading=request("bootstrap",{action:"performance_dashboard"}).then(data=>{
+     if(ticket!==generation)return;
      if(!data?.ok||!Array.isArray(data.power)||!Array.isArray(data.events)||!Array.isArray(data.rankings))
        throw new Error("invalid_performance_response");
      cache=data;error="";draw();
-   }).catch(e=>{error=String(e?.message||e);draw();}).finally(()=>{loading=null;});
+   }).catch(e=>{if(ticket!==generation)return;error=String(e?.message||e);draw();}).finally(()=>{if(ticket===generation)loading=null;});
    return loading;
  }
  if(root){
@@ -242,6 +244,6 @@ export function createPerformance({getState,getLanguage,request,esc,openPlayer})
      if(btn?.dataset.perfOpenPlayer)openPlayer(btn.dataset.perfOpenPlayer);
    });
  }
- function reset(){cache=null;loading=null;error="";eventId="";search="";selectedPower="all";if(root)root.textContent="";}
+ function reset(){generation++;cache=null;loading=null;error="";eventId="";search="";selectedPower="all";if(root)root.textContent="";}
  return {enabled,open,render:draw,reset};
 }
