@@ -8,6 +8,7 @@ de:{eyebrow:"NEU AUS DER NRW-EVENTPLANUNG",title:"Bestätigte Allianztermine",in
 en:{eyebrow:"NRW EVENT UPDATES",title:"Confirmed alliance events",intro:"These events were published by NRW leadership. Times are shown in your device timezone.",laws:"Server Laws · Kingdom 1044",lawsInfo:"Only server laws explicitly published by leadership.",emptyLaws:"No server laws have been published yet.",loadFailed:"Server laws are currently unavailable.",nr:"Rule",version:"Version"},
 fr:{eyebrow:"ÉVÉNEMENTS NRW",title:"Événements confirmés",intro:"Ces dates ont été publiées par les responsables NRW. L’heure est adaptée à ton fuseau.",laws:"Lois du serveur · Royaume 1044",lawsInfo:"Uniquement les lois du serveur publiées par la direction.",emptyLaws:"Aucune loi du serveur publiée.",loadFailed:"Les lois du serveur sont indisponibles.",nr:"Règle",version:"Version"},
 es:{eyebrow:"EVENTOS NRW",title:"Eventos confirmados",intro:"Fechas publicadas por los líderes de NRW, mostradas en tu zona horaria.",laws:"Leyes del servidor · Reino 1044",lawsInfo:"Solo las leyes publicadas por la dirección.",emptyLaws:"Todavía no se han publicado leyes.",loadFailed:"Las leyes del servidor no están disponibles.",nr:"Norma",version:"Versión"}};
+const lawUI={"de":{"search":"Law suchen …","all":"Alle Kategorien","emptyResults":"Keine passenden Laws gefunden.","category":{"protection":"Schutz","conduct":"Verhalten","combat":"Kampf","alliance":"Allianz","buildings":"Gebäude","governance":"NAP intern","spending":"3×-Regel","other":"Sonstiges"}},"en":{"search":"Search laws …","all":"All categories","emptyResults":"No matching laws.","category":{"protection":"Protection","conduct":"Conduct","combat":"Combat","alliance":"Alliance","buildings":"Buildings","governance":"Governance","spending":"3× rule","other":"Other"}},"fr":{"search":"Rechercher une loi …","all":"Toutes les catégories","emptyResults":"Aucune loi correspondante.","category":{"protection":"Protection","conduct":"Comportement","combat":"Combat","alliance":"Alliance","buildings":"Bâtiments","governance":"Gouvernance","spending":"Règle 3×","other":"Autre"}},"es":{"search":"Buscar leyes …","all":"Todas las categorías","emptyResults":"No se encontraron leyes.","category":{"protection":"Protección","conduct":"Conducta","combat":"Combate","alliance":"Alianza","buildings":"Edificios","governance":"Gobierno","spending":"Regla 3×","other":"Otros"}}};
 const selected=()=>{const l=document.body?.dataset.lang||localStorage.getItem("nrw_page_lang")||"en";return strings[l]?l:"en";};
 const local=(obj,l)=>typeof obj==="string"?obj:(obj?.[l]||obj?.en||obj?.de||obj?.fr||obj?.es||"");
 const date=(input,l)=>new Intl.DateTimeFormat(({de:"de-DE",en:"en-GB",fr:"fr-FR",es:"es-ES"})[l],{weekday:"short",year:"numeric",month:"short",day:"2-digit",hour:"2-digit",minute:"2-digit",timeZoneName:"short"}).format(new Date(input));
@@ -15,6 +16,10 @@ const root=document.querySelector("[data-allianceos]");
 if(!root)return;
 const mode=root.dataset.allianceos==="laws"?"public-laws":"public-events";
 let records=[],loadError=false;
+const lawSearch=document.getElementById("publicLawSearch");
+const lawCategory=document.getElementById("publicLawCategory");
+lawSearch?.addEventListener("input",render);
+lawCategory?.addEventListener("change",render);
 function render(){
  const l=selected(),words=strings[l],outer=root.querySelector("[data-aos-content]");
  if(!outer)return;
@@ -26,8 +31,22 @@ function render(){
    (e.requirements?'<p class="aos-public-meta">'+esc(e.requirements)+'</p>':'')+
    (local(e.description,l)?'<p>'+esc(local(e.description,l))+'</p>':'')+'</article>').join("")+'</div></div>';
  }else{
+  const ui=lawUI[l]||lawUI.de;
+  if(lawSearch)lawSearch.placeholder=ui.search;
+  if(lawCategory){
+    const selectedCategory=lawCategory.value||"all";
+    lawCategory.innerHTML='<option value="all">'+esc(ui.all)+'</option>'+
+      ["protection","conduct","combat","alliance","buildings","governance","spending","other"].map(k=>
+        '<option value="'+k+'">'+esc(ui.category[k])+'</option>').join("");
+    lawCategory.value=selectedCategory;
+  }
+  const term=(lawSearch?.value||"").toLocaleLowerCase(l).trim();
+  const cat=lawCategory?.value||"all";
+  const filtered=records.filter(x=>(cat==="all"||x.category===cat) &&
+    (!term||[x.number,local(x.title,l),local(x.body,l),ui.category[x.category]||""]
+      .some(v=>String(v||"").toLocaleLowerCase(l).includes(term))));
   outer.innerHTML='<div class="aos-public-block"><div class="aos-kicker">ALLIANCEOS</div><h2>'+esc(words.laws)+'</h2><p class="aos-intro">'+esc(words.lawsInfo)+'</p>'+
-   (records.length?records.map(x=>'<details class="aos-public-card aos-public-law"><summary><span>'+esc(words.nr)+' '+esc(x.number)+'</span>'+esc(local(x.title,l))+'</summary><p>'+esc(local(x.body,l))+'</p><small>'+esc(words.version)+' '+esc(x.version)+'</small></details>').join(""):'<p class="aos-intro">'+esc(loadError?words.loadFailed:words.emptyLaws)+'</p>')+'</div>';
+   (filtered.length?filtered.map(x=>'<details class="aos-public-card aos-public-law"><summary><span>'+esc(words.nr)+' '+esc(x.number)+'</span>'+esc(local(x.title,l))+'</summary><p>'+esc(local(x.body,l))+'</p><small>'+esc(ui.category[x.category]||"")+' · '+esc(words.version)+' '+esc(x.version)+'</small></details>').join(""):'<p class="aos-intro">'+esc(loadError?words.loadFailed:records.length?ui.emptyResults:words.emptyLaws)+'</p>')+'</div>';
  }
 }
 fetch(ENDPOINT+"?alliance=NRW&mode="+mode,{cache:"no-store",headers:{Accept:"application/json"}}).then(r=>r.ok?r.json():Promise.reject()).then(data=>{
