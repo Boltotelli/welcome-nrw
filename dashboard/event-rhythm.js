@@ -281,7 +281,7 @@
       const start=dateKey(new Date(dayMs-mod*day)),end=dateKey(new Date(dayMs+(c.duration_days-mod-1)*day));
       const name=(c.title&&Object.keys(c.title).length?c.title:null)||groupLabels[c.group_key]||{de:c.group_key,en:c.group_key,fr:c.group_key};
       const isBear=/^bear-[123]$/.test(c.group_key);
-      if(isBear&&!/^([01]\\d|2[0-3]):[0-5]\\d(:00)?$/.test(String(c.start_time_utc||"")))continue;
+      if(isBear&&!/^([01]\d|2[0-3]):[0-5]\d(:00)?$/.test(String(c.start_time_utc||"")))continue;
       result.push({id:"rhythm-"+c.group_key+"-"+start,start,end,name,
         icon:isBear?"🐻":"📅",confidence:"alliance-schedule",
         aos_group:c.group_key,aos_phase:mod+1,
