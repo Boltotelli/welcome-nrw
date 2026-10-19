@@ -314,3 +314,13 @@
  .perf-line{min-height:100px}
  .perf-filter{flex-wrap:wrap}
 }
+
+/* Phase 2 visual comparison of actually imported contributors */
+.perf-top-chart{display:grid;gap:10px;margin:16px 0 22px;padding:14px;border:1px solid var(--border);border-radius:12px}
+.perf-top-chart>strong{font-size:13px;margin-bottom:2px}
+.perf-top-row{display:grid;grid-template-columns:minmax(90px,1.15fr) minmax(60px,2fr) minmax(62px,.55fr);gap:10px;align-items:center;font-size:12px}
+.perf-top-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.perf-top-row>b{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.perf-top-track{height:11px;border-radius:999px;background:var(--panel);overflow:hidden}
+.perf-top-bar{height:100%;border-radius:999px;background:var(--accent)}
+@media(max-width:620px){.perf-top-chart{padding:12px}.perf-top-row{grid-template-columns:minmax(85px,1.1fr) minmax(45px,1fr) 62px;gap:7px}}
