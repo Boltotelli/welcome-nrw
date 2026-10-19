@@ -434,6 +434,7 @@ jobs:
           test -s _site/index.html
           test -s _site/leitung/index.html
           test -s _site/leitung/app.js
+          test -s _site/leitung/discord-events.js
           test -s _site/leitung/event-library.js
           test -s _site/leitung/operations.js
           test -s _site/leitung/public-config.js
@@ -459,6 +460,10 @@ jobs:
           grep -Fq 'data-alliance-logo' _site/dashboard/index.html
           grep -Fq 'id="bt3Row" hidden' _site/dashboard/index.html
           grep -Fq 'id="defaultLanguage"' _site/leitung/index.html
+          grep -Fq 'data-tab="discord"' _site/leitung/index.html
+          grep -Fq 'id="discordRuleForm"' _site/leitung/index.html
+          grep -Fq 'createDiscordEventPlanner' _site/leitung/app.js
+          node --input-type=module --check < _site/leitung/discord-events.js
           node --input-type=module --check < _site/leitung/app.js
           node --input-type=module --check < _site/leitung/event-library.js
           node --input-type=module --check < _site/leitung/operations.js
