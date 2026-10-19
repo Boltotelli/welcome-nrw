@@ -69,11 +69,11 @@ async function staffFor(req: Request, alliance: string) {
   const {data: who,error} = await auth.auth.getUser(token);
   if (error || !who.user || who.user.is_anonymous) throw new HttpError("invalid_session",401);
   const staff = await checked<any>(db.from("aos_staff")
-    .select("rank,permissions,enabled").eq("user_id",who.user.id)
+    .select("rank,permissions,enabled,is_admin").eq("user_id",who.user.id)
     .eq("alliance_code",alliance).maybeSingle());
   if (!staff?.enabled || !["R4","R5"].includes(staff.rank)) throw new HttpError("not_authorized",403);
   // Ownership is tied to a verified, pre-existing Auth identity, NEVER user metadata.
-  staff.is_owner=staff.rank==="R5"&&who.user.email?.toLowerCase()==="admin@nap-tracker.invalid";
+  staff.is_owner=(staff.rank==="R5"&&who.user.email?.toLowerCase()==="admin@nap-tracker.invalid") || staff.is_admin===true;
   const match=/^leader-([0-9]{5,20})@accounts\.allianceos\.invalid$/i.exec(who.user.email||"");
   if(match){
     const member=await checked<any>(db.from("players").select("alliance_rank,active")
