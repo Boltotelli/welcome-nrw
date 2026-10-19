@@ -59,7 +59,8 @@ const rosterLabels={"de":{"discordPresence":"Discord","discordLinked":"Mit NRW-D
 const powerLabels={"de":{"powerFetching":"Stärke wird aus der Kingshot-API geladen …","powerUpdated":"Stärke von {n} NRW-Spielern aus API abgeglichen","powerCached":"aktueller Zwischenspeicher","powerUpdateError":"API-Abruf nicht möglich","syncPower":"↻ Stärke aus API abrufen"},"en":{"powerFetching":"Loading strength from the Kingshot API …","powerUpdated":"Power synced for {n} NRW players","powerCached":"recent cache","powerUpdateError":"API lookup failed","syncPower":"↻ Refresh power from API"},"fr":{"powerFetching":"Chargement de la puissance depuis l'API …","powerUpdated":"Puissance actualisée pour {n} membres NRW","powerCached":"cache récent","powerUpdateError":"Échec de l'API","syncPower":"↻ Actualiser la puissance"},"es":{"powerFetching":"Consultando el poder desde la API …","powerUpdated":"Poder actualizado para {n} jugadores NRW","powerCached":"caché reciente","powerUpdateError":"Error de API","syncPower":"↻ Actualizar poder"}};
 const transferUiCopy={"de":{"transferInternalOnly":"Interne Transferplanung. Es werden keine Daten automatisch extern geteilt.","transferApiDescription":"Die drei nächsten bestätigten Transferphasen aus der Königreichs-API.","phaseRefresh":"↻ API aktualisieren","manualTransferPlanning":"Eigene Reservierungen und Einladungsplätze (optional)","manualTransferPlanningHint":"Manuelle Pläne sind nicht automatisch bestätigte Eventtermine.","moveSearch":"Spieler oder Game-ID …","allMoves":"Alle Richtungen","movesInto":"Zu NRW","movesOut":"Von NRW","allTime":"Gesamter Zeitraum"},"en":{"transferInternalOnly":"Internal recruitment planning. Nothing is automatically shared externally.","transferApiDescription":"Next three confirmed transfer phases from the kingdom API.","phaseRefresh":"↻ Refresh API","manualTransferPlanning":"Manual reservations and invitation slots (optional)","manualTransferPlanningHint":"Manual plans are not confirmed in-game event dates.","moveSearch":"Player or game ID …","allMoves":"All directions","movesInto":"To NRW","movesOut":"From NRW","allTime":"All history"},"fr":{"transferInternalOnly":"Planification interne, sans partage automatique.","transferApiDescription":"Trois prochaines phases annoncées via l’API.","phaseRefresh":"↻ Actualiser","manualTransferPlanning":"Réservations manuelles (facultatif)","manualTransferPlanningHint":"Les plans ne constituent pas des dates officielles.","moveSearch":"Joueur ou ID …","allMoves":"Toutes directions","movesInto":"Vers NRW","movesOut":"Depuis NRW","allTime":"Tout l’historique"},"es":{"transferInternalOnly":"Planificación interna, sin compartir datos automáticamente.","transferApiDescription":"Próximas tres fases anunciadas por la API.","phaseRefresh":"↻ Actualizar","manualTransferPlanning":"Reservas manuales (opcional)","manualTransferPlanningHint":"Los planes manuales no son fechas oficiales.","moveSearch":"Jugador o ID …","allMoves":"Todas direcciones","movesInto":"Hacia NRW","movesOut":"Desde NRW","allTime":"Todo el historial"}};
 const manualPhasesCopy={"de":{"transferManualInfo":"Die Kalender-API erfordert ein kostenpflichtiges Mighty-Abo. Hier erscheinen höchstens drei von uns selbst erfasste kommende Transferphasen. Ohne Eingabe werden keine Termine geschätzt.","transferWindowsTitle":"Nächste Transferphasen (manuell)"},"en":{"transferManualInfo":"The kingdom calendar API requires a paid Mighty subscription. Displaying up to three upcoming manually entered transfer windows, with no guessed dates.","transferWindowsTitle":"Upcoming transfer phases (manual)"},"fr":{"transferManualInfo":"L'API du calendrier nécessite un abonnement Mighty payant. Jusqu'à trois phases futures saisies manuellement, sans dates estimées.","transferWindowsTitle":"Prochaines phases (manuelles)"},"es":{"transferManualInfo":"La API del calendario requiere una suscripción Mighty de pago. Hasta tres fases próximas introducidas manualmente, sin fechas estimadas.","transferWindowsTitle":"Próximas fases (manual)"}};
-const t=k=>manualPhasesCopy[lang]?.[k]||transferUiCopy[lang]?.[k]||powerLabels[lang]?.[k]||rosterLabels[lang]?.[k]||leaderUiCopy[lang]?.[k]||latestModuleCopy[lang]?.[k]||opsUI[lang]?.[k]||groupUI[lang]?.[k]||eventLabels[lang]?.[k]||phase1Labels[lang]?.[k]||staffExtra[lang]?.[k]||copy[lang]?.[k]||manualPhasesCopy.de[k]||transferUiCopy.de[k]||powerLabels.de[k]||rosterLabels.de[k]||leaderUiCopy.de[k]||latestModuleCopy.de[k]||opsUI.de[k]||groupUI.de[k]||eventLabels.de[k]||phase1Labels.de[k]||staffExtra.de[k]||copy.de[k]||k;
+const lawUiCopy={"de":{"lawPublicVersion":"Öffentlich: Version {n}","lawUnpublishedChanges":"Neuer Entwurf: Version {n}","lawOnlyDraft":"Nur intern · Entwurf v{n}","lawWithdraw":"Zurückziehen","noServerLaws":"Noch keine Server-Laws eingetragen. Über „+ Neue Regel“ kannst du die erste erstellen.","editedAt":"Bearbeitet:","lawSaveDraft":"Als Entwurf speichern (nicht öffentlich)","lawPublishNow":"Auf der Laws-Seite veröffentlichen","lawEditorTip":"Die deutsche Fassung ist für die Veröffentlichung erforderlich. Englisch, Französisch und Spanisch sind optional. Ein Entwurf verändert nicht die zuletzt veröffentlichte Version.","lawPublishConfirm":"Server-Law {n} jetzt öffentlich auf der Laws-Seite veröffentlichen? Diese Änderung ist für alle Besucher sichtbar.","lawNeedGerman":"Zum Veröffentlichen sind deutscher Titel und Gesetzestext erforderlich.","lawNumberConflict":"Diese Law-Nummer ist bereits vergeben. Bitte bearbeite die bestehende Law.","lawEditConflict":"Die Law wurde zwischenzeitlich geändert. Bitte neu laden und erneut bearbeiten.","lawUnpublishConfirm":"Server-Law {n} wirklich von der öffentlichen Laws-Seite zurückziehen? Die Texte und alle Versionen bleiben im Archiv.","lawWithdrawn":"Die Server-Law wurde zurückgezogen. Ihr Entwurf bleibt erhalten."},"en":{"lawPublicVersion":"Public: version {n}","lawUnpublishedChanges":"New draft: version {n}","lawOnlyDraft":"Private draft · v{n}","lawWithdraw":"Withdraw","noServerLaws":"No server laws yet. Select '+ New law' to add your first.","editedAt":"Edited:","lawSaveDraft":"Save draft (not public)","lawPublishNow":"Publish on Laws page","lawEditorTip":"German title and text are required before publishing. English, French and Spanish are optional. Saving a draft does not replace the last published version.","lawPublishConfirm":"Publish server law {n} on the public Laws page now? Visitors will see it.","lawNeedGerman":"German title and law text are required to publish.","lawNumberConflict":"This law number already exists. Edit the existing law instead.","lawEditConflict":"This law changed since you loaded it. Reload and try again.","lawUnpublishConfirm":"Withdraw server law {n} from the public page? The draft and revision history will remain.","lawWithdrawn":"Law withdrawn; draft preserved."},"fr":{"lawPublicVersion":"Publique : version {n}","lawUnpublishedChanges":"Nouveau brouillon : version {n}","lawOnlyDraft":"Brouillon privé · v{n}","lawWithdraw":"Retirer","noServerLaws":"Aucune loi du serveur. Utilisez '+ Nouvelle loi'.","editedAt":"Modifié :","lawSaveDraft":"Enregistrer comme brouillon","lawPublishNow":"Publier sur la page Laws","lawEditorTip":"Un titre et un texte allemand sont nécessaires pour publier. Les autres langues sont facultatives. Un brouillon ne remplace pas la publication existante.","lawPublishConfirm":"Publier la loi {n} sur la page publique ?","lawNeedGerman":"Le titre et le texte en allemand sont requis pour publier.","lawNumberConflict":"Ce numéro de loi existe déjà.","lawEditConflict":"Cette loi a changé. Rechargez la page.","lawUnpublishConfirm":"Retirer la loi {n} de la page publique ? Les anciennes versions restent conservées.","lawWithdrawn":"Loi retirée ; brouillon conservé."},"es":{"lawPublicVersion":"Pública: versión {n}","lawUnpublishedChanges":"Nuevo borrador: versión {n}","lawOnlyDraft":"Borrador privado · v{n}","lawWithdraw":"Retirar","noServerLaws":"Todavía no hay leyes. Pulsa '+ Nueva ley'.","editedAt":"Editado:","lawSaveDraft":"Guardar borrador","lawPublishNow":"Publicar en la página Laws","lawEditorTip":"Se requieren título y texto en alemán para publicar. Los demás idiomas son opcionales. El borrador no reemplaza la versión publicada.","lawPublishConfirm":"¿Publicar la ley {n} en la página pública?","lawNeedGerman":"Se requiere título y texto en alemán para publicar.","lawNumberConflict":"Ese número de ley ya existe.","lawEditConflict":"Esta ley ha cambiado. Recarga la página.","lawUnpublishConfirm":"¿Retirar la ley {n} de la página pública? Se conservarán las versiones anteriores.","lawWithdrawn":"Ley retirada; borrador conservado."}};
+const t=k=>lawUiCopy[lang]?.[k]||manualPhasesCopy[lang]?.[k]||transferUiCopy[lang]?.[k]||powerLabels[lang]?.[k]||rosterLabels[lang]?.[k]||leaderUiCopy[lang]?.[k]||latestModuleCopy[lang]?.[k]||opsUI[lang]?.[k]||groupUI[lang]?.[k]||eventLabels[lang]?.[k]||phase1Labels[lang]?.[k]||staffExtra[lang]?.[k]||copy[lang]?.[k]||lawUiCopy.de[k]||manualPhasesCopy.de[k]||transferUiCopy.de[k]||powerLabels.de[k]||rosterLabels.de[k]||leaderUiCopy.de[k]||latestModuleCopy.de[k]||opsUI.de[k]||groupUI.de[k]||eventLabels.de[k]||phase1Labels.de[k]||staffExtra.de[k]||copy.de[k]||k;
 const locale={de:"de-DE",en:"en-GB",fr:"fr-FR",es:"es-ES"}[lang];
 function txt(obj){return typeof obj==="string"?obj:(obj?.[lang]||obj?.[state?.alliance?.default_language]||obj?.de||obj?.en||"");}
 function patchTranslations(){
@@ -217,9 +218,26 @@ function renderTransfers(){
  $("internalMoveRows").innerHTML=filteredMoves.length?filteredMoves.map(m=>'<tr><td>'+esc(dateText(m.moved_at))+'</td><td><b>'+esc(m.player_name||"—")+'</b><small>'+esc(m.game_id||"—")+'</small></td><td>'+esc(m.from_alliance||"—")+'</td><td>→</td><td>'+esc(m.to_alliance||"—")+'</td></tr>').join(""):'<tr><td colspan="5" class="empty">'+esc(t("noMoves"))+'</td></tr>';
 }
 function renderLaws(){
- const list=state.laws.filter(x=>x.scope==="kingdom").slice().sort((a,b)=>a.scope.localeCompare(b.scope)||a.number.localeCompare(b.number,lang));
- $("lawList").innerHTML=list.length?list.map(x=>'<article class="list-card"><div><span class="eyebrow">'+esc(x.scope==="kingdom"?t("kingdom"):t("allianceLaw"))+' · '+esc(x.number)+'</span><h3>'+esc(txt(x.title)||t("lawTitle"))+'</h3><p>'+esc(t("version"))+' '+esc(x.version)+' · '+esc(dateText(x.updated_at))+'</p></div><div class="card-actions">'+badge(x.status)+'<button data-edit="law" data-id="'+esc(x.id)+'" class="ghost" '+(!can("laws")||x.scope==="kingdom"?"disabled":"")+'>'+esc(t("edit"))+'</button><button type="button" class="ghost" data-law-history="'+esc(x.id)+'" '+(!can("laws")?"disabled":"")+'>'+esc(t("lawHistory"))+'</button></div></article>').join(""):'<div class="card empty">'+esc(t("noLaws"))+'</div>';
+ const laws=(state.laws||[]).filter(x=>x.scope==="kingdom").slice().sort((a,b)=>
+  String(a.number).localeCompare(String(b.number),lang,{numeric:true,sensitivity:"base"}));
+ const publicVersions=new Map((state.lawPublications||[]).map(p=>[p.law_id,p]));
+ $("lawList").innerHTML=laws.length?laws.map(x=>{
+  const published=publicVersions.get(x.id),hasDraft=published&&Number(x.version)>Number(published.version);
+  const description=published?
+    t("lawPublicVersion").replace("{n}",String(published.version))+
+      (hasDraft?" · "+t("lawUnpublishedChanges").replace("{n}",String(x.version)):""):
+    t("lawOnlyDraft").replace("{n}",String(x.version));
+  return '<article class="list-card server-law-item"><div><span class="eyebrow">'+esc(t("kingdom"))+' · '+esc(x.number)+'</span>'+
+    '<h3>'+esc(txt(x.title)||t("lawTitle"))+'</h3><p>'+esc(description)+'</p>'+
+    '<small class="muted">'+esc(t("editedAt"))+' '+esc(dateText(x.updated_at))+'</small></div>'+
+    '<div class="card-actions">'+badge(published?"published":"draft")+
+    '<button type="button" data-edit="law" data-id="'+esc(x.id)+'" class="ghost" '+(!can("laws")?"disabled":"")+'>'+esc(t("edit"))+'</button>'+
+    '<button type="button" class="ghost" data-law-history="'+esc(x.id)+'" '+(!can("laws")?"disabled":"")+'>'+esc(t("lawHistory"))+'</button>'+
+    (published?'<button type="button" class="ghost law-withdraw" data-law-unpublish="'+esc(x.id)+'" '+(!can("laws")?"disabled":"")+'>'+esc(t("lawWithdraw"))+'</button>':"")+
+    '</div></article>';
+ }).join(""):'<div class="card empty">'+esc(t("noServerLaws"))+'</div>';
 }
+
 function renderEvents(){
  const list=state.events.slice().sort((a,b)=>Date.parse(a.start_at)-Date.parse(b.start_at));
  $("eventList").innerHTML=list.length?list.map(x=>'<article class="list-card"><div><span class="eyebrow">'+esc(localTime(x.start_at))+' <span class="muted">· '+esc(new Date(x.start_at).toISOString().slice(11,16))+' UTC</span></span><h3>'+esc(txt(x.title))+'</h3><p>'+esc(txt(x.description)||x.requirements||"")+'</p></div><div class="card-actions">'+badge(x.status)+'<button data-edit="event" data-id="'+esc(x.id)+'" class="ghost" '+(!can("events")?"disabled":"")+'>'+esc(t("edit"))+'</button></div></article>').join(""):'<div class="card empty">'+esc(t("noEvents"))+'</div>';
@@ -308,8 +326,11 @@ function openEdit(entity,id=null,sourcePlayer=null){
    const s=record||{scope:"kingdom",status:"draft",title:{},body:{}};
    h='<div class="form-grid">'+select(t("scope"),"scope","kingdom",[["kingdom",t("kingdom")]])+
       control(t("lawNumber"),"number",s.number||"","text",{required:"required",maxlength:30})+
-      select(t("status"),"status",s.status,[["draft",t("draft")],["published",t("published")]])+'</div>';
-   h+=LANGS.map(l=>'<hr class="form-break"><span class="eyebrow">'+esc(NAMES[l])+'</span>'+control(t("lawTitle"),"title_"+l,s.title?.[l]||"")+textarea(t("lawText"),"body_"+l,s.body?.[l]||"")).join("");
+      select(t("status"),"status","draft",[["draft",t("lawSaveDraft")],["published",t("lawPublishNow")]])+'</div>'+
+      '<p class="notice-inline">'+esc(t("lawEditorTip"))+'</p>';
+   h+=LANGS.map(l=>'<hr class="form-break"><span class="eyebrow">'+esc(NAMES[l])+(l==="de"?" *":"")+'</span>'+
+     control(t("lawTitle"),"title_"+l,s.title?.[l]||"","text",{maxlength:150})+
+     textarea(t("lawText"),"body_"+l,s.body?.[l]||"")).join("");
  }else if(entity==="event"){
    const s=record||{status:"draft",reminder_minutes:[60],title:{},description:{}};
    h='<div class="form-grid">'+control(t("startTime"),"start_at",dateForInput(s.start_at),"datetime-local",{required:"required"})+
@@ -393,6 +414,12 @@ async function saveDialog(event){
      data.reminder_minutes=String(fd.get("reminder_minutes")||"").split(",").map(s=>Number(s.trim())).filter(Number.isInteger);
    }
  }
+ if(entity==="law"){
+   if(data.status==="published"){
+     if(!data.title.de||!data.body.de){flash(t("lawNeedGerman"),true);return;}
+     if(!window.confirm(t("lawPublishConfirm").replace("{n}",String(data.number||""))))return;
+   }
+ }
  if(entity==="transfer"){
     data.share_approved=record?.share_approved??false;
     data.confirm_arrival=fd.has("confirm_arrival");
@@ -406,7 +433,11 @@ async function saveDialog(event){
  try{
    await request("bootstrap",{action:"save",entity,id,data});
    $("editDialog").close();await refresh();setTab(entity==="member"?"roster":entity==="law"?"laws":entity==="event"?"events":"transfers");flash(t("saved"));
- }catch(e){flash(t("genericError")+" ("+e.message+")",true);}
+ }catch(e){
+   const key=entity==="law"?({law_number_exists:"lawNumberConflict",version_conflict:"lawEditConflict",
+     law_requires_german:"lawNeedGerman",incomplete_law:"lawNeedGerman"}[e.message]):null;
+   flash(key?t(key):t("genericError")+" ("+e.message+")",true);
+ }
  finally{$("submitDialog").disabled=false;}
 }
 q(".nav-item").forEach(el=>el.addEventListener("click",()=>setTab(el.dataset.tab)));
