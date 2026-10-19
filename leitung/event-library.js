@@ -4,6 +4,15 @@
 export function createEventHub({request,flash,esc,t}) {
  const $=id=>document.getElementById(id);
  const localeName={de:"de-DE",en:"en-GB",fr:"fr-FR",es:"es-ES"};
+ const EVENT_UI={
+ de:{namesHeading:"Eventnamen je Sprache",namesHint:"Originalnamen aus den Kingshot-Guides; für jede Sprache getrennt bearbeitbar.",namesSave:"Eventnamen speichern",bearOptions:"Bärenfalle: UTC-Zeit & Aktivierung",bearTime:"Startzeit (UTC)",bearEnabled:"Bärenfalle aktiv",bearInactive:"Noch nicht aktiviert",bearTimeRequired:"Aktive Bärenfallen benötigen eine UTC-Uhrzeit.",nameMissing:"Bitte einen Eventnamen eintragen."},
+ en:{namesHeading:"Event names by language",namesHint:"Original Kingshot guide names; each language is editable.",namesSave:"Save event names",bearOptions:"Bear Trap: UTC time & activation",bearTime:"Start time (UTC)",bearEnabled:"Bear Trap active",bearInactive:"Not yet enabled",bearTimeRequired:"Active Bear Traps require a UTC start time.",nameMissing:"Please enter an event name."},
+ fr:{namesHeading:"Noms des événements par langue",namesHint:"Noms des guides Kingshot, modifiables par langue.",namesSave:"Enregistrer les noms",bearOptions:"Piège à ours : heure UTC et activation",bearTime:"Heure de début (UTC)",bearEnabled:"Piège à ours actif",bearInactive:"Non activé",bearTimeRequired:"Heure UTC requise.",nameMissing:"Indique un nom d’événement."},
+ es:{namesHeading:"Nombres del evento por idioma",namesHint:"Nombres de las guías Kingshot, editables por idioma.",namesSave:"Guardar nombres",bearOptions:"Trampa del oso: hora UTC y activación",bearTime:"Hora de inicio (UTC)",bearEnabled:"Trampa activa",bearInactive:"Sin activar",bearTimeRequired:"Se requiere hora UTC.",nameMissing:"Introduce un nombre."}
+ };
+ const tx=k=>EVENT_UI[language]?.[k]||t(k);
+ const bearSlot=k=>/^bear-[123]$/.test(k||"");
+ const bearNames=i=>({de:"Bärenfalle "+i,en:"Bear Trap "+i,fr:"Piège à ours "+i,es:"Trampa del oso "+i});
  const guideIds={brawl:"alliance-brawl",kvk:"kingdom-of-power-prep",strongest:"strongest-governor",armament:"armament-competition",officer:"officer-project",golden:"golden-glaives",merchant:"merchant-empire",fishing:"fishing-tournament",viking:"viking-vengeance",eternity:"eternitys-reach",cesare:"cesares-fury",championship:"alliance-championship",kill:"kill-event",bear:"bear-trap",transfer:"kingdom-transfer",champagne:"champagne-fair",roulette:"hero-roulette"};
  let sources=null,loading=null,items=[],extraEvents=[],groups=[],state=null,language="de",canEdit=false,selected=null,rhythmByDay=new Map();
  const lk=(value,lang=language)=>typeof value==="string"?value:Array.isArray(value)?value:(value?.[lang]||value?.en||value?.de||value?.fr||value?.es||"");
@@ -78,7 +87,11 @@ export function createEventHub({request,flash,esc,t}) {
   items=[...dict.values()].sort((a,b)=>a.record.start.localeCompare(b.record.start)||name(a).localeCompare(name(b)));
 
  }
- const groupName=group=>lk(group.guide?.names||group.guide?.name)||name(group.instances[0]);
+ const baseNames=group=>bearSlot(group.key)?bearNames(group.key.slice(-1)):(
+   group.guide?.names||group.guide?.name||window.NRW_EVENT_RHYTHM?.groupLabels?.[group.key]||
+   group.instances?.[0]?.record?.name||group.instances?.[0]?.record?.title||{});
+ const groupName=group=>lk((state?.eventCycles||[]).find(c=>c.group_key===group.key)?.title)||
+   lk(baseNames(group))||name(group.instances[0]);
  const normalizeKey=raw=>String(raw||"").toLowerCase().replace(/[^a-z0-9-]+/g,"-").replace(/^-+|-+$/g,"").slice(0,70);
  const keyForEntry=(x)=>{
    if(x.source==="custom"){const recognized=kind(x.record);return recognized!=="generic"?recognized:"custom-"+x.record.id;}
@@ -119,6 +132,12 @@ export function createEventHub({request,flash,esc,t}) {
     const full=lookup.get(g.key)||lookup.get(guideIds[g.key]);
     if(full)g.guide=full;
   }
+  const oldBear=map.get("bear");map.delete("bear");
+  for(let i=1;i<=3;i++){
+    const key="bear-"+i,guide=oldBear?.guide||lookup.get("bear-trap")||null;
+    map.set(key,{key,guide,instances:[{key:"slot-"+i,source:"slot",days:[],
+      record:{id:key,name:bearNames(i)},guide}]});
+  }
   groups=[...map.values()].sort((a,b)=>groupName(a).localeCompare(groupName(b),language));
  }
  const cycleFor=g=>(state?.eventCycles||[]).find(c=>c.group_key===g.key)||null;
@@ -129,6 +148,7 @@ export function createEventHub({request,flash,esc,t}) {
      merchant:["2026-09-14",28,7,7],golden:["2026-09-21",14,3,3],
      championship:["2026-10-19",7,2,2],bear:["2026-09-13",2,1,1]
    };
+   if(bearSlot(g.key))return{anchor_date:dayKey(new Date()),interval_days:2,duration_days:1,phase_count:1,start_time_utc:null,enabled:false};
    const baseline=options[g.key];if(baseline)return{anchor_date:baseline[0],interval_days:baseline[1],duration_days:baseline[2],phase_count:baseline[3]};
    const instance=g.instances.find(e=>e.record.start);
    const start=instance?.record.start||dayKey(new Date());
@@ -187,12 +207,13 @@ export function createEventHub({request,flash,esc,t}) {
      .map(x=>x.record?.start)
      .filter(d=>typeof d==="string"&&/^\d{4}-\d{2}-\d{2}$/.test(d)&&d>=today)
      .sort();
-   const upcoming=cycle&&cycle.enabled!==false?nextOccurrence(cycle):futureDates[0]||null;
+   const upcoming=bearSlot(g.key)&&(!cycle||cycle.enabled===false)?null:cycle&&cycle.enabled!==false?nextOccurrence(cycle):futureDates[0]||null;
    const difference=upcoming?Math.round((Date.parse(upcoming+"T00:00:00Z")-Date.parse(today+"T00:00:00Z"))/86400000):null;
-   const badge=cycle?recurring:t("noCycle");
+   const badge=bearSlot(g.key)?(!cycle||cycle.enabled===false?tx("bearInactive"):recurring):cycle?recurring:t("noCycle");
+   const time=bearSlot(g.key)&&cycle?.enabled&&cycle.start_time_utc?" · "+esc(cycle.start_time_utc.slice(0,5))+" UTC":"";
    const desc=difference===null?t("nextUnknown"):difference===0?t("nextToday"):difference===1?t("nextTomorrow"):t("nextInDays").replace("{n}",difference);
    return '<details class="event-group"><summary><span class="event-group-title"><b>'+esc(groupName(g))+'</b>'+
-      '<small>'+esc(badge)+' · '+esc(desc)+'</small></span><span class="event-group-count">'+esc(t("daysCount").replace("{n}",phases))+'</span></summary>'+
+      '<small>'+esc(badge)+' · '+esc(desc)+time+'</small></span><span class="event-group-count">'+esc(t("daysCount").replace("{n}",phases))+'</span></summary>'+
       '<div class="event-group-body"><div class="event-group-actions"><span>'+esc(t("cycleInfo"))+'</span><button type="button" class="ghost" data-library-key="'+esc(g.key)+'" data-phase="1">'+esc(t("cycleSettings"))+'</button>'+((g.instances.find(x=>x.source==="custom")?.record?.id&&canEdit)?'<button class="ghost" type="button" data-edit="event" data-id="'+esc(g.instances.find(x=>x.source==="custom").record.id)+'">'+esc(t("edit"))+'</button>':"")+'</div>'+days+'</div></details>';
  }
  function render(current,lang,allowed){
