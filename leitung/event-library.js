@@ -458,7 +458,7 @@ export function createEventHub({request,flash,esc,t}) {
    }
    const isBear=bearSlot(selected.group_key),start_time_utc=isBear?$("cycleStartTime").value:"";
    const enabled=isBear?$("cycleBearEnabled").checked:true;
-   if(isBear&&enabled&&!/^([01]\\d|2[0-3]):[0-5]\\d$/.test(start_time_utc)){
+   if(isBear&&enabled&&!/^([01]\d|2[0-3]):[0-5]\d$/.test(start_time_utc)){
      flash(tx("bearTimeRequired"),true);return;
    }
    const title=titlePayload();
