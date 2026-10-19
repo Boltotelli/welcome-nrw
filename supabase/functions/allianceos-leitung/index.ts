@@ -422,7 +422,7 @@ async function saveDiscordRule(req:Request,alliance:string,userId:string,staff:a
  if(isExisting&&!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id))throw new HttpError("invalid_rule_id",400);
  const item=await checked<any>(isExisting
   ?db.from("aos_discord_message_rules").update(patch).eq("alliance_code",alliance).eq("id",id).select("*").maybeSingle()
-  :db.from("aos_discord_message_rules").insert({...patch,alliance_code:alliance}).select("*").single());
+  :db.from("aos_discord_message_rules").insert({...patch,alliance_code:alliance,mention_role:alliance==="NRW"}).select("*").single());
  if(!item)throw new HttpError("rule_not_found",404);
  await audit(alliance,userId,"discord_message_rule",item.id,isExisting?"update":"create");
  return json(req,{ok:true,item});
