@@ -27,7 +27,10 @@ function update(){
  if(img)document.querySelectorAll("[data-alliance-logo]").forEach(node=>{node.src=img;});
  if(data.name)document.querySelectorAll("[data-alliance-name]").forEach(node=>{node.textContent=data.name;});
  const invite=validInvite(data.discord_invite_url);
- if(invite)document.querySelectorAll("[data-discord-invite]").forEach(node=>{node.href=invite;});
+ document.querySelectorAll("[data-discord-invite]").forEach(node=>{
+  if(invite){node.href=invite;node.hidden=false;node.style.display="";}
+  else{node.removeAttribute("href");node.hidden=true;node.style.display="none";}
+ });
  const available=SUPPORTED.filter(code=>(data.languages||SUPPORTED).includes(code));
  // Keep at least one visible option if the public translations are temporarily unavailable.
  const options=available.length?available:SUPPORTED;
