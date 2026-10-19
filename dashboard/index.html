@@ -3,6 +3,17 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <!-- Static Vercel routes can resolve /dashboard/ to /dashboard (no trailing
+       slash). Give relative CSS, JS, icons and JSON a stable directory base on
+       both Vercel and GitHub Pages before the browser discovers any assets. -->
+  <script>
+    (function () {
+      var isProjectPages = /^\\/welcome-nrw(?:\\/|$)/i.test(location.pathname);
+      var base = document.createElement('base');
+      base.href = (isProjectPages ? '/welcome-nrw' : '') + '/dashboard/';
+      document.head.appendChild(base);
+    })();
+  </script>
   <meta name="theme-color" content="#0b1020">
   <title>NRW Player Dashboard · Server 1044</title>
   <meta name="description" content="Daily Kingshot event plan for NRW on Server 1044.">
@@ -12,13 +23,13 @@
   <link rel="shortcut icon" href="../assets/nrw-dashboard-icon.svg">
   <link rel="apple-touch-icon" href="../assets/nrw-dashboard-icon.svg">
   <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="stylesheet" href="./styles.css?v=step4-bearfix-2"><link rel="stylesheet" href="../leitung/public-feed.css?v=pages-1">
+  <link rel="stylesheet" href="./styles.css?v=layout-basefix-20261019-1"><link rel="stylesheet" href="../leitung/public-feed.css?v=pages-1">
   
 </head>
 <body data-lang="en">
   <div class="ambient one"></div><div class="ambient two"></div>
   <header class="topbar">
-    <a class="brand" href="/"><img src="../assets/nrw-banner.svg" alt="NRW"><span>[NRW]United<small>PLAYER DASHBOARD · K1044</small></span></a>
+    <a class="brand" href="../"><img src="../assets/nrw-banner.svg" alt="NRW"><span>[NRW]United<small>PLAYER DASHBOARD · K1044</small></span></a>
     <section class="kvk-timer" aria-label="KvK preparation countdown">
       <img src="https://kingshotdata.com/uploads/2025/05/kingdom-of-power-event-icon.webp" alt="Kingdom of Power">
       <div class="kvk-copy">
@@ -188,8 +199,8 @@
     <section data-allianceos="events" hidden><div data-aos-content></div></section>
   </main>
 
-  <footer><a href="/">← <span class="de">Zur Willkommensseite</span><span class="en">Back to welcome page</span><span class="fr">Retour à l’accueil</span></a></footer>
-  <script src="./event-rhythm.js?v=step4-1"></script><script src="./app.js?v=step4-bearfix-2"></script><script src="../leitung/public-feed.js?v=pages-1" defer></script>
+  <footer><a href="../">← <span class="de">Zur Willkommensseite</span><span class="en">Back to welcome page</span><span class="fr">Retour à l’accueil</span></a></footer>
+  <script src="./event-rhythm.js?v=step4-1"></script><script src="./app.js?v=layout-basefix-20261019-1"></script><script src="../leitung/public-feed.js?v=pages-1" defer></script>
   <script defer src="./codes.js?v=20260915a"></script>
 </body>
 </html>
