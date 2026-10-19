@@ -6,7 +6,7 @@
 <title>AllianceOS · NRW Leitungszentrale</title>
 <meta name="description" content="Geschützte Leitungszentrale für Allianzverwaltung, Transfers, Laws und Events.">
 <link rel="icon" href="../assets/nrw-dashboard-icon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="./styles.css?v=step6-discord-1">
+<link rel="stylesheet" href="./styles.css?v=step6-days-1">
 
 </head>
 <body>
@@ -153,12 +153,21 @@
               <article class="card">
                 <div class="filters"><div><span class="eyebrow" data-i18n="selectedEvent">Gewähltes Event</span><h3 id="discordEventTitle">—</h3>
                   <p class="small-note" id="discordEventTimingHint"></p></div></div>
-                <div class="discord-bot-anchor">
-                  <label class="field"><span data-i18n="botEventStart">Eventstart (UTC)</span><input id="discordAnchorStart" class="control" type="time" step="60"></label>
-                  <label class="field"><span data-i18n="botEventEnd">Eventende (UTC, optional)</span><input id="discordAnchorEnd" class="control" type="time" step="60"></label>
-                  <button id="saveDiscordAnchor" type="button" class="ghost" data-permission="events" data-i18n="saveEventTimes">Eventzeiten speichern</button>
+                <div class="discord-bot-day-header">
+                  <h4 data-i18n="botEventDays">Eventtage</h4>
+                  <span class="small-note" id="discordEventDuration"></span>
                 </div>
-                <p class="small-note" data-i18n="botAnchorHint">Für Nachrichten „X Minuten vor/nach Start“ muss eine genaue UTC-Startzeit vorliegen. Datum/Turnus stammen aus der Eventplanung. Keine Termine werden geschätzt.</p>
+                <div class="discord-bot-days" id="discordDayTabs" role="group" aria-label="Eventtage"></div>
+                <div class="discord-day-info"><strong id="discordDayTitle">—</strong><p id="discordDayInfo" class="small-note"></p></div>
+                <div class="discord-bot-anchor">
+                  <label class="field"><span data-i18n="botEventStart">Tagesbeginn (UTC)</span><input id="discordAnchorStart" class="control" type="time" step="60"></label>
+                  <label class="field"><span data-i18n="botEventEnd">Tagesende (UTC, optional)</span><input id="discordAnchorEnd" class="control" type="time" step="60"></label>
+                  <div class="discord-anchor-buttons">
+                    <button id="saveDiscordAnchor" type="button" class="ghost" data-permission="events" data-i18n="saveEventTimes">Tageszeiten speichern</button>
+                    <button id="saveDiscordAllAnchors" type="button" class="ghost" data-permission="events" data-i18n="saveAllEventTimes">Zeiten für alle Tage übernehmen</button>
+                  </div>
+                </div>
+                <p class="small-note" data-i18n="botAnchorHint">Jeder Eventtag hat eigene Zeiten und Texte. Relative Erinnerungen beziehen sich auf den ausgewählten Tag (nicht nur auf den Start von Tag 1). Zeiten UTC; keine Schätzungen.</p>
               </article>
               <article class="card">
                 <div class="filters"><div><h3 data-i18n="botMessages">Geplante Nachrichten</h3>
@@ -166,7 +175,10 @@
                   <button class="primary" type="button" id="discordAddRule" data-permission="events" data-i18n="botAddMessage">+ Nachricht</button></div>
                 <p class="small-note" id="discordMessageCount"></p>
                 <div id="discordRuleList" class="discord-bot-rule-list"></div>
-                <button type="button" id="discordPreset" class="ghost" data-permission="events" data-i18n="botUsePresets">Vorkonfigurierte Vorlagen hinzufügen</button>
+                <div class="discord-preset-actions">
+                  <button type="button" id="discordPreset" class="ghost" data-permission="events" data-i18n="botUsePresets">Vorlage für diesen Tag hinzufügen</button>
+                  <button type="button" id="discordAllDaysPreset" class="ghost" data-permission="events" data-i18n="botPresetAllDays">Tagesvorlagen für alle Eventtage anlegen</button>
+                </div>
                 <p id="discordRuleStatus" role="status" class="small-note" aria-live="polite"></p>
               </article>
             </div>
@@ -351,7 +363,7 @@
   <div class="modal-body">
    <label class="field"><span data-i18n="botRuleTitle">Name / Zweck dieser Nachricht</span><input class="control" name="title" maxlength="100" required placeholder="z. B. Erinnerung 15 Minuten vorher"></label>
    <div class="discord-rule-times">
-     <label class="field"><span data-i18n="botEventDay">Eventtag</span><input name="day_number" class="control" type="number" value="1" min="1" max="14" required></label>
+     <label class="field"><span data-i18n="botEventDay">Eventtag</span><select name="day_number" class="control" required></select></label>
      <label class="field"><span data-i18n="botTrigger">Zeitplan</span><select name="trigger_type" class="control"><option value="relative" data-i18n="botRelative">Relativ zum Event</option><option value="clock" data-i18n="botClock">Feste Uhrzeit (UTC)</option></select></label>
      <label class="field" id="botRelativeTarget"><span data-i18n="botReference">Bezugspunkt</span><select name="relative_to" class="control"><option value="start" data-i18n="botStart">Eventstart</option><option value="end" data-i18n="botEnd">Eventende</option></select></label>
      <label class="field" id="botRelativeAmount"><span data-i18n="botMinutes">Minuten Abstand</span><input name="offset_amount" class="control" type="number" min="0" max="43200" value="15" required></label>
@@ -375,5 +387,5 @@
  </form>
 </dialog>
 <script src="../dashboard/event-rhythm.js?v=pages-step4-1"></script>
-<script type="module" src="./app.js?v=step6-discord-1"></script>
+<script type="module" src="./app.js?v=step6-days-1"></script>
 </body></html>
