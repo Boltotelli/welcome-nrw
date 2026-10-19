@@ -1,5 +1,5 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.58.0/+esm";
-import {createEventHub} from "./event-library.js?v=step6-days-2";
+import {createEventHub} from "./event-library.js?v=step6-iteratorfix-1";
 import {createOperations} from "./operations.js?v=pages-4";
 import {createDiscordEventPlanner} from "./discord-events.js?v=step6-days-2";
 
