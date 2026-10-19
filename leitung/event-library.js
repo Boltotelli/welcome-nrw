@@ -613,7 +613,7 @@ export function createEventHub({request,flash,esc,t}) {
          const customized=String(instruction[l]||"").trim();
          const fromGuide=Array.isArray(guideNotes[l])?guideNotes[l].join("\n"):String(guideNotes[l]||"");
          const general=g.guide?.nrwRule?.[l];
-         return [customized,fromGuide,String(general||"")].filter(Boolean).join("\n");
+         return [l,[customized,fromGuide,String(general||"")].filter(Boolean).join("\n")];
        }));
        const scoringNames=Object.fromEntries(["de","en","fr"].map(l=>[l,scoring.slice(0,4).map(k=>sources.guides.actionDictionary?.[k]?.[l]||k)]));
        return {number:n,phase_id:phase?.id||null,names,tips,scoring:scoringNames,has_guide:!!phase,configured:!!template};
