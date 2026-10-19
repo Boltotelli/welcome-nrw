@@ -4,7 +4,7 @@ import {createOperations} from "./operations.js?v=pages-4";
 import {createDiscordEventPlanner} from "./discord-events.js?v=eventbot-4lang-20261019";
 import {createEventBotStatusPanel} from "./event-bot-status.js?v=eventbot-4lang-20261019";
 import {createMemberRelationships} from "./member-relationships.js?v=phase1-20261019-1";
-import {createPerformance} from "./performance.js?v=phase2-perf-test-20261019-1";
+import {createPerformance} from "./performance.js?v=phase2-perf-release-20261019-2";
 
 // Private AllianceOS pilot. Data is NEVER stored in localStorage; only auth session is.
 // All records and permissions are issued by the authenticated Edge Function.
