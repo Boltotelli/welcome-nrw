@@ -583,13 +583,45 @@ export function createEventHub({request,flash,esc,t}) {
    if(!sources)return [];
    const previous=language;language=locale;
    buildGroups();
-   const result=groups.map(g=>({
-     key:g.key,
-     name:groupName(g),
-     names:Object.fromEntries(["de","en","fr"].map(l=>[l,lk(cycleFor(g)?.title,l)||lk(baseNames(g),l)||groupName(g)])),
-     cycle:cycleFor(g)||null,
-     suggested_time_utc:cycleFor(g)?.start_time_utc||null
-   }));
+   const titles={
+     "rise-of-city":{de:"Stadtentwicklung",en:"City Development",fr:"Développement de la ville"},
+     "city-construction":{de:"Stadtentwicklung",en:"City Construction",fr:"Construction de la ville"},
+     "hero-development":{de:"Heldenentwicklung",en:"Hero Development",fr:"Développement des héros"},
+     "hero-development-2":{de:"Heldenentwicklung",en:"Hero Development",fr:"Développement des héros"},
+     "pet-training":{de:"Pet-Training",en:"Pet Training",fr:"Entraînement des familiers"},
+     "gear-enhancement":{de:"Ausrüstung verbessern",en:"Gear Enhancement",fr:"Amélioration d’équipement"},
+     "trade-baron":{de:"Handel",en:"Trade",fr:"Commerce"},
+     "full-scale":{de:"Gesamtwertung",en:"Full Scale",fr:"Bilan général"},
+     "basic-skills":{de:"Grundfertigkeiten",en:"Basic Skills",fr:"Compétences de base"},
+     "basic-skills-2":{de:"Grundfertigkeiten",en:"Basic Skills",fr:"Compétences de base"},
+     "combat-training":{de:"Kampftraining",en:"Combat Training",fr:"Entraînement au combat"},
+     "combat-training-2":{de:"Kampftraining",en:"Combat Training",fr:"Entraînement au combat"},
+     "power-boost":{de:"Stärke erhöhen",en:"Power Boost",fr:"Renforcement de puissance"}
+   };
+   const result=groups.map(g=>{
+     const cycle=cycleOf(g),savedCycle=cycleFor(g),guidePhases=g.guide?.phases||[];
+     const templates=state?.eventDayTemplates||[];
+     const total=Math.min(14,Math.max(1,Number(cycle?.duration_days||1),Number(cycle?.phase_count||1),
+       guidePhases.reduce((max,p)=>Math.max(max,Number(p.day||0)),0)));
+     const days=Array.from({length:total},(_,index)=>{
+       const n=index+1,phase=guidePhases.find(p=>Number(p.day)===n)||null,
+        template=templates.find(t=>t.group_key===g.key&&Number(t.day_number)===n),
+        instruction=template?.instructions||{},
+        guideNotes=phase?.nrw||{}, scoring=(phase?.scoring||[]).map(v=>v.action).filter(Boolean);
+       const names=Object.fromEntries(["de","en","fr"].map(l=>[l,titles[phase?.id]?.[l]||""]));
+       const tips=Object.fromEntries(["de","en","fr"].map(l=>{
+         const customized=String(instruction[l]||"").trim();
+         const fromGuide=Array.isArray(guideNotes[l])?guideNotes[l].join("\n"):String(guideNotes[l]||"");
+         const general=g.guide?.nrwRule?.[l];
+         return [customized,fromGuide,String(general||"")].filter(Boolean).join("\n");
+       }));
+       const scoringNames=Object.fromEntries(["de","en","fr"].map(l=>[l,scoring.slice(0,4).map(k=>sources.guides.actionDictionary?.[k]?.[l]||k)]));
+       return {number:n,phase_id:phase?.id||null,names,tips,scoring:scoringNames,has_guide:!!phase,configured:!!template};
+     });
+     const names=Object.fromEntries(["de","en","fr"].map(l=>[l,lk(cycleFor(g)?.title,l)||lk(baseNames(g),l)||groupName(g)]));
+     return {key:g.key,name:groupName(g),names,cycle:cycle||null,calendar_confirmed:!!savedCycle,
+       duration_days:total,days,suggested_time_utc:cycle?.start_time_utc||null};
+   });
    language=previous;
    return result;
  }
