@@ -465,7 +465,9 @@ jobs:
           grep -Fq 'createDiscordEventPlanner' _site/leitung/app.js
           node --input-type=module --check < _site/leitung/discord-events.js
           node v3-latest/leitung/test-discord-catalog.cjs
-          grep -Fq 'step6-iteratorfix-1' _site/leitung/index.html
+          grep -Fq 'roster-dossier-fix-20261019-1' _site/leitung/index.html
+          node v3-latest/leitung/test-roster-dossier.cjs
+          grep -Fq 'data-edit-member=' _site/leitung/app.js
           grep -Fq 'event-library.js?v=step6-iteratorfix-1' _site/leitung/app.js
           grep -Fq 'catalog=eventHub.catalog(language)' _site/leitung/discord-events.js
           grep -Fq 'id="discordDayTabs"' _site/leitung/index.html
