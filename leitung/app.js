@@ -129,7 +129,9 @@ function showLive(){
 async function refresh(){
  const data=await request();
  if(!data?.alliance||!data?.staff)throw new Error("not_authorized");
- state=data;showLive();
+ state=data;
+ if(!localStorage.getItem("nrw_page_lang")&&LANGS.includes(state.alliance.default_language))lang=state.alliance.default_language;
+ showLive();
  if(!powerSyncStarted&&can("members")){
    powerSyncStarted=true;
    Promise.resolve().then(syncPlayerPower);
