@@ -230,6 +230,7 @@
 
   // Optional published AllianceOS recurrence override. The original 28-day generator stays intact.
   const keyFor=e=>{
+    if(e?.aos_group)return e.aos_group;
     const x=String(e?.id||"").toLowerCase();
     for(const [needle,key] of [["alliance-brawl","brawl"],["strongest-governor","strongest"],["kingdom-of-power-prep","kvk"],["alliance-mobilization","mobilization"],["merchant-empire","merchant"],["golden-glaives","golden"],["officer-project","officer"],["armament-competition","armament"],["rhythm-officer","officer"],["rhythm-armament","armament"],["viking","viking"],["fishing","fishing"],["eternity","eternity"],["champagne","champagne"],["bear-trap","bear"],["hero-roulette","roulette"],["alliance-championship","championship"],["kill-event","kill"]]){
       if(x.includes(needle))return key;
@@ -240,7 +241,7 @@
     brawl:{de:"Allianzgemenge",en:"Alliance Brawl",fr:"Alliance Brawl"},
     strongest:{de:"Stärkster Gouverneur",en:"Strongest Governor",fr:"Strongest Governor"},
     kvk:{de:"KvK-Vorbereitung",en:"KvK Preparation",fr:"Préparation KvK"},
-    mobilization:{de:"Allianz-Mobilisierung",en:"Alliance Mobilization",fr:"Mobilisation d’alliance"},
+    mobilization:{de:"Allianzmobilisierung",en:"Alliance Mobilization",fr:"Mobilisation d’alliance"},
     merchant:{de:"Handelsimperium",en:"Merchant Empire",fr:"Empire commercial"},
     golden:{de:"Golden Glaives",en:"Golden Glaives",fr:"Golden Glaives"},
     officer:{de:"Offiziersprojekt",en:"Officer Project",fr:"Projet d’officier"},
@@ -248,6 +249,9 @@
     viking:{de:"Wikinger-Vergeltung",en:"Viking Vengeance",fr:"Viking Vengeance"},
     fishing:{de:"Fischerturnier",en:"Fishing Tournament",fr:"Tournoi de pêche"},
     bear:{de:"Bärenfalle",en:"Bear Trap",fr:"Piège à ours"},
+    "bear-1":{de:"Bärenfalle 1",en:"Bear Trap 1",fr:"Piège à ours 1",es:"Trampa del oso 1"},
+    "bear-2":{de:"Bärenfalle 2",en:"Bear Trap 2",fr:"Piège à ours 2",es:"Trampa del oso 2"},
+    "bear-3":{de:"Bärenfalle 3",en:"Bear Trap 3",fr:"Piège à ours 3",es:"Trampa del oso 3"},
     eternity:{de:"Eternity’s Reach",en:"Eternity’s Reach",fr:"Eternity’s Reach"},
     champagne:{de:"Champagne Fair",en:"Champagne Fair",fr:"Champagne Fair"},
     roulette:{de:"Heldenroulette",en:"Hero Roulette",fr:"Roulette des héros"},
@@ -257,12 +261,17 @@
   function withCycles(date,cycles){
     const normal=officialRhythmFor(date);
     if(!Array.isArray(cycles)||!cycles.length)return normal;
+    // Name-only edits must not alter the official rhythm or dates.
+    const titled=normal.map(e=>{
+      const setting=cycles.find(c=>c?.enabled!==false&&c.group_key===keyFor(e)&&c.title&&Object.keys(c.title).length);
+      return setting?{...e,name:{...(e.name||{}),...setting.title}}:e;
+    });
     const overrides=cycles.filter(c=>c&&c.enabled!==false&&c.override_schedule===true&&/^[a-z0-9-]{2,70}$/.test(c.group_key||"") &&
       /^\d{4}-\d{2}-\d{2}$/.test(c.anchor_date||"")&&Number.isInteger(c.interval_days)&&c.interval_days>=1&&
       Number.isInteger(c.duration_days)&&c.duration_days>=1&&c.duration_days<=14&&c.duration_days<=c.interval_days);
-    if(!overrides.length)return normal;
+    if(!overrides.length)return titled;
     const replaced=new Set(overrides.map(c=>c.group_key));
-    const result=normal.filter(e=>!replaced.has(keyFor(e)));
+    const result=titled.filter(e=>!replaced.has(keyFor(e)));
     const dayMs=Date.parse(date+"T00:00:00Z");
     for(const c of overrides){
       const diff=Math.round((dayMs-Date.parse(c.anchor_date+"T00:00:00Z"))/day);
@@ -271,7 +280,12 @@
       if(mod>=c.duration_days)continue;
       const start=dateKey(new Date(dayMs-mod*day)),end=dateKey(new Date(dayMs+(c.duration_days-mod-1)*day));
       const name=(c.title&&Object.keys(c.title).length?c.title:null)||groupLabels[c.group_key]||{de:c.group_key,en:c.group_key,fr:c.group_key};
-      result.push({id:"rhythm-"+c.group_key+"-"+start,start,end,name,icon:"📅",confidence:"alliance-schedule",aos_group:c.group_key,aos_phase:mod+1});
+      const isBear=/^bear-[123]$/.test(c.group_key);
+      if(isBear&&!/^([01]\\d|2[0-3]):[0-5]\\d(:00)?$/.test(String(c.start_time_utc||"")))continue;
+      result.push({id:"rhythm-"+c.group_key+"-"+start,start,end,name,
+        icon:isBear?"🐻":"📅",confidence:"alliance-schedule",
+        aos_group:c.group_key,aos_phase:mod+1,
+        start_time_utc:isBear?String(c.start_time_utc).slice(0,5):null});
     }
     return result;
   }
