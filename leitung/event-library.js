@@ -87,9 +87,14 @@ export function createEventHub({request,flash,esc,t}) {
   items=[...dict.values()].sort((a,b)=>a.record.start.localeCompare(b.record.start)||name(a).localeCompare(name(b)));
 
  }
- const baseNames=group=>bearSlot(group.key)?bearNames(group.key.slice(-1)):(
-   group.guide?.names||group.guide?.name||window.NRW_EVENT_RHYTHM?.groupLabels?.[group.key]||
-   group.instances?.[0]?.record?.name||group.instances?.[0]?.record?.title||{});
+ const baseNames=group=>{
+   if(bearSlot(group.key))return bearNames(group.key.slice(-1));
+   const raw=group.guide?.names||group.guide?.name||window.NRW_EVENT_RHYTHM?.groupLabels?.[group.key]||
+     group.instances?.[0]?.record?.name||group.instances?.[0]?.record?.title||{};
+   const names=typeof raw==="string"?{en:raw}:raw;
+   // Official German Kingshot terminology: "Allianzmobilisierung".
+   return group.key==="mobilization"?{...names,de:"Allianzmobilisierung"}:names;
+ };
  const groupName=group=>lk((state?.eventCycles||[]).find(c=>c.group_key===group.key)?.title)||
    lk(baseNames(group))||name(group.instances[0]);
  const normalizeKey=raw=>String(raw||"").toLowerCase().replace(/[^a-z0-9-]+/g,"-").replace(/^-+|-+$/g,"").slice(0,70);
@@ -353,7 +358,7 @@ export function createEventHub({request,flash,esc,t}) {
    const overrides=cycleFor(group)?.title||{},defaults=baseNames(group);
    const languages={de:"Deutsch",en:"English",fr:"Français",es:"Español"};
    $("eventNameFields").innerHTML=Object.entries(languages).map(([code,label])=>
-     '<label class="field"><span>'+esc(label)+'</span><input class="control" maxlength="120" data-event-name="'+code+'" value="'+esc(overrides[code]||defaults?.[code]||"")+'" placeholder="'+esc(defaults?.en||"")+'"></label>').join("");
+     '<label class="field"><span>'+esc(label)+'</span><input class="control" maxlength="120" data-event-name="'+code+'" value="'+esc(overrides[code]||defaults?.[code]||defaults?.en||"")+'" placeholder="'+esc(defaults?.en||"")+'"></label>').join("");
    $("saveEventNames").disabled=!canEdit;
  }
  function titlePayload(){
