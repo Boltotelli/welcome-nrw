@@ -6,7 +6,7 @@
 <title>AllianceOS · NRW Leitungszentrale</title>
 <meta name="description" content="Geschützte Leitungszentrale für Allianzverwaltung, Transfers, Laws und Events.">
 <link rel="icon" href="../assets/nrw-dashboard-icon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="./styles.css?v=step5-branding-2">
+<link rel="stylesheet" href="./styles.css?v=step6-discord-1">
 
 </head>
 <body>
@@ -22,6 +22,7 @@
 
       <button class="nav-item" data-tab="laws"><i>⚖</i><span data-i18n="laws">Laws-Verwaltung</span></button>
       <button class="nav-item" data-tab="events"><i>▣</i><span data-i18n="events">Eventplanung</span></button>
+       <button class="nav-item" data-tab="discord"><i>◉</i><span data-i18n="discordBot">Discord Event-Bot</span></button>
       <button class="nav-item" data-tab="settings"><i>⚙</i><span data-i18n="settings">Allianz &amp; Rechte</span></button>
     </nav>
     <div class="side-foot"><div class="security-dot">● <span data-i18n="private">Geschützter Bereich</span></div>
@@ -120,6 +121,56 @@
             <div id="eventLibraryList" class="event-source-list"><p class="muted">Eventquellen werden geladen …</p></div>
           </div>
           <div id="eventList" hidden></div>
+        </section>
+
+        <section class="tab-page" data-page="discord" hidden>
+          <div class="page-heading"><div><span class="eyebrow">DISCORD EVENT AUTOMATION · STEP 6</span>
+            <h2 data-i18n="discordBot">Discord Event-Bot</h2>
+            <p data-i18n="discordBotSubtitle">Nachrichten pro Kingshot-Event einzeln planen · DE / EN / FR auf eigenen Sprachkanälen.</p>
+          </div></div>
+          <div class="notice discord-bot-notice"><strong data-i18n="discordBotOffline">Konfigurationsmodus · Noch kein Bot verbunden</strong>
+            <p data-i18n="discordBotOfflineDesc">Alle Einstellungen und Vorlagen werden gespeichert. Es werden noch keine Discord-Nachrichten versendet. Die Bot-Anbindung erfolgt erst nach Abschluss dieser Seite.</p>
+          </div>
+          <form id="discordSettingsForm" class="card discord-bot-config">
+            <div class="filters"><div><h3 data-i18n="botDestinations">Discord-Zielkanäle</h3>
+              <p class="muted" data-i18n="botDestinationHint">Jede Sprache erhält ihre eigene Nachricht im zugewiesenen Textkanal. IDs kopieren: Discord Entwicklermodus → Rechtsklick → ID kopieren.</p></div>
+              <button class="primary" type="submit" data-permission="settings" data-i18n="saveChannels">Kanäle speichern</button></div>
+            <div class="discord-bot-channel-grid">
+              <label class="field"><span data-i18n="discordGuildId">Discord-Server-ID</span><input id="discordGuild" class="control" inputmode="numeric" pattern="[0-9]{17,20}" maxlength="20" placeholder="Server-ID"></label>
+              <label class="field"><span>🇩🇪 Deutsch · #DE</span><input id="discordChannelDe" class="control" inputmode="numeric" pattern="[0-9]{17,20}" maxlength="20" placeholder="DE Channel ID"></label>
+              <label class="field"><span>🇬🇧 English · #EN</span><input id="discordChannelEn" class="control" inputmode="numeric" pattern="[0-9]{17,20}" maxlength="20" placeholder="EN Channel ID"></label>
+              <label class="field"><span>🇫🇷 Français · #FR</span><input id="discordChannelFr" class="control" inputmode="numeric" pattern="[0-9]{17,20}" maxlength="20" placeholder="FR Channel ID"></label>
+            </div>
+            <p class="small-note" id="discordSettingsStatus" role="status" aria-live="polite"></p>
+          </form>
+          <div class="discord-bot-layout">
+            <article class="card discord-bot-catalog">
+              <div class="filters"><h3 data-i18n="discordEventCatalog">Alle Kingshot-Events</h3><span class="counter" id="discordEventCount">–</span></div>
+              <input id="discordEventSearch" type="search" class="control" data-placeholder="discordEventSearch" placeholder="Events durchsuchen …">
+              <div id="discordEventList" class="discord-bot-events"><p class="muted" data-i18n="botLoading">Eventkatalog wird geladen …</p></div>
+            </article>
+            <div class="discord-bot-workspace">
+              <article class="card">
+                <div class="filters"><div><span class="eyebrow" data-i18n="selectedEvent">Gewähltes Event</span><h3 id="discordEventTitle">—</h3>
+                  <p class="small-note" id="discordEventTimingHint"></p></div></div>
+                <div class="discord-bot-anchor">
+                  <label class="field"><span data-i18n="botEventStart">Eventstart (UTC)</span><input id="discordAnchorStart" class="control" type="time" step="60"></label>
+                  <label class="field"><span data-i18n="botEventEnd">Eventende (UTC, optional)</span><input id="discordAnchorEnd" class="control" type="time" step="60"></label>
+                  <button id="saveDiscordAnchor" type="button" class="ghost" data-permission="events" data-i18n="saveEventTimes">Eventzeiten speichern</button>
+                </div>
+                <p class="small-note" data-i18n="botAnchorHint">Für Nachrichten „X Minuten vor/nach Start“ muss eine genaue UTC-Startzeit vorliegen. Datum/Turnus stammen aus der Eventplanung. Keine Termine werden geschätzt.</p>
+              </article>
+              <article class="card">
+                <div class="filters"><div><h3 data-i18n="botMessages">Geplante Nachrichten</h3>
+                    <p class="muted" data-i18n="botUnlimited">Pro Event beliebig viele unabhängige Nachrichten mit eigenem Auslöser und drei Sprachfassungen.</p></div>
+                  <button class="primary" type="button" id="discordAddRule" data-permission="events" data-i18n="botAddMessage">+ Nachricht</button></div>
+                <p class="small-note" id="discordMessageCount"></p>
+                <div id="discordRuleList" class="discord-bot-rule-list"></div>
+                <button type="button" id="discordPreset" class="ghost" data-permission="events" data-i18n="botUsePresets">Vorkonfigurierte Vorlagen hinzufügen</button>
+                <p id="discordRuleStatus" role="status" class="small-note" aria-live="polite"></p>
+              </article>
+            </div>
+          </div>
         </section>
         <section class="tab-page" data-page="settings" hidden>
           <div class="page-heading"><div><span class="eyebrow">ALLIANCE SETTINGS</span><h2 data-i18n="settings">Allianz &amp; Rechte</h2><p data-i18n="settingsDesc">Stammdaten, Kapazitäten, Freigaben und Plattformmodule.</p></div></div>
@@ -293,6 +344,36 @@
  </div>
  <div class="modal-actions"><button type="button" class="ghost" id="copyLeaderCredentials" data-i18n="copyCredentials">Einmalig kopieren</button><button type="button" class="primary" id="leaderCredentialsClose" data-i18n="closeCredentials">Schließen & Anzeige löschen</button></div>
 </dialog>
+
+<dialog id="discordRuleDialog" class="modal discord-rule-dialog" aria-labelledby="discordRuleHeading">
+ <form id="discordRuleForm">
+  <div class="modal-top"><h2 id="discordRuleHeading" data-i18n="botEditMessage">Discord-Nachricht planen</h2><button id="discordRuleCloseTop" type="button" class="close" aria-label="Close">×</button></div>
+  <div class="modal-body">
+   <label class="field"><span data-i18n="botRuleTitle">Name / Zweck dieser Nachricht</span><input class="control" name="title" maxlength="100" required placeholder="z. B. Erinnerung 15 Minuten vorher"></label>
+   <div class="discord-rule-times">
+     <label class="field"><span data-i18n="botEventDay">Eventtag</span><input name="day_number" class="control" type="number" value="1" min="1" max="14" required></label>
+     <label class="field"><span data-i18n="botTrigger">Zeitplan</span><select name="trigger_type" class="control"><option value="relative" data-i18n="botRelative">Relativ zum Event</option><option value="clock" data-i18n="botClock">Feste Uhrzeit (UTC)</option></select></label>
+     <label class="field" id="botRelativeTarget"><span data-i18n="botReference">Bezugspunkt</span><select name="relative_to" class="control"><option value="start" data-i18n="botStart">Eventstart</option><option value="end" data-i18n="botEnd">Eventende</option></select></label>
+     <label class="field" id="botRelativeAmount"><span data-i18n="botMinutes">Minuten Abstand</span><input name="offset_amount" class="control" type="number" min="0" max="43200" value="15" required></label>
+     <label class="field" id="botRelativeDirection"><span data-i18n="botBeforeAfter">Versandzeitpunkt</span><select name="direction" class="control"><option value="before" data-i18n="botBefore">vorher</option><option value="after" data-i18n="botAfter">nachher</option></select></label>
+     <label class="field" id="botFixedClock" hidden><span data-i18n="botClockUtc">Uhrzeit (UTC)</span><input name="clock_utc" class="control" type="time" step="60"></label>
+   </div>
+   <p class="small-note" data-i18n="botTimingNote">Alle Zeiten UTC. Tag 1 ist der erste Eventtag; jede Nachricht wird unabhängig geplant.</p>
+   <div class="discord-rule-locales">
+     <label class="field"><span>🇩🇪 Deutsch <small id="discordDeCount">0 / 1800</small></span><textarea class="control" name="de" maxlength="1800" rows="4" placeholder="Nachricht für DE"></textarea></label>
+     <label class="field"><span>🇬🇧 English <small id="discordEnCount">0 / 1800</small></span><textarea class="control" name="en" maxlength="1800" rows="4" placeholder="Message for EN"></textarea></label>
+     <label class="field"><span>🇫🇷 Français <small id="discordFrCount">0 / 1800</small></span><textarea class="control" name="fr" maxlength="1800" rows="4" placeholder="Message pour FR"></textarea></label>
+   </div>
+   <label class="discord-bot-check"><input name="enabled" type="checkbox"><span data-i18n="botRuleEnabled">Regel aktivieren (Bot wird später verbunden)</span></label>
+   <p class="small-note" data-i18n="botRuleEnableHint">Zum Aktivieren müssen DE, EN und FR ausgefüllt sein. Bis zur Bot-Anbindung wird nichts gesendet.</p>
+  </div>
+  <div class="modal-actions">
+   <button type="button" id="discordRuleDelete" class="ghost" data-i18n="botDelete">Löschen</button>
+   <button type="button" id="discordRuleCancel" class="ghost" data-i18n="cancel">Abbrechen</button>
+   <button type="submit" id="discordRuleSave" class="primary" data-permission="events" data-i18n="save">Speichern</button>
+  </div>
+ </form>
+</dialog>
 <script src="../dashboard/event-rhythm.js?v=pages-step4-1"></script>
-<script type="module" src="./app.js?v=step5-branding-2"></script>
+<script type="module" src="./app.js?v=step6-discord-1"></script>
 </body></html>
