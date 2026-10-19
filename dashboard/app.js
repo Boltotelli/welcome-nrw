@@ -159,7 +159,7 @@
   function nextBearAt(hour,minute){const now=new Date();for(let add=0;add<4;add++){const x=new Date(Date.UTC(now.getUTCFullYear(),now.getUTCMonth(),now.getUTCDate()+add,hour,minute));if(isBearDay(x)&&x>now)return x}return new Date(Date.UTC(now.getUTCFullYear(),now.getUTCMonth(),now.getUTCDate()+2,hour,minute))}
   const trapConfigs=()=>eventCycles.filter(c=>/^bear-[123]$/.test(c.group_key||""));
   const configuredTrapSlots=()=>trapConfigs().filter(c=>c.enabled!==false&&c.override_schedule===true&&
-    /^([01]\\d|2[0-3]):[0-5]\\d(:00)?$/.test(c.start_time_utc||"")).sort((a,b)=>a.group_key.localeCompare(b.group_key));
+    /^([01]\d|2[0-3]):[0-5]\d(:00)?$/.test(c.start_time_utc||"")).sort((a,b)=>a.group_key.localeCompare(b.group_key));
   function nextConfiguredBear(c,now=new Date()){
     const time=String(c.start_time_utc).slice(0,5);
     const anchor=Date.parse(c.anchor_date+"T"+time+":00Z"),every=Number(c.interval_days)*day;
