@@ -357,7 +357,7 @@ async function saveDiscordConfig(req:Request,alliance:string,userId:string,staff
  const guild_id=discordId(body.guild_id);
  if(!body.channels||typeof body.channels!=="object"||Array.isArray(body.channels))throw new HttpError("invalid_discord_channels",400);
  const channels:Record<string,string>={};
- for(const l of ["de","en","fr"])channels[l]=discordId(body.channels[l]);
+ for(const l of ["de","en","fr","es"])channels[l]=discordId(body.channels[l]);
  const supplied=Object.values(channels).filter(Boolean);
  if(new Set(supplied).size!==supplied.length)throw new HttpError("duplicate_discord_channel",400);
  const item=await checked<any>(db.from("aos_discord_bot_config").upsert({
@@ -409,14 +409,14 @@ async function saveDiscordRule(req:Request,alliance:string,userId:string,staff:a
  if(!Number.isInteger(day_number)||day_number<1||day_number>14)throw new HttpError("invalid_event_day",400);
  const messages:Record<string,string>={};
  if(!body.messages||typeof body.messages!=="object"||Array.isArray(body.messages))throw new HttpError("invalid_messages",400);
- for(const l of ["de","en","fr"]){
+ for(const l of ["de","en","fr","es"]){
   const value=String(body.messages[l]??"").trim();
   // Discord's message limit is 2000 characters, leaving headroom for future tokens.
   if(value.length>1800)throw new HttpError("discord_message_too_long",400);
   messages[l]=value;
  }
  const enabled=body.enabled===true;
- if(enabled&&!["de","en","fr"].every(l=>Boolean(messages[l])))throw new HttpError("three_languages_required",400);
+ if(enabled&&!["de","en","fr","es"].every(l=>Boolean(messages[l])))throw new HttpError("four_languages_required",400);
  const patch={event_key,title,trigger_type,relative_to,offset_minutes,clock_utc:trigger_type==="clock"?clock_utc:null,day_number,enabled,messages,updated_at:new Date().toISOString(),updated_by:userId};
  const id=str(body.id,36),isExisting=Boolean(id);
  if(isExisting&&!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id))throw new HttpError("invalid_rule_id",400);
