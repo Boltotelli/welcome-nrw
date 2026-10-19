@@ -104,3 +104,7 @@ h2{font-size:clamp(38px,5vw,63px);line-height:1;letter-spacing:-.055em;margin:10
 .empty{padding:40px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:20px;display:none}
 @media(max-width:900px){.law-hero-grid{grid-template-columns:1fr}.law-art{height:260px}.law-art .law-hero-character{height:100%;max-height:260px;right:4px}.toolbar{grid-template-columns:1fr}}
 @media(max-width:760px){.law14-sections{grid-template-columns:1fr}}@media(max-width:600px){.law-body{padding-left:18px;padding-right:18px}.law14-section-head{padding:11px}.law14-copy{padding:12px;font-size:11.5px}.filters{overflow-x:auto;flex-wrap:nowrap;padding-bottom:4px}}
+
+/* Public server laws include Spanish alongside DE/EN/FR. */
+body[data-lang="de"] .es,body[data-lang="en"] .es,body[data-lang="fr"] .es{display:none!important}
+body[data-lang="es"] .de,body[data-lang="es"] .en,body[data-lang="es"] .fr{display:none!important}
