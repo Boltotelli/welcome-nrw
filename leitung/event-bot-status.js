@@ -110,7 +110,7 @@ export function createEventBotStatusPanel({supabase,can,flash,esc}){
   const status=$("aosBotStatusFilter").value,lang=$("aosBotLangFilter").value,ev=$("aosBotEventFilter").value.trim().toLowerCase();
   $("aosBotHistory").innerHTML=table(history.filter(x=>(!status||x.status===status)&&(!lang||x.language===lang)&&
    (!ev||x.event_key.toLowerCase().includes(ev))).slice(0,150));
-  const enabled=can("settings");
+  const enabled=can("event_bot");
   $("aosBotTest").disabled=!enabled||!connected;
   $("aosBotAlliancePause").hidden=!enabled||!l.sending_enabled;
   $("aosBotGlobalPause").hidden=!state.isOwner||!g.sending_enabled;
