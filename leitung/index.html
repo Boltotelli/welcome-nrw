@@ -184,6 +184,12 @@
 <dialog id="eventLibraryDialog" class="modal event-library-modal" aria-labelledby="libraryModalTitle">
   <div class="modal-top"><div><span class="eyebrow" id="libraryModalSource">PLAYER DASHBOARD</span><h2 id="libraryModalTitle"></h2></div><button type="button" class="close" id="closeLibraryDialog" aria-label="Schließen">×</button></div>
   <div class="modal-body">
+    <section class="library-event-names">
+      <div class="library-subhead"><h3 data-event-i18n="namesHeading">Eventnamen je Sprache</h3>
+        <p data-event-i18n="namesHint">Die Bezeichnungen können in jeder Sprache geändert werden.</p></div>
+      <div id="eventNameFields" class="form-grid"></div>
+      <div class="library-cycle-bar"><button type="button" class="primary" id="saveEventNames" data-event-i18n="namesSave">Eventnamen speichern</button></div>
+    </section>
     <section class="library-cycle">
       <div class="library-subhead"><h3 data-i18n="cycleHeading">Wiederholung und Eventtage</h3><p data-i18n="cycleHint">Der Turnus wird nur einmal pro Event festgelegt.</p></div>
       <div class="form-grid">
@@ -192,6 +198,13 @@
         <label class="field"><span data-i18n="cycleLength">Kalendertage inkl. Abschluss</span><input id="cycleLength" class="control" type="number" min="1" max="14"></label>
         <label class="field"><span data-i18n="cyclePhases">Bearbeitbare Eventtage</span><input id="cyclePhases" class="control" type="number" min="1" max="14"></label>
       </div>
+      <fieldset id="cycleBearOptions" class="event-bear-options" hidden>
+        <legend data-event-i18n="bearOptions">Bärenfalle: Zeit und Aktivierung</legend>
+        <div class="form-grid">
+          <label class="field"><span data-event-i18n="bearTime">Beginn (UTC)</span><input id="cycleStartTime" class="control" type="time" step="60"></label>
+          <label class="field event-checkbox"><input id="cycleBearEnabled" type="checkbox"><span data-event-i18n="bearEnabled">Bärenfalle aktiv</span></label>
+        </div>
+      </fieldset>
       <div class="library-cycle-bar"><span id="cycleSummary" class="muted"></span><button type="button" class="primary" id="saveCycle" data-i18n="cycleSave">Turnus speichern</button></div>
     </section>
     <section class="library-phase-editor">
@@ -267,6 +280,6 @@
  </div>
  <div class="modal-actions"><button type="button" class="ghost" id="copyLeaderCredentials" data-i18n="copyCredentials">Einmalig kopieren</button><button type="button" class="primary" id="leaderCredentialsClose" data-i18n="closeCredentials">Schließen & Anzeige löschen</button></div>
 </dialog>
-<script src="../dashboard/event-rhythm.js?v=pages-1"></script>
+<script src="../dashboard/event-rhythm.js?v=pages-step4-1"></script>
 <script type="module" src="./app.js?v=pages-13"></script>
 </body></html>
