@@ -177,3 +177,12 @@
 .server-law-item .law-withdraw:hover{background:rgba(180,45,68,.12)}
 #editDialog .form-break{margin:22px 0 15px}
 #editDialog textarea[name^="body_"]{min-height:115px;white-space:pre-wrap}
+
+/* Phase 4: event naming / independent Bear Trap slots */
+.library-event-names{padding:14px;border:1px solid var(--border);border-radius:12px;margin-bottom:16px;background:var(--panel)}
+.library-event-names .library-cycle-bar{justify-content:flex-end;margin-top:12px}
+.event-bear-options{border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin:12px 0}
+.event-bear-options legend{padding:0 7px;color:var(--muted);font-size:13px;font-weight:700}
+.event-checkbox{display:flex;align-items:center;gap:10px;align-self:center;flex-direction:row}
+.event-checkbox input{width:19px;height:19px;accent-color:var(--accent)}
+.event-bear-options[hidden]{display:none}
