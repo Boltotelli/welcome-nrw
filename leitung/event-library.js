@@ -222,7 +222,7 @@ export function createEventHub({request,flash,esc,t}) {
     key:"aos-"+e.id,source:"custom",record:{...e,id:e.id,name:e.title,start:e.start_at.slice(0,10),end:(e.end_at||e.start_at).slice(0,10),tips:e.description},
     days:dateRange(e.start_at.slice(0,10),(e.end_at||e.start_at).slice(0,10),90),guide:null
   }));
-  if(sources)list();
+  if(sources){syncLabels();list();}
  }
  function findItem(key){return [...items,...extraEvents].find(x=>x.key===key)||[...(sources?.guides.events||[]).map(g=>({key:"guide-"+g.id,source:"guide",record:g,days:[dayKey(new Date())],guide:g})),...(sources?.guides.catalogOnly||[]).map((g,i)=>({key:"catalog-"+String(g.id||i),source:"catalog",record:g,days:[dayKey(new Date())],guide:g}))].find(x=>x.key===key);}
  function activeDay(){return $("libraryDay").value||selected?.days?.[0]||dayKey(new Date());}
@@ -348,6 +348,24 @@ export function createEventHub({request,flash,esc,t}) {
    $("libraryPhase").innerHTML=Array.from({length:number},(_,i)=>'<option value="'+(i+1)+'">'+esc(t("phaseN").replace("{n}",i+1))+'</option>').join("");
    $("libraryPhase").value=String(Math.min(number,Math.max(1,Number(preferred)||1)));
  }
+ function populateNames(){
+   const group=groups.find(x=>x.key===selected?.group_key);if(!group)return;
+   const overrides=cycleFor(group)?.title||{},defaults=baseNames(group);
+   const languages={de:"Deutsch",en:"English",fr:"Français",es:"Español"};
+   $("eventNameFields").innerHTML=Object.entries(languages).map(([code,label])=>
+     '<label class="field"><span>'+esc(label)+'</span><input class="control" maxlength="120" data-event-name="'+code+'" value="'+esc(overrides[code]||defaults?.[code]||"")+'" placeholder="'+esc(defaults?.en||"")+'"></label>').join("");
+   $("saveEventNames").disabled=!canEdit;
+ }
+ function titlePayload(){
+   const names={};
+   document.querySelectorAll("#eventNameFields [data-event-name]").forEach(el=>{
+     const v=el.value.trim();if(v)names[el.dataset.eventName]=v;
+   });
+   return names;
+ }
+ function syncLabels(){
+   document.querySelectorAll("[data-event-i18n]").forEach(el=>{el.textContent=tx(el.dataset.eventI18n);});
+ }
  function cycleFields(){
    const g=groups.find(x=>x.key===selected?.group_key);if(!g)return;
    const cycle=cycleOf(g);
@@ -355,6 +373,12 @@ export function createEventHub({request,flash,esc,t}) {
    $("cycleEvery").value=cycle.interval_days;
    $("cycleLength").value=cycle.duration_days;
    $("cyclePhases").value=cycle.phase_count||cycle.duration_days;
+   const isBear=bearSlot(g.key);
+   $("cycleBearOptions").hidden=!isBear;
+   $("cycleStartTime").value=isBear?(cycle.start_time_utc||"").slice(0,5):"";
+   $("cycleBearEnabled").checked=isBear?cycle.enabled===true:false;
+   $("cycleStartTime").disabled=!canEdit;
+   $("cycleBearEnabled").disabled=!canEdit;
    $("cycleSummary").textContent=cycleFor(g)?periodLabel(cycleFor(g)):t("cycleUnconfigured");
    for(const id of ["cycleAnchor","cycleEvery","cycleLength","cyclePhases"])$(id).disabled=!canEdit;
    $("saveCycle").disabled=!canEdit;
@@ -398,6 +422,26 @@ export function createEventHub({request,flash,esc,t}) {
    const days=selected.days||[],match=source?.day;
    if(match&&days.includes(match)){$("libraryDay").value=match;renderDetails();}
  }
+ function rememberCycle(item){
+   state.eventCycles=(state.eventCycles||[]).filter(c=>c.group_key!==item.group_key);
+   state.eventCycles.push(item);
+ }
+ async function saveNames(){
+   if(!selected?.group_key||!canEdit)return;
+   const title=titlePayload();
+   if(!Object.keys(title).length){flash(tx("nameMissing"),true);return;}
+   const btn=$("saveEventNames");btn.disabled=true;
+   try{
+     const cycle=cycleOf(groups.find(g=>g.key===selected.group_key));
+     const result=await request("bootstrap",{action:"event_cycle",group_key:selected.group_key,
+       anchor_date:cycle.anchor_date,interval_days:cycle.interval_days,duration_days:cycle.duration_days,
+       phase_count:cycle.phase_count||cycle.duration_days,title,title_only:true});
+     rememberCycle(result.item);list();
+     $("libraryModalTitle").textContent=groupName(groups.find(g=>g.key===selected.group_key));
+     cycleFields();flash(t("saved"));
+   }catch(e){flash(t("genericError")+" ("+e.message+")",true);}
+   finally{btn.disabled=!canEdit;}
+ }
  async function saveCycle(){
    if(!selected?.group_key||!canEdit)return;
    const anchor_date=$("cycleAnchor").value,interval_days=Number($("cycleEvery").value),
@@ -407,13 +451,18 @@ export function createEventHub({request,flash,esc,t}) {
       !Number.isInteger(phase_count)||phase_count<1||phase_count>duration_days){
      flash(t("cycleInvalid"),true);return;
    }
+   const isBear=bearSlot(selected.group_key),start_time_utc=isBear?$("cycleStartTime").value:"";
+   const enabled=isBear?$("cycleBearEnabled").checked:true;
+   if(isBear&&enabled&&!/^([01]\\d|2[0-3]):[0-5]\\d$/.test(start_time_utc)){
+     flash(tx("bearTimeRequired"),true);return;
+   }
+   const title=titlePayload();
+   if(!Object.keys(title).length){flash(tx("nameMissing"),true);return;}
    const id=$("saveCycle");id.disabled=true;
    try{
-     const group=groups.find(g=>g.key===selected.group_key),original=group?.guide?.names||group?.record?.name||selected.guide?.names||selected.record?.name;
-     const title=original&&typeof original==="object"&&!Array.isArray(original)?original:{de:groupName(group),en:groupName(group)};
-     const r=await request("bootstrap",{action:"event_cycle",group_key:selected.group_key,anchor_date,interval_days,duration_days,phase_count,enabled:true,title});
-     state.eventCycles=(state.eventCycles||[]).filter(c=>c.group_key!==selected.group_key);
-     state.eventCycles.push(r.item);
+     const r=await request("bootstrap",{action:"event_cycle",group_key:selected.group_key,anchor_date,
+       interval_days,duration_days,phase_count,enabled,start_time_utc,title});
+     rememberCycle(r.item);
      setPhaseOptions(Number($("libraryPhase").value));
      cycleFields();fillPhase();list();flash(t("saved"));
    }catch(e){flash(t("genericError")+" ("+e.message+")",true)}
@@ -449,6 +498,7 @@ export function createEventHub({request,flash,esc,t}) {
    const original=group.instances.find(x=>x.record.dailyPlans)||group.instances.find(x=>x.source==="rhythm")||group.instances[0];
    selected={...original,group_key:group.key,guide:group.guide||original.guide};
    $("libraryModalTitle").textContent=groupName(group);
+   syncLabels();populateNames();
    $("libraryModalSource").textContent=t("oneEvent");
    const dates=selected.days?.length?selected.days:[dayKey(new Date())];
    $("libraryDay").innerHTML=dates.map(d=>'<option value="'+esc(d)+'">'+esc(formatDate(d))+'</option>').join("");
@@ -498,6 +548,7 @@ export function createEventHub({request,flash,esc,t}) {
   $("saveLibraryGuidance").addEventListener("click",saveGuidance);
   $("libraryPhase").addEventListener("change",fillPhase);
   $("saveCycle").addEventListener("click",saveCycle);
+  $("saveEventNames").addEventListener("click",saveNames);
   $("savePhase").addEventListener("click",savePhase);
   $("phaseChat").addEventListener("input",updatePhaseCounts);
   $("phaseNote").addEventListener("input",updatePhaseCounts);
