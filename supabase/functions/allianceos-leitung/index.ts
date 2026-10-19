@@ -618,10 +618,11 @@ async function performanceDashboard(req:Request,alliance:string,staff:any){
       score:Number(item.score),server_rank:item.server_rank,
       recorded_at:item.recorded_at,source:item.source_type};
   });
+  const ownEventIds=new Set(rankings.map(r=>r.event_id));
   return json(req,{ok:true,days:90,since,partial:truncated,
     power:history.map(x=>({game_id:x.game_id,date:x.observed_on,
       value:Number(x.power),observed_at:x.fetched_at})),
-    events,rankings,raw_count:raw.length});
+    events:events.filter(e=>ownEventIds.has(e.id)),rankings,raw_count:raw.length});
 }
 async function memberPowerHistory(req:Request,alliance:string,staff:any,body:any){
  if(!permission(staff,"members"))throw new HttpError("permission_denied",403);
