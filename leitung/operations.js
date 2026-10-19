@@ -72,18 +72,29 @@ export function createOperations({getState,request,flash,esc,t,can,refresh}){
      $("lawHistoryItems").innerHTML=(result.revisions||[]).map(row=>
        '<article class="ops-history"><div><strong>v'+esc(row.version)+'</strong> · '+esc(row.snapshot?.status||"")+'<small>'+esc(row.changed_at?.slice(0,16).replace("T"," ")||"")+' UTC</small></div>'+
        '<p>'+esc(row.snapshot?.title?.de||row.snapshot?.title?.en||"")+'</p>'+
-       (law?.scope==="alliance"&&can("laws")?'<button class="ghost" type="button" data-law-restore="'+esc(id)+'" data-version="'+esc(row.version)+'">'+esc(t("restoreAsDraft"))+'</button>':"")+'</article>').join("")||'<p class="muted">'+esc(t("noVersions"))+'</p>';
+       (law?.scope==="kingdom"&&can("laws")?'<button class="ghost" type="button" data-law-restore="'+esc(id)+'" data-version="'+esc(row.version)+'">'+esc(t("restoreAsDraft"))+'</button>':"")+'</article>').join("")||'<p class="muted">'+esc(t("noVersions"))+'</p>';
    }catch(e){$("lawHistoryItems").textContent=t("genericError")+" ("+e.message+")";}
  }
  async function restore(id,version){
    if(!can("laws"))return;
    const law=(getState()?.laws||[]).find(x=>x.id===id);
-   if(!law||law.scope!=="alliance")return;
+   if(!law||law.scope!=="kingdom")return;
    if(!window.confirm(t("restoreConfirm")))return;
    try{
      await request("bootstrap",{action:"law_restore",id,restore_version:version,expected_version:law.version});
      $("lawHistoryDialog").close();await refresh();flash(t("saved"));
    }catch(e){flash(t("genericError")+" ("+e.message+")",true)}
+ }
+ async function unpublish(id){
+  if(!can("laws"))return;
+  const law=(getState()?.laws||[]).find(x=>x.id===id&&x.scope==="kingdom");
+  const publication=(getState()?.lawPublications||[]).find(x=>x.law_id===id);
+  if(!law||!publication)return;
+  if(!window.confirm(t("lawUnpublishConfirm").replace("{n}",String(law.number))))return;
+  try{
+    await request("bootstrap",{action:"law_unpublish",id,expected_version:law.version});
+    await refresh();flash(t("lawWithdrawn"));
+  }catch(e){flash(t("genericError")+" ("+e.message+")",true);}
  }
  async function invite(){
    const state=getState();if(state?.staff?.rank!=="R5")return;
@@ -109,6 +120,8 @@ export function createOperations({getState,request,flash,esc,t,can,refresh}){
    document.addEventListener("click",e=>{
      const w=e.target.closest("[data-transfer-window]");
      if(w){openWindow(w.dataset.transferWindow);return;}
+     const wlaw=e.target.closest("[data-law-unpublish]");
+     if(wlaw){unpublish(wlaw.dataset.lawUnpublish);return;}
      const h=e.target.closest("[data-law-history]");
      if(h){history(h.dataset.lawHistory);return;}
      const v=e.target.closest("[data-law-restore]");
