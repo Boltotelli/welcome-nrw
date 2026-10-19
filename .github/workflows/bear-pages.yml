@@ -476,7 +476,7 @@ jobs:
           grep -Fq 'const DAY_UI=' _site/leitung/discord-events.js
           grep -Fq 'action:"discord_event_day_time"' _site/leitung/discord-events.js
           grep -Fq 'duration_days:total,days' _site/leitung/event-library.js
-          grep -Fq 'step6-days-1' _site/leitung/index.html
+          grep -Fq 'id="discordDayTabs"' _site/leitung/index.html
           node --input-type=module --check < _site/leitung/app.js
           node --input-type=module --check < _site/leitung/event-library.js
           node --input-type=module --check < _site/leitung/operations.js
