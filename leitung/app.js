@@ -94,7 +94,7 @@ async function request(mode="bootstrap",payload=null){
  if(!session?.access_token)throw new Error("authentication_required");
  const options={headers:{Authorization:"Bearer "+session.access_token,"Content-Type":"application/json",apikey:"sb_publishable_8i1ismeQtj9WM-xVN_Vm0w_Tj7AvVtL"},cache:"no-store"};
  if(payload){options.method="POST";options.body=JSON.stringify(payload);}
- const pageMatch=/^discord-bot:(\\d+)$/.exec(mode);
+ const pageMatch=/^discord-bot:(\d+)$/.exec(mode);
   const queryMode=pageMatch?"discord-bot":mode;
   const suffix=pageMatch?"&page="+pageMatch[1]:"";
   const response=await fetch(FUNCTION+"?alliance=NRW&mode="+encodeURIComponent(queryMode)+suffix,options);
