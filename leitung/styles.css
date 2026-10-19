@@ -168,3 +168,12 @@
   .transfer-id-row{grid-template-columns:minmax(0,1fr)}
   .transfer-id-row>button{width:100%}
 }
+
+/* Law Studio: clear public-vs-draft state and explicit withdrawal action. */
+.server-law-item{align-items:center}
+.server-law-item .card-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.server-law-item h3{overflow-wrap:anywhere}
+.server-law-item .law-withdraw{border-color:#9f4551;color:#f7a1ab}
+.server-law-item .law-withdraw:hover{background:rgba(180,45,68,.12)}
+#editDialog .form-break{margin:22px 0 15px}
+#editDialog textarea[name^="body_"]{min-height:115px;white-space:pre-wrap}
