@@ -7,7 +7,8 @@
  function themeIcon(){ if(themeBtn) themeBtn.textContent=root.dataset.theme==='dark'?'☀':'☾'; }
  themeIcon();
  themeBtn?.addEventListener('click',()=>{root.dataset.theme=root.dataset.theme==='dark'?'light':'dark';localStorage.setItem('nrw_theme',root.dataset.theme);themeIcon();});
- const savedLang=localStorage.getItem('nrw_page_lang')||'en';
+ const storedLanguage=localStorage.getItem('nrw_page_lang');
+ const savedLang=['de','en','fr'].includes(storedLanguage)?storedLanguage:'en';
  body.dataset.lang=savedLang;document.documentElement.lang=savedLang;
  document.querySelectorAll('[data-lang-btn]').forEach(b=>{
    b.classList.toggle('active',b.dataset.langBtn===savedLang);
