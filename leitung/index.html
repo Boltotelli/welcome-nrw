@@ -6,13 +6,13 @@
 <title>AllianceOS · NRW Leitungszentrale</title>
 <meta name="description" content="Geschützte Leitungszentrale für Allianzverwaltung, Transfers, Laws und Events.">
 <link rel="icon" href="../assets/nrw-dashboard-icon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="./styles.css?v=pages-step4-1">
+<link rel="stylesheet" href="./styles.css?v=step5-branding-1">
 
 </head>
 <body>
 <div class="shell">
   <aside class="sidebar">
-    <a class="side-brand" href="../"><img src="../assets/nrw-banner.svg" alt="NRW">
+    <a class="side-brand" href="../"><img data-alliance-logo src="../assets/nrw-banner.svg" alt="NRW">
       <span><strong>Alliance<span class="accent">OS</span></strong><small>NRW · KINGDOM 1044</small></span></a>
     <p class="side-label" data-i18n="workplace">LEITUNGSZENTRALE</p>
     <nav id="sideNav" aria-label="Module">
@@ -47,7 +47,7 @@
             <h1><span data-i18n="leadership">Deine Allianz.</span><br><em data-i18n="underControl">Alles im Blick.</em></h1>
             <p data-i18n="heroText">Spieler, Transfers, Regeln und Termine zentral verwalten. Änderungen bleiben auf NRW beschränkt.</p>
           </div>
-          <div class="hero-badge"><img src="../assets/nrw-banner.svg" alt="NRW Wappen"><div><strong id="heroAlliance">[NRW]United</strong><small id="heroKingdom">KINGDOM 1044</small></div></div>
+          <div class="hero-badge"><img data-alliance-logo src="../assets/nrw-banner.svg" alt="NRW Wappen"><div><strong id="heroAlliance">[NRW]United</strong><small id="heroKingdom">KINGDOM 1044</small></div></div>
         </section>
         <div id="flash" class="flash" role="status" hidden></div>
         <section class="tab-page" data-page="overview">
@@ -126,13 +126,26 @@
           <div class="two-col"><form class="card" id="settingsForm"><h3 data-i18n="allianceConfig">Allianzkonfiguration</h3>
               <label class="field"><span data-i18n="allianceName">Allianzname</span><input class="control" name="name" required maxlength="100"></label>
               <label class="field"><span data-i18n="capacity">Maximale Mitglieder</span><input class="control" name="capacity" type="number" min="1" max="500"></label>
-              <label class="field"><span data-i18n="logoUrl">Logo-URL (optional)</span><input class="control" name="logo_url" type="url" maxlength="400"></label>
-              <label class="field"><span data-i18n="discordGuild">Discord Server-ID</span><input class="control" name="discord_guild_id" maxlength="40"></label>
+              <div class="logo-settings">
+                <div class="logo-settings-preview"><img id="logoPreview" src="../assets/nrw-banner.svg" alt="Alliance logo"></div>
+                <div class="logo-settings-actions">
+                  <label class="field" for="allianceLogoFile"><span data-i18n="logoUpload">Allianzlogo hochladen</span><input class="control" id="allianceLogoFile" type="file" accept="image/png,image/jpeg,image/webp"></label>
+                  <p class="small-note" data-i18n="logoHint">PNG, JPG oder WebP · maximal 1 MB nach Optimierung. Die Datei wird gespeichert, nicht nur verlinkt.</p>
+                  <div class="logo-action-buttons">
+                    <button type="button" class="ghost" id="uploadAllianceLogo" data-permission="settings" data-i18n="uploadLogo">Logo hochladen</button>
+                    <button type="button" class="ghost" id="removeAllianceLogo" data-permission="settings" data-i18n="removeLogo">Logo zurücksetzen</button>
+                  </div>
+                  <p class="small-note" id="logoUploadStatus" role="status" aria-live="polite"></p>
+                </div>
+              </div>
+              <label class="field"><span data-i18n="discordInvite">Discord-Einladungslink</span><input class="control" name="discord_invite_url" type="url" placeholder="https://discord.gg/…" maxlength="230"></label>
+              <p class="small-note" data-i18n="discordHint">Der Link wird für alle Discord-Buttons auf der Willkommensseite und im Player Dashboard verwendet.</p>
               <div class="settings-languages"><h3 data-i18n="pageLanguageSettings">Seitensprachen</h3>
 <label class="field"><span data-i18n="defaultLang">Standardsprache</span><select id="defaultLanguage" class="control">
 <option value="de">Deutsch</option><option value="en">English</option><option value="fr">Français</option><option value="es">Español</option></select></label>
 <p class="muted" data-i18n="availableSiteLanguages">Verfügbare Seitensprachen</p>
-<div class="check-grid" id="activeLanguages"><label><input type="checkbox" value="de"> Deutsch</label><label><input type="checkbox" value="en"> English</label><label><input type="checkbox" value="fr"> Français</label><label><input type="checkbox" value="es"> Español</label></div></div><input type="checkbox" name="advertising_enabled" hidden disabled>
+<div class="check-grid" id="activeLanguages"><label><input type="checkbox" value="de"> Deutsch</label><label><input type="checkbox" value="en"> English</label><label><input type="checkbox" value="fr"> Français</label><label><input type="checkbox" value="es"> Español</label></div>
+<p class="small-note" data-i18n="siteLanguagesNote">Die öffentlichen Seiten haben vollständige Texte auf DE/EN/FR. ES ist bereits in der Leitung verfügbar, auf den öffentlichen Seiten nach vollständiger Übersetzung.</p></div><input type="checkbox" name="advertising_enabled" hidden disabled>
               <button class="primary" data-permission="settings" data-i18n="save">Speichern</button>
             </form><div class="card"><h3 data-i18n="permissions">Berechtigungen</h3><div class="permission-matrix" id="permissionTable"></div>
               <div id="staffControls" hidden>
@@ -281,5 +294,5 @@
  <div class="modal-actions"><button type="button" class="ghost" id="copyLeaderCredentials" data-i18n="copyCredentials">Einmalig kopieren</button><button type="button" class="primary" id="leaderCredentialsClose" data-i18n="closeCredentials">Schließen & Anzeige löschen</button></div>
 </dialog>
 <script src="../dashboard/event-rhythm.js?v=pages-step4-1"></script>
-<script type="module" src="./app.js?v=pages-step4-bearfix-2"></script>
+<script type="module" src="./app.js?v=step5-branding-1"></script>
 </body></html>
