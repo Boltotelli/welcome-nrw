@@ -1,7 +1,8 @@
 (function(){
   const body=document.body,root=document.documentElement,day=86400000;
   let eventFeed=[],eventGuideDb={events:[],catalogOnly:[],sources:{}},expandedCards=new Set(),eventGuidance=new Map(),eventCycles=[],eventPhaseTemplates=new Map();
-  const savedLang=localStorage.getItem('nrw_page_lang')||'en';
+  const preferredLang=localStorage.getItem('nrw_page_lang');
+  const savedLang=['de','en','fr'].includes(preferredLang)?preferredLang:'en';
   const savedTheme=localStorage.getItem('nrw_theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
   body.dataset.lang=savedLang;root.lang=savedLang;root.dataset.theme=savedTheme;
   const themeBtn=document.getElementById('themeBtn');
@@ -157,9 +158,27 @@
   function bindEventCards(){document.querySelectorAll('.event-card[data-event-key]').forEach(card=>card.addEventListener('toggle',()=>{const key=card.dataset.eventKey;if(card.open){document.querySelectorAll(`.event-card[name="${card.getAttribute('name')}"]`).forEach(other=>{if(other!==card)other.open=false});expandedCards.add(key)}else expandedCards.delete(key)}))}
   function kvkPrepWindow(now){let start=kvkPrepBase;while(now.getTime()>=start+kvkPrepDuration)start+=kvkCycle;return{start:new Date(start),active:now.getTime()>=start}}
   function nextBearAt(hour,minute){const now=new Date();for(let add=0;add<4;add++){const x=new Date(Date.UTC(now.getUTCFullYear(),now.getUTCMonth(),now.getUTCDate()+add,hour,minute));if(isBearDay(x)&&x>now)return x}return new Date(Date.UTC(now.getUTCFullYear(),now.getUTCMonth(),now.getUTCDate()+2,hour,minute))}
+  // NRW has two regular traps. A third slot exists only after explicit activation.
+  // Apply defaults per slot: configuring one trap must never hide the other.
   const trapConfigs=()=>eventCycles.filter(c=>/^bear-[123]$/.test(c.group_key||""));
-  const configuredTrapSlots=()=>trapConfigs().filter(c=>c.enabled!==false&&c.override_schedule===true&&
-    /^([01]\d|2[0-3]):[0-5]\d(:00)?$/.test(c.start_time_utc||"")).sort((a,b)=>a.group_key.localeCompare(b.group_key));
+  const activeBearSlots=()=>{
+    const stored=trapConfigs(),labels=window.NRW_EVENT_RHYTHM?.groupLabels||{};
+    return [1,2,3].flatMap(i=>{
+      const key="bear-"+i,setting=stored.find(c=>c.group_key===key);
+      if(setting?.enabled===false)return [];
+      const configured=setting?.enabled===true&&setting?.override_schedule===true;
+      const valid=configured&&/^([01]\\d|2[0-3]):[0-5]\\d(:00)?$/.test(String(setting.start_time_utc||""))&&
+        /^\\d{4}-\\d{2}-\\d{2}$/.test(setting.anchor_date||"")&&
+        Number.isInteger(Number(setting.interval_days))&&Number(setting.interval_days)>=1;
+      // Never display slot 3 without an explicitly enabled, valid schedule.
+      if((configured&&!valid)||(i===3&&!valid))return [];
+      const defaults=labels[key]||{de:"Bärenfalle "+i,en:"Bear Trap "+i,fr:"Piège à ours "+i};
+      return [{group_key:key,title:{...defaults,...(setting?.title||{})},
+        anchor_date:valid?setting.anchor_date:"2026-09-13",
+        interval_days:valid?Number(setting.interval_days):2,
+        start_time_utc:valid?String(setting.start_time_utc).slice(0,5):(i===1?"17:00":"18:30")}];
+    });
+  };
   function nextConfiguredBear(c,now=new Date()){
     const time=String(c.start_time_utc).slice(0,5);
     const anchor=Date.parse(c.anchor_date+"T"+time+":00Z"),every=Number(c.interval_days)*day;
@@ -171,34 +190,25 @@
   function fmtCountdown(target){let s=Math.max(0,Math.floor((target-Date.now())/1000)),days=Math.floor(s/86400);s%=86400;const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60;return(days?days+'d ':'')+[h,m,sec].map(v=>String(v).padStart(2,'0')).join(':')}
   function placeReleaseCard(today){const card=document.getElementById('gen6Card'),priority=document.getElementById('priorityGrid'),lower=document.getElementById('releaseLower'),section=document.getElementById('releaseDetails'),released=today>releaseDay;if(released&&card.parentElement!==lower)lower.appendChild(card);if(!released&&card.parentElement!==priority)priority.appendChild(card);section.hidden=!released;priority.classList.toggle('single',released)}
   function renderDynamic(){const lang=body.dataset.lang||'en',t=ui[lang],now=new Date(),todayUTC=new Date(Date.UTC(now.getUTCFullYear(),now.getUTCMonth(),now.getUTCDate())),tomorrow=new Date(todayUTC.getTime()+day),today=dateKey(todayUTC),next=dateKey(tomorrow),locale=t.locale;document.getElementById('weekday').textContent=now.toLocaleDateString(locale,{weekday:'long',timeZone:'UTC'});document.getElementById('dateLabel').textContent=now.toLocaleDateString(locale,{day:'2-digit',month:'short',timeZone:'UTC'}).toUpperCase();const kvk=kvkPrepWindow(now);document.getElementById('kvkStartLabel').textContent=kvk.start.toLocaleDateString(locale,{day:'2-digit',month:'short',year:'numeric',timeZone:'UTC'}).toUpperCase()+' · 00:00 UTC';const serverAge=Math.floor((todayUTC.getTime()-serverOpened)/day);document.querySelectorAll('[data-server-age]').forEach(el=>el.textContent=serverAge);placeReleaseCard(today);renderPriorities(today,lang,now);const todayCards=cardsFor(today,lang,t.today,'today');document.getElementById('todayEvents').innerHTML=todayCards.length?todayCards.join(''):`<div class="empty-plan">${t.noEvents}</div>`;document.getElementById('tomorrowTitle').textContent=tomorrow.toLocaleDateString(locale,{weekday:'long',day:'2-digit',month:'2-digit',timeZone:'UTC'});document.getElementById('tomorrowTasks').innerHTML=cardsFor(next,lang,t.tomorrow,'tomorrow').join('');bindEventCards();bindPriorityCards();const todayTrapEnd=new Date(todayUTC.getTime()+18.5*3600000),nextDay=nextBearAt(17,0),dateFmt=d=>d.toLocaleDateString(locale,{weekday:'long',day:'2-digit',month:'2-digit',timeZone:'UTC'}),followingBear=isBearDay(todayUTC)&&now<todayTrapEnd?new Date(todayUTC.getTime()+2*day):nextDay;
-    const saved=trapConfigs(),slots=configuredTrapSlots();
+    const slots=activeBearSlots();
     const nextSlots=slots.map(c=>({config:c,next:nextConfiguredBear(c,now)})).filter(x=>x.next).sort((a,b)=>a.next-b.next);
-    if(saved.length){
-      const upcomingToday=nextSlots.some(x=>dateKey(x.next)===today);
-      document.getElementById('bearTag').textContent=upcomingToday?t.bearTodayTag:t.bearNextTag;
-      document.getElementById('bearDateNote').textContent=nextSlots.length?
-        localized(nextSlots[0].config.title,lang)+" · "+dateFmt(nextSlots[0].next)+" · "+String(nextSlots[0].config.start_time_utc).slice(0,5)+" UTC":
-        ({de:"Aktuell keine Bärenfalle aktiviert.",en:"No Bear Trap is enabled.",fr:"Aucun piège à ours activé.",es:"No hay ninguna trampa del oso activa."}[lang]||"No Bear Trap is enabled.");
-    }else{
-      document.getElementById('bearTag').textContent=isBearDay(todayUTC)&&now<todayTrapEnd?t.bearTodayTag:t.bearNextTag;
-      document.getElementById('bearDateNote').textContent=(isBearDay(todayUTC)&&now<todayTrapEnd?t.bearToday:t.bearNext).replace('{date}',dateFmt(followingBear));
-    }
+    const upcomingToday=nextSlots.some(x=>dateKey(x.next)===today);
+    document.getElementById('bearTag').textContent=upcomingToday?t.bearTodayTag:t.bearNextTag;
+    document.getElementById('bearDateNote').textContent=nextSlots.length?
+      localized(nextSlots[0].config.title,lang)+" · "+dateFmt(nextSlots[0].next)+" · "+nextSlots[0].config.start_time_utc+" UTC":
+      ({de:"Aktuell keine Bärenfalle aktiviert.",en:"No Bear Trap is enabled.",fr:"Aucun piège à ours activé."}[lang]||"No Bear Trap is enabled.");
     document.getElementById('genTag').textContent=t.genNowTag}
-  function tick(){const now=new Date(),lang=body.dataset.lang||'en',kvk=kvkPrepWindow(now);document.getElementById('utcClock').textContent=now.toLocaleTimeString('en-GB',{hour12:false,timeZone:'UTC'});document.getElementById('kvkPrepCountdown').textContent=kvk.active?({de:'PREP LÄUFT',en:'PREP ACTIVE',fr:'PREP EN COURS'}[lang]||'PREP ACTIVE'):fmtCountdown(kvk.start);const saved=trapConfigs(),slots=configuredTrapSlots();
+  function tick(){const now=new Date(),lang=body.dataset.lang||'en',kvk=kvkPrepWindow(now);document.getElementById('utcClock').textContent=now.toLocaleTimeString('en-GB',{hour12:false,timeZone:'UTC'});document.getElementById('kvkPrepCountdown').textContent=kvk.active?({de:'PREP LÄUFT',en:'PREP ACTIVE',fr:'PREP EN COURS'}[lang]||'PREP ACTIVE'):fmtCountdown(kvk.start);const slots=activeBearSlots();
     for(let i=1;i<=3;i++){
       const row=document.getElementById('bt'+i+'Row'),label=document.getElementById('bt'+i+'Name'),counter=document.getElementById('bt'+i+'Countdown');
       if(!row||!label||!counter)continue;
-      const cycle=saved.length?slots.find(c=>c.group_key==="bear-"+i):null;
-      const legacy=!saved.length&&i<=2;
-      row.hidden=!cycle&&!legacy;
-      if(cycle){
-        label.textContent=(cycle.title?.[lang]||cycle.title?.en||"BT"+i)+" · "+String(cycle.start_time_utc).slice(0,5)+" UTC";
-        const next=nextConfiguredBear(cycle,now);counter.textContent=next?fmtCountdown(next):"—";
-      }else if(legacy){
-        label.textContent="BT"+i+" · "+(i===1?"17:00":"18:30")+" UTC";
-        counter.textContent=fmtCountdown(i===1?nextBearAt(17,0):nextBearAt(18,30));
-      }
-    }document.getElementById('gen6Countdown').textContent={de:'Freigeschaltet',en:'Unlocked',fr:'Débloqué'}[lang]||'Unlocked';document.querySelectorAll('[data-count-to]').forEach(el=>{const d=new Date(el.dataset.countTo);el.textContent=d>now?fmtCountdown(d):({de:'Jetzt verfügbar',en:'Available now',fr:'Disponible'}[lang]||'Available now')})}
+      const cycle=slots.find(c=>c.group_key==="bear-"+i);
+      row.hidden=!cycle;
+      if(!cycle){counter.textContent="";continue;}
+      label.textContent=(localized(cycle.title,lang)||"BT"+i)+" · "+cycle.start_time_utc+" UTC";
+      const next=nextConfiguredBear(cycle,now);counter.textContent=next?fmtCountdown(next):"—";
+    }
+    document.getElementById('gen6Countdown').textContent={de:'Freigeschaltet',en:'Unlocked',fr:'Débloqué'}[lang]||'Unlocked';document.querySelectorAll('[data-count-to]').forEach(el=>{const d=new Date(el.dataset.countTo);el.textContent=d>now?fmtCountdown(d):({de:'Jetzt verfügbar',en:'Available now',fr:'Disponible'}[lang]||'Available now')})}
 
   const heroDeck=document.getElementById('heroSwipe'),heroCards=[...document.querySelectorAll('.hero-flip')],heroDots=[...document.querySelectorAll('.hero-dots i')];let heroIndex=0,heroScrollTimer;
   const resetHeroFaces=()=>heroCards.forEach(card=>{card.classList.remove('is-flipped');card.setAttribute('aria-pressed','false')});
