@@ -14,7 +14,7 @@ export function createPerformance({getState,getLanguage,request,esc,openPlayer})
    kvk:"KvK Prep",am:"Allianzmobilisierung",event:"Durchlauf",recorded:"Erfasste Spieler",
    total:"Summe der erfassten Punkte",notComplete:"Nur importierte Rankings. Fehlende Spieler gelten NICHT als 0 Punkte.",
    provisional:"Nicht als abgeschlossen markiert",finalized:"Als abgeschlossen markiert",
-   historical:"Punkte aus Ranking-Importen",rankObserved:"NRW-Platz*",serverRank:"Server-Platz",name:"Name",score:"Punkte",
+   historical:"Punkte aus Ranking-Importen",top:"Top 8 erfasste Beiträge",rankObserved:"NRW-Platz*",serverRank:"Server-Platz",name:"Name",score:"Punkte",
    previous:"Δ zum vorherigen Durchlauf",unknown:"–",search:"Spieler suchen …",noRows:"Keine Ergebnisse für diese Auswahl.",
    sourceNote:"* NRW-Platz = Sortierung der erfassten NRW-Spieler, keine bestätigte vollständige Allianzplatzierung. Server-Platz stammt aus dem ursprünglichen Screenshot.",
    refreshed:"Aktualisieren",loading:"Echte Daten werden geladen …",failed:"Daten konnten nicht geladen werden.",
@@ -31,7 +31,7 @@ export function createPerformance({getState,getLanguage,request,esc,openPlayer})
    kvk:"KvK Prep",am:"Alliance Mobilization",event:"Cycle",recorded:"Observed players",
    total:"Sum of observed scores",notComplete:"Imported rankings only. Missing players are NOT scored as zero.",
    provisional:"Not marked final",finalized:"Marked final",
-   historical:"Scores from ranking imports",rankObserved:"NRW position*",serverRank:"Server rank",name:"Name",score:"Score",
+   historical:"Scores from ranking imports",top:"Top 8 observed contributions",rankObserved:"NRW position*",serverRank:"Server rank",name:"Name",score:"Score",
    previous:"Δ vs. previous cycle",unknown:"–",search:"Search players …",noRows:"No results for this selection.",
    sourceNote:"* NRW position is a sorting of observed NRW players, not a verified complete alliance ranking. Server rank comes from the original screenshot.",
    refreshed:"Refresh",loading:"Loading recorded data …",failed:"Could not load performance data.",
@@ -48,7 +48,7 @@ export function createPerformance({getState,getLanguage,request,esc,openPlayer})
    kvk:"Préparation KvK",am:"Mobilisation d'alliance",event:"Cycle",recorded:"Joueurs observés",
    total:"Somme des scores observés",notComplete:"Classements importés uniquement. Les absents ne valent PAS zéro.",
    provisional:"Non marqué final",finalized:"Marqué final",
-   historical:"Scores des classements importés",rankObserved:"Position NRW*",serverRank:"Rang serveur",name:"Nom",score:"Score",
+   historical:"Scores des classements importés",top:"8 meilleures contributions relevées",rankObserved:"Position NRW*",serverRank:"Rang serveur",name:"Nom",score:"Score",
    previous:"Δ cycle précédent",unknown:"–",search:"Rechercher un joueur …",noRows:"Aucun résultat.",
    sourceNote:"* Position NRW : tri des joueurs observés, pas un classement complet confirmé. Rang serveur : capture d'origine.",
    refreshed:"Actualiser",loading:"Chargement des valeurs réelles …",failed:"Impossible de charger les données.",
@@ -65,7 +65,7 @@ export function createPerformance({getState,getLanguage,request,esc,openPlayer})
    kvk:"Preparación KvK",am:"Movilización de alianza",event:"Ciclo",recorded:"Jugadores registrados",
    total:"Suma de puntos registrados",notComplete:"Solo clasificaciones importadas. Los ausentes NO cuentan como cero.",
    provisional:"No marcado como definitivo",finalized:"Marcado como definitivo",
-   historical:"Puntos de clasificaciones importadas",rankObserved:"Posición NRW*",serverRank:"Rango servidor",name:"Nombre",score:"Puntos",
+   historical:"Puntos de clasificaciones importadas",top:"8 contribuciones registradas principales",rankObserved:"Posición NRW*",serverRank:"Rango servidor",name:"Nombre",score:"Puntos",
    previous:"Δ ciclo anterior",unknown:"–",search:"Buscar jugadores …",noRows:"Sin resultados.",
    sourceNote:"* Posición NRW: orden de jugadores registrados, no clasificación completa verificada. Rango servidor: captura original.",
    refreshed:"Actualizar",loading:"Cargando datos reales …",failed:"No se pudieron cargar los datos.",
@@ -164,6 +164,14 @@ export function createPerformance({getState,getLanguage,request,esc,openPlayer})
    const total=all.reduce((sum,x)=>sum+Number(x.score),0),previousEvent=events.find(e=>e.period_start<current?.period_start);
    const prevMap=new Map((previousEvent?uniqueRows(previousEvent.id):[]).filter(x=>x.game_id).map(x=>[x.game_id,x]));
    const rankMap=new Map(all.map((p,i)=>[p.game_id||p.player_name,i+1]));
+   const maxScore=Number(all[0]?.score)||1;
+   const contributionChart=all.length?'<div class="perf-top-chart"><strong>'+esc(t("top"))+'</strong>'+
+     all.slice(0,8).map((p,i)=>{
+       const pct=Math.max(1,Math.min(100,Math.round(Number(p.score)*100/maxScore)));
+       return '<div class="perf-top-row"><span class="perf-top-name">'+(i+1)+'. '+esc(p.player_name||p.game_id||"–")+'</span>'+
+         '<div class="perf-top-track"><div class="perf-top-bar" style="width:'+pct+'%"></div></div>'+
+         '<b>'+esc(compact(p.score))+'</b></div>';
+     }).join("")+'</div>':"";
    const trs=filtered.map(x=>{
      const prev=prevMap.get(x.game_id),diff=prev?Number(x.score)-Number(prev.score):null;
      return '<tr><td><b>'+esc(rankMap.get(x.game_id||x.player_name))+'</b></td>'+
@@ -187,6 +195,7 @@ export function createPerformance({getState,getLanguage,request,esc,openPlayer})
        '<small>'+esc(t("notComplete"))+'</small></div>'+
        '<div class="perf-stat"><span>'+esc(t("current"))+'</span><strong class="perf-status">'+esc(current.finalized?t("finalized"):t("provisional"))+'</strong>'+
        '<small>'+esc(t("source"))+'</small></div></div>'+
+       contributionChart+
        '<div class="perf-filter"><input type="search" class="control" data-perf-search placeholder="'+esc(t("search"))+'" value="'+esc(search)+'">'+
        '<span class="counter">'+num(filtered.length)+' / '+num(all.length)+'</span></div>'+
        '<div class="table-scroll"><table class="perf-table"><thead><tr><th>'+esc(t("rankObserved"))+'</th><th>'+esc(t("name"))+'</th>'+
