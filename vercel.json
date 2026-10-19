@@ -2,8 +2,22 @@
   "cleanUrls": false,
   "trailingSlash": false,
   "rewrites": [
-    { "source": "/leitung", "destination": "/leitung/index.html" },
-    { "source": "/leitung/", "destination": "/leitung/index.html" },
+    {
+      "source": "/dashboard",
+      "destination": "/dashboard/index.html"
+    },
+    {
+      "source": "/dashboard/",
+      "destination": "/dashboard/index.html"
+    },
+    {
+      "source": "/leitung",
+      "destination": "/leitung/index.html"
+    },
+    {
+      "source": "/leitung/",
+      "destination": "/leitung/index.html"
+    },
     {
       "source": "/bear",
       "destination": "/bear/preview-v3.html"
