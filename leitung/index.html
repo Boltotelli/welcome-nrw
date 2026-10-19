@@ -134,7 +134,7 @@
           <form id="discordSettingsForm" class="card discord-bot-config">
             <div class="filters"><div><h3 data-i18n="botDestinations">Discord-Zielkanäle</h3>
               <p class="muted" data-i18n="botDestinationHint">Jede Sprache erhält ihre eigene Nachricht im zugewiesenen Textkanal. IDs kopieren: Discord Entwicklermodus → Rechtsklick → ID kopieren.</p></div>
-              <button class="primary" type="submit" data-permission="settings" data-i18n="saveChannels">Kanäle speichern</button></div>
+              <button class="primary" type="submit" data-permission="event_bot" data-i18n="saveChannels">Kanäle speichern</button></div>
             <div class="discord-bot-channel-grid">
               <label class="field"><span data-i18n="discordGuildId">Discord-Server-ID</span><input id="discordGuild" class="control" inputmode="numeric" pattern="[0-9]{17,20}" maxlength="20" placeholder="Server-ID"></label>
               <label class="field"><span>🇩🇪 Deutsch · #DE</span><input id="discordChannelDe" class="control" inputmode="numeric" pattern="[0-9]{17,20}" maxlength="20" placeholder="DE Channel ID"></label>
@@ -164,8 +164,8 @@
                   <label class="field"><span data-i18n="botEventStart">Tagesbeginn (UTC)</span><input id="discordAnchorStart" class="control" type="time" step="60"></label>
                   <label class="field"><span data-i18n="botEventEnd">Tagesende (UTC, optional)</span><input id="discordAnchorEnd" class="control" type="time" step="60"></label>
                   <div class="discord-anchor-buttons">
-                    <button id="saveDiscordAnchor" type="button" class="ghost" data-permission="events" data-i18n="saveEventTimes">Tageszeiten speichern</button>
-                    <button id="saveDiscordAllAnchors" type="button" class="ghost" data-permission="events" data-i18n="saveAllEventTimes">Zeiten für alle Tage übernehmen</button>
+                    <button id="saveDiscordAnchor" type="button" class="ghost" data-permission="event_bot" data-i18n="saveEventTimes">Tageszeiten speichern</button>
+                    <button id="saveDiscordAllAnchors" type="button" class="ghost" data-permission="event_bot" data-i18n="saveAllEventTimes">Zeiten für alle Tage übernehmen</button>
                   </div>
                 </div>
                 <p class="small-note" data-i18n="botAnchorHint">Jeder Eventtag hat eigene Zeiten und Texte. Relative Erinnerungen beziehen sich auf den ausgewählten Tag (nicht nur auf den Start von Tag 1). Zeiten UTC; keine Schätzungen.</p>
@@ -173,12 +173,12 @@
               <article class="card">
                 <div class="filters"><div><h3 data-i18n="botMessages">Geplante Nachrichten</h3>
                     <p class="muted" data-i18n="botUnlimited">Pro Event beliebig viele unabhängige Nachrichten mit eigenem Auslöser und drei Sprachfassungen.</p></div>
-                  <button class="primary" type="button" id="discordAddRule" data-permission="events" data-i18n="botAddMessage">+ Nachricht</button></div>
+                  <button class="primary" type="button" id="discordAddRule" data-permission="event_bot" data-i18n="botAddMessage">+ Nachricht</button></div>
                 <p class="small-note" id="discordMessageCount"></p>
                 <div id="discordRuleList" class="discord-bot-rule-list"></div>
                 <div class="discord-preset-actions">
-                  <button type="button" id="discordPreset" class="ghost" data-permission="events" data-i18n="botUsePresets">Vorlage für diesen Tag hinzufügen</button>
-                  <button type="button" id="discordAllDaysPreset" class="ghost" data-permission="events" data-i18n="botPresetAllDays">Tagesvorlagen für alle Eventtage anlegen</button>
+                  <button type="button" id="discordPreset" class="ghost" data-permission="event_bot" data-i18n="botUsePresets">Vorlage für diesen Tag hinzufügen</button>
+                  <button type="button" id="discordAllDaysPreset" class="ghost" data-permission="event_bot" data-i18n="botPresetAllDays">Tagesvorlagen für alle Eventtage anlegen</button>
                 </div>
                 <p id="discordRuleStatus" role="status" class="small-note" aria-live="polite"></p>
               </article>
@@ -390,5 +390,5 @@
  </form>
 </dialog>
 <script src="../dashboard/event-rhythm.js?v=pages-step4-1"></script>
-<script type="module" src="./app.js?v=step6-iteratorfix-1"></script>
+<script type="module" src="./app.js?v=eventbot-4lang-20261019"></script>
 </body></html>
