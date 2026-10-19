@@ -271,5 +271,6 @@
        eventPhaseTemplates=new Map((scheduleResult.value.phases||[]).map(row=>[row.group_key+"|"+row.day_number,row.instructions]));
      }
      renderDynamic()});
+  window.addEventListener("nrw-lang-change",()=>{renderDynamic();tick();});
   renderDynamic();tick();setInterval(tick,1000);setInterval(renderDynamic,60000);
 })();
