@@ -181,7 +181,7 @@ export function createDiscordEventPlanner({request,flash,esc,can,eventHub}){
    const fallback=score.length?(DAY_UI[l]?.scoring||DAY_UI.de.scoring)+" "+score.join(", ")+".":DAY_UI[l]?.guideLine||DAY_UI.de.guideLine;
    const notes=tip||fallback;
    const prefix={de:"📣",en:"📣",fr:"📣"}[l];
-   return [prefix+" "+name(l)+" · "+(l==="de"?"Tag":l==="fr"?"Jour":"Day")+" "+day+(phase?" – "+phase:""),notes].join("\n").slice(0,1800);
+   return [l,[prefix+" "+name(l)+" · "+(l==="de"?"Tag":l==="fr"?"Jour":"Day")+" "+day+(phase?" – "+phase:""),notes].join("\n").slice(0,1800)];
   }));
   return {id:null,event_key:e.key,
    title:tx("dayPresetTitle").replace("{n}",day),
