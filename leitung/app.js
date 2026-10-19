@@ -126,7 +126,7 @@ function grantButtons(){
  q("[data-permission]").forEach(el=>{el.disabled=!can(el.dataset.permission);el.title=el.disabled?t("permissionDenied"):"";});
  for(const el of q(".nav-item[data-tab]")){
   const required=el.dataset.tab==="roster"?"members":["transfers","laws","events","settings"].includes(el.dataset.tab)?el.dataset.tab:null;
-  el.hidden=el.dataset.tab==="discord"?(!can("events")&&!can("settings")):Boolean(required&&!can(required));
+  el.hidden=el.dataset.tab==="discord"?!can("event_bot"):Boolean(required&&!can(required));
  }
 }
 let powerSyncStarted=false;
@@ -284,7 +284,7 @@ function renderSettings(){
  form.elements.advertising_enabled.checked=Boolean(config.advertising_enabled);
  q("#activeLanguages input").forEach(x=>x.checked=(config.languages||[]).includes(x.value));
  $("defaultLanguage").value=config.default_language;
- const options=[["members",t("roster")],["transfers",t("transfers")],["laws",t("laws")],["events",t("events")],["settings",t("settings")]];
+ const options=[["members",t("roster")],["transfers",t("transfers")],["laws",t("laws")],["events",t("events")],["event_bot",t("discordBot")],["settings",t("settings")]];
  const grants=(state.staffMembers||[]).filter(x=>/^leader-[0-9]+@accounts\.allianceos\.invalid$/i.test(x.email||""));
  $("permissionTable").innerHTML='<div><strong>'+esc(t("permissions"))+'</strong><b>R4/R5</b></div>'+
    options.map(([feature,label])=>'<div><span>'+esc(label)+'</span><b>'+
@@ -507,7 +507,7 @@ $("staffList").addEventListener("click",e=>{
  if(!member||!/^leader-/.test(member.email||""))return;
  const form=$("r4Form");
  form.elements.email.value=member.email;
- for(const feature of ["members","transfers","laws","events","settings"])form.elements[feature].checked=member.permissions?.[feature]===true;
+ for(const feature of ["members","transfers","laws","events","event_bot","settings"])form.elements[feature].checked=member.permissions?.[feature]===true;
  form.elements.enabled.checked=member.enabled;
  form.scrollIntoView({behavior:"smooth",block:"center"});
 });
@@ -516,7 +516,7 @@ $("r4Form").addEventListener("submit",async e=>{
  if(!state?.staff?.is_owner)return;
  const form=e.currentTarget,fd=new FormData(form);
  const email=String(fd.get("email")||"").trim(),permissions={};
- for(const feature of ["members","transfers","laws","events","settings"])permissions[feature]=fd.has(feature);
+ for(const feature of ["members","transfers","laws","events","event_bot","settings"])permissions[feature]=fd.has(feature);
  const button=form.querySelector("button[type=submit]");button.disabled=true;
  try{
   await request("bootstrap",{action:"staff",email,permissions,enabled:fd.has("enabled")});
