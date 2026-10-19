@@ -1,5 +1,5 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.58.0/+esm";
-import {createEventHub} from "./event-library.js?v=pages-step4-2";
+import {createEventHub} from "./event-library.js?v=pages-step4-bearfix-2";
 import {createOperations} from "./operations.js?v=pages-4";
 
 // Private AllianceOS pilot. Data is NEVER stored in localStorage; only auth session is.
