@@ -764,9 +764,16 @@ async function save(req: Request, alliance: string, userId: string, staff: any, 
         spoken_languages:spoken,joined_on:validateDate(data.joined_on),
         responsibilities:str(data.responsibilities,500)};
     }
-    result=await checked<any>(existing
-      ? db.from(entry.table).update(patch).eq("id",id).eq("alliance_code",alliance).select("*").single()
-      : db.from(entry.table).insert(patch).select("*").single());
+    if(entity==="law" && existing){
+      // Atomic optimistic locking on the UPDATE itself (not just a stale pre-read).
+      result=await checked<any>(db.from(entry.table).update(patch).eq("id",id)
+        .eq("alliance_code",alliance).eq("version",existing.version).select("*").maybeSingle());
+      if(!result)throw new HttpError("version_conflict",409);
+    }else{
+      result=await checked<any>(existing
+        ? db.from(entry.table).update(patch).eq("id",id).eq("alliance_code",alliance).select("*").single()
+        : db.from(entry.table).insert(patch).select("*").single());
+    }
     if(entity==="law"){
       await checked<any>(db.from("aos_law_versions").insert({
         law_id:result.id, alliance_code:alliance,version:result.version,
