@@ -222,6 +222,57 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
      String(p.game_id||"").includes(query));
   });
  }
+
+ function settingsPanel(){
+   const limit=threshold();
+   return '<div class="bear-settings-compact"><label>'+esc(t("threshold"))+
+      ' <input class="control" type="number" min="1" max="9999999999999" step="1" data-bear-threshold value="'+esc(limit===null?"":limit)+'" placeholder="'+esc(t("thresholdUnset"))+'"></label>'+
+      '<button type="button" class="ghost" data-bear-threshold-save '+(settingsBusy?"disabled":"")+'>'+esc(t("saveThreshold"))+'</button></div>';
+ }
+ function quickPanel(){
+   return '<section class="card bear-fast-assign"><h3>⚡ '+esc(t("quick"))+'</h3><div class="bear-fast-form">'+
+     '<label>'+esc(t("player"))+'<select class="control" data-bear-quick-player><option value="">—</option>'+
+       active().map(p=>'<option value="'+esc(p.game_id)+'">'+esc(p.name)+' · '+esc(p.game_id)+'</option>').join("")+'</select></label>'+
+     '<label>'+esc(t("time"))+select([["",t("empty")],...(cache.slots||[]).map(sl=>[sl.slot_key,slotLabel(sl)])],"",'data-bear-quick-slot')+'</label>'+
+     '<label>'+esc(t("attendance"))+select([["confirmed",t("confirmed")],["tentative",t("tentative")],["no",t("no")]],"confirmed",'data-bear-quick-attendance')+'</label>'+
+     '<label class="bear-switch-label">'+esc(t("role"))+' <span class="bear-switch"><span>'+esc(t("starter"))+'</span><input type="checkbox" role="switch" data-bear-quick-role><span>'+esc(t("joiner"))+'</span></span></label>'+
+     '<button type="button" class="primary" data-bear-quick-save>'+esc(t("save"))+'</button></div></section>';
+ }
+ async function saveThreshold(){
+   if(settingsBusy)return;
+   const raw=root.querySelector("[data-bear-threshold]")?.value||"";
+   const n=raw===""?null:Number(raw);
+   if(n!==null&&(!Number.isSafeInteger(n)||n<=0||n>9999999999999)){flash(t("threshold"),true);return;}
+   settingsBusy=true;
+   try{
+     const result=await request("bootstrap",{action:"bear_settings_save",strong_power_threshold:n});
+     if(!result?.ok)throw Error("save_failed");
+     cache.settings=result.settings;flash(t("saved"));render();
+   }catch(e){flash(t("error")+" ("+String(e?.message||e)+")",true);}
+   finally{settingsBusy=false;}
+ }
+ async function quickSave(){
+   const id=root.querySelector("[data-bear-quick-player]")?.value||"";
+   if(!id){flash(t("player"),true);return;}
+   if(pending.has(id))return;
+   const slotKey=root.querySelector("[data-bear-quick-slot]")?.value||"";
+   const attendance=root.querySelector("[data-bear-quick-attendance]")?.value||"confirmed";
+   const role=root.querySelector("[data-bear-quick-role]")?.checked?"joiner":"starter";
+   if(attendance!=="no"&&!slotKey){flash(t("required"),true);return;}
+   pending.add(id);
+   const old=assignment(id),ticket=generation;
+   try{
+     const result=await request("bootstrap",{action:"bear_assignment",game_id:id,
+       slot_key:attendance==="no"?"":slotKey,attendance,role,notes:old?.notes||""});
+     if(ticket!==generation)return;
+     if(!result?.ok)throw Error("save_failed");
+     cache.assignments=cache.assignments.filter(x=>String(x.game_id)!==String(id));
+     if(!result.removed)cache.assignments.push(result.assignment);
+     flash(t("saved"));render();
+   }catch(e){if(ticket===generation)flash(t("error")+" ("+String(e?.message||e)+")",true);}
+   finally{pending.delete(id);}
+ }
+
  function render(){
   if(!root||!enabled)return;
   const sub=document.getElementById("bearManagementSubtitle");if(sub)sub.textContent=t("intro");
@@ -233,7 +284,7 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
   root.innerHTML='<section class="bear-intro"><p>'+esc(t("source"))+'</p><p>'+esc(t("management"))+'</p></section>'+
    '<section class="bear-slot-summary"><div class="bear-section-heading"><h3>'+esc(t("summary"))+'</h3>'+
    '<button type="button" class="ghost" data-bear-refresh>'+esc(t("refresh"))+' ↻</button></div>'+
-   '<div class="bear-count-grid">'+counters()+'</div></section>'+
+   settingsPanel()+'<div class="bear-count-grid">'+counters()+'</div></section>'+quickPanel()+
    '<section class="card bear-roster-card"><div class="bear-section-heading"><h3>'+esc(t("assignment"))+'</h3>'+
    '<button type="button" class="ghost" data-bear-copy>'+esc(t("export"))+' ↗</button></div>'+
    '<p class="small-note">'+esc(t("noteSource"))+' '+esc(t("activeOnly"))+'</p>'+
@@ -268,14 +319,14 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
   if(pending.has(id))return;
   const item=root.querySelector('[data-bear-row="'+id+'"]');if(!item)return;
   const slotKey=item.querySelector("[data-bear-slot]")?.value||"";
-  const role=item.querySelector("[data-bear-role]")?.value||"flex";
+  const role=item.querySelector("[data-bear-role]")?.checked?"joiner":"starter";
   const attendance=item.querySelector("[data-bear-attendance]")?.value||"tentative";
   const notes=item.querySelector("[data-bear-note]")?.value||"";
   if(slotKey&&!slot(slotKey)){flash(t("required"),true);return;}
   const ticket=generation;pending.add(id);
   const button=item.querySelector("[data-bear-save]");if(button){button.disabled=true;button.textContent=t("saving");}
   try{
-   const result=await request("bootstrap",{action:"bear_assignment",game_id:id,slot_key:slotKey,role,attendance,notes});
+   const result=await request("bootstrap",{action:"bear_assignment",game_id:id,slot_key:attendance==="no"?"":slotKey,role,attendance,notes});
    if(ticket!==generation)return;
    if(!result.ok)throw Error("save_failed");
    if(result.removed)cache.assignments=cache.assignments.filter(a=>String(a.game_id)!==id);
@@ -298,6 +349,8 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
  if(root){
   root.addEventListener("click",async e=>{
    const target=e.target;
+   if(target.closest("[data-bear-threshold-save]")){await saveThreshold();return;}
+   if(target.closest("[data-bear-quick-save]")){await quickSave();return;}
    const refresh=target.closest("[data-bear-refresh]");
    if(refresh){open(true);return;}
    const copy=target.closest("[data-bear-copy]");
