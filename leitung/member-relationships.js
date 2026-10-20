@@ -126,6 +126,34 @@ export function createMemberRelationships({getState,getLanguage,request,esc,flas
       if(target)target.textContent=t("historyError");
     });
   }
+  // External references are separate actions; never create player records.
+  const dialog=document.getElementById("editDialog");
+  if(dialog){
+    dialog.addEventListener("click",async event=>{
+      const add=event.target.closest("[data-add-external-alt]");
+      const remove=event.target.closest("[data-remove-external-alt]");
+      if(!add&&!remove||!dialog.open)return;
+      event.preventDefault();
+      const main=dialog.dataset.memberGameId;
+      const current=player(main);
+      if(!current||current.main_game_id){flash(t("externalNoMain"),true);return;}
+      const alt=remove?.dataset.removeExternalAlt||
+        String(dialog.querySelector('[name="external_alt_id"]')?.value||"").trim();
+      if(!/^[0-9]{5,20}$/.test(alt)){flash(t("externalError")+" (ID)",true);return;}
+      if(remove&&!window.confirm(t("externalConfirm")))return;
+      const btn=add||remove;
+      btn.disabled=true;
+      try{
+        await request("bootstrap",{action:"external_alt_save",command:remove?"remove":"save",
+          main_game_id:main,alt_game_id:alt,
+          display_name:remove?"":String(dialog.querySelector('[name="external_alt_name"]')?.value||"").trim(),
+          reported_alliance:remove?"":String(dialog.querySelector('[name="external_alt_alliance"]')?.value||"").trim()});
+        flash(t(remove?"externalDeleted":"externalSaved"));
+        if(reloadDossier)await reloadDossier(main);
+      }catch(e){flash(t("externalError")+" ("+String(e?.message||e)+")",true);}
+      finally{btn.disabled=false;}
+    });
+  }
   function appendSaveData(data,formData){
     if(!enabled)return;
     data.main_game_id=formData.get("account_kind")==="alt"?String(formData.get("main_game_id")||""):"";
