@@ -4,7 +4,7 @@
 export function createPerformance({getState,getLanguage,request,esc,openPlayer}){
  const canDossier=()=>getState()?.staff?.is_owner===true||getState()?.staff?.permissions?.members===true;
  const root=document.getElementById("performanceRoot");
- const enabled=location.hostname==="boltotelli.github.io"||["localhost","127.0.0.1"].includes(location.hostname);
+ const enabled=true; // Released for both GitHub Pages and Vercel; access is enforced by server-side module permissions.
  const dict={
  de:{title:"Performance",subtitle:"Kraftentwicklung, KvK Prep und Allianzmobilisierung – ausschließlich dokumentierte Werte.",
    power:"Kraftentwicklung",events:"Event-Rankings",powerType:"Ansicht",allPlayers:"Erfasste Allianz-Accounts",player:"Spieler",
