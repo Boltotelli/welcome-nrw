@@ -503,6 +503,44 @@ async function deleteDiscordRule(req:Request,alliance:string,userId:string,staff
 }
 
 // Event loans are separate from permanent transfer requests and NAP history.
+// External second accounts are MANUAL associations only: no login, roster,
+// NAP transfer, permissions, or inferred in-game membership.
+async function saveExternalAlt(req:Request,alliance:string,userId:string,staff:any,body:any){
+ if(!permission(staff,"members"))throw new HttpError("permission_denied",403);
+ const mainId=str(body?.main_game_id,20),altId=str(body?.alt_game_id,20);
+ if(!isId(mainId)||!isId(altId)||mainId===altId)throw new HttpError("invalid_account_link",400);
+ const main=await checked<any>(db.from("players").select("id").eq("alliance_code",alliance)
+   .eq("game_id",mainId).eq("active",true).maybeSingle());
+ if(!main)throw new HttpError("main_not_in_alliance",403);
+ const alreadyAlt=await checked<any>(db.from("aos_member_account_links").select("main_game_id")
+   .eq("alliance_code",alliance).eq("alt_game_id",mainId).maybeSingle());
+ if(alreadyAlt)throw new HttpError("main_is_already_alt",409);
+ const existing=await checked<any>(db.from("aos_member_account_links").select("main_game_id")
+   .eq("alliance_code",alliance).eq("alt_game_id",altId).maybeSingle());
+ if(existing&&existing.main_game_id!==mainId)throw new HttpError("alt_linked_to_another_main",409);
+ const domestic=await checked<any[]>(db.from("players").select("game_id").eq("alliance_code",alliance)
+   .eq("game_id",altId).limit(1));
+ if(domestic.length)throw new HttpError("alt_already_in_nrw_use_roster_link",409);
+ if(body?.command==="remove"){
+   if(!existing)throw new HttpError("alt_link_not_found",404);
+   await checked<any>(db.from("aos_member_account_links").delete().eq("alliance_code",alliance)
+     .eq("alt_game_id",altId).eq("main_game_id",mainId).select("alt_game_id").single());
+   await audit(alliance,userId,"external_alt",altId,"unlink");
+   return json(req,{ok:true,removed:true});
+ }
+ if(body?.command!=="save")throw new HttpError("invalid_command",400);
+ const name=str(body?.display_name||"",80).trim(),location=str(body?.reported_alliance||"",24).trim();
+ const dependents=await checked<any[]>(db.from("aos_member_account_links").select("alt_game_id")
+   .eq("alliance_code",alliance).eq("main_game_id",altId).limit(1));
+ if(dependents.length)throw new HttpError("alt_is_already_a_main",409);
+ const item=await checked<any>(db.from("aos_member_account_links").upsert({
+   alliance_code:alliance,alt_game_id:altId,main_game_id:mainId,
+   display_name:name||null,reported_alliance:location||null,
+   updated_at:new Date().toISOString(),updated_by:userId
+ },{onConflict:"alliance_code,alt_game_id"}).select("alt_game_id,main_game_id,display_name,reported_alliance").single());
+ await audit(alliance,userId,"external_alt",altId,existing?"update":"link");
+ return json(req,{ok:true,item});
+}
 async function eventLoanSave(req:Request,alliance:string,userId:string,staff:any,body:any){
  if(!staff.is_owner)throw new HttpError("permission_denied",403);
  const command=str(body?.command||"approve",15),now=new Date().toISOString();
@@ -1513,6 +1551,7 @@ Deno.serve(async(req: Request)=>{
     if(body?.action==="staff")return await saveStaff(req,alliance,userId,staff,body);
     if(body?.action==="event_loan_data")return await eventLoanData(req,alliance,staff);
     if(body?.action==="event_loan_save")return await eventLoanSave(req,alliance,userId,staff,body);
+    if(body?.action==="external_alt_save")return await saveExternalAlt(req,alliance,userId,staff,body);
     if(body?.action==="provision_leaders")return await provisionLeaders(req,alliance,userId,staff);
     if(body?.action==="reset_leader_password")return await rotateLeaderPassword(req,alliance,userId,staff,body);
     if(body?.action==="player_lookup")return await lookupTransferPlayer(req,alliance,staff,body);
