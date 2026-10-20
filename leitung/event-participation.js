@@ -13,7 +13,7 @@ export function createEventParticipation({getState,getLanguage,request,esc,flash
   fromCalendar:"Rhythmus aus Eventplanung",selectedDay:"Gewählter Tag",response:"Rückmeldung",attendance:"Anwesenheit",
   open:"Offen",yes:"Zusage",maybe:"Vielleicht",no:"Absage",unknown:"Offen",present:"Anwesend",absent:"Fehlend",excused:"Entschuldigt",
   rsvpUnknown:"Keine Angabe",actualUnknown:"Noch nicht erfasst",after:"Anwesenheit erst ab Eventdatum eintragen",
-  total:"Aktive Spieler",withReply:"Mit Rückmeldung",withoutReply:"Offen",yesCount:"Zusagen",maybeCount:"Vielleicht",noCount:"Absagen",
+  total:"Aktive Spieler",withReply:"Mit Rückmeldung",withoutReply:"Offen",yesCount:"Zusagen",maybeCount:"Vielleicht",noCount:"Absagen",excusedCount:"Entschuldigt erfasst",
   actualCount:"Anwesend erfasst",absentCount:"Fehlend erfasst",notes:"Notiz der Leitung",noteHint:"Optional, intern",
   filter:"Filter",all:"Alle",pending:"Ohne Rückmeldung",replies:"Mit Rückmeldung",noted:"Mit Notiz",
   search:"Spieler oder Kingshot-ID suchen …",power:"Kraft",missingPower:"Kraft unbekannt",
@@ -37,7 +37,7 @@ export function createEventParticipation({getState,getLanguage,request,esc,flash
   fromCalendar:"Schedule from event planning",selectedDay:"Selected date",response:"Reply",attendance:"Attendance",
   open:"Pending",yes:"Yes",maybe:"Maybe",no:"No",unknown:"Pending",present:"Attended",absent:"Absent",excused:"Excused",
   rsvpUnknown:"Not provided",actualUnknown:"Not recorded",after:"Only record attendance from the event date onwards",
-  total:"Active players",withReply:"Reply recorded",withoutReply:"Pending",yesCount:"Yes",maybeCount:"Maybe",noCount:"No",
+  total:"Active players",withReply:"Reply recorded",withoutReply:"Pending",yesCount:"Yes",maybeCount:"Maybe",noCount:"No",excusedCount:"Excused recorded",
   actualCount:"Attended recorded",absentCount:"Absent recorded",notes:"Leadership note",noteHint:"Optional, internal",
   filter:"Filter",all:"All",pending:"No reply",replies:"Has reply",noted:"Has note",
   search:"Search player or Kingshot ID …",power:"Power",missingPower:"Power unavailable",
@@ -61,7 +61,7 @@ export function createEventParticipation({getState,getLanguage,request,esc,flash
   fromCalendar:"Rythme du calendrier",selectedDay:"Date choisie",response:"Réponse",attendance:"Présence",
   open:"En attente",yes:"Oui",maybe:"Peut-être",no:"Non",unknown:"En attente",present:"Présent",absent:"Absent",excused:"Excusé",
   rsvpUnknown:"Non renseigné",actualUnknown:"Non enregistré",after:"Enregistrer la présence à partir de la date de l'événement",
-  total:"Joueurs actifs",withReply:"Réponses enregistrées",withoutReply:"En attente",yesCount:"Oui",maybeCount:"Peut-être",noCount:"Non",
+  total:"Joueurs actifs",withReply:"Réponses enregistrées",withoutReply:"En attente",yesCount:"Oui",maybeCount:"Peut-être",noCount:"Non",excusedCount:"Excusés",
   actualCount:"Présences",absentCount:"Absences",notes:"Note de direction",noteHint:"Facultatif, interne",
   filter:"Filtre",all:"Tous",pending:"Sans réponse",replies:"Avec réponse",noted:"Avec note",
   search:"Rechercher joueur ou ID Kingshot …",power:"Puissance",missingPower:"Puissance indisponible",
@@ -85,7 +85,7 @@ export function createEventParticipation({getState,getLanguage,request,esc,flash
   fromCalendar:"Programación del calendario",selectedDay:"Fecha seleccionada",response:"Respuesta",attendance:"Asistencia",
   open:"Pendiente",yes:"Sí",maybe:"Quizá",no:"No",unknown:"Pendiente",present:"Asistió",absent:"Ausente",excused:"Justificado",
   rsvpUnknown:"Sin respuesta",actualUnknown:"No registrada",after:"Registrar asistencia solo a partir del día del evento",
-  total:"Jugadores activos",withReply:"Respuestas registradas",withoutReply:"Pendiente",yesCount:"Sí",maybeCount:"Quizá",noCount:"No",
+  total:"Jugadores activos",withReply:"Respuestas registradas",withoutReply:"Pendiente",yesCount:"Sí",maybeCount:"Quizá",noCount:"No",excusedCount:"Justificados",
   actualCount:"Asistencias",absentCount:"Ausencias",notes:"Nota de dirección",noteHint:"Opcional, interna",
   filter:"Filtro",all:"Todos",pending:"Sin respuesta",replies:"Con respuesta",noted:"Con nota",
   search:"Buscar jugador o ID Kingshot …",power:"Poder",missingPower:"Poder desconocido",
@@ -154,7 +154,7 @@ export function createEventParticipation({getState,getLanguage,request,esc,flash
   const count=k=>r.filter(x=>x.response===k).length;
   const attended=k=>r.filter(x=>x.attendance===k).length;
   const summaryItems=[["total",people.length],["yesCount",count("yes")],["maybeCount",count("maybe")],
-    ["noCount",count("no")],["withoutReply",count("unknown")],["actualCount",attended("present")],["absentCount",attended("absent")]];
+    ["noCount",count("no")],["withoutReply",count("unknown")],["actualCount",attended("present")],["absentCount",attended("absent")],["excusedCount",attended("excused")]];
   return '<section class="participation-summary"><div class="participation-heading"><h3>'+esc(t("summary"))+'</h3>'+
    '<button class="ghost" type="button" data-part-copy>'+esc(t("copy"))+' ↗</button></div>'+
    '<div class="participation-summary-grid">'+summaryItems.map(([label,value])=>
@@ -197,7 +197,9 @@ export function createEventParticipation({getState,getLanguage,request,esc,flash
    return (!search||String(p.name||"").toLocaleLowerCase().includes(search.toLocaleLowerCase())||
     String(p.game_id).includes(search))&&
     (filter==="all"||filter==="pending"&&(!r||r.response==="unknown")||
-     filter==="replies"&&r&&r.response!=="unknown"||filter==="noted"&&r?.notes);
+     filter==="replies"&&r&&r.response!=="unknown"||
+     ["yes","maybe","no"].includes(filter)&&(r?.response||"unknown")===filter||
+     filter==="noted"&&r?.notes);
   });
  }
  function rosterUI(){
@@ -205,7 +207,8 @@ export function createEventParticipation({getState,getLanguage,request,esc,flash
   return '<section class="card participation-players"><div class="participation-heading"><h3>'+esc(t("player"))+'</h3>'+
    '<span class="counter">'+people.length+' / '+activePlayers().length+'</span></div>'+
    '<div class="participation-filters"><input class="control" type="search" data-part-search value="'+esc(search)+'" placeholder="'+esc(t("search"))+'">'+
-     select([["all",t("all")],["pending",t("pending")],["replies",t("replies")],["noted",t("noted")]],filter,'data-part-filter')+'</div>'+
+     select([["all",t("all")],["pending",t("pending")],["yes",t("yes")],["maybe",t("maybe")],
+       ["no",t("no")],["replies",t("replies")],["noted",t("noted")]],filter,'data-part-filter')+'</div>'+
     '<p class="small-note">'+esc(t("notVerified"))+' '+esc(t("resetTip"))+' '+esc(t("family"))+'</p>'+
     '<div class="participation-member-list">'+(people.length?people.map(memberRow).join(""):
      '<p class="perf-empty">'+esc(t("emptyResult"))+'</p>')+'</div></section>';
