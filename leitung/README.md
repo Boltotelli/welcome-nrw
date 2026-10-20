@@ -189,3 +189,16 @@ The kingdom-scoped Law editor now supports real creation, editing, drafts, publi
 - The Dashboard consumes the same public cycles: localized event names appear without a second schedule; each enabled Bear Trap gets its own countdown. If leadership has not created any new trap slot, the existing two NRW legacy trap times stay visible. A disabled slot is hidden.
 - Discord bear-minister scheduling remains **untouched**; this work configures the NRW Player Dashboard and event guidance, not the separate Discord bot or local Messaging Queue.
 - Static runtime source tests cover all three simultaneous slots, repeating/off days, a disabled slot, name-only edits, and unchanged baseline events. Authenticated R4/R5 browser save-and-reload still requires a logged-in smoke test.
+
+## 2026-10-20 · FightClub battlefield maps (Swordland & TriAlliance)
+
+The existing FightClub module now contains **an interactive tactical objective map** per event + UTC date + legion, after the roster summary and before the player list.
+
+- **Swordland:** diagram derived from the supplied screenshot of the in-game layout (11 persistent points: Swordshrine, two Sanctums, four Abbeys, Bell Tower, Mercenary, Reformation, Stables) plus four optional Undercellar planning sectors. Undercellars are not guaranteed spawn coordinates.
+- **TriAlliance:** the user-supplied Daryl map is used as a reference; the map is displayed from the original public artist page at kingshotguides.com and a full interactive overlay provides A1–A31, B1–B31, C1–C31 and the central Temple of Tides (94 positions). The map remains operable even if the external background fails to load. The A/B/C starting side is never inferred from the participant's legion.
+- Click or select a location, select an eligible account from the selected Legion 1 or 2 and save. Many accounts can share a location, but one account can be assigned to only one location on that event date. Save again to move; remove to clear. A copyable text plan includes all populated locations and still-unassigned legion players. Mobile layouts scroll the detailed map horizontally and provide an objective dropdown.
+- All records are scoped to `alliance_code,event_type,battle_date,game_id` in `aos_fightclub_map_assignments`. They are private, RLS-enabled, service-role only and require an existing FightClub assignment (FK cascade on roster removal).
+- The authenticated `allianceos-leitung` API (`fightclub_data`, `fightclub_map_save`) checks the already-existing R4/R5 `fightclub` permission. On save, the server checks exact UTC date, event type, objective whitelist, active alliance roster and a currently available player in Legion 1/2. If their legion is changed in the existing planner, their previous tactical assignment is cleared.
+- The existing Discord Event Bot, matchmaking, Kingshot, NAP and player source tables are not modified; this is purely leadership planning.
+- Migration `supabase/migrations/20261020215000_aos_fightclub_objective_map_planning.sql` applied. Edge Function deployed as ACTIVE v54. Transaction-level insert/reassign/cascade checks passed and rolled back, leaving no test assignments. Browser-authenticated R4/R5 save + reload remains untested.
+- Frontend `fightclub-map.js`, `fightclub.js` and `styles.css` updated; `app.js` and `index.html` cache keys bumped.
