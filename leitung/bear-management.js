@@ -172,36 +172,45 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
  }
  function counters(){
   const activeIds=new Set(active().map(p=>String(p.game_id)));
-  const assigned=(cache?.assignments||[]).filter(x=>activeIds.has(String(x.game_id)));
-  return (cache?.slots||[]).map(s=>{
-   const rows=assigned.filter(x=>x.slot_key===s.slot_key);
-   return '<article class="bear-count-card"><div class="bear-count-top"><strong>'+esc(slotLabel(s))+'</strong>'+
-    '<span>'+rows.length+' '+esc(t("count"))+'</span></div><div class="bear-count-pills">'+
-    '<span>'+esc(t("confirmed"))+': <b>'+rows.filter(x=>x.attendance==="confirmed").length+'</b></span>'+
-    '<span>'+esc(t("tentative"))+': <b>'+rows.filter(x=>x.attendance==="tentative").length+'</b></span>'+
-    '<span>'+esc(t("starter"))+': <b>'+rows.filter(x=>x.role==="starter").length+'</b></span>'+
-    '<span>'+esc(t("joiner"))+': <b>'+rows.filter(x=>x.role==="joiner").length+'</b></span>'+
-    '</div></article>';
+  const assigned=(cache?.assignments||[]).filter(x=>activeIds.has(String(x.game_id))&&x.attendance!=="no");
+  return (cache?.slots||[]).map(slot=>{
+   const rows=assigned.filter(x=>x.slot_key===slot.slot_key);
+   const starter=rows.filter(x=>x.role!=="joiner"),joiner=rows.filter(x=>x.role==="joiner");
+   const powersInfo=powerSummary(rows),average=averageFormation(starter);
+   return '<article class="bear-count-card"><div class="bear-count-top"><strong>'+esc(slotLabel(slot))+'</strong>'+
+     '<span>'+rows.length+' '+esc(t("count"))+'</span></div><div class="bear-count-pills">'+
+     '<span>'+esc(t("confirmed"))+': <b>'+rows.filter(x=>x.attendance==="confirmed").length+'</b></span>'+
+     '<span>'+esc(t("tentative"))+': <b>'+rows.filter(x=>x.attendance==="tentative").length+'</b></span>'+
+     '<span>'+esc(t("starter"))+': <b>'+starter.length+'</b></span>'+
+     '<span>'+esc(t("joiner"))+': <b>'+joiner.length+'</b></span></div>'+
+     '<div class="bear-slot-analytics"><strong>'+esc(t("meanStarter"))+': '+esc(average.text)+'</strong>'+
+       '<small>'+average.count+' '+esc(t("countModels"))+' · '+esc(t("meanPower"))+': '+esc(powersInfo.average===null?"—":fmt(powersInfo.average))+' ('+powersInfo.verified+'/'+rows.length+')</small>'+
+       '<small>'+esc(t("strong"))+': '+(threshold()===null?esc(t("thresholdUnset")):powersInfo.strong+'/'+rows.length+' ≥ '+esc(fmt(threshold())))+'</small></div></article>';
   }).join("");
  }
  function row(p){
-  const a=assignment(p.game_id)||{},prof=profile(p.game_id);
+  const a=assignment(p.game_id)||{},prof=profile(p.game_id),pow=powers().get(String(p.game_id));
   const parent=p.main_game_id?(byId().get(String(p.main_game_id))?.name||p.main_game_id):null;
-  return '<article class="bear-member-row" data-bear-row="'+esc(p.game_id)+'">'+
+  const no=a.attendance==="no";
+  const readyFormation=formation(prof);
+  return '<article class="bear-member-row bear-member-compact" data-bear-row="'+esc(p.game_id)+'">'+
    '<div class="bear-member-head"><button type="button" class="bear-member-name" data-bear-open="'+esc(p.game_id)+'" '+(!canDossier()?'disabled':'')+'>'+esc(p.name||p.game_id)+'</button>'+
    '<small>'+esc(p.game_id)+(parent?' · '+esc(t("altInfo"))+' → '+esc(parent):'')+'</small>'+
-   '<span class="bear-opt-flag '+(prof?'ready':'')+'">'+esc(t(prof?"withProfile":"withoutProfile"))+'</span></div>'+
-   '<div class="bear-fields"><label><span>'+esc(t("time"))+'</span>'+
-    select([["",t("empty")],...(cache.slots||[]).map(s=>[s.slot_key,slotLabel(s)])],a.slot_key||"",'data-bear-slot')+'</label>'+
-    '<label><span>'+esc(t("role"))+'</span>'+
-    select([["flex",t("flex")],["starter",t("starter")],["joiner",t("joiner")]],a.role||"flex",'data-bear-role')+'</label>'+
-    '<label><span>'+esc(t("attendance"))+'</span>'+
-    select([["tentative",t("tentative")],["confirmed",t("confirmed")]],a.attendance||"tentative",'data-bear-attendance')+'</label></div>'+
-    '<div class="bear-note-row"><label><span>'+esc(t("note"))+'</span>'+
-    '<input type="text" maxlength="500" class="control" data-bear-note placeholder="'+esc(t("notePlaceholder"))+'" value="'+esc(a.notes||"")+'"></label>'+
-    '<button type="button" class="primary" data-bear-save="'+esc(p.game_id)+'">'+esc(t("save"))+'</button></div>'+
-    (prof?'<details class="bear-details"><summary>'+esc(t("data"))+' · '+esc((prof.heroes||[]).map(h=>h.name).join(" / ")||"—")+'</summary>'+dataProfile(prof)+'</details>':"")+
-    '</article>';
+   '<span class="bear-opt-flag '+(strong(p)?'ready':'')+'">'+esc(pow?fmt(pow.power):"—")+
+     (threshold()===null?'':' · '+esc(t(strong(p)?"strong":"weak")))+'</span>'+
+   (readyFormation?'<span class="bear-formation-badge" title="'+esc(t("validStarter"))+'">🐻 '+esc(formationText(readyFormation))+'</span>':"")+
+   '</div><div class="bear-fields">'+
+   '<label><span>'+esc(t("time"))+'</span>'+
+      select([["",t("empty")],...(cache.slots||[]).map(slot=>[slot.slot_key,slotLabel(slot)])],a.slot_key||"",'data-bear-slot')+'</label>'+
+   '<label><span>'+esc(t("attendance"))+'</span>'+
+      select([["tentative",t("tentative")],["confirmed",t("confirmed")],["no",t("no")]],a.attendance||"tentative",'data-bear-attendance')+'</label>'+
+   '<label class="bear-switch-label"><span>'+esc(t("role"))+'</span>'+
+      '<span class="bear-switch"><span>'+esc(t("starter"))+'</span><input type="checkbox" role="switch" data-bear-role '+(a.role==="joiner"?'checked':'')+'><span>'+esc(t("joiner"))+'</span></span></label>'+
+   '<button class="primary" type="button" data-bear-save="'+esc(p.game_id)+'">'+esc(t("save"))+'</button></div>'+
+   '<details class="bear-row-more"><summary>'+esc(t("showAll"))+' · '+esc(t("note"))+(prof?' · '+esc(t("withProfile")):'')+'</summary>'+
+      '<label>'+esc(t("note"))+' <input type="text" maxlength="500" class="control" data-bear-note placeholder="'+esc(t("notePlaceholder"))+'" value="'+esc(a.notes||"")+'"></label>'+
+      (prof?dataProfile(prof):'<p class="small-note">'+esc(t("noData"))+'</p>')+'</details>'+
+   '</article>';
  }
  function eligible(){
   const all=active();
