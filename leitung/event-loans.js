@@ -2,15 +2,18 @@ export function createEventLoans({getState,getLanguage,request,esc,flash}){
  const root=document.getElementById("eventLoanRoot");
  const enabled=location.hostname==="boltotelli.github.io"||["localhost","127.0.0.1"].includes(location.hostname);
  const labels={
- de:["Temporäre Event-Ausleihen","NRW bleibt Heimatallianz. Das ist kein dauerhafter Transfer.","Genehmigen","Rückkehr bestätigen","Abbrechen","Beginn","Rückkehrfrist","Leitungszugang erhalten (R4/R5, Admin)","Aktuelle Allianz","Keine Einträge","Nur Admins bearbeiten Ausleihen.","Änderung bestätigen?","Aktualisieren","Rückkehr überfällig","Laufend"],
- en:["Temporary event loans","NRW stays home alliance. Not a permanent transfer.","Approve","Confirm return","Cancel","Start","Return deadline","Preserve leader access (R4/R5, admin)","Current alliance","No entries","Only admins may edit loans.","Confirm this change?","Refresh","Return overdue","Active"],
- fr:["Prêts temporaires","NRW reste l'alliance d'origine. Pas un transfert définitif.","Approuver","Confirmer le retour","Annuler","Début","Limite de retour","Préserver l'accès de direction (R4/R5, admin)","Alliance actuelle","Aucune entrée","Seuls les admins peuvent modifier.","Confirmer ?", "Actualiser","Retour en retard","En cours"],
- es:["Préstamos temporales","NRW sigue siendo la alianza de origen. No es un traslado permanente.","Aprobar","Confirmar regreso","Cancelar","Inicio","Límite de regreso","Mantener acceso de dirección (R4/R5, admin)","Alianza actual","Sin registros","Solo los administradores pueden editar.","¿Confirmar cambio?","Actualizar","Regreso atrasado","En curso"]
+ de:["Temporäre Event-Ausleihen","NRW bleibt Heimatallianz. Das ist kein dauerhafter Transfer.","Genehmigen","Rückkehr bestätigen","Abbrechen","Beginn","Rückkehrfrist","Leitungszugang erhalten (R4/R5, Admin)","Aktuelle Allianz","Keine Einträge","Nur Admins bearbeiten Ausleihen.","Änderung bestätigen?","Aktualisieren","Rückkehr überfällig","Laufend","Nur ganze UTC-Spieltage. Der letzte Tag gilt bis zum folgenden Reset um 00:00 UTC."],
+ en:["Temporary event loans","NRW stays home alliance. Not a permanent transfer.","Approve","Confirm return","Cancel","Start","Return deadline","Preserve leader access (R4/R5, admin)","Current alliance","No entries","Only admins may edit loans.","Confirm this change?","Refresh","Return overdue","Active","Full UTC game days only. The last selected day is valid until the following 00:00 UTC reset."],
+ fr:["Prêts temporaires","NRW reste l'alliance d'origine. Pas un transfert définitif.","Approuver","Confirmer le retour","Annuler","Début","Limite de retour","Préserver l'accès de direction (R4/R5, admin)","Alliance actuelle","Aucune entrée","Seuls les admins peuvent modifier.","Confirmer ?", "Actualiser","Retour en retard","En cours","Journées UTC uniquement. Le dernier jour reste valide jusqu'au reset suivant à 00:00 UTC."],
+ es:["Préstamos temporales","NRW sigue siendo la alianza de origen. No es un traslado permanente.","Aprobar","Confirmar regreso","Cancelar","Inicio","Límite de regreso","Mantener acceso de dirección (R4/R5, admin)","Alianza actual","Sin registros","Solo los administradores pueden editar.","¿Confirmar cambio?","Actualizar","Regreso atrasado","En curso","Solo días completos UTC. El último día sigue vigente hasta el siguiente reset a las 00:00 UTC."]
  };
  const t=i=>(labels[getLanguage()]||labels.de)[i],staff=()=>getState()?.staff||{};
  const canRead=()=>staff().is_owner||staff().permissions?.members||staff().permissions?.transfers;
  const admin=()=>staff().is_owner===true;
  let data=null,loading=null,selected="";
+ const utcDay=date=>new Date(date).toISOString().slice(0,10);
+ const lastDay=end=>new Date(Date.parse(end)-86400000).toISOString().slice(0,10);
+ const gameDayToday=()=>new Date().toISOString().slice(0,10);
  function render(){
   if(!root||!enabled||!canRead()||!data)return;
   const entries=(data.loans||[]).map(l=>{
@@ -19,7 +22,7 @@ export function createEventLoans({getState,getLanguage,request,esc,flash}){
      l.expired?"⚠ "+t(13):"● "+t(14);
     return '<article class="loan-record"><b>'+esc(p?.name||data.observed?.[l.game_id]?.name||l.game_id)+'</b> '+badge+
       '<small> · '+esc(l.game_id)+' · '+esc(l.event_type.toUpperCase())+' · NRW → '+esc(l.target_alliance)+'</small>'+
-      '<p>'+esc(t(5))+': '+esc(new Date(l.starts_at).toLocaleString())+' · '+esc(t(6))+': '+esc(new Date(l.ends_at).toLocaleString())+'</p>'+
+      '<p>'+esc(t(5))+': '+esc(utcDay(l.starts_at))+' · '+esc(t(6))+': '+esc(lastDay(l.ends_at))+'</p>'+
       '<p>'+esc(t(8))+': '+esc(data.observed?.[l.game_id]?.alliance||"—")+'</p>'+
       (l.protect_leadership?'<p>🔒 R'+esc(l.original_rank)+'</p>':'')+
       (l.status==="approved"&&admin()?'<div class="loan-actions"><button type="button" data-loan-action="return" data-id="'+esc(l.id)+'">'+esc(t(3))+'</button>'+
@@ -36,11 +39,11 @@ export function createEventLoans({getState,getLanguage,request,esc,flash}){
     '<label>Game ID<input class="control" id="loanPlayer" name="game_id" list="loanPlayerList" pattern="[0-9]{5,20}" required value="'+esc(selected)+'"></label><datalist id="loanPlayerList">'+suggestions+'</datalist>'+
     '<label>Event<select class="control" name="event_type"><option value="fdt">FDT</option><option value="castle">Castle Battle</option><option value="kvk">KvK</option></select></label>'+
     '<label>Alliance<select class="control" name="target_alliance"><option>NWO</option><option>RDS</option></select></label>'+
-    '<label>'+esc(t(5))+'<input class="control" name="starts_at" type="datetime-local" required></label>'+
-    '<label>'+esc(t(6))+'<input class="control" name="ends_at" type="datetime-local" required></label>'+
+    '<label>'+esc(t(5))+'<input class="control" name="start_date" type="date" required value="'+esc(gameDayToday())+'"></label>'+
+    '<label>'+esc(t(6))+'<input class="control" name="end_date" type="date" required value="'+esc(gameDayToday())+'"></label>'+
     '<label>Notiz<input class="control" name="note" maxlength="500"></label>'+
     '<label class="loan-protect"><input type="checkbox" name="protect_leadership">'+esc(t(7))+'</label>'+
-    '<button type="submit" class="primary">'+esc(t(2))+'</button></form>':'<p>'+esc(t(10))+'</p>';
+    '<p class="small-note loan-date-note">'+esc(t(15))+'</p><button type="submit" class="primary">'+esc(t(2))+'</button></form>':'<p>'+esc(t(10))+'</p>';
   root.innerHTML='<header class="loan-header"><h3>'+esc(t(0))+'</h3><button type="button" data-loan-refresh>'+esc(t(12))+'</button></header>'+
     '<p>'+esc(t(1))+'</p>'+form+'<div class="loan-entries">'+(entries||esc(t(9)))+'</div>';
  }
@@ -57,9 +60,10 @@ export function createEventLoans({getState,getLanguage,request,esc,flash}){
  if(root){
   root.addEventListener("submit",e=>{
    if(e.target.id!=="eventLoanForm")return;e.preventDefault();
-   const fd=new FormData(e.target),start=Date.parse(fd.get("starts_at")),end=Date.parse(fd.get("ends_at"));
-   if(!Number.isFinite(start)||!Number.isFinite(end)||start>=end)return;
-   save({command:"approve",game_id:String(fd.get("game_id")||"").trim(),target_alliance:fd.get("target_alliance"),event_type:fd.get("event_type"),starts_at:new Date(start).toISOString(),ends_at:new Date(end).toISOString(),protect_leadership:fd.has("protect_leadership"),note:fd.get("note")});
+   const fd=new FormData(e.target),start=String(fd.get("start_date")||""),end=String(fd.get("end_date")||"");
+   if(!/^\d{4}-\d{2}-\d{2}$/.test(start)||!/^\d{4}-\d{2}-\d{2}$/.test(end)||
+      Date.parse(end)<Date.parse(start)){flash(t(6),true);return;}
+   save({command:"approve",game_id:String(fd.get("game_id")||"").trim(),target_alliance:fd.get("target_alliance"),event_type:fd.get("event_type"),start_date:start,end_date:end,protect_leadership:fd.has("protect_leadership"),note:fd.get("note")});
   });
   root.addEventListener("click",e=>{
    if(e.target.closest("[data-loan-refresh]"))return open(true);
