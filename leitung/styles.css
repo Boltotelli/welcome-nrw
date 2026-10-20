@@ -382,3 +382,63 @@
  .bear-opt-flag{margin-left:0}
 }
 @media(max-width:420px){.bear-note-row{grid-template-columns:1fr}.bear-note-row .primary{width:100%}}
+
+/* Phase 4 — FightClub private draft legion management */
+.fightclub-dashboard{display:grid;gap:16px;min-width:0}
+.fightclub-dashboard .card{min-width:0}
+.fight-heading{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:12px}
+.fight-heading h3,.fight-overview h3{font-size:18px;margin:0}
+.fight-switches{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fight-switches label,.fight-player-fields label,.fight-player-note label{display:grid;gap:5px;min-width:0}
+.fight-switches label>span,.fight-player-fields label>span,.fight-player-note label>span{font-size:12px;color:var(--muted)}
+.fight-switches .control{width:100%;min-width:0}
+.fight-past-dates{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.fight-past-dates button{padding:6px 10px;border-radius:9px;font-size:12px}
+.fight-past-dates button.selected{border-color:var(--accent);color:var(--accent)}
+.fight-facts{background:var(--panel);border-radius:12px;padding:12px 16px;color:var(--muted);font-size:12px;line-height:1.5}
+.fight-facts p{margin:4px 0}
+.fight-overview{display:grid;gap:12px}
+.fight-summary-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.fight-summary-card{border:1px solid var(--border);background:var(--surface);padding:14px;border-radius:14px;display:grid;align-content:start;gap:8px;min-width:0}
+.fight-summary-card>strong{font-size:16px}
+.fight-summary-card>small,.fight-summary-card p>small{color:var(--muted);font-size:11px}
+.fight-summary-big{font-size:30px;font-weight:800;color:var(--accent);font-variant-numeric:tabular-nums}
+.fight-summary-big span{font-size:12px;color:var(--muted);font-weight:500}
+.fight-summary-stats{display:flex;gap:7px;flex-wrap:wrap;font-size:11px;color:var(--muted)}
+.fight-summary-stats span{padding:4px 6px;background:var(--panel);border-radius:7px}
+.fight-summary-card>p{font-size:12px;margin:0;line-height:1.45;color:var(--muted)}
+.fight-summary-card>p b{color:var(--text)}
+.fight-conflict{border:1px solid var(--red);border-radius:10px;padding:8px 11px;color:var(--red);font-size:12px;line-height:1.45;margin:0}
+.fight-suggestions{border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:14px}
+.fight-suggestions summary{cursor:pointer;font-weight:750;color:var(--accent)}
+.fight-suggestion-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.fight-candidate-group{border:1px solid var(--border);border-radius:10px;padding:10px;min-width:0}
+.fight-candidate-group>strong{display:block;margin-bottom:8px;font-size:12px}
+.fight-candidate-group>div{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;margin:7px 0}
+.fight-candidate-group>div span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fight-candidate-group>div b{white-space:nowrap;font-variant-numeric:tabular-nums}
+.fight-roster .small-note{margin:0 0 14px}
+.fight-filterbar{display:grid;grid-template-columns:minmax(150px,1.6fr) minmax(130px,.8fr) auto;gap:9px;align-items:center;margin:12px 0 16px}
+.fight-filterbar .control{min-width:0;width:100%}
+.fight-filterbar>span{font-size:12px;color:var(--muted);white-space:nowrap}
+.fight-player-list{display:grid;gap:11px}
+.fight-player{border:1px solid var(--border);border-radius:12px;background:var(--panel);padding:13px;display:grid;gap:11px;min-width:0}
+.fight-player-top{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.fight-player-name{border:0;background:transparent;color:var(--text);font-weight:770;padding:0;cursor:pointer;overflow-wrap:anywhere}
+.fight-player-name:hover{text-decoration:underline;color:var(--accent)}
+.fight-player-top>small{color:var(--muted);font-size:11px}
+.fight-power{margin-left:auto;border:1px solid var(--border);padding:3px 8px;border-radius:100px;color:var(--accent);font-size:12px;white-space:nowrap}
+.fight-player-fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.fight-player-fields .control{width:100%;min-width:0}
+.fight-player-note{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:9px;align-items:end}
+.fight-player-note input{width:100%;min-width:0}
+.fight-player-note .primary,.fight-player-note .ghost{white-space:nowrap}
+@media(max-width:800px){.fight-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.fight-summary-grid>.fight-summary-card:last-child{grid-column:1/-1}}
+@media(max-width:640px){
+ .fight-switches{grid-template-columns:1fr}
+ .fight-summary-grid{grid-template-columns:1fr}.fight-summary-grid>.fight-summary-card:last-child{grid-column:auto}
+ .fight-filterbar{grid-template-columns:1fr 1fr}.fight-filterbar input{grid-column:1/-1}.fight-filterbar>span{justify-self:end}
+ .fight-player-fields{grid-template-columns:1fr 1fr}.fight-player-fields label:last-child{grid-column:1/-1}
+ .fight-player-note{grid-template-columns:1fr 1fr}.fight-player-note label{grid-column:1/-1}
+ .fight-suggestion-grid{grid-template-columns:1fr}.fight-summary-big{font-size:25px}
+}
