@@ -5,7 +5,7 @@ const serviceKey=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const db=createClient(supabaseUrl,serviceKey,{auth:{persistSession:false}});
 const ALLIANCE="NRW";
 const USER_EMAIL=/^leader-([0-9]{5,20})@accounts\.allianceos\.invalid$/i;
-const PERMISSIONS={members:false,transfers:false,laws:false,events:false,event_bot:false,settings:false};
+const PERMISSIONS={members:false,performance:false,bear:false,fightclub:false,participation:false,transfers:false,laws:false,events:false,event_bot:false,settings:false};
 const resp=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,headers:{"content-type":"application/json","cache-control":"no-store"}});
 const load=async<T>(query:PromiseLike<{data:T|null,error:any}>):Promise<T>=>{
  const {data,error}=await query;if(error)throw new Error("db_"+String(error.code||error.message).slice(0,75));return data as T;
