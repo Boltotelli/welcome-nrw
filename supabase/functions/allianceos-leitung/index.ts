@@ -811,8 +811,9 @@ async function saveEventParticipation(req:Request,alliance:string,userId:string,
  if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(eventDate)||!Number.isFinite(parsed)||
     new Date(parsed).toISOString().slice(0,10)!==eventDate)
    throw new HttpError("invalid_event_date",400);
- const distance=parsed-Date.now();
- if(distance<-90*86400000||distance>365*86400000)
+ const minDate=new Date(Date.now()-90*86400000).toISOString().slice(0,10);
+ const maxDate=new Date(Date.now()+365*86400000).toISOString().slice(0,10);
+ if(eventDate<minDate||eventDate>maxDate)
    throw new HttpError("event_date_out_of_range",400);
  if(!isId(gameId))throw new HttpError("invalid_player_id",400);
  const [eventType,player]=await Promise.all([
