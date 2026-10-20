@@ -8,6 +8,8 @@ on:
       - 'bear/**'
       - '.github/workflows/bear-pages.yml'
   workflow_dispatch:
+  # Can also be called by the lightweight main-branch publishing workflow.
+  workflow_call:
 
 permissions:
   contents: read
@@ -26,6 +28,10 @@ jobs:
       url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Tests and the Bear root still rely on this stable source branch.
+          # Leadership, dashboard, and latest Bear V3 come from main below.
+          ref: feature/bear-optimizer-nrw-prototype
       - uses: actions/configure-pages@v5
       - name: Verify Bear scripts and combat data
         run: |
