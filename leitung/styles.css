@@ -442,3 +442,50 @@
  .fight-player-note{grid-template-columns:1fr 1fr}.fight-player-note label{grid-column:1/-1}
  .fight-suggestion-grid{grid-template-columns:1fr}.fight-summary-big{font-size:25px}
 }
+
+/* Phase 5 – event participation register (GitHub Pages leadership pilot). */
+.participation-dashboard{display:grid;gap:16px;min-width:0}
+.participation-dashboard .card{min-width:0}
+.participation-heading{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:13px}
+.participation-heading h3,.participation-related h3{margin:0;font-size:18px}
+.participation-pickers{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(160px,.7fr);gap:12px}
+.participation-pickers label,.participation-member-options label,.participation-member-save label{display:grid;gap:6px;min-width:0}
+.participation-pickers label>span,.participation-member-options label>span,.participation-member-save label>span{color:var(--muted);font-size:12px}
+.participation-pickers .control,.participation-member-options .control,.participation-member-save .control{min-width:0;width:100%}
+.participation-day-chips{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0}
+.participation-day-chips button{padding:6px 10px;border-radius:9px;font-size:12px}
+.participation-day-chips button.selected{border-color:var(--accent);color:var(--accent)}
+.participation-picker>.small-note{line-height:1.55}
+.participation-summary{display:grid;gap:10px}
+.participation-summary-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px}
+.participation-count{border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:13px;display:grid;gap:6px;min-width:0}
+.participation-count span{font-size:12px;color:var(--muted);overflow-wrap:anywhere}
+.participation-count strong{font-size:24px;line-height:1.2;font-variant-numeric:tabular-nums}
+.participation-related-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.participation-related-grid>div{border:1px solid var(--border);background:var(--panel);border-radius:11px;padding:13px;min-width:0}
+.participation-related-grid strong{font-size:14px}
+.participation-related-grid p{font-size:12px;color:var(--muted);margin:8px 0 10px}
+.participation-filters{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(160px,.6fr);gap:11px;margin:0 0 14px}
+.participation-filters .control{width:100%;min-width:0}
+.participation-member-list{display:grid;gap:11px}
+.participation-member{border:1px solid var(--border);background:var(--panel);border-radius:12px;padding:13px;display:grid;gap:11px;min-width:0}
+.participation-member-top{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.participation-player-name{background:transparent;border:0;padding:0;font-weight:750;color:var(--text);text-align:left;cursor:pointer;overflow-wrap:anywhere}
+.participation-player-name:hover{color:var(--accent);text-decoration:underline}
+.participation-member-top small,.participation-member-top span{font-size:11px;color:var(--muted)}
+.participation-member-top>span{margin-left:auto}
+.participation-member-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.participation-member-save{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:9px;align-items:end}
+.participation-member-save button{white-space:nowrap}
+.participation-players>.small-note{margin:0 0 14px;line-height:1.5}
+@media(max-width:900px){.participation-summary-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:650px){
+ .participation-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .participation-pickers{grid-template-columns:1fr}
+ .participation-related-grid{grid-template-columns:1fr}
+ .participation-filters{grid-template-columns:1fr}
+ .participation-member-save{grid-template-columns:1fr 1fr}
+ .participation-member-save label{grid-column:1/-1}
+ .participation-member-options{grid-template-columns:1fr 1fr}
+}
+@media(max-width:390px){.participation-member-options{grid-template-columns:1fr}}
