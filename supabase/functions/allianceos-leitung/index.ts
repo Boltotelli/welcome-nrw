@@ -581,6 +581,9 @@ async function eventLoanData(req:Request,alliance:string,staff:any){
  const now=new Date().toISOString();
  return json(req,{ok:true,loans:loans.map(l=>({...l,
    expired:l.status==="approved"&&l.ends_at<now,
+   return_observed:l.status==="approved"&&Boolean(l.away_seen_at)&&
+      observed[l.game_id]?.alliance===alliance&&
+      Date.parse(observed[l.game_id]?.seen_at||"")>Date.parse(l.away_seen_at),
    overdue:l.status==="approved"&&l.ends_at<now&&observed[l.game_id]?.alliance!==alliance})),
    observed,can_approve:staff.is_owner===true});
 }
