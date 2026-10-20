@@ -99,9 +99,16 @@ async function staffFor(req: Request, alliance: string) {
   staff.is_owner=(staff.rank==="R5"&&who.user.email?.toLowerCase()==="admin@nap-tracker.invalid") || staff.is_admin===true;
   const match=/^leader-([0-9]{5,20})@accounts\.allianceos\.invalid$/i.exec(who.user.email||"");
   if(match){
-    const member=await checked<any>(db.from("players").select("alliance_rank,active")
+    const member=await checked<any>(db.from("players").select("alliance_rank,active,provider_seen_at")
       .eq("alliance_code",alliance).eq("game_id",match[1]).maybeSingle());
-    if(member?.active&&[4,5].includes(Number(member.alliance_rank))){
+    const other=await checked<any[]>(db.from("players").select("active,provider_seen_at")
+      .eq("game_id",match[1]).neq("alliance_code",alliance).eq("active",true).limit(12));
+    const nrwSeen=Date.parse(member?.provider_seen_at||"")||0;
+    const elsewhere=other.some(p=>{
+      const last=Date.parse(p.provider_seen_at||"");
+      return Number.isFinite(last)&&last>nrwSeen&&last<=Date.now()+300000&&Date.now()-last<48*3600000;
+    });
+    if(member?.active&&[4,5].includes(Number(member.alliance_rank))&&!elsewhere){
       staff.rank="R"+member.alliance_rank;
     }else{
       const exception=await protectedLoanFor(alliance,match[1],staff.rank);
