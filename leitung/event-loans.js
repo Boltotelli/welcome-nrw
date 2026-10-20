@@ -1,6 +1,6 @@
 export function createEventLoans({getState,getLanguage,request,esc,flash}){
  const root=document.getElementById("eventLoanRoot");
- const enabled=location.hostname==="boltotelli.github.io"||["localhost","127.0.0.1"].includes(location.hostname);
+ const enabled=true; // Released for both GitHub Pages and Vercel; access is enforced by server-side module permissions.
  const labels={
  de:["Temporäre Event-Ausleihen","NRW bleibt Heimatallianz. Das ist kein dauerhafter Transfer.","Genehmigen","Rückkehr bestätigen","Abbrechen","Starttag","Letzter Ausleihtag","Leitungszugang erhalten (R4/R5, Admin)","Aktuelle Allianz","Keine Einträge","Nur Admins bearbeiten Ausleihen.","Änderung bestätigen?","Aktualisieren","Rückkehr überfällig","Laufend","Nur ganze UTC-Spieltage. Der letzte Tag gilt bis zum folgenden Reset um 00:00 UTC."],
  en:["Temporary event loans","NRW stays home alliance. Not a permanent transfer.","Approve","Confirm return","Cancel","First day","Last loan day","Preserve leader access (R4/R5, admin)","Current alliance","No entries","Only admins may edit loans.","Confirm this change?","Refresh","Return overdue","Active","Full UTC game days only. The last selected day is valid until the following 00:00 UTC reset."],
