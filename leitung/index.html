@@ -14,7 +14,7 @@
 <title>AllianceOS · NRW Leitungszentrale</title>
 <meta name="description" content="Geschützte Leitungszentrale für Allianzverwaltung, Transfers, Laws und Events.">
 <link rel="icon" href="../assets/nrw-dashboard-icon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="./styles.css?v=phase2-perf-release-20261019-2">
+<link rel="stylesheet" href="./styles.css?v=phase3-bear-test-20261020-1">
 
 </head>
 <body>
@@ -27,6 +27,7 @@
       <button class="nav-item active" data-tab="overview"><i>▦</i><span data-i18n="overview">Übersicht</span></button>
       <button class="nav-item" data-tab="roster"><i>♙</i><span data-i18n="roster">Spielerverwaltung</span></button>
       <button class="nav-item" data-tab="performance" hidden><i>▥</i><span data-i18n="performance">Performance</span></button>
+      <button class="nav-item" data-tab="bear" hidden><i>🐻</i><span data-i18n="bearManagement">Bärenfalle</span></button>
       <button class="nav-item" data-tab="transfers"><i>⇄</i><span data-i18n="transfers">Transferplanung</span></button>
 
       <button class="nav-item" data-tab="laws"><i>⚖</i><span data-i18n="laws">Laws-Verwaltung</span></button>
@@ -91,6 +92,13 @@
             <p id="performanceSubtitle">Kraftentwicklung, KvK Prep und Allianzmobilisierung – ausschließlich dokumentierte Werte.</p>
           </div></div>
           <div id="performanceRoot" class="performance-dashboard" aria-live="polite"></div>
+        </section>
+        <section class="tab-page" data-page="bear" hidden>
+          <div class="page-heading"><div><span class="eyebrow">ALLIANCEOS · BEAR MANAGEMENT</span>
+            <h2 data-i18n="bearManagement">Bärenfalle</h2>
+            <p id="bearManagementSubtitle">Spieler den Bärenfallen zuordnen und Optimierer-Daten einsehen.</p>
+          </div></div>
+          <div id="bearManagementRoot" class="bear-management" aria-live="polite"></div>
         </section>
         <section class="tab-page" data-page="transfers" hidden>
           <div class="page-heading"><div><span class="eyebrow">TRANSFER CENTER</span><h2 data-i18n="transfers">Transferplanung</h2><p data-i18n="transfersDesc">Bewerbungen, Reservierungen, Wartelisten und abgeschlossene Wechsel.</p></div><button class="primary" data-create="transfer" data-permission="transfers" data-i18n="addTransfer">+ Transfer planen</button></div>
@@ -406,5 +414,5 @@
  </form>
 </dialog>
 <script src="../dashboard/event-rhythm.js?v=pages-step4-1"></script>
-<script type="module" src="./app.js?v=phase2-perf-release-20261019-2"></script>
+<script type="module" src="./app.js?v=phase3-bear-test-20261020-1"></script>
 </body></html>
