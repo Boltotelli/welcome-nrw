@@ -539,3 +539,17 @@
 .loan-actions button{padding:7px 12px;border-radius:9px;border:1px solid var(--border);background:var(--panel);color:var(--text)}
 .loan-actions button:hover{border-color:var(--accent)}
 @media(max-width:670px){.loan-form{grid-template-columns:1fr}.loan-form>.primary{width:100%}}
+
+/* Main-account external second-account references (manual, not a NRW membership). */
+.external-alt-editor{margin-top:14px;padding:14px;border:1px solid var(--border);border-radius:12px;background:var(--panel)}
+.external-alt-editor h4{margin:0 0 5px;font-size:14px}
+.external-alt-editor .form-grid{margin:12px 0;grid-template-columns:repeat(2,minmax(0,1fr))}
+.external-alt-editor .form-grid label:first-child{grid-column:1/-1}
+.external-alt-editor .ghost{margin:4px 0}
+.external-alt-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;margin-top:7px;min-width:0;background:var(--surface)}
+.external-alt-row span{min-width:0;overflow-wrap:anywhere}
+.external-alt-row b,.external-alt-row small{display:block}
+.external-alt-row small{font-size:11px;color:var(--muted);margin-top:3px}
+.external-alt-row button{flex-shrink:0}
+.loan-date-note{grid-column:1/-1;margin:0}
+@media(max-width:620px){.external-alt-editor .form-grid{grid-template-columns:1fr}.external-alt-editor .form-grid label:first-child{grid-column:auto}.external-alt-row{flex-wrap:wrap}}
