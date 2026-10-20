@@ -233,3 +233,11 @@ For every future production change:
 - Production alias: `https://welcome-nrw.vercel.app`.
 - Legacy embedded NAP production/test code was removed from this repository on 2026-10-02 after the dedicated NAP repository cutover was verified.
 - Current repository boundary is Welcome + Laws + Player Dashboard + their API routes only.
+
+### 2026-10-20 · FightClub tactical Swordland / TriAlliance maps
+
+- The original FightClub (Legion 1, Legion 2, reserves, player power) now adds interactive location assignment maps for **Swordland** and **TriAlliance**, scoped separately to event type, UTC event date and current selected legion.
+- Swordland uses an authored schematic of the user-provided battlefield image with 11 permanent objectives and four dynamic Undercellar planning sectors. TriAlliance overlays 94 clickable objectives (A1–31, B1–31, C1–31 and temple) on the original map illustration hosted publicly by its author (Daryl, kingshotguides.com), with a fallback if the background fails.
+- A player can occupy only one objective for a given battle date; multiple players may share one. Location assignments require an existing FightClub player entry in Legion 1 or 2, and are cleared on roster deletion/legion switching. R4/R5 `fightclub` permission is enforced server-side; all plans remain internal and editable, never bot/game actions.
+- Deployed Supabase migration `aos_fightclub_objective_map_planning` creates private RLS-enabled `aos_fightclub_map_assignments` with cascading composite FK to the existing `aos_fightclub_assignments`. Edge Function `allianceos-leitung` v54 ACTIVE adds permissioned `fightclub_map_save` and date-scoped `fightclub_data.map_assignments`.
+- GitHub `main` contains `leitung/fightclub-map.js`, FightClub integration, responsive CSS, updated version references. Tested frontend syntax and 15 Swordland / 94 TriAlliance point rendering; SQL insert-reassign-FK cascade passed in a transaction rolled back; no actual live player plans were inserted. Still requires authenticated R4/R5 browser save/reload and mobile visual QA.
