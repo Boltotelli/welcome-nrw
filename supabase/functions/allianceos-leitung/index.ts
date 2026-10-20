@@ -699,6 +699,76 @@ async function saveBearAssignment(req:Request,alliance:string,userId:string,staf
  await audit(alliance,userId,"bear_assignment",gameId,"assign");
  return json(req,{ok:true,assignment:result});
 }
+// FightClub Phase 4: isolated draft rosters. Historical Discord event cycles
+// and timestamps are read-only. Manual planning dates are NOT official dates.
+async function fightClubData(req:Request,alliance:string,staff:any){
+ if(!permission(staff,"members"))throw new HttpError("permission_denied",403);
+ const since=new Date(Date.now()-120*86400000).toISOString().slice(0,10);
+ const [cycles,assignments,powers]=await Promise.all([
+  checked<any[]>(db.from("discord_special_event_cycles")
+   .select("id,event_type,battle_date,source_begin_at,source_end_at")
+   .in("event_type",["swordland","triforce"]).order("battle_date",{ascending:false}).limit(60)),
+  checked<any[]>(db.from("aos_fightclub_assignments")
+   .select("event_type,battle_date,game_id,legion,availability,combat_role,notes,updated_at")
+   .eq("alliance_code",alliance).gte("battle_date",since)
+   .order("battle_date",{ascending:false}).limit(2000)),
+  checked<any[]>(db.from("aos_member_power_snapshot")
+   .select("game_id,power,fetched_at,source").eq("alliance_code",alliance).limit(500))
+ ]);
+ const ids=cycles.map(c=>c.id);
+ const legionTimes=ids.length?await checked<any[]>(db.from("discord_special_legions")
+   .select("cycle_id,legion,starts_at").eq("alliance_code",alliance)
+   .in("cycle_id",ids).limit(180)):[];
+ const verified=new Map<string,any>();
+ for(const p of powers){
+  const n=Number(p.power);
+  if(isId(p.game_id)&&p.power!==null&&Number.isSafeInteger(n)&&n>=0){
+   verified.set(p.game_id,{game_id:p.game_id,power:n,fetched_at:p.fetched_at,source:p.source});
+  }
+ }
+ return json(req,{ok:true,cycles:cycles.map(c=>({
+  event_type:c.event_type,battle_date:c.battle_date,
+  times:legionTimes.filter(l=>l.cycle_id===c.id).map(l=>({legion:l.legion,starts_at:l.starts_at}))
+ })),assignments,powers:[...verified.values()],since});
+}
+async function saveFightClub(req:Request,alliance:string,userId:string,staff:any,body:any){
+ if(!permission(staff,"members"))throw new HttpError("permission_denied",403);
+ const eventType=str(body?.event_type,30),battleDate=str(body?.battle_date,10),gameId=str(body?.game_id,20);
+ if(!["swordland","triforce"].includes(eventType))throw new HttpError("invalid_fight_event",400);
+ // Calendar date only. Do not invent an event or trust client timestamps.
+ if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(battleDate)||
+  new Date(battleDate+"T00:00:00Z").toISOString().slice(0,10)!==battleDate)
+  throw new HttpError("invalid_battle_date",400);
+ const delta=Date.parse(battleDate+"T00:00:00Z")-Date.now();
+ if(!Number.isFinite(delta)||delta < -120*86400000||delta>540*86400000)
+   throw new HttpError("battle_date_out_of_range",400);
+ if(!isId(gameId))throw new HttpError("invalid_player_id",400);
+ const p=await checked<any>(db.from("players").select("id").eq("alliance_code",alliance)
+   .eq("game_id",gameId).eq("active",true).maybeSingle());
+ if(!p)throw new HttpError("player_not_active_in_alliance",403);
+ if(body?.remove===true){
+  await checked<any>(db.from("aos_fightclub_assignments").delete()
+   .eq("alliance_code",alliance).eq("event_type",eventType)
+   .eq("battle_date",battleDate).eq("game_id",gameId));
+  await audit(alliance,userId,"fightclub",gameId,"unassign_"+eventType+"_"+battleDate);
+  return json(req,{ok:true,removed:true,game_id:gameId});
+ }
+ const legion=Number(body?.legion??0),availability=str(body?.availability??"unknown",20),
+ combatRole=str(body?.combat_role??"flex",20),notes=str(body?.notes??"",500);
+ if(!Number.isInteger(legion)||![0,1,2].includes(legion)||
+  !["unknown","full","partial","unavailable"].includes(availability)||
+  !["flex","attack","defense","support"].includes(combatRole))
+   throw new HttpError("invalid_fight_assignment",400);
+ if(legion!==0&&availability==="unavailable")throw new HttpError("unavailable_cannot_join_legion",409);
+ const a=await checked<any>(db.from("aos_fightclub_assignments").upsert({
+   alliance_code:alliance,event_type:eventType,battle_date:battleDate,game_id:gameId,
+   legion,availability,combat_role:combatRole,notes,
+   updated_at:new Date().toISOString(),updated_by:userId
+ },{onConflict:"alliance_code,event_type,battle_date,game_id"})
+   .select("event_type,battle_date,game_id,legion,availability,combat_role,notes,updated_at").single());
+ await audit(alliance,userId,"fightclub",gameId,"plan_"+eventType+"_"+battleDate);
+ return json(req,{ok:true,assignment:a});
+}
 async function memberPowerHistory(req:Request,alliance:string,staff:any,body:any){
  if(!permission(staff,"members"))throw new HttpError("permission_denied",403);
  const gameId=str(body?.game_id,20);
@@ -1203,6 +1273,8 @@ Deno.serve(async(req: Request)=>{
     if(body?.action==="performance_dashboard")return await performanceDashboard(req,alliance,staff);
     if(body?.action==="bear_management")return await bearManagement(req,alliance,staff);
     if(body?.action==="bear_assignment")return await saveBearAssignment(req,alliance,userId,staff,body);
+    if(body?.action==="fightclub_data")return await fightClubData(req,alliance,staff);
+    if(body?.action==="fightclub_save")return await saveFightClub(req,alliance,userId,staff,body);
     if(body?.action==="staff_invite")return await inviteR4(req,alliance,userId,staff,body);
     if(body?.action==="transfer_window")return await saveTransferWindow(req,alliance,userId,staff,body);
     if(body?.action==="transfer_portraits")return await refreshTransferPortraits(req,alliance,staff);
