@@ -115,7 +115,7 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
    const diff=Date.parse(v+"T00:00:00Z")-Date.now();
    return diff>=-120*86400000 && diff<=540*86400000;
  };
- let state=null,loading=null,generation=0,eventType="swordland",date="",search="",filter="all",pending=new Set(),warning="",fastLegion=1,fastAvailability="full";
+ let state=null,loading=null,generation=0,eventType="swordland",date="",search="",filter="all",pending=new Set(),warning="",fastLegion=1,fastAvailability="full",rosterExpanded=false;
  function players(){return (getState()?.players||[]).filter(p=>p.active&&p.member_status!=="left"&&/^[0-9]{1,20}$/.test(String(p.game_id||""))).slice().sort((a,b)=>String(a.name||"").localeCompare(String(b.name||""),locale()));}
  const playerMap=()=>new Map(players().map(p=>[String(p.game_id),p]));
  const powers=()=>new Map((state?.powers||[]).map(p=>[String(p.game_id),p]));
@@ -214,7 +214,7 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
        filter==="0"&&assignment(p.game_id)&&Number(assignment(p.game_id).legion)===0));
    visible.sort((a,b)=>Number(powerById.get(String(b.game_id))?.power??-1)-Number(powerById.get(String(a.game_id))?.power??-1)||
     String(a.name||"").localeCompare(String(b.name||""),locale()));
-   return '<details class="card fight-roster fight-roster-collapsible"><summary>'+esc(t("plans"))+' · '+visible.length+' / '+players().length+'</summary><div class="fight-heading">'+
+   return '<details class="card fight-roster fight-roster-collapsible" '+(rosterExpanded?'open':'')+'><summary>'+esc(t("plans"))+' · '+visible.length+' / '+players().length+'</summary><div class="fight-heading">'+
        '<button class="ghost" type="button" data-fight-export>'+esc(t("copyList"))+' ↗</button></div>'+
      '<p class="small-note">'+esc(t("registration"))+' '+esc(t("planningNote"))+'</p>'+
      '<div class="fight-filterbar"><input class="control" data-fight-search type="search" value="'+esc(search)+'" placeholder="'+esc(t("search"))+'">'+
@@ -294,6 +294,8 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
        candidateLists()+fastAssign()+mapUI.render()+list();
    }
    root.innerHTML=html;
+   const expanded=root.querySelector(".fight-roster-collapsible");
+   expanded?.addEventListener("toggle",()=>{rosterExpanded=expanded.open;});
    pending.forEach(id=>{const b=root.querySelector('[data-fight-save="'+id+'"]');if(b){b.disabled=true;b.textContent=t("saving");}});
  }
  async function load(force=false){
@@ -390,6 +392,6 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
      }
    });
  }
- function reset(){fastLegion=1;fastAvailability="full";mapUI.reset();generation++;state=null;loading=null;pending.clear();date="";search="";filter="all";eventType="swordland";if(root){root.innerHTML="";root.textContent="";}}
+ function reset(){fastLegion=1;fastAvailability="full";rosterExpanded=false;mapUI.reset();generation++;state=null;loading=null;pending.clear();date="";search="";filter="all";eventType="swordland";if(root){root.innerHTML="";root.textContent="";}}
  return {enabled,open:load,render:draw,reset};
 }
