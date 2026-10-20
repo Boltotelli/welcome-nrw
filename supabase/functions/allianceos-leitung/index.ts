@@ -519,7 +519,7 @@ async function saveExternalAlt(req:Request,alliance:string,userId:string,staff:a
    .eq("alliance_code",alliance).eq("alt_game_id",altId).maybeSingle());
  if(existing&&existing.main_game_id!==mainId)throw new HttpError("alt_linked_to_another_main",409);
  const domestic=await checked<any[]>(db.from("players").select("game_id").eq("alliance_code",alliance)
-   .eq("game_id",altId).limit(1));
+   .eq("game_id",altId).eq("active",true).limit(1));
  if(domestic.length)throw new HttpError("alt_already_in_nrw_use_roster_link",409);
  if(body?.command==="remove"){
    if(!existing)throw new HttpError("alt_link_not_found",404);
