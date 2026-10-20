@@ -31,28 +31,28 @@ const TRI=Object.entries(TRI_COORDS).flatMap(([side,coords])=>coords.map(([x,y],
  return {key:side+number,x:x/1440*100,y:y/1050*100,name:side+number+suffix,group:side};
 })).concat([{key:"temple",x:725/1440*100,y:477/1050*100,name:"Temple of Tides",group:"temple"}]);
 const WORDS={
- de:{heading:"Taktische Kartenplanung",hint:"Markiere einen Ort und teile ihm Spieler aus der ausgewählten Legion zu. Mehrere Spieler pro Ort sind möglich. Die Planung sendet keine Ingame-Befehle.",
+ de:{positionCopy:"Namen für Spiel-Label kopieren",teamCopy:"Teamtext kopieren",leader:"Teamleiter",leaderSave:"Leader speichern",teamTexts:"Ingame-Einsatztexte",copiedNames:"Spielernamen kopiert",heading:"Taktische Kartenplanung",hint:"Markiere einen Ort und teile ihm Spieler aus der ausgewählten Legion zu. Mehrere Spieler pro Ort sind möglich. Die Planung sendet keine Ingame-Befehle.",
    assign:"Spieler zuweisen",none:"Spieler auswählen",location:"Zielposition",legion:"Legion",assigned:"Eingeplant",free:"Noch ohne Ort",
    noLegion:"Ordne Spieler zuerst oben in der Legionplanung Legion 1 oder 2 zu.",save:"Zuteilen / umplanen",remove:"Entfernen",clipboard:"Kartenplan kopieren",copied:"Kartenplan kopiert",
    error:"Kartenplanung konnte nicht gespeichert werden",swordNote:"Die Undercellars sind dynamische Sammelziele – die vier Bereiche sind Planungspositionen und keine garantierten Spawns.",
    triNote:"A / B / C zeigen die drei möglichen Startseiten, keine automatische Zuweisung eurer Allianz. Die exakte Startseite muss im Match geprüft werden.",
    source:"Kartenvorlage: Daryl · Kingshot Guides",locationEmpty:"Für diesen Ort ist noch niemand geplant.",count:"Plätze mit Zuordnung",
    waiting:"Speichert …",confirmRemove:"Diese Zuweisung von der Karte entfernen?",noDate:"Bitte Datum wählen.",hintMobile:"Auf dem Handy die Karte seitlich verschieben oder die Zielliste nutzen."},
- en:{heading:"Battlefield assignment map",hint:"Select an objective and assign players from the chosen legion. Several players can share an objective. No in-game orders are sent.",
+ en:{positionCopy:"Copy names for game label",teamCopy:"Copy team message",leader:"Team leader",leaderSave:"Save leader",teamTexts:"In-game deployment messages",copiedNames:"Player names copied",heading:"Battlefield assignment map",hint:"Select an objective and assign players from the chosen legion. Several players can share an objective. No in-game orders are sent.",
    assign:"Assign player",none:"Select player",location:"Objective",legion:"Legion",assigned:"Planned",free:"Without objective",
    noLegion:"Assign players to Legion 1 or 2 in the roster planner above first.",save:"Assign / move",remove:"Remove",clipboard:"Copy map plan",copied:"Map plan copied",
    error:"Could not save map assignment",swordNote:"Undercellars spawn dynamically; the four sectors are planning targets, not guaranteed locations.",
    triNote:"A / B / C represent possible starting sides, not your alliance's confirmed side. Verify the actual starting side in-game.",
    source:"Illustration: Daryl · Kingshot Guides",locationEmpty:"No players planned for this objective.",count:"Occupied objectives",
    waiting:"Saving …",confirmRemove:"Remove this assignment from the map?",noDate:"Please choose a date.",hintMobile:"On mobile, scroll the map horizontally or use the objective selector."},
- fr:{heading:"Planification sur carte",hint:"Sélectionner un objectif et attribuer des joueurs de la légion. Plusieurs joueurs peuvent partager un objectif. Aucun ordre envoyé au jeu.",
+ fr:{positionCopy:"Copier les noms pour le jeu",teamCopy:"Copier le message",leader:"Chef d’équipe",leaderSave:"Enregistrer",teamTexts:"Instructions en jeu",copiedNames:"Noms copiés",heading:"Planification sur carte",hint:"Sélectionner un objectif et attribuer des joueurs de la légion. Plusieurs joueurs peuvent partager un objectif. Aucun ordre envoyé au jeu.",
    assign:"Attribuer un joueur",none:"Choisir un joueur",location:"Objectif",legion:"Légion",assigned:"Planifiés",free:"Sans objectif",
    noLegion:"Attribuez d'abord les joueurs à la légion 1 ou 2 dans la liste.",save:"Attribuer / déplacer",remove:"Retirer",clipboard:"Copier le plan",copied:"Plan copié",
    error:"Enregistrement du plan impossible",swordNote:"Les Undercellars apparaissent dynamiquement ; les secteurs sont indicatifs.",
    triNote:"A / B / C sont des côtés de départ possibles, pas un côté confirmé. Vérifiez en jeu.",
    source:"Illustration : Daryl · Kingshot Guides",locationEmpty:"Aucun joueur prévu ici.",count:"Objectifs occupés",
    waiting:"Enregistrement…",confirmRemove:"Retirer ce joueur de la carte ?",noDate:"Choisissez une date.",hintMobile:"Sur mobile, faites défiler la carte ou utilisez la liste."},
- es:{heading:"Planificación en el mapa",hint:"Selecciona un objetivo y asigna jugadores de la legión. Varios jugadores pueden compartir objetivo. No se envían órdenes al juego.",
+ es:{positionCopy:"Copiar nombres para el juego",teamCopy:"Copiar mensaje",leader:"Líder de equipo",leaderSave:"Guardar",teamTexts:"Mensajes en el juego",copiedNames:"Nombres copiados",heading:"Planificación en el mapa",hint:"Selecciona un objetivo y asigna jugadores de la legión. Varios jugadores pueden compartir objetivo. No se envían órdenes al juego.",
    assign:"Asignar jugador",none:"Seleccionar jugador",location:"Objetivo",legion:"Legión",assigned:"Asignados",free:"Sin objetivo",
    noLegion:"Primero asigna jugadores a la Legión 1 o 2 en la planificación.",save:"Asignar / mover",remove:"Quitar",clipboard:"Copiar plan",copied:"Plan copiado",
    error:"No se pudo guardar la asignación",swordNote:"Las Undercellars aparecen dinámicamente; los sectores son solo para planificación.",
@@ -61,12 +61,14 @@ const WORDS={
    waiting:"Guardando…",confirmRemove:"¿Quitar esta asignación del mapa?",noDate:"Elige una fecha.",hintMobile:"En el móvil, desplaza el mapa o usa la lista de objetivos."}
 };
 export function createFightClubMap({getContext,getLanguage,request,flash,esc,onUpdated}){
- let selected="shrine",legion=1,selectedPlayer="",busy=false,scope="";
+ let selected="shrine",legion=1,selectedPlayer="",busy=false,scope="",leaderChoice={1:"",2:""};
  const t=k=>(WORDS[getLanguage()]||WORDS.de)[k]||WORDS.de[k]||k;
  const sites=()=>getContext()?.eventType==="triforce"?TRI:SWORD;
  const ctx=()=>getContext()||{};
  const roster=()=>ctx().assignments||[];
  const mapRows=()=>ctx().mapAssignments||[];
+ const leaders=()=>ctx().state?.leaders?.filter(l=>l.event_type===ctx().eventType&&l.battle_date===ctx().date)||[];
+ const leaderFor=lg=>leaders().find(l=>Number(l.legion)===lg)?.game_id||"";
  const siteList=()=>sites().map(s=>s.key);
  const activeLegion=()=>roster().filter(x=>Number(x.legion)===legion&&x.availability!=="unavailable");
  const seenIds=()=>new Map((ctx().players||[]).map(p=>[String(p.game_id),p]));
@@ -107,7 +109,8 @@ export function createFightClubMap({getContext,getLanguage,request,flash,esc,onU
   const key=selected,site=sites().find(s=>s.key===key),listed=rowsForLocation(key),everyone=sortedPlayers();
   const rosterSize=everyone.length,chosen=everyone.some(p=>String(p.game_id)===selectedPlayer)?selectedPlayer:"";
   return '<aside class="fight-map-detail"><div class="fight-map-detail-heading"><h4>'+esc(site?.name||key)+'</h4>'+
-     '<span>'+listed.length+' '+esc(t("assigned"))+'</span></div>'+
+     '<span>'+listed.length+' '+esc(t("assigned"))+'</span></div>'+ 
+     '<button class="ghost" type="button" data-map-copy-position>'+esc(t("positionCopy"))+' 📋</button>'+
      '<label class="fight-map-field">'+esc(t("location"))+'<select class="control" data-map-location>'+options(sites().map(s=>[s.key,s.name]),selected)+'</select></label>'+
      '<div class="fight-map-occupants">'+(listed.length?listed.map(m=>
        '<div class="fight-map-occupant"><span><strong>'+esc(playerName(m.game_id))+'</strong><small>'+esc(m.game_id)+'</small></span>'+
@@ -123,6 +126,58 @@ export function createFightClubMap({getContext,getLanguage,request,flash,esc,onU
        '<p class="small-note">'+esc(t("noLegion"))+'</p>')+
      '</aside>';
  }
+
+ function teamMembers(team){
+  const seen=new Set();
+  return roster().filter(a=>Number(a.legion)===team&&a.availability!=="unavailable").filter(a=>{
+   const id=String(a.game_id);if(seen.has(id))return false;seen.add(id);return true;
+  });
+ }
+ function teamMessage(team){
+  if(team===0){
+   const names=teamMembers(0).map(a=>"• "+playerName(a.game_id)).join("\n")||"—";
+   return "📛 SAFE ZONE\n"+names+"\n\n"+
+     "Stay in the Safe Zone as long as possible.\n"+
+     "Before battle: reinforce Guerrilla players or Team Leaders.\n"+
+     "Join rallies in your assigned area – use free troop speed-ups if necessary.\n"+
+     "Prioritize nearby strongholds and resource gathering.";
+  }
+  const leader=leaderFor(team),members=teamMembers(team).filter(a=>String(a.game_id)!==String(leader))
+    .map(a=>"• "+playerName(a.game_id)).join("\n")||"—";
+  return (team===2?"🔴 TEAM 2 – NORTH":"🟢 TEAM 1 – SOUTH")+"\n👑 Leader: "+
+    (leader?playerName(leader):"—")+"\n\n"+members;
+ }
+ function teamCard(team){
+  const name=team===2?"🔴 TEAM 2 – NORTH":team===1?"🟢 TEAM 1 – SOUTH":"📛 SAFE ZONE";
+  const people=teamMembers(team),leader=leaderFor(team);
+  const leaderEditor=team===0?"":'<div class="fight-map-leader-row"><label>'+esc(t("leader"))+
+    '<select class="control" data-map-leader="'+team+'">'+options([["","—"],...people.map(p=>[String(p.game_id),playerName(p.game_id)])],leaderChoice[team]||leader)+'</select></label>'+
+    '<button class="ghost" type="button" data-map-leader-save="'+team+'" '+(busy?'disabled':'')+'>'+esc(t("leaderSave"))+'</button></div>';
+  return '<article class="fight-map-team-card"><div class="fight-map-team-header"><strong>'+name+'</strong><small>'+people.length+' '+esc(t("assigned"))+'</small></div>'+
+    leaderEditor+'<pre>'+esc(teamMessage(team))+'</pre>'+
+    '<button type="button" class="ghost" data-map-copy-team="'+team+'">'+esc(t("teamCopy"))+' 📋</button></article>';
+ }
+ async function copyText(value,label){
+  try{await navigator.clipboard.writeText(value);flash(label);}
+  catch{flash(t("error"),true);}
+ }
+ async function saveLeader(team){
+  if(busy)return;
+  const gameId=leaderChoice[team]??leaderFor(team);
+  const {eventType,date}=ctx();busy=true;onUpdated();
+  try{
+   const result=await request("bootstrap",{action:"fightclub_leader_save",event_type:eventType,battle_date:date,legion:team,game_id:gameId||""});
+   if(!result?.ok)throw Error("save_failed");
+   const state=ctx().state;
+   if(state){
+    state.leaders=(state.leaders||[]).filter(x=>!(x.event_type===eventType&&x.battle_date===date&&Number(x.legion)===team));
+    if(!result.removed)state.leaders.push(result.leader);
+   }
+   leaderChoice[team]="";flash(t("leaderSave"));
+  }catch(e){flash(t("error")+" ("+String(e?.message||e)+")",true);}
+  finally{busy=false;onUpdated();}
+ }
+
  function render(){
   if(!ctx().date)return "";
   resetIfScope();
@@ -138,7 +193,8 @@ export function createFightClubMap({getContext,getLanguage,request,flash,esc,onU
    '<p class="small-note">'+esc(tri?t("triNote"):t("swordNote"))+'</p>'+
    '<div class="fight-map-layout"><div class="fight-map-scroll" tabindex="0"><div class="fight-map-stage '+(tri?"fight-map-tri":"fight-map-sword")+'">'+
      (tri?'<img class="fight-map-photo" src="https://kingshotguides.com/wp-content/uploads/2025/10/tri-alliance-clash-map-by-daryl-scaled.webp" alt="" loading="lazy" referrerpolicy="no-referrer">':swordBackdrop())+
-     pins()+'</div></div>'+siteDetail()+'</div>'+
+     pins()+'</div></div>'+siteDetail()+'</div>'+ 
+   (tri?'':'<div class="fight-map-team-section"><h4>'+esc(t("teamTexts"))+'</h4><div class="fight-map-team-grid">'+[1,2,0].map(teamCard).join("")+'</div></div>')+
    '<p class="small-note">'+esc(t("hintMobile"))+(tri?' · <a href="https://kingshotguides.com/guide/tri-alliance-clash-map/" target="_blank" rel="noopener noreferrer">'+esc(t("source"))+'</a>':"")+'</p>'+
    '</section>';
  }
@@ -181,6 +237,7 @@ export function createFightClubMap({getContext,getLanguage,request,flash,esc,onU
  function change(e){
   const el=e.target;if(el.matches("[data-map-legion]")){legion=Number(el.value)===2?2:1;selectedPlayer="";onUpdated();return true;}
   if(el.matches("[data-map-location]")){selected=el.value;selectedPlayer="";onUpdated();return true;}
+  if(el.matches("[data-map-leader]")){leaderChoice[Number(el.dataset.mapLeader)]=el.value;return true;}
   if(el.matches("[data-map-player]")){selectedPlayer=el.value;return true;}
   return false;
  }
@@ -188,6 +245,11 @@ export function createFightClubMap({getContext,getLanguage,request,flash,esc,onU
   const el=e.target;
   const site=el.closest("[data-map-site]");
   if(site){selected=site.dataset.mapSite;selectedPlayer="";onUpdated();return true;}
+  if(el.closest("[data-map-copy-position]")){await copyText(rowsForLocation(selected).map(x=>playerName(x.game_id)).join(", "),t("copiedNames"));return true;}
+  const teamCopy=el.closest("[data-map-copy-team]");
+  if(teamCopy){await copyText(teamMessage(Number(teamCopy.dataset.mapCopyTeam)),t("copied"));return true;}
+  const leaderSave=el.closest("[data-map-leader-save]");
+  if(leaderSave){await saveLeader(Number(leaderSave.dataset.mapLeaderSave));return true;}
   if(el.closest("[data-map-save]")){await save(selectedPlayer);return true;}
   const remove=el.closest("[data-map-remove]");
   if(remove){if(window.confirm(t("confirmRemove")))await save(remove.dataset.mapRemove,true);return true;}
@@ -197,5 +259,5 @@ export function createFightClubMap({getContext,getLanguage,request,flash,esc,onU
   }
   return false;
  }
- return {render,change,click,reset(){scope="";selected="shrine";selectedPlayer="";legion=1;busy=false;}};
+ return {render,change,click,reset(){scope="";selected="shrine";selectedPlayer="";legion=1;busy=false;leaderChoice={1:"",2:""};}};
 }
