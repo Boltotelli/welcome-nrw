@@ -794,17 +794,18 @@ async function eventParticipationData(req:Request,alliance:string,staff:any){
     .select("event_key,event_date,game_id,response,attendance,notes,updated_at")
     .eq("alliance_code",alliance).gte("event_date",since).lte("event_date",until)
     .order("event_date",{ascending:false}).limit(3500)),
-  checked<any[]>(db.from("aos_bear_assignments").select("game_id,slot_key")
-    .eq("alliance_code",alliance).limit(250)),
-  checked<any[]>(db.from("aos_fightclub_assignments")
+  permission(staff,"bear")?checked<any[]>(db.from("aos_bear_assignments").select("game_id,slot_key")
+    .eq("alliance_code",alliance).limit(250)):Promise.resolve([]),
+  permission(staff,"fightclub")?checked<any[]>(db.from("aos_fightclub_assignments")
     .select("event_type,battle_date,game_id,legion")
     .eq("alliance_code",alliance).gte("battle_date",today)
-    .order("battle_date",{ascending:false}).limit(1000))
+    .order("battle_date",{ascending:false}).limit(1000)):Promise.resolve([])
  ]);
  const cycleKeySet=new Set(cycles.map(c=>String(c.group_key)));
  return json(req,{ok:true,today,cycles,partial:records.length===3500,
   records:records.filter(r=>cycleKeySet.has(String(r.event_key))),
   overview:{
+   bear_access:permission(staff,"bear"),fightclub_access:permission(staff,"fightclub"),
    bear_accounts:new Set(bearRows.map(r=>r.game_id)).size,
    fightclub_plans:fightRows.filter(r=>Number(r.legion)>=0).length,
    fightclub_events:[...new Set(fightRows.filter(r=>Number(r.legion)>=0)
