@@ -3,12 +3,12 @@ import {createEventHub} from "./event-library.js?v=step6-iteratorfix-1";
 import {createOperations} from "./operations.js?v=pages-4";
 import {createDiscordEventPlanner} from "./discord-events.js?v=eventbot-4lang-20261019";
 import {createEventBotStatusPanel} from "./event-bot-status.js?v=eventbot-4lang-20261019";
-import {createMemberRelationships} from "./member-relationships.js?v=phase1-20261019-1";
+import {createMemberRelationships} from "./member-relationships.js?v=external-alts-dayloans-20261020-1";
 import {createPerformance} from "./performance.js?v=permissions-split-20261020-3";
 import {createBearManagement} from "./bear-management.js?v=permissions-split-20261020-3";
 import {createFightClub} from "./fightclub.js?v=permissions-split-20261020-3";
 import {createEventParticipation} from "./event-participation.js?v=permissions-split-20261020-3";
-import {createEventLoans} from "./event-loans.js?v=event-loans-20261020-3";
+import {createEventLoans} from "./event-loans.js?v=external-alts-dayloans-20261020-1";
 
 // Private AllianceOS pilot. Data is NEVER stored in localStorage; only auth session is.
 // All records and permissions are issued by the authenticated Edge Function.
@@ -177,7 +177,8 @@ const eventHub=createEventHub({request,flash,esc,t});
  const discordPlanner=createDiscordEventPlanner({request,flash,esc,can,eventHub});
 const eventBotStatusPanel=createEventBotStatusPanel({supabase,flash,can,esc});
 const operations=createOperations({getState:()=>state,request,flash,esc,t,can,refresh});
-const relationships=createMemberRelationships({getState:()=>state,getLanguage:()=>lang,request,esc});
+const relationships=createMemberRelationships({getState:()=>state,getLanguage:()=>lang,request,esc,flash,
+  reloadDossier:async gameId=>{$("editDialog").close();await refresh();openEdit("member",gameId);}});
 const performance=createPerformance({getState:()=>state,getLanguage:()=>lang,request,esc,
   openPlayer:gameId=>openEdit("member",gameId)});
 const bearManagement=createBearManagement({getState:()=>state,getLanguage:()=>lang,request,esc,flash,
