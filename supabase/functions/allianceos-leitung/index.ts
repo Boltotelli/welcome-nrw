@@ -474,6 +474,29 @@ async function deleteDiscordRule(req:Request,alliance:string,userId:string,staff
  return json(req,{ok:true});
 }
 
+// Event loans are separate from permanent transfer requests and NAP history.
+async function eventLoanData(req:Request,alliance:string,staff:any){
+ if(!permission(staff,"members")&&!permission(staff,"transfers"))throw new HttpError("permission_denied",403);
+ const loans=await checked<any[]>(db.from("aos_event_loans").select("*")
+   .eq("home_alliance",alliance).order("created_at",{ascending:false}).limit(250));
+ const ids=[...new Set(loans.map(l=>l.game_id))];
+ const matches=ids.length?await checked<any[]>(db.from("players")
+   .select("game_id,name,alliance_code,active,provider_seen_at,alliance_rank_observed_at")
+   .in("game_id",ids).limit(350)):[];
+ const observed:any={};
+ for(const id of ids){
+   const rows=matches.filter(p=>p.game_id===id&&p.active)
+     .sort((a,b)=>(Date.parse(b.provider_seen_at||b.alliance_rank_observed_at||"")||0)-
+                   (Date.parse(a.provider_seen_at||a.alliance_rank_observed_at||"")||0));
+   observed[id]=rows.length?{name:rows[0].name,alliance:rows[0].alliance_code,
+     seen_at:rows[0].provider_seen_at||rows[0].alliance_rank_observed_at}:null;
+ }
+ const now=new Date().toISOString();
+ return json(req,{ok:true,loans:loans.map(l=>({...l,
+   expired:l.status==="approved"&&l.ends_at<now,
+   overdue:l.status==="approved"&&l.ends_at<now&&observed[l.game_id]?.alliance!==alliance})),
+   observed,can_approve:staff.is_owner===true});
+}
 async function bootstrap(req: Request, alliance: string, staff: any) {
   const config=await checked<any>(db.from("aos_alliances").select("*").eq("code",alliance).single());
   const [players, transfers, laws, events, internalMoves, eventMessages, eventGuidance, eventCycles, eventDayTemplates, transferWindows, lawVersions, lawPublications, auditTrail]=await Promise.all([
@@ -1379,6 +1402,7 @@ Deno.serve(async(req: Request)=>{
     if(body?.action!=="alliance_logo_upload"&&Number(req.headers.get("content-length")||"0")>200000)throw new HttpError("payload_too_large",413);
     if(body?.action==="alliance_logo_upload"||body?.action==="alliance_logo_remove")return await updateAllianceLogo(req,alliance,userId,staff,body);
     if(body?.action==="staff")return await saveStaff(req,alliance,userId,staff,body);
+    if(body?.action==="event_loan_data")return await eventLoanData(req,alliance,staff);
     if(body?.action==="provision_leaders")return await provisionLeaders(req,alliance,userId,staff);
     if(body?.action==="reset_leader_password")return await rotateLeaderPassword(req,alliance,userId,staff,body);
     if(body?.action==="player_lookup")return await lookupTransferPlayer(req,alliance,staff,body);
