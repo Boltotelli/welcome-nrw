@@ -2,10 +2,10 @@ export function createEventLoans({getState,getLanguage,request,esc,flash}){
  const root=document.getElementById("eventLoanRoot");
  const enabled=location.hostname==="boltotelli.github.io"||["localhost","127.0.0.1"].includes(location.hostname);
  const labels={
- de:["Temporäre Event-Ausleihen","NRW bleibt Heimatallianz. Das ist kein dauerhafter Transfer.","Genehmigen","Rückkehr bestätigen","Abbrechen","Beginn","Rückkehrfrist","Leitungszugang erhalten (R4/R5, Admin)","Aktuelle Allianz","Keine Einträge","Nur Admins bearbeiten Ausleihen.","Änderung bestätigen?","Aktualisieren"],
- en:["Temporary event loans","NRW stays home alliance. Not a permanent transfer.","Approve","Confirm return","Cancel","Start","Return deadline","Preserve leader access (R4/R5, admin)","Current alliance","No entries","Only admins may edit loans.","Confirm this change?","Refresh"],
- fr:["Prêts temporaires","NRW reste l'alliance d'origine. Pas un transfert définitif.","Approuver","Confirmer le retour","Annuler","Début","Limite de retour","Préserver l'accès de direction (R4/R5, admin)","Alliance actuelle","Aucune entrée","Seuls les admins peuvent modifier.","Confirmer ?", "Actualiser"],
- es:["Préstamos temporales","NRW sigue siendo la alianza de origen. No es un traslado permanente.","Aprobar","Confirmar regreso","Cancelar","Inicio","Límite de regreso","Mantener acceso de dirección (R4/R5, admin)","Alianza actual","Sin registros","Solo los administradores pueden editar.","¿Confirmar cambio?","Actualizar"]
+ de:["Temporäre Event-Ausleihen","NRW bleibt Heimatallianz. Das ist kein dauerhafter Transfer.","Genehmigen","Rückkehr bestätigen","Abbrechen","Beginn","Rückkehrfrist","Leitungszugang erhalten (R4/R5, Admin)","Aktuelle Allianz","Keine Einträge","Nur Admins bearbeiten Ausleihen.","Änderung bestätigen?","Aktualisieren","Rückkehr überfällig","Laufend"],
+ en:["Temporary event loans","NRW stays home alliance. Not a permanent transfer.","Approve","Confirm return","Cancel","Start","Return deadline","Preserve leader access (R4/R5, admin)","Current alliance","No entries","Only admins may edit loans.","Confirm this change?","Refresh","Return overdue","Active"],
+ fr:["Prêts temporaires","NRW reste l'alliance d'origine. Pas un transfert définitif.","Approuver","Confirmer le retour","Annuler","Début","Limite de retour","Préserver l'accès de direction (R4/R5, admin)","Alliance actuelle","Aucune entrée","Seuls les admins peuvent modifier.","Confirmer ?", "Actualiser","Retour en retard","En cours"],
+ es:["Préstamos temporales","NRW sigue siendo la alianza de origen. No es un traslado permanente.","Aprobar","Confirmar regreso","Cancelar","Inicio","Límite de regreso","Mantener acceso de dirección (R4/R5, admin)","Alianza actual","Sin registros","Solo los administradores pueden editar.","¿Confirmar cambio?","Actualizar","Regreso atrasado","En curso"]
  };
  const t=i=>(labels[getLanguage()]||labels.de)[i],staff=()=>getState()?.staff||{};
  const canRead=()=>staff().is_owner||staff().permissions?.members||staff().permissions?.transfers;
@@ -15,7 +15,8 @@ export function createEventLoans({getState,getLanguage,request,esc,flash}){
   if(!root||!enabled||!canRead()||!data)return;
   const entries=(data.loans||[]).map(l=>{
     const p=(getState()?.players||[]).find(p=>p.game_id===l.game_id);
-    const badge=l.status==="approved"&&l.expired?"⚠":l.status==="approved"?"●":"✓";
+    const badge=l.status==="returned"?"✓ "+t(3):l.status==="cancelled"?"× "+t(4):
+     l.expired?"⚠ "+t(13):"● "+t(14);
     return '<article class="loan-record"><b>'+esc(p?.name||data.observed?.[l.game_id]?.name||l.game_id)+'</b> '+badge+
       '<small> · '+esc(l.game_id)+' · '+esc(l.event_type.toUpperCase())+' · NRW → '+esc(l.target_alliance)+'</small>'+
       '<p>'+esc(t(5))+': '+esc(new Date(l.starts_at).toLocaleString())+' · '+esc(t(6))+': '+esc(new Date(l.ends_at).toLocaleString())+'</p>'+
