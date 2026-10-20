@@ -48,13 +48,45 @@ async function reconcile(){
   }
  }
  result.active_leaders=qualified.size;
+ // Only an explicitly protected, time-bounded loan plus CURRENT destination
+ // evidence can preserve the existing NRW login. A manually disabled account
+ // never receives automatic privileges from this path.
+ const stamp=new Date().toISOString();
+ const activeLoans=await load<any[]>(db.from("aos_event_loans")
+   .select("id,game_id,target_alliance,original_rank,away_seen_at")
+   .eq("home_alliance",ALLIANCE).eq("status","approved")
+   .eq("protect_leadership",true).lte("starts_at",stamp).gte("ends_at",stamp)
+   .limit(100));
+ const loanIds=[...new Set(activeLoans.map(l=>l.game_id))];
+ const visitors=loanIds.length?await load<Player[]>(db.from("players")
+   .select("game_id,name,active,alliance_code,provider_seen_at,alliance_rank_observed_at")
+   .in("game_id",loanIds).eq("active",true).limit(200)):[];
+ const validLoans=new Map<string,any>();
+ for(const loan of activeLoans){
+   const current=visitors.find(p=>p.game_id===loan.game_id &&
+     (p as any).alliance_code===loan.target_alliance&&p.active&&
+     Number.isFinite(Date.parse((p as any).provider_seen_at||(p as any).alliance_rank_observed_at||""))&&
+     Date.now()-Date.parse((p as any).provider_seen_at||(p as any).alliance_rank_observed_at)<48*3600000);
+   if(current){
+     validLoans.set(loan.game_id,loan);
+     if(!loan.away_seen_at)await load(db.from("aos_event_loans").update({away_seen_at:stamp})
+       .eq("id",loan.id).is("away_seen_at",null).select("id").single());
+   }
+ }
  // Revoke demoted/transferred accounts, but NEVER touch the owner's legacy login.
  for(const [email,user] of existingUsers){
   const found=USER_EMAIL.exec(email);if(!found)continue;
   const entry=rights.get(user.id);if(!entry)continue;
   const player=byId.get(found[1]);
-  const allowed=player?.active && (player.alliance_rank===4||player.alliance_rank===5);
-  if(!allowed && (entry.enabled||(!entry.disabled_reason))){
+  const loan=validLoans.get(found[1]);
+  const borrowed=loan && loan.original_rank===Number(entry.rank?.slice(1));
+  const allowed=(player?.active && (player.alliance_rank===4||player.alliance_rank===5))||borrowed;
+  if(borrowed&&!entry.enabled&&entry.disabled_reason==="rank_lost"){
+    await load(db.from("aos_staff").update({enabled:true,disabled_reason:null})
+      .eq("alliance_code",ALLIANCE).eq("user_id",user.id).eq("disabled_reason","rank_lost")
+      .select("user_id").single());
+    result.restored++;
+  }else if(!allowed && (entry.enabled||(!entry.disabled_reason))){
    await load(db.from("aos_staff").update({enabled:false,disabled_reason:"rank_lost"}).eq("alliance_code",ALLIANCE).eq("user_id",user.id).select("user_id").single());
    result.disabled++;
   }
