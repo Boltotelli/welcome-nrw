@@ -3,6 +3,7 @@
  * Only GitHub Pages pilot. Existing event cycles read-only and all times UTC.
  */
 export function createEventParticipation({getState,getLanguage,request,esc,flash,openPlayer,navigate}){
+ const canDossier=()=>getState()?.staff?.is_owner===true||getState()?.staff?.permissions?.members===true;
  const root=document.getElementById("participationRoot");
  const enabled=location.hostname==="boltotelli.github.io"||["localhost","127.0.0.1"].includes(location.hostname);
  const words={
@@ -176,7 +177,7 @@ export function createEventParticipation({getState,getLanguage,request,esc,flash
   const canMark=selectedDate<=(cache?.today||new Date().toISOString().slice(0,10));
   const parent=p.main_game_id?roster().get(String(p.main_game_id))?.name||p.main_game_id:null;
   return '<article class="participation-member" data-part-row="'+esc(p.game_id)+'">'+
-    '<div class="participation-member-top"><button type="button" class="participation-player-name" data-part-profile="'+esc(p.game_id)+'">'+esc(p.name||p.game_id)+'</button>'+
+    '<div class="participation-member-top"><button type="button" class="participation-player-name" data-part-profile="'+esc(p.game_id)+'" '+(!canDossier()?'disabled':'')+'>'+esc(p.name||p.game_id)+'</button>'+
     '<small>'+esc(p.game_id)+(parent?' · '+esc(t("mainAlt"))+' '+esc(parent):'')+'</small>'+
     (r?.updated_at?'<span>'+esc(t("lastUpdate"))+': '+esc(String(r.updated_at).slice(0,10))+'</span>':'')+'</div>'+
     '<div class="participation-member-options"><label><span>'+esc(t("response"))+'</span>'+
