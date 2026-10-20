@@ -661,6 +661,12 @@ async function bootstrap(req: Request, alliance: string, staff: any) {
     permission(staff,"laws")?checked<any[]>(db.from("aos_law_publications").select("law_id,scope,version,published_at").eq("alliance_code",alliance).eq("scope","kingdom").limit(250)):Promise.resolve([]),
     staff.is_owner?checked<any[]>(db.from("aos_audit").select("entity,entity_id,action,actor_id,created_at").eq("alliance_code",alliance).order("created_at",{ascending:false}).limit(60)):Promise.resolve([])
   ]);
+  const linkedAccounts=permission(staff,"members")?await checked<any[]>(db.from("aos_member_account_links")
+    .select("alt_game_id,main_game_id,display_name,reported_alliance")
+    .eq("alliance_code",alliance).limit(500)):[];
+  const rosterIds=new Set(players.map(p=>String(p.game_id)));
+  const externalAlts=linkedAccounts.filter(x=>!rosterIds.has(String(x.alt_game_id))&&
+    rosterIds.has(String(x.main_game_id)));
   let staffMembers:any[]=[];
   if(staff.is_owner){
     const assigned=await checked<any[]>(db.from("aos_staff")
@@ -682,7 +688,7 @@ async function bootstrap(req: Request, alliance: string, staff: any) {
         label:error?"":(data?.user?.email||"")};
     }));
   }
-  return json(req,{alliance:config,staff:{rank:staff.rank,permissions:staff.permissions,is_owner:staff.is_owner},staffMembers,transferContacts,
+  return json(req,{alliance:config,staff:{rank:staff.rank,permissions:staff.permissions,is_owner:staff.is_owner},staffMembers,transferContacts,externalAlts,
     players:permission(staff,"members")?players:
       ["performance","bear","fightclub","participation"].some(feature=>permission(staff,feature))?
         players.filter(p=>p.active&&p.member_status!=="left")
