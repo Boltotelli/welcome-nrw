@@ -1,7 +1,7 @@
 /* AllianceOS Phase 1 – account groups and true dated power observations.
  * Only enabled on GitHub Pages for the initial leadership preview.
  * Never creates player logins or modifies NAP player records. */
-export function createMemberRelationships({getState,getLanguage,request,esc}){
+export function createMemberRelationships({getState,getLanguage,request,esc,flash,reloadDossier}){
   const enabled=location.hostname==="boltotelli.github.io" || ["localhost","127.0.0.1"].includes(location.hostname);
   const labels={
     de:{kind:"Account-Typ",main:"Main",alt:"Alt",mainAccount:"Zugehöriger Main",pickMain:"Main auswählen …",
@@ -33,8 +33,15 @@ export function createMemberRelationships({getState,getLanguage,request,esc}){
       observed:"Registrado",change:"Cambio durante el periodo mostrado",provider:"Fuente: plantilla de alianza MightPulse",
       linked:"Vinculado a",mainHasAlts:"Esta cuenta principal ya tiene alternativas y no puede ser alternativa."}
   };
-  const t=key=>(labels[getLanguage()]||labels.de)[key]||labels.de[key]||key;
+  const extra={
+  de:{externalTitle:"Zweitaccounts außerhalb von NRW",externalHelp:"Nur eine private Übersicht. Keine NRW-Mitgliedschaft, keine Loginrechte, keine automatische Übernahme von API-Daten.",externalId:"Kingshot-ID des Zweitaccounts",externalName:"Name (optional)",externalAlliance:"Allianz (optional)",externalAdd:"Zweitaccount verknüpfen",externalRemove:"Entfernen",externalType:"Extern · manuell eingetragen",externalConfirm:"Diese externe Verknüpfung wirklich entfernen?",externalSaved:"Externer Zweitaccount gespeichert.",externalDeleted:"Externe Verknüpfung entfernt.",externalError:"Externer Zweitaccount konnte nicht gespeichert werden.",externalCount:"extern",externalNoMain:"Zuerst einen Main-Account öffnen."},
+  en:{externalTitle:"Second accounts outside NRW",externalHelp:"Private overview only. No NRW membership, login rights or automatic API ownership claims.",externalId:"Second account Kingshot ID",externalName:"Name (optional)",externalAlliance:"Alliance (optional)",externalAdd:"Link second account",externalRemove:"Remove",externalType:"External · entered manually",externalConfirm:"Remove this external association?",externalSaved:"External second account saved.",externalDeleted:"External link removed.",externalError:"Unable to save external second account.",externalCount:"external",externalNoMain:"Open a main account first."},
+  fr:{externalTitle:"Comptes secondaires hors NRW",externalHelp:"Vue privée uniquement : aucune adhésion NRW, aucun accès ni vérification automatique de propriété.",externalId:"ID Kingshot du secondaire",externalName:"Nom (facultatif)",externalAlliance:"Alliance (facultatif)",externalAdd:"Associer ce compte",externalRemove:"Supprimer",externalType:"Externe · saisi manuellement",externalConfirm:"Supprimer cette association ?",externalSaved:"Compte secondaire externe enregistré.",externalDeleted:"Association supprimée.",externalError:"Enregistrement impossible.",externalCount:"externes",externalNoMain:"Ouvrir d'abord le compte principal."},
+  es:{externalTitle:"Cuentas secundarias fuera de NRW",externalHelp:"Solo vista privada. Sin membresía NRW, acceso ni verificación automática de propiedad.",externalId:"ID Kingshot secundaria",externalName:"Nombre (opcional)",externalAlliance:"Alianza (opcional)",externalAdd:"Vincular cuenta",externalRemove:"Quitar",externalType:"Externa · introducida manualmente",externalConfirm:"¿Quitar esta vinculación?",externalSaved:"Cuenta secundaria guardada.",externalDeleted:"Vinculación eliminada.",externalError:"No se pudo guardar.",externalCount:"externas",externalNoMain:"Abre una cuenta principal primero."}
+  };
+  const t=key=>extra[getLanguage()]?.[key]||(labels[getLanguage()]||labels.de)[key]||extra.de[key]||labels.de[key]||key;
   const player=id=>(getState()?.players||[]).find(x=>String(x.game_id)===String(id));
+  const externalFor=id=>(getState()?.externalAlts||[]).filter(x=>String(x.main_game_id)===String(id));
   const format=n=>Number(n).toLocaleString({de:"de-DE",en:"en-GB",fr:"fr-FR",es:"es-ES"}[getLanguage()]||"de-DE");
   function rowBadge(p){
     if(!enabled)return "";
@@ -42,12 +49,13 @@ export function createMemberRelationships({getState,getLanguage,request,esc}){
       const main=player(p.main_game_id);
       return ' <span class="member-account-tag alt" title="'+esc(t("linked"))+'">ALT → '+esc(main?.name||p.main_game_id)+'</span>';
     }
-    const count=(getState()?.players||[]).filter(x=>x.main_game_id===p.game_id).length;
+    const count=(getState()?.players||[]).filter(x=>x.main_game_id===p.game_id).length+externalFor(p.game_id).length;
     return count?' <span class="member-account-tag">MAIN · '+count+' ALT'+(count===1?'':'s')+'</span>':"";
   }
   function editorFields(record){
     if(!enabled)return "";
-    const all=getState()?.players||[],related=all.filter(x=>x.main_game_id===record.game_id);
+    const all=getState()?.players||[],related=all.filter(x=>x.main_game_id===record.game_id),
+      external=externalFor(record.game_id),totalRelated=related.length+external.length;
     const isAlt=Boolean(record.main_game_id);
     const options=all.filter(x=>x.game_id!==record.game_id&&!x.main_game_id&&x.game_id)
       .sort((a,b)=>String(a.name||"").localeCompare(String(b.name||""),getLanguage()));
@@ -55,17 +63,23 @@ export function createMemberRelationships({getState,getLanguage,request,esc}){
       options.unshift({game_id:record.main_game_id,name:player(record.main_game_id)?.name||record.main_game_id});
     }
     const mainOptions=options.map(p=>'<option value="'+esc(p.game_id)+'" '+(p.game_id===record.main_game_id?'selected':'')+'>'+esc(p.name)+' · '+esc(p.game_id)+'</option>').join("");
-    const accounts=related.length
-      ? related.map(alt=>'<button type="button" class="ghost member-related" data-related-player="'+esc(alt.game_id)+'">'+esc(alt.name)+' <small>· '+esc(alt.game_id)+'</small> ↗</button>').join("")
-      : '<p class="muted">'+esc(t("noAlt"))+'</p>';
+    const nativeAccounts=related.map(alt=>'<button type="button" class="ghost member-related" data-related-player="'+esc(alt.game_id)+'">'+esc(alt.name)+' <small>· '+esc(alt.game_id)+'</small> ↗</button>').join("");
+    const externalAccounts=external.map(alt=>'<div class="external-alt-row"><span><b>'+esc(alt.display_name||alt.alt_game_id)+'</b> <small>· '+esc(alt.alt_game_id)+(alt.reported_alliance?' · '+esc(alt.reported_alliance):'')+' · '+esc(t("externalType"))+'</small></span>'+
+      '<button type="button" class="ghost" data-remove-external-alt="'+esc(alt.alt_game_id)+'">'+esc(t("externalRemove"))+'</button></div>').join("");
+    const accounts=nativeAccounts+externalAccounts||( '<p class="muted">'+esc(t("noAlt"))+'</p>');
+    const externalEditor='<div class="external-alt-editor"><h4>'+esc(t("externalTitle"))+'</h4><p class="small-note">'+esc(t("externalHelp"))+'</p>'+
+      '<div class="form-grid"><label class="field"><span>'+esc(t("externalId"))+'</span><input class="control" name="external_alt_id" pattern="[0-9]{5,20}" inputmode="numeric" maxlength="20" placeholder="123456789"></label>'+
+      '<label class="field"><span>'+esc(t("externalName"))+'</span><input class="control" name="external_alt_name" maxlength="80"></label>'+
+      '<label class="field"><span>'+esc(t("externalAlliance"))+'</span><input class="control" name="external_alt_alliance" maxlength="24" placeholder="NWO / RDS"></label></div>'+
+      '<button type="button" class="ghost" data-add-external-alt>'+esc(t("externalAdd"))+'</button></div>';
     return '<section class="member-links-panel"><h3>'+esc(t("kind"))+'</h3>'+
       '<div class="form-grid"><label class="field"><span>'+esc(t("kind"))+'</span><select class="control" name="account_kind">'+
       '<option value="main" '+(!isAlt?'selected':'')+'>'+esc(t("main"))+'</option>'+
-      '<option value="alt" '+(isAlt?'selected':'')+' '+(related.length?'disabled':'')+'>'+esc(t("alt"))+'</option></select></label>'+
+      '<option value="alt" '+(isAlt?'selected':'')+' '+(totalRelated?'disabled':'')+'>'+esc(t("alt"))+'</option></select></label>'+
       '<div id="memberMainField" '+(!isAlt?'hidden':'')+'><label class="field"><span>'+esc(t("mainAccount"))+'</span>'+
       '<select class="control" name="main_game_id"><option value="">'+esc(t("pickMain"))+'</option>'+mainOptions+'</select></label></div></div>'+
-      '<p class="small-note">'+esc(related.length?t("mainHasAlts"):t("linkHelp"))+'</p>'+
-      (!isAlt?'<div class="member-related-list"><strong>'+esc(t("altAccounts"))+'</strong>'+accounts+'</div>':
+      '<p class="small-note">'+esc(totalRelated?t("mainHasAlts"):t("linkHelp"))+'</p>'+
+      (!isAlt?'<div class="member-related-list"><strong>'+esc(t("altAccounts"))+'</strong>'+accounts+'</div>'+externalEditor:
         '<div class="member-related-list"><strong>'+esc(t("mainAccount"))+'</strong><button type="button" class="ghost member-related" data-related-player="'+esc(record.main_game_id)+'">'+esc(player(record.main_game_id)?.name||record.main_game_id)+' ↗</button></div>')+
       '</section><section class="member-history-panel"><h3>'+esc(t("powerHistory"))+'</h3>'+
       '<p class="small-note">'+esc(t("provider"))+'</p>'+
