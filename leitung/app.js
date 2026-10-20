@@ -8,7 +8,7 @@ import {createPerformance} from "./performance.js?v=permissions-split-20261020-3
 import {createBearManagement} from "./bear-management.js?v=permissions-split-20261020-3";
 import {createFightClub} from "./fightclub.js?v=permissions-split-20261020-3";
 import {createEventParticipation} from "./event-participation.js?v=permissions-split-20261020-3";
-import {createEventLoans} from "./event-loans.js?v=event-loans-20261020-1";
+import {createEventLoans} from "./event-loans.js?v=event-loans-20261020-2";
 
 // Private AllianceOS pilot. Data is NEVER stored in localStorage; only auth session is.
 // All records and permissions are issued by the authenticated Edge Function.
