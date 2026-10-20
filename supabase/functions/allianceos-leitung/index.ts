@@ -929,7 +929,7 @@ async function fightClubMapSave(req:Request,alliance:string,userId:string,staff:
  if(!["swordland","triforce"].includes(eventType)||!isId(gameId))
    throw new HttpError("invalid_map_assignment",400);
  const parsed=Date.parse(battleDate+"T00:00:00Z");
- if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(battleDate)||!Number.isFinite(parsed)||
+ if(!/^\d{4}-\d{2}-\d{2}$/.test(battleDate)||!Number.isFinite(parsed)||
     new Date(parsed).toISOString().slice(0,10)!==battleDate||
     parsed-Date.now() < -120*86400000||parsed-Date.now() > 540*86400000)
    throw new HttpError("invalid_battle_date",400);
