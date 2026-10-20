@@ -553,3 +553,51 @@
 .external-alt-row button{flex-shrink:0}
 .loan-date-note{grid-column:1/-1;margin:0}
 @media(max-width:620px){.external-alt-editor .form-grid{grid-template-columns:1fr}.external-alt-editor .form-grid label:first-child{grid-column:auto}.external-alt-row{flex-wrap:wrap}}
+
+/* Swordland / TriAlliance tactical maps (FightClub). No fixed squad size or
+   automatic event registration: all objective assignments are leadership notes. */
+.fight-map-card{min-width:0;overflow:hidden}
+.fight-map-title{display:flex;align-items:start;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.fight-map-title h3{margin:0 0 5px}
+.fight-map-title p{max-width:720px;margin:0}
+.fight-map-topbar{display:flex;flex-wrap:wrap;align-items:end;gap:16px;margin:12px 0}
+.fight-map-topbar label{display:flex;flex-direction:column;gap:5px;font-size:12px;font-weight:700}
+.fight-map-topbar select{min-width:150px}
+.fight-map-topbar>span{font-size:12px;color:var(--muted);padding-bottom:9px}
+.fight-map-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(235px,300px);gap:14px;align-items:start;margin-top:12px;min-width:0}
+.fight-map-scroll{width:100%;max-width:100%;overflow:auto;border:1px solid var(--border);border-radius:14px;background:#8b735d;scrollbar-color:#c8a76d #382e25;overscroll-behavior-x:contain}
+.fight-map-scroll:focus-visible{outline:2px solid var(--accent)}
+.fight-map-stage{position:relative;width:100%;min-width:790px;overflow:hidden;isolation:isolate}
+.fight-map-stage.fight-map-tri{min-width:970px;aspect-ratio:1440 / 1050;background:radial-gradient(circle at 50% 45%,#a28869,#e2c39d 75%)}
+.fight-map-stage.fight-map-sword{min-width:690px;aspect-ratio:785 / 710;background:#82664c}
+.fight-map-photo,.fight-map-sketch{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;pointer-events:none}
+.fight-map-pin{position:absolute;z-index:2;transform:translate(-50%,-50%);border:1px solid #fff9e9;background:#223e50ed;color:#fff9ed;min-width:31px;min-height:27px;border-radius:8px;padding:3px 6px;box-shadow:0 2px 7px #000a;cursor:pointer;line-height:1.1;white-space:nowrap;font-weight:800;font-size:10px;transition:background .15s,transform .15s;touch-action:manipulation}
+.fight-map-pin:hover,.fight-map-pin:focus-visible{z-index:4;background:#f1c40f;color:#23221c;transform:translate(-50%,-50%) scale(1.12);outline:2px solid #fff}
+.fight-map-pin.selected{z-index:5;background:#f1c40f;color:#151b20;border:2px solid #1d2f40;transform:translate(-50%,-50%) scale(1.16);box-shadow:0 0 0 3px #ffffffae,0 5px 15px #000c}
+.fight-map-pin.occupied:not(.selected){background:#216f53}
+.fight-map-pin-count{position:absolute;right:-7px;top:-10px;border-radius:99px;min-width:15px;height:15px;padding:2px 3px;background:#f1c40f;color:#111;font-size:10px;border:1px solid #222;line-height:11px;text-align:center}
+.fight-map-stage.fight-map-tri .fight-map-pin{padding:2px 3px;min-width:24px;min-height:20px;border-radius:5px;font-size:10px;background:#243b4fdf}
+.fight-map-stage.fight-map-tri .fight-map-pin.occupied:not(.selected){background:#21745bed}
+.fight-map-stage.fight-map-tri .fight-map-pin--A:not(.selected){border-color:#d0b1f2}
+.fight-map-stage.fight-map-tri .fight-map-pin--B:not(.selected){border-color:#f6c78b}
+.fight-map-stage.fight-map-tri .fight-map-pin--C:not(.selected){border-color:#85d0e4}
+.fight-map-stage.fight-map-sword .fight-map-pin{max-width:110px;text-align:center;white-space:normal;min-height:35px;border-radius:12px;font-size:11px}
+.fight-map-stage.fight-map-sword .fight-map-pin--under{background:#753d49e8}
+.fight-map-stage.fight-map-sword .fight-map-pin--sanctum{background:#a06a2f}
+.fight-map-stage.fight-map-sword .fight-map-pin--shrine{background:#5c426e}
+.fight-map-detail{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:14px;min-width:0}
+.fight-map-detail-heading{display:flex;justify-content:space-between;align-items:start;gap:8px;margin:0 0 12px}
+.fight-map-detail-heading h4{font-size:16px;margin:0}
+.fight-map-detail-heading span{font-size:11px;color:var(--muted);text-align:right}
+.fight-map-field{display:grid;gap:5px;font-size:12px;font-weight:700;margin:11px 0}
+.fight-map-field .control{width:100%;min-width:0;max-width:100%}
+.fight-map-occupants{max-height:240px;overflow:auto;margin:8px 0}
+.fight-map-occupant{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 2px;border-bottom:1px solid var(--border)}
+.fight-map-occupant span{min-width:0;overflow-wrap:anywhere}
+.fight-map-occupant strong{font-size:12px;display:block}
+.fight-map-occupant small{font-size:10px;display:block;color:var(--muted)}
+.fight-map-occupant button{padding:5px 9px;font-size:11px;flex-shrink:0}
+.fight-map-submit{width:100%;margin-top:5px}
+.fight-map-card>.small-note:last-child{margin-top:10px}
+@media(max-width:1120px){.fight-map-layout{grid-template-columns:minmax(0,1fr)}.fight-map-detail{max-width:none}.fight-map-occupants{max-height:180px}}
+@media(max-width:650px){.fight-map-card{padding:13px}.fight-map-title>.ghost{width:100%}.fight-map-stage.fight-map-tri{min-width:940px}.fight-map-stage.fight-map-sword{min-width:680px}.fight-map-topbar>span{flex:1}}
