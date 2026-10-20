@@ -522,12 +522,21 @@ async function eventLoanSave(req:Request,alliance:string,userId:string,staff:any
  if(command!=="approve")throw new HttpError("invalid_command",400);
  const gameId=str(body?.game_id,20),target=str(body?.target_alliance,8),
   eventType=str(body?.event_type,10),note=str(body?.note||"",500);
- const begin=Date.parse(String(body?.starts_at||"")),end=Date.parse(String(body?.ends_at||""));
+ // Inclusive UTC calendar days: the last selected date remains valid until the
+ // following game's 00:00 UTC reset. No client timezone or minute precision.
+ const startDay=str(body?.start_date,10),lastDay=str(body?.end_date,10);
  if(!isId(gameId)||!["NWO","RDS"].includes(target)||!["fdt","castle","kvk"].includes(eventType))
    throw new HttpError("invalid_event_loan",400);
- if(!Number.isFinite(begin)||!Number.isFinite(end)||begin>=end||
-    end-begin>21*86400000||begin<Date.now()-14*86400000||
-    begin>Date.now()+45*86400000||end<Date.now())
+ if(!/^\d{4}-\d{2}-\d{2}$/.test(startDay)||!/^\d{4}-\d{2}-\d{2}$/.test(lastDay))
+   throw new HttpError("invalid_event_loan_dates",400);
+ const begin=Date.parse(startDay+"T00:00:00.000Z");
+ const last=Date.parse(lastDay+"T00:00:00.000Z");
+ const end=last+86400000;
+ if(!Number.isFinite(begin)||!Number.isFinite(last)||
+   new Date(begin).toISOString().slice(0,10)!==startDay||
+   new Date(last).toISOString().slice(0,10)!==lastDay||
+   last<begin||end-begin>21*86400000||begin<Date.now()-15*86400000||
+   begin>Date.now()+45*86400000||end<=Date.now())
    throw new HttpError("invalid_event_loan_dates",400);
  const existing=await checked<any>(db.from("aos_event_loans").select("id")
    .eq("home_alliance",alliance).eq("game_id",gameId).eq("status","approved").maybeSingle());
