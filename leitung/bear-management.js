@@ -102,7 +102,7 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
  function assignment(id){return (cache?.assignments||[]).find(x=>String(x.game_id)===String(id));}
  function profile(id){return (cache?.profiles||[]).find(x=>String(x.game_id)===String(id));}
  function slot(id){return (cache?.slots||[]).find(x=>x.slot_key===id);}
- function slotLabel(s){return (s.slot_label||hhmm(s.start_time))+" · "+hhmm(s.start_time)+" UTC";}
+ function slotLabel(s){return (s.slot_label?s.slot_label+" · ":"")+hhmm(s.start_time)+" UTC";}
  function select(options,value,extra=""){return '<select class="control" '+extra+'>'+options.map(([v,label])=>
   '<option value="'+esc(v)+'" '+(v===value?'selected':'')+'>'+esc(label)+'</option>').join("")+'</select>';}
  function dataProfile(p){
@@ -121,7 +121,7 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
     '<strong>'+esc(t("troops"))+' · '+esc(t("attack"))+' / '+esc(t("lethality"))+'</strong>'+
     '<div class="bear-attack-grid">'+stats.map(([key,a,l])=>
       '<span>'+esc(t(key))+'</span><b>'+esc(pct(a))+'</b><b>'+esc(pct(l))+'</b>').join("")+'</div>'+
-    '<p class="small-note">'+esc(t("comparison"))+': '+esc(t(p.comparison||"unknown"))+
+    '<p class="small-note">'+esc(t("comparison"))+': '+esc(p.comparison?t(p.comparison):"–")+
     ' · '+esc(t("latest"))+': '+esc(when(p.updated_at))+'</p></div>';
  }
  function counters(){
