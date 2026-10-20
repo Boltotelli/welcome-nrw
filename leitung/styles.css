@@ -520,3 +520,22 @@
 .staff-actions .danger-soft:hover:not(:disabled){background:color-mix(in srgb,var(--red) 10%,var(--surface))}
 @media(max-width:630px){.staff-permission-grid{grid-template-columns:1fr}.staff-actions{display:grid;grid-template-columns:1fr 1fr}.staff-actions button{min-width:0;white-space:normal}.staff-access-row{padding:11px}}
 @media(max-width:395px){.staff-actions{grid-template-columns:1fr}}
+
+/* Event loan cards are part of the existing transfer center. */
+.event-loan-root{margin-bottom:18px;min-width:0}
+.loan-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.loan-header h3{margin:0}
+.loan-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;border:1px solid var(--border);border-radius:12px;background:var(--panel);padding:15px;margin:16px 0}
+.loan-form label{display:grid;gap:6px;font-size:12px;color:var(--muted);min-width:0}
+.loan-form label .control{min-width:0;width:100%}
+.loan-form .loan-protect{grid-column:1/-1;display:flex;align-items:center;gap:10px;color:var(--text)}
+.loan-form .loan-protect input{width:18px;height:18px;accent-color:var(--green)}
+.loan-form>.primary{justify-self:start}
+.loan-entries{display:grid;gap:9px;margin:12px 0}
+.loan-record{border:1px solid var(--border);border-radius:11px;background:var(--surface);padding:12px;overflow-wrap:anywhere}
+.loan-record p{margin:7px 0;font-size:13px}
+.loan-record small{font-size:11px;color:var(--muted)}
+.loan-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:10px}
+.loan-actions button{padding:7px 12px;border-radius:9px;border:1px solid var(--border);background:var(--panel);color:var(--text)}
+.loan-actions button:hover{border-color:var(--accent)}
+@media(max-width:670px){.loan-form{grid-template-columns:1fr}.loan-form>.primary{width:100%}}
