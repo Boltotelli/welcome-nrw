@@ -601,3 +601,87 @@
 .fight-map-card>.small-note:last-child{margin-top:10px}
 @media(max-width:1120px){.fight-map-layout{grid-template-columns:minmax(0,1fr)}.fight-map-detail{max-width:none}.fight-map-occupants{max-height:180px}}
 @media(max-width:650px){.fight-map-card{padding:13px}.fight-map-title>.ghost{width:100%}.fight-map-stage.fight-map-tri{min-width:940px}.fight-map-stage.fight-map-sword{min-width:680px}.fight-map-topbar>span{flex:1}}
+
+/* Compact high-throughput assignment controls for FightClub and Bear Trap. */
+.fight-fast-assign,.bear-fast-assign{margin:12px 0;padding:15px}
+.fight-fast-assign h3,.bear-fast-assign h3{font-size:16px;margin:0 0 12px}
+.fight-fast-form,.bear-fast-form{display:grid;grid-template-columns:minmax(180px,1.75fr) minmax(110px,1fr) minmax(155px,1fr) auto;align-items:end;gap:10px;min-width:0}
+.bear-fast-form{grid-template-columns:minmax(180px,1.6fr) minmax(155px,1fr) minmax(150px,1fr) minmax(155px,1fr) auto}
+.fight-fast-form>label,.bear-fast-form>label,.bear-settings-compact>label{display:grid;gap:5px;min-width:0;font-size:12px;font-weight:650}
+.fight-fast-form .control,.bear-fast-form .control{width:100%;min-width:0}
+.fight-roster-collapsible{margin-top:12px;min-width:0}
+.fight-roster-collapsible>summary{font-weight:750;font-size:15px;cursor:pointer;padding:3px 0 13px}
+.fight-roster-collapsible[open]>summary{border-bottom:1px solid var(--border);margin-bottom:12px}
+.fight-player-compact{display:grid;grid-template-columns:minmax(170px,1fr) minmax(0,1.7fr);align-items:center;gap:12px;padding:10px 12px;margin:0 0 7px;border-radius:11px}
+.fight-player-compact .fight-player-top{display:flex;align-items:center;gap:7px;flex-wrap:wrap;min-width:0}
+.fight-player-compact .fight-player-top .fight-power{margin-left:auto}
+.fight-player-compact .fight-player-fields{display:grid;grid-template-columns:minmax(100px,1fr) minmax(120px,1.1fr) auto 42px;align-items:end;gap:8px}
+.fight-player-compact .fight-player-fields label{min-width:0}
+.fight-player-compact .fight-player-fields select{width:100%;min-width:0}
+.fight-player-compact .fight-player-fields .primary{align-self:end}
+.fight-row-more{position:relative}
+.fight-row-more>summary{font-size:19px;cursor:pointer;text-align:center;list-style:none;min-height:36px;line-height:30px;border:1px solid var(--border);border-radius:8px}
+.fight-row-more>summary::-webkit-details-marker{display:none}
+.fight-row-more[open]{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:10px;align-items:end}
+.fight-row-more[open]>summary{width:42px;margin-left:auto}
+.fight-row-more label{min-width:180px;display:grid;gap:5px;font-size:12px}
+.fight-row-more button{align-self:end}
+.fight-map-detail>.ghost[data-map-copy-position]{width:100%;text-align:center;font-size:12px;margin-bottom:7px}
+.fight-map-team-section{margin:17px 0 4px}
+.fight-map-team-section>h4{margin:0 0 10px;font-size:17px}
+.fight-map-team-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.fight-map-team-card{border:1px solid var(--border);background:var(--panel);border-radius:12px;padding:12px;min-width:0;display:flex;flex-direction:column;gap:10px}
+.fight-map-team-header{display:flex;align-items:center;gap:8px;justify-content:space-between;flex-wrap:wrap}
+.fight-map-team-header strong{font-size:13px}
+.fight-map-team-header small{color:var(--muted);font-size:11px}
+.fight-map-team-card pre{background:var(--surface);padding:12px;white-space:pre-wrap;overflow-wrap:anywhere;border-radius:9px;font:12px/1.5 system-ui,Arial,sans-serif;max-height:290px;overflow:auto;flex:1;min-height:125px;margin:0}
+.fight-map-leader-row{display:flex;align-items:end;gap:7px}
+.fight-map-leader-row>label{min-width:0;flex:1;font-size:11px}
+.fight-map-leader-row>label select{display:block;width:100%;margin-top:4px;min-width:0}
+.fight-map-leader-row button{font-size:11px;white-space:nowrap}
+.fight-map-team-card>button{width:100%;margin-top:auto}
+.bear-settings-compact{display:flex;align-items:end;gap:10px;flex-wrap:wrap;margin:0 0 14px}
+.bear-settings-compact>label{min-width:220px;max-width:300px}
+.bear-settings-compact .control{width:100%}
+.bear-count-card{min-width:0}
+.bear-slot-analytics{display:grid;gap:5px;margin-top:12px;border-top:1px solid var(--border);padding-top:10px}
+.bear-slot-analytics>strong{font-size:13px}
+.bear-slot-analytics>small{font-size:11px;color:var(--muted)}
+.bear-member-compact{display:grid;grid-template-columns:minmax(170px,.95fr) minmax(0,1.8fr);align-items:center;gap:12px;padding:10px 13px;margin:0 0 7px}
+.bear-member-compact .bear-member-head{min-width:0;display:flex;align-items:center;flex-wrap:wrap;gap:6px}
+.bear-member-compact .bear-member-head>small{font-size:11px}
+.bear-member-compact .bear-formation-badge{border:1px solid #f1c40f70;border-radius:7px;padding:3px 6px;font-size:11px;color:var(--accent)}
+.bear-member-compact .bear-fields{display:grid;grid-template-columns:minmax(145px,1.2fr) minmax(130px,1.1fr) minmax(155px,1fr) auto;align-items:end;gap:7px}
+.bear-member-compact .bear-fields label{min-width:0;display:grid;gap:4px}
+.bear-member-compact .bear-fields select{width:100%;min-width:0}
+.bear-member-compact .bear-fields>button{margin:0}
+.bear-switch-label{font-size:11px;font-weight:650;white-space:nowrap}
+.bear-switch{display:flex;align-items:center;gap:5px;min-height:38px}
+.bear-switch>span{font-size:11px}
+.bear-switch input[type="checkbox"]{cursor:pointer;appearance:none;-webkit-appearance:none;width:37px;height:22px;position:relative;flex:none;outline-offset:3px;background:#334155;border:1px solid var(--border);border-radius:99px;margin:0;transition:background .15s}
+.bear-switch input[type="checkbox"]:before{content:"";display:block;position:absolute;left:3px;top:3px;width:14px;height:14px;border-radius:50%;background:#fff;transition:transform .15s}
+.bear-switch input[type="checkbox"]:checked{background:#1e8e63}
+.bear-switch input[type="checkbox"]:checked:before{transform:translateX(15px)}
+.bear-row-more{grid-column:1/-1;font-size:12px;padding:5px 0}
+.bear-row-more>summary{cursor:pointer;color:var(--muted);font-size:12px;padding:5px 0}
+.bear-row-more[open]{margin-top:5px;border-top:1px solid var(--border)}
+.bear-row-more label{display:grid;gap:5px;max-width:600px}
+.bear-row-more .bear-profile-details{margin-top:12px}
+.bear-recommendation{padding:9px 12px;border-radius:9px;background:var(--panel);border:1px solid var(--border)}
+@media(max-width:1170px){
+ .fight-fast-form,.bear-fast-form{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .fight-fast-form>button,.bear-fast-form>button{grid-column:1/-1}
+ .fight-map-team-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .bear-member-compact,.fight-player-compact{grid-template-columns:1fr}
+}
+@media(max-width:690px){
+ .fight-fast-form,.bear-fast-form{grid-template-columns:1fr}
+ .fight-map-team-grid{grid-template-columns:1fr}
+ .fight-player-compact .fight-player-fields{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .fight-player-compact .fight-player-fields>button{align-self:stretch}
+ .fight-row-more[open]{display:block}
+ .bear-member-compact .bear-fields{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .bear-member-compact .bear-fields>button{grid-column:1/-1;width:100%}
+ .bear-switch-label .bear-switch{justify-content:center}
+ .bear-settings-compact>label,.bear-settings-compact>button{max-width:none;width:100%}
+}
