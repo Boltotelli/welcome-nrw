@@ -736,8 +736,9 @@ async function saveFightClub(req:Request,alliance:string,userId:string,staff:any
  const eventType=str(body?.event_type,30),battleDate=str(body?.battle_date,10),gameId=str(body?.game_id,20);
  if(!["swordland","triforce"].includes(eventType))throw new HttpError("invalid_fight_event",400);
  // Calendar date only. Do not invent an event or trust client timestamps.
+ const parsed=Date.parse(battleDate+"T00:00:00Z");
  if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(battleDate)||
-  new Date(battleDate+"T00:00:00Z").toISOString().slice(0,10)!==battleDate)
+  !Number.isFinite(parsed)||new Date(parsed).toISOString().slice(0,10)!==battleDate)
   throw new HttpError("invalid_battle_date",400);
  const delta=Date.parse(battleDate+"T00:00:00Z")-Date.now();
  if(!Number.isFinite(delta)||delta < -120*86400000||delta>540*86400000)
@@ -755,11 +756,11 @@ async function saveFightClub(req:Request,alliance:string,userId:string,staff:any
  }
  const legion=Number(body?.legion??0),availability=str(body?.availability??"unknown",20),
  combatRole=str(body?.combat_role??"flex",20),notes=str(body?.notes??"",500);
- if(!Number.isInteger(legion)||![0,1,2].includes(legion)||
+ if(!Number.isInteger(legion)||![-1,0,1,2].includes(legion)||
   !["unknown","full","partial","unavailable"].includes(availability)||
   !["flex","attack","defense","support"].includes(combatRole))
    throw new HttpError("invalid_fight_assignment",400);
- if(legion!==0&&availability==="unavailable")throw new HttpError("unavailable_cannot_join_legion",409);
+ if([1,2].includes(legion)&&availability==="unavailable")throw new HttpError("unavailable_cannot_join_legion",409);
  const a=await checked<any>(db.from("aos_fightclub_assignments").upsert({
    alliance_code:alliance,event_type:eventType,battle_date:battleDate,game_id:gameId,
    legion,availability,combat_role:combatRole,notes,
