@@ -475,6 +475,72 @@ async function deleteDiscordRule(req:Request,alliance:string,userId:string,staff
 }
 
 // Event loans are separate from permanent transfer requests and NAP history.
+async function eventLoanSave(req:Request,alliance:string,userId:string,staff:any,body:any){
+ if(!staff.is_owner)throw new HttpError("permission_denied",403);
+ const command=str(body?.command||"approve",15),now=new Date().toISOString();
+ if(command==="return"||command==="cancel"){
+   const id=str(body?.id,40);
+   if(!/^[a-f0-9-]{36}$/i.test(id))throw new HttpError("invalid_loan_id",400);
+   const row=await checked<any>(db.from("aos_event_loans").select("*")
+     .eq("home_alliance",alliance).eq("id",id).maybeSingle());
+   if(!row||row.status!=="approved")throw new HttpError("loan_not_active",409);
+   const data=command==="return"?{status:"returned",returned_at:now,updated_at:now,updated_by:userId}
+     :{status:"cancelled",updated_at:now,updated_by:userId};
+   const saved=await checked<any>(db.from("aos_event_loans").update(data)
+     .eq("home_alliance",alliance).eq("id",id).eq("status","approved").select("*").single());
+   await audit(alliance,userId,"event_loan",id,command);
+   return json(req,{ok:true,loan:saved});
+ }
+ if(command!=="approve")throw new HttpError("invalid_command",400);
+ const gameId=str(body?.game_id,20),target=str(body?.target_alliance,8),
+  eventType=str(body?.event_type,10),note=str(body?.note||"",500);
+ const begin=Date.parse(String(body?.starts_at||"")),end=Date.parse(String(body?.ends_at||""));
+ if(!isId(gameId)||!["NWO","RDS"].includes(target)||!["fdt","castle","kvk"].includes(eventType))
+   throw new HttpError("invalid_event_loan",400);
+ if(!Number.isFinite(begin)||!Number.isFinite(end)||begin>=end||
+    end-begin>21*86400000||begin<Date.now()-14*86400000||
+    begin>Date.now()+45*86400000||end<Date.now())
+   throw new HttpError("invalid_event_loan_dates",400);
+ const existing=await checked<any>(db.from("aos_event_loans").select("id")
+   .eq("home_alliance",alliance).eq("game_id",gameId).eq("status","approved").maybeSingle());
+ if(existing)throw new HttpError("loan_already_active",409);
+ const people=await checked<any[]>(db.from("players")
+   .select("id,game_id,alliance_code,active,alliance_rank,provider_seen_at")
+   .eq("game_id",gameId).limit(20));
+ const home=people.find(p=>p.alliance_code===alliance&&p.active);
+ const atTarget=people.find(p=>p.alliance_code===target&&p.active);
+ if(!home&&!atTarget)throw new HttpError("player_not_verified_in_home_or_target",409);
+ if(!home&&atTarget){
+   const moves=await checked<any[]>(db.from("player_alliance_transfers")
+     .select("id").eq("player_id",atTarget.id).eq("from_alliance",alliance)
+     .gte("moved_at",new Date(Date.now()-21*86400000).toISOString()).limit(1));
+   if(!moves.length)throw new HttpError("no_recent_nrw_membership_evidence",409);
+ }
+ let originalRank:number|null=null;
+ const protect=body?.protect_leadership===true;
+ if(protect){
+   const email=loginEmail(gameId);
+   const {data,error}=await db.auth.admin.listUsers({page:1,perPage:1000});
+   if(error)throw new HttpError("user_lookup_failed",500);
+   const identity=data?.users?.find(u=>u.email?.toLowerCase()===email);
+   if(!identity)throw new HttpError("leader_account_not_found",409);
+   const leader=await checked<any>(db.from("aos_staff").select("rank,enabled,disabled_reason")
+      .eq("user_id",identity.id).eq("alliance_code",alliance).maybeSingle());
+   if(!leader||!["R4","R5"].includes(leader.rank)||leader.disabled_reason==="manual")
+     throw new HttpError("leader_loan_protection_denied",403);
+   originalRank=Number(leader.rank.slice(1));
+   if(home?.alliance_rank&&Number(home.alliance_rank)!==originalRank)
+     throw new HttpError("home_rank_changed",409);
+ }
+ const saved=await checked<any>(db.from("aos_event_loans").insert({
+   home_alliance:alliance,game_id:gameId,target_alliance:target,event_type:eventType,
+   starts_at:new Date(begin).toISOString(),ends_at:new Date(end).toISOString(),
+   protect_leadership:protect,original_rank:originalRank,status:"approved",
+   away_seen_at:atTarget?now:null,note,created_by:userId,updated_by:userId
+ }).select("*").single());
+ await audit(alliance,userId,"event_loan",saved.id,protect?"approve_protected":"approve");
+ return json(req,{ok:true,loan:saved});
+}
 async function eventLoanData(req:Request,alliance:string,staff:any){
  if(!permission(staff,"members")&&!permission(staff,"transfers"))throw new HttpError("permission_denied",403);
  const loans=await checked<any[]>(db.from("aos_event_loans").select("*")
@@ -1403,6 +1469,7 @@ Deno.serve(async(req: Request)=>{
     if(body?.action==="alliance_logo_upload"||body?.action==="alliance_logo_remove")return await updateAllianceLogo(req,alliance,userId,staff,body);
     if(body?.action==="staff")return await saveStaff(req,alliance,userId,staff,body);
     if(body?.action==="event_loan_data")return await eventLoanData(req,alliance,staff);
+    if(body?.action==="event_loan_save")return await eventLoanSave(req,alliance,userId,staff,body);
     if(body?.action==="provision_leaders")return await provisionLeaders(req,alliance,userId,staff);
     if(body?.action==="reset_leader_password")return await rotateLeaderPassword(req,alliance,userId,staff,body);
     if(body?.action==="player_lookup")return await lookupTransferPlayer(req,alliance,staff,body);
