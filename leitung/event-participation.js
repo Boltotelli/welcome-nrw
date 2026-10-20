@@ -5,7 +5,7 @@
 export function createEventParticipation({getState,getLanguage,request,esc,flash,openPlayer,navigate}){
  const canDossier=()=>getState()?.staff?.is_owner===true||getState()?.staff?.permissions?.members===true;
  const root=document.getElementById("participationRoot");
- const enabled=location.hostname==="boltotelli.github.io"||["localhost","127.0.0.1"].includes(location.hostname);
+ const enabled=true; // Released for both GitHub Pages and Vercel; access is enforced by server-side module permissions.
  const words={
  de:{title:"Event-Teilnahme",intro:"Anmeldungen koordinieren, fehlende Rückmeldungen erkennen und Anwesenheit nach dem Event erfassen.",
   event:"Event",day:"Eventdatum",calendar:"Vorschläge aus der Eventplanung",manual:"Datum manuell wählen",
