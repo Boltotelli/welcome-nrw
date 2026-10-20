@@ -8,6 +8,7 @@ import {createPerformance} from "./performance.js?v=permissions-split-20261020-3
 import {createBearManagement} from "./bear-management.js?v=permissions-split-20261020-3";
 import {createFightClub} from "./fightclub.js?v=permissions-split-20261020-3";
 import {createEventParticipation} from "./event-participation.js?v=permissions-split-20261020-3";
+import {createEventLoans} from "./event-loans.js?v=event-loans-20261020-1";
 
 // Private AllianceOS pilot. Data is NEVER stored in localStorage; only auth session is.
 // All records and permissions are issued by the authenticated Edge Function.
@@ -130,6 +131,7 @@ function setTab(name){
   if(name==="bear"&&state)bearManagement.open();
   if(name==="fightclub"&&state)fightclub.open();
   if(name==="participation"&&state)participation.open();
+  if(name==="transfers"&&state)eventLoans.open();
 }
 function flash(message,error=false){
  const el=$("flash");el.textContent=message;el.classList.toggle("error",error);el.hidden=false;
@@ -184,6 +186,7 @@ const fightclub=createFightClub({getState:()=>state,getLanguage:()=>lang,request
   openPlayer:gameId=>openEdit("member",gameId)});
 const participation=createEventParticipation({getState:()=>state,getLanguage:()=>lang,request,esc,flash,
   openPlayer:gameId=>openEdit("member",gameId),navigate:name=>setTab(name)});
+const eventLoans=createEventLoans({getState:()=>state,getLanguage:()=>lang,request,esc,flash});
 function showLogin(message=""){
  $("liveArea").hidden=true;$("loginArea").hidden=false;$("logoutBtn").hidden=true;
  $("roleChip").textContent="R4 / R5";$("loginError").textContent=message;$("changePasswordBtn").hidden=true;
@@ -255,7 +258,7 @@ function renderRoster(){
  $("rosterCount").textContent=fmtInt(list.length);
  $("rosterRows").innerHTML=list.length?list.map(p=>{
   const id=esc(p.game_id||""),name=esc(p.name),avatar=/^https:\/\//i.test(p.avatar_url||"")?'<img class="avatar" src="'+esc(p.avatar_url)+'" alt="">':'<span class="avatar">'+esc((p.name||"?").slice(0,1))+'</span>';
-  return '<tr><td><div class="person">'+avatar+'<div><strong>'+name+'</strong><small>'+id+relationships.rowBadge(p)+'</small></div></div></td><td>'+'<span class="rank-and-tg"><strong>'+esc(p.rank?"R"+p.rank:"—")+'</strong><span class="level">· '+esc(cityLevel(p.tc_level))+'</span></span>'+'</td><td>'+(p.power==null?'<span class="muted">'+esc(t("noPower"))+'</span>':'<strong title="'+esc(fmtInt(p.power))+'">'+esc(formattedPower(p.power))+'</strong><small title="'+esc(p.power_source||"")+'">'+esc(dateText(p.power_observed_at))+'</small>')+'</td><td>'+languageChips(p.languages)+'</td><td>'+'<span class="discord-presence '+(p.discord_connected?"connected":"unlinked")+'" title="'+esc(p.discord_connected?t("discordLinked"):t("discordUnlinked"))+'">'+esc(p.discord_connected?t("yes"):t("no"))+'</span>'+'</td><td>'+badge(p.member_status)+'</td><td><button type="button" class="action-link" data-edit-member="'+id+'" aria-label="'+esc(t("dossier"))+' · '+name+'" '+(!can("members")?"disabled":"")+'>'+esc(t("dossier"))+'</button></td></tr>';
+  return '<tr><td><div class="person">'+avatar+'<div><strong>'+name+'</strong><small>'+id+relationships.rowBadge(p)+(p.is_event_loan?' · ⏱ '+esc(p.current_alliance||"")+" ("+esc(p.event_loan_type||"")+")":'')+'</small></div></div></td><td>'+'<span class="rank-and-tg"><strong>'+esc(p.rank?"R"+p.rank:"—")+'</strong><span class="level">· '+esc(cityLevel(p.tc_level))+'</span></span>'+'</td><td>'+(p.power==null?'<span class="muted">'+esc(t("noPower"))+'</span>':'<strong title="'+esc(fmtInt(p.power))+'">'+esc(formattedPower(p.power))+'</strong><small title="'+esc(p.power_source||"")+'">'+esc(dateText(p.power_observed_at))+'</small>')+'</td><td>'+languageChips(p.languages)+'</td><td>'+'<span class="discord-presence '+(p.discord_connected?"connected":"unlinked")+'" title="'+esc(p.discord_connected?t("discordLinked"):t("discordUnlinked"))+'">'+esc(p.discord_connected?t("yes"):t("no"))+'</span>'+'</td><td>'+badge(p.member_status)+'</td><td><button type="button" class="action-link" data-edit-member="'+id+'" aria-label="'+esc(t("dossier"))+' · '+name+'" '+(!can("members")?"disabled":"")+'>'+esc(t("dossier"))+'</button></td></tr>';
  }).join(""):empty(t("noPlayers"));
 }
 function renderTransfers(){
@@ -364,7 +367,7 @@ function renderSettings(){
  }
  if(!members.length)$("staffSelectionInfo").textContent=t("rightsSelected");
 }
-function render(){patchTranslations();counts();renderRoster();renderTransfers();renderLaws();renderEvents();renderSettings();eventHub.render(state,lang,can("events"));discordPlanner.render(lang);operations.render();}
+function render(){patchTranslations();counts();renderRoster();renderTransfers();renderLaws();renderEvents();renderSettings();eventLoans.render();eventHub.render(state,lang,can("events"));discordPlanner.render(lang);operations.render();}
 function control(label,name,value="",type="text",opts={}){
  const attr=Object.entries(opts).map(([k,v])=>' '+k+'="'+esc(v)+'"').join("");
  return '<label class="field"><span>'+esc(label)+'</span><input class="control" name="'+esc(name)+'" type="'+esc(type)+'" value="'+esc(value??"")+'"'+attr+'></label>';
@@ -459,7 +462,8 @@ function openEdit(entity,id=null,sourcePlayer=null){
       '<h3>'+esc(t("serverMoves"))+'</h3>'+
       (internal.length?internal.map(x=>'<div class="history-item">'+esc(dateText(x.moved_at))+' · '+esc(x.from_alliance||"—")+' → '+esc(x.to_alliance||"—")+'</div>').join(""):'<p class="muted">'+esc(t("noHistory"))+'</p>')+
       
-      (can("transfers")?'<button type="button" class="ghost" data-plan-player="'+esc(record.game_id)+'">'+esc(t("serverTransfer"))+' →</button>':"");
+      (can("transfers")?'<button type="button" class="ghost" data-plan-player="'+esc(record.game_id)+'">'+esc(t("serverTransfer"))+' →</button>':"")+
+      (can("transfers")?'<button type="button" class="ghost" data-loan-player="'+esc(record.game_id)+'">⏱ Event-Ausleihe →</button>':"");
  }else return;
  $("modalFields").innerHTML=h;
  if(entity==="transfer"){
@@ -545,7 +549,7 @@ async function saveDialog(event){
 }
 q(".nav-item").forEach(el=>el.addEventListener("click",()=>setTab(el.dataset.tab)));
 q("[data-jump]").forEach(el=>el.addEventListener("click",()=>setTab(el.dataset.jump)));
-$("language").addEventListener("change",e=>{lang=e.target.value;localStorage.setItem("nrw_page_lang",lang);if(state){render();if(tab==="performance")performance.render();if(tab==="bear")bearManagement.render();if(tab==="fightclub")fightclub.render();if(tab==="participation")participation.render();}else{patchTranslations();loadLeaderList();$("toggleLegacyLogin").textContent=t(legacyLogin?"normalSignIn":"legacySignIn");}});
+$("language").addEventListener("change",e=>{lang=e.target.value;localStorage.setItem("nrw_page_lang",lang);if(state){render();if(tab==="performance")performance.render();if(tab==="bear")bearManagement.render();if(tab==="fightclub")fightclub.render();if(tab==="participation")participation.render();if(tab==="transfers")eventLoans.render();}else{patchTranslations();loadLeaderList();$("toggleLegacyLogin").textContent=t(legacyLogin?"normalSignIn":"legacySignIn");}});
 $("themeToggle").addEventListener("click",()=>{const next=document.documentElement.dataset.theme==="dark"?"light":"dark";document.documentElement.dataset.theme=next;localStorage.setItem("nrw_theme",next);});
 $("syncPlayerPower").addEventListener("click",syncPlayerPower);
 $("rosterSearch").addEventListener("input",()=>state&&renderRoster());
@@ -577,6 +581,8 @@ $("transferWindowFilter").addEventListener("change",()=>state&&renderTransfers()
    $(id).addEventListener(id==="internalMoveSearch"?"input":"change",()=>state&&renderTransfers());
 q("[data-create]").forEach(el=>el.addEventListener("click",()=>openEdit(el.dataset.create)));
 document.addEventListener("click",e=>{
+  const loan=e.target.closest("[data-loan-player]");
+  if(loan){$("editDialog").close();setTab("transfers");eventLoans.selectPlayer(loan.dataset.loanPlayer);return;}
   const plan=e.target.closest("[data-plan-player]");if(plan){const p=state.players.find(x=>x.game_id===plan.dataset.planPlayer);if(p){$("editDialog").close();openEdit("transfer",null,p);}return;}
  const edit=e.target.closest("[data-edit]");if(edit)openEdit(edit.dataset.edit,edit.dataset.id);
 });
@@ -827,7 +833,7 @@ $("changePasswordForm").addEventListener("submit",async e=>{
  }catch(e){flash(t("genericError")+" ("+e.message+")",true);}
  finally{button.disabled=false;}
 });
-$("logoutBtn").addEventListener("click",async()=>{await supabase.auth.signOut();state=null;discordPlanner.reset();eventBotStatusPanel.reset();performance.reset();bearManagement.reset();fightclub.reset();participation.reset();selectedStaffEmail="";showLogin();});
+$("logoutBtn").addEventListener("click",async()=>{await supabase.auth.signOut();state=null;discordPlanner.reset();eventBotStatusPanel.reset();performance.reset();bearManagement.reset();fightclub.reset();participation.reset();eventLoans.reset();selectedStaffEmail="";showLogin();});
 document.documentElement.dataset.theme=localStorage.getItem("nrw_theme")||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");
 patchTranslations();
 loadLeaderList();
