@@ -286,7 +286,7 @@ async function rotateLeaderPassword(req:Request,alliance:string,userId:string,st
 }
 async function rosterFor(alliance: string, kingdom: number) {
   // Read-only reuse of NAP's cached records. No NAP table or law is modified.
-  const players = await checked<any[]>(db.from("players")
+  let players = await checked<any[]>(db.from("players")
     .select("id,game_id,name,alliance_code,alliance_rank,active,languages,provider_seen_at")
     // Only verified game identities belong in player management. Historical
     // placeholder/import rows without a game_id (including the distinct
@@ -294,6 +294,24 @@ async function rosterFor(alliance: string, kingdom: number) {
     // Preserve those source records in NAP/players for audit; do not delete.
     .eq("alliance_code",alliance).not("game_id","is",null)
     .order("name",{ascending:true}).limit(500));
+  // Add the current temporary event loan as a home-roster *overlay* only.
+  // The actual source alliance remains NWO/RDS; never rewrite the NAP record.
+  const now=new Date().toISOString();
+  const activeLoans=await checked<any[]>(db.from("aos_event_loans").select("*")
+    .eq("home_alliance",alliance).eq("status","approved")
+    .lte("starts_at",now).gte("ends_at",now).limit(100));
+  if(activeLoans.length){
+    const borrowed=await checked<any[]>(db.from("players")
+      .select("id,game_id,name,alliance_code,alliance_rank,active,languages,provider_seen_at")
+      .in("game_id",activeLoans.map(l=>l.game_id)).eq("active",true).limit(200));
+    const overseas=activeLoans.map(l=>{
+      const source=borrowed.find(p=>p.game_id===l.game_id&&p.alliance_code===l.target_alliance);
+      return source?{...source,is_event_loan:true,event_loan_type:l.event_type,
+        event_loan_until:l.ends_at,current_alliance:source.alliance_code,
+        original_rank:l.original_rank||null}:null;
+    }).filter(Boolean);
+    players=[...players,...overseas.filter(p=>!players.some(home=>home.game_id===p.game_id))];
+  }
   const notes = await checked<any[]>(db.from("aos_member_notes")
     .select("id,game_id,member_status,discord_user_id,notes,spoken_languages,joined_on,responsibilities,power_override,power_override_at,updated_at")
     .eq("alliance_code",alliance).limit(500));
@@ -327,9 +345,12 @@ async function rosterFor(alliance: string, kingdom: number) {
   return players.map(p=>{
     const overlay=byNote.get(p.game_id)||{}, cache=byImg.get(p.game_id)||{}, match=byDiscord.get(p.id)||{}, power=byPower.get(p.game_id)||{}, api=byApiPower.get(p.game_id)||{};
     return {
-      game_id:p.game_id, name:p.name, rank:p.alliance_rank || null,
+      game_id:p.game_id, name:p.name, rank:p.is_event_loan?(p.original_rank||null):(p.alliance_rank || null),
       main_game_id:byAlt.get(p.game_id)||null,
-      alliance:p.alliance_code, active:p.active,
+      alliance:alliance,current_alliance:p.current_alliance||p.alliance_code,
+      is_event_loan:p.is_event_loan===true,
+      event_loan_type:p.event_loan_type||null,event_loan_until:p.event_loan_until||null,
+      active:p.active,
       member_status:overlay.member_status||(p.active?"active":"left"),
       note_id:overlay.id||null, notes:overlay.notes||null,
       languages:overlay.spoken_languages??p.languages??[], source_languages:p.languages||[], joined_on:overlay.joined_on||null,
