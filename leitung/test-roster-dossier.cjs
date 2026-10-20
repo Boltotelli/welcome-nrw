@@ -25,7 +25,10 @@ const errors=[],deps={
  playerLangNames:{de:"Deutsch",en:"English",fr:"Français",es:"Español",tr:"Türkçe"},
  $:id=>elements[id]||(elements[id]={}),t:s=>s,
  esc:s=>String(s??"").replaceAll("<","&lt;").replaceAll('"',"&quot;"),
- can:()=>true,flash:(message)=>errors.push(message),cityLevel:x=>String(x),
+ can:()=>true,flash:(message)=>errors.push(message),
+ // Phase 1 now adds read-only member relationships to the dossier.
+ relationships:{editorFields:()=>'',activate:()=>{}},
+ cityLevel:x=>String(x),
  formattedPower:x=>String(x),dateText:x=>String(x)
 };
 const test=new Function(...Object.keys(deps),
