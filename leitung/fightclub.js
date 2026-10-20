@@ -4,7 +4,7 @@
 export function createFightClub({getState,getLanguage,request,flash,esc,openPlayer}){
  const canDossier=()=>getState()?.staff?.is_owner===true||getState()?.staff?.permissions?.members===true;
  const root=document.getElementById("fightclubRoot");
- const enabled=location.hostname==="boltotelli.github.io"||["localhost","127.0.0.1"].includes(location.hostname);
+ const enabled=true; // Released for both GitHub Pages and Vercel; access is enforced by server-side module permissions.
  const copy={
  de:{intro:"Swordland und TriAlliance: Legionen planen, Verfügbarkeit berücksichtigen und Spieler nach dokumentierter Kraft vergleichen.",
    swordland:"Swordland",triforce:"TriAlliance",type:"Event",date:"Planungsdatum",dateMissing:"Wähle ein Planungsdatum oder einen vorhandenen bestätigten Termin.",
