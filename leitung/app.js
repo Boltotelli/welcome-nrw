@@ -41,7 +41,7 @@ const phase1Labels={
  es:{spokenSeparateTitle:"Los idiomas del jugador van por separado",spokenSeparateText:"Los idiomas hablados se editan en cada ficha. Aquí solo se configuran los idiomas y el idioma predeterminado del sitio.",toDossiers:"→ Abrir fichas",pageLanguageNote:"Los idiomas DE/EN/FR activos y el predeterminado controlan también las páginas públicas.",invited:"Invitado",pilotFree:"NRW seguirá siendo gratuito y sin anuncios.",dossier:"Ficha del jugador",joined:"Fecha de ingreso",responsibilities:"Responsabilidades",spoken:"Idiomas hablados",otherSpoken:"Otros idiomas (separados por comas)",serverTransfer:"Planear transferencia",serverMoves:"Cambios internos en 1044 (registro)",internalHistoryNote:"Historial de solo lectura con NRW.",noMoves:"Sin cambios",worldTransfers:"Transferencias de reino",noHistory:"Sin historial",targetKingdom:"Reino de destino",priority:"Prioridad",invitation:"Tipo de invitación",high:"Alta",normal:"Normal",low:"Baja",inviteOpen:"Sin asignar",inviteNormal:"Invitación normal",inviteSpecial:"Invitación especial",externalNote:"Entre reinos: entradas a #1044, salidas desde #1044. Cambios internos separados.",sourceNote:"Datos principales conservados en el registro existente.",arrived:"Llegada detectada",notArrived:"Llegada no confirmada"}
 };
 let lang=LANGS.includes(localStorage.getItem("nrw_page_lang"))?localStorage.getItem("nrw_page_lang"):"de";
-let state=null, tab="overview", editing=null;
+let state=null, tab="overview", editing=null, selectedStaffEmail="";
 const eventLabels={
  de:{leadershipGuidance:"NRW-Anweisungen im Player Dashboard",guidanceInfo:"Veröffentlicht ergänzt dieser Hinweis die vorhandenen Eventinformationen am ausgewählten Tag. Die Original-Guides bleiben unverändert.",saveGuidance:"Hinweis speichern / veröffentlichen",guidancePublished:"Veröffentlicht: Im Player Dashboard sichtbar.",guidanceDraft:"Entwurf: Nur für die Leitung sichtbar.",guidanceNotSupported:"Nur bestehende Kalenderevents können im Dashboard überschrieben werden.",canonicalEvents:"Bestehende Events & Guides",canonicalNote:"Direkt aus dem Player Dashboard – keine doppelte Pflege.",eventSearch:"Event / Guide suchen …",eventUpcoming:"Aktuell / nächste 8 Wochen",eventPast:"Vergangene Termine",eventGuideCatalog:"Alle Event-Guides",eventAll:"Alle Termine",customEvents:"Weitere Allianztermine",customEventsNote:"Zusätzliche, separat bearbeitbare Sondertermine.",libraryDay:"Eventtag",ingameChat:"Allianzchat · maximal 512 Zeichen",ingameNotice:"Allianznotiz · maximal 300 Zeichen",copyChat:"📋 Chat kopieren",copyNote:"📋 Notiz kopieren",saveMessages:"Nachrichten für diesen Tag speichern",libraryLoadError:"Eventquellen nicht verfügbar.",manualSource:"Eingetragener Termin",rhythmSource:"28-Tage-Rotation",customSource:"Allianztermin",guideSource:"Event-Guide",catalogSource:"Event-Katalog",guideOnly:"Nachschlagewerk",notConfirmed:"Voraussichtlich",showEvent:"Öffnen / Kopieren",dailyPoints:"Punkte / Ziele",dailySteps:"Tagesaufgaben",eventNote:"Hinweis",eventPrepare:"Vorbereitung",dailyDetails:"Weitere Details",eventTips:"NRW-Tipps",guideObjective:"Eventziel",guideNrwRule:"NRW-Regeln",eventLimits:"Grenzwert der Quelle",sourceLink:"Originalquelle",guideConnected:"Verknüpfter Guide",rawSource:"Vollständige Quelldaten",rawDaily:"Vollständige Tagesinformationen",customTextSaved:"Eigene Nachricht gespeichert – pro Tag und Sprache.",generatedFromGuide:"Automatisch aus den vorhandenen Hinweisen erstellt. Vor dem Versenden überprüfen.",invalidMessage:"Text leer oder Zeichenlimit überschritten.",copiedText:"Text kopiert.",copySelect:"Text markiert. Bitte Strg+C drücken."},
  en:{leadershipGuidance:"NRW instructions in Player Dashboard",guidanceInfo:"Published notices supplement the existing event details for this day. The original guides remain unchanged.",saveGuidance:"Save / Publish instruction",guidancePublished:"Published: Visible in Player Dashboard.",guidanceDraft:"Draft: Visible only to leadership.",guidanceNotSupported:"Only original scheduled events support Dashboard guidance.",canonicalEvents:"Existing events & guides",canonicalNote:"Directly from Player Dashboard, no duplicated source data.",eventSearch:"Search event / guide …",eventUpcoming:"Current / next 8 weeks",eventPast:"Past events",eventGuideCatalog:"All event guides",eventAll:"All dates",customEvents:"Additional alliance dates",customEventsNote:"Separate, editable special dates.",libraryDay:"Event day",ingameChat:"Alliance chat · 512 characters max",ingameNotice:"Alliance note · 300 characters max",copyChat:"📋 Copy chat",copyNote:"📋 Copy note",saveMessages:"Save messages for this day",libraryLoadError:"Event sources unavailable.",manualSource:"Scheduled entry",rhythmSource:"28-day cycle",customSource:"Alliance date",guideSource:"Event guide",catalogSource:"Event catalog",guideOnly:"Reference",notConfirmed:"Predicted",showEvent:"Open / Copy",dailyPoints:"Points / Targets",dailySteps:"Daily tasks",eventNote:"Note",eventPrepare:"Preparation",dailyDetails:"More details",eventTips:"NRW tips",guideObjective:"Event objective",guideNrwRule:"NRW rules",eventLimits:"Source limit",sourceLink:"Original source",guideConnected:"Linked guide",rawSource:"Full source data",rawDaily:"Full day data",customTextSaved:"Custom message saved for day and language.",generatedFromGuide:"Auto-generated from existing guidance. Review before sending.",invalidMessage:"Empty text or character limit exceeded.",copiedText:"Text copied.",copySelect:"Text selected. Please press Ctrl+C."},
@@ -89,11 +89,20 @@ Object.assign(step6Copy.es,{discordBotOffline:"Planificador integrado · Envío 
  botRuleEnableHint:"DE, EN, FR y ES obligatorioss. No habrá envíos automáticos sin autorización expresa."});
 const step6DaysCopy={"de":{"botEventDays":"Eventtage","saveAllEventTimes":"Zeiten für alle Tage übernehmen","botPresetAllDays":"Tagesvorlagen für alle Eventtage anlegen","botEventStart":"Tagesbeginn (UTC)","botEventEnd":"Tagesende (UTC, optional)","saveEventTimes":"Tageszeiten speichern","botAnchorHint":"Jeder Eventtag kann andere Zeiten und Texte besitzen. Relative Erinnerungen richten sich nach Beginn oder Ende des jeweiligen Tages. Alle Zeiten UTC; keine geschätzten Termine.","botUsePresets":"Vorlage für diesen Tag hinzufügen","botEventDay":"Nachricht am Eventtag","botRelative":"Relativ zum gewählten Eventtag","botStart":"Tagesbeginn","botEnd":"Tagesende","botTimingNote":"Alle Zeiten in UTC. Jeder Eventtag hat eigene Vorlagen und eigene Start-/Endzeiten. Ein Vorlauf vor 00:00 UTC kann am Vortag liegen."},"en":{"botEventDays":"Event days","saveAllEventTimes":"Apply times to all days","botPresetAllDays":"Create templates for every event day","botEventStart":"Day start (UTC)","botEventEnd":"Day end (UTC, optional)","saveEventTimes":"Save daily times","botAnchorHint":"Each event day can have its own texts and times. Relative reminders refer to the start/end of that particular day. UTC only; no estimated dates.","botUsePresets":"Add a template for this day","botEventDay":"Message on event day","botRelative":"Relative to selected event day","botStart":"Start of day","botEnd":"End of day","botTimingNote":"UTC only. Each event day has its own messages and start/end anchors. A reminder before 00:00 UTC may fall on the previous calendar day."},"fr":{"botEventDays":"Jours de l'événement","saveAllEventTimes":"Appliquer les heures à tous les jours","botPresetAllDays":"Créer les modèles de chaque journée","botEventStart":"Début du jour (UTC)","botEventEnd":"Fin du jour (UTC, facultatif)","saveEventTimes":"Enregistrer les horaires du jour","botAnchorHint":"Chaque journée peut avoir ses propres textes et horaires. Les rappels relatifs se réfèrent au début/à la fin de ce jour. Heures UTC, aucune estimation.","botUsePresets":"Ajouter un modèle pour ce jour","botEventDay":"Message le jour","botRelative":"Relatif à la journée choisie","botStart":"Début du jour","botEnd":"Fin du jour","botTimingNote":"Heures UTC. Chaque jour dispose de ses messages et horaires. Un rappel avant minuit UTC peut être envoyé la veille."},"es":{"botEventDays":"Días del evento","saveAllEventTimes":"Aplicar horarios a todos los días","botPresetAllDays":"Crear plantillas para todos los días","botEventStart":"Inicio del día (UTC)","botEventEnd":"Fin del día (UTC, opcional)","saveEventTimes":"Guardar horas del día","botAnchorHint":"Cada día puede tener horas y textos diferentes. Los recordatorios relativos usan el inicio/fin de ese día. Solo UTC, sin fechas estimadas.","botUsePresets":"Añadir plantilla para este día","botEventDay":"Mensaje del día","botRelative":"Relativo al día elegido","botStart":"Inicio del día","botEnd":"Fin del día","botTimingNote":"Solo UTC. Cada día tiene mensajes y horas propias. Un recordatorio anterior a las 00:00 puede enviarse el día anterior."}};
 const rosterDossierError={de:{playerUnavailable:"Diese Spielerakte ist nicht verfügbar: Eine gültige Kingshot-Spieler-ID fehlt. Bitte Spielerzuordnung prüfen."},en:{playerUnavailable:"Player dossier unavailable: a valid Kingshot player ID is missing. Check the player record."},fr:{playerUnavailable:"Fiche indisponible : identifiant Kingshot valide manquant. Vérifiez le joueur."},es:{playerUnavailable:"Ficha no disponible: falta un ID Kingshot válido. Revisa el registro."}};
+const rightsCopy={
+de:{moduleRights:"Modulberechtigungen",rightsHelp:"Schalter aus = Recht entzogen. Zum Übernehmen speichern. Zugriffe sind sofort nach dem Speichern serverseitig wirksam.",undoRights:"Änderungen verwerfen",clearRights:"Alle Modulrechte entziehen",disableStaffAccount:"Zugang vollständig sperren",rightsSelected:"Konto auswählen, um Rechte zu bearbeiten.",rightsCount:"aktive Modulrechte",rightsDisabled:"Zugang gesperrt",rightsProtected:"Administratorkonto · nicht bearbeitbar",rightsEnabled:"Zugang aktiv",rightsNone:"Keine Rechte",rightsClearConfirm:"Wirklich alle Modulrechte für {name} entziehen? Der Zugang bleibt aktiv, aber ohne Modulberechtigungen.",rightsDisableConfirm:"Zugang für {name} vollständig sperren und alle Modulrechte entziehen? Der Spieler kann sich dann nicht mehr anmelden.",rightsCleared:"Alle Modulrechte entzogen.",rightsAccountDisabled:"Zugang vollständig gesperrt.",rightsSaved:"Berechtigungen gespeichert.",rightsAdminNote:"Administratorkonten sind geschützt und haben immer alle Rechte.",rolesFuture:"Wähle einen R4/R5 und verwalte seine Zugriffsrechte. Das Entziehen wirkt sofort nach dem Speichern.",saveR4:"Änderungen speichern",noStaffSelection:"Bitte zuerst einen R4/R5 auswählen."},
+en:{moduleRights:"Module permissions",rightsHelp:"Switch off to revoke a permission. Save to apply. Server-side enforcement takes effect immediately.",undoRights:"Discard changes",clearRights:"Revoke all module permissions",disableStaffAccount:"Block account access",rightsSelected:"Select an account to edit rights.",rightsCount:"active module permissions",rightsDisabled:"Account disabled",rightsProtected:"Administrator · cannot edit",rightsEnabled:"Account enabled",rightsNone:"No permissions",rightsClearConfirm:"Revoke all module permissions for {name}? The account remains enabled but without module access.",rightsDisableConfirm:"Disable access for {name} and revoke all permissions? This account will no longer be able to sign in.",rightsCleared:"All module permissions revoked.",rightsAccountDisabled:"Account disabled.",rightsSaved:"Permissions saved.",rightsAdminNote:"Administrator accounts are protected and always have full access.",rolesFuture:"Select an R4/R5 account and manage access. Revoked rights are enforced immediately after saving.",saveR4:"Save changes",noStaffSelection:"Select an R4/R5 first."},
+fr:{moduleRights:"Autorisations par module",rightsHelp:"Désactivez le bouton pour retirer un droit, puis enregistrez. Application immédiate côté serveur.",undoRights:"Annuler les modifications",clearRights:"Retirer tous les droits",disableStaffAccount:"Bloquer cet accès",rightsSelected:"Choisissez un compte pour gérer ses droits.",rightsCount:"droits actifs",rightsDisabled:"Compte désactivé",rightsProtected:"Administrateur · modification interdite",rightsEnabled:"Compte actif",rightsNone:"Aucun droit",rightsClearConfirm:"Retirer tous les droits de {name} ? Le compte reste actif mais sans accès aux modules.",rightsDisableConfirm:"Bloquer complètement {name} et retirer tous les droits ? Ce compte ne pourra plus se connecter.",rightsCleared:"Tous les droits retirés.",rightsAccountDisabled:"Accès bloqué.",rightsSaved:"Droits enregistrés.",rightsAdminNote:"Les comptes administrateurs sont protégés et disposent de tous les droits.",rolesFuture:"Choisissez un R4/R5 pour gérer ses droits. Les retraits sont appliqués immédiatement après l'enregistrement.",saveR4:"Enregistrer",noStaffSelection:"Choisissez d'abord un R4/R5."},
+es:{moduleRights:"Permisos por módulo",rightsHelp:"Desactiva una opción para quitar su permiso y guarda. Se aplica inmediatamente en el servidor.",undoRights:"Descartar cambios",clearRights:"Quitar todos los permisos",disableStaffAccount:"Bloquear acceso",rightsSelected:"Selecciona una cuenta para editar permisos.",rightsCount:"permisos activos",rightsDisabled:"Cuenta desactivada",rightsProtected:"Administrador · no editable",rightsEnabled:"Cuenta activa",rightsNone:"Sin permisos",rightsClearConfirm:"¿Quitar todos los permisos de {name}? La cuenta seguirá activa, pero sin acceso a módulos.",rightsDisableConfirm:"¿Bloquear por completo la cuenta de {name} y quitar todos los permisos? Ya no podrá iniciar sesión.",rightsCleared:"Permisos retirados.",rightsAccountDisabled:"Cuenta bloqueada.",rightsSaved:"Permisos guardados.",rightsAdminNote:"Las cuentas administradoras están protegidas y tienen acceso completo.",rolesFuture:"Selecciona un R4/R5 para gestionar derechos. Los cambios se aplican inmediatamente al guardar.",saveR4:"Guardar cambios",noStaffSelection:"Primero selecciona un R4/R5."}
+};
+const STAFF_FEATURES=[["members","roster"],["performance","performance"],["bear","bearManagement"],["fightclub","fightclub"],["participation","participation"],["transfers","transfers"],["laws","laws"],["events","events"],["event_bot","discordBot"],["settings","settings"]];
+const STAFF_KEYS=STAFF_FEATURES.map(([key])=>key);
+const modulePermission={roster:"members",performance:"performance",bear:"bear",fightclub:"fightclub",participation:"participation"};
 const phase2Labels={de:{performance:"Performance",bearManagement:"Bärenfalle",fightclub:"FightClub",participation:"Event-Teilnahme"},
 en:{performance:"Performance",bearManagement:"Bear Trap",fightclub:"FightClub",participation:"Event participation"},
 fr:{performance:"Performance",bearManagement:"Piège à ours",fightclub:"FightClub",participation:"Participation aux événements"},
 es:{performance:"Rendimiento",bearManagement:"Trampa de oso",fightclub:"FightClub",participation:"Participación en eventos"}};
-const t=k=>phase2Labels[lang]?.[k]||rosterDossierError[lang]?.[k]||step6DaysCopy[lang]?.[k]||step6DaysCopy.de[k]||step6Copy[lang]?.[k]||step6Copy.de[k]||step5Copy[lang]?.[k]||lawCategoryLabels[lang]?.[k]||lawUiCopy[lang]?.[k]||manualPhasesCopy[lang]?.[k]||transferUiCopy[lang]?.[k]||powerLabels[lang]?.[k]||rosterLabels[lang]?.[k]||leaderUiCopy[lang]?.[k]||latestModuleCopy[lang]?.[k]||opsUI[lang]?.[k]||groupUI[lang]?.[k]||eventLabels[lang]?.[k]||phase1Labels[lang]?.[k]||staffExtra[lang]?.[k]||copy[lang]?.[k]||lawCategoryLabels.de[k]||lawUiCopy.de[k]||manualPhasesCopy.de[k]||transferUiCopy.de[k]||powerLabels.de[k]||rosterLabels.de[k]||leaderUiCopy.de[k]||latestModuleCopy.de[k]||opsUI.de[k]||groupUI.de[k]||eventLabels.de[k]||phase1Labels.de[k]||staffExtra.de[k]||copy.de[k]||k;
+const t=k=>rightsCopy[lang]?.[k]||phase2Labels[lang]?.[k]||rosterDossierError[lang]?.[k]||step6DaysCopy[lang]?.[k]||step6DaysCopy.de[k]||step6Copy[lang]?.[k]||step6Copy.de[k]||step5Copy[lang]?.[k]||lawCategoryLabels[lang]?.[k]||lawUiCopy[lang]?.[k]||manualPhasesCopy[lang]?.[k]||transferUiCopy[lang]?.[k]||powerLabels[lang]?.[k]||rosterLabels[lang]?.[k]||leaderUiCopy[lang]?.[k]||latestModuleCopy[lang]?.[k]||opsUI[lang]?.[k]||groupUI[lang]?.[k]||eventLabels[lang]?.[k]||phase1Labels[lang]?.[k]||staffExtra[lang]?.[k]||copy[lang]?.[k]||lawCategoryLabels.de[k]||lawUiCopy.de[k]||manualPhasesCopy.de[k]||transferUiCopy.de[k]||powerLabels.de[k]||rosterLabels.de[k]||leaderUiCopy.de[k]||latestModuleCopy.de[k]||opsUI.de[k]||groupUI.de[k]||eventLabels.de[k]||phase1Labels.de[k]||staffExtra.de[k]||copy.de[k]||k;
 const locale={de:"de-DE",en:"en-GB",fr:"fr-FR",es:"es-ES"}[lang];
 function txt(obj){return typeof obj==="string"?obj:(obj?.[lang]||obj?.[state?.alliance?.default_language]||obj?.de||obj?.en||"");}
 function patchTranslations(){
@@ -109,7 +118,7 @@ function setTab(name){
  if(name==="fightclub"&&!fightclub.enabled)return;
  if(name==="participation"&&!participation.enabled)return;
  if(name==="performance"&&!performance.enabled)return;
- const required=["roster","performance","bear","fightclub","participation"].includes(name)?"members":["transfers","laws","events","settings"].includes(name)?name:null;
+ const required=modulePermission[name]||(["transfers","laws","events","settings"].includes(name)?name:null);
  if(required&&state&&!can(required))name="overview";
   if(name==="discord"&&state&&!can("events")&&!can("settings"))name="overview";
  tab=name;q(".tab-page").forEach(p=>p.hidden=p.dataset.page!==name);
@@ -143,10 +152,10 @@ function can(feature){return state?.staff?.is_owner===true||state?.staff?.permis
 function grantButtons(){
  q("[data-permission]").forEach(el=>{el.disabled=!can(el.dataset.permission);el.title=el.disabled?t("permissionDenied"):"";});
  for(const el of q(".nav-item[data-tab]")){
-  const required=["roster","performance","bear","fightclub","participation"].includes(el.dataset.tab)?"members":["transfers","laws","events","settings"].includes(el.dataset.tab)?el.dataset.tab:null;
+  const required=modulePermission[el.dataset.tab]||(["transfers","laws","events","settings"].includes(el.dataset.tab)?el.dataset.tab:null);
   el.hidden=el.dataset.tab==="discord"?!can("event_bot"):
    ["performance","bear","fightclub","participation"].includes(el.dataset.tab)?
-     !(el.dataset.tab==="performance"?performance.enabled:el.dataset.tab==="bear"?bearManagement.enabled:el.dataset.tab==="fightclub"?fightclub.enabled:participation.enabled)||!can("members"):Boolean(required&&!can(required));
+     !(el.dataset.tab==="performance"?performance.enabled:el.dataset.tab==="bear"?bearManagement.enabled:el.dataset.tab==="fightclub"?fightclub.enabled:participation.enabled)||!can(required):Boolean(required&&!can(required));
  }
 }
 let powerSyncStarted=false;
@@ -313,11 +322,11 @@ function renderSettings(){
  form.elements.advertising_enabled.checked=Boolean(config.advertising_enabled);
  q("#activeLanguages input").forEach(x=>x.checked=(config.languages||[]).includes(x.value));
  $("defaultLanguage").value=config.default_language;
- const options=[["members",t("roster")],["transfers",t("transfers")],["laws",t("laws")],["events",t("events")],["event_bot",t("discordBot")],["settings",t("settings")]];
+ const options=STAFF_FEATURES.map(([key,label])=>[key,t(label)]);
  const grants=(state.staffMembers||[]).filter(x=>/^leader-[0-9]+@accounts\.allianceos\.invalid$/i.test(x.email||""));
  $("permissionTable").innerHTML='<div><strong>'+esc(t("permissions"))+'</strong><b>R4/R5</b></div>'+
    options.map(([feature,label])=>'<div><span>'+esc(label)+'</span><b>'+
-     esc(state.staff.is_owner?(grants.filter(x=>x.enabled&&x.permissions?.[feature]).length+" / "+grants.length):(can(feature)?"✓":"—"))+
+     esc(state.staff.is_owner?(grants.filter(x=>x.enabled&&(x.is_admin||x.permissions?.[feature]===true)).length+" / "+grants.length):(can(feature)?"✓":"—"))+
      '</b></div>').join("")+'<p class="small-note">'+esc(t("individualRights"))+'</p>';
  $("staffControls").hidden=!state.staff.is_owner;
  const members=(state.staffMembers||[]).filter(x=>x.email);
@@ -327,15 +336,33 @@ function renderSettings(){
     return p?String(p.name):t("legacyAdmin");
  };
  $("staffList").innerHTML=members.length?'<p class="eyebrow">'+esc(t("staffList"))+'</p>'+
- members.map(m=>'<button type="button" class="staff-row" data-staff-email="'+esc(m.email)+'" '+
-   (!/^leader-/.test(m.email)?"disabled":"")+'><span><b>'+esc(lookupName(m.email))+'</b><small>'+esc(m.rank)+
-   (m.enabled?"":" · "+esc(t("r4Disabled")))+" · "+esc(Object.keys(m.permissions||{}).filter(k=>m.permissions[k]===true).join(", ")||"—")+
-   '</small></span><span>→</span></button>').join(""):"";
- const sel=$("staffAccountSelect"),original=sel.value;
+ members.map(m=>{
+   const protectedAccount=m.is_admin||m.protected_account||!/^leader-[0-9]+@accounts\\.allianceos\\.invalid$/i.test(m.email||"");
+   const activeCount=protectedAccount?STAFF_KEYS.length:STAFF_KEYS.filter(k=>m.permissions?.[k]===true).length;
+   const status=protectedAccount?t("rightsProtected"):m.enabled?t("rightsEnabled"):t("rightsDisabled");
+   return '<button type="button" class="staff-row staff-access-row'+(selectedStaffEmail===m.email?" selected":"")+'" data-staff-email="'+esc(m.email)+'" aria-pressed="'+(selectedStaffEmail===m.email)+'" '+
+     (protectedAccount?"disabled":"")+'><span><b>'+esc(lookupName(m.email))+'</b><small>'+esc(m.rank)+' · '+esc(status)+'</small></span>'+
+     '<span class="staff-rights-count">'+(protectedAccount?"★":activeCount+" / "+STAFF_KEYS.length)+
+       '<small>'+esc(t("rightsCount"))+'</small></span></button>';
+ }).join(""):"";
+ const sel=$("staffAccountSelect");
  sel.innerHTML='<option value="">'+esc(t("chooseLeader"))+'</option>'+
  members.filter(x=>/^leader-/.test(x.email||"")).map(x=>
-   '<option value="'+esc(x.email)+'">'+esc(lookupName(x.email))+'</option>').join("");
- if([...sel.options].some(x=>x.value===original))sel.value=original;
+   '<option value="'+esc(x.email)+'" '+(x.is_admin||x.protected_account?"disabled":"")+'>'+esc(lookupName(x.email))+(x.is_admin?" · "+esc(t("rightsProtected")):"")+'</option>').join("");
+ const selected=members.find(m=>m.email===selectedStaffEmail&&!m.is_admin&&!m.protected_account);
+ if(!selected)selectedStaffEmail="";
+ sel.value=selectedStaffEmail;
+ const rights=$("staffRightsFieldset"),form=$("r4Form");
+ rights.disabled=!selected;
+ for(const key of STAFF_KEYS)form.elements[key].checked=selected?.permissions?.[key]===true;
+ form.elements.enabled.checked=selected?.enabled===true;
+ $("staffSelectionInfo").textContent=selected?
+  lookupName(selected.email)+" · "+selected.rank+" · "+(selected.enabled?t("rightsEnabled"):t("rightsDisabled")):
+  t("rightsSelected");
+ for(const id of ["staffSaveRights","staffUndoRights","staffClearRights","staffDisableAccount"]){
+   $(id).disabled=!selected||(id==="staffDisableAccount"&&!selected.enabled);
+ }
+ if(!members.length)$("staffSelectionInfo").textContent=t("rightsSelected");
 }
 function render(){patchTranslations();counts();renderRoster();renderTransfers();renderLaws();renderEvents();renderSettings();eventHub.render(state,lang,can("events"));discordPlanner.render(lang);operations.render();}
 function control(label,name,value="",type="text",opts={}){
@@ -556,31 +583,55 @@ document.addEventListener("click",e=>{
 $("closeDialog").addEventListener("click",()=>$("editDialog").close());
 $("cancelDialog").addEventListener("click",()=>$("editDialog").close());
 $("editForm").addEventListener("submit",saveDialog);
+function chooseStaffAccount(email,scroll=false){
+ const member=(state?.staffMembers||[]).find(m=>m.email===email);
+ selectedStaffEmail=member&&!member.is_admin&&!member.protected_account&&/^leader-/.test(email)?email:"";
+ renderSettings();
+ if(scroll&&selectedStaffEmail)$("r4Form").scrollIntoView({behavior:"smooth",block:"center"});
+}
 $("staffList").addEventListener("click",e=>{
  const item=e.target.closest("[data-staff-email]");
- if(!item)return;
- const member=(state.staffMembers||[]).find(x=>x.email===item.dataset.staffEmail);
- if(!member||!/^leader-/.test(member.email||""))return;
- const form=$("r4Form");
- form.elements.email.value=member.email;
- for(const feature of ["members","transfers","laws","events","event_bot","settings"])form.elements[feature].checked=member.permissions?.[feature]===true;
- form.elements.enabled.checked=member.enabled;
- form.scrollIntoView({behavior:"smooth",block:"center"});
+ if(item)chooseStaffAccount(item.dataset.staffEmail,true);
 });
+$("staffAccountSelect").addEventListener("change",e=>chooseStaffAccount(e.target.value));
+$("staffUndoRights").addEventListener("click",()=>chooseStaffAccount(selectedStaffEmail));
+async function saveStaffChanges(email,permissions,enabled,successKey){
+ const selected=(state?.staffMembers||[]).find(m=>m.email===email&&!m.is_admin&&!m.protected_account);
+ if(!state?.staff?.is_owner||!selected){flash(t("noStaffSelection"),true);return;}
+ const controls=["staffSaveRights","staffUndoRights","staffClearRights","staffDisableAccount"];
+ controls.forEach(id=>$(id).disabled=true);
+ try{
+  await request("bootstrap",{action:"staff",email,permissions,enabled});
+  selectedStaffEmail=email;
+  await refresh();setTab("settings");flash(t(successKey));
+ }catch(error){
+  flash(t("genericError")+" ("+(error?.message||"unknown")+")",true);
+ }finally{
+  if(state)renderSettings();
+ }
+}
 $("r4Form").addEventListener("submit",async e=>{
  e.preventDefault();
- if(!state?.staff?.is_owner)return;
- const form=e.currentTarget,fd=new FormData(form);
- const email=String(fd.get("email")||"").trim(),permissions={};
- for(const feature of ["members","transfers","laws","events","event_bot","settings"])permissions[feature]=fd.has(feature);
- const button=form.querySelector("button[type=submit]");button.disabled=true;
- try{
-  await request("bootstrap",{action:"staff",email,permissions,enabled:fd.has("enabled")});
-  await refresh();setTab("settings");flash(t("r4Saved"));form.reset();
- }catch(error){
-  const message=error.message==="account_not_found"?t("r4NotFound"):t("genericError")+" ("+error.message+")";
-  flash(message,true);
- }finally{button.disabled=false;}
+ if(!selectedStaffEmail)return flash(t("noStaffSelection"),true);
+ const form=e.currentTarget,fd=new FormData(form),permissions={};
+ for(const key of STAFF_KEYS)permissions[key]=fd.has(key);
+ await saveStaffChanges(selectedStaffEmail,permissions,fd.has("enabled"),"rightsSaved");
+});
+$("staffClearRights").addEventListener("click",async()=>{
+ const staff=(state?.staffMembers||[]).find(x=>x.email===selectedStaffEmail);
+ if(!staff)return;
+ const person=state.players.find(p=>selectedStaffEmail.includes("leader-"+p.game_id+"@"));
+ const label=person?.name||staff.rank;
+ if(!window.confirm(t("rightsClearConfirm").replace("{name}",label)))return;
+ await saveStaffChanges(staff.email,Object.fromEntries(STAFF_KEYS.map(k=>[k,false])),staff.enabled,"rightsCleared");
+});
+$("staffDisableAccount").addEventListener("click",async()=>{
+ const staff=(state?.staffMembers||[]).find(x=>x.email===selectedStaffEmail);
+ if(!staff)return;
+ const person=state.players.find(p=>selectedStaffEmail.includes("leader-"+p.game_id+"@"));
+ const label=person?.name||staff.rank;
+ if(!window.confirm(t("rightsDisableConfirm").replace("{name}",label)))return;
+ await saveStaffChanges(staff.email,Object.fromEntries(STAFF_KEYS.map(k=>[k,false])),false,"rightsAccountDisabled");
 });
 $("settingsForm").addEventListener("submit",async(e)=>{
  e.preventDefault();if(!can("settings"))return;
@@ -776,7 +827,7 @@ $("changePasswordForm").addEventListener("submit",async e=>{
  }catch(e){flash(t("genericError")+" ("+e.message+")",true);}
  finally{button.disabled=false;}
 });
-$("logoutBtn").addEventListener("click",async()=>{await supabase.auth.signOut();state=null;discordPlanner.reset();eventBotStatusPanel.reset();performance.reset();bearManagement.reset();fightclub.reset();participation.reset();showLogin();});
+$("logoutBtn").addEventListener("click",async()=>{await supabase.auth.signOut();state=null;discordPlanner.reset();eventBotStatusPanel.reset();performance.reset();bearManagement.reset();fightclub.reset();participation.reset();selectedStaffEmail="";showLogin();});
 document.documentElement.dataset.theme=localStorage.getItem("nrw_theme")||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");
 patchTranslations();
 loadLeaderList();
