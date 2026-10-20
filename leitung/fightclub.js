@@ -115,7 +115,7 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
    const diff=Date.parse(v+"T00:00:00Z")-Date.now();
    return diff>=-120*86400000 && diff<=540*86400000;
  };
- let state=null,loading=null,generation=0,eventType="swordland",date="",search="",filter="all",pending=new Set(),warning="";
+ let state=null,loading=null,generation=0,eventType="swordland",date="",search="",filter="all",pending=new Set(),warning="",fastLegion=1,fastAvailability="full";
  function players(){return (getState()?.players||[]).filter(p=>p.active&&p.member_status!=="left"&&/^[0-9]{1,20}$/.test(String(p.game_id||""))).slice().sort((a,b)=>String(a.name||"").localeCompare(String(b.name||""),locale()));}
  const playerMap=()=>new Map(players().map(p=>[String(p.game_id),p]));
  const powers=()=>new Map((state?.powers||[]).map(p=>[String(p.game_id),p]));
@@ -127,10 +127,10 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
  const assignment=id=>assignments().find(a=>String(a.game_id)===String(id));
  const cycles=()=>state?.cycles?.filter(c=>c.event_type===eventType)||[];
  const cycle=()=>cycles().find(c=>c.battle_date===date);
- const legionName=v=>v===1?t("l1"):v===2?t("l2"):v===0?t("reserve"):t("empty");
+ const legionName=v=>v===1?t("l1"):v===2?t("l2"):v===0?(eventType==="swordland"?"📛 SAFE ZONE":t("reserve")):t("empty");
  function selectOptions(items,value,attr){return '<select class="control" '+attr+'>'+items.map(([v,name])=>
   '<option value="'+esc(String(v))+'" '+(String(value)===String(v)?"selected":"")+'>'+esc(name)+'</option>').join("")+'</select>';}
- function optLegion(){return [["-1",t("empty")],["1",t("l1")],["2",t("l2")],["0",t("reserve")]];}
+ function optLegion(){return [["-1",t("empty")],["1",t("l1")],["2",t("l2")],["0",eventType==="swordland"?"📛 SAFE ZONE":t("reserve")]];}
  function optAvailability(){return [["unknown",t("unknown")],["full",t("full")],["partial",t("partial")],["unavailable",t("unavailable")]];}
  function optRole(){return [["flex",t("flex")],["attack",t("attack")],["defense",t("defense")],["support",t("support")]];}
  function minutes(utc){return utc?new Intl.DateTimeFormat(locale(),{hour:"2-digit",minute:"2-digit",hour12:false,timeZone:"UTC"}).format(new Date(utc))+" UTC":t("noTime");}
@@ -229,8 +229,8 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
    return '<section class="card fight-fast-assign"><h3>⚡ '+esc(getLanguage()==="de"?"Schnell zuweisen":getLanguage()==="fr"?"Affectation rapide":getLanguage()==="es"?"Asignación rápida":"Quick assignment")+'</h3>'+
     '<div class="fight-fast-form"><label>'+esc(t("player"))+'<select class="control" data-fight-fast-player>'+
     '<option value="">—</option>'+availPlayers.map(p=>'<option value="'+esc(p.game_id)+'">'+esc(p.name)+' · '+esc(p.game_id)+'</option>').join("")+'</select></label>'+
-    '<label>'+esc(t("legion"))+selectOptions(optLegion(),"-1",'data-fight-fast-legion')+'</label>'+
-    '<label>'+esc(t("availability"))+selectOptions(optAvailability(),"full",'data-fight-fast-availability')+'</label>'+
+    '<label>'+esc(t("legion"))+selectOptions(optLegion(),String(fastLegion),'data-fight-fast-legion')+'</label>'+
+    '<label>'+esc(t("availability"))+selectOptions(optAvailability(),fastAvailability,'data-fight-fast-availability')+'</label>'+
     '<button type="button" class="primary" data-fight-fast-save>'+esc(t("save"))+'</button></div></section>';
  }
  async function fastSave(){
@@ -359,6 +359,8 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
    root.addEventListener("change",e=>{
      if(mapUI.change(e))return;
      const el=e.target;
+     if(el.matches("[data-fight-fast-legion]")){fastLegion=Number(el.value);return;}
+     if(el.matches("[data-fight-fast-availability]")){fastAvailability=el.value;return;}
      if(el.matches("[data-fight-type]")){eventType=el.value;date="";filter="all";search="";draw();}
      else if(el.matches("[data-fight-date]")){date=el.value;filter="all";search="";draw();}
      else if(el.matches("[data-fight-filter]")){filter=el.value;draw();}
@@ -388,6 +390,6 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
      }
    });
  }
- function reset(){mapUI.reset();generation++;state=null;loading=null;pending.clear();date="";search="";filter="all";eventType="swordland";if(root){root.innerHTML="";root.textContent="";}}
+ function reset(){fastLegion=1;fastAvailability="full";mapUI.reset();generation++;state=null;loading=null;pending.clear();date="";search="";filter="all";eventType="swordland";if(root){root.innerHTML="";root.textContent="";}}
  return {enabled,open:load,render:draw,reset};
 }
