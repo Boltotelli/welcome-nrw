@@ -2,6 +2,7 @@
    Source schedule and optimizer profiles are read-only; this only saves AllianceOS
    participation, attendance, role, and leadership notes by immutable game ID. */
 export function createBearManagement({getState,getLanguage,request,esc,openPlayer,flash}){
+ const canDossier=()=>getState()?.staff?.is_owner===true||getState()?.staff?.permissions?.members===true;
  const root=document.getElementById("bearManagementRoot");
  const enabled=location.hostname==="boltotelli.github.io"||["localhost","127.0.0.1"].includes(location.hostname);
  const messages={
@@ -142,7 +143,7 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
   const a=assignment(p.game_id)||{},prof=profile(p.game_id);
   const parent=p.main_game_id?(byId().get(String(p.main_game_id))?.name||p.main_game_id):null;
   return '<article class="bear-member-row" data-bear-row="'+esc(p.game_id)+'">'+
-   '<div class="bear-member-head"><button type="button" class="bear-member-name" data-bear-open="'+esc(p.game_id)+'">'+esc(p.name||p.game_id)+'</button>'+
+   '<div class="bear-member-head"><button type="button" class="bear-member-name" data-bear-open="'+esc(p.game_id)+'" '+(!canDossier()?'disabled':'')+'>'+esc(p.name||p.game_id)+'</button>'+
    '<small>'+esc(p.game_id)+(parent?' · '+esc(t("altInfo"))+' → '+esc(parent):'')+'</small>'+
    '<span class="bear-opt-flag '+(prof?'ready':'')+'">'+esc(t(prof?"withProfile":"withoutProfile"))+'</span></div>'+
    '<div class="bear-fields"><label><span>'+esc(t("time"))+'</span>'+
