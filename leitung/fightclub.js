@@ -2,6 +2,7 @@
  * Distinguishes confirmed source schedules from a manually chosen planning date.
  * No Discord role/slot/bot changes, no automatic player assignments. */
 export function createFightClub({getState,getLanguage,request,flash,esc,openPlayer}){
+ const canDossier=()=>getState()?.staff?.is_owner===true||getState()?.staff?.permissions?.members===true;
  const root=document.getElementById("fightclubRoot");
  const enabled=location.hostname==="boltotelli.github.io"||["localhost","127.0.0.1"].includes(location.hostname);
  const copy={
@@ -180,7 +181,7 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
    const family=conflicts.get(String(p.game_id));
    const main=p.main_game_id?playerMap().get(String(p.main_game_id))?.name||p.main_game_id:null;
    return '<article class="fight-player" data-fight-row="'+esc(p.game_id)+'">'+
-     '<div class="fight-player-top"><button type="button" data-fight-profile="'+esc(p.game_id)+'" class="fight-player-name">'+esc(p.name)+'</button>'+
+     '<div class="fight-player-top"><button type="button" data-fight-profile="'+esc(p.game_id)+'" class="fight-player-name" '+(!canDossier()?'disabled':'')+'>'+esc(p.name)+'</button>'+
      '<small>'+esc(p.game_id)+(main?' · '+esc(t("alts"))+' '+esc(main):'')+'</small>'+
      '<span class="fight-power" title="'+esc(pw?.fetched_at?t("stale")+": "+iso(pw.fetched_at):t("missingPower"))+'">'+
        esc(pw?powerFormat(pw.power):t("missingPower"))+'</span></div>'+
