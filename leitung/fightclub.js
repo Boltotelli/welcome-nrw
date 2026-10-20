@@ -201,8 +201,8 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
    const conflicts=overlap(),powerById=powers();
    const visible=players().filter(p=>(!search||String(p.name||"").toLocaleLowerCase().includes(search.toLocaleLowerCase())||
       String(p.game_id).includes(search))&&
-      (filter==="all"||filter==="assigned"&&Boolean(assignment(p.game_id))||
-       filter==="unassigned"&&!assignment(p.game_id)||filter==="1"&&Number(assignment(p.game_id)?.legion)===1||
+      (filter==="all"||filter==="assigned"&&[0,1,2].includes(Number(assignment(p.game_id)?.legion))||
+       filter==="unassigned"&&(!assignment(p.game_id)||Number(assignment(p.game_id)?.legion)===-1)||filter==="1"&&Number(assignment(p.game_id)?.legion)===1||
        filter==="2"&&Number(assignment(p.game_id)?.legion)===2||
        filter==="0"&&assignment(p.game_id)&&Number(assignment(p.game_id).legion)===0));
    visible.sort((a,b)=>Number(powerById.get(String(b.game_id))?.power??-1)-Number(powerById.get(String(a.game_id))?.power??-1)||
@@ -280,9 +280,7 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
    const role=rowEl.querySelector("[data-fight-role]")?.value||"flex";
    const notes=rowEl.querySelector("[data-fight-note]")?.value||"";
    const ticket=generation,whichEvent=eventType,whichDate=date;
-   if(!remove&&legion===-1){ // a documented availability can be saved as reserve (0)
-     flash(t("selectDate")+" · "+t("legion"),true);return;
-   }
+   // -1 preserves a participant's availability without assigning a legion.
    pending.add(id);
    const button=rowEl.querySelector('[data-fight-save]');if(button){button.disabled=true;button.textContent=t("saving");}
    try{
