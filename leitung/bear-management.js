@@ -39,7 +39,7 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
   troops:"Troop inventory",inf:"Infantry",cav:"Cavalry",arc:"Archers",
   attack:"Attack",lethality:"Lethality",widget:"Widget",tier:"Tier",stars:"Stars",level:"Level",
   comparison:"Self-assessment",stronger:"Stronger than rally leaders",weaker:"Weaker than rally leaders",similar:"Similar strength",
-  disclaimer:"Optimizer values are player-entered, not a verified optimal lineup. Planned Starter/Joiner role is a separate leadership decision.",
+  disclaimer:"Starter formations are recalculated with the existing NRW optimizer model when the saved inputs are complete. They are recommendations, not guaranteed in-game damage.",
   noHeroes:"No starter heroes entered.",latest:"Profile updated",noData:"No optimizer profile yet.",
   showAssigned:"Assigned members",export:"Copy lists",copied:"Lists copied.",copyFailed:"Could not copy lists.",
   loading:"Loading Bear Trap data …",error:"Could not load Bear Trap data.",refresh:"Refresh",
@@ -60,7 +60,7 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
   troops:"Troupes",inf:"Infanterie",cav:"Cavalerie",arc:"Archers",
   attack:"Attaque",lethality:"Létalité",widget:"Widget",tier:"Palier",stars:"Étoiles",level:"Niveau",
   comparison:"Auto-évaluation",stronger:"Plus fort que les lanceurs",weaker:"Moins fort que les lanceurs",similar:"Force semblable",
-  disclaimer:"Données saisies par les joueurs, pas une formation optimale certifiée. Le rôle est défini séparément par la direction.",
+  disclaimer:"La formation de départ est recalculée avec le modèle NRW lorsque les données enregistrées sont complètes. Résultat indicatif, non garanti en jeu.",
   noHeroes:"Aucun héros renseigné.",latest:"Profil modifié",noData:"Aucun profil d'optimiseur.",
   showAssigned:"Joueurs attribués",export:"Copier les listes",copied:"Listes copiées.",copyFailed:"Copie impossible.",
   loading:"Chargement des données …",error:"Chargement impossible.",refresh:"Actualiser",
@@ -81,7 +81,7 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
   troops:"Tropas",inf:"Infantería",cav:"Caballería",arc:"Arqueros",
   attack:"Ataque",lethality:"Letalidad",widget:"Widget",tier:"Grado",stars:"Estrellas",level:"Nivel",
   comparison:"Autoevaluación",stronger:"Más fuerte que los líderes",weaker:"Más débil que los líderes",similar:"Fuerza similar",
-  disclaimer:"Valores introducidos por jugadores, no una formación óptima confirmada. La función planificada se decide por separado.",
+  disclaimer:"La formación inicial se recalcula con el modelo existente de NRW cuando los datos guardados están completos. Es una recomendación, no daño garantizado.",
   noHeroes:"No hay héroes iniciales.",latest:"Perfil actualizado",noData:"Sin perfil de optimizador.",
   showAssigned:"Jugadores asignados",export:"Copiar listas",copied:"Listas copiadas.",copyFailed:"No se pudo copiar.",
   loading:"Cargando datos …",error:"No se pudieron cargar datos.",refresh:"Actualizar",
@@ -339,14 +339,18 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
  }
  function exportText(){
   const ids=new Set(active().map(p=>String(p.game_id))),people=byId();
-  return (cache?.slots||[]).map(s=>{
-   const rows=(cache?.assignments||[]).filter(a=>a.slot_key===s.slot_key&&ids.has(String(a.game_id)))
-    .sort((a,b)=>String(people.get(a.game_id)?.name||a.game_id).localeCompare(String(people.get(b.game_id)?.name||b.game_id),locale()));
-   return slotLabel(s)+"\n"+(rows.length?rows.map(a=>{
+  const groups=(cache?.slots||[]).map(slot=>{
+   const rows=(cache?.assignments||[]).filter(a=>a.slot_key===slot.slot_key&&a.attendance!=="no"&&ids.has(String(a.game_id)))
+     .sort((a,b)=>String(people.get(a.game_id)?.name||a.game_id).localeCompare(String(people.get(b.game_id)?.name||b.game_id),locale()));
+   return slotLabel(slot)+"\n"+(rows.length?rows.map(a=>{
     const p=people.get(String(a.game_id));
-    return (p?.name||a.game_id)+" ("+(t(a.role)||a.role)+" · "+t(a.attendance)+")";
+    return (p?.name||a.game_id)+" ("+t(a.role==="joiner"?"joiner":"starter")+" · "+t(a.attendance)+")";
    }).join("\n"):"—");
-  }).join("\n\n");
+  });
+  const no=(cache?.assignments||[]).filter(a=>a.attendance==="no"&&ids.has(String(a.game_id)))
+   .map(a=>people.get(String(a.game_id))?.name||a.game_id).sort((a,b)=>a.localeCompare(b,locale()));
+  if(no.length)groups.push("🚫 "+t("no")+"\n"+no.join("\n"));
+  return groups.join("\n\n");
  }
  if(root){
   root.addEventListener("click",async e=>{
