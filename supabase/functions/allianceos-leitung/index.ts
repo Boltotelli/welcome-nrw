@@ -624,6 +624,81 @@ async function performanceDashboard(req:Request,alliance:string,staff:any){
       value:Number(x.power),observed_at:x.fetched_at})),
     events:events.filter(e=>ownEventIds.has(e.id)),rankings,raw_count:raw.length});
 }
+// Phase 3 – read-only source integration. This never edits Discord slots or
+// Bear Optimizer profiles/PINs. Only authorized alliance leaders may read it.
+async function bearManagement(req:Request,alliance:string,staff:any){
+ if(!permission(staff,"members"))throw new HttpError("permission_denied",403);
+ const roster=await checked<any[]>(db.from("players").select("game_id,name,active")
+   .eq("alliance_code",alliance).not("game_id","is",null).limit(250));
+ const allIds=[...new Set(roster.map(p=>String(p.game_id||"")).filter(isId))];
+ const activeIds=new Set(roster.filter(p=>p.active).map(p=>String(p.game_id)));
+ const [slots,assignments]=await Promise.all([
+   checked<any[]>(db.from("discord_bear_slots")
+     .select("slot_key,slot_label,start_time,timezone,active,anchor_date")
+     .eq("alliance_code",alliance).eq("active",true).order("start_time",{ascending:true}).limit(20)),
+   checked<any[]>(db.from("aos_bear_assignments")
+     .select("game_id,slot_key,role,attendance,notes,updated_at")
+     .eq("alliance_code",alliance).order("updated_at",{ascending:false}).limit(250))
+ ]);
+ const rawProfiles:any[]=[];
+ for(let i=0;i<allIds.length;i+=100){
+   if(!allIds.slice(i,i+100).length)break;
+   rawProfiles.push(...await checked<any[]>(db.from("bear_player_profiles")
+     .select("game_id,updated_at,data").in("game_id",allIds.slice(i,i+100)).limit(100)));
+ }
+ const safeNumber=(x:any,cap=9999999999999):number|null=>
+   x===null||x===undefined||x===""||typeof x==="boolean"||!Number.isFinite(Number(x))||
+   Number(x)<0||Number(x)>cap?null:Number(x);
+ const profiles=rawProfiles.filter(p=>activeIds.has(String(p.game_id))).map(p=>{
+   const d=p.data&&typeof p.data==="object"?p.data:{};
+   const v=d.values&&typeof d.values==="object"?d.values:{};
+   const names=Array.isArray(d.ownHeroes)?d.ownHeroes.filter((x:any)=>typeof x==="string").slice(0,3):[];
+   const heroes=names.map((name:string)=>{
+     const raw=(d.heroes&&typeof d.heroes==="object"?d.heroes[name]:null)||{};
+     return {name:str(name,45),stars:safeNumber(raw.stars,10),
+       tier:safeNumber(raw.tier,20),level:safeNumber(raw.level,200),
+       widget:safeNumber(raw.widget,20)};
+   });
+   return {game_id:String(p.game_id),updated_at:p.updated_at,
+     heroes,join_count:safeNumber(d.joinCount,20),
+     comparison:["weaker","similar","stronger"].includes(d.joinLeaderComparison)?d.joinLeaderComparison:null,
+     capacity:safeNumber(v.cap),
+     troops:{inf:safeNumber(v.troopsI),cav:safeNumber(v.troopsC),arc:safeNumber(v.troopsA)},
+     stats:{inf_attack:safeNumber(v.iAtk,100000),inf_lethality:safeNumber(v.iLet,100000),
+       cav_attack:safeNumber(v.cAtk,100000),cav_lethality:safeNumber(v.cLet,100000),
+       arc_attack:safeNumber(v.aAtk,100000),arc_lethality:safeNumber(v.aLet,100000)}
+   };
+ });
+ return json(req,{ok:true,slots,assignments:assignments.filter(a=>allIds.includes(a.game_id)),
+   profiles,source_note:"Optimizer data are player-entered; not verified optimal lineups."});
+}
+async function saveBearAssignment(req:Request,alliance:string,userId:string,staff:any,body:any){
+ if(!permission(staff,"members"))throw new HttpError("permission_denied",403);
+ const gameId=str(body?.game_id,20),slotKey=str(body?.slot_key,70),
+       role=str(body?.role||"flex",20),attendance=str(body?.attendance||"tentative",20);
+ if(!isId(gameId))throw new HttpError("invalid_player_id",400);
+ const member=await checked<any>(db.from("players").select("id")
+   .eq("alliance_code",alliance).eq("game_id",gameId).eq("active",true).maybeSingle());
+ if(!member)throw new HttpError("player_not_active_in_alliance",403);
+ if(!slotKey){
+   await checked<any>(db.from("aos_bear_assignments").delete()
+     .eq("alliance_code",alliance).eq("game_id",gameId));
+   await audit(alliance,userId,"bear_assignment",gameId,"unassign");
+   return json(req,{ok:true,game_id:gameId,removed:true});
+ }
+ if(!["starter","joiner","flex"].includes(role)||!["confirmed","tentative"].includes(attendance))
+   throw new HttpError("invalid_bear_assignment",400);
+ const slot=await checked<any>(db.from("discord_bear_slots").select("slot_key")
+   .eq("alliance_code",alliance).eq("slot_key",slotKey).eq("active",true).maybeSingle());
+ if(!slot)throw new HttpError("bear_slot_unavailable",409);
+ const notes=str(body?.notes||"",500);
+ const result=await checked<any>(db.from("aos_bear_assignments").upsert({
+   alliance_code:alliance,game_id:gameId,slot_key:slotKey,role,attendance,notes,
+   updated_at:new Date().toISOString(),updated_by:userId
+ },{onConflict:"alliance_code,game_id"}).select("game_id,slot_key,role,attendance,notes,updated_at").single());
+ await audit(alliance,userId,"bear_assignment",gameId,"assign");
+ return json(req,{ok:true,assignment:result});
+}
 async function memberPowerHistory(req:Request,alliance:string,staff:any,body:any){
  if(!permission(staff,"members"))throw new HttpError("permission_denied",403);
  const gameId=str(body?.game_id,20);
@@ -1126,6 +1201,8 @@ Deno.serve(async(req: Request)=>{
     if(body?.action==="power_sync")return await syncRosterPower(req,alliance,staff);
     if(body?.action==="power_history")return await memberPowerHistory(req,alliance,staff,body);
     if(body?.action==="performance_dashboard")return await performanceDashboard(req,alliance,staff);
+    if(body?.action==="bear_management")return await bearManagement(req,alliance,staff);
+    if(body?.action==="bear_assignment")return await saveBearAssignment(req,alliance,userId,staff,body);
     if(body?.action==="staff_invite")return await inviteR4(req,alliance,userId,staff,body);
     if(body?.action==="transfer_window")return await saveTransferWindow(req,alliance,userId,staff,body);
     if(body?.action==="transfer_portraits")return await refreshTransferPortraits(req,alliance,staff);
