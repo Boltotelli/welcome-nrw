@@ -1,6 +1,7 @@
 /* AllianceOS Phase 4 – GitHub Pages only: FightClub draft rosters.
  * Distinguishes confirmed source schedules from a manually chosen planning date.
  * No Discord role/slot/bot changes, no automatic player assignments. */
+import {createFightClubMap} from "./fightclub-map.js?v=20261020-tactical-map-v1";
 export function createFightClub({getState,getLanguage,request,flash,esc,openPlayer}){
  const canDossier=()=>getState()?.staff?.is_owner===true||getState()?.staff?.permissions?.members===true;
  const root=document.getElementById("fightclubRoot");
@@ -119,6 +120,10 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
  const playerMap=()=>new Map(players().map(p=>[String(p.game_id),p]));
  const powers=()=>new Map((state?.powers||[]).map(p=>[String(p.game_id),p]));
  const assignments=()=>state?.assignments?.filter(a=>a.event_type===eventType&&a.battle_date===date)||[];
+ const mapUI=createFightClubMap({
+  getContext:()=>({eventType,date,assignments:assignments(),mapAssignments:state?.map_assignments||[],players:players(),state}),
+  getLanguage,request,flash,esc,onUpdated:()=>draw()
+ });
  const assignment=id=>assignments().find(a=>String(a.game_id)===String(id));
  const cycles=()=>state?.cycles?.filter(c=>c.event_type===eventType)||[];
  const cycle=()=>cycles().find(c=>c.battle_date===date);
@@ -251,7 +256,7 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
        '<p>'+esc(t("snapshotHint"))+' '+esc(t("noAutomatic"))+'</p></div>'+
        '<section class="fight-overview"><h3>'+esc(t("head"))+'</h3><div class="fight-summary-grid">'+summary()+'</div></section>'+
        (conflicts.size?'<div class="fight-conflict">⚠ '+esc(t("familyHint"))+'</div>':'')+
-       candidateLists()+list();
+       candidateLists()+mapUI.render()+list();
    }
    root.innerHTML=html;
    pending.forEach(id=>{const b=root.querySelector('[data-fight-save="'+id+'"]');if(b){b.disabled=true;b.textContent=t("saving");}});
@@ -289,8 +294,13 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
        game_id:id,legion,availability:avail,combat_role:role,notes,remove});
      if(ticket!==generation)return;
      if(!result?.ok)throw Error("save_failed");
+     const oldAssignment=state.assignments.find(a=>a.event_type===whichEvent&&a.battle_date===whichDate&&String(a.game_id)===id);
      state.assignments=state.assignments.filter(a=>!(a.event_type===whichEvent&&a.battle_date===whichDate&&String(a.game_id)===id));
      if(!result.removed)state.assignments.push(result.assignment);
+     // Mirror the backend FK cascade and clearing objectives when moving legions.
+     if(result.removed||(oldAssignment&&Number(oldAssignment.legion)!==legion)){
+       state.map_assignments=(state.map_assignments||[]).filter(a=>!(a.event_type===whichEvent&&a.battle_date===whichDate&&String(a.game_id)===id));
+     }
      flash(t(result.removed?"removed":"saved"));draw();
    }catch(e){if(ticket===generation)flash(t("error")+" ("+String(e.message||e)+")",true);}
    finally{pending.delete(id);if(ticket===generation){const b=root.querySelector('[data-fight-save="'+id+'"]');if(b){b.disabled=false;b.textContent=t("save");}}}
@@ -311,6 +321,7 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
  }
  if(root){
    root.addEventListener("change",e=>{
+     if(mapUI.change(e))return;
      const el=e.target;
      if(el.matches("[data-fight-type]")){eventType=el.value;date="";filter="all";search="";draw();}
      else if(el.matches("[data-fight-date]")){date=el.value;filter="all";search="";draw();}
@@ -323,6 +334,7 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
      if(Number.isInteger(pos))input?.setSelectionRange(pos,pos);
    });
    root.addEventListener("click",async e=>{
+     if(await mapUI.click(e))return;
      const target=e.target;
      if(target.closest("[data-fight-refresh]")){load(true);return;}
      const known=target.closest("[data-fight-known]");
@@ -339,6 +351,6 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
      }
    });
  }
- function reset(){generation++;state=null;loading=null;pending.clear();date="";search="";filter="all";eventType="swordland";if(root){root.innerHTML="";root.textContent="";}}
+ function reset(){mapUI.reset();generation++;state=null;loading=null;pending.clear();date="";search="";filter="all";eventType="swordland";if(root){root.innerHTML="";root.textContent="";}}
  return {enabled,open:load,render:draw,reset};
 }
