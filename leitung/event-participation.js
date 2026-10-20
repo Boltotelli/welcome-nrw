@@ -162,13 +162,14 @@ export function createEventParticipation({getState,getLanguage,request,esc,flash
  }
  function sidebar(){
   const o=cache?.overview||{};
-  return '<section class="card participation-related"><h3>'+esc(t("overview"))+'</h3>'+
-   '<div class="participation-related-grid"><div><strong>'+esc(t("bear"))+'</strong><p>'+
-     esc(number(o.bear_accounts||0))+' '+esc(t("bearCount"))+'</p><button type="button" class="ghost" data-part-jump="bear">'+esc(t("goBear"))+' →</button></div>'+
-   '<div><strong>'+esc(t("fightclub"))+'</strong><p>'+esc(number(o.fightclub_plans||0))+' '+esc(t("fightCount"))+
-     ' · '+esc(number(o.fightclub_events||0))+' '+esc(t("fightEvents"))+'</p>'+
-     '<button type="button" class="ghost" data-part-jump="fightclub">'+esc(t("goFight"))+' →</button></div></div>'+
-   '</section>';
+  const blocks=[];
+  if(o.bear_access!==false)blocks.push('<div><strong>'+esc(t("bear"))+'</strong><p>'+
+     esc(number(o.bear_accounts||0))+' '+esc(t("bearCount"))+'</p><button type="button" class="ghost" data-part-jump="bear">'+esc(t("goBear"))+' →</button></div>');
+  if(o.fightclub_access!==false)blocks.push('<div><strong>'+esc(t("fightclub"))+'</strong><p>'+
+     esc(number(o.fightclub_plans||0))+' '+esc(t("fightCount"))+' · '+esc(number(o.fightclub_events||0))+
+     ' '+esc(t("fightEvents"))+'</p><button type="button" class="ghost" data-part-jump="fightclub">'+esc(t("goFight"))+' →</button></div>');
+  return blocks.length?'<section class="card participation-related"><h3>'+esc(t("overview"))+
+    '</h3><div class="participation-related-grid">'+blocks.join("")+'</div></section>':"";
  }
  function memberRow(p){
   const r=stored(p.game_id);
