@@ -1000,7 +1000,7 @@ async function saveFightClub(req:Request,alliance:string,userId:string,staff:any
  if(!["swordland","triforce"].includes(eventType))throw new HttpError("invalid_fight_event",400);
  // Calendar date only. Do not invent an event or trust client timestamps.
  const parsed=Date.parse(battleDate+"T00:00:00Z");
- if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(battleDate)||
+ if(!/^\d{4}-\d{2}-\d{2}$/.test(battleDate)||
   !Number.isFinite(parsed)||new Date(parsed).toISOString().slice(0,10)!==battleDate)
   throw new HttpError("invalid_battle_date",400);
  const delta=Date.parse(battleDate+"T00:00:00Z")-Date.now();
