@@ -4,10 +4,10 @@ import {createOperations} from "./operations.js?v=pages-4";
 import {createDiscordEventPlanner} from "./discord-events.js?v=eventbot-4lang-20261019";
 import {createEventBotStatusPanel} from "./event-bot-status.js?v=eventbot-4lang-20261019";
 import {createMemberRelationships} from "./member-relationships.js?v=phase1-20261019-1";
-import {createPerformance} from "./performance.js?v=phase2-perf-release-20261019-2";
-import {createBearManagement} from "./bear-management.js?v=phase3-bear-release-20261020-3";
-import {createFightClub} from "./fightclub.js?v=phase4-fightclub-20261020-2";
-import {createEventParticipation} from "./event-participation.js?v=permissions-split-20261020-2";
+import {createPerformance} from "./performance.js?v=permissions-split-20261020-3";
+import {createBearManagement} from "./bear-management.js?v=permissions-split-20261020-3";
+import {createFightClub} from "./fightclub.js?v=permissions-split-20261020-3";
+import {createEventParticipation} from "./event-participation.js?v=permissions-split-20261020-3";
 
 // Private AllianceOS pilot. Data is NEVER stored in localStorage; only auth session is.
 // All records and permissions are issued by the authenticated Edge Function.
