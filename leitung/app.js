@@ -5,6 +5,7 @@ import {createDiscordEventPlanner} from "./discord-events.js?v=eventbot-4lang-20
 import {createEventBotStatusPanel} from "./event-bot-status.js?v=eventbot-4lang-20261019";
 import {createMemberRelationships} from "./member-relationships.js?v=phase1-20261019-1";
 import {createPerformance} from "./performance.js?v=phase2-perf-release-20261019-2";
+import {createBearManagement} from "./bear-management.js?v=phase3-bear-test-20261020-1";
 
 // Private AllianceOS pilot. Data is NEVER stored in localStorage; only auth session is.
 // All records and permissions are issued by the authenticated Edge Function.
@@ -86,7 +87,7 @@ Object.assign(step6Copy.es,{discordBotOffline:"Planificador integrado · Envío 
  botRuleEnableHint:"DE, EN, FR y ES obligatorioss. No habrá envíos automáticos sin autorización expresa."});
 const step6DaysCopy={"de":{"botEventDays":"Eventtage","saveAllEventTimes":"Zeiten für alle Tage übernehmen","botPresetAllDays":"Tagesvorlagen für alle Eventtage anlegen","botEventStart":"Tagesbeginn (UTC)","botEventEnd":"Tagesende (UTC, optional)","saveEventTimes":"Tageszeiten speichern","botAnchorHint":"Jeder Eventtag kann andere Zeiten und Texte besitzen. Relative Erinnerungen richten sich nach Beginn oder Ende des jeweiligen Tages. Alle Zeiten UTC; keine geschätzten Termine.","botUsePresets":"Vorlage für diesen Tag hinzufügen","botEventDay":"Nachricht am Eventtag","botRelative":"Relativ zum gewählten Eventtag","botStart":"Tagesbeginn","botEnd":"Tagesende","botTimingNote":"Alle Zeiten in UTC. Jeder Eventtag hat eigene Vorlagen und eigene Start-/Endzeiten. Ein Vorlauf vor 00:00 UTC kann am Vortag liegen."},"en":{"botEventDays":"Event days","saveAllEventTimes":"Apply times to all days","botPresetAllDays":"Create templates for every event day","botEventStart":"Day start (UTC)","botEventEnd":"Day end (UTC, optional)","saveEventTimes":"Save daily times","botAnchorHint":"Each event day can have its own texts and times. Relative reminders refer to the start/end of that particular day. UTC only; no estimated dates.","botUsePresets":"Add a template for this day","botEventDay":"Message on event day","botRelative":"Relative to selected event day","botStart":"Start of day","botEnd":"End of day","botTimingNote":"UTC only. Each event day has its own messages and start/end anchors. A reminder before 00:00 UTC may fall on the previous calendar day."},"fr":{"botEventDays":"Jours de l'événement","saveAllEventTimes":"Appliquer les heures à tous les jours","botPresetAllDays":"Créer les modèles de chaque journée","botEventStart":"Début du jour (UTC)","botEventEnd":"Fin du jour (UTC, facultatif)","saveEventTimes":"Enregistrer les horaires du jour","botAnchorHint":"Chaque journée peut avoir ses propres textes et horaires. Les rappels relatifs se réfèrent au début/à la fin de ce jour. Heures UTC, aucune estimation.","botUsePresets":"Ajouter un modèle pour ce jour","botEventDay":"Message le jour","botRelative":"Relatif à la journée choisie","botStart":"Début du jour","botEnd":"Fin du jour","botTimingNote":"Heures UTC. Chaque jour dispose de ses messages et horaires. Un rappel avant minuit UTC peut être envoyé la veille."},"es":{"botEventDays":"Días del evento","saveAllEventTimes":"Aplicar horarios a todos los días","botPresetAllDays":"Crear plantillas para todos los días","botEventStart":"Inicio del día (UTC)","botEventEnd":"Fin del día (UTC, opcional)","saveEventTimes":"Guardar horas del día","botAnchorHint":"Cada día puede tener horas y textos diferentes. Los recordatorios relativos usan el inicio/fin de ese día. Solo UTC, sin fechas estimadas.","botUsePresets":"Añadir plantilla para este día","botEventDay":"Mensaje del día","botRelative":"Relativo al día elegido","botStart":"Inicio del día","botEnd":"Fin del día","botTimingNote":"Solo UTC. Cada día tiene mensajes y horas propias. Un recordatorio anterior a las 00:00 puede enviarse el día anterior."}};
 const rosterDossierError={de:{playerUnavailable:"Diese Spielerakte ist nicht verfügbar: Eine gültige Kingshot-Spieler-ID fehlt. Bitte Spielerzuordnung prüfen."},en:{playerUnavailable:"Player dossier unavailable: a valid Kingshot player ID is missing. Check the player record."},fr:{playerUnavailable:"Fiche indisponible : identifiant Kingshot valide manquant. Vérifiez le joueur."},es:{playerUnavailable:"Ficha no disponible: falta un ID Kingshot válido. Revisa el registro."}};
-const phase2Labels={de:{performance:"Performance"},en:{performance:"Performance"},fr:{performance:"Performance"},es:{performance:"Rendimiento"}};
+const phase2Labels={de:{performance:"Performance",bearManagement:"Bärenfalle"},en:{performance:"Performance",bearManagement:"Bear Trap"},fr:{performance:"Performance",bearManagement:"Piège à ours"},es:{performance:"Rendimiento",bearManagement:"Trampa de oso"}};
 const t=k=>phase2Labels[lang]?.[k]||rosterDossierError[lang]?.[k]||step6DaysCopy[lang]?.[k]||step6DaysCopy.de[k]||step6Copy[lang]?.[k]||step6Copy.de[k]||step5Copy[lang]?.[k]||lawCategoryLabels[lang]?.[k]||lawUiCopy[lang]?.[k]||manualPhasesCopy[lang]?.[k]||transferUiCopy[lang]?.[k]||powerLabels[lang]?.[k]||rosterLabels[lang]?.[k]||leaderUiCopy[lang]?.[k]||latestModuleCopy[lang]?.[k]||opsUI[lang]?.[k]||groupUI[lang]?.[k]||eventLabels[lang]?.[k]||phase1Labels[lang]?.[k]||staffExtra[lang]?.[k]||copy[lang]?.[k]||lawCategoryLabels.de[k]||lawUiCopy.de[k]||manualPhasesCopy.de[k]||transferUiCopy.de[k]||powerLabels.de[k]||rosterLabels.de[k]||leaderUiCopy.de[k]||latestModuleCopy.de[k]||opsUI.de[k]||groupUI.de[k]||eventLabels.de[k]||phase1Labels.de[k]||staffExtra.de[k]||copy.de[k]||k;
 const locale={de:"de-DE",en:"en-GB",fr:"fr-FR",es:"es-ES"}[lang];
 function txt(obj){return typeof obj==="string"?obj:(obj?.[lang]||obj?.[state?.alliance?.default_language]||obj?.de||obj?.en||"");}
@@ -98,9 +99,10 @@ function patchTranslations(){
  $("pageLabel").textContent=t(tab);
 }
 function setTab(name){
- if(!["overview","roster","performance","transfers","laws","events","discord","settings"].includes(name))return;
+ if(!["overview","roster","performance","bear","transfers","laws","events","discord","settings"].includes(name))return;
+ if(name==="bear"&&!bearManagement.enabled)return;
  if(name==="performance"&&!performance.enabled)return;
- const required=["roster","performance"].includes(name)?"members":["transfers","laws","events","settings"].includes(name)?name:null;
+ const required=["roster","performance","bear"].includes(name)?"members":["transfers","laws","events","settings"].includes(name)?name:null;
  if(required&&state&&!can(required))name="overview";
   if(name==="discord"&&state&&!can("events")&&!can("settings"))name="overview";
  tab=name;q(".tab-page").forEach(p=>p.hidden=p.dataset.page!==name);
@@ -109,6 +111,7 @@ function setTab(name){
  history.replaceState(null,"",LEITUNG_PATH+(name==="overview"?"":"?tab="+encodeURIComponent(name)));
   if(name==="discord"&&state)Promise.all([discordPlanner.open(lang),eventBotStatusPanel.refresh()]).catch(e=>flash(String(e.message),true));
   if(name==="performance"&&state)performance.open();
+  if(name==="bear"&&state)bearManagement.open();
 }
 function flash(message,error=false){
  const el=$("flash");el.textContent=message;el.classList.toggle("error",error);el.hidden=false;
@@ -131,9 +134,10 @@ function can(feature){return state?.staff?.is_owner===true||state?.staff?.permis
 function grantButtons(){
  q("[data-permission]").forEach(el=>{el.disabled=!can(el.dataset.permission);el.title=el.disabled?t("permissionDenied"):"";});
  for(const el of q(".nav-item[data-tab]")){
-  const required=["roster","performance"].includes(el.dataset.tab)?"members":["transfers","laws","events","settings"].includes(el.dataset.tab)?el.dataset.tab:null;
+  const required=["roster","performance","bear"].includes(el.dataset.tab)?"members":["transfers","laws","events","settings"].includes(el.dataset.tab)?el.dataset.tab:null;
   el.hidden=el.dataset.tab==="discord"?!can("event_bot"):
-   el.dataset.tab==="performance"?!performance.enabled||!can("members"):Boolean(required&&!can(required));
+   ["performance","bear"].includes(el.dataset.tab)?
+     !(el.dataset.tab==="performance"?performance.enabled:bearManagement.enabled)||!can("members"):Boolean(required&&!can(required));
  }
 }
 let powerSyncStarted=false;
@@ -155,6 +159,8 @@ const eventBotStatusPanel=createEventBotStatusPanel({supabase,flash,can,esc});
 const operations=createOperations({getState:()=>state,request,flash,esc,t,can,refresh});
 const relationships=createMemberRelationships({getState:()=>state,getLanguage:()=>lang,request,esc});
 const performance=createPerformance({getState:()=>state,getLanguage:()=>lang,request,esc,
+  openPlayer:gameId=>openEdit("member",gameId)});
+const bearManagement=createBearManagement({getState:()=>state,getLanguage:()=>lang,request,esc,flash,
   openPlayer:gameId=>openEdit("member",gameId)});
 function showLogin(message=""){
  $("liveArea").hidden=true;$("loginArea").hidden=false;$("logoutBtn").hidden=true;
@@ -499,7 +505,7 @@ async function saveDialog(event){
 }
 q(".nav-item").forEach(el=>el.addEventListener("click",()=>setTab(el.dataset.tab)));
 q("[data-jump]").forEach(el=>el.addEventListener("click",()=>setTab(el.dataset.jump)));
-$("language").addEventListener("change",e=>{lang=e.target.value;localStorage.setItem("nrw_page_lang",lang);if(state){render();if(tab==="performance")performance.render();}else{patchTranslations();loadLeaderList();$("toggleLegacyLogin").textContent=t(legacyLogin?"normalSignIn":"legacySignIn");}});
+$("language").addEventListener("change",e=>{lang=e.target.value;localStorage.setItem("nrw_page_lang",lang);if(state){render();if(tab==="performance")performance.render();if(tab==="bear")bearManagement.render();}else{patchTranslations();loadLeaderList();$("toggleLegacyLogin").textContent=t(legacyLogin?"normalSignIn":"legacySignIn");}});
 $("themeToggle").addEventListener("click",()=>{const next=document.documentElement.dataset.theme==="dark"?"light":"dark";document.documentElement.dataset.theme=next;localStorage.setItem("nrw_theme",next);});
 $("syncPlayerPower").addEventListener("click",syncPlayerPower);
 $("rosterSearch").addEventListener("input",()=>state&&renderRoster());
@@ -757,7 +763,7 @@ $("changePasswordForm").addEventListener("submit",async e=>{
  }catch(e){flash(t("genericError")+" ("+e.message+")",true);}
  finally{button.disabled=false;}
 });
-$("logoutBtn").addEventListener("click",async()=>{await supabase.auth.signOut();state=null;discordPlanner.reset();eventBotStatusPanel.reset();performance.reset();showLogin();});
+$("logoutBtn").addEventListener("click",async()=>{await supabase.auth.signOut();state=null;discordPlanner.reset();eventBotStatusPanel.reset();performance.reset();bearManagement.reset();showLogin();});
 document.documentElement.dataset.theme=localStorage.getItem("nrw_theme")||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");
 patchTranslations();
 loadLeaderList();
