@@ -790,7 +790,7 @@ async function eventParticipationData(req:Request,alliance:string,staff:any){
     .eq("alliance_code",alliance).limit(250)),
   checked<any[]>(db.from("aos_fightclub_assignments")
     .select("event_type,battle_date,game_id,legion")
-    .eq("alliance_code",alliance).gte("battle_date",since)
+    .eq("alliance_code",alliance).gte("battle_date",today)
     .order("battle_date",{ascending:false}).limit(1000))
  ]);
  const cycleKeySet=new Set(cycles.map(c=>String(c.group_key)));
