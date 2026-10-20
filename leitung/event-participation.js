@@ -112,7 +112,11 @@ export function createEventParticipation({getState,getLanguage,request,esc,flash
  let cache=null,loading=null,requestId=0,selectedEvent="",selectedDate="",filter="all",search="",pending=new Set();
  function eventList(){return (cache?.cycles||[]).filter(x=>x.group_key&&!["bear-1","bear-2","catalog-swordland-showdown","catalog-tri-alliance-clash"].includes(x.group_key));}
  function event(){return eventList().find(x=>x.group_key===selectedEvent);}
- function eventName(item){const obj=item?.title||{};return obj[getLanguage()]||obj.de||obj.en||String(item.group_key);}
+ function eventName(item){
+   const obj=item?.title||{};
+   const fallback={brawl:{de:"Alliance Brawl",en:"Alliance Brawl",fr:"Alliance Brawl",es:"Alliance Brawl"}};
+   return obj[getLanguage()]||obj.de||obj.en||fallback[item.group_key]?.[getLanguage()]||String(item.group_key);
+ }
  function activePlayers(){return (getState()?.players||[]).filter(p=>p.active&&p.member_status!=="left"&&/^\d{1,20}$/.test(String(p.game_id||"")))
     .slice().sort((a,b)=>String(a.name||"").localeCompare(String(b.name||""),language()));}
  function roster(){return new Map(activePlayers().map(p=>[String(p.game_id),p]));}
@@ -232,7 +236,11 @@ export function createEventParticipation({getState,getLanguage,request,esc,flash
    if(!response?.ok||!Array.isArray(response.cycles)||!Array.isArray(response.records))
     throw Error("invalid_participation_response");
    cache=response;
-   if(!selectedEvent)selectedEvent=eventList()[0]?.group_key||"";
+   if(!selectedEvent){
+     const upcoming=eventList().map(item=>({item,next:tentativeDates(item).find(d=>d>=cache.today)||"9999-12-31"}))
+       .sort((a,b)=>a.next.localeCompare(b.next));
+     selectedEvent=upcoming[0]?.item?.group_key||"";
+   }
    if(!selectedDate&&event())selectedDate=tentativeDates(event()).find(d=>d>=cache.today)||cache.today;
    draw();
   }).catch(e=>{if(ticket!==requestId)return;root.textContent=t("error")+" ("+String(e.message||e)+")";})
@@ -242,8 +250,9 @@ export function createEventParticipation({getState,getLanguage,request,esc,flash
  async function save(id,remove=false){
   if(!selectedEvent||!validDate(selectedDate)){flash(t("noDate"),true);return;}
   const today=cache?.today;
-  const diff=millis(selectedDate)-millis(today);
-  if(!Number.isFinite(diff)||diff<-90*86400000||diff>365*86400000){flash(t("dateRange"),true);return;}
+  const minDate=new Date(millis(today)-90*86400000).toISOString().slice(0,10);
+  const maxDate=new Date(millis(today)+365*86400000).toISOString().slice(0,10);
+  if(selectedDate<minDate||selectedDate>maxDate){flash(t("dateRange"),true);return;}
   if(pending.has(id))return;
   const item=root.querySelector('[data-part-row="'+id+'"]');if(!item)return;
   const reply=item.querySelector("[data-part-response]")?.value||"unknown";
