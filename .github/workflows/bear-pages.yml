@@ -435,6 +435,16 @@ jobs:
           test -s _site/leitung/index.html
           test -s _site/leitung/app.js
           test -s _site/leitung/discord-events.js
+          # Verify AllianceOS Phases 1–5 reached the actual Pages artifact.
+          test -s _site/leitung/member-relationships.js
+          test -s _site/leitung/performance.js
+          test -s _site/leitung/bear-management.js
+          test -s _site/leitung/fightclub.js
+          test -s _site/leitung/event-participation.js
+          grep -Fq 'data-tab="performance"' _site/leitung/index.html
+          grep -Fq 'data-tab="bear"' _site/leitung/index.html
+          grep -Fq 'data-tab="fightclub"' _site/leitung/index.html
+          grep -Fq 'data-tab="participation"' _site/leitung/index.html
           test -s _site/leitung/event-library.js
           test -s _site/leitung/operations.js
           test -s _site/leitung/public-config.js
