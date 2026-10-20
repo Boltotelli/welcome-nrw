@@ -537,11 +537,14 @@ async function eventLoanSave(req:Request,alliance:string,userId:string,staff:any
    .eq("game_id",gameId).limit(20));
  const home=people.find(p=>p.alliance_code===alliance&&p.active);
  const atTarget=people.find(p=>p.alliance_code===target&&p.active);
- if(!home&&!atTarget)throw new HttpError("player_not_verified_in_home_or_target",409);
- if(!home&&atTarget){
+ if(!people.length)throw new HttpError("player_not_found",409);
+ if(!home){
+   // A late FDT/RDS approval is allowed with recent NRW movement evidence,
+   // even if the destination has not been imported yet. No privileged access
+   // is granted until the target is independently observed.
    const moves=await checked<any[]>(db.from("player_alliance_transfers")
-     .select("id").eq("player_id",atTarget.id).eq("from_alliance",alliance)
-     .gte("moved_at",new Date(Date.now()-21*86400000).toISOString()).limit(1));
+     .select("id").in("player_id",people.map(p=>p.id)).eq("from_alliance",alliance)
+     .gte("moved_at",new Date(Date.now()-21*86400000).toISOString()).limit(5));
    if(!moves.length)throw new HttpError("no_recent_nrw_membership_evidence",409);
  }
  let originalRank:number|null=null;
