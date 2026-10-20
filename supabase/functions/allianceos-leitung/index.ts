@@ -880,7 +880,24 @@ async function bearManagement(req:Request,alliance:string,staff:any){
      troops:{inf:safeNumber(v.troopsI),cav:safeNumber(v.troopsC),arc:safeNumber(v.troopsA)},
      stats:{inf_attack:safeNumber(v.iAtk,100000),inf_lethality:safeNumber(v.iLet,100000),
        cav_attack:safeNumber(v.cAtk,100000),cav_lethality:safeNumber(v.cLet,100000),
-       arc_attack:safeNumber(v.aAtk,100000),arc_lethality:safeNumber(v.aLet,100000)}
+       arc_attack:safeNumber(v.aAtk,100000),arc_lethality:safeNumber(v.aLet,100000)},
+     // Allowlist only optimizer combat/formation inputs; never transmit
+     // profile editing credentials, edit PINs or unsupported history.
+     formation_input:{
+       values:Object.fromEntries(["cap","troopsI","troopsC","troopsA","iAtk","iLet","cAtk","cLet","aAtk","aLet","squadAtk","squadLet","pet","master","heroCapManual"].filter(k=>safeNumber(v[k],10000000000)!==null).map(k=>[k,safeNumber(v[k],10000000000)])),
+       v2:{
+         ownHeroes:names,
+         manualHeroes:Object.fromEntries(Object.entries(d.heroes||{}).filter(([key,value])=>key.length<=45&&value&&typeof value==="object").map(([key,value])=>{const h=value as any;return [key,{name:key,stars:safeNumber(h.stars,10),tier:safeNumber(h.tier,20),level:safeNumber(h.level,200),widget:safeNumber(h.widget,20),skills:Array.isArray(h.skills)?h.skills.slice(0,5):[]}];})),
+         scannedOwnedHeroes:Object.keys(d.heroes||{}).filter(k=>typeof k==="string").slice(0,80),
+         joinCount:safeNumber(d.joinCount,6)||0,
+         troopGroups:Array.isArray(d.troopGroups)?d.troopGroups.filter((g:any)=>g&&["infantry","cavalry","archer"].includes(g.type)).slice(0,36).map((g:any)=>({type:g.type,tier:safeNumber(g.tier,11),tg:safeNumber(g.tg,8),count:safeNumber(g.count)})):[],
+         ministers:{court:["king","highKing"].includes(d.ministers?.court)?d.ministers.court:"king",fc:d.ministers?.fc===true,m:d.ministers?.m===true},
+         petActive:{"Mighty Bison":d.petActive?.["Mighty Bison"]===true},
+         petSkillRanks:{"Mighty Bison":safeNumber(d.petSkillRanks?.["Mighty Bison"],20)},
+         savageAdvantage:safeNumber(d.savageAdvantage,10),
+         valoraTalent:safeNumber(d.valoraTalent,10)
+       }
+     }
    };
  });
  return json(req,{ok:true,slots,assignments:assignments.filter(a=>allIds.includes(a.game_id)),
