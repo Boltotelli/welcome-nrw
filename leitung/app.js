@@ -337,7 +337,7 @@ function renderSettings(){
  };
  $("staffList").innerHTML=members.length?'<p class="eyebrow">'+esc(t("staffList"))+'</p>'+
  members.map(m=>{
-   const protectedAccount=m.is_admin||m.protected_account||!/^leader-[0-9]+@accounts\\.allianceos\\.invalid$/i.test(m.email||"");
+   const protectedAccount=m.is_admin||m.protected_account||!/^leader-[0-9]+@accounts\.allianceos\.invalid$/i.test(m.email||"");
    const activeCount=protectedAccount?STAFF_KEYS.length:STAFF_KEYS.filter(k=>m.permissions?.[k]===true).length;
    const status=protectedAccount?t("rightsProtected"):m.enabled?t("rightsEnabled"):t("rightsDisabled");
    return '<button type="button" class="staff-row staff-access-row'+(selectedStaffEmail===m.email?" selected":"")+'" data-staff-email="'+esc(m.email)+'" aria-pressed="'+(selectedStaffEmail===m.email)+'" '+
@@ -352,10 +352,10 @@ function renderSettings(){
  const selected=members.find(m=>m.email===selectedStaffEmail&&!m.is_admin&&!m.protected_account);
  if(!selected)selectedStaffEmail="";
  sel.value=selectedStaffEmail;
- const rights=$("staffRightsFieldset"),form=$("r4Form");
+ const rights=$("staffRightsFieldset"),permissionForm=$("r4Form");
  rights.disabled=!selected;
- for(const key of STAFF_KEYS)form.elements[key].checked=selected?.permissions?.[key]===true;
- form.elements.enabled.checked=selected?.enabled===true;
+ for(const key of STAFF_KEYS)permissionForm.elements[key].checked=selected?.permissions?.[key]===true;
+ permissionForm.elements.enabled.checked=selected?.enabled===true;
  $("staffSelectionInfo").textContent=selected?
   lookupName(selected.email)+" · "+selected.rank+" · "+(selected.enabled?t("rightsEnabled"):t("rightsDisabled")):
   t("rightsSelected");
