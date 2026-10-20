@@ -2,7 +2,7 @@
  * Only enabled on GitHub Pages for the initial leadership preview.
  * Never creates player logins or modifies NAP player records. */
 export function createMemberRelationships({getState,getLanguage,request,esc,flash,reloadDossier}){
-  const enabled=location.hostname==="boltotelli.github.io" || ["localhost","127.0.0.1"].includes(location.hostname);
+  const enabled=true; // Released for both GitHub Pages and Vercel; access is enforced by server-side module permissions.
   const labels={
     de:{kind:"Account-Typ",main:"Main",alt:"Alt",mainAccount:"Zugehöriger Main",pickMain:"Main auswählen …",
       linkHelp:"Alts werden über ihre Kingshot-ID verknüpft. Der Main muss zu dieser Allianz gehören.",
