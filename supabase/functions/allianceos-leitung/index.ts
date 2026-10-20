@@ -65,6 +65,27 @@ async function checked<T>(promise: PromiseLike<{data:T|null,error:any}>, fallbac
   if (error) { console.error("AllianceOS DB error:",error.code,error.message); throw new HttpError(fallback,500); }
   return data as T;
 }
+// An event loan can preserve an ALREADY EXISTING leader login only when it is
+// approved by the NRW owner, unexpired, rank-matched and corroborated by a
+// recent observation in the registered destination alliance.
+async function protectedLoanFor(alliance:string,id:string,rank:string){
+ const now=new Date().toISOString();
+ const loans=await checked<any[]>(db.from("aos_event_loans")
+   .select("target_alliance,ends_at,original_rank").eq("home_alliance",alliance)
+   .eq("game_id",id).eq("status","approved").eq("protect_leadership",true)
+   .lte("starts_at",now).gte("ends_at",now).limit(2));
+ for(const loan of loans){
+   if(loan.original_rank!==Number(rank.slice(1)))continue;
+   const rows=await checked<any[]>(db.from("players")
+     .select("provider_seen_at,alliance_rank_observed_at").eq("game_id",id)
+     .eq("alliance_code",loan.target_alliance).eq("active",true).limit(5));
+   if(rows.some(p=>{
+     const observed=Date.parse(p.provider_seen_at||p.alliance_rank_observed_at||"");
+     return Number.isFinite(observed)&&observed<=Date.now()+300000&&Date.now()-observed<48*3600000;
+   }))return loan;
+ }
+ return null;
+}
 async function staffFor(req: Request, alliance: string) {
   const token = (req.headers.get("authorization")||"").replace(/^Bearer\s+/i,"").trim();
   if (!token || token.length < 20) throw new HttpError("authentication_required",401);
@@ -80,8 +101,13 @@ async function staffFor(req: Request, alliance: string) {
   if(match){
     const member=await checked<any>(db.from("players").select("alliance_rank,active")
       .eq("alliance_code",alliance).eq("game_id",match[1]).maybeSingle());
-    if(!member?.active||![4,5].includes(Number(member.alliance_rank)))throw new HttpError("leader_no_longer_active",403);
-    staff.rank="R"+member.alliance_rank;
+    if(member?.active&&[4,5].includes(Number(member.alliance_rank))){
+      staff.rank="R"+member.alliance_rank;
+    }else{
+      const exception=await protectedLoanFor(alliance,match[1],staff.rank);
+      if(!exception)throw new HttpError("leader_no_longer_active",403);
+      staff.event_loan_until=exception.ends_at;
+    }
   }
   return {userId: who.user.id, staff};
 }
