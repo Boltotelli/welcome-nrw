@@ -4,7 +4,7 @@
 export function createBearManagement({getState,getLanguage,request,esc,openPlayer,flash}){
  const canDossier=()=>getState()?.staff?.is_owner===true||getState()?.staff?.permissions?.members===true;
  const root=document.getElementById("bearManagementRoot");
- const enabled=location.hostname==="boltotelli.github.io"||["localhost","127.0.0.1"].includes(location.hostname);
+ const enabled=true; // Released for both GitHub Pages and Vercel; access is enforced by server-side module permissions.
  const messages={
  de:{intro:"Wer spielt welche Bärenfalle? Teilnehmer zuordnen und gespeicherte Optimierer-Werte einsehen.",
   source:"Fallenzeiten aus der bestehenden Discord-Rotation (UTC), schreibgeschützt. Diese Planung verändert keine Bot-Zeiten oder Minister.",
