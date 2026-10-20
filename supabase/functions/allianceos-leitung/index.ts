@@ -770,6 +770,82 @@ async function saveFightClub(req:Request,alliance:string,userId:string,staff:any
  await audit(alliance,userId,"fightclub",gameId,"plan_"+eventType+"_"+battleDate);
  return json(req,{ok:true,assignment:a});
 }
+// Phase 5 – private, manually recorded event attendance. Event templates are
+// reused read-only. Neither the Discord bot nor player accounts are modified.
+async function eventParticipationData(req:Request,alliance:string,staff:any){
+ if(!permission(staff,"members"))throw new HttpError("permission_denied",403);
+ const today=new Date().toISOString().slice(0,10);
+ const since=new Date(Date.now()-90*86400000).toISOString().slice(0,10);
+ const until=new Date(Date.now()+365*86400000).toISOString().slice(0,10);
+ const [cycles,records,bearRows,fightRows]=await Promise.all([
+  checked<any[]>(db.from("aos_event_cycles")
+    .select("group_key,title,anchor_date,interval_days,duration_days,enabled,start_time_utc")
+    .eq("alliance_code",alliance).eq("enabled",true)
+    .order("group_key",{ascending:true}).limit(120)),
+  checked<any[]>(db.from("aos_event_participation")
+    .select("event_key,event_date,game_id,response,attendance,notes,updated_at")
+    .eq("alliance_code",alliance).gte("event_date",since).lte("event_date",until)
+    .order("event_date",{ascending:false}).limit(3500)),
+  checked<any[]>(db.from("aos_bear_assignments").select("game_id,slot_key")
+    .eq("alliance_code",alliance).limit(250)),
+  checked<any[]>(db.from("aos_fightclub_assignments")
+    .select("event_type,battle_date,game_id,legion")
+    .eq("alliance_code",alliance).gte("battle_date",since)
+    .order("battle_date",{ascending:false}).limit(1000))
+ ]);
+ const cycleKeySet=new Set(cycles.map(c=>String(c.group_key)));
+ return json(req,{ok:true,today,cycles,partial:records.length===3500,
+  records:records.filter(r=>cycleKeySet.has(String(r.event_key))),
+  overview:{
+   bear_accounts:new Set(bearRows.map(r=>r.game_id)).size,
+   fightclub_plans:fightRows.filter(r=>Number(r.legion)>=0).length,
+   fightclub_events:[...new Set(fightRows.filter(r=>Number(r.legion)>=0)
+      .map(r=>r.event_type+":"+r.battle_date))].length
+  }});
+}
+async function saveEventParticipation(req:Request,alliance:string,userId:string,staff:any,body:any){
+ if(!permission(staff,"members"))throw new HttpError("permission_denied",403);
+ const eventKey=str(body?.event_key,80),eventDate=str(body?.event_date,10),gameId=str(body?.game_id,20);
+ if(!/^[a-z0-9][a-z0-9_-]{0,79}$/.test(eventKey))throw new HttpError("invalid_event_key",400);
+ const parsed=Date.parse(eventDate+"T00:00:00Z");
+ if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(eventDate)||!Number.isFinite(parsed)||
+    new Date(parsed).toISOString().slice(0,10)!==eventDate)
+   throw new HttpError("invalid_event_date",400);
+ const distance=parsed-Date.now();
+ if(distance<-90*86400000||distance>365*86400000)
+   throw new HttpError("event_date_out_of_range",400);
+ if(!isId(gameId))throw new HttpError("invalid_player_id",400);
+ const [eventType,player]=await Promise.all([
+  checked<any>(db.from("aos_event_cycles").select("group_key")
+    .eq("alliance_code",alliance).eq("group_key",eventKey).eq("enabled",true).maybeSingle()),
+  checked<any>(db.from("players").select("id").eq("alliance_code",alliance)
+    .eq("game_id",gameId).eq("active",true).maybeSingle())
+ ]);
+ if(!eventType)throw new HttpError("event_not_configured",409);
+ if(!player)throw new HttpError("player_not_active_in_alliance",403);
+ if(body?.remove===true){
+  await checked<any>(db.from("aos_event_participation").delete()
+    .eq("alliance_code",alliance).eq("event_key",eventKey)
+    .eq("event_date",eventDate).eq("game_id",gameId));
+  await audit(alliance,userId,"event_participation",gameId,"unassign_"+eventKey+"_"+eventDate);
+  return json(req,{ok:true,removed:true,game_id:gameId});
+ }
+ const response=str(body?.response??"unknown",20),attendance=str(body?.attendance??"unknown",20);
+ if(!["unknown","yes","maybe","no"].includes(response)||
+    !["unknown","present","absent","excused"].includes(attendance))
+   throw new HttpError("invalid_attendance",400);
+ // A leader cannot mark attendance as observed before that event date.
+ if(attendance!=="unknown"&&eventDate>new Date().toISOString().slice(0,10))
+   throw new HttpError("future_attendance_forbidden",409);
+ const notes=str(body?.notes??"",500);
+ const record=await checked<any>(db.from("aos_event_participation").upsert({
+   alliance_code:alliance,event_key:eventKey,event_date:eventDate,game_id:gameId,
+   response,attendance,notes,updated_at:new Date().toISOString(),updated_by:userId
+ },{onConflict:"alliance_code,event_key,event_date,game_id"})
+   .select("event_key,event_date,game_id,response,attendance,notes,updated_at").single());
+ await audit(alliance,userId,"event_participation",gameId,"save_"+eventKey+"_"+eventDate);
+ return json(req,{ok:true,record});
+}
 async function memberPowerHistory(req:Request,alliance:string,staff:any,body:any){
  if(!permission(staff,"members"))throw new HttpError("permission_denied",403);
  const gameId=str(body?.game_id,20);
@@ -1276,6 +1352,8 @@ Deno.serve(async(req: Request)=>{
     if(body?.action==="bear_assignment")return await saveBearAssignment(req,alliance,userId,staff,body);
     if(body?.action==="fightclub_data")return await fightClubData(req,alliance,staff);
     if(body?.action==="fightclub_save")return await saveFightClub(req,alliance,userId,staff,body);
+    if(body?.action==="event_participation_data")return await eventParticipationData(req,alliance,staff);
+    if(body?.action==="event_participation_save")return await saveEventParticipation(req,alliance,userId,staff,body);
     if(body?.action==="staff_invite")return await inviteR4(req,alliance,userId,staff,body);
     if(body?.action==="transfer_window")return await saveTransferWindow(req,alliance,userId,staff,body);
     if(body?.action==="transfer_portraits")return await refreshTransferPortraits(req,alliance,staff);
