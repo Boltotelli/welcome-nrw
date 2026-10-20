@@ -25,8 +25,14 @@ export function createEventLoans({getState,getLanguage,request,esc,flash}){
       '<button type="button" data-loan-action="cancel" data-id="'+esc(l.id)+'">'+esc(t(4))+'</button></div>':'')+
       '</article>';
   }).join("");
+  const available=[...(getState()?.players||[]),...(getState()?.internalMoves||[])
+     .filter(m=>m.from_alliance==="NRW").map(m=>({game_id:m.game_id,name:m.player_name}))];
+  const seen=new Set();
+  const suggestions=available.filter(p=>/^[0-9]{5,20}$/.test(String(p.game_id||""))&&
+     (!seen.has(String(p.game_id))&&seen.add(String(p.game_id))))
+     .map(p=>'<option value="'+esc(p.game_id)+'">'+esc(p.name||p.game_id)+'</option>').join("");
   const form=admin()?'<form id="eventLoanForm" class="loan-form">'+
-    '<label>Game ID<input class="control" id="loanPlayer" name="game_id" pattern="[0-9]{5,20}" required value="'+esc(selected)+'"></label>'+
+    '<label>Game ID<input class="control" id="loanPlayer" name="game_id" list="loanPlayerList" pattern="[0-9]{5,20}" required value="'+esc(selected)+'"></label><datalist id="loanPlayerList">'+suggestions+'</datalist>'+
     '<label>Event<select class="control" name="event_type"><option value="fdt">FDT</option><option value="castle">Castle Battle</option><option value="kvk">KvK</option></select></label>'+
     '<label>Alliance<select class="control" name="target_alliance"><option>NWO</option><option>RDS</option></select></label>'+
     '<label>'+esc(t(5))+'<input class="control" name="starts_at" type="datetime-local" required></label>'+
