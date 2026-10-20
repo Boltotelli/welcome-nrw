@@ -40,6 +40,8 @@ function localized(raw: unknown, max = 10000) {
   const obj = (raw && typeof raw === "object" && !Array.isArray(raw)) ? raw as Record<string,unknown> : {};
   return Object.fromEntries(langs.map(l => [l, str(obj[l], max)]).filter(([,v]) => v));
 }
+// Phase 1–5 module access is independent of player-dossier rights.
+const STAFF_PERMISSION_KEYS=["members","performance","bear","fightclub","participation","transfers","laws","events","event_bot","settings"] as const;
 function permission(staff: any, feature: string) {
   return staff?.is_owner===true || staff?.permissions?.[feature]===true;
 }
@@ -224,7 +226,7 @@ async function provisionLeaders(req:Request,alliance:string,userId:string,staff:
   if(authError||!made?.user){errors.push({name:member.name,reason:"account_creation_failed"});continue;}
   const assigned=await db.from("aos_staff").insert({
     user_id:made.user.id,alliance_code:alliance,rank,
-    enabled:true,permissions:{members:false,transfers:false,laws:false,events:false,event_bot:false,settings:false}
+    enabled:true,permissions:Object.fromEntries(STAFF_PERMISSION_KEYS.map(key=>[key,false]))
   }).select("user_id").single();
   if(assigned.error){
     await db.auth.admin.deleteUser(made.user.id).catch(()=>{});
@@ -466,11 +468,12 @@ async function bootstrap(req: Request, alliance: string, staff: any) {
   let staffMembers:any[]=[];
   if(staff.is_owner){
     const assigned=await checked<any[]>(db.from("aos_staff")
-      .select("user_id,rank,permissions,enabled").eq("alliance_code",alliance).limit(100));
+      .select("user_id,rank,permissions,enabled,is_admin").eq("alliance_code",alliance).limit(100));
     staffMembers=await Promise.all(assigned.map(async (entry:any)=>{
       const {data,error}=await db.auth.admin.getUserById(entry.user_id);
       return {user_id:entry.user_id,email:error?"":data?.user?.email||"",rank:entry.rank,
-        permissions:entry.permissions,enabled:entry.enabled};
+        permissions:entry.permissions,enabled:entry.enabled,is_admin:entry.is_admin===true,
+        protected_account:entry.is_admin===true || data?.user?.email?.toLowerCase()==="admin@nap-tracker.invalid"};
     }));
   }
   let transferContacts:any[]=[];
@@ -484,7 +487,12 @@ async function bootstrap(req: Request, alliance: string, staff: any) {
     }));
   }
   return json(req,{alliance:config,staff:{rank:staff.rank,permissions:staff.permissions,is_owner:staff.is_owner},staffMembers,transferContacts,
-    players:permission(staff,"members")?players:[],transfers:permission(staff,"transfers")?transfers:[],
+    players:permission(staff,"members")?players:
+      ["performance","bear","fightclub","participation"].some(feature=>permission(staff,feature))?
+        players.filter(p=>p.active&&p.member_status!=="left")
+          .map(p=>({game_id:p.game_id,name:p.name,active:p.active,
+            member_status:p.member_status,main_game_id:p.main_game_id||null})):[],
+    transfers:permission(staff,"transfers")?transfers:[],
     internalMoves:permission(staff,"transfers")?internalMoves:[],
     laws:permission(staff,"laws")?laws:[],events:permission(staff,"events")?events:[],
     eventMessages:permission(staff,"events")?eventMessages:[],
@@ -568,7 +576,7 @@ async function syncRosterPower(req:Request,alliance:string,staff:any){
 // Read-only Phase 2 dashboard. Alliance staff authorization is enforced before
 // any data is collected. No NAP or performance source records are modified.
 async function performanceDashboard(req:Request,alliance:string,staff:any){
-  if(!permission(staff,"members"))throw new HttpError("permission_denied",403);
+  if(!permission(staff,"performance"))throw new HttpError("permission_denied",403);
   const since=new Date(Date.now()-89*86400000).toISOString().slice(0,10);
   const history:any[]=[];
   let truncated=false;
@@ -627,7 +635,7 @@ async function performanceDashboard(req:Request,alliance:string,staff:any){
 // Phase 3 – read-only source integration. This never edits Discord slots or
 // Bear Optimizer profiles/PINs. Only authorized alliance leaders may read it.
 async function bearManagement(req:Request,alliance:string,staff:any){
- if(!permission(staff,"members"))throw new HttpError("permission_denied",403);
+ if(!permission(staff,"bear"))throw new HttpError("permission_denied",403);
  const roster=await checked<any[]>(db.from("players").select("game_id,name,active")
    .eq("alliance_code",alliance).not("game_id","is",null).limit(250));
  const allIds=[...new Set(roster.map(p=>String(p.game_id||"")).filter(isId))];
@@ -673,7 +681,7 @@ async function bearManagement(req:Request,alliance:string,staff:any){
    profiles,source_note:"Optimizer data are player-entered; not verified optimal lineups."});
 }
 async function saveBearAssignment(req:Request,alliance:string,userId:string,staff:any,body:any){
- if(!permission(staff,"members"))throw new HttpError("permission_denied",403);
+ if(!permission(staff,"bear"))throw new HttpError("permission_denied",403);
  const gameId=str(body?.game_id,20),slotKey=str(body?.slot_key,70),
        role=str(body?.role||"flex",20),attendance=str(body?.attendance||"tentative",20);
  if(!isId(gameId))throw new HttpError("invalid_player_id",400);
@@ -702,7 +710,7 @@ async function saveBearAssignment(req:Request,alliance:string,userId:string,staf
 // FightClub Phase 4: isolated draft rosters. Historical Discord event cycles
 // and timestamps are read-only. Manual planning dates are NOT official dates.
 async function fightClubData(req:Request,alliance:string,staff:any){
- if(!permission(staff,"members"))throw new HttpError("permission_denied",403);
+ if(!permission(staff,"fightclub"))throw new HttpError("permission_denied",403);
  const since=new Date(Date.now()-120*86400000).toISOString().slice(0,10);
  const [cycles,assignments,powers]=await Promise.all([
   checked<any[]>(db.from("discord_special_event_cycles")
@@ -732,7 +740,7 @@ async function fightClubData(req:Request,alliance:string,staff:any){
  })),assignments,powers:[...verified.values()],since});
 }
 async function saveFightClub(req:Request,alliance:string,userId:string,staff:any,body:any){
- if(!permission(staff,"members"))throw new HttpError("permission_denied",403);
+ if(!permission(staff,"fightclub"))throw new HttpError("permission_denied",403);
  const eventType=str(body?.event_type,30),battleDate=str(body?.battle_date,10),gameId=str(body?.game_id,20);
  if(!["swordland","triforce"].includes(eventType))throw new HttpError("invalid_fight_event",400);
  // Calendar date only. Do not invent an event or trust client timestamps.
@@ -773,7 +781,7 @@ async function saveFightClub(req:Request,alliance:string,userId:string,staff:any
 // Phase 5 – private, manually recorded event attendance. Event templates are
 // reused read-only. Neither the Discord bot nor player accounts are modified.
 async function eventParticipationData(req:Request,alliance:string,staff:any){
- if(!permission(staff,"members"))throw new HttpError("permission_denied",403);
+ if(!permission(staff,"participation"))throw new HttpError("permission_denied",403);
  const today=new Date().toISOString().slice(0,10);
  const since=new Date(Date.now()-90*86400000).toISOString().slice(0,10);
  const until=new Date(Date.now()+365*86400000).toISOString().slice(0,10);
@@ -804,7 +812,7 @@ async function eventParticipationData(req:Request,alliance:string,staff:any){
   }});
 }
 async function saveEventParticipation(req:Request,alliance:string,userId:string,staff:any,body:any){
- if(!permission(staff,"members"))throw new HttpError("permission_denied",403);
+ if(!permission(staff,"participation"))throw new HttpError("permission_denied",403);
  const eventKey=str(body?.event_key,80),eventDate=str(body?.event_date,10),gameId=str(body?.game_id,20);
  if(!/^[a-z0-9][a-z0-9_-]{0,79}$/.test(eventKey))throw new HttpError("invalid_event_key",400);
  const parsed=Date.parse(eventDate+"T00:00:00Z");
@@ -976,7 +984,7 @@ async function inviteR4(req:Request,alliance:string,userId:string,staff:any,payl
   if(listError)throw new HttpError("user_lookup_failed",500);
   if(list?.users?.some((u:any)=>u.email?.toLowerCase()===email))throw new HttpError("account_exists_assign_access",409);
   const perms=payload.permissions||{};
-  const permissions=Object.fromEntries(["members","transfers","laws","events","event_bot","settings"].map(x=>[x,perms[x]===true]));
+  const permissions=Object.fromEntries(STAFF_PERMISSION_KEYS.map(x=>[x,perms[x]===true]));
   if(!Object.values(permissions).some(Boolean))throw new HttpError("no_permissions_selected",400);
   const {data,error}=await db.auth.admin.inviteUserByEmail(email,{redirectTo:"https://boltotelli.github.io/welcome-nrw/leitung/"});
   if(error||!data?.user){console.error("R4 invitation",error?.code);throw new HttpError("invitation_failed",502);}
@@ -995,8 +1003,9 @@ async function saveStaff(req:Request,alliance:string,userId:string,staff:any,pay
   const user=data?.users?.find((u:any)=>u.email?.toLowerCase()===email);
   if(!user)throw new HttpError("account_not_found",404);
   if(user.id===userId)throw new HttpError("cannot_edit_self",403);
-  const existing=await checked<any>(db.from("aos_staff").select("rank,disabled_reason")
+  const existing=await checked<any>(db.from("aos_staff").select("rank,disabled_reason,is_admin")
     .eq("user_id",user.id).eq("alliance_code",alliance).maybeSingle());
+  if(existing?.is_admin===true)throw new HttpError("cannot_edit_admin",403);
   if(user.email?.toLowerCase()==="admin@nap-tracker.invalid")throw new HttpError("cannot_edit_owner",403);
   if(existing?.rank==="R5"&&!/^leader-[0-9]{5,20}@accounts\.allianceos\.invalid$/i.test(email))throw new HttpError("cannot_edit_legacy_r5",403);
   let rank="R4";
@@ -1008,7 +1017,7 @@ async function saveStaff(req:Request,alliance:string,userId:string,staff:any,pay
     rank="R"+member.alliance_rank;
   }
   const incoming=payload.permissions||{};
-  const granted=Object.fromEntries(["members","transfers","laws","events","event_bot","settings"]
+  const granted=Object.fromEntries(STAFF_PERMISSION_KEYS
     .map(feature=>[feature,incoming[feature]===true]));
   const item=await checked<any>(db.from("aos_staff").upsert({
     user_id:user.id,alliance_code:alliance,rank,
