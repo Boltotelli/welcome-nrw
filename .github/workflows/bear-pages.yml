@@ -441,6 +441,12 @@ jobs:
           test -s _site/leitung/bear-management.js
           test -s _site/leitung/fightclub.js
           test -s _site/leitung/event-participation.js
+          # Prevent stale Phase 1–5 bundles from silently being redeployed.
+          grep -Fq 'createMemberRelationships' _site/leitung/app.js
+          grep -Fq 'createPerformance' _site/leitung/app.js
+          grep -Fq 'createBearManagement' _site/leitung/app.js
+          grep -Fq 'createFightClub' _site/leitung/app.js
+          grep -Fq 'createEventParticipation' _site/leitung/app.js
           grep -Fq 'data-tab="performance"' _site/leitung/index.html
           grep -Fq 'data-tab="bear"' _site/leitung/index.html
           grep -Fq 'data-tab="fightclub"' _site/leitung/index.html
