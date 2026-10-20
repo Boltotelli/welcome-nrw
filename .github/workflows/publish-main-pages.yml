@@ -1,0 +1,29 @@
+name: Publish Welcome NRW GitHub Pages on main changes
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'leitung/**'
+      - 'dashboard/**'
+      - 'bear/**'
+      - 'assets/**'
+      - 'index.html'
+      - 'app.js'
+      - 'styles.css'
+      - 'laws.*'
+      - '.github/workflows/publish-main-pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Reuse the established verified Pages publisher, which combines the stable
+# Bear test site with the freshest AllianceOS/Welcome/dashboard files from main.
+# This does not deploy to Vercel or modify Supabase.
+jobs:
+  publish:
+    uses: Boltotelli/welcome-nrw/.github/workflows/bear-pages.yml@feature/bear-optimizer-nrw-prototype
