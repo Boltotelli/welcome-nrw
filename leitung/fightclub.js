@@ -182,26 +182,27 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
      '<div class="fight-suggestion-grid">'+build("full","l1Candidates")+build("partial","l2Candidates")+'</div></details>';
  }
  function row(p,conflicts){
-   const a=assignment(p.game_id),val=a?.legion??-1,pw=powers().get(String(p.game_id));
-   const family=conflicts.get(String(p.game_id));
-   const main=p.main_game_id?playerMap().get(String(p.main_game_id))?.name||p.main_game_id:null;
-   return '<article class="fight-player" data-fight-row="'+esc(p.game_id)+'">'+
-     '<div class="fight-player-top"><button type="button" data-fight-profile="'+esc(p.game_id)+'" class="fight-player-name" '+(!canDossier()?'disabled':'')+'>'+esc(p.name)+'</button>'+
-     '<small>'+esc(p.game_id)+(main?' · '+esc(t("alts"))+' '+esc(main):'')+'</small>'+
-     '<span class="fight-power" title="'+esc(pw?.fetched_at?t("stale")+": "+iso(pw.fetched_at):t("missingPower"))+'">'+
-       esc(pw?powerFormat(pw.power):t("missingPower"))+'</span></div>'+
-     (family?'<p class="fight-conflict">⚠ '+esc(t("family"))+': '+esc(family)+'</p>':'')+
-     '<div class="fight-player-fields"><label><span>'+esc(t("availability"))+'</span>'+
-       selectOptions(optAvailability(),a?.availability||"unknown",'data-fight-availability')+'</label>'+
-     '<label><span>'+esc(t("legion"))+'</span>'+
-       selectOptions(optLegion(),String(val),'data-fight-legion')+'</label>'+
-     '<label><span>'+esc(t("role"))+'</span>'+
-       selectOptions(optRole(),a?.combat_role||"flex",'data-fight-role')+'</label></div>'+
-     '<div class="fight-player-note"><label><span>'+esc(t("note"))+'</span>'+
-     '<input class="control" type="text" maxlength="500" data-fight-note value="'+esc(a?.notes||"")+'" placeholder="'+esc(t("noteHint"))+'"></label>'+
-     '<button type="button" class="primary" data-fight-save="'+esc(p.game_id)+'">'+esc(t("save"))+'</button>'+
-     (a?'<button type="button" class="ghost" data-fight-remove="'+esc(p.game_id)+'">'+esc(t("remove"))+'</button>':"")+
-     '</div></article>';
+  const a=assignment(p.game_id),val=a?.legion??-1;
+  const family=conflicts.get(String(p.game_id));
+  const pw=powers().get(String(p.game_id));
+  const main=p.main_game_id?playerMap().get(String(p.main_game_id))?.name||p.main_game_id:null;
+  return '<article class="fight-player fight-player-compact" data-fight-row="'+esc(p.game_id)+'">'+
+   '<div class="fight-player-top"><button type="button" data-fight-profile="'+esc(p.game_id)+'" class="fight-player-name" '+(!canDossier()?'disabled':'')+'>'+esc(p.name)+'</button>'+
+    '<small>'+esc(p.game_id)+(main?' · '+esc(t("alts"))+' '+esc(main):'')+'</small>'+
+    '<span class="fight-power">'+esc(pw?powerFormat(pw.power):t("missingPower"))+'</span></div>'+
+   '<div class="fight-player-fields">'+
+    '<label><span>'+esc(t("legion"))+'</span>'+
+    selectOptions(optLegion(),String(val),'data-fight-legion')+'</label>'+
+    '<label><span>'+esc(t("availability"))+'</span>'+
+    selectOptions(optAvailability(),a?.availability||"unknown",'data-fight-availability')+'</label>'+
+    '<button type="button" class="primary" data-fight-save="'+esc(p.game_id)+'">'+esc(t("save"))+'</button>'+
+    '<details class="fight-row-more"><summary>⋯</summary>'+
+    '<label><span>'+esc(t("role"))+'</span>'+selectOptions(optRole(),a?.combat_role||"flex",'data-fight-role')+'</label>'+
+    '<label><span>'+esc(t("note"))+'</span><input class="control" type="text" maxlength="500" data-fight-note value="'+esc(a?.notes||"")+'"></label>'+
+    (a?'<button type="button" class="ghost" data-fight-remove="'+esc(p.game_id)+'">'+esc(t("remove"))+'</button>':"")+
+    '</details></div>'+
+   (family?'<p class="fight-conflict">⚠ '+esc(t("family"))+': '+esc(family)+'</p>':"")+
+   '</article>';
  }
  function list(){
    const conflicts=overlap(),powerById=powers();
@@ -213,7 +214,7 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
        filter==="0"&&assignment(p.game_id)&&Number(assignment(p.game_id).legion)===0));
    visible.sort((a,b)=>Number(powerById.get(String(b.game_id))?.power??-1)-Number(powerById.get(String(a.game_id))?.power??-1)||
     String(a.name||"").localeCompare(String(b.name||""),locale()));
-   return '<section class="card fight-roster"><div class="fight-heading"><h3>'+esc(t("plans"))+'</h3>'+
+   return '<details class="card fight-roster fight-roster-collapsible"><summary>'+esc(t("plans"))+' · '+visible.length+' / '+players().length+'</summary><div class="fight-heading">'+
        '<button class="ghost" type="button" data-fight-export>'+esc(t("copyList"))+' ↗</button></div>'+
      '<p class="small-note">'+esc(t("registration"))+' '+esc(t("planningNote"))+'</p>'+
      '<div class="fight-filterbar"><input class="control" data-fight-search type="search" value="'+esc(search)+'" placeholder="'+esc(t("search"))+'">'+
@@ -221,8 +222,42 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
         ["1",t("l1")],["2",t("l2")],["0",t("reserve")]],filter,'data-fight-filter')+
         '<span>'+visible.length+' / '+players().length+'</span></div>'+
      '<div class="fight-player-list">'+(visible.length?visible.map(p=>row(p,conflicts)).join(""):
-       '<p class="perf-empty">'+esc(t("noPlayers"))+'</p>')+'</div></section>';
+       '<p class="perf-empty">'+esc(t("noPlayers"))+'</p>')+'</div></details>';
  }
+ function fastAssign(){
+   const availPlayers=players();
+   return '<section class="card fight-fast-assign"><h3>⚡ '+esc(getLanguage()==="de"?"Schnell zuweisen":getLanguage()==="fr"?"Affectation rapide":getLanguage()==="es"?"Asignación rápida":"Quick assignment")+'</h3>'+
+    '<div class="fight-fast-form"><label>'+esc(t("player"))+'<select class="control" data-fight-fast-player>'+
+    '<option value="">—</option>'+availPlayers.map(p=>'<option value="'+esc(p.game_id)+'">'+esc(p.name)+' · '+esc(p.game_id)+'</option>').join("")+'</select></label>'+
+    '<label>'+esc(t("legion"))+selectOptions(optLegion(),"-1",'data-fight-fast-legion')+'</label>'+
+    '<label>'+esc(t("availability"))+selectOptions(optAvailability(),"full",'data-fight-fast-availability')+'</label>'+
+    '<button type="button" class="primary" data-fight-fast-save>'+esc(t("save"))+'</button></div></section>';
+ }
+ async function fastSave(){
+   if(!date||!nextDateValid(date)){flash(t("selectDate"),true);return;}
+   const id=root.querySelector("[data-fight-fast-player]")?.value||"";
+   if(!id){flash(t("player"),true);return;}
+   if(pending.has(id))return;
+   const leg=Number(root.querySelector("[data-fight-fast-legion]")?.value??-1),
+       availability=root.querySelector("[data-fight-fast-availability]")?.value||"full",
+       prev=assignment(id),event=eventType,eventDate=date,ticket=generation;
+   pending.add(id);
+   try{
+     const result=await request("bootstrap",{action:"fightclub_save",event_type:event,battle_date:eventDate,
+       game_id:id,legion:leg,availability,combat_role:prev?.combat_role||"flex",notes:prev?.notes||""});
+     if(!result?.ok)throw Error("save_failed");
+     if(ticket!==generation)return;
+     state.assignments=state.assignments.filter(x=>!(x.event_type===event&&x.battle_date===eventDate&&String(x.game_id)===id));
+     state.assignments.push(result.assignment);
+     if(prev&&Number(prev.legion)!==leg){
+       state.map_assignments=(state.map_assignments||[]).filter(x=>!(x.event_type===event&&x.battle_date===eventDate&&String(x.game_id)===id));
+       state.leaders=(state.leaders||[]).filter(x=>!(x.event_type===event&&x.battle_date===eventDate&&String(x.game_id)===id));
+     }
+     flash(t("saved"));draw();
+   }catch(e){flash(t("error")+" ("+String(e?.message||e)+")",true);}
+   finally{pending.delete(id);}
+ }
+
  function dateBar(){
    const known=cycles();
    const saved=[...new Set((state?.assignments||[]).filter(x=>x.event_type===eventType).map(x=>x.battle_date))];
@@ -256,7 +291,7 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
        '<p>'+esc(t("snapshotHint"))+' '+esc(t("noAutomatic"))+'</p></div>'+
        '<section class="fight-overview"><h3>'+esc(t("head"))+'</h3><div class="fight-summary-grid">'+summary()+'</div></section>'+
        (conflicts.size?'<div class="fight-conflict">⚠ '+esc(t("familyHint"))+'</div>':'')+
-       candidateLists()+mapUI.render()+list();
+       candidateLists()+fastAssign()+mapUI.render()+list();
    }
    root.innerHTML=html;
    pending.forEach(id=>{const b=root.querySelector('[data-fight-save="'+id+'"]');if(b){b.disabled=true;b.textContent=t("saving");}});
@@ -300,6 +335,7 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
      // Mirror the backend FK cascade and clearing objectives when moving legions.
      if(result.removed||(oldAssignment&&Number(oldAssignment.legion)!==legion)){
        state.map_assignments=(state.map_assignments||[]).filter(a=>!(a.event_type===whichEvent&&a.battle_date===whichDate&&String(a.game_id)===id));
+       state.leaders=(state.leaders||[]).filter(a=>!(a.event_type===whichEvent&&a.battle_date===whichDate&&String(a.game_id)===id));
      }
      flash(t(result.removed?"removed":"saved"));draw();
    }catch(e){if(ticket===generation)flash(t("error")+" ("+String(e.message||e)+")",true);}
@@ -335,6 +371,7 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
    });
    root.addEventListener("click",async e=>{
      if(await mapUI.click(e))return;
+     if(e.target.closest("[data-fight-fast-save]")){await fastSave();return;}
      const target=e.target;
      if(target.closest("[data-fight-refresh]")){load(true);return;}
      const known=target.closest("[data-fight-known]");
