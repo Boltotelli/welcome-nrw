@@ -842,13 +842,17 @@ async function bearManagement(req:Request,alliance:string,staff:any){
    .eq("alliance_code",alliance).not("game_id","is",null).limit(250));
  const allIds=[...new Set(roster.map(p=>String(p.game_id||"")).filter(isId))];
  const activeIds=new Set(roster.filter(p=>p.active).map(p=>String(p.game_id)));
- const [slots,assignments]=await Promise.all([
+ const [slots,assignments,plannerConfig,powers]=await Promise.all([
    checked<any[]>(db.from("discord_bear_slots")
      .select("slot_key,slot_label,start_time,timezone,active,anchor_date")
      .eq("alliance_code",alliance).eq("active",true).order("start_time",{ascending:true}).limit(20)),
    checked<any[]>(db.from("aos_bear_assignments")
      .select("game_id,slot_key,role,attendance,notes,updated_at")
-     .eq("alliance_code",alliance).order("updated_at",{ascending:false}).limit(250))
+     .eq("alliance_code",alliance).order("updated_at",{ascending:false}).limit(250)),
+   checked<any>(db.from("aos_bear_planning_settings")
+     .select("strong_power_threshold").eq("alliance_code",alliance).maybeSingle()),
+   checked<any[]>(db.from("aos_member_power_snapshot")
+     .select("game_id,power,fetched_at,source").eq("alliance_code",alliance).limit(500))
  ]);
  const rawProfiles:any[]=[];
  for(let i=0;i<allIds.length;i+=100){
@@ -880,34 +884,52 @@ async function bearManagement(req:Request,alliance:string,staff:any){
    };
  });
  return json(req,{ok:true,slots,assignments:assignments.filter(a=>allIds.includes(a.game_id)),
-   profiles,source_note:"Optimizer data are player-entered; not verified optimal lineups."});
+   profiles,settings:{strong_power_threshold:plannerConfig?.strong_power_threshold??null},
+   powers:powers.filter(p=>activeIds.has(String(p.game_id))&&Number.isFinite(Number(p.power))&&Number(p.power)>=0)
+     .map(p=>({game_id:p.game_id,power:Number(p.power),fetched_at:p.fetched_at})),
+   source_note:"Optimizer values are player-entered; calculations are provisional."});
 }
 async function saveBearAssignment(req:Request,alliance:string,userId:string,staff:any,body:any){
  if(!permission(staff,"bear"))throw new HttpError("permission_denied",403);
  const gameId=str(body?.game_id,20),slotKey=str(body?.slot_key,70),
-       role=str(body?.role||"flex",20),attendance=str(body?.attendance||"tentative",20);
+       role=str(body?.role||"starter",20),attendance=str(body?.attendance||"tentative",20);
  if(!isId(gameId))throw new HttpError("invalid_player_id",400);
  const member=await checked<any>(db.from("players").select("id")
    .eq("alliance_code",alliance).eq("game_id",gameId).eq("active",true).maybeSingle());
  if(!member)throw new HttpError("player_not_active_in_alliance",403);
- if(!slotKey){
+ if(!slotKey&&attendance!=="no"){
    await checked<any>(db.from("aos_bear_assignments").delete()
      .eq("alliance_code",alliance).eq("game_id",gameId));
    await audit(alliance,userId,"bear_assignment",gameId,"unassign");
    return json(req,{ok:true,game_id:gameId,removed:true});
  }
- if(!["starter","joiner","flex"].includes(role)||!["confirmed","tentative"].includes(attendance))
+ if(!["starter","joiner","flex"].includes(role)||!["confirmed","tentative","no"].includes(attendance))
    throw new HttpError("invalid_bear_assignment",400);
- const slot=await checked<any>(db.from("discord_bear_slots").select("slot_key")
-   .eq("alliance_code",alliance).eq("slot_key",slotKey).eq("active",true).maybeSingle());
- if(!slot)throw new HttpError("bear_slot_unavailable",409);
+ if(attendance!=="no"){
+   const slot=await checked<any>(db.from("discord_bear_slots").select("slot_key")
+     .eq("alliance_code",alliance).eq("slot_key",slotKey).eq("active",true).maybeSingle());
+   if(!slot)throw new HttpError("bear_slot_unavailable",409);
+ }
  const notes=str(body?.notes||"",500);
  const result=await checked<any>(db.from("aos_bear_assignments").upsert({
-   alliance_code:alliance,game_id:gameId,slot_key:slotKey,role,attendance,notes,
+   alliance_code:alliance,game_id:gameId,slot_key:attendance==="no"?null:slotKey,role:role==="joiner"?"joiner":"starter",attendance,notes,
    updated_at:new Date().toISOString(),updated_by:userId
  },{onConflict:"alliance_code,game_id"}).select("game_id,slot_key,role,attendance,notes,updated_at").single());
  await audit(alliance,userId,"bear_assignment",gameId,"assign");
  return json(req,{ok:true,assignment:result});
+}
+async function saveBearPlanningSettings(req:Request,alliance:string,userId:string,staff:any,body:any){
+ if(!permission(staff,"bear"))throw new HttpError("permission_denied",403);
+ const input=body?.strong_power_threshold;
+ const threshold=input===null||input===undefined||input===""?null:Number(input);
+ if(threshold!==null&&(!Number.isSafeInteger(threshold)||threshold<1||threshold>9999999999999))
+   throw new HttpError("invalid_power_threshold",400);
+ const result=await checked<any>(db.from("aos_bear_planning_settings").upsert({
+   alliance_code:alliance,strong_power_threshold:threshold,
+   updated_at:new Date().toISOString(),updated_by:userId
+ },{onConflict:"alliance_code"}).select("strong_power_threshold").single());
+ await audit(alliance,userId,"bear_planning_settings",alliance,"save_strength_threshold");
+ return json(req,{ok:true,settings:result});
 }
 // FightClub Phase 4: isolated draft rosters. Historical Discord event cycles
 // and timestamps are read-only. Manual planning dates are NOT official dates.
@@ -1628,6 +1650,7 @@ Deno.serve(async(req: Request)=>{
     if(body?.action==="performance_dashboard")return await performanceDashboard(req,alliance,staff);
     if(body?.action==="bear_management")return await bearManagement(req,alliance,staff);
     if(body?.action==="bear_assignment")return await saveBearAssignment(req,alliance,userId,staff,body);
+    if(body?.action==="bear_settings_save")return await saveBearPlanningSettings(req,alliance,userId,staff,body);
     if(body?.action==="fightclub_data")return await fightClubData(req,alliance,staff);
     if(body?.action==="fightclub_save")return await saveFightClub(req,alliance,userId,staff,body);
     if(body?.action==="fightclub_map_save")return await fightClubMapSave(req,alliance,userId,staff,body);
