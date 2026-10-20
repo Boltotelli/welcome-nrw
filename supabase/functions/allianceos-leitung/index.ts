@@ -1002,7 +1002,7 @@ async function fightClubMapSave(req:Request,alliance:string,userId:string,staff:
 async function fightClubData(req:Request,alliance:string,staff:any){
  if(!permission(staff,"fightclub"))throw new HttpError("permission_denied",403);
  const since=new Date(Date.now()-120*86400000).toISOString().slice(0,10);
- const [cycles,assignments,powers,mapAssignments]=await Promise.all([
+ const [cycles,assignments,powers,mapAssignments,leaders]=await Promise.all([
   checked<any[]>(db.from("discord_special_event_cycles")
    .select("id,event_type,battle_date,source_begin_at,source_end_at")
    .in("event_type",["swordland","triforce"]).order("battle_date",{ascending:false}).limit(60)),
@@ -1015,7 +1015,10 @@ async function fightClubData(req:Request,alliance:string,staff:any){
   checked<any[]>(db.from("aos_fightclub_map_assignments")
    .select("event_type,battle_date,game_id,location_key,updated_at")
    .eq("alliance_code",alliance).gte("battle_date",since)
-   .order("battle_date",{ascending:false}).limit(2000))
+   .order("battle_date",{ascending:false}).limit(2000)),
+  checked<any[]>(db.from("aos_fightclub_team_leaders")
+   .select("event_type,battle_date,legion,game_id")
+   .eq("alliance_code",alliance).gte("battle_date",since).limit(350))
  ]);
  const ids=cycles.map(c=>c.id);
  const legionTimes=ids.length?await checked<any[]>(db.from("discord_special_legions")
@@ -1031,7 +1034,7 @@ async function fightClubData(req:Request,alliance:string,staff:any){
  return json(req,{ok:true,cycles:cycles.map(c=>({
   event_type:c.event_type,battle_date:c.battle_date,
   times:legionTimes.filter(l=>l.cycle_id===c.id).map(l=>({legion:l.legion,starts_at:l.starts_at}))
- })),assignments,powers:[...verified.values()],map_assignments:mapAssignments,since});
+ })),assignments,powers:[...verified.values()],map_assignments:mapAssignments,leaders,since});
 }
 async function saveFightClub(req:Request,alliance:string,userId:string,staff:any,body:any){
  if(!permission(staff,"fightclub"))throw new HttpError("permission_denied",403);
@@ -1077,9 +1080,44 @@ async function saveFightClub(req:Request,alliance:string,userId:string,staff:any
    await checked<any>(db.from("aos_fightclub_map_assignments").delete()
     .eq("alliance_code",alliance).eq("event_type",eventType)
     .eq("battle_date",battleDate).eq("game_id",gameId));
+   await checked<any>(db.from("aos_fightclub_team_leaders").delete()
+    .eq("alliance_code",alliance).eq("event_type",eventType)
+    .eq("battle_date",battleDate).eq("game_id",gameId));
  }
  await audit(alliance,userId,"fightclub",gameId,"plan_"+eventType+"_"+battleDate);
  return json(req,{ok:true,assignment:a});
+}
+// Optional manually selected Swordland/TriAlliance legion leader.
+async function saveFightClubLeader(req:Request,alliance:string,userId:string,staff:any,body:any){
+ if(!permission(staff,"fightclub"))throw new HttpError("permission_denied",403);
+ const eventType=str(body?.event_type,30),battleDate=str(body?.battle_date,10),
+       legion=Number(body?.legion),gameId=str(body?.game_id||"",20);
+ const parsed=Date.parse(battleDate+"T00:00:00Z");
+ if(!["swordland","triforce"].includes(eventType)||![1,2].includes(legion)||
+    !/^\d{4}-\d{2}-\d{2}$/.test(battleDate)||!Number.isFinite(parsed)||
+    new Date(parsed).toISOString().slice(0,10)!==battleDate||
+    parsed-Date.now() < -120*86400000||parsed-Date.now() > 540*86400000)
+   throw new HttpError("invalid_battle_date",400);
+ if(!gameId){
+   await checked<any>(db.from("aos_fightclub_team_leaders").delete()
+     .eq("alliance_code",alliance).eq("event_type",eventType)
+     .eq("battle_date",battleDate).eq("legion",legion));
+   await audit(alliance,userId,"fightclub_leader",eventType+"_"+battleDate+"_"+legion,"clear");
+   return json(req,{ok:true,removed:true});
+ }
+ if(!isId(gameId))throw new HttpError("invalid_player_id",400);
+ const present=await checked<any>(db.from("aos_fightclub_assignments")
+   .select("game_id").eq("alliance_code",alliance).eq("event_type",eventType)
+   .eq("battle_date",battleDate).eq("legion",legion)
+   .eq("game_id",gameId).maybeSingle());
+ if(!present)throw new HttpError("leader_must_join_legion",409);
+ const saved=await checked<any>(db.from("aos_fightclub_team_leaders").upsert({
+   alliance_code:alliance,event_type:eventType,battle_date:battleDate,legion,game_id:gameId,
+   updated_at:new Date().toISOString(),updated_by:userId
+ },{onConflict:"alliance_code,event_type,battle_date,legion"})
+   .select("event_type,battle_date,legion,game_id").single());
+ await audit(alliance,userId,"fightclub_leader",gameId,"assign_"+eventType+"_"+battleDate+"_"+legion);
+ return json(req,{ok:true,leader:saved});
 }
 // Phase 5 – private, manually recorded event attendance. Event templates are
 // reused read-only. Neither the Discord bot nor player accounts are modified.
@@ -1671,6 +1709,7 @@ Deno.serve(async(req: Request)=>{
     if(body?.action==="fightclub_data")return await fightClubData(req,alliance,staff);
     if(body?.action==="fightclub_save")return await saveFightClub(req,alliance,userId,staff,body);
     if(body?.action==="fightclub_map_save")return await fightClubMapSave(req,alliance,userId,staff,body);
+    if(body?.action==="fightclub_leader_save")return await saveFightClubLeader(req,alliance,userId,staff,body);
     if(body?.action==="event_participation_data")return await eventParticipationData(req,alliance,staff);
     if(body?.action==="event_participation_save")return await saveEventParticipation(req,alliance,userId,staff,body);
     if(body?.action==="staff_invite")return await inviteR4(req,alliance,userId,staff,body);
