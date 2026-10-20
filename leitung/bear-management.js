@@ -97,7 +97,7 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
  const pct=n=>n===null||n===undefined||n===""?"–":Number(n).toLocaleString(locale(),{maximumFractionDigits:2})+"%";
  const when=raw=>raw?new Date(raw).toLocaleDateString(locale()):"–";
  const hhmm=s=>String(s||"").slice(0,5);
- let cache=null,loading=null,generation=0,filter="all",query="",pending=new Set(),recommendations=new Map(),settingsBusy=false,quickSlot="",quickAttendance="confirmed",quickJoiner=false;
+ let cache=null,loading=null,generation=0,filter="all",query="",pending=new Set(),recommendations=new Map(),settingsBusy=false,quickSlot="",quickAttendance="confirmed",quickJoiner=false,rosterExpanded=false;
  const byId=()=>new Map((getState()?.players||[]).map(p=>[String(p.game_id),p]));
  function active(){return (getState()?.players||[]).filter(p=>p.active&&p.member_status!=="left"&&/^[0-9]{1,20}$/.test(String(p.game_id||""))).slice().sort((a,b)=>String(a.name).localeCompare(String(b.name),locale()));}
  function assignment(id){return (cache?.assignments||[]).find(x=>String(x.game_id)===String(id));}
@@ -285,7 +285,7 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
    '<section class="bear-slot-summary"><div class="bear-section-heading"><h3>'+esc(t("summary"))+'</h3>'+
    '<button type="button" class="ghost" data-bear-refresh>'+esc(t("refresh"))+' ↻</button></div>'+
    settingsPanel()+'<div class="bear-count-grid">'+counters()+'</div></section>'+quickPanel()+
-   '<section class="card bear-roster-card"><div class="bear-section-heading"><h3>'+esc(t("assignment"))+'</h3>'+
+   '<details class="card bear-roster-card bear-roster-collapsible" data-bear-roster '+(rosterExpanded?'open':'')+'><summary>'+esc(t("assignment"))+' · '+all.length+' / '+active().length+'</summary><div class="bear-section-heading"><h3>'+esc(t("assignment"))+'</h3>'+
    '<button type="button" class="ghost" data-bear-copy>'+esc(t("export"))+' ↗</button></div>'+
    '<p class="small-note">'+esc(t("noteSource"))+' '+esc(t("activeOnly"))+'</p>'+
    '<div class="bear-filter-row"><input class="control" type="search" data-bear-search value="'+esc(query)+'" placeholder="'+esc(t("search"))+'">'+
@@ -295,7 +295,9 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
        '<option value="'+esc(value)+'" '+(filter===value?'selected':'')+'>'+esc(label)+'</option>').join("")+'</select>'+
      '<span class="counter">'+all.length+' / '+active().length+'</span></div>'+
      '<div class="bear-member-list">'+(all.length?all.map(row).join(""):'<p class="perf-empty">'+esc(t("noPlayers"))+'</p>')+
-     '</div></section>';
+     '</div></details>';
+  const details=root.querySelector("[data-bear-roster]");
+  details?.addEventListener("toggle",()=>{rosterExpanded=details.open;});
   pending.forEach(id=>{
    const btn=root.querySelector('[data-bear-save="'+id+'"]');if(btn){btn.disabled=true;btn.textContent=t("saving");}
   });
@@ -376,6 +378,6 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
    next?.focus();if(Number.isInteger(pos))next?.setSelectionRange(pos,pos);
   });
  }
- function reset(){generation++;cache=null;loading=null;pending.clear();recommendations.clear();quickSlot="";quickAttendance="confirmed";quickJoiner=false;filter="all";query="";if(root){root.innerHTML="";root.textContent="";}}
+ function reset(){generation++;cache=null;loading=null;pending.clear();recommendations.clear();quickSlot="";quickAttendance="confirmed";quickJoiner=false;rosterExpanded=false;filter="all";query="";if(root){root.innerHTML="";root.textContent="";}}
  return {enabled,open,render,reset};
 }
