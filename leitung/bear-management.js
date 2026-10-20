@@ -97,7 +97,7 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
  const pct=n=>n===null||n===undefined||n===""?"–":Number(n).toLocaleString(locale(),{maximumFractionDigits:2})+"%";
  const when=raw=>raw?new Date(raw).toLocaleDateString(locale()):"–";
  const hhmm=s=>String(s||"").slice(0,5);
- let cache=null,loading=null,generation=0,filter="all",query="",pending=new Set(),recommendations=new Map(),settingsBusy=false;
+ let cache=null,loading=null,generation=0,filter="all",query="",pending=new Set(),recommendations=new Map(),settingsBusy=false,quickSlot="",quickAttendance="confirmed",quickJoiner=false;
  const byId=()=>new Map((getState()?.players||[]).map(p=>[String(p.game_id),p]));
  function active(){return (getState()?.players||[]).filter(p=>p.active&&p.member_status!=="left"&&/^[0-9]{1,20}$/.test(String(p.game_id||""))).slice().sort((a,b)=>String(a.name).localeCompare(String(b.name),locale()));}
  function assignment(id){return (cache?.assignments||[]).find(x=>String(x.game_id)===String(id));}
@@ -233,9 +233,9 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
    return '<section class="card bear-fast-assign"><h3>⚡ '+esc(t("quick"))+'</h3><div class="bear-fast-form">'+
      '<label>'+esc(t("player"))+'<select class="control" data-bear-quick-player><option value="">—</option>'+
        active().map(p=>'<option value="'+esc(p.game_id)+'">'+esc(p.name)+' · '+esc(p.game_id)+'</option>').join("")+'</select></label>'+
-     '<label>'+esc(t("time"))+select([["",t("empty")],...(cache.slots||[]).map(sl=>[sl.slot_key,slotLabel(sl)])],"",'data-bear-quick-slot')+'</label>'+
-     '<label>'+esc(t("attendance"))+select([["confirmed",t("confirmed")],["tentative",t("tentative")],["no",t("no")]],"confirmed",'data-bear-quick-attendance')+'</label>'+
-     '<label class="bear-switch-label">'+esc(t("role"))+' <span class="bear-switch"><span>'+esc(t("starter"))+'</span><input type="checkbox" role="switch" data-bear-quick-role><span>'+esc(t("joiner"))+'</span></span></label>'+
+     '<label>'+esc(t("time"))+select([["",t("empty")],...(cache.slots||[]).map(sl=>[sl.slot_key,slotLabel(sl)])],quickSlot,'data-bear-quick-slot')+'</label>'+
+     '<label>'+esc(t("attendance"))+select([["confirmed",t("confirmed")],["tentative",t("tentative")],["no",t("no")]],quickAttendance,'data-bear-quick-attendance')+'</label>'+
+     '<label class="bear-switch-label">'+esc(t("role"))+' <span class="bear-switch"><span>'+esc(t("starter"))+'</span><input type="checkbox" role="switch" data-bear-quick-role '+(quickJoiner?'checked':'')+'><span>'+esc(t("joiner"))+'</span></span></label>'+
      '<button type="button" class="primary" data-bear-quick-save>'+esc(t("save"))+'</button></div></section>';
  }
  async function saveThreshold(){
@@ -310,7 +310,7 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
    if(ticket!==generation)return;
    if(!result?.ok||!Array.isArray(result.slots)||!Array.isArray(result.assignments)||
       !Array.isArray(result.profiles))throw Error("invalid_bear_response");
-   cache=result;render();
+   recommendations.clear();cache=result;render();
   }).catch(e=>{if(ticket!==generation)return;root.textContent=t("error")+" ("+String(e.message||e)+")";})
     .finally(()=>{if(ticket===generation)loading=null;});
   return loading;
@@ -363,6 +363,9 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
   root.addEventListener("change",e=>{
    const el=e.target;
    if(el.matches("[data-bear-filter]")){filter=el.value;render();}
+   if(el.matches("[data-bear-quick-slot]"))quickSlot=el.value;
+   if(el.matches("[data-bear-quick-attendance]"))quickAttendance=el.value;
+   if(el.matches("[data-bear-quick-role]"))quickJoiner=el.checked;
    // Row-level role/time fields deliberately do not auto-save.
   });
   root.addEventListener("input",e=>{
@@ -373,6 +376,6 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
    next?.focus();if(Number.isInteger(pos))next?.setSelectionRange(pos,pos);
   });
  }
- function reset(){generation++;cache=null;loading=null;pending.clear();filter="all";query="";if(root){root.innerHTML="";root.textContent="";}}
+ function reset(){generation++;cache=null;loading=null;pending.clear();recommendations.clear();quickSlot="";quickAttendance="confirmed";quickJoiner=false;filter="all";query="";if(root){root.innerHTML="";root.textContent="";}}
  return {enabled,open,render,reset};
 }
