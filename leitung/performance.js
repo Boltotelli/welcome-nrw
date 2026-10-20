@@ -2,6 +2,7 @@
  * Real dated API observations and historical rank imports; no estimated points.
  * Private data is fetched only via the authorized AllianceOS Edge Function. */
 export function createPerformance({getState,getLanguage,request,esc,openPlayer}){
+ const canDossier=()=>getState()?.staff?.is_owner===true||getState()?.staff?.permissions?.members===true;
  const root=document.getElementById("performanceRoot");
  const enabled=location.hostname==="boltotelli.github.io"||["localhost","127.0.0.1"].includes(location.hostname);
  const dict={
@@ -175,7 +176,7 @@ export function createPerformance({getState,getLanguage,request,esc,openPlayer})
    const trs=filtered.map(x=>{
      const prev=prevMap.get(x.game_id),diff=prev?Number(x.score)-Number(prev.score):null;
      return '<tr><td><b>'+esc(rankMap.get(x.game_id||x.player_name))+'</b></td>'+
-       '<td><div class="perf-player-cell"><button type="button" data-perf-open-player="'+esc(x.game_id||"")+'" '+(!x.game_id?'disabled':'')+'>'+
+       '<td><div class="perf-player-cell"><button type="button" data-perf-open-player="'+esc(x.game_id||"")+'" '+(!x.game_id||!canDossier()?'disabled':'')+'>'+
        esc(x.player_name||x.game_id||"–")+'</button><small>'+esc(x.game_id||"")+'</small></div></td>'+
        '<td class="perf-number">'+esc(num(x.score))+'</td>'+
        '<td class="perf-number">'+esc(x.server_rank||"–")+'</td>'+
