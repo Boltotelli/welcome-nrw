@@ -14,7 +14,7 @@
 <title>AllianceOS · NRW Leitungszentrale</title>
 <meta name="description" content="Geschützte Leitungszentrale für Allianzverwaltung, Transfers, Laws und Events.">
 <link rel="icon" href="../assets/nrw-dashboard-icon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="./styles.css?v=phase5-participation-release-20261020-2">
+<link rel="stylesheet" href="./styles.css?v=permissions-split-20261020-1">
 
 </head>
 <body>
@@ -254,20 +254,34 @@
             </form><div class="card"><h3 data-i18n="permissions">Berechtigungen</h3><div class="permission-matrix" id="permissionTable"></div>
               <div id="staffControls" hidden>
                 <p class="notice-inline" data-i18n="rolesFuture">R5 kann vorhandene Konten als AllianceOS-R4 freischalten. Ohne ausdrückliche Freigabe erhält niemand Zugriff.</p>
-                <div id="staffList" class="staff-list"></div>
+                <div id="staffList" class="staff-list" aria-label="Leitungskonten"></div>
                   <div class="notice-inline" data-i18n="r4AccessInfo">R4-Zugriffe gelten nur für die ausgewählten Module. Deaktivierte Zugänge bleiben gesperrt.</div>
                 <form id="r4Form">
                   <label class="field"><span data-i18n="staffUser">R4/R5 auswählen</span><select class="control" name="email" id="staffAccountSelect" required><option value="" data-i18n="chooseLeader">Spielernamen auswählen</option></select></label>
-                  <div class="check-grid staff-grid">
-                    <label><input type="checkbox" name="members"> <span data-i18n="roster">Spielerverwaltung</span></label>
-                    <label><input type="checkbox" name="transfers"> <span data-i18n="transfers">Transferplanung</span></label>
-                    <label><input type="checkbox" name="laws"> <span data-i18n="laws">Laws-Verwaltung</span></label>
-                    <label><input type="checkbox" name="events"> <span data-i18n="events">Eventplanung</span></label>
-                    <label><input type="checkbox" name="event_bot"> <span data-i18n="discordBot">Discord Event-Bot</span></label>
-                    <label><input type="checkbox" name="settings"> <span data-i18n="settings">Allianz &amp; Rechte</span></label>
-                    <label><input type="checkbox" name="enabled" checked> <span data-i18n="r4Enabled">R4-Zugang aktiviert</span></label>
+                  <p class="staff-selected-hint" id="staffSelectionInfo" role="status" aria-live="polite"></p>
+                  <fieldset class="staff-permission-fieldset" id="staffRightsFieldset" disabled>
+                    <legend data-i18n="moduleRights">Modulberechtigungen</legend>
+                    <p class="small-note" data-i18n="rightsHelp">Schalter aus = Zugriff entzogen. Änderungen erst mit Speichern übernehmen.</p>
+                    <div class="staff-permission-grid">
+                      <label class="staff-permission-toggle"><input type="checkbox" name="members"><span data-i18n="roster">Spielerverwaltung</span></label>
+                      <label class="staff-permission-toggle"><input type="checkbox" name="performance"><span data-i18n="performance">Performance</span></label>
+                      <label class="staff-permission-toggle"><input type="checkbox" name="bear"><span data-i18n="bearManagement">Bärenfalle</span></label>
+                      <label class="staff-permission-toggle"><input type="checkbox" name="fightclub"><span data-i18n="fightclub">FightClub</span></label>
+                      <label class="staff-permission-toggle"><input type="checkbox" name="participation"><span data-i18n="participation">Event-Teilnahme</span></label>
+                      <label class="staff-permission-toggle"><input type="checkbox" name="transfers"><span data-i18n="transfers">Transferplanung</span></label>
+                      <label class="staff-permission-toggle"><input type="checkbox" name="laws"><span data-i18n="laws">Laws-Verwaltung</span></label>
+                      <label class="staff-permission-toggle"><input type="checkbox" name="events"><span data-i18n="events">Eventplanung</span></label>
+                      <label class="staff-permission-toggle"><input type="checkbox" name="event_bot"><span data-i18n="discordBot">Discord Event-Bot</span></label>
+                      <label class="staff-permission-toggle"><input type="checkbox" name="settings"><span data-i18n="settings">Allianz &amp; Rechte</span></label>
+                    </div>
+                    <label class="staff-active-toggle"><input type="checkbox" name="enabled"><span data-i18n="r4Enabled">R4-Zugang aktiviert</span></label>
+                  </fieldset>
+                  <div class="staff-actions">
+                    <button class="primary" id="staffSaveRights" type="submit" disabled data-i18n="saveR4">Berechtigungen speichern</button>
+                    <button class="ghost" id="staffUndoRights" type="button" disabled data-i18n="undoRights">Änderungen verwerfen</button>
+                    <button class="ghost danger-soft" id="staffClearRights" type="button" disabled data-i18n="clearRights">Alle Modulrechte entziehen</button>
+                    <button class="ghost danger-soft" id="staffDisableAccount" type="button" disabled data-i18n="disableStaffAccount">Zugang vollständig sperren</button>
                   </div>
-                  <button class="primary" type="submit" data-i18n="saveR4">R4-Freigabe speichern</button>
                   <button type="button" class="ghost" id="provisionLeaders" data-i18n="provisionLeaders">Alle R4/R5-Konten erstellen</button>
 <button type="button" class="ghost" id="resetLeaderPassword" data-i18n="resetLeaderPassword">Initialpasswort neu ausstellen</button>
 <p class="small-note" data-i18n="credentialsNote">Neue Passwörter werden nur einmal angezeigt. Bitte vorher sicher aufbewahren.</p>
@@ -430,5 +444,5 @@
  </form>
 </dialog>
 <script src="../dashboard/event-rhythm.js?v=pages-step4-1"></script>
-<script type="module" src="./app.js?v=phase5-participation-release-20261020-2"></script>
+<script type="module" src="./app.js?v=permissions-split-20261020-1"></script>
 </body></html>
