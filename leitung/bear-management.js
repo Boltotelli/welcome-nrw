@@ -6,7 +6,7 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
  const root=document.getElementById("bearManagementRoot");
  const enabled=true; // Released for both GitHub Pages and Vercel; access is enforced by server-side module permissions.
  const messages={
- de:{intro:"Wer spielt welche Bärenfalle? Teilnehmer zuordnen und gespeicherte Optimierer-Werte einsehen.",
+ de:{no:"Keine Teilnahme",strong:"Stark",weak:"Unter Grenze",power:"Kraft",threshold:"Stark ab Kraft",thresholdUnset:"Schwelle nicht festgelegt",saveThreshold:"Grenze speichern",meanPower:"Ø Kraft",meanStarter:"Ø Starter-Formation",validStarter:"Optimierte Starter-Formation (Modell)",noStarter:"Keine vollständige Modellberechnung",countModels:"Profile",quick:"Schnell einteilen",noAttendees:"Keine Teilnahme",showAll:"Erweitert",intro:"Wer spielt welche Bärenfalle? Teilnehmer zuordnen und gespeicherte Optimierer-Werte einsehen.",
   source:"Fallenzeiten aus der bestehenden Discord-Rotation (UTC), schreibgeschützt. Diese Planung verändert keine Bot-Zeiten oder Minister.",
   unavailable:"Für NRW sind derzeit keine aktiven Bärenzeiten hinterlegt.",assignment:"Teilnehmerplanung",
   summary:"Belegung der Fallen",confirmed:"Bestätigt",tentative:"Unsicher",starter:"Starter",joiner:"Joiner",flex:"Flexibel",
@@ -18,7 +18,7 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
   troops:"Truppenbestand",inf:"Infanterie",cav:"Kavallerie",arc:"Bogenschützen",
   attack:"Angriff",lethality:"Tödlichkeit",widget:"Widget",tier:"Tier",stars:"Sterne",level:"Level",
   comparison:"Selbsteinschätzung",stronger:"Stärker als Rallyleader",weaker:"Schwächer als Rallyleader",similar:"Etwa gleich",
-  disclaimer:"Optimierer-Werte sind vom Spieler eingegeben und stellen keine bestätigte optimale Formation dar. Das geplante Starter-/Joiner-Feld ist eine separate Leitungsentscheidung.",
+  disclaimer:"Die Starter-Formation wird mit der vorhandenen NRW-Optimierer-Modellfunktion neu berechnet, soweit die gespeicherten Eingaben vollständig sind. Sie ist eine Empfehlung und kein garantiertes Ingame-Ergebnis.",
   noHeroes:"Keine Starter-Helden gespeichert.",latest:"Profilstand",noData:"Noch kein Optimierer-Profil.",
   showAssigned:"Zugeordnete Spieler",export:"Listen kopieren",copied:"Listen kopiert.",copyFailed:"Kopieren fehlgeschlagen.",
   loading:"Bären-Daten werden geladen …",error:"Daten konnten nicht geladen werden.",refresh:"Aktualisieren",
@@ -27,7 +27,7 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
   activeOnly:"Nur aktive Allianzmitglieder. Frühere Optimierer-Profile bleiben erhalten, werden aber nicht in die Planung übernommen.",
   noteSource:"Anmeldestatus ist eine Eingabe der Leitung, keine vom Spieler bestätigte Discord-Rückmeldung.",
   altInfo:"Alt-Account",mainInfo:"Main",allCount:"Aktive Spieler"},
- en:{intro:"Assign members to Bear Traps and review their saved optimizer values.",
+ en:{no:"Not participating",strong:"Strong",weak:"Below threshold",power:"Power",threshold:"Strong from power",thresholdUnset:"Threshold not set",saveThreshold:"Save threshold",meanPower:"Avg power",meanStarter:"Avg starter formation",validStarter:"Optimized starter formation (model)",noStarter:"No complete model calculation",countModels:"Profiles",quick:"Quick assignment",noAttendees:"Not participating",showAll:"Advanced",intro:"Assign members to Bear Traps and review their saved optimizer values.",
   source:"UTC Bear times from the existing Discord rotation (read-only). This planner does not alter bot schedules or ministers.",
   unavailable:"No active Bear Trap times are configured for this alliance.",assignment:"Member planning",
   summary:"Bear Trap attendance",confirmed:"Confirmed",tentative:"Tentative",starter:"Starter",joiner:"Joiner",flex:"Flexible",
@@ -48,7 +48,7 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
   activeOnly:"Active alliance members only. Former optimizer profiles are retained but excluded from planning.",
   noteSource:"Attendance is entered by leadership; it is not a confirmed Discord response from the player.",
   altInfo:"Alt account",mainInfo:"Main",allCount:"Active players"},
- fr:{intro:"Répartir les joueurs entre les pièges à ours et consulter les valeurs enregistrées.",
+ fr:{no:"Ne participe pas",strong:"Fort",weak:"Sous le seuil",power:"Puissance",threshold:"Fort à partir de",thresholdUnset:"Seuil non défini",saveThreshold:"Enregistrer le seuil",meanPower:"Puissance moyenne",meanStarter:"Formation de départ moyenne",validStarter:"Formation de départ optimisée (modèle)",noStarter:"Calcul du modèle incomplet",countModels:"Profils",quick:"Affectation rapide",noAttendees:"Ne participe pas",showAll:"Avancé",intro:"Répartir les joueurs entre les pièges à ours et consulter les valeurs enregistrées.",
   source:"Heures UTC de la rotation Discord existante (lecture seule). Aucun horaire du bot ou ministre n'est modifié.",
   unavailable:"Aucun horaire actif de piège à ours.",assignment:"Organisation des membres",
   summary:"Participation aux pièges",confirmed:"Confirmé",tentative:"Incertain",starter:"Lanceur",joiner:"Participant",flex:"Flexible",
@@ -69,7 +69,7 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
   activeOnly:"Membres actifs seulement. Les anciens profils restent conservés hors de cette liste.",
   noteSource:"Participation renseignée par la direction, non confirmée par une réponse Discord du joueur.",
   altInfo:"Compte secondaire",mainInfo:"Principal",allCount:"Joueurs actifs"},
- es:{intro:"Organiza quién juega cada trampa de oso y consulta los datos guardados del optimizador.",
+ es:{no:"No participa",strong:"Fuerte",weak:"Por debajo del límite",power:"Poder",threshold:"Fuerte desde poder",thresholdUnset:"Límite sin definir",saveThreshold:"Guardar límite",meanPower:"Poder promedio",meanStarter:"Formación inicial media",validStarter:"Formación inicial optimizada (modelo)",noStarter:"Cálculo del modelo incompleto",countModels:"Perfiles",quick:"Asignación rápida",noAttendees:"No participa",showAll:"Avanzado",intro:"Organiza quién juega cada trampa de oso y consulta los datos guardados del optimizador.",
   source:"Horarios UTC de la rotación existente de Discord (solo lectura). No cambia horarios ni ministros.",
   unavailable:"No hay horarios activos de trampa de oso.",assignment:"Planificación de miembros",
   summary:"Asistencia a trampas",confirmed:"Confirmado",tentative:"Posible",starter:"Iniciador",joiner:"Participante",flex:"Flexible",
@@ -97,7 +97,7 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
  const pct=n=>n===null||n===undefined||n===""?"–":Number(n).toLocaleString(locale(),{maximumFractionDigits:2})+"%";
  const when=raw=>raw?new Date(raw).toLocaleDateString(locale()):"–";
  const hhmm=s=>String(s||"").slice(0,5);
- let cache=null,loading=null,generation=0,filter="all",query="",pending=new Set();
+ let cache=null,loading=null,generation=0,filter="all",query="",pending=new Set(),recommendations=new Map(),settingsBusy=false;
  const byId=()=>new Map((getState()?.players||[]).map(p=>[String(p.game_id),p]));
  function active(){return (getState()?.players||[]).filter(p=>p.active&&p.member_status!=="left"&&/^[0-9]{1,20}$/.test(String(p.game_id||""))).slice().sort((a,b)=>String(a.name).localeCompare(String(b.name),locale()));}
  function assignment(id){return (cache?.assignments||[]).find(x=>String(x.game_id)===String(id));}
@@ -106,6 +106,50 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
  function slotLabel(s){return (s.slot_label?s.slot_label+" · ":"")+hhmm(s.start_time)+" UTC";}
  function select(options,value,extra=""){return '<select class="control" '+extra+'>'+options.map(([v,label])=>
   '<option value="'+esc(v)+'" '+(v===value?'selected':'')+'>'+esc(label)+'</option>').join("")+'</select>';}
+
+ const powers=()=>new Map((cache?.powers||[]).map(p=>[String(p.game_id),p]));
+ const threshold=()=>cache?.settings?.strong_power_threshold==null?null:Number(cache.settings.strong_power_threshold);
+ const strong=p=>{
+   const raw=powers().get(String(p.game_id))?.power,n=Number(raw),limit=threshold();
+   return limit!==null&&raw!==undefined&&Number.isFinite(n)&&n>=limit;
+ };
+ function formation(p){
+   if(!p?.formation_input)return null;
+   const id=String(p.game_id);
+   if(recommendations.has(id))return recommendations.get(id);
+   let result=null;
+   try{
+     const formationEngine=window.NRW_BEAR_FORMATION,capacity=window.NRW_BEAR_CAPACITY,catalog=window.NRW_BEAR_CATALOG,
+           combat=window.NRW_BEAR_COMBAT;
+     if(formationEngine?.plan&&capacity?.breakdown&&catalog&&combat){
+       const plan=formationEngine.plan(p.formation_input,catalog,combat,capacity);
+       if(plan?.ready&&Array.isArray(plan.marches)&&plan.marches.length&&
+          Array.isArray(plan.marches[0].ratio)&&plan.marches[0].ratio.reduce((a,b)=>a+b,0)===100){
+         result={ratio:plan.marches[0].ratio,source:plan.scoreType,joined:plan.joinCount};
+       }
+     }
+   }catch(e){console.warn("Bear formation calculation not ready for profile",id,e);}
+   recommendations.set(id,result);
+   return result;
+ }
+ function formationText(r){
+   return Array.isArray(r?.ratio)?r.ratio.map(x=>Math.round(x)).join(" / ")+" %":"—";
+ }
+ function averageFormation(rows){
+   const ratios=rows.map(a=>formation(profile(a.game_id))).filter(x=>Array.isArray(x?.ratio)).map(x=>x.ratio);
+   if(!ratios.length)return {text:"—",count:0};
+   const sums=[0,1,2].map(i=>ratios.reduce((n,row)=>n+row[i],0)/ratios.length);
+   const floored=sums.map(Math.floor),missing=100-floored.reduce((a,b)=>a+b,0);
+   const order=[0,1,2].sort((a,b)=>(sums[b]-floored[b])-(sums[a]-floored[a])||a-b);
+   for(let i=0;i<missing;i++)floored[order[i%3]]++;
+   return {text:floored.join(" / ")+" %",count:ratios.length};
+ }
+ function powerSummary(rows){
+   const known=rows.map(a=>powers().get(String(a.game_id))?.power).filter(x=>x!==null&&x!==undefined&&Number.isSafeInteger(Number(x)));
+   return {average:known.length?Math.round(known.reduce((n,p)=>n+Number(p),0)/known.length):null,
+     verified:known.length,strong:rows.filter(a=>strong({game_id:a.game_id})).length};
+ }
+
  function dataProfile(p){
   if(!p)return '<div class="bear-opt-empty">'+esc(t("noData"))+'</div>';
   const heroes=(p.heroes||[]).length?(p.heroes||[]).map(h=>
@@ -117,6 +161,7 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
   const stats=[["inf",p.stats?.inf_attack,p.stats?.inf_lethality],
     ["cav",p.stats?.cav_attack,p.stats?.cav_lethality],["arc",p.stats?.arc_attack,p.stats?.arc_lethality]];
   return '<div class="bear-profile-details"><p class="small-note">'+esc(t("disclaimer"))+'</p>'+
+    '<p class="bear-recommendation"><b>'+esc(t("validStarter"))+':</b> '+esc(formationText(formation(p)))+'</p>'+
     '<strong>'+esc(t("heroes"))+'</strong><div class="bear-heroes">'+heroes+'</div>'+
     '<div class="bear-profile-grid">'+values.map(([key,value])=>'<div><small>'+esc(t(key))+'</small><b>'+esc(value)+'</b></div>').join("")+'</div>'+
     '<strong>'+esc(t("troops"))+' · '+esc(t("attack"))+' / '+esc(t("lethality"))+'</strong>'+
