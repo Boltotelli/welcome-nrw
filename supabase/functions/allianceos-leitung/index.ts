@@ -887,7 +887,8 @@ async function bearManagement(req:Request,alliance:string,staff:any){
        values:Object.fromEntries(["cap","troopsI","troopsC","troopsA","iAtk","iLet","cAtk","cLet","aAtk","aLet","squadAtk","squadLet","pet","master","heroCapManual"].filter(k=>safeNumber(v[k],10000000000)!==null).map(k=>[k,safeNumber(v[k],10000000000)])),
        v2:{
          ownHeroes:names,
-         manualHeroes:Object.fromEntries(Object.entries(d.heroes||{}).filter(([key,value])=>key.length<=45&&value&&typeof value==="object").map(([key,value])=>{const h=value as any;return [key,{name:key,stars:safeNumber(h.stars,10),tier:safeNumber(h.tier,20),level:safeNumber(h.level,200),widget:safeNumber(h.widget,20),skills:Array.isArray(h.skills)?h.skills.slice(0,5):[]}];})),
+         manualHeroes:Object.fromEntries(Object.entries(d.heroes||{}).filter(([key,value])=>key.length<=45&&value&&typeof value==="object").map(([key,value])=>{const h=value as any;return [key,{name:key,stars:safeNumber(h.stars,10),tier:safeNumber(h.tier,20),level:safeNumber(h.level,200),widget:safeNumber(h.widget,20),skills:Array.isArray(h.skills)?h.skills.slice(0,5):[],
+  expeditionStats:Object.fromEntries(["iAtk","iLet","cAtk","cLet","aAtk","aLet"].filter(k=>safeNumber(h.expeditionStats?.[k],5000)!==null).map(k=>[k,safeNumber(h.expeditionStats[k],5000)]))}];})),
          scannedOwnedHeroes:Object.keys(d.heroes||{}).filter(k=>typeof k==="string").slice(0,80),
          joinCount:safeNumber(d.joinCount,6)||0,
          troopGroups:Array.isArray(d.troopGroups)?d.troopGroups.filter((g:any)=>g&&["infantry","cavalry","archer"].includes(g.type)).slice(0,36).map((g:any)=>({type:g.type,tier:safeNumber(g.tier,11),tg:safeNumber(g.tg,8),count:safeNumber(g.count)})):[],
@@ -895,7 +896,9 @@ async function bearManagement(req:Request,alliance:string,staff:any){
          petActive:{"Mighty Bison":d.petActive?.["Mighty Bison"]===true},
          petSkillRanks:{"Mighty Bison":safeNumber(d.petSkillRanks?.["Mighty Bison"],20)},
          savageAdvantage:safeNumber(d.savageAdvantage,10),
-         valoraTalent:safeNumber(d.valoraTalent,10)
+         valoraTalent:safeNumber(d.valoraTalent,10),
+         combatStatOrigin:["separate-overview","combined-report"].includes(d.combatStatOrigin)?d.combatStatOrigin:null,
+         squadSeparate:d.squadSeparate===true
        }
      }
    };
