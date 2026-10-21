@@ -215,6 +215,29 @@ Service information and planning notes use native disclosures around existing co
 
 ## Do's and Don'ts
 
+### Role selection and finishing pass · 21 October 2026
+
+The Bear module uses an authored bear-head outline instead of the generic house.
+Every module header carries its matching 30px outline in restrained NRW gold, with
+a quiet bottom rule. Surface edges use `--os-edge` (`#292c2f` dark, `#e2e5e7` light)
+to distinguish working containers from the page without adding card shadows.
+
+Starter and Joiner are two equal rally roles. They are represented as an accessible
+radio group with two visible labels and one sliding selection segment; never expose
+this as an on/off switch. The segment uses `--os-role-selected` (`#e3d2a9` dark,
+`#e9dcc0` light) and `--os-role-ink` (`#292417` dark, `#382c12` light). Clicking,
+dragging horizontally, arrow keys, Home/End and normal button activation select a role.
+The underlying existing checkbox stays hidden solely to preserve the original save
+contract. No extra save or automatic write is introduced.
+
+Pointer selection uses a 160ms transform-only transition with
+`cubic-bezier(.23,1,.32,1)`; dragging tracks the pointer directly. Keyboard input and
+reduced-motion preferences switch instantly. No motion dependency is added.
+
+The Bear participant roster opens by default to put the actual working list on the
+page. A user's deliberate collapse persists across module rerenders. The original
+details element and module listeners remain intact.
+
 ### Do:
 
 - **Do** preserve the exact-host and `/leitung/` scope of this visual system.

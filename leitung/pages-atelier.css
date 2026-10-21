@@ -6,6 +6,8 @@
 html.pages-atelier {
  color-scheme:dark; --bg:#0c0d0e; --surface:#171819; --panel:#222325;
  --border:#343638; --text:#f3f3f1; --muted:#b4b6b8; --accent:#d8ba73;
+ --os-edge:#292c2f; --os-role-selected:#e3d2a9; --os-role-ink:#292417;
+ --os-ease:cubic-bezier(.23,1,.32,1); --os-role-duration:160ms;
  --green:#8dc8a7; --red:#f19a9a; --violet:#c7c9cc; --shadow:none;
  --os-control:#484b4e; --os-radius:8px; --os-gap:16px; --os-pad:24px;
  --os-primary:#eeefed; --os-primary-ink:#151617; --os-selected:#292b2d;
@@ -20,6 +22,7 @@ html.pages-atelier[data-theme=light] {
  --green:#246647; --red:#a1353e; --violet:#50565b; --os-control:#9ba2a8;
  --os-primary:#222628; --os-primary-ink:#fff; --os-selected:#e3e6e8;
  --os-good-bg:#e4f2e9; --os-bad-bg:#f9e9ea; --os-gold-bg:#f2ead8;
+ --os-edge:#e2e5e7; --os-role-selected:#e9dcc0; --os-role-ink:#382c12;
 }
 html.pages-atelier body {background:var(--bg); color:var(--text); letter-spacing:0}
 html.pages-atelier *,html.pages-atelier *::before,html.pages-atelier *::after {box-sizing:border-box}
@@ -65,14 +68,18 @@ html.pages-atelier :is(.bar-actions select,.icon-action,.text-action) {border:1p
 html.pages-atelier .user-role {font-size:12px;color:var(--muted);border:0;border-radius:0;padding:6px 4px;font-weight:400;white-space:nowrap}
 html.pages-atelier .workspace main {padding:28px 28px 60px;max-width:1600px;margin:0 auto}
 html.pages-atelier .hero {display:none}
-html.pages-atelier .os-page-header {margin-bottom:24px;display:flex;align-items:end;justify-content:space-between;gap:16px}
+html.pages-atelier .os-page-header {margin-bottom:24px;display:flex;align-items:end;justify-content:space-between;gap:16px;padding-bottom:18px;border-bottom:1px solid var(--os-edge)}
+html.pages-atelier .os-title-block {display:grid;grid-template-columns:30px minmax(0,1fr);column-gap:12px;align-items:center}
+html.pages-atelier .os-title-block>p {grid-column:2}
+html.pages-atelier .os-module-icon {display:flex;width:30px;height:30px;color:var(--accent)}
+html.pages-atelier .os-module-icon svg {width:100%;height:100%;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
 html.pages-atelier .os-page-header p {margin:6px 0 0;color:var(--muted);font-size:13px}
 html.pages-atelier .os-header-actions {display:flex;gap:8px;flex-wrap:wrap}
 html.pages-atelier .page-heading {align-items:center;margin-bottom:20px;gap:16px}
 html.pages-atelier .page-heading h2 {font-size:24px;margin:0 0 6px;font-weight:600;letter-spacing:-.03em}
 html.pages-atelier .page-heading p {font-size:13px;max-width:75ch;line-height:1.5}
 html.pages-atelier .eyebrow {display:none}
-html.pages-atelier .card {border:0;border-radius:var(--os-radius);background:var(--surface);padding:var(--os-pad);box-shadow:none}
+html.pages-atelier .card {border:1px solid var(--os-edge);border-radius:var(--os-radius);background:var(--surface);padding:var(--os-pad);box-shadow:none}
 html.pages-atelier .card .card {padding:16px 0;border-radius:0;background:transparent;border:0;border-top:1px solid var(--border)}
 html.pages-atelier .card h3 {font-size:16px;margin:0 0 16px}
 html.pages-atelier .card-heading {gap:12px;align-items:start}
@@ -127,7 +134,10 @@ html.pages-atelier :is(.chip.active,.chip.confirmed,.chip.published,.discord-pre
 html.pages-atelier :is(.chip.left,.chip.cancelled,.chip.outgoing) {background:var(--os-bad-bg);color:var(--red)}
 html.pages-atelier :is(.chip.draft,.chip.interested) {background:var(--os-gold-bg);color:var(--accent)}
 html.pages-atelier :is(.perf-stats,.bear-count-grid,.fight-summary-grid) {gap:var(--os-gap)}
-html.pages-atelier :is(.perf-panel,.perf-stat,.bear-count-card,.fight-summary-card) {background:var(--surface);border:0;border-radius:8px;box-shadow:none;padding:18px}
+html.pages-atelier :is(.perf-panel,.perf-stat,.bear-count-card,.fight-summary-card) {background:var(--surface);border:1px solid var(--os-edge);border-radius:8px;box-shadow:none;padding:18px}
+html.pages-atelier .perf-stat {border:0;border-radius:0;background:transparent;border-right:1px solid var(--border);padding:4px 18px}
+html.pages-atelier .perf-stat:last-child {border-right:0}
+html.pages-atelier .perf-stats {margin:20px 0 24px;gap:0}
 html.pages-atelier :is(.perf-stat strong,.fight-summary-big) {font-size:24px;font-weight:500;font-variant-numeric:tabular-nums}
 html.pages-atelier :is(.perf-table,.perf-number,.bear-slot-analytics,.fight-power) {font-variant-numeric:tabular-nums}
 html.pages-atelier :is(.perf-label,.perf-status,.perf-dot) {font-size:12px}
@@ -156,6 +166,17 @@ html.pages-atelier .bear-settings-compact {margin-bottom:12px}
 html.pages-atelier :is(.bear-fields,.fight-player-fields) {gap:10px}
 html.pages-atelier .bear-switch {background:var(--panel);border:1px solid var(--os-control);border-radius:6px;box-shadow:none}
 html.pages-atelier .bear-switch input {accent-color:var(--accent)}
+html.pages-atelier .bear-switch.os-role-shell {display:block;border:0;background:transparent;padding:0;min-width:0;min-height:36px;width:100%}
+html.pages-atelier :is(.bear-fast-form,.bear-fields) .bear-switch-label {display:grid;gap:6px;min-width:0;font-size:12px;color:var(--muted)}
+html.pages-atelier .os-role-choice {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));position:relative;isolation:isolate;padding:4px;min-height:38px;width:100%;background:var(--bg);border:1px solid var(--os-control);border-radius:7px;touch-action:pan-y;user-select:none}
+html.pages-atelier .os-role-thumb {position:absolute;left:4px;top:4px;bottom:4px;width:calc((100% - 8px)/2);border-radius:4px;background:var(--os-role-selected);transform:translateX(0);transition:transform var(--os-role-duration) var(--os-ease);pointer-events:none}
+html.pages-atelier .os-role-choice[data-value="1"] .os-role-thumb {transform:translateX(100%)}
+html.pages-atelier .os-role-choice[data-keyboard="true"] .os-role-thumb,html.pages-atelier .os-role-choice[data-dragging="true"] .os-role-thumb {transition:none}
+html.pages-atelier .os-role-choice>button {z-index:1;min-height:28px;min-width:0;padding:3px 8px;background:transparent;border:0;color:var(--muted);border-radius:4px;font-size:12px;font-weight:500;cursor:pointer}
+html.pages-atelier .os-role-choice>button[aria-checked="true"] {color:var(--os-role-ink);font-weight:600}
+html.pages-atelier .os-role-choice>button:active {filter:none}
+html.pages-atelier .bear-roster-collapsible[open]>summary {border-bottom:1px solid var(--os-edge);padding-bottom:16px;margin-bottom:16px}
+html.pages-atelier .bear-roster-collapsible[open]>.bear-section-heading h3 {display:none}
 html.pages-atelier :is(.bear-profile-details,.bear-profile-grid,.bear-attack-grid) {background:transparent;color:var(--text);border-color:var(--border)}
 html.pages-atelier :is(.bear-profile-grid>div,.bear-attack-grid>div) {background:var(--panel);border:0;border-radius:4px}
 html.pages-atelier .fightclub-dashboard {display:flex;flex-direction:column;gap:var(--os-gap)}
@@ -303,6 +324,7 @@ html.pages-atelier button:active:not(:disabled) {filter:brightness(.86)}
 @media(pointer:coarse) {
  html.pages-atelier :is(input,select,textarea) {font-size:16px}
  html.pages-atelier :is(button,summary) {min-height:44px}
+ html.pages-atelier .os-role-choice>button {min-height:36px}
 }
 @media(prefers-reduced-motion:reduce) {
  html.pages-atelier *,html.pages-atelier *::before,html.pages-atelier *::after {animation:none!important;transition:none!important;scroll-behavior:auto!important}
