@@ -171,3 +171,12 @@ Keep calendar calculations, profile behavior, Bear timing/optimizer, existing he
 - Don't imply cross-device completion sync or successful live deployment from local checks.
 
 Evidence supplied by the implementation workflow: `outputs/player-dashboard-2/after-1440.png`, `after-390.png`, `light-360.png`, `daily-desktop.png`, `daily-mobile.png` and `guides-mobile.png`. These are local review evidence, not proof of publication.
+
+
+## Player feedback revision · 2026-10-21
+
+Daily progress and per-event numeric counters are hidden. Native task checkmarks remain optional local reminders and do not announce a quota. Fragment navigation is intercepted within the current document so the directory base cannot trigger a reload.
+
+Bear Trap uses the locally sourced game icon, a compact art/title/next-date composition and separate time panels, with a full-width mobile optimizer link. Event art is now self-hosted in assets/events; sources.json and README.md retain provenance for all 18 originals.
+
+The roadmap renders only future server-age estimates (Gen 7 at day 440, Gen 8 at day 540). Passed estimates leave the upcoming list automatically. Existing confirmed releases remain in a closed history disclosure, with historical copy. The hero section leads with the next generation and links to sourced profiles; the retained Gen-6 guide is closed by default. Estimated dates are explicitly not in-game confirmations.

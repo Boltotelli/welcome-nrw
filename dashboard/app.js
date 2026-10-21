@@ -20,7 +20,7 @@
   const dateKey=d=>d.toISOString().slice(0,10);
   const safe=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   const localized=(value,lang)=>typeof value==='string'?value:(value?.[lang]||value?.en||'');
-  const eventIcon=e=>e.iconUrl?`<img class="event-icon${e.iconFit==='cover'?' event-icon-cover':''}" src="${safe(e.iconUrl)}" alt="">`:`<span>${safe(e.icon||'📅')}</span>`;
+  const eventIcon=e=>{const url=window.NRW_EVENT_ASSETS.urlFor(e,e.id?.startsWith('mythic-')?'mythic':eventKind(e))||e.iconUrl;return url?`<img class="event-icon${e.iconFit==='cover'?' event-icon-cover':''}" src="${safe(url)}" alt="">`:`<span>${safe(e.icon||'📅')}</span>`;};
   const isRelease=e=>e.display==='timeline-only'||['new-master-2026-09-14','isnor-master-2026-09-14','hero-generation-6-1044'].includes(e.id);
   const eventsFor=date=>{
      const configured=new Set(eventCycles.filter(c=>c.enabled!==false&&c.override_schedule===true).map(c=>c.group_key));
@@ -206,7 +206,7 @@
     document.getElementById('bearDateNote').textContent=nextSlots.length?
       localized(nextSlots[0].config.title,lang)+" · "+dateFmt(nextSlots[0].next)+" · "+nextSlots[0].config.start_time_utc+" UTC":
       ({de:"Aktuell keine Bärenfalle aktiviert.",en:"No Bear Trap is enabled.",fr:"Aucun piège à ours activé."}[lang]||"No Bear Trap is enabled.");
-    document.getElementById('genTag').textContent=t.genNowTag;window.NRW_PLAYER.finish()}
+    document.getElementById('genTag').textContent=t.genNowTag;window.NRW_PLAYER.finish();window.NRW_ROADMAP.render(today,lang)}
   let lastPlayerMinute='';
   function tick(){const minute=new Date().toISOString().slice(0,16);if(lastPlayerMinute&&minute!==lastPlayerMinute)renderDynamic();lastPlayerMinute=minute;const now=new Date(),lang=body.dataset.lang||'en',kvk=kvkPrepWindow(now);document.getElementById('utcClock').textContent=now.toLocaleTimeString('en-GB',{hour12:false,timeZone:'UTC'});document.getElementById('kvkPrepCountdown').textContent=kvk.active?({de:'PREP LÄUFT',en:'PREP ACTIVE',fr:'PREP EN COURS'}[lang]||'PREP ACTIVE'):fmtCountdown(kvk.start);const slots=activeBearSlots();
     for(let i=1;i<=3;i++){
