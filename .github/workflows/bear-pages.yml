@@ -429,11 +429,12 @@ jobs:
           from pathlib import Path
           p=Path('_site/welcome/index.html')
           html=p.read_text()
-          html=html.replace('<head>','<head>\\n<base href="../">',1)
+          html=html.replace('<head>','<head>'+chr(10)+'<base href="../">',1)
           # With a project-root base, hash links must point back to /welcome/.
           html=html.replace('href="#','href="welcome/#')
           html=html.replace('href="/site.webmanifest"','href="site.webmanifest"')
           html=html.replace('<script defer src="/_vercel/insights/script.js"></script>','')
+          assert '<head>'+chr(92)+'n' not in html
           p.write_text(html)
           PY
           # Essential Step 5 files and wiring must all be included, not just
