@@ -2,7 +2,7 @@
 
 ## Scope and model invariants
 
-The active Vercel `/bear/` route rewrites to `preview-v3.html`. It uses V3 name-flow, advisor, formation, skill-effects and damage-skills, plus the shared `bear/hero-reference.js` loader. There is no `preview-v3/hero-reference.js` in the active graph.
+The active Vercel `/bear/` route rewrites to `preview-v3.html`. The Pages `/bear/` entry now forwards to that same active V3 page; the legacy implementation is retained in source. V3 uses name-flow, advisor, formation, skill-effects and damage-skills, plus the shared `bear/hero-reference.js` loader. There is no `preview-v3/hero-reference.js` in the active graph.
 
 `hero-explanations.js` presents the existing advisor groups. It never reorders them, changes their scores or writes to profiles. Each comparison uses the next scored owned candidate of the same troop class and the group's single shared model context. Relative gap is `(winner.score / alternative.score - 1) * 100`; ties are described as ties. This is an isolated recommendation-model contribution, not a complete three-hero team swap or measured Bear damage. Five percent is only a presentation threshold for small/clear model gaps and never a scoring weight.
 
