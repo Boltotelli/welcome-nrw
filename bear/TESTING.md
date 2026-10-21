@@ -4,7 +4,7 @@
 
 The active Vercel `/bear/` route rewrites to `preview-v3.html`. The Pages `/bear/` entry now forwards to that same active V3 page; the legacy implementation is retained in source. V3 uses name-flow, advisor, formation, skill-effects and damage-skills, plus the shared `bear/hero-reference.js` loader. There is no `preview-v3/hero-reference.js` in the active graph.
 
-`hero-explanations.js` presents the existing advisor groups. It never reorders them, changes their scores or writes to profiles. Each comparison uses the next scored owned candidate of the same troop class and the group's single shared model context. Relative gap is `(winner.score / alternative.score - 1) * 100`; ties are described as ties. This is an isolated recommendation-model contribution, not a complete three-hero team swap or measured Bear damage. Five percent is only a presentation threshold for small/clear model gaps and never a scoring weight.
+`hero-explanations.js` presents the existing advisor groups. It never reorders them, changes their scores or writes to profiles. Each comparison defaults to the next scored owned candidate of the same troop class, with an optional explicitly selected owned alternative and the group's single shared model context. Relative gap is `(winner.score / alternative.score - 1) * 100`; ties are described as ties. This is an isolated recommendation-model contribution, not a complete three-hero team swap or measured Bear damage. Five percent is only a presentation threshold for small/clear model gaps and never a scoring weight.
 
 Star-derived skill maxima, simplified level 80, illustrative class weights when stats are missing, unsupported mechanics and overlapping sensitivity intervals are disclosed. Confirmed profile inputs do not imply an official Kingshot formula. No input, profile-schema, API or database change was introduced.
 
@@ -21,6 +21,8 @@ The selectable comparison update adds every owned same-class candidate to a nati
 
 ## Browser verification
 
+Live GitHub Pages verification of the selectable comparison: existing #1044 search returns matching players; a saved locked profile opens; Petra defaults to Jabel and the selector includes Thrud and Sophia. Selecting Sophia updates the evidence and exposes both unverified Terror mechanics while the profile stays locked.
+
 Headless installed Microsoft Edge, isolated local QA data, shared API mocked to prevent any test writes to real profiles:
 
 - 1440, 810, 390 and 320 CSS pixel widths: no page-level horizontal overflow.
@@ -35,6 +37,6 @@ Taste draw, lint and browser inspector were used; lint has no failures. The insp
 
 ## Release boundary and remaining limits
 
-Publish and verify Pages first. Vercel's existing production baseline is `22a58321273360123a707cb4941aafde1348ad73`; apply only this Bear change there so other live NRW sections are retained. Record actual resulting commit, Pages run and production state in the delivery report.
+Publish and verify Pages first. The combined release `86cacc3cc397bac11abcfb63bc87cbb36affa0c9` preserves the current Welcome production baseline `bf88c987a9902233d053253782fd86a129489a1d` and adds the Bear redesign and selectable comparisons. Recheck production before publishing to retain any newer parallel changes. Record actual resulting commit, Pages run and production state in the delivery report.
 
 Real-phone Safari/hardware testing is still needed. Live PIN writes to other players' profiles were intentionally not used for QA. No official Kingshot mathematical verification is claimed.
