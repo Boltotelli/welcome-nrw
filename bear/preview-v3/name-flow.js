@@ -7,6 +7,7 @@ const B=window.NRW_BEAR_BRIDGE,C=window.NRW_BEAR_CATALOG;
 const I18N=window.NRW_BEAR_I18N;
 const PROFILES=window.NRW_BEAR_PROFILES,HELP=window.NRW_BEAR_HELP;
 const T=text=>I18N?.tr?.(text)??text;
+const copy=(de,en,fr,es)=>({de,en,fr,es}[I18N?.language?.()||'en']||en);
 if(!B||!C)return;
 const CL=['infantry','cavalry','archer'],LABEL=['Infanterie','Kavallerie','Bogenschützen'];
 const heroList=C.heroes||[],heroNames=new Set(heroList.map(h=>h.name));
@@ -74,7 +75,10 @@ function refreshSecurityStatus(){
 }
 function markReadOnly(root){
  if(canEdit||localOnly)return;
- root.querySelectorAll('input,select,textarea').forEach(el=>el.disabled=true);
+ root.querySelectorAll('input,select,textarea').forEach(el=>{
+  // Comparison is read-only evidence, not a profile edit.
+  if(!el.matches('.bear-advice-select'))el.disabled=true;
+ });
  root.querySelectorAll('button:not(.bear-name-help-trigger):not(.bear-name-action-btn)').forEach(el=>el.disabled=true);
 }
 function numberField(label,value,onChange,options={}){
@@ -491,6 +495,7 @@ function rosterSection(){
     // Preserve the reader's position when the selected card gains fields.
     window.requestAnimationFrame?.(()=>window.scrollTo({top:previousY,behavior:'instant'}));
    },'bear-name-hero-pick');
+   tap.setAttribute('aria-pressed',String(owned));
    const img=el('img');img.src=heroInfoCache[n]?.imageUrl||hero.img||'';img.alt=n;img.loading='lazy';
    const text=el('span','',n);tap.append(img,text);card.append(tap);
    if(owned){
@@ -810,7 +815,7 @@ function formationCards(){
  };
  for(let index=0;index<groups.length;index++){
   const row=groups[index],detail=validCap?plan.marches[index]:null;
-  const article=el('article','bear-name-formation-card');
+  const article=el('article','bear-name-formation-card '+(index===0?'is-starter':'is-joiner'));
   article.append(title(label(row,index),'h3'));
   const avatars=el('div','bear-name-formation-heroes');
   for(let i=0;i<3;i++){
@@ -886,11 +891,15 @@ function formationCards(){
 // complete existing Kingshot hero-selection WebM; damage has a cloud-themed
 // dedicated animation until an approved original cloud WebM is available.
 async function loadingSequence(kind){
+ // Keep both original videos intact. Playback accompanies the ready result
+ // and never gates computation. Reduced-motion users skip the media.
+ if(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches)return;
  const old=document.getElementById('bearNameLoading');old?.remove();
  const loading=el('div','bear-name-loading '+(kind==='formation'?'bear-name-loading-hero':'bear-name-loading-cloud'));
  loading.id='bearNameLoading';
  loading.setAttribute('role','status');
- const text=el('p','',kind==='formation'?'Helden und Truppen werden zusammengestellt …':'Schadenswerte werden berechnet …');
+ const text=el('p','',kind==='formation'?copy('Deine Formationen sind bereit.','Your formations are ready.','Tes formations sont prêtes.','Tus formaciones están listas.'):
+  copy('Dein Modellergebnis ist bereit.','Your model result is ready.','Le résultat du modèle est prêt.','El resultado del modelo está listo.'));
  if(kind==='formation'){
   const video=el('video');video.src='./assets/kingshot_formations_loading.webm';
   video.autoplay=true;video.muted=true;video.playsInline=true;video.preload='auto';
@@ -902,7 +911,7 @@ async function loadingSequence(kind){
    const img=el('img');img.src=item.img;img.alt=n;strip.append(img);
   }
   if(strip.children.length)loading.append(strip);
-  loading.append(text);box.append(loading);loading.scrollIntoView({behavior:'smooth'});
+  loading.append(text);box.append(loading);
   await new Promise(resolve=>{
    let finished=false;
    const finish=()=>{if(finished)return;finished=true;clearTimeout(timer);resolve();};
@@ -923,13 +932,13 @@ async function loadingSequence(kind){
   for(let i=0;i<4;i++){const cloud=el('span','bear-name-cloud cloud-'+i,'☁');clouds.append(cloud);}
   clouds.append(el('span','bear-name-cloud-center','⚡'));
   clouds.hidden=true;
-  loading.append(video,clouds,text);box.append(loading);loading.scrollIntoView({behavior:'smooth'});
+  loading.append(video,clouds,text);box.append(loading);
   await new Promise(resolve=>{
    let finished=false;
    const finish=()=>{if(finished)return;finished=true;clearTimeout(timer);resolve();};
    // Do not serve a pixelated downscaled copy of the provided animation.
    // If this browser cannot decode VP9, show the non-video CSS fallback.
-   const fallback=()=>{video.hidden=true;clouds.hidden=false;setTimeout(finish,4200);};
+   const fallback=()=>{video.hidden=true;clouds.hidden=false;finish();};
    const timer=setTimeout(finish,15000);
    video.addEventListener('ended',finish,{once:true});
    video.addEventListener('error',fallback,{once:true});
@@ -944,9 +953,10 @@ async function performCalculation(kind){
  const controls=box.querySelectorAll('.bear-name-action-btn');
  controls.forEach(b=>b.disabled=true);
  try{
-  await loadingSequence(kind);
+  void loadingSequence(kind);
   const result=kind==='formation'?formationCards():predicted();
-  result.id=id;box.append(result);result.scrollIntoView({behavior:'smooth'});
+  const playback=document.getElementById('bearNameLoading');if(playback)result.prepend(playback);
+  result.id=id;box.append(result);result.scrollIntoView({behavior:window.matchMedia?.('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
  }finally{controls.forEach(b=>b.disabled=false);}
 }
 function actionButtons(advanced){
@@ -963,10 +973,13 @@ function summaryHeroes(){
  section.append(title('Empfohlene Starter'),el('p','bear-name-muted',
   'Aus deinen ausgewählten Helden.'));
  const starter=el('div','bear-name-picks');
- picked.forEach((n,i)=>{const h=el('div','bear-name-pick'),hero=heroList.find(x=>x.name===n);
+ picked.forEach((n,i)=>{const wrapper=el('article','bear-advice-slot'),h=el('div','bear-name-pick'),hero=heroList.find(x=>x.name===n);
   if(hero){const img=el('img');img.src=heroInfoCache[n]?.imageUrl||hero.img;img.alt='';h.append(img);}
   h.append(el('strong','',LABEL[i]),el('span','',n||'Noch kein passender Held'));
-  starter.append(h);
+  wrapper.append(h);
+  const group=groups[i],explain=window.NRW_BEAR_HERO_EXPLANATIONS;
+  if(group&&explain)wrapper.append(explain.render(group,n=>heroInfoCache[n]?.imageUrl||heroList.find(x=>x.name===n)?.img));
+  starter.append(wrapper);
  });section.append(starter);
 
  return {section,picked};
@@ -1083,11 +1096,20 @@ function languageSwitcher(){
  return div;
 }
 function landing(){
- const head=el('div','bear-name-landing');head.append(el('p','bear-name-eyebrow','🐻 NRW · BÄREN-OPTIMIERER'),
-  title('Deine Bear-Formation. Ohne Screenshot-Marathon.','h1'),
-  el('p','bear-name-muted','Spielername suchen, ein gemeinsames Profil ansehen und eigene Favoriten speichern.'));
+ const head=el('div','bear-name-landing');
+ const mast=el('div','bear-warroom-brand');
+ const logo=el('img');logo.src='../assets/nrw-banner.svg';logo.alt='NRW United';
+ mast.append(logo,el('span','','NRW United · Kingshot #1044'),languageSwitcher());
+ const intro=el('div','bear-warroom-intro');
+ intro.append(title(copy('Jeder Marsch zählt.','Every march matters.','Chaque marche compte.','Cada marcha cuenta.'),'h1'),
+  el('p','bear-name-muted',copy('Deine Helden. Deine Truppen. Dein Plan für die Bärenfalle.','Your heroes. Your troops. Your plan for the Bear Trap.','Tes héros. Tes troupes. Ton plan pour la chasse à l’ours.','Tus héroes. Tus tropas. Tu plan para la trampa del oso.')));
+ const art=el('img','bear-warroom-bear');art.src='https://got-global-wiki.s3.us-west-1.amazonaws.com/wp-content/uploads/2026/01/jump_icon_40088.png';art.alt='';
+ intro.append(art);head.append(mast,intro);
+ head.append(title(copy('Bear Trap Optimizer','Bear Trap Optimizer','Bear Trap Optimizer','Bear Trap Optimizer'),'h2'),
+  el('p','bear-name-muted',copy('Profil öffnen, Starter und Joiner planen – mit nachvollziehbaren Empfehlungen aus deinen gespeicherten Werten.','Open your profile, plan starters and joiners, and understand recommendations based on your saved values.','Ouvre ton profil, prépare tes lanceurs et renforts et comprends les recommandations selon tes données.','Abre tu perfil, organiza líderes y apoyos y entiende las recomendaciones basadas en tus datos.')));
  const input=el('input','bear-name-input');
  input.placeholder=T('Dein Kingshot-Name');input.maxLength=50;input.autocomplete='off';
+ input.enterKeyHint='search';input.autocapitalize='none';input.spellcheck=false;
  input.setAttribute('aria-label',T('Dein Kingshot-Name'));
  const results=el('div','bear-name-search-results');
  let timer=null,token=0;
@@ -1118,7 +1140,14 @@ function landing(){
   else showStatus('Bitte einen Namen mit mindestens zwei Zeichen eingeben.',true);
  },'bear-name-btn primary'));
  head.append(el('p','bear-name-muted','Gemeinsame Profile sind einsehbar. Bearbeiten kannst du sie mit einer selbst gewählten 4- bis 6-stelligen Zahlen-PIN. Favoriten bleiben lokal.'));
- head.prepend(languageSwitcher());box.append(head);
+ const paths=el('div','bear-warroom-paths');
+ paths.append(el('p','',copy('Schnellmodus · Helden & Formationen','Quick mode · Heroes & formations','Mode rapide · Héros et formations','Modo rápido · Héroes y formaciones')),
+  el('p','',copy('Erweitert · Kampfwerte & Schadensmodell','Advanced · Combat stats & damage model','Avancé · Statistiques et modèle de dégâts','Avanzado · Estadísticas y modelo de daño')));
+ head.append(paths);box.append(head);
+ const nav=el('nav','bear-warroom-links');nav.setAttribute('aria-label','NRW');
+ for(const [href,label] of [['https://welcome-nrw.vercel.app/dashboard/',copy('Spielerübersicht','Player dashboard','Tableau des joueurs','Panel de jugadores')],['https://welcome-nrw.vercel.app/leitung/',copy('NRW-Leitung','NRW leadership','Direction NRW','Dirección NRW')]]){
+  const a=el('a','',label);a.href=href;nav.append(a);
+ }box.append(nav);
  const saved=PROFILES?.ordered()||[];
  const legacy=(()=>{
   try{return JSON.parse(localStorage.getItem('nrw_bear_name_list_v1')||'[]');}catch{return [];}
