@@ -16,6 +16,7 @@ on:
       - 'welcome.js'
       - 'laws.*'
       - '.github/workflows/publish-main-pages.yml'
+      - '.github/workflows/bear-pages.yml'
   workflow_dispatch:
 
 permissions:
