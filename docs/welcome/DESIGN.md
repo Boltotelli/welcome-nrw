@@ -69,6 +69,8 @@ rounded:
   control: "5px"
   compact: "6px"
   surface: "8px"
+  panorama: "12px"
+  panorama-phone: "8px"
   contact: "12px"
   circular: "50%"
 spacing:
@@ -97,6 +99,12 @@ components:
     textColor: "{colors.scene-ink}"
     rounded: "{rounded.contact}"
     padding: "30px"
+  alliance-panorama:
+    rounded: "{rounded.panorama}"
+    height: "430px"
+  bear-panorama:
+    rounded: "{rounded.panorama}"
+    height: "440px"
   contact-copy:
     backgroundColor: "{colors.scene-gold}"
     textColor: "{colors.scene-action-ink}"
@@ -136,7 +144,7 @@ The base container remains 1280px maximum with 32px side gutters, reducing to 16
 
 One continuous page contains banner, transfer fit, server facts, live times, guides, Dashboard, onboarding, language profile, Discord, contacts, and FAQ. Header anchors remain visible at all widths and the hero choices scroll to sections. No selected audience hides primary content. FAQ questions and historical warning remain details; major information wrappers do not. The optional configured public-feed block remains conditional.
 
-Times use a 1fr/1.1fr heading/schedule layout with 70px gap, collapsing on phones. Server facts and guides use two columns before stacking; onboarding uses three columns before stacking. Contact cards use two columns before stacking, with portraits stepping from 100px to 76px at 1000px and 70px on phones. Existing profile labels, IDs, status nodes, and listeners remain.
+Times use a 1fr/1.1fr heading/schedule layout with 70px gap, collapsing on phones. The Bear panorama spans both desktop columns beneath that first row. Its final crop is 440px high, center top; on phones it is 220px high, 62% center. The alliance camp panorama leads server facts at 430px height, centered; phones use 245px height at 52% center. Panorama corners follow the frontmatter desktop/phone radii. Captions remain below images, never overlaid on them. Server facts and guides use two columns before stacking; onboarding uses three columns before stacking. Contact cards use two columns before stacking, with portraits stepping from 100px to 76px at 1000px and 70px on phones. Existing profile labels, IDs, status nodes, and listeners remain.
 
 ## Elevation & Depth
 
@@ -166,11 +174,17 @@ The first-landing intro retains six bounded transform/opacity arrivals: backdrop
 
 Conditional fine-hover pointer depth remains subordinate: spring mass 1, stiffness 100, damping 10; backdrop at most 6px/4px, foreground 12px/8px plus 1.5deg, text stationary. It stops settled, hidden, blurred, keyboard-driven, outside the hero intersection, reduced-motion, or pointer capability change. Touch input is rejected. Preserve direct navigation and reduced-motion settling rather than restoring audience transitions.
 
+### Scenic illustrations and event emblems
+
+Two new original AI images carry the world between practical sections: alliance-camp in server facts and bear-rally in event times. Both lazy-load with intrinsic 1672×941 dimensions. Their captions explicitly identify illustration; exact prompts/provenance are adjacent JSON and embedded Exif. These are not game screenshots. No new animation is attached to these images.
+
+Guide event containers are 96px with 88px local emblems; phones use 80px containers and 76px emblems. The crossed-swords SVG is 76px, 66px on phones; smaller server/onboarding emblems use 60px images. Existing artwork and official UI assets are not modified. Legions use two readable clock lines; on phones their secondary-event groups form two columns.
+
 ### Assets and data
 
-The existing citadel remains explicitly AI fantasy illustration with exact-prompt provenance; it is not a game screenshot. Official local Helga and cached real Jey/Demaze portraits retain sources.json provenance. Cinzel OFL remains bundled. This revision generates no new image assets. Broken external decorative media are replaced by local Helga and authored crossed swords.
+The existing citadel remains explicitly AI fantasy illustration with exact-prompt provenance; it is not a game screenshot. Official local Helga and cached real Jey/Demaze portraits retain sources.json provenance. Cinzel OFL remains bundled. This revision adds the two documented original AI panoramas; no external player-provider imagery is fetched. Broken external decorative media are replaced by local Helga and authored crossed swords.
 
-Bear clocks retain one public-schedule authority and no stale fallback; Discord public-config remains the invite authority. Swordland/Tri-Alliance prose uses current in-game polls rather than fixed early/late expectations. Contact/profile functionality and external-player/backend boundaries remain unchanged.
+Bear clocks retain one public-schedule authority and no stale fallback; Discord public-config remains the invite authority. Swordland/Tri-Alliance display persisted L1/L2 fields from the same public-schedule authority. The user-requested seed is L1 14:00 and L2 19:00 UTC for both events; these are editable configuration, not hardcoded frontend fallbacks. Group assignments remain in-game. BRIEF.md records the explicitly authorized paired-column migration, existing-ACL editor/API extension, backward compatibility, and unchanged authentication. Contact/profile and external-provider boundaries remain unchanged.
 
 ## Do's and Don'ts
 
@@ -179,4 +193,5 @@ Bear clocks retain one public-schedule authority and no stale fallback; Discord 
 - **Do** preserve real data, provenance, OFL, labels, focus, locale/theme support, and deployment boundaries.
 - **Don't** restore hidden audience streams or major information disclosures.
 - **Don't** hijack scrolling, add fake rewards or proof, or animate factual body text out of readability.
-- **Don't** restore broken decorative media, fixed early/late poll claims, green surfaces, or a giant crown hero.
+- **Don't** restore broken decorative media, obsolete polling-time or early/late claims, green surfaces, or a giant crown hero.
+

@@ -352,6 +352,14 @@
           <label class="field event-checkbox"><input id="cycleBearEnabled" type="checkbox"><span data-event-i18n="bearEnabled">Bärenfalle aktiv</span></label>
         </div>
       </fieldset>
+      <fieldset id="cycleLegionOptions" class="event-bear-options" hidden>
+        <legend data-event-i18n="legionTimes">Legionszeiten (UTC)</legend>
+        <div class="form-grid">
+          <label class="field"><span>Legion 1 · UTC</span><input id="cycleLegion1Time" class="control" type="time" step="60"></label>
+          <label class="field"><span>Legion 2 · UTC</span><input id="cycleLegion2Time" class="control" type="time" step="60"></label>
+        </div>
+        <p class="small-note" data-event-i18n="legionTimeHint">Für Schwertland und Tri-Alliance getrennt gespeichert. Beide Zeiten angeben oder beide leeren.</p>
+      </fieldset>
       <div class="library-cycle-bar"><span id="cycleSummary" class="muted"></span><button type="button" class="primary" id="saveCycle" data-i18n="cycleSave">Turnus speichern</button></div>
     </section>
     <section class="library-phase-editor">

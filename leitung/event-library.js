@@ -5,12 +5,13 @@ export function createEventHub({request,flash,esc,t}) {
  const $=id=>document.getElementById(id);
  const localeName={de:"de-DE",en:"en-GB",fr:"fr-FR",es:"es-ES"};
  const EVENT_UI={
- de:{namesHeading:"Eventnamen je Sprache",namesHint:"Originalnamen aus den Kingshot-Guides; für jede Sprache getrennt bearbeitbar.",namesSave:"Eventnamen speichern",bearOptions:"Bärenfalle: UTC-Zeit & Aktivierung",bearTime:"Startzeit (UTC)",bearEnabled:"Bärenfalle aktiv",bearInactive:"Noch nicht aktiviert",bearTimeRequired:"Aktive Bärenfallen benötigen eine UTC-Uhrzeit.",nameMissing:"Bitte einen Eventnamen eintragen."},
- en:{namesHeading:"Event names by language",namesHint:"Original Kingshot guide names; each language is editable.",namesSave:"Save event names",bearOptions:"Bear Trap: UTC time & activation",bearTime:"Start time (UTC)",bearEnabled:"Bear Trap active",bearInactive:"Not yet enabled",bearTimeRequired:"Active Bear Traps require a UTC start time.",nameMissing:"Please enter an event name."},
- fr:{namesHeading:"Noms des événements par langue",namesHint:"Noms des guides Kingshot, modifiables par langue.",namesSave:"Enregistrer les noms",bearOptions:"Piège à ours : heure UTC et activation",bearTime:"Heure de début (UTC)",bearEnabled:"Piège à ours actif",bearInactive:"Non activé",bearTimeRequired:"Heure UTC requise.",nameMissing:"Indique un nom d’événement."},
- es:{namesHeading:"Nombres del evento por idioma",namesHint:"Nombres de las guías Kingshot, editables por idioma.",namesSave:"Guardar nombres",bearOptions:"Trampa del oso: hora UTC y activación",bearTime:"Hora de inicio (UTC)",bearEnabled:"Trampa activa",bearInactive:"Sin activar",bearTimeRequired:"Se requiere hora UTC.",nameMissing:"Introduce un nombre."}
+ de:{legionTimes:"Legionszeiten (UTC)",legionTimeHint:"Für dieses Event gespeichert. Beide Zeiten angeben oder beide leeren.",legionTimeInvalid:"Bitte beide Legionszeiten gültig angeben oder beide leeren.",namesHeading:"Eventnamen je Sprache",namesHint:"Originalnamen aus den Kingshot-Guides; für jede Sprache getrennt bearbeitbar.",namesSave:"Eventnamen speichern",bearOptions:"Bärenfalle: UTC-Zeit & Aktivierung",bearTime:"Startzeit (UTC)",bearEnabled:"Bärenfalle aktiv",bearInactive:"Noch nicht aktiviert",bearTimeRequired:"Aktive Bärenfallen benötigen eine UTC-Uhrzeit.",nameMissing:"Bitte einen Eventnamen eintragen."},
+ en:{legionTimes:"Legion times (UTC)",legionTimeHint:"Saved for this event. Enter both times or clear both.",legionTimeInvalid:"Enter both valid legion times or clear both.",namesHeading:"Event names by language",namesHint:"Original Kingshot guide names; each language is editable.",namesSave:"Save event names",bearOptions:"Bear Trap: UTC time & activation",bearTime:"Start time (UTC)",bearEnabled:"Bear Trap active",bearInactive:"Not yet enabled",bearTimeRequired:"Active Bear Traps require a UTC start time.",nameMissing:"Please enter an event name."},
+ fr:{legionTimes:"Horaires des légions (UTC)",legionTimeHint:"Enregistrés pour cet événement. Indique les deux heures ou efface les deux.",legionTimeInvalid:"Indique deux heures valides ou efface les deux.",namesHeading:"Noms des événements par langue",namesHint:"Noms des guides Kingshot, modifiables par langue.",namesSave:"Enregistrer les noms",bearOptions:"Piège à ours : heure UTC et activation",bearTime:"Heure de début (UTC)",bearEnabled:"Piège à ours actif",bearInactive:"Non activé",bearTimeRequired:"Heure UTC requise.",nameMissing:"Indique un nom d’événement."},
+ es:{legionTimes:"Horarios de legión (UTC)",legionTimeHint:"Guardados para este evento. Introduce ambas horas o borra ambas.",legionTimeInvalid:"Introduce ambas horas válidas o borra ambas.",namesHeading:"Nombres del evento por idioma",namesHint:"Nombres de las guías Kingshot, editables por idioma.",namesSave:"Guardar nombres",bearOptions:"Trampa del oso: hora UTC y activación",bearTime:"Hora de inicio (UTC)",bearEnabled:"Trampa activa",bearInactive:"Sin activar",bearTimeRequired:"Se requiere hora UTC.",nameMissing:"Introduce un nombre."}
  };
  const tx=k=>EVENT_UI[language]?.[k]||t(k);
+ const legionEvent=k=>["catalog-swordland-showdown","catalog-tri-alliance-clash"].includes(k);
  const bearSlot=k=>/^bear-[123]$/.test(k||"");
  const bearNames=i=>({de:"Bärenfalle "+i,en:"Bear Trap "+i,fr:"Piège à ours "+i,es:"Trampa del oso "+i});
  const guideIds={brawl:"alliance-brawl",kvk:"kingdom-of-power-prep",strongest:"strongest-governor",armament:"armament-competition",officer:"officer-project",golden:"golden-glaives",merchant:"merchant-empire",fishing:"fishing-tournament",viking:"viking-vengeance",eternity:"eternitys-reach",cesare:"cesares-fury",championship:"alliance-championship",kill:"kill-event",bear:"bear-trap",transfer:"kingdom-transfer",champagne:"champagne-fair",roulette:"hero-roulette"};
@@ -223,10 +224,11 @@ export function createEventHub({request,flash,esc,t}) {
    const upcoming=bearSlot(g.key)&&effective.enabled===false?null:effective&&effective.enabled!==false?nextOccurrence(effective):futureDates[0]||null;
    const difference=upcoming?Math.round((Date.parse(upcoming+"T00:00:00Z")-Date.parse(today+"T00:00:00Z"))/86400000):null;
    const badge=bearSlot(g.key)?(effective.enabled===false?tx("bearInactive"):periodLabel(effective)):cycle?recurring:t("noCycle");
+   const legionSummary=legionEvent(g.key)&&cycle?.legion1_time_utc&&cycle?.legion2_time_utc?" · L1 "+esc(cycle.legion1_time_utc.slice(0,5))+" / L2 "+esc(cycle.legion2_time_utc.slice(0,5))+" UTC":"";
    const time=bearSlot(g.key)&&effective?.enabled&&effective.start_time_utc?" · "+esc(effective.start_time_utc.slice(0,5))+" UTC":"";
    const desc=difference===null?t("nextUnknown"):difference===0?t("nextToday"):difference===1?t("nextTomorrow"):t("nextInDays").replace("{n}",difference);
    return '<details class="event-group"><summary><span class="event-group-title"><b>'+esc(groupName(g))+'</b>'+
-      '<small>'+esc(badge)+' · '+esc(desc)+time+'</small></span><span class="event-group-count">'+esc(t("daysCount").replace("{n}",phases))+'</span></summary>'+
+      '<small>'+esc(badge)+' · '+esc(desc)+time+legionSummary+'</small></span><span class="event-group-count">'+esc(t("daysCount").replace("{n}",phases))+'</span></summary>'+
       '<div class="event-group-body"><div class="event-group-actions"><span>'+esc(t("cycleInfo"))+'</span><button type="button" class="ghost" data-library-key="'+esc(g.key)+'" data-phase="1">'+esc(t("cycleSettings"))+'</button>'+((g.instances.find(x=>x.source==="custom")?.record?.id&&canEdit)?'<button class="ghost" type="button" data-edit="event" data-id="'+esc(g.instances.find(x=>x.source==="custom").record.id)+'">'+esc(t("edit"))+'</button>':"")+'</div>'+days+'</div></details>';
  }
  function render(current,lang,allowed){
@@ -388,6 +390,8 @@ export function createEventHub({request,flash,esc,t}) {
    $("cyclePhases").value=cycle.phase_count||cycle.duration_days;
    const isBear=bearSlot(g.key);
    $("cycleBearOptions").hidden=!isBear;
+   $("cycleLegionOptions").hidden=!legionEvent(g.key);
+   for(const n of [1,2]){const input=$("cycleLegion"+n+"Time");input.value=(cycle["legion"+n+"_time_utc"]||"").slice(0,5);input.disabled=!canEdit;}
    $("cycleStartTime").value=isBear?(cycle.start_time_utc||"").slice(0,5):"";
    $("cycleBearEnabled").checked=isBear?cycle.enabled===true:false;
    $("cycleStartTime").disabled=!canEdit;
@@ -465,7 +469,13 @@ export function createEventHub({request,flash,esc,t}) {
      flash(t("cycleInvalid"),true);return;
    }
    const isBear=bearSlot(selected.group_key),start_time_utc=isBear?$("cycleStartTime").value:"";
-   const enabled=isBear?$("cycleBearEnabled").checked:true;
+   const enabled=isBear?$("cycleBearEnabled").checked:legionEvent(selected.group_key)?cycleOf(groups.find(g=>g.key===selected.group_key)).enabled!==false:true;
+   const legionTimes={};
+   if(legionEvent(selected.group_key)){
+     const one=$("cycleLegion1Time").value,two=$("cycleLegion2Time").value;
+     if((!one)!==(!two)||[one,two].some(v=>v&&!/^([01]\d|2[0-3]):[0-5]\d$/.test(v))){flash(tx("legionTimeInvalid"),true);return;}
+     legionTimes.legion1_time_utc=one||null;legionTimes.legion2_time_utc=two||null;
+   }
    if(isBear&&enabled&&!/^([01]\d|2[0-3]):[0-5]\d$/.test(start_time_utc)){
      flash(tx("bearTimeRequired"),true);return;
    }
@@ -474,7 +484,7 @@ export function createEventHub({request,flash,esc,t}) {
    const id=$("saveCycle");id.disabled=true;
    try{
      const r=await request("bootstrap",{action:"event_cycle",group_key:selected.group_key,anchor_date,
-       interval_days,duration_days,phase_count,enabled,start_time_utc,title});
+       interval_days,duration_days,phase_count,enabled,start_time_utc,title,...legionTimes});
      rememberCycle(r.item);
      setPhaseOptions(Number($("libraryPhase").value));
      cycleFields();fillPhase();list();flash(t("saved"));

@@ -214,7 +214,7 @@ async function publicInfo(req: Request, alliance: string, mode: string) {
   }
   if(mode==="public-schedule"){
     const [cycles,phases]=await Promise.all([
-      checked<any[]>(db.from("aos_event_cycles").select("group_key,anchor_date,interval_days,duration_days,phase_count,enabled,title,override_schedule,start_time_utc")
+      checked<any[]>(db.from("aos_event_cycles").select("group_key,anchor_date,interval_days,duration_days,phase_count,enabled,title,override_schedule,start_time_utc,legion1_time_utc,legion2_time_utc")
        .eq("alliance_code",alliance).limit(200)),
       checked<any[]>(db.from("aos_event_day_templates").select("group_key,day_number,instructions")
        .eq("alliance_code",alliance).eq("status","published").limit(300))
@@ -1480,10 +1480,21 @@ async function saveEventCycle(req:Request,alliance:string,userId:string,staff:an
   if(start_time_utc&&!/^([01]\d|2[0-3]):[0-5]\d$/.test(start_time_utc))throw new HttpError("invalid_utc_time",400);
   const enabled=title_only?(previous?.enabled??!isBearSlot):payload.enabled!==false;
   if(isBearSlot&&enabled&&!start_time_utc&&!title_only)throw new HttpError("bear_time_required",400);
+  const isLegionEvent=["catalog-swordland-showdown","catalog-tri-alliance-clash"].includes(group_key);
+  const hasLegionTimes=!title_only&&(Object.hasOwn(payload,"legion1_time_utc")||Object.hasOwn(payload,"legion2_time_utc"));
+  if(hasLegionTimes&&!isLegionEvent)throw new HttpError("legion_times_not_supported",400);
+  const legionTime=(value:unknown)=>{
+    if(value===null||value==="")return null;
+    if(typeof value!=="string"||!/^([01]\d|2[0-3]):[0-5]\d$/.test(value))throw new HttpError("invalid_legion_time",400);
+    return value;
+  };
+  const legion1_time_utc=hasLegionTimes?legionTime(payload.legion1_time_utc):(previous?.legion1_time_utc??null);
+  const legion2_time_utc=hasLegionTimes?legionTime(payload.legion2_time_utc):(previous?.legion2_time_utc??null);
+  if((legion1_time_utc===null)!==(legion2_time_utc===null))throw new HttpError("both_legion_times_required",400);
   const cycle=await checked<any>(db.from("aos_event_cycles").upsert({
     alliance_code:alliance,group_key,anchor_date,interval_days,duration_days,phase_count,
     enabled,override_schedule:title_only?(previous?.override_schedule===true):true,
-    start_time_utc:isBearSlot?start_time_utc:null,
+    start_time_utc:isBearSlot?start_time_utc:null,legion1_time_utc,legion2_time_utc,
     title:localized(payload.title,120),updated_at:new Date().toISOString(),updated_by:userId
   },{onConflict:"alliance_code,group_key"}).select("*").single());
   await audit(alliance,userId,title_only?"event_title":"event_cycle",group_key,"save");

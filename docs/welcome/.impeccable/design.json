@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-21T17:59:12Z",
+  "generatedAt": "2026-10-21T18:25:03Z",
   "title": "Design System: Welcome NRW",
   "extensions": {
     "colorMeta": {
@@ -143,14 +143,17 @@
     "scope": "docs/welcome/DESIGN.md only. Public root Welcome; leadership and Dashboard excluded.",
     "sourceFingerprints": {
       "algorithm": "SHA256",
-      "index.html": "5D0992F3E4F7768DA630A2A4E3F76016439D7E795C1D43E855440A28A856BB76",
+      "index.html": "B34F35D5A3A2A47F4AB05DA2BD10C59B85A701D342181A60EBB22A141028491E",
       "welcome.css": "6D847322DFEF2FE3D7AC092CC9508B50624C0267CDE5D9B111861B405683607B",
       "welcome-cinematic.css": "F25A7B4E0CBB4F4728EB5398E995566A8B41C7A945440B5F522218E3E01240BD",
       "welcome-cinematic.js": "7724931D81978930CFDF04F72D7B098C363A4D206EEB1C2C2CB071BA95A0C834",
-      "welcome-story.css": "7F8C949FB67CC3BE0C87484F68A1260C1468E0610FD1AF17C61D55079FC95109",
+      "welcome-story.css": "5AA4992104153E6A07FC92314C23049E4384716B2A8F97346350A99B9F4D6579",
       "welcome-story.js": "77FD872FD4C186C5F718762B9EB3C090A7507E7212FA722C5C008B1F65FEF622",
-      "welcome.js": "7E6331802D585CC20FE755518F3E580C4172D5C240C2C85388643F012D736BEE",
-      "app.js": "4F50683D5166320C204A1A3CCF3903B75371833EAD0724B4272D50671C5DDA4F"
+      "welcome.js": "AC71CB2C5D4056742E11AB05531CA9269231E18595341AE1CF8FF10117101015",
+      "app.js": "4F50683D5166320C204A1A3CCF3903B75371833EAD0724B4272D50671C5DDA4F",
+      "leitung/event-library.js": "62F1A1BADE2A72AE15F1394593C45CE9548DB0C15064DB275AC6BA8768A709B8",
+      "supabase/functions/allianceos-leitung/index.ts": "2EE5184F4CD402379CED5945EE2198076C0BE34BE5763D606591CFD1395AC26A",
+      "supabase/migrations/20261021181556_event_legion_times.sql": "767856B873B67BE93AE2546BED754CE84F32C71CCCF429D73D9685468E744B43"
     },
     "pointerDepth": {
       "foreground": "max 12px/8px plus 1.5deg rotateY",
@@ -176,7 +179,23 @@
       "license": "assets/welcome/Cinzel-OFL.txt",
       "font": "assets/welcome/Cinzel-Variable.ttf",
       "classification": "AI fantasy illustration, not a Kingshot screenshot",
-      "scene": "assets/welcome/kingdom-dusk.webp"
+      "scene": "assets/welcome/kingdom-dusk.webp",
+      "panoramas": [
+        {
+          "dimensions": "1672x941",
+          "kind": "Original AI fantasy illustration, not screenshot",
+          "provenance": "assets/welcome/alliance-camp.provenance.json",
+          "bytes": 336082,
+          "file": "assets/welcome/alliance-camp.webp"
+        },
+        {
+          "dimensions": "1672x941",
+          "kind": "Original AI fantasy illustration, not screenshot",
+          "provenance": "assets/welcome/bear-rally.provenance.json",
+          "bytes": 350806,
+          "file": "assets/welcome/bear-rally.webp"
+        }
+      ]
     },
     "scrollScene": {
       "noJS": "Content visible by default",
@@ -196,6 +215,50 @@
       "bannerColumns": "1fr 1.4fr",
       "contentMax": "1120px",
       "standard": "260px by 330px; phone 125px by 158px"
+    },
+    "panoramas": {
+      "bear": {
+        "height": "440px",
+        "position": "center top",
+        "phoneHeight": "220px",
+        "phonePosition": "62% center"
+      },
+      "radius": "12px",
+      "phoneRadius": "8px",
+      "animation": "No new effects",
+      "loading": "lazy, intrinsic 1672x941",
+      "captions": "11px, var(--muted), line-height1.6, 10px top padding; below images",
+      "alliance": {
+        "height": "430px",
+        "position": "center",
+        "phoneHeight": "245px",
+        "phonePosition": "52% center"
+      }
+    },
+    "eventEmblems": {
+      "smallEmblems": "60px",
+      "swords": "76px; phone66px",
+      "phoneContainer": "80px",
+      "container": "96px",
+      "phoneImage": "76px",
+      "image": "88px",
+      "shadow": "drop-shadow(0 8px 7px #0003)"
+    },
+    "legionConfiguration": {
+      "constraint": "Both null or paired minute-precision values for supported groups",
+      "editor": "Event Planning/Event Library/Turnus; two inputs for SL/Tri only; read-only disabled",
+      "compatibility": "Old client/title-only preserve clocks",
+      "bear": "Existing17:00/18:30 untouched",
+      "backend": "Active Edge v64, existing events ACL/audit, strict HH:mm, paired clear",
+      "seed": "NRW Swordland and Tri-Alliance only:14:00/19:00 UTC",
+      "migration": "20261021181556_event_legion_times.sql",
+      "copy": "Group assignments coordinated in game; clocks set by leadership",
+      "authentication": "Existing manual auth and verify_jwt=false unchanged",
+      "fields": [
+        "legion1_time_utc",
+        "legion2_time_utc"
+      ],
+      "source": "Same persisted public-schedule response; no frontend fallback"
     }
   },
   "components": [
@@ -229,7 +292,7 @@
       "Keep all primary information directly available.",
       "Preserve ordinary scroll, body readability, no-JS visibility, direct hashes, and authoritative data."
     ],
-    "overview": "The cinematic citadel and Helga lead into a continuous, directly readable Welcome. The real NRW standard traces its gold edge while three localized lines build with native reversible scroll. Primary information is not hidden behind audience selection.",
+    "overview": "The cinematic citadel and Helga lead into a continuous, directly readable Welcome. The real NRW standard traces its gold edge while three localized lines build with native reversible scroll. Primary information is not hidden behind audience selection. Two captioned original AI panoramas and larger real event emblems enrich the world without changing native scroll motion. Editable persisted L1/L2 clocks use the same public schedule authority.",
     "rules": [
       {
         "body": "Final story styles supersede earlier hidden audience layout; current markup is authoritative.",
@@ -240,8 +303,9 @@
     "donts": [
       "Do not restore hidden audience streams or major information disclosures.",
       "Do not hijack scrolling or invent game rewards or proof.",
-      "Do not restore broken decorative media or fixed early/late event claims.",
-      "Do not change Dashboard, leadership, or deployment scope."
+      "Do not call AI panoramas game screenshots or overlay factual text on them.",
+      "Do not hardcode legion clock fallbacks or restore obsolete polling-time claims.",
+      "Do not expand the narrowly authorized legion feature into unrelated backend or leadership changes."
     ]
   }
 }
