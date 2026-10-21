@@ -23,8 +23,15 @@
   <link rel="shortcut icon" href="../assets/nrw-dashboard-icon.svg">
   <link rel="apple-touch-icon" href="../assets/nrw-dashboard-icon.svg">
   <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="stylesheet" href="./styles.css?v=player2-20261021"><link rel="stylesheet" href="../leitung/public-feed.css?v=pages-1">
-  <link rel="stylesheet" href="./player-experience.css?v=player2-20261021">
+  <link rel="stylesheet" data-dashboard-href="./styles.css?v=player2-20261021"><link rel="stylesheet" data-dashboard-href="../leitung/public-feed.css?v=pages-1">
+  <link rel="stylesheet" data-dashboard-href="./player-experience.css?v=player2-20261021">
+  <script>
+    // Do not expose relative CSS URLs to the speculative preload scanner before
+    // the host-specific directory base has been established (also /dashboard).
+    document.querySelectorAll('link[data-dashboard-href]').forEach(function (link) {
+      link.href = new URL(link.dataset.dashboardHref, document.baseURI).href;
+    });
+  </script>
 </head>
 <body data-lang="en">
   <a class="player-skip" href="#dailyPlan"><span class="de">Zum Tagesplan</span><span class="en">Skip to daily plan</span><span class="fr">Aller au programme</span></a>
@@ -207,7 +214,17 @@
   </main>
 
   <footer><a href="../">← <span class="de">Zur Willkommensseite</span><span class="en">Back to welcome page</span><span class="fr">Retour à l’accueil</span></a></footer>
-  <script src="./event-rhythm.js?v=step4-1"></script><script src="./player-core.js?v=player2-20261021"></script><script src="./player-experience.js?v=player2-20261021"></script><script src="./app.js?v=player2-20261021"></script><script src="../leitung/public-config.js?v=step5-2" defer></script><script src="../leitung/public-feed.js?v=pages-1" defer></script>
-  <script defer src="./codes.js?v=20260915a"></script>
+  <script data-dashboard-src="./event-rhythm.js?v=step4-1"></script><script data-dashboard-src="./player-core.js?v=player2-20261021"></script><script data-dashboard-src="./player-experience.js?v=player2-20261021"></script><script data-dashboard-src="./app.js?v=player2-20261021"></script><script data-dashboard-src="../leitung/public-config.js?v=step5-2"></script><script data-dashboard-src="../leitung/public-feed.js?v=pages-1"></script>
+  <script data-dashboard-src="./codes.js?v=20260915a"></script>
+  <script>
+    // Dynamic classic scripts with async=false execute in document order. Their
+    // URLs are resolved only after the directory base, never by preloading /app.js.
+    document.querySelectorAll('script[data-dashboard-src]').forEach(function (placeholder) {
+      var script = document.createElement('script');
+      script.async = false;
+      script.src = new URL(placeholder.dataset.dashboardSrc, document.baseURI).href;
+      document.body.appendChild(script);
+    });
+  </script>
 </body>
 </html>
