@@ -1,7 +1,7 @@
-/* Presentation only. The exact hostname is the production boundary. */
+/* Presentation on the explicitly approved Pages and production domains. */
 (() => {
   'use strict';
-  if(location.hostname!=='boltotelli.github.io')return;
+  if(!['boltotelli.github.io','welcome-nrw.vercel.app'].includes(location.hostname))return;
   document.documentElement.classList.add('pages-atelier');
   function run(){
     const nav=document.getElementById('sideNav'),main=document.querySelector('.workspace main');

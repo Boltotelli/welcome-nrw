@@ -273,3 +273,7 @@ The deployment planner works only within an existing Legion 1 or Legion 2. It ne
 The deterministic engine uses documented cached power. Missing power is excluded from redistribution. Existing retained positions take precedence over automatic target counts. Preview shows exclusions, actual counts, known-power coverage and copyable labels. Group-qualified map keys preserve North/South intent on Tri without a new database schema; virtual SECURE/GUERILLA destinations have no invented map coordinates.
 
 Applying is explicit. A fresh roster and player snapshot must match the proposal, including active status and main/alt links. Stale data refreshes the local snapshot and requires a new proposal. Sequential writes update only map assignments through the existing permission-protected action. A partial error stops the run; successful assignments remain saved and retry handles only the remainder. No live alliance planning data is modified during QA.
+
+## Production publication
+
+On 2026-10-21 the user explicitly requested publication of this reviewed state to welcome-nrw.vercel.app/leitung. The presentation loader now permits the approved production hostname as well as the existing Pages hostname. Both installations use the same Neumorph default, module behavior and deployment-group planner. Existing base-path normalization supports /leitung and /leitung/ without the Pages prefix. This release changes no Supabase schema, authentication or provider settings.
