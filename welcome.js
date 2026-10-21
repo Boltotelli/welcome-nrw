@@ -41,6 +41,7 @@ function showPath(view){
  const switcher=document.querySelector('.audience-switch');switcher.hidden=view==='landing';
  switcher.querySelectorAll('[data-view-link]').forEach(a=>{if(a.dataset.viewLink===view)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
 }
+// Resolve the audience before choosing motion; in-view section links stay direct.
 function viewFor(target){
  const id=target.id;
  const path=target.closest('[data-path]')?.dataset.path;
