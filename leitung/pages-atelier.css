@@ -240,3 +240,197 @@ html.pages-atelier .login-card{border-radius:16px;padding:32px;background:var(--
 html.pages-atelier .lock-symbol{background:var(--atelier-tint);border:1px solid #edbe5954;color:var(--accent);border-radius:12px}
 html.pages-atelier .login-card h1{font-weight:835}
 html.pages-atelier .flash{top:80px;border-radius:9px}
+
+/* Operational modules — preserve original data flow and action hit targets. */
+html.pages-atelier :is(.performance-dashboard,.bear-management,.fightclub-dashboard,.participation-dashboard){
+  --accent:var(--accent);min-width:0;
+}
+html.pages-atelier :is(.performance-dashboard,.bear-management,.fightclub-dashboard,.participation-dashboard)>*{max-width:100%}
+html.pages-atelier :is(.fight-overview,.fight-summary-card,.fight-fast-assign,.fight-map-team-card,.fight-player-compact,.bear-count-card,.bear-fast-assign,.bear-recommendation,.bear-member-compact,.bear-profile-details,.bear-slot-summary){
+  border-color:var(--atelier-line);border-radius:12px;
+}
+html.pages-atelier :is(.fight-summary-card,.bear-count-card){
+  background:var(--surface);box-shadow:0 4px 17px #0000000b;
+}
+html.pages-atelier :is(.fight-heading,.bear-section-heading){
+  font-weight:800;letter-spacing:-.35px;
+}
+html.pages-atelier .fight-map-team-card{
+  padding:16px;background:var(--surface);border:1px solid var(--atelier-line);
+  box-shadow:0 3px 13px #00000010;gap:12px;
+}
+html.pages-atelier .fight-map-team-header strong{font-size:13px;letter-spacing:-.2px}
+html.pages-atelier .fight-map-team-card pre{
+  font-size:12px;line-height:1.65;background:var(--panel);
+  border:1px solid var(--atelier-line);border-radius:9px;
+  font-family:inherit;padding:13px;min-height:120px;
+}
+html.pages-atelier .fight-map-team-card>button{font-size:12px;font-weight:750}
+html.pages-atelier .fight-player-compact,
+html.pages-atelier .bear-member-compact{
+  border:1px solid var(--atelier-line);
+  background:var(--surface);box-shadow:0 2px 9px #00000008;
+  border-radius:10px;padding:13px 14px;
+}
+html.pages-atelier :is(.fight-player-name,.bear-member-name){font-size:13px;font-weight:790}
+html.pages-atelier :is(.fight-fast-form,.bear-fast-form){
+  border-radius:10px;gap:10px;
+}
+html.pages-atelier :is(.fight-roster-collapsible,.bear-roster-collapsible)>summary{
+  font-size:13px;font-weight:790;color:var(--text);
+  padding:12px 0;outline-offset:4px;
+}
+html.pages-atelier .bear-count-grid{gap:12px}
+html.pages-atelier .bear-slot-analytics{
+  padding-top:13px;border-top-color:var(--atelier-line);
+}
+html.pages-atelier .bear-slot-analytics>strong{font-size:13px}
+html.pages-atelier .bear-slot-analytics>small{font-size:11px;line-height:1.5}
+html.pages-atelier .bear-formation-badge,
+html.pages-atelier .bear-member-compact .bear-formation-badge{
+  border-color:#c9a1526b;background:var(--atelier-tint);border-radius:7px;
+  color:var(--accent);font-weight:730;
+}
+html.pages-atelier .bear-recommendation{
+  background:var(--panel);border-color:var(--atelier-line);
+}
+html.pages-atelier :is(.fight-fast-form,.bear-fast-form,.bear-settings-compact) .control{
+  font-size:12px;min-height:39px;
+}
+html.pages-atelier .bear-switch input[type=checkbox]:checked{background:var(--green)}
+html.pages-atelier :is(.fight-player-compact,.bear-member-compact,.fight-map-team-card):hover{
+  border-color:#d7b46660;
+}
+html.pages-atelier .staff-row{background:var(--panel);border-color:var(--atelier-line)}
+html.pages-atelier .staff-row:hover{background:var(--atelier-tint);border-color:var(--accent)}
+html.pages-atelier :is(.staff-grid label,.check-grid label,.permission-matrix>div){
+  border-radius:8px;
+}
+html.pages-atelier .event-loan-root{border-left:3px solid var(--accent)}
+html.pages-atelier :is(.loan-record,.external-alt-row){background:var(--panel);border-color:var(--atelier-line)}
+html.pages-atelier :is(.loan-record,.external-alt-row):hover{border-color:#d7b46661}
+html.pages-atelier details.card>summary{cursor:pointer;outline-offset:5px}
+html.pages-atelier .nav-item[hidden],html.pages-atelier [hidden]{display:none!important}
+
+/* Viewport-specific rhythm and actual handheld usability. */
+@media(min-width:1450px){
+  html.pages-atelier .workspace main{padding:36px clamp(38px,4vw,70px) 90px}
+  html.pages-atelier .hero{padding:30px 38px;min-height:190px}
+}
+@media(max-width:1180px) and (min-width:751px){
+  html.pages-atelier .shell{grid-template-columns:224px minmax(0,1fr)}
+  html.pages-atelier .sidebar{padding:19px 9px}
+  html.pages-atelier .nav-item{font-size:12px;padding:9px 10px}
+  html.pages-atelier .topbar{padding:0 22px}
+  html.pages-atelier .workspace main{padding:26px 23px 65px}
+  html.pages-atelier .hero{padding:23px}
+}
+@media(max-width:750px){
+  html.pages-atelier .shell{display:block}
+  html.pages-atelier .sidebar{
+    width:100%;height:auto;position:sticky;top:0;z-index:12;
+    padding:9px 12px 7px;border-right:0;border-bottom:1px solid var(--atelier-line);
+    overflow:visible;
+    background:color-mix(in srgb,var(--atelier-shell) 95%,transparent);
+    backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  }
+  html.pages-atelier .side-brand{
+    margin:0;padding:4px 2px 10px;border:0;
+  }
+  html.pages-atelier .side-brand img{width:31px;height:31px}
+  html.pages-atelier .side-brand strong{font-size:18px}
+  html.pages-atelier .side-brand small{font-size:8px;letter-spacing:.8px}
+  html.pages-atelier .side-label,.pages-atelier .pages-nav-group,
+  html.pages-atelier .side-foot{display:none}
+  html.pages-atelier #sideNav{
+    display:flex;overflow-x:auto;scrollbar-width:thin;
+    gap:6px;padding:2px 0 7px;overscroll-behavior-x:contain;
+    scroll-snap-type:x proximity;
+  }
+  html.pages-atelier #sideNav .nav-item{
+    flex:none;width:auto;min-height:36px;padding:7px 10px;gap:7px;
+    font-size:11px;border-radius:8px;scroll-snap-align:start;white-space:nowrap;
+  }
+  html.pages-atelier #sideNav .nav-item i{font-size:15px;width:17px;height:19px}
+  html.pages-atelier #sideNav .nav-item.active{box-shadow:inset 0 -2px 0 var(--accent)}
+  html.pages-atelier .topbar{
+    height:auto;min-height:52px;top:100px;
+    padding:8px 12px;gap:8px;justify-content:flex-end;position:relative;
+    background:var(--surface);backdrop-filter:none;
+  }
+  html.pages-atelier .breadcrumb{display:none}
+  html.pages-atelier .mobile-brand{
+    display:block;margin-right:auto;font-size:13px;white-space:nowrap;
+  }
+  html.pages-atelier .bar-actions{gap:5px;flex-wrap:nowrap;min-width:0}
+  html.pages-atelier .bar-actions select,
+  html.pages-atelier .bar-actions .icon-action,
+  html.pages-atelier .bar-actions .text-action{padding:6px 7px;min-height:32px;font-size:10px}
+  html.pages-atelier .user-role{padding:7px;font-size:9px}
+  html.pages-atelier .workspace main{padding:19px 13px 55px}
+  html.pages-atelier .hero{padding:22px 20px;margin-bottom:16px;min-height:0;border-radius:13px}
+  html.pages-atelier .hero h1{font-size:29px;letter-spacing:-1px;line-height:1.14}
+  html.pages-atelier .hero h1 em{margin-left:.1em}
+  html.pages-atelier .hero p{font-size:11px}
+  html.pages-atelier .hero-badge{
+    margin-top:17px;min-width:0;padding:8px 11px;max-width:100%;
+    border-radius:9px;
+  }
+  html.pages-atelier .hero-badge img{width:37px;height:37px}
+  html.pages-atelier .hero-badge strong{font-size:11px}
+  html.pages-atelier .stat-grid{gap:9px;margin:11px 0 17px;grid-template-columns:repeat(2,minmax(0,1fr))}
+  html.pages-atelier .stat{padding:16px 13px 13px;border-radius:11px}
+  html.pages-atelier .stat:before{left:13px}
+  html.pages-atelier .stat span{font-size:10.5px}
+  html.pages-atelier .stat strong{font-size:26px;margin:7px 0 4px}
+  html.pages-atelier .stat small{font-size:9.5px}
+  html.pages-atelier .card{padding:16px;border-radius:11px}
+  html.pages-atelier .page-heading{
+    flex-wrap:wrap;align-items:flex-start;gap:10px;margin:2px 0 15px;
+  }
+  html.pages-atelier .page-heading h2{font-size:24px;letter-spacing:-.8px}
+  html.pages-atelier .page-heading p{font-size:11.5px}
+  html.pages-atelier .page-heading .primary{
+    max-width:none;width:auto;font-size:11px;padding:9px 12px;
+  }
+  html.pages-atelier .two-col{grid-template-columns:minmax(0,1fr);gap:12px}
+  html.pages-atelier .card-heading{flex-wrap:wrap;gap:10px}
+  html.pages-atelier .card-heading .ghost{margin-left:auto}
+  html.pages-atelier .mini-metrics{gap:7px}
+  html.pages-atelier .filters{gap:8px}
+  html.pages-atelier .filters .control{min-width:0}
+  html.pages-atelier .filters .search{min-width:100%;flex-basis:100%}
+  html.pages-atelier .table-scroll{
+    max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;
+  }
+  html.pages-atelier .table-scroll table{min-width:690px}
+  html.pages-atelier :is(.fight-map-team-grid,.fight-summary-grid,.bear-count-grid){
+    grid-template-columns:minmax(0,1fr);
+  }
+  html.pages-atelier :is(.fight-player-compact,.bear-member-compact){
+    grid-template-columns:minmax(0,1fr);padding:12px;gap:10px;
+  }
+  html.pages-atelier .fight-player-compact .fight-player-fields,
+  html.pages-atelier .bear-member-compact .bear-fields{
+    grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;
+  }
+  html.pages-atelier :is(.fight-fast-form,.bear-fast-form){grid-template-columns:minmax(0,1fr)}
+  html.pages-atelier .fight-map-team-card{padding:13px}
+  html.pages-atelier .fight-map-team-card pre{font-size:11.5px;min-height:0}
+  html.pages-atelier .login-area{min-height:calc(100dvh - 200px);padding:20px 2px}
+  html.pages-atelier .login-card{padding:23px;max-width:460px}
+  html.pages-atelier .modal{width:calc(100vw - 16px);max-height:94dvh}
+  html.pages-atelier .modal-top,html.pages-atelier .modal-actions{padding:14px 17px}
+  html.pages-atelier .modal-body{padding:11px 17px 18px;max-height:67dvh}
+  html.pages-atelier .form-grid{grid-template-columns:minmax(0,1fr)}
+}
+@media(max-width:380px){
+ html.pages-atelier .user-role{display:none}
+ html.pages-atelier .topbar .text-action{font-size:9px;padding:6px}
+ html.pages-atelier .workspace main{padding:14px 9px 45px}
+ html.pages-atelier .hero h1{font-size:26px}
+}
+@media(prefers-reduced-motion:reduce){
+ html.pages-atelier :is(button,.card,.stat,.nav-item,.control){transition:none!important}
+ html.pages-atelier #sideNav{scroll-snap-type:none}
+}
