@@ -1,452 +1,324 @@
-/* ALLIANCEOS / LEITUNG — GITHUB PAGES ATELIER
-   Scoped visual system: only loaded on boltotelli.github.io.
-   No production domain imports this stylesheet. */
-html.pages-atelier{
-  color-scheme:dark;
-  --bg:#0a0f19;--surface:#111a28;--panel:#172334;
-  --border:#29364a;--text:#edf2f8;--muted:#9aacc0;
-  --accent:#e9ba55;--violet:#a7a1e3;--green:#57c8ad;--red:#ed8d98;
-  --shadow:0 24px 70px #03081375;
-  --atelier-shell:#0a101c;--atelier-line:#2a394c;
-  --atelier-raised:#1b293c;--atelier-tint:#e9ba5516;
-  font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-  font-size:14px;
+@font-face{font-family:Inter;font-style:normal;font-weight:100 900;font-display:swap;src:url(./fonts/InterVariable.woff2) format('woff2')}
+/* AllianceOS / Einsatzbuch. Exact-host loader in index.html is the boundary.
+   Replaces the former atelier stylesheet; application modules keep ownership of data.
+   1440 = 224 sidebar + 2*28 gutter + 1160 working area.
+   1160 = 2*572 + 16 gap. At <=1100 navigation becomes a native dialog. */
+html.pages-atelier {
+ color-scheme:dark; --bg:#0c0d0e; --surface:#171819; --panel:#222325;
+ --border:#343638; --text:#f3f3f1; --muted:#b4b6b8; --accent:#d8ba73;
+ --green:#8dc8a7; --red:#f19a9a; --violet:#c7c9cc; --shadow:none;
+ --os-control:#484b4e; --os-radius:8px; --os-gap:16px; --os-pad:24px;
+ --os-primary:#eeefed; --os-primary-ink:#151617; --os-selected:#292b2d;
+ --os-good-bg:#1b3026; --os-bad-bg:#352426; --os-gold-bg:#302a1e;
+ font:14px/1.5 "Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+ -webkit-text-size-adjust:100%; -webkit-tap-highlight-color:transparent;
+ font-synthesis:none; scrollbar-color:var(--os-control) var(--bg);
 }
-html.pages-atelier[data-theme=light]{
-  color-scheme:light;
-  --bg:#f2f4f6;--surface:#fff;--panel:#f8fafc;
-  --border:#d9e1e9;--text:#1e293b;--muted:#5d6e7c;
-  --accent:#956815;--violet:#62599d;--green:#167c6b;--red:#b85161;
-  --shadow:0 20px 50px #16263b12;
-  --atelier-shell:#f7f8fb;--atelier-line:#dce3ea;
-  --atelier-raised:#fff;--atelier-tint:#b7831410;
+html.pages-atelier[data-theme=light] {
+ color-scheme:light; --bg:#f4f5f6; --surface:#fff; --panel:#eef0f1;
+ --border:#dce0e2; --text:#1c1f21; --muted:#5c6267; --accent:#806017;
+ --green:#246647; --red:#a1353e; --violet:#50565b; --os-control:#9ba2a8;
+ --os-primary:#222628; --os-primary-ink:#fff; --os-selected:#e3e6e8;
+ --os-good-bg:#e4f2e9; --os-bad-bg:#f9e9ea; --os-gold-bg:#f2ead8;
 }
-html.pages-atelier body{
-  background:
-    radial-gradient(ellipse 780px 450px at 77% -15%,#d5a9520a,transparent 80%),
-    var(--bg);
-  font-synthesis:none;
-  letter-spacing:.005em;
+html.pages-atelier body {background:var(--bg); color:var(--text); letter-spacing:0}
+html.pages-atelier *,html.pages-atelier *::before,html.pages-atelier *::after {box-sizing:border-box}
+html.pages-atelier [hidden] {display:none!important}
+html.pages-atelier ::selection {background:var(--accent);color:var(--bg)}
+html.pages-atelier :is(button,a,[role=button]) {touch-action:manipulation}
+html.pages-atelier button {user-select:none; -webkit-user-select:none}
+html.pages-atelier :is(a,button,input,select,textarea,summary):focus-visible {outline:2px solid var(--accent)!important;outline-offset:3px}
+html.pages-atelier :is(input,textarea) {caret-color:var(--accent)}
+html.pages-atelier :is(input,select,textarea)::placeholder {color:var(--muted);opacity:1}
+html.pages-atelier :is(button,input,select,textarea) {font-family:inherit}
+html.pages-atelier button:disabled {opacity:1; color:var(--muted);background:var(--panel);cursor:not-allowed}
+html.pages-atelier :is(h1,h2,h3,h4) {font-weight:600;letter-spacing:-.02em;line-height:1.3;text-wrap:balance}
+html.pages-atelier h1 {font-size:26px;margin:0}
+html.pages-atelier :is(h2,h3) {font-size:16px}
+html.pages-atelier :is(small,.small-note,.muted) {font-size:12px;color:var(--muted);line-height:1.55}
+html.pages-atelier .shell {grid-template-columns:224px minmax(0,1fr);min-height:100dvh}
+html.pages-atelier .sidebar {height:100dvh;padding:24px 12px 16px;background:var(--bg);border-right:1px solid var(--border);overflow-y:auto;scrollbar-width:thin}
+html.pages-atelier .side-brand {gap:10px;margin:0 10px 24px;padding:0 0 24px;border-bottom:1px solid var(--border)}
+html.pages-atelier .side-brand img {width:34px;height:42px;filter:none;flex:none}
+html.pages-atelier .side-brand strong {font-size:22px;font-weight:600;letter-spacing:-1px}
+html.pages-atelier .side-brand small {font-size:11px;font-weight:400;letter-spacing:0}
+html.pages-atelier .side-label {display:none}
+html.pages-atelier #sideNav {gap:2px}
+html.pages-atelier .pages-nav-group {font-size:12px;font-weight:400;color:var(--muted);padding:22px 12px 8px;letter-spacing:0;text-transform:none}
+html.pages-atelier .pages-nav-group:first-child {padding-top:0}
+html.pages-atelier .nav-item {min-height:38px;border:0;border-radius:6px;padding:9px 12px;gap:10px;background:transparent;box-shadow:none;color:var(--muted);font-size:13px;font-weight:400;line-height:1.35}
+html.pages-atelier .nav-item i {display:flex;align-items:center;width:18px;height:18px;flex:none;color:inherit;opacity:1}
+html.pages-atelier .nav-item svg {width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+html.pages-atelier .nav-item.active {background:var(--os-selected);color:var(--text);border:0;box-shadow:none;font-weight:600}
+html.pages-atelier .side-foot {border:0;border-radius:0;background:none;margin-top:auto;padding:28px 12px 0;font-size:12px}
+html.pages-atelier .side-foot p {font-size:12px}
+html.pages-atelier .side-foot a {font-size:12px;color:var(--text);font-weight:400}
+html.pages-atelier .security-dot {font-size:12px;color:var(--muted);font-weight:400}
+html.pages-atelier .workspace {min-width:0;background:transparent}
+html.pages-atelier .topbar {height:58px;padding:0 28px;position:sticky;top:0;z-index:8;background:var(--bg);border-bottom:1px solid var(--border);backdrop-filter:none;gap:16px}
+html.pages-atelier .breadcrumb {display:flex;align-items:center;gap:10px;font-size:12px;letter-spacing:0;min-width:0}
+html.pages-atelier .breadcrumb>span {text-transform:none;font-size:12px}
+html.pages-atelier .breadcrumb b {padding:0;color:var(--muted);font-weight:400}
+html.pages-atelier .breadcrumb strong {font-size:13px;font-weight:500;white-space:nowrap}
+html.pages-atelier .bar-actions {gap:8px;flex-wrap:wrap;justify-content:flex-end}
+html.pages-atelier :is(.bar-actions select,.icon-action,.text-action) {border:1px solid var(--os-control);background:transparent;border-radius:6px;padding:6px 9px;min-height:32px;font-size:12px;color:var(--text)}
+html.pages-atelier .user-role {font-size:12px;color:var(--muted);border:0;border-radius:0;padding:6px 4px;font-weight:400;white-space:nowrap}
+html.pages-atelier .workspace main {padding:28px 28px 60px;max-width:1600px;margin:0 auto}
+html.pages-atelier .hero {display:none}
+html.pages-atelier .os-page-header {margin-bottom:24px;display:flex;align-items:end;justify-content:space-between;gap:16px}
+html.pages-atelier .os-page-header p {margin:6px 0 0;color:var(--muted);font-size:13px}
+html.pages-atelier .os-header-actions {display:flex;gap:8px;flex-wrap:wrap}
+html.pages-atelier .page-heading {align-items:center;margin-bottom:20px;gap:16px}
+html.pages-atelier .page-heading h2 {font-size:24px;margin:0 0 6px;font-weight:600;letter-spacing:-.03em}
+html.pages-atelier .page-heading p {font-size:13px;max-width:75ch;line-height:1.5}
+html.pages-atelier .eyebrow {display:none}
+html.pages-atelier .card {border:0;border-radius:var(--os-radius);background:var(--surface);padding:var(--os-pad);box-shadow:none}
+html.pages-atelier .card .card {padding:16px 0;border-radius:0;background:transparent;border:0;border-top:1px solid var(--border)}
+html.pages-atelier .card h3 {font-size:16px;margin:0 0 16px}
+html.pages-atelier .card-heading {gap:12px;align-items:start}
+html.pages-atelier .card-heading h2 {font-size:16px;font-weight:600}
+html.pages-atelier .card-heading p {font-size:12px;margin-top:5px}
+html.pages-atelier .icon-circle {display:none}
+html.pages-atelier .two-col {grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--os-gap);align-items:start}
+html.pages-atelier .stat-grid {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;border:0;border-radius:8px;background:var(--surface);margin:0 0 24px;padding:18px 0}
+html.pages-atelier .stat {border:0;border-right:1px solid var(--border);border-radius:0;background:transparent;padding:0 20px;box-shadow:none;position:static}
+html.pages-atelier .stat:last-child {border-right:0}
+html.pages-atelier .stat::before,html.pages-atelier .stat::after {content:none}
+html.pages-atelier .stat span {font-size:12px;font-weight:400}
+html.pages-atelier .stat strong,html.pages-atelier .stat-grid.small .stat strong {font-size:26px;font-weight:500;letter-spacing:-.03em;line-height:1.3;margin:8px 0 4px;font-variant-numeric:tabular-nums}
+html.pages-atelier .stat small {font-size:11px;font-weight:400}
+html.pages-atelier .mini-metrics {margin-top:18px;gap:0}
+html.pages-atelier .mini-metrics>div {border-radius:0;background:transparent;padding:0 16px;border-right:1px solid var(--border)}
+html.pages-atelier .mini-metrics>div:first-child {padding-left:0}
+html.pages-atelier .mini-metrics>div:last-child {border:0}
+html.pages-atelier .mini-metrics b {font-size:22px;font-weight:500;font-variant-numeric:tabular-nums}
+html.pages-atelier .mini-metrics span {font-size:12px}
+html.pages-atelier :is(.ghost,.primary,.action-link,.close) {font-size:13px;font-weight:500;line-height:1.4;min-height:36px;border-radius:6px;padding:8px 12px;box-shadow:none;text-shadow:none}
+html.pages-atelier .ghost {background:transparent;border:1px solid var(--os-control);color:var(--text)}
+html.pages-atelier .primary {background:var(--os-primary);border:1px solid var(--os-primary);color:var(--os-primary-ink)}
+html.pages-atelier .action-link {color:var(--text);text-decoration:underline;text-underline-offset:4px;border:0;background:none;white-space:normal}
+html.pages-atelier :is(.notice,.notice-inline,.bear-intro,.fight-facts,.discord-bot-notice) {background:var(--panel);border:0;border-radius:6px;box-shadow:none;color:var(--muted);padding:14px 16px;font-size:12px;line-height:1.6}
+html.pages-atelier .notice {margin-top:20px}
+html.pages-atelier .notice p {font-size:12px}
+html.pages-atelier .notice b {font-size:13px;color:var(--text);font-weight:500}
+html.pages-atelier .os-notice {margin-top:24px;border-top:1px solid var(--border);padding-top:16px;color:var(--muted);font-size:12px}
+html.pages-atelier .os-notice summary {cursor:pointer;font-weight:500}
+html.pages-atelier .os-notice .notice {margin-top:8px}
+html.pages-atelier .flash {background:var(--os-good-bg);color:var(--text);border:1px solid var(--green);border-radius:6px;position:sticky;top:68px;z-index:7}
+html.pages-atelier .flash.error {background:var(--os-bad-bg);border-color:var(--red)}
+html.pages-atelier :is(.filters,.bear-filter-row,.fight-filterbar,.participation-filters) {gap:8px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+html.pages-atelier .control {background:var(--bg);border:1px solid var(--os-control);border-radius:6px;color:var(--text);padding:8px 10px;min-height:36px;font-size:13px;box-shadow:none;max-width:100%;min-width:0}
+html.pages-atelier .search {min-width:min(220px,100%)}
+html.pages-atelier :is(.field>span,.field>label) {font-size:13px;font-weight:500;color:var(--text)}
+html.pages-atelier .counter {font-size:12px;font-variant-numeric:tabular-nums;white-space:nowrap}
+html.pages-atelier .table-scroll {max-width:100%;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin}
+html.pages-atelier table {min-width:700px;font-variant-numeric:tabular-nums}
+html.pages-atelier th {text-transform:none;letter-spacing:0;font-size:12px;font-weight:400;color:var(--muted);background:transparent;padding:10px 12px;border-bottom:1px solid var(--border)}
+html.pages-atelier td {font-size:13px;padding:12px;border-bottom:1px solid var(--border);vertical-align:middle}
+html.pages-atelier td strong {font-weight:500}
+html.pages-atelier td small {font-size:11px}
+html.pages-atelier .person {min-width:170px;gap:10px}
+html.pages-atelier .person>div {min-width:0;max-width:300px;overflow-wrap:anywhere}
+html.pages-atelier :is(.avatar,.dossier-avatar) {flex:none;box-shadow:none}
+html.pages-atelier .rank-and-tg {white-space:nowrap}
+html.pages-atelier [data-page=roster] :is(th,td):nth-child(3) {text-align:right;white-space:nowrap}
+html.pages-atelier :is(.chip,.level,.discord-presence) {font-size:11px;font-weight:500;border-radius:4px;min-height:20px;padding:3px 6px;white-space:nowrap;flex:none;background:var(--panel);color:var(--muted);border:0}
+html.pages-atelier :is(.chip.active,.chip.confirmed,.chip.published,.discord-presence.connected) {background:var(--os-good-bg);color:var(--green)}
+html.pages-atelier :is(.chip.left,.chip.cancelled,.chip.outgoing) {background:var(--os-bad-bg);color:var(--red)}
+html.pages-atelier :is(.chip.draft,.chip.interested) {background:var(--os-gold-bg);color:var(--accent)}
+html.pages-atelier :is(.perf-stats,.bear-count-grid,.fight-summary-grid) {gap:var(--os-gap)}
+html.pages-atelier :is(.perf-panel,.perf-stat,.bear-count-card,.fight-summary-card) {background:var(--surface);border:0;border-radius:8px;box-shadow:none;padding:18px}
+html.pages-atelier :is(.perf-stat strong,.fight-summary-big) {font-size:24px;font-weight:500;font-variant-numeric:tabular-nums}
+html.pages-atelier :is(.perf-table,.perf-number,.bear-slot-analytics,.fight-power) {font-variant-numeric:tabular-nums}
+html.pages-atelier :is(.perf-label,.perf-status,.perf-dot) {font-size:12px}
+html.pages-atelier :is(.bear-section-heading,.fight-heading,.participation-heading) {margin-bottom:12px;align-items:center;gap:12px}
+html.pages-atelier :is(.bear-section-heading,.fight-heading,.participation-heading) h3 {margin:0;font-size:16px}
+html.pages-atelier .bear-management {display:flex;flex-direction:column;gap:var(--os-gap)}
+html.pages-atelier .bear-fast-assign {order:-2;margin:0}
+html.pages-atelier .bear-slot-summary {order:-1}
+html.pages-atelier .bear-intro {order:2}
+html.pages-atelier :is(.bear-fast-form,.fight-fast-form) {display:grid;grid-template-columns:minmax(180px,1.5fr) minmax(130px,1fr) minmax(120px,1fr) minmax(130px,1fr) auto;align-items:end;gap:12px}
+html.pages-atelier :is(.bear-fast-form,.fight-fast-form) label {min-width:0;font-size:12px;color:var(--muted)}
+html.pages-atelier :is(.bear-fast-form,.fight-fast-form) .control {width:100%;margin-top:6px}
+html.pages-atelier :is(.bear-roster-collapsible,.fight-roster-collapsible)>summary {font-size:15px;font-weight:500;padding:4px 0;cursor:pointer}
+html.pages-atelier :is(.bear-member-row,.fight-player,.participation-member) {background:transparent;border:0;border-bottom:1px solid var(--border);border-radius:0;box-shadow:none;padding:16px 0;min-width:0}
+html.pages-atelier :is(.bear-member-list,.fight-player-list,.participation-member-list) {gap:0}
+html.pages-atelier :is(.bear-member-head,.fight-player-top,.participation-member-top) {min-width:0;gap:10px;flex-wrap:wrap}
+html.pages-atelier :is(.bear-member-name,.fight-player-name,.participation-player-name) {font-size:14px;font-weight:500;color:var(--text);white-space:normal;overflow-wrap:anywhere;text-align:left;min-width:0}
+html.pages-atelier :is(.bear-formation-badge,.bear-opt-flag,.bear-hero-chip) {background:var(--panel);color:var(--text);border:0;border-radius:4px;font-size:12px;box-shadow:none}
+html.pages-atelier .bear-opt-flag.ready {background:var(--os-good-bg);color:var(--green)}
+html.pages-atelier :is(.bear-count-pills span,.fight-summary-stats span) {background:none;border:0;color:var(--muted);font-size:12px;padding:3px 0}
+html.pages-atelier .bear-count-pills {gap:12px;flex-wrap:wrap}
+html.pages-atelier .bear-slot-analytics {border-top:1px solid var(--border);font-size:12px;padding-top:12px}
+html.pages-atelier .bear-slot-analytics strong {font-size:13px;font-weight:500;color:var(--text)}
+html.pages-atelier :is(.bear-settings-compact,.bear-row-more,.fight-row-more) {font-size:12px;color:var(--muted)}
+html.pages-atelier .bear-settings-compact {margin-bottom:12px}
+html.pages-atelier :is(.bear-fields,.fight-player-fields) {gap:10px}
+html.pages-atelier .bear-switch {background:var(--panel);border:1px solid var(--os-control);border-radius:6px;box-shadow:none}
+html.pages-atelier .bear-switch input {accent-color:var(--accent)}
+html.pages-atelier :is(.bear-profile-details,.bear-profile-grid,.bear-attack-grid) {background:transparent;color:var(--text);border-color:var(--border)}
+html.pages-atelier :is(.bear-profile-grid>div,.bear-attack-grid>div) {background:var(--panel);border:0;border-radius:4px}
+html.pages-atelier .fightclub-dashboard {display:flex;flex-direction:column;gap:var(--os-gap)}
+html.pages-atelier .fight-dates {margin:0}
+html.pages-atelier .fight-fast-assign {margin:0}
+html.pages-atelier .fight-map-card {margin:0}
+html.pages-atelier .fight-map-team-grid {gap:var(--os-gap)}
+html.pages-atelier .fight-map-team-card {background:var(--panel);border:0;border-radius:8px;box-shadow:none;padding:16px}
+html.pages-atelier .fight-map-team-header {border-color:var(--os-control)}
+html.pages-atelier .fight-map-team-card:nth-child(1) .fight-map-team-header {color:var(--text)}
+html.pages-atelier .fight-map-team-card:nth-child(2) .fight-map-team-header {color:var(--accent)}
+html.pages-atelier .fight-map-team-card:nth-child(3) .fight-map-team-header {color:var(--muted)}
+html.pages-atelier :is(.fight-map-detail,.fight-map-occupant,.fight-map-leader-row) {background:var(--surface);border-color:var(--border);box-shadow:none;border-radius:6px}
+html.pages-atelier :is(.fight-map-topbar,.fight-map-detail-heading) {flex-wrap:wrap;gap:10px}
+html.pages-atelier .fight-map-scroll {max-width:100%;overflow:auto;overscroll-behavior:contain}
+html.pages-atelier .fight-conflict {background:var(--os-gold-bg);color:var(--accent);border:0;border-radius:6px;font-size:12px}
+html.pages-atelier .fight-facts p {margin:0}
+html.pages-atelier .participation-dashboard {display:grid;grid-template-columns:minmax(0,1fr);gap:var(--os-gap)}
+html.pages-atelier .participation-picker {order:0;margin:0}
+html.pages-atelier .participation-pickers {grid-template-columns:minmax(0,1fr) minmax(150px,.4fr);gap:12px}
+html.pages-atelier .participation-day-chips {display:flex;flex-wrap:nowrap;overflow:auto;gap:6px;padding:4px 0;scrollbar-width:thin}
+html.pages-atelier .participation-day-chips button {flex:none;font-size:12px;min-height:32px;padding:6px 10px}
+html.pages-atelier .participation-summary {order:1;margin:0}
+html.pages-atelier .participation-summary-grid {grid-template-columns:repeat(4,minmax(0,1fr));gap:0;background:var(--surface);border-radius:8px;padding:14px 0}
+html.pages-atelier .participation-count {background:transparent;border:0;border-right:1px solid var(--border);border-radius:0;padding:10px 16px;box-shadow:none}
+html.pages-atelier .participation-count:nth-child(4n) {border-right:0}
+html.pages-atelier .participation-count span {font-size:12px;color:var(--muted);font-weight:400}
+html.pages-atelier .participation-count strong {font-size:22px;font-weight:500;color:var(--text);font-variant-numeric:tabular-nums}
+html.pages-atelier .participation-players {order:2}
+html.pages-atelier .participation-related {order:3}
+html.pages-atelier .participation-related-grid {gap:16px}
+html.pages-atelier .participation-related-grid>div {background:transparent;border-radius:0;padding:0}
+html.pages-atelier .participation-member {display:grid;grid-template-columns:minmax(170px,1fr) minmax(240px,1.2fr) minmax(220px,1.2fr);align-items:end;gap:16px}
+html.pages-atelier .participation-member-top {display:flex;flex-direction:column;align-items:start;gap:4px;margin:0;align-self:center}
+html.pages-atelier .participation-member-options {gap:10px;margin:0}
+html.pages-atelier .participation-member-save {margin:0;gap:8px}
+html.pages-atelier :is(.participation-member-options,.participation-member-save) label {min-width:0;font-size:12px}
+html.pages-atelier :is(.participation-member-options,.participation-member-save) .control {width:100%}
+html.pages-atelier .participation-member-save button {flex:none}
+html.pages-atelier :is(.participation-day-chips,.fight-past-dates) .selected {background:var(--os-selected);border-color:var(--text);color:var(--text)}
+html.pages-atelier :is(.discord-bot-event,.discord-bot-rule,.event-group,.event-source-item,.ops-window,.ops-slot,.ops-audit-entry) {background:var(--surface);border:1px solid var(--border);border-radius:6px;box-shadow:none}
+html.pages-atelier :is(.discord-bot-event.selected,.discord-day-tab.active) {background:var(--os-selected);color:var(--text);border-color:var(--os-control)}
+html.pages-atelier :is(.discord-bot-layout,.discord-bot-channel-grid,.discord-rule-locales,.discord-rule-times) {gap:var(--os-gap)}
+html.pages-atelier .modal {background:var(--surface);color:var(--text);border:1px solid var(--os-control);border-radius:12px;padding:0;max-height:calc(100dvh - 40px);max-width:calc(100vw - 32px);box-shadow:0 24px 80px #0006;overscroll-behavior:contain}
+html.pages-atelier .modal::backdrop {background:#0009;backdrop-filter:none}
+html.pages-atelier .modal-top {background:var(--surface);border-bottom:1px solid var(--border);padding:20px 24px;gap:12px;position:sticky;top:0;z-index:2}
+html.pages-atelier .modal-top h2 {font-size:20px;font-weight:600;margin:0}
+html.pages-atelier .modal-body {padding:24px;overflow-wrap:anywhere}
+html.pages-atelier .modal-actions {border-top:1px solid var(--border);padding:16px 24px;background:var(--surface);gap:8px;position:sticky;bottom:0;z-index:2;flex-wrap:wrap}
+html.pages-atelier .modal .close {background:transparent;color:var(--text);border:1px solid var(--os-control);min-width:36px}
+html.pages-atelier .login-card {background:var(--surface);border:0;border-radius:12px;box-shadow:none;padding:32px;max-width:480px}
+html.pages-atelier .login-card h1 {font-size:26px;line-height:1.25;letter-spacing:-.03em}
+html.pages-atelier .login-card p {font-size:13px;color:var(--muted)}
+html.pages-atelier .login-emblem {color:var(--accent);background:transparent;box-shadow:none}
+html.pages-atelier .pages-skip {position:fixed;left:16px;top:-80px;z-index:9999;background:var(--os-primary);color:var(--os-primary-ink);border-radius:6px;padding:12px 16px}
+html.pages-atelier .pages-skip:focus {top:12px}
+html.pages-atelier .os-menu-toggle {display:none}
+html.pages-atelier .os-nav-dialog {background:var(--bg);color:var(--text);border:1px solid var(--os-control);border-radius:10px;width:min(420px,calc(100vw - 24px));max-height:calc(100dvh - 24px);padding:16px;overscroll-behavior:contain}
+html.pages-atelier .os-nav-dialog::backdrop {background:#0009}
+html.pages-atelier .os-nav-dialog .os-nav-heading {display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:16px}
+html.pages-atelier .os-nav-dialog #sideNav {display:flex;flex-direction:column;overflow:visible;gap:2px;padding:0}
+html.pages-atelier .os-nav-dialog .nav-item {flex:0 0 auto;width:100%;white-space:normal}
+html.pages-atelier .os-nav-dialog>a {display:block;padding:16px 12px;font-size:13px;text-decoration:underline;text-underline-offset:4px}
+html.pages-atelier .fight-dates {order:-3}
+html.pages-atelier .fight-fast-assign {order:-2}
+@media(hover:hover) and (pointer:fine) {
+ html.pages-atelier :is(.nav-item,.ghost,.text-action,.icon-action):hover {background:var(--panel);color:var(--text);border-color:var(--os-control)}
+ html.pages-atelier .primary:hover {background:var(--os-primary);filter:brightness(.92);color:var(--os-primary-ink)}
+ html.pages-atelier tbody tr:hover {background:var(--panel)}
 }
-html.pages-atelier :is(button,input,select,textarea,summary){-webkit-tap-highlight-color:transparent}
-html.pages-atelier :is(a,button,input,textarea,select,summary):focus-visible{
-  outline:2px solid var(--accent)!important;outline-offset:3px;
+html.pages-atelier button:active:not(:disabled) {filter:brightness(.86)}
+@media(min-width:1600px) {html.pages-atelier .workspace main {padding-left:40px;padding-right:40px}}
+@media(max-width:1250px) {
+ html.pages-atelier :is(.bear-fast-form,.fight-fast-form) {grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+ html.pages-atelier :is(.bear-fast-form,.fight-fast-form)>button {justify-self:start}
+ html.pages-atelier .participation-member {grid-template-columns:minmax(150px,.8fr) minmax(0,1.2fr)}
+ html.pages-atelier .participation-member-save {grid-column:1/-1;max-width:600px}
 }
-html.pages-atelier :is(button,.card,.stat,.nav-item,.control){transition:background-color .16s ease,border-color .16s ease,color .16s ease,box-shadow .16s ease,transform .16s ease}
-html.pages-atelier .shell{grid-template-columns:250px minmax(0,1fr)}
-html.pages-atelier .sidebar{
-  width:auto;min-width:0;background:var(--atelier-shell);
-  border-right:1px solid var(--atelier-line);padding:22px 14px 17px;
-  z-index:10;overflow-y:auto;scrollbar-width:thin;
+@media(max-width:1100px) {
+ html.pages-atelier .shell {display:block}
+ html.pages-atelier .sidebar {display:none}
+ html.pages-atelier .os-menu-toggle {display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px}
+ html.pages-atelier .topbar {padding:0 20px;height:auto;min-height:64px;flex-wrap:wrap;padding-top:8px;padding-bottom:8px;gap:10px}
+ html.pages-atelier .breadcrumb {flex:1}
+ html.pages-atelier .breadcrumb>span,html.pages-atelier .breadcrumb>b {display:none}
+ html.pages-atelier .mobile-brand {display:none}
+ html.pages-atelier .workspace main {padding:24px 20px 48px}
+ html.pages-atelier .bar-actions {gap:6px}
+ html.pages-atelier :is(.bar-actions select,.icon-action,.text-action) {min-height:40px}
+ html.pages-atelier .os-nav-dialog .nav-item {min-height:44px;font-size:14px}
+ html.pages-atelier .os-nav-dialog .pages-nav-group {padding-top:14px}
 }
-html.pages-atelier .side-brand{
-  gap:12px;margin:0 7px 25px;padding:6px 3px 23px;
-  border-bottom:1px solid var(--atelier-line);
+@media(max-width:700px) {
+ html.pages-atelier .topbar {padding-left:12px;padding-right:12px;gap:8px}
+ html.pages-atelier .bar-actions {flex:0 0 auto;gap:6px}
+ html.pages-atelier #changePasswordBtn {display:none}
+ html.pages-atelier #logoutBtn {font-size:12px;min-height:44px}
+ html.pages-atelier .user-role {display:none}
+ html.pages-atelier .breadcrumb strong {font-size:12px;white-space:normal;max-width:110px;line-height:1.3}
+ html.pages-atelier .workspace main {padding:22px 16px 40px;padding-bottom:calc(40px + env(safe-area-inset-bottom,0px))}
+ html.pages-atelier .os-page-header {flex-direction:column;align-items:start;gap:16px}
+ html.pages-atelier :is(.os-page-header h1,.page-heading h2) {font-size:22px}
+ html.pages-atelier .os-header-actions {width:100%}
+ html.pages-atelier .page-heading {flex-wrap:wrap;align-items:start;gap:12px}
+ html.pages-atelier .card {padding:16px}
+ html.pages-atelier .two-col {grid-template-columns:minmax(0,1fr)}
+ html.pages-atelier .stat-grid {grid-template-columns:repeat(2,minmax(0,1fr));padding:0}
+ html.pages-atelier .stat {padding:16px;border-bottom:1px solid var(--border)}
+ html.pages-atelier .stat:nth-child(2n) {border-right:0}
+ html.pages-atelier .stat:nth-last-child(-n+2) {border-bottom:0}
+ html.pages-atelier .stat strong {font-size:24px}
+ html.pages-atelier .card-heading {flex-wrap:wrap}
+ html.pages-atelier .card-heading .ghost {margin-left:0}
+ html.pages-atelier :is(.ghost,.primary,.action-link,.close,.control,.icon-action,.text-action) {min-height:44px}
+ html.pages-atelier .control {font-size:16px}
+ html.pages-atelier .filters>.control {flex:1 1 140px;width:100%}
+ html.pages-atelier .filters>.search {flex-basis:100%}
+ html.pages-atelier :is(.bear-count-grid,.fight-summary-grid,.perf-stats) {grid-template-columns:minmax(0,1fr)}
+ html.pages-atelier :is(.bear-fast-form,.fight-fast-form) {grid-template-columns:repeat(2,minmax(0,1fr))}
+ html.pages-atelier :is(.bear-fast-form,.fight-fast-form)>label:first-child {grid-column:1/-1}
+ html.pages-atelier :is(.bear-fast-form,.fight-fast-form)>button {width:100%;grid-column:1/-1}
+ html.pages-atelier :is(.bear-fields,.fight-player-fields) {display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+ html.pages-atelier :is(.bear-fields,.fight-player-fields)>.primary {grid-column:1/-1}
+ html.pages-atelier .bear-settings-compact {display:flex;flex-wrap:wrap;align-items:end;gap:8px}
+ html.pages-atelier .bear-settings-compact label {max-width:100%;min-width:0}
+ html.pages-atelier .participation-pickers {grid-template-columns:minmax(0,1fr)}
+ html.pages-atelier .participation-summary-grid {grid-template-columns:repeat(2,minmax(0,1fr));padding:0}
+ html.pages-atelier .participation-count {padding:12px;border-bottom:1px solid var(--border)}
+ html.pages-atelier .participation-count:nth-child(2n) {border-right:0}
+ html.pages-atelier .participation-member {display:flex;flex-direction:column;align-items:stretch;gap:12px}
+ html.pages-atelier .participation-member-top {align-self:stretch;flex-direction:row;justify-content:space-between;align-items:start}
+ html.pages-atelier .participation-member-top small {text-align:right;flex:none}
+ html.pages-atelier .participation-member-save {width:100%;flex-wrap:wrap}
+ html.pages-atelier .participation-member-save label {flex:1 1 100%}
+ html.pages-atelier .participation-member-options {display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+ html.pages-atelier :is(.fight-map-team-grid,.fight-map-layout,.discord-bot-layout,.discord-bot-channel-grid,.discord-rule-locales,.discord-rule-times) {grid-template-columns:minmax(0,1fr)}
+ html.pages-atelier .modal {max-width:calc(100vw - 16px);max-height:calc(100dvh - 16px);width:calc(100vw - 16px);border-radius:8px}
+ html.pages-atelier .modal-top,html.pages-atelier .modal-body {padding:16px}
+ html.pages-atelier .modal-actions {padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px))}
+ html.pages-atelier .modal-top h2 {font-size:18px}
+ html.pages-atelier .modal .form-grid {grid-template-columns:minmax(0,1fr)}
+ html.pages-atelier .login-card {padding:24px 20px}
+ html.pages-atelier .login-card h1 {font-size:24px}
 }
-html.pages-atelier .side-brand img{
-  width:46px;height:46px;filter:drop-shadow(0 3px 13px #dfaf5135);
+@media(pointer:coarse) {
+ html.pages-atelier :is(input,select,textarea) {font-size:16px}
+ html.pages-atelier :is(button,summary) {min-height:44px}
 }
-html.pages-atelier .side-brand strong{font-size:23px;letter-spacing:-1.1px;font-weight:810}
-html.pages-atelier .side-brand small{font-size:9px;letter-spacing:1.5px;font-weight:750;color:var(--muted)}
-html.pages-atelier .side-label{margin:0 0 14px;padding:0 14px;font-size:10px;letter-spacing:1.65px}
-html.pages-atelier #sideNav{gap:3px}
-html.pages-atelier .pages-nav-group{
-  padding:17px 14px 7px;margin-top:6px;
-  color:#8ca0b7;font-size:10px;font-weight:800;letter-spacing:1.5px;
-  text-transform:uppercase;user-select:none;
-}
-html.pages-atelier .pages-nav-group:first-child{margin-top:0;padding-top:3px}
-html.pages-atelier[data-theme=light] .pages-nav-group{color:#78869b}
-html.pages-atelier .nav-item{
-  min-height:43px;padding:10px 13px;border-radius:9px;
-  color:var(--muted);font-size:12.5px;font-weight:660;letter-spacing:0;
-  gap:12px;border:1px solid transparent;position:relative;
-}
-html.pages-atelier .nav-item i{
-  display:grid;place-items:center;flex:none;
-  font-size:18px;width:23px;height:24px;opacity:.88;color:#9fadc2;
-}
-html.pages-atelier .nav-item[data-tab="bear"] i,
-html.pages-atelier .nav-item[data-tab="fightclub"] i{font-size:16px}
-html.pages-atelier .nav-item:hover{
-  color:var(--text);background:#e2edfc0c;border-color:var(--border);
-}
-html.pages-atelier .nav-item.active{
-  color:var(--text);font-weight:770;
-  background:linear-gradient(92deg,#eabb551c,#eabb5508 72%,transparent);
-  border-color:#dcac493c;box-shadow:inset 3px 0 0 var(--accent);
-}
-html.pages-atelier .nav-item.active i{color:var(--accent);opacity:1}
-html.pages-atelier[data-theme=light] .nav-item:hover{background:#e6edf5}
-html.pages-atelier .side-foot{
-  border:1px solid var(--atelier-line);border-radius:13px;
-  background:var(--surface);margin:22px 0 0;padding:14px 15px;font-size:11px;
-}
-html.pages-atelier .side-foot p{font-size:11px;line-height:1.6;margin:8px 0}
-html.pages-atelier .side-foot a{color:var(--accent);font-weight:700}
-html.pages-atelier .security-dot{font-size:11px}
-html.pages-atelier .workspace{background:transparent;min-width:0}
-html.pages-atelier .topbar{
-  height:70px;padding:0 33px;position:sticky;top:0;z-index:8;
-  background:color-mix(in srgb,var(--bg) 92%,transparent);
-  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
-  border-bottom:1px solid var(--atelier-line);
-}
-html.pages-atelier .breadcrumb{
-  font-size:12px;font-weight:550;letter-spacing:.01em;
-  display:flex;align-items:center;gap:8px;
-}
-html.pages-atelier .breadcrumb b{padding:0 4px;color:var(--border)}
-html.pages-atelier .breadcrumb strong{font-size:13px;font-weight:770;color:var(--text)}
-html.pages-atelier .bar-actions{gap:8px}
-html.pages-atelier :is(.bar-actions select,.icon-action,.text-action){
-  background:var(--surface);border:1px solid var(--atelier-line);
-  color:var(--text);min-height:35px;border-radius:9px;font-size:11px;
-  font-weight:700;padding:7px 11px;
-}
-html.pages-atelier :is(.bar-actions select,.icon-action,.text-action):hover{border-color:#dcae536e;background:var(--panel)}
-html.pages-atelier .user-role{
-  border:1px solid #dfb65a4a;background:#d6a8490d;color:var(--accent);
-  border-radius:8px;padding:8px 11px;font-size:10px;letter-spacing:.7px;
-}
-html.pages-atelier .workspace main{
-  max-width:1650px;padding:31px clamp(23px,3vw,46px) 75px;
-  margin:0 auto;
-}
-html.pages-atelier .hero{
-  position:relative;padding:26px 32px;min-height:180px;
-  border-radius:17px;margin-bottom:24px;align-items:center;
-  background:
-   radial-gradient(circle at 94% 1%,#f2cc7040,transparent 28%),
-   radial-gradient(circle at 64% 120%,#566d8f27,transparent 48%),
-   linear-gradient(110deg,#142131,#1c2c3f 76%,#27374a);
-  color:#f5f7fc;border:1px solid #3d5065;box-shadow:0 12px 35px #02081522;
-}
-html.pages-atelier[data-theme=light] .hero{background:linear-gradient(105deg,#15263c,#2b4059)}
-html.pages-atelier .hero:before{
-  content:"";position:absolute;right:5%;bottom:-100px;width:350px;height:350px;
-  opacity:.12;pointer-events:none;border:1px solid #e9ba55;border-radius:50%;
-  box-shadow:0 0 0 45px #e9ba5514,0 0 0 85px #e9ba5509;
-}
-html.pages-atelier .hero>div{position:relative;z-index:1}
-html.pages-atelier .hero .eyebrow{
-  color:#e2bd76;font-size:10px;letter-spacing:1.6px;
-}
-html.pages-atelier .hero h1{
-  margin:11px 0;font-weight:840;font-size:clamp(27px,3vw,43px);
-  line-height:1.13;letter-spacing:-1.5px;
-}
-html.pages-atelier .hero h1 br{display:none}
-html.pages-atelier .hero h1 em{margin-left:.25em;color:#f0c674}
-html.pages-atelier .hero p{font-size:12px;color:#c4d0df;max-width:590px;line-height:1.6}
-html.pages-atelier .hero-badge{
-  border:1px solid #eac26b47;border-radius:12px;background:#0f1927bd;
-  padding:12px 14px;min-width:208px;
-}
-html.pages-atelier .hero-badge img{height:55px;width:52px}
-html.pages-atelier .hero-badge strong{font-weight:810;font-size:13px}
-html.pages-atelier .hero-badge small{font-size:10px}
-html.pages-atelier .stat-grid{gap:13px;margin:16px 0 24px}
-html.pages-atelier .stat{
-  position:relative;border-radius:13px;padding:20px 20px 18px;
-  background:var(--surface);border:1px solid var(--atelier-line);
-  box-shadow:0 3px 14px #00000008;
-}
-html.pages-atelier .stat:before{
-  content:"";position:absolute;left:19px;top:0;width:32px;height:2px;
-  border-radius:0 0 9px 9px;background:var(--accent);opacity:.82;
-}
-html.pages-atelier .stat span{font-size:12px;font-weight:690;color:var(--muted)}
-html.pages-atelier .stat strong{
-  font-size:34px;font-weight:830;margin:9px 0 4px;letter-spacing:-1.5px;
-  font-variant-numeric:tabular-nums;
-}
-html.pages-atelier .stat small{font-size:10.5px;color:var(--muted)}
-html.pages-atelier .two-col{gap:14px}
-html.pages-atelier .card{
-  border:1px solid var(--atelier-line);border-radius:13px;
-  background:var(--surface);box-shadow:0 3px 17px #00000009;padding:21px;
-}
-html.pages-atelier .card h3{font-weight:780;letter-spacing:-.35px}
-html.pages-atelier .card-heading h2{font-size:16px;font-weight:800;letter-spacing:-.4px}
-html.pages-atelier .card-heading p{line-height:1.55;color:var(--muted)}
-html.pages-atelier .icon-circle{
-  border-radius:10px;width:43px;height:43px;background:var(--atelier-tint);
-  border:1px solid #e7ba5040;color:var(--accent);
-}
-html.pages-atelier .mini-metrics>div{background:var(--panel);border:1px solid var(--atelier-line);border-radius:9px}
-html.pages-atelier .mini-metrics b{font-variant-numeric:tabular-nums}
-html.pages-atelier .simple-list .row{gap:12px;line-height:1.45}
-html.pages-atelier .page-heading{align-items:center;gap:15px;margin:4px 0 22px}
-html.pages-atelier .page-heading h2{
-  font-size:clamp(22px,2.15vw,29px);font-weight:825;
-  letter-spacing:-1.05px;margin:6px 0 5px;
-}
-html.pages-atelier .page-heading p{line-height:1.58;font-size:12px;max-width:740px}
-html.pages-atelier .eyebrow{font-size:9.5px;letter-spacing:1.7px}
-html.pages-atelier :is(.ghost,.primary){
-  border-radius:9px;padding:9px 14px;font-size:12px;
-  font-weight:760;min-height:36px;line-height:1.4;
-}
-html.pages-atelier .ghost{
-  border:1px solid var(--atelier-line);color:var(--text);background:var(--panel);
-}
-html.pages-atelier .ghost:hover{border-color:#e7b8548c;background:var(--atelier-tint)}
-html.pages-atelier .primary{
-  color:#221b11;background:#edbe59;border:1px solid #edbe59;
-  box-shadow:0 2px 9px #c59d2b1a;
-}
-html.pages-atelier .primary:hover{background:#ffd078;border-color:#ffd078}
-html.pages-atelier :is(.control,select,.field input,.field textarea){
-  border-radius:8px;min-height:39px;
-}
-html.pages-atelier .control{
-  background:var(--panel);border:1px solid var(--atelier-line);
-  font-size:12px;padding:8px 11px;color:var(--text);
-}
-html.pages-atelier .control:hover{border-color:#8c9bad99}
-html.pages-atelier .control:focus{border-color:var(--accent);outline:2px solid #e7b8553d;outline-offset:1px}
-html.pages-atelier .filters{gap:10px;margin-bottom:16px}
-html.pages-atelier .search{min-width:190px}
-html.pages-atelier .counter{font-size:11px;font-weight:690}
-html.pages-atelier .table-scroll{border:1px solid var(--atelier-line);border-radius:10px;overflow:auto}
-html.pages-atelier table{font-size:12px}
-html.pages-atelier th{
-  font-size:9.5px;letter-spacing:1px;padding:12px 13px;
-  background:var(--panel);color:var(--muted);border-bottom:1px solid var(--atelier-line);
-}
-html.pages-atelier td{padding:12px 13px;border-bottom:1px solid var(--atelier-line);line-height:1.45}
-html.pages-atelier tbody tr:last-child td{border-bottom:0}
-html.pages-atelier tbody tr:hover{background:var(--atelier-tint)}
-html.pages-atelier td small{font-size:10px}
-html.pages-atelier .chip{border-radius:7px;padding:5px 8px;font-size:10px}
-html.pages-atelier .notice{
-  border:1px solid var(--atelier-line);border-left:3px solid #ddb253;
-  background:var(--surface);border-radius:10px;padding:14px 17px;
-}
-html.pages-atelier .notice p{line-height:1.65}
-html.pages-atelier .notice-inline{background:var(--panel);border-left-color:var(--accent)}
-html.pages-atelier .list-card{border-radius:11px;padding:17px}
-html.pages-atelier .field{margin:12px 0;font-weight:650}
-html.pages-atelier .modal{
-  border-radius:16px;background:var(--surface);border-color:var(--atelier-line);
-  box-shadow:0 30px 110px #000a;
-}
-html.pages-atelier .modal-top,.pages-atelier .modal-actions{padding:17px 23px}
-html.pages-atelier .modal-top h2{font-size:21px}
-html.pages-atelier .modal-body{padding:14px 23px 24px}
-html.pages-atelier .login-area{min-height:calc(100vh - 150px)}
-html.pages-atelier .login-card{border-radius:16px;padding:32px;background:var(--surface);border-color:var(--atelier-line)}
-html.pages-atelier .lock-symbol{background:var(--atelier-tint);border:1px solid #edbe5954;color:var(--accent);border-radius:12px}
-html.pages-atelier .login-card h1{font-weight:835}
-html.pages-atelier .flash{top:80px;border-radius:9px}
-
-/* Operational modules — preserve original data flow and action hit targets. */
-html.pages-atelier :is(.performance-dashboard,.bear-management,.fightclub-dashboard,.participation-dashboard){
-  --accent:var(--accent);min-width:0;
-}
-html.pages-atelier :is(.performance-dashboard,.bear-management,.fightclub-dashboard,.participation-dashboard)>*{max-width:100%}
-html.pages-atelier :is(.fight-overview,.fight-summary-card,.fight-fast-assign,.fight-map-team-card,.fight-player-compact,.bear-count-card,.bear-fast-assign,.bear-recommendation,.bear-member-compact,.bear-profile-details,.bear-slot-summary){
-  border-color:var(--atelier-line);border-radius:12px;
-}
-html.pages-atelier :is(.fight-summary-card,.bear-count-card){
-  background:var(--surface);box-shadow:0 4px 17px #0000000b;
-}
-html.pages-atelier :is(.fight-heading,.bear-section-heading){
-  font-weight:800;letter-spacing:-.35px;
-}
-html.pages-atelier .fight-map-team-card{
-  padding:16px;background:var(--surface);border:1px solid var(--atelier-line);
-  box-shadow:0 3px 13px #00000010;gap:12px;
-}
-html.pages-atelier .fight-map-team-header strong{font-size:13px;letter-spacing:-.2px}
-html.pages-atelier .fight-map-team-card pre{
-  font-size:12px;line-height:1.65;background:var(--panel);
-  border:1px solid var(--atelier-line);border-radius:9px;
-  font-family:inherit;padding:13px;min-height:120px;
-}
-html.pages-atelier .fight-map-team-card>button{font-size:12px;font-weight:750}
-html.pages-atelier .fight-player-compact,
-html.pages-atelier .bear-member-compact{
-  border:1px solid var(--atelier-line);
-  background:var(--surface);box-shadow:0 2px 9px #00000008;
-  border-radius:10px;padding:13px 14px;
-}
-html.pages-atelier :is(.fight-player-name,.bear-member-name){font-size:13px;font-weight:790}
-html.pages-atelier :is(.fight-fast-form,.bear-fast-form){
-  border-radius:10px;gap:10px;
-}
-html.pages-atelier :is(.fight-roster-collapsible,.bear-roster-collapsible)>summary{
-  font-size:13px;font-weight:790;color:var(--text);
-  padding:12px 0;outline-offset:4px;
-}
-html.pages-atelier .bear-count-grid{gap:12px}
-html.pages-atelier .bear-slot-analytics{
-  padding-top:13px;border-top-color:var(--atelier-line);
-}
-html.pages-atelier .bear-slot-analytics>strong{font-size:13px}
-html.pages-atelier .bear-slot-analytics>small{font-size:11px;line-height:1.5}
-html.pages-atelier .bear-formation-badge,
-html.pages-atelier .bear-member-compact .bear-formation-badge{
-  border-color:#c9a1526b;background:var(--atelier-tint);border-radius:7px;
-  color:var(--accent);font-weight:730;
-}
-html.pages-atelier .bear-recommendation{
-  background:var(--panel);border-color:var(--atelier-line);
-}
-html.pages-atelier :is(.fight-fast-form,.bear-fast-form,.bear-settings-compact) .control{
-  font-size:12px;min-height:39px;
-}
-html.pages-atelier .bear-switch input[type=checkbox]:checked{background:var(--green)}
-html.pages-atelier :is(.fight-player-compact,.bear-member-compact,.fight-map-team-card):hover{
-  border-color:#d7b46660;
-}
-html.pages-atelier .staff-row{background:var(--panel);border-color:var(--atelier-line)}
-html.pages-atelier .staff-row:hover{background:var(--atelier-tint);border-color:var(--accent)}
-html.pages-atelier :is(.staff-grid label,.check-grid label,.permission-matrix>div){
-  border-radius:8px;
-}
-html.pages-atelier .event-loan-root{border-left:3px solid var(--accent)}
-html.pages-atelier :is(.loan-record,.external-alt-row){background:var(--panel);border-color:var(--atelier-line)}
-html.pages-atelier :is(.loan-record,.external-alt-row):hover{border-color:#d7b46661}
-html.pages-atelier details.card>summary{cursor:pointer;outline-offset:5px}
-html.pages-atelier .nav-item[hidden],html.pages-atelier [hidden]{display:none!important}
-
-/* Viewport-specific rhythm and actual handheld usability. */
-@media(min-width:1450px){
-  html.pages-atelier .workspace main{padding:36px clamp(38px,4vw,70px) 90px}
-  html.pages-atelier .hero{padding:30px 38px;min-height:190px}
-}
-@media(max-width:1180px) and (min-width:751px){
-  html.pages-atelier .shell{grid-template-columns:224px minmax(0,1fr)}
-  html.pages-atelier .sidebar{padding:19px 9px}
-  html.pages-atelier .nav-item{font-size:12px;padding:9px 10px}
-  html.pages-atelier .topbar{padding:0 22px}
-  html.pages-atelier .workspace main{padding:26px 23px 65px}
-  html.pages-atelier .hero{padding:23px}
-}
-@media(max-width:750px){
-  html.pages-atelier .shell{display:block}
-  html.pages-atelier .sidebar{
-    width:100%;height:auto;position:sticky;top:0;z-index:12;
-    padding:9px 12px 7px;border-right:0;border-bottom:1px solid var(--atelier-line);
-    overflow:visible;
-    background:color-mix(in srgb,var(--atelier-shell) 95%,transparent);
-    backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
-  }
-  html.pages-atelier .side-brand{
-    margin:0;padding:4px 2px 10px;border:0;
-  }
-  html.pages-atelier .side-brand img{width:31px;height:31px}
-  html.pages-atelier .side-brand strong{font-size:18px}
-  html.pages-atelier .side-brand small{font-size:8px;letter-spacing:.8px}
-  html.pages-atelier .side-label,.pages-atelier .pages-nav-group,
-  html.pages-atelier .side-foot{display:none}
-  html.pages-atelier #sideNav{
-    display:flex;overflow-x:auto;scrollbar-width:thin;
-    gap:6px;padding:2px 0 7px;overscroll-behavior-x:contain;
-    scroll-snap-type:x proximity;
-  }
-  html.pages-atelier #sideNav .nav-item{
-    flex:none;width:auto;min-height:36px;padding:7px 10px;gap:7px;
-    font-size:11px;border-radius:8px;scroll-snap-align:start;white-space:nowrap;
-  }
-  html.pages-atelier #sideNav .nav-item i{font-size:15px;width:17px;height:19px}
-  html.pages-atelier #sideNav .nav-item.active{box-shadow:inset 0 -2px 0 var(--accent)}
-  html.pages-atelier .topbar{
-    height:auto;min-height:52px;top:100px;
-    padding:8px 12px;gap:8px;justify-content:flex-end;position:relative;
-    background:var(--surface);backdrop-filter:none;
-  }
-  html.pages-atelier .breadcrumb{display:none}
-  html.pages-atelier .mobile-brand{
-    display:block;margin-right:auto;font-size:13px;white-space:nowrap;
-  }
-  html.pages-atelier .bar-actions{gap:5px;flex-wrap:nowrap;min-width:0}
-  html.pages-atelier .bar-actions select,
-  html.pages-atelier .bar-actions .icon-action,
-  html.pages-atelier .bar-actions .text-action{padding:6px 7px;min-height:32px;font-size:10px}
-  html.pages-atelier .user-role{padding:7px;font-size:9px}
-  html.pages-atelier .workspace main{padding:19px 13px 55px}
-  html.pages-atelier .hero{padding:22px 20px;margin-bottom:16px;min-height:0;border-radius:13px}
-  html.pages-atelier .hero h1{font-size:29px;letter-spacing:-1px;line-height:1.14}
-  html.pages-atelier .hero h1 em{margin-left:.1em}
-  html.pages-atelier .hero p{font-size:11px}
-  html.pages-atelier .hero-badge{
-    margin-top:17px;min-width:0;padding:8px 11px;max-width:100%;
-    border-radius:9px;
-  }
-  html.pages-atelier .hero-badge img{width:37px;height:37px}
-  html.pages-atelier .hero-badge strong{font-size:11px}
-  html.pages-atelier .stat-grid{gap:9px;margin:11px 0 17px;grid-template-columns:repeat(2,minmax(0,1fr))}
-  html.pages-atelier .stat{padding:16px 13px 13px;border-radius:11px}
-  html.pages-atelier .stat:before{left:13px}
-  html.pages-atelier .stat span{font-size:10.5px}
-  html.pages-atelier .stat strong{font-size:26px;margin:7px 0 4px}
-  html.pages-atelier .stat small{font-size:9.5px}
-  html.pages-atelier .card{padding:16px;border-radius:11px}
-  html.pages-atelier .page-heading{
-    flex-wrap:wrap;align-items:flex-start;gap:10px;margin:2px 0 15px;
-  }
-  html.pages-atelier .page-heading h2{font-size:24px;letter-spacing:-.8px}
-  html.pages-atelier .page-heading p{font-size:11.5px}
-  html.pages-atelier .page-heading .primary{
-    max-width:none;width:auto;font-size:11px;padding:9px 12px;
-  }
-  html.pages-atelier .two-col{grid-template-columns:minmax(0,1fr);gap:12px}
-  html.pages-atelier .card-heading{flex-wrap:wrap;gap:10px}
-  html.pages-atelier .card-heading .ghost{margin-left:auto}
-  html.pages-atelier .mini-metrics{gap:7px}
-  html.pages-atelier .filters{gap:8px}
-  html.pages-atelier .filters .control{min-width:0}
-  html.pages-atelier .filters .search{min-width:100%;flex-basis:100%}
-  html.pages-atelier .table-scroll{
-    max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;
-  }
-  html.pages-atelier .table-scroll table{min-width:690px}
-  html.pages-atelier :is(.fight-map-team-grid,.fight-summary-grid,.bear-count-grid){
-    grid-template-columns:minmax(0,1fr);
-  }
-  html.pages-atelier :is(.fight-player-compact,.bear-member-compact){
-    grid-template-columns:minmax(0,1fr);padding:12px;gap:10px;
-  }
-  html.pages-atelier .fight-player-compact .fight-player-fields,
-  html.pages-atelier .bear-member-compact .bear-fields{
-    grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;
-  }
-  html.pages-atelier :is(.fight-fast-form,.bear-fast-form){grid-template-columns:minmax(0,1fr)}
-  html.pages-atelier .fight-map-team-card{padding:13px}
-  html.pages-atelier .fight-map-team-card pre{font-size:11.5px;min-height:0}
-  html.pages-atelier .login-area{min-height:calc(100dvh - 200px);padding:20px 2px}
-  html.pages-atelier .login-card{padding:23px;max-width:460px}
-  html.pages-atelier .modal{width:calc(100vw - 16px);max-height:94dvh}
-  html.pages-atelier .modal-top,html.pages-atelier .modal-actions{padding:14px 17px}
-  html.pages-atelier .modal-body{padding:11px 17px 18px;max-height:67dvh}
-  html.pages-atelier .form-grid{grid-template-columns:minmax(0,1fr)}
-}
-@media(max-width:380px){
- html.pages-atelier .user-role{display:none}
- html.pages-atelier .topbar .text-action{font-size:9px;padding:6px}
- html.pages-atelier .workspace main{padding:14px 9px 45px}
- html.pages-atelier .hero h1{font-size:26px}
-}
-@media(prefers-reduced-motion:reduce){
- html.pages-atelier :is(button,.card,.stat,.nav-item,.control){transition:none!important}
- html.pages-atelier #sideNav{scroll-snap-type:none}
+@media(prefers-reduced-motion:reduce) {
+ html.pages-atelier *,html.pages-atelier *::before,html.pages-atelier *::after {animation:none!important;transition:none!important;scroll-behavior:auto!important}
 }
 
-/* Keyboard users can bypass the grouped navigation. */
-html.pages-atelier .pages-skip{
- position:fixed;z-index:1000;left:18px;top:-90px;padding:11px 17px;
- background:#edbe59;color:#1e1a12;font-weight:800;font-size:13px;
- border:2px solid #fff9;border-radius:9px;box-shadow:0 8px 30px #0006;
-}
-html.pages-atelier .pages-skip:focus{top:12px}
-html.pages-atelier .security-dot span{color:var(--muted)}
-html.pages-atelier .mobile-brand .accent{color:var(--accent)}
-html.pages-atelier .tab-page .page-heading:first-child{position:relative}
-html.pages-atelier .tab-page .page-heading h2{overflow-wrap:anywhere}
-@supports not (color:color-mix(in srgb,black,white)){
- html.pages-atelier .topbar{background:var(--bg)}
- html.pages-atelier .sidebar{background:var(--atelier-shell)}
+html.pages-atelier .page-heading h2{display:none}
+html.pages-atelier .os-page-header:not([data-tab=overview]) {margin-bottom:8px}
+html.pages-atelier .os-page-header:not([data-tab=overview]) p {display:none}
+html.pages-atelier .os-module-notes {color:var(--muted);font-size:12px;margin:10px 0 0}
+html.pages-atelier .os-module-notes summary {cursor:pointer;width:fit-content}
+html.pages-atelier .os-module-notes p {max-width:90ch;margin:10px 0}
+html.pages-atelier .participation-picker>.participation-heading h3 {display:none}
+html.pages-atelier .participation-picker>.participation-heading {justify-content:flex-end;margin-bottom:6px}
+@media(min-width:1200px) {
+ html.pages-atelier .participation-summary-grid {grid-template-columns:repeat(8,minmax(0,1fr));padding:12px 0}
+ html.pages-atelier .participation-count {padding:6px 12px}
+ html.pages-atelier .participation-count:nth-child(4) {border-right:1px solid var(--border)}
+ html.pages-atelier .participation-count span {min-height:36px;display:block}
 }
