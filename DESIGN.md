@@ -277,3 +277,14 @@ Applying is explicit. A fresh roster and player snapshot must match the proposal
 ## Production publication
 
 On 2026-10-21 the user explicitly requested publication of this reviewed state to welcome-nrw.vercel.app/leitung. The presentation loader now permits the approved production hostname as well as the existing Pages hostname. Both installations use the same Neumorph default, module behavior and deployment-group planner. Existing base-path normalization supports /leitung and /leitung/ without the Pages prefix. This release changes no Supabase schema, authentication or provider settings.
+
+
+## Usability pass, 2026-10-21
+
+Temporary event loans, Discord channels, bot detail controls and alliance configuration use closed native disclosures. Bot connection, eight status metrics and scheduler notes remain visible first. Rights editing precedes alliance configuration, starts with one account selector, and reveals three permission groups only after selection. Staff and module overviews are optional disclosures. Existing permission keys and server enforcement are retained.
+
+Roster defaults to descending rank with alphabetical ties. Desktop tables use page scrolling; phone rows become labelled cards. Module navigation resets page scroll and stale notices. Bot-only staff access uses the event_bot permission consistently. The misleading event finalization badge is removed.
+
+Deliberate power refresh covers canonical server-side listed IDs, including away accounts and active loan overlays, in batches of twenty. A NRW aggregate is reused where applicable; missing IDs use the individual player endpoint with three concurrent requests and a 25-minute cache. Missing/invalid/failed values preserve previous power; zero remains valid. Rate limiting stops the cursor run and retains successful partial results. Automatic startup refresh keeps its existing aggregate-only behavior. Snapshot/history source tags remain compatible with existing schema constraints; membership, authentication and schema are unchanged.
+
+Verification uses Playwright with isolated authentication/data fixtures, eleven modules at desktop/tablet/phone widths, explicit interaction assertions, and provider/database unit doubles. No real staff permissions, bot messages or event assignments are changed during testing.

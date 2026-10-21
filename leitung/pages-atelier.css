@@ -407,3 +407,62 @@ html.pages-atelier .deployment-dialog footer{position:sticky;bottom:-24px;displa
 html.pages-atelier[data-appearance=neumorph] .deployment-group{box-shadow:4px 4px 9px var(--neo-dark),-4px -4px 9px var(--neo-light)}
 @media(max-width:760px){html.pages-atelier .deployment-fields{grid-template-columns:repeat(2,minmax(0,1fr))}html.pages-atelier .deployment-groups{grid-template-columns:1fr}}
 @media(max-width:480px){html.pages-atelier .deployment-dialog{width:calc(100vw - 20px);padding:16px;max-height:94dvh}html.pages-atelier .deployment-dialog-head{gap:10px;flex-wrap:wrap}html.pages-atelier .deployment-dialog-head h2{font-size:20px}html.pages-atelier .deployment-fields{grid-template-columns:1fr}html.pages-atelier .deployment-preview-head{flex-direction:column}html.pages-atelier .deployment-dialog footer{bottom:-16px;flex-wrap:wrap}html.pages-atelier .deployment-dialog footer button{flex:1;min-width:120px}html.pages-atelier .deployment-options{flex-direction:column;align-items:start}}
+
+/* Operate: one page scroll, progressive disclosure, one rights editor. */
+html.pages-atelier .ux-settings-layout{grid-template-columns:minmax(0,1fr);gap:20px}
+html.pages-atelier .ux-settings-layout #staffAccountSelect{max-width:540px}
+html.pages-atelier .ux-settings-layout #settingsForm{min-height:0;padding-top:8px;padding-bottom:8px}
+html.pages-atelier .table-scroll{max-height:none;overflow-x:auto;overscroll-behavior:auto;touch-action:pan-x pan-y}
+html.pages-atelier .ux-disclosure>summary{display:flex;align-items:center;gap:10px;cursor:pointer;padding:14px 0;font-size:14px;font-weight:600;list-style:none}
+html.pages-atelier .ux-disclosure>summary::before{content:'›';font-size:20px;line-height:1;transform:rotate(0);transition:transform 120ms}
+html.pages-atelier .ux-disclosure[open]>summary::before{transform:rotate(90deg)}
+html.pages-atelier .ux-disclosure>summary small{margin-left:auto;color:var(--muted);font-size:12px}
+html.pages-atelier .ux-disclosure[open]>summary{border-bottom:1px solid var(--border);margin-bottom:14px}
+html.pages-atelier .ux-disclosure-body{padding:0 0 8px}
+html.pages-atelier :is(.event-loan-root,.discord-bot-config){padding-top:8px;padding-bottom:8px}
+html.pages-atelier .ux-disclosure .loan-header{justify-content:flex-end}
+html.pages-atelier .staff-list{max-height:none;overflow:visible;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+html.pages-atelier .staff-list>.eyebrow{display:none}
+html.pages-atelier .staff-access-row{padding:10px 12px;border-radius:8px;box-shadow:none}
+html.pages-atelier .staff-rights-count{white-space:nowrap}
+html.pages-atelier .staff-rights-count small{display:none}
+html.pages-atelier .ux-rights-overview{margin-bottom:12px}
+html.pages-atelier .ux-staff-overview,html.pages-atelier .ux-account-admin{border-top:1px solid var(--border);margin-top:18px}
+html.pages-atelier #r4Form{margin-top:12px}
+html.pages-atelier #staffSelectionInfo{margin:12px 0;padding:12px;background:var(--panel);border:0;border-radius:8px}
+html.pages-atelier #staffRightsFieldset{margin:16px 0;padding:16px;min-width:0}
+html.pages-atelier .staff-permission-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+html.pages-atelier .staff-permission-group{min-width:0}
+html.pages-atelier .staff-permission-group h4{font-size:12px;color:var(--muted);font-weight:600;margin:0 0 10px}
+html.pages-atelier .staff-permission-toggle{padding:10px 8px;gap:8px;margin:0 0 6px;border:0;border-radius:6px;background:var(--panel);font-size:12px}
+html.pages-atelier .staff-permission-toggle input{appearance:auto!important;width:18px!important;height:18px!important;min-width:18px;accent-color:var(--accent);border-radius:3px;box-shadow:none!important;flex-shrink:0}
+html.pages-atelier .staff-permission-toggle input::before,html.pages-atelier .staff-permission-toggle input::after{display:none!important}
+html.pages-atelier .staff-active-toggle{margin-top:16px}
+html.pages-atelier #staffEditActions{display:flex;gap:8px;flex-wrap:wrap}
+html.pages-atelier #staffEditActions[hidden],html.pages-atelier #staffRightsFieldset[hidden],html.pages-atelier #staffSelectionInfo[hidden]{display:none!important}
+html.pages-atelier .ux-account-admin .ux-disclosure-body{display:flex;gap:8px;flex-wrap:wrap}
+html.pages-atelier .ux-account-admin .small-note{flex-basis:100%}
+html.pages-atelier .aos-event-bot-ops>.filters{background:none;padding:0}
+html.pages-atelier .aos-bot-more{border-top:1px solid var(--border);margin-top:12px}
+html.pages-atelier .aos-bot-stats{grid-template-columns:repeat(4,minmax(0,1fr))}
+html.pages-atelier .aos-bot-stats>div{min-width:0}
+html.pages-atelier .aos-bot-table{max-height:none;overscroll-behavior:auto}
+@media(max-width:1000px){html.pages-atelier .staff-permission-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){
+ html.pages-atelier [data-page=roster] .table-scroll{overflow:visible}
+ html.pages-atelier [data-page=roster] table{display:block;min-width:0;width:100%}
+ html.pages-atelier [data-page=roster] thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+ html.pages-atelier #rosterRows{display:block}
+ html.pages-atelier #rosterRows tr{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 14px;border-top:1px solid var(--border);padding:16px 0}
+ html.pages-atelier #rosterRows td{display:block;min-width:0;padding:6px 0;border:0;overflow-wrap:anywhere}
+ html.pages-atelier #rosterRows td::before{content:attr(data-label);display:block;color:var(--muted);font-size:11px;margin-bottom:4px}
+ html.pages-atelier #rosterRows td:first-child,html.pages-atelier #rosterRows td:last-child{grid-column:1/-1}
+ html.pages-atelier #rosterRows td:first-child::before,html.pages-atelier #rosterRows td:last-child::before{display:none}
+ html.pages-atelier #rosterRows .person>div{max-width:none}
+ html.pages-atelier #rosterRows td:last-child button{width:100%;min-height:40px}
+ html.pages-atelier .aos-bot-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:480px){html.pages-atelier .staff-permission-grid,html.pages-atelier .staff-list{grid-template-columns:1fr}html.pages-atelier #staffRightsFieldset{padding:12px}html.pages-atelier .aos-bot-stats{gap:8px}}
+
+.pages-atelier .perf-event-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media(max-width:520px){.pages-atelier .perf-event-stats{grid-template-columns:1fr}}

@@ -21,10 +21,10 @@
     document.documentElement.classList.add("pages-atelier");
     const design = document.createElement("link");
     design.rel = "stylesheet";
-    design.href = "./pages-atelier.css?v=20261021-vercel-1";
+    design.href = "./pages-atelier.css?v=20261021-usability-1";
     document.head.appendChild(design);
     const nav = document.createElement("script");
-    nav.src = "./pages-atelier.js?v=20261021-vercel-1";
+    nav.src = "./pages-atelier.js?v=20261021-usability-1";
     document.head.appendChild(nav);
   }
 </script>
@@ -96,7 +96,7 @@
           <div class="card"><div class="filters">
             <input class="control search" id="rosterSearch" type="search" autocomplete="off" data-placeholder="searchPlayers" placeholder="Name oder Spieler-ID suchen …">
             <select class="control" id="rosterStatus"><option value="all" data-i18n="allStatuses">Alle Status</option><option value="active" data-i18n="active">Aktiv</option><option value="planned" data-i18n="planned">Geplant</option><option value="left" data-i18n="left">Ausgetreten</option></select>
-            <select class="control" id="rosterSort"><option value="name" data-i18n="sortName">Name A–Z</option><option value="rank" data-i18n="sortRank">Rang absteigend</option><option value="power" data-i18n="sortPower">Spielerstärke ↓</option><option value="id" data-i18n="sortId">Spieler-ID</option></select>
+            <select class="control" id="rosterSort"><option value="name" data-i18n="sortName">Name A–Z</option><option value="rank" selected data-i18n="sortRank">Rang absteigend</option><option value="power" data-i18n="sortPower">Spielerstärke ↓</option><option value="id" data-i18n="sortId">Spieler-ID</option></select>
             <button type="button" class="ghost" id="syncPlayerPower" data-permission="members" data-i18n="syncPower">↻ Stärke aus API abrufen</button>
             <span class="counter" id="rosterCount">–</span>
           </div><p class="small-note" id="powerSyncStatus" role="status" aria-live="polite"></p><div class="table-scroll"><table><thead><tr><th data-i18n="player">Spieler</th><th data-i18n="rank">Rang</th><th data-i18n="strength">Stärke</th><th data-i18n="language">Sprache</th><th>Discord</th><th data-i18n="memberStatus">Mitgliedschaft</th><th></th></tr></thead><tbody id="rosterRows"></tbody></table></div></div>
@@ -186,7 +186,7 @@
             <p data-i18n="discordBotOfflineDesc">Alle Einstellungen und Vorlagen werden gespeichert. Es werden noch keine Discord-Nachrichten versendet. Die Bot-Anbindung erfolgt erst nach Abschluss dieser Seite.</p>
           </div>
           <form id="discordSettingsForm" class="card discord-bot-config">
-            <div class="filters"><div><h3 data-i18n="botDestinations">Discord-Zielkanäle</h3>
+            <details class="ux-disclosure" id="discordChannelDetails"><summary><span data-i18n="botDestinations">Discord-Zielkanäle</span></summary><div class="ux-disclosure-body"><div class="filters"><div>
               <p class="muted" data-i18n="botDestinationHint">Jede Sprache erhält ihre eigene Nachricht im zugewiesenen Textkanal. IDs kopieren: Discord Entwicklermodus → Rechtsklick → ID kopieren.</p></div>
               <button class="primary" type="submit" data-permission="event_bot" data-i18n="saveChannels">Kanäle speichern</button></div>
             <div class="discord-bot-channel-grid">
@@ -197,6 +197,7 @@
                <label class="field"><span>🇪🇸 Español · #ES</span><input id="discordChannelEs" class="control" inputmode="numeric" pattern="[0-9]{17,20}" maxlength="20" placeholder="ES Channel ID"></label>
             </div>
             <p class="small-note" id="discordSettingsStatus" role="status" aria-live="polite"></p>
+            </div></details>
           </form>
           <div class="discord-bot-layout">
             <article class="card discord-bot-catalog">
@@ -241,7 +242,44 @@
         </section>
         <section class="tab-page" data-page="settings" hidden>
           <div class="page-heading"><div><span class="eyebrow">ALLIANCE SETTINGS</span><h2 data-i18n="settings">Allianz &amp; Rechte</h2><p data-i18n="settingsDesc">Stammdaten, Kapazitäten, Freigaben und Plattformmodule.</p></div></div>
-          <div class="two-col"><form class="card" id="settingsForm"><h3 data-i18n="allianceConfig">Allianzkonfiguration</h3>
+          <div class="two-col ux-settings-layout"><div class="card"><h3 data-i18n="permissions">Berechtigungen</h3><details class="ux-disclosure ux-rights-overview"><summary data-ux-label="rightsOverview">Zugriffsübersicht pro Modul</summary><div class="permission-matrix" id="permissionTable"></div></details>
+              <div id="staffControls" hidden>
+                <form id="r4Form">
+                  <label class="field"><span data-i18n="staffUser">R4/R5 auswählen</span><select class="control" name="email" id="staffAccountSelect" required><option value="" data-i18n="chooseLeader">Spielernamen auswählen</option></select></label>
+                  <p class="staff-selected-hint" id="staffSelectionInfo" role="status" aria-live="polite"></p>
+                  <fieldset class="staff-permission-fieldset" id="staffRightsFieldset" hidden disabled>
+                    <legend data-i18n="moduleRights">Modulberechtigungen</legend>
+                    <p class="small-note" data-ux-label="rightsHelp">Schalter aus = Zugriff entzogen. Änderungen erst mit Speichern übernehmen.</p>
+                    <div class="staff-permission-grid">
+                      <section class="staff-permission-group"><h4 data-ux-label="playersGroup">Spieler &amp; Einsatz</h4><label class="staff-permission-toggle"><input type="checkbox" name="members"><span data-i18n="roster">Spielerverwaltung</span></label>
+                      <label class="staff-permission-toggle"><input type="checkbox" name="performance"><span data-i18n="performance">Performance</span></label>
+                      <label class="staff-permission-toggle"><input type="checkbox" name="bear"><span data-i18n="bearManagement">Bärenfalle</span></label>
+                      <label class="staff-permission-toggle"><input type="checkbox" name="fightclub"><span data-i18n="fightclub">FightClub</span></label>
+                      <label class="staff-permission-toggle"><input type="checkbox" name="participation"><span data-i18n="participation">Event-Teilnahme</span></label>
+                      </section><section class="staff-permission-group"><h4 data-ux-label="contentGroup">Inhalte &amp; Organisation</h4><label class="staff-permission-toggle"><input type="checkbox" name="transfers"><span data-i18n="transfers">Transferplanung</span></label>
+                      <label class="staff-permission-toggle"><input type="checkbox" name="laws"><span data-i18n="laws">Laws-Verwaltung</span></label>
+                      <label class="staff-permission-toggle"><input type="checkbox" name="events"><span data-i18n="events">Eventplanung</span></label>
+                      <label class="staff-permission-toggle"><input type="checkbox" name="event_bot"><span data-i18n="discordBot">Discord Event-Bot</span></label>
+                      </section><section class="staff-permission-group"><h4 data-ux-label="adminGroup">Verwaltung</h4><label class="staff-permission-toggle"><input type="checkbox" name="settings"><span data-i18n="settings">Allianz &amp; Rechte</span></label></section>
+                    </div>
+                    <label class="staff-active-toggle"><input type="checkbox" name="enabled"><span data-i18n="r4Enabled">R4-Zugang aktiviert</span></label>
+                  </fieldset>
+                  <div class="staff-actions" id="staffEditActions" hidden>
+                    <button class="primary" id="staffSaveRights" type="submit" disabled data-i18n="saveR4">Berechtigungen speichern</button>
+                    <button class="ghost" id="staffUndoRights" type="button" disabled data-i18n="undoRights">Änderungen verwerfen</button>
+</div><details class="ux-disclosure ux-account-admin"><summary data-ux-label="accountActions">Weitere Kontenaktionen</summary><div class="ux-disclosure-body">                    <button class="ghost danger-soft" id="staffClearRights" type="button" disabled data-i18n="clearRights">Alle Modulrechte entziehen</button>
+                    <button class="ghost danger-soft" id="staffDisableAccount" type="button" disabled data-i18n="disableStaffAccount">Zugang vollständig sperren</button>
+
+                  <button type="button" class="ghost" id="provisionLeaders" data-i18n="provisionLeaders">Alle R4/R5-Konten erstellen</button>
+<button type="button" class="ghost" id="resetLeaderPassword" data-i18n="resetLeaderPassword">Initialpasswort neu ausstellen</button>
+<p class="small-note" data-i18n="credentialsNote">Neue Passwörter werden nur einmal angezeigt. Bitte vorher sicher aufbewahren.</p>
+</div></details>
+                  <p id="staffFormInfo" class="small-note" role="status"></p>
+                </form>
+<details class="ux-disclosure ux-staff-overview"><summary data-ux-label="accountsOverview">Leitungskonten im Überblick</summary><div id="staffList" class="staff-list" aria-label="Leitungskonten"></div></details>
+                <details class="ops-audit"><summary data-i18n="accessAudit">Letzte Änderungen / Rechteprotokoll</summary><div id="accessAuditRows"></div></details>
+              </div>
+              <h3 data-i18n="pilotLabel">Pilotprojekt</h3><div class="status-line"><span data-i18n="pilotFree">NRW bleibt kostenlos und werbefrei.</span><strong>✓</strong></div></div><form class="card" id="settingsForm"><details class="ux-disclosure" id="allianceConfigDetails"><summary data-i18n="allianceConfig">Allianzkonfiguration</summary><div class="ux-disclosure-body">
               <label class="field"><span data-i18n="allianceName">Allianzname</span><input class="control" name="name" required maxlength="100"></label>
               <label class="field"><span data-i18n="capacity">Maximale Mitglieder</span><input class="control" name="capacity" type="number" min="1" max="500"></label>
               <div class="logo-settings">
@@ -265,45 +303,7 @@
 <div class="check-grid" id="activeLanguages"><label><input type="checkbox" value="de"> Deutsch</label><label><input type="checkbox" value="en"> English</label><label><input type="checkbox" value="fr"> Français</label><label><input type="checkbox" value="es"> Español</label></div>
 <p class="small-note" data-i18n="siteLanguagesNote">Die öffentlichen Seiten haben vollständige Texte auf DE/EN/FR. ES ist bereits in der Leitung verfügbar, auf den öffentlichen Seiten nach vollständiger Übersetzung.</p></div><input type="checkbox" name="advertising_enabled" hidden disabled>
               <button class="primary" data-permission="settings" data-i18n="save">Speichern</button>
-            </form><div class="card"><h3 data-i18n="permissions">Berechtigungen</h3><div class="permission-matrix" id="permissionTable"></div>
-              <div id="staffControls" hidden>
-                <p class="notice-inline" data-i18n="rolesFuture">R5 kann vorhandene Konten als AllianceOS-R4 freischalten. Ohne ausdrückliche Freigabe erhält niemand Zugriff.</p>
-                <div id="staffList" class="staff-list" aria-label="Leitungskonten"></div>
-                  <div class="notice-inline" data-i18n="r4AccessInfo">R4-Zugriffe gelten nur für die ausgewählten Module. Deaktivierte Zugänge bleiben gesperrt.</div>
-                <form id="r4Form">
-                  <label class="field"><span data-i18n="staffUser">R4/R5 auswählen</span><select class="control" name="email" id="staffAccountSelect" required><option value="" data-i18n="chooseLeader">Spielernamen auswählen</option></select></label>
-                  <p class="staff-selected-hint" id="staffSelectionInfo" role="status" aria-live="polite"></p>
-                  <fieldset class="staff-permission-fieldset" id="staffRightsFieldset" disabled>
-                    <legend data-i18n="moduleRights">Modulberechtigungen</legend>
-                    <p class="small-note" data-i18n="rightsHelp">Schalter aus = Zugriff entzogen. Änderungen erst mit Speichern übernehmen.</p>
-                    <div class="staff-permission-grid">
-                      <label class="staff-permission-toggle"><input type="checkbox" name="members"><span data-i18n="roster">Spielerverwaltung</span></label>
-                      <label class="staff-permission-toggle"><input type="checkbox" name="performance"><span data-i18n="performance">Performance</span></label>
-                      <label class="staff-permission-toggle"><input type="checkbox" name="bear"><span data-i18n="bearManagement">Bärenfalle</span></label>
-                      <label class="staff-permission-toggle"><input type="checkbox" name="fightclub"><span data-i18n="fightclub">FightClub</span></label>
-                      <label class="staff-permission-toggle"><input type="checkbox" name="participation"><span data-i18n="participation">Event-Teilnahme</span></label>
-                      <label class="staff-permission-toggle"><input type="checkbox" name="transfers"><span data-i18n="transfers">Transferplanung</span></label>
-                      <label class="staff-permission-toggle"><input type="checkbox" name="laws"><span data-i18n="laws">Laws-Verwaltung</span></label>
-                      <label class="staff-permission-toggle"><input type="checkbox" name="events"><span data-i18n="events">Eventplanung</span></label>
-                      <label class="staff-permission-toggle"><input type="checkbox" name="event_bot"><span data-i18n="discordBot">Discord Event-Bot</span></label>
-                      <label class="staff-permission-toggle"><input type="checkbox" name="settings"><span data-i18n="settings">Allianz &amp; Rechte</span></label>
-                    </div>
-                    <label class="staff-active-toggle"><input type="checkbox" name="enabled"><span data-i18n="r4Enabled">R4-Zugang aktiviert</span></label>
-                  </fieldset>
-                  <div class="staff-actions">
-                    <button class="primary" id="staffSaveRights" type="submit" disabled data-i18n="saveR4">Berechtigungen speichern</button>
-                    <button class="ghost" id="staffUndoRights" type="button" disabled data-i18n="undoRights">Änderungen verwerfen</button>
-                    <button class="ghost danger-soft" id="staffClearRights" type="button" disabled data-i18n="clearRights">Alle Modulrechte entziehen</button>
-                    <button class="ghost danger-soft" id="staffDisableAccount" type="button" disabled data-i18n="disableStaffAccount">Zugang vollständig sperren</button>
-                  </div>
-                  <button type="button" class="ghost" id="provisionLeaders" data-i18n="provisionLeaders">Alle R4/R5-Konten erstellen</button>
-<button type="button" class="ghost" id="resetLeaderPassword" data-i18n="resetLeaderPassword">Initialpasswort neu ausstellen</button>
-<p class="small-note" data-i18n="credentialsNote">Neue Passwörter werden nur einmal angezeigt. Bitte vorher sicher aufbewahren.</p>
-                  <p id="staffFormInfo" class="small-note" role="status"></p>
-                </form>
-                <details class="ops-audit"><summary data-i18n="accessAudit">Letzte Änderungen / Rechteprotokoll</summary><div id="accessAuditRows"></div></details>
-              </div>
-              <h3 data-i18n="pilotLabel">Pilotprojekt</h3><div class="status-line"><span data-i18n="pilotFree">NRW bleibt kostenlos und werbefrei.</span><strong>✓</strong></div></div></div>
+            </div></details></form></div>
         </section>
       </div>
       <section id="loginArea" class="login-area">
@@ -464,5 +464,5 @@
 <script src="../bear/combat.js?v=20261020-formation-shared"></script>
 <script src="../bear/own-baseline.js?v=20261020-formation-shared"></script>
 <script src="../bear/formation-core.js?v=20261020-formation-shared"></script>
-<script type="module" src="./app.js?v=20261021-plan-1"></script>
+<script type="module" src="./app.js?v=20261021-usability-1"></script>
 </body></html>

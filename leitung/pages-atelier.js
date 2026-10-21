@@ -66,6 +66,9 @@
     const update=()=>{
       const language=document.getElementById('language')?.value||'de';
       const l=words[language]||words.de;
+      const ux={de:{rightsOverview:'Zugriffsübersicht pro Modul',accountsOverview:'Leitungskonten im Überblick',accountActions:'Weitere Kontenaktionen',playersGroup:'Spieler & Einsatz',contentGroup:'Inhalte & Organisation',adminGroup:'Verwaltung',rightsHelp:'Häkchen = Zugriff erlaubt. Änderungen werden erst mit Speichern übernommen.'},en:{rightsOverview:'Access overview by module',accountsOverview:'Leadership accounts',accountActions:'More account actions',playersGroup:'Players & deployment',contentGroup:'Content & organisation',adminGroup:'Administration',rightsHelp:'Checked = access allowed. Changes apply only after saving.'},fr:{rightsOverview:'Accès par module',accountsOverview:'Comptes de direction',accountActions:'Autres actions de compte',playersGroup:'Joueurs et affectations',contentGroup:'Contenu et organisation',adminGroup:'Administration',rightsHelp:'Coché = accès autorisé. Enregistrez pour appliquer.'},es:{rightsOverview:'Acceso por módulo',accountsOverview:'Cuentas de dirección',accountActions:'Más acciones de cuenta',playersGroup:'Jugadores y despliegue',contentGroup:'Contenido y organización',adminGroup:'Administración',rightsHelp:'Marcado = acceso permitido. Guarda para aplicar.'}};
+      document.querySelectorAll('[data-ux-label]').forEach(e=>e.textContent=(ux[language]||ux.en)[e.dataset.uxLabel]||e.textContent);
+
       appearanceText.textContent=({de:'Ansicht',en:'Appearance',fr:'Apparence',es:'Apariencia'})[language]||'Appearance';
       appearanceSelect.options[0].textContent=({de:'Klar',en:'Clear',fr:'Épuré',es:'Simple'})[language]||'Clear';
       const active=items.find(x=>x.classList.contains('active'));

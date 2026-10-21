@@ -364,7 +364,7 @@ async function rosterFor(alliance: string, kingdom: number) {
       responsibilities:overlay.responsibilities||"", avatar_url:cache.avatar_url||null,
       tc_level:cache.tc_level??null,
       power:overlay.power_override!=null?Number(overlay.power_override):api.power!=null?Number(api.power):power.power!=null?Number(power.power):null,
-      power_source:overlay.power_override!=null?"manual":api.power!=null?"mightpulse_roster":power.power!=null?"bear_buff":null,
+      power_source:overlay.power_override!=null?"manual":api.power!=null?(api.source||"mightpulse_roster"):power.power!=null?"bear_buff":null,
       power_override:overlay.power_override??null,
       power_observed_at:overlay.power_override!=null?overlay.power_override_at||null:api.power!=null?api.fetched_at||null:power.fetched_at||null,
       // Existing NRW onboarding and manually linked IDs are compared by immutable roster player ID.
@@ -718,6 +718,64 @@ function profileAvatar(raw:any,upload:any):string|null{
 }
 // Full NRW strength can be read in ONE MightPulse alliance-roster request (rather than
 // calling the player endpoint 70+ times). Cache solely within AllianceOS.
+// Manual roster refresh: authorize every ID from the same server-side roster
+// shown in player management. Never accept arbitrary client-supplied IDs.
+async function syncListedRosterPower(req:Request,alliance:string,staff:any,body:any){
+ if(!permission(staff,"members"))throw new HttpError("permission_denied",403);
+ if(alliance!=="NRW")throw new HttpError("unsupported_alliance",400);
+ const key=Deno.env.get("KINGSHOTSTATS_API_KEY")||"";
+ if(!key)throw new HttpError("player_provider_unconfigured",503);
+ const config=await checked<any>(db.from("aos_alliances").select("kingdom_id").eq("code",alliance).single());
+ const people=await rosterFor(alliance,config.kingdom_id);
+ const ids=[...new Set(people.map((p:any)=>String(p.game_id||"")).filter(isId))].sort();
+ if(!ids.length)throw new HttpError("roster_missing",409);
+ const cursor=Number(body?.cursor??0);
+ if(!Number.isInteger(cursor)||cursor<0||cursor>=ids.length)throw new HttpError("invalid_sync_cursor",400);
+ const allowed=new Set(ids),batch=ids.slice(cursor,cursor+20),now=new Date().toISOString();
+ const snapshots=await checked<any[]>(db.from("aos_member_power_snapshot")
+  .select("game_id,power,fetched_at").eq("alliance_code",alliance).in("game_id",ids).limit(1000));
+ const validPower=(n:any)=>n!==null&&n!==undefined&&n!==""&&Number.isSafeInteger(Number(n))&&Number(n)>=0&&Number(n)<=9999999999999;
+ const fresh=new Set(snapshots.filter(p=>validPower(p.power)&&Date.now()-Date.parse(p.fetched_at)>=0&&Date.now()-Date.parse(p.fetched_at)<25*60*1000).map(p=>String(p.game_id)));
+ const values=new Map<string,any>(),failed:any[]=[];let rateLimited=false,providerCalls=0;
+ // Retain the existing roster-refresh cache tag (schema enum), regardless of endpoint.
+ const add=(id:string,power:any)=>{if(allowed.has(id)&&validPower(power))values.set(id,{alliance_code:alliance,game_id:id,power:Number(power),fetched_at:now,source:"mightpulse_roster"});};
+ // One aggregate request covers current NRW members; absent/away/left accounts
+ // are subsequently resolved through the player endpoint, irrespective of tag.
+ if(cursor===0&&people.some((p:any)=>p.active&&!p.is_event_loan&&!fresh.has(String(p.game_id)))){
+  try{
+   providerCalls++;
+   const response=await fetch("https://api.mightpulse.com/v1/alliances/"+encodeURIComponent(String(config.kingdom_id))+"/"+encodeURIComponent(alliance)+"?include=info,roster",{headers:{Accept:"application/json",Authorization:"Bearer "+key},signal:AbortSignal.timeout(30000)});
+   if(response.status===429)throw new HttpError("provider_rate_limited",429);
+   if(response.ok){const raw=await response.json().catch(()=>null),rows=raw?.members??raw?.roster?.members??raw?.data?.members??raw?.data?.roster?.members;
+    if(Array.isArray(rows))for(const p of rows)add(String(p?.governor_id??p?.fid??p?.player_id??""),p?.power);}
+  }catch(e){if(e instanceof HttpError&&e.httpStatus===429)throw e;}
+ }
+ const pending=batch.filter(id=>!fresh.has(id)&&!values.has(id));let index=0;
+ async function worker(){
+  while(index<pending.length){const id=pending[index++];
+   if(rateLimited){failed.push({game_id:id,error:"provider_rate_limited"});continue;}
+   try{
+    providerCalls++;
+    const response=await fetch("https://api.mightpulse.com/v1/players/"+encodeURIComponent(id)+"?include=base",{headers:{Accept:"application/json",Authorization:"Bearer "+key},signal:AbortSignal.timeout(12000)});
+    if(response.status===429)rateLimited=true;
+    if(!response.ok)throw Error(response.status===404?"player_not_found":response.status===429?"provider_rate_limited":"player_provider_unavailable");
+    const wire=await response.json(),p=wire?.player??wire?.data?.player;
+    const responseId=p?.governor_id??p?.game_id??p?.fid??p?.player_id;
+    if(!p||(responseId!=null&&String(responseId)!==id)||!validPower(p.power??p.total_power))throw Error("player_power_unavailable");
+    add(id,p.power??p.total_power);
+   }catch(e){failed.push({game_id:id,error:String((e as Error)?.message||"player_provider_unavailable")});}
+  }
+ }
+ await Promise.all(Array.from({length:Math.min(3,pending.length)},()=>worker()));
+ const updates=[...values.values()];
+ for(let i=0;i<updates.length;i+=100){const part=updates.slice(i,i+100);
+  await checked<any>(db.from("aos_member_power_history").upsert(part.map(p=>({...p,observed_on:now.slice(0,10)})),{onConflict:"alliance_code,game_id,observed_on"}).select("game_id"));
+  await checked<any>(db.from("aos_member_power_snapshot").upsert(part,{onConflict:"alliance_code,game_id"}).select("game_id"));
+ }
+ return json(req,{ok:true,source:providerCalls?"mightpulse_mixed":"cache",matched:new Set([...fresh,...values.keys()]).size,updated:updates.length,requested:ids.length,failed,
+  rate_limited:rateLimited,next_cursor:!rateLimited&&cursor+batch.length<ids.length?cursor+batch.length:null,fetched_at:now});
+}
+
 async function syncRosterPower(req:Request,alliance:string,staff:any){
  if(!permission(staff,"members"))throw new HttpError("permission_denied",403);
  if(alliance!=="NRW")throw new HttpError("unsupported_alliance",400);
@@ -1710,7 +1768,7 @@ Deno.serve(async(req: Request)=>{
     if(body?.action==="provision_leaders")return await provisionLeaders(req,alliance,userId,staff);
     if(body?.action==="reset_leader_password")return await rotateLeaderPassword(req,alliance,userId,staff,body);
     if(body?.action==="player_lookup"||body?.action==="external_alt_lookup")return await lookupTransferPlayer(req,alliance,staff,body);
-    if(body?.action==="power_sync")return await syncRosterPower(req,alliance,staff);
+    if(body?.action==="power_sync")return body?.include_listed===true?await syncListedRosterPower(req,alliance,staff,body):await syncRosterPower(req,alliance,staff);
     if(body?.action==="power_history")return await memberPowerHistory(req,alliance,staff,body);
     if(body?.action==="performance_dashboard")return await performanceDashboard(req,alliance,staff);
     if(body?.action==="bear_management")return await bearManagement(req,alliance,staff);
