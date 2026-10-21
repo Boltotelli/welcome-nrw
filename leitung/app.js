@@ -1,3 +1,4 @@
+import {createAnnouncementEditor} from "./announcement.js?v=player2-20261021";
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.58.0/+esm";
 import {createEventHub} from "./event-library.js?v=step6-iteratorfix-1";
 import {createOperations} from "./operations.js?v=pages-4";
@@ -134,6 +135,7 @@ function setTab(name){
   if(name==="fightclub"&&state)fightclub.open();
   if(name==="participation"&&state)participation.open();
   if(name==="transfers"&&state)eventLoans.open();
+  if(name==="events"&&state)announcementEditor.open();
 }
 function flash(message,error=false){
  const el=$("flash");el.textContent=message;el.classList.toggle("error",error);el.hidden=false;
@@ -183,6 +185,7 @@ async function syncPlayerPower({allListed=false}={}){
    status.textContent=t("powerUpdateError")+": "+String(e.message||"unknown");
  }finally{button.disabled=!can("members");}
 }
+const announcementEditor=createAnnouncementEditor({request,can,getLanguage:()=>lang,esc});
 const eventHub=createEventHub({request,flash,esc,t});
  const discordPlanner=createDiscordEventPlanner({request,flash,esc,can,eventHub});
 const eventBotStatusPanel=createEventBotStatusPanel({supabase,flash,can,esc});
@@ -199,6 +202,7 @@ const participation=createEventParticipation({getState:()=>state,getLanguage:()=
   openPlayer:gameId=>openEdit("member",gameId),navigate:name=>setTab(name)});
 const eventLoans=createEventLoans({getState:()=>state,getLanguage:()=>lang,request,esc,flash});
 function showLogin(message=""){
+ announcementEditor.reset();
  $("liveArea").hidden=true;$("loginArea").hidden=false;$("logoutBtn").hidden=true;
  $("roleChip").textContent="R4 / R5";$("loginError").textContent=message;$("changePasswordBtn").hidden=true;
 }
@@ -381,7 +385,7 @@ function renderSettings(){
  }
  if(!members.length)$("staffSelectionInfo").textContent=t("rightsSelected");
 }
-function render(){patchTranslations();counts();renderRoster();renderTransfers();renderLaws();renderEvents();renderSettings();eventLoans.render();eventHub.render(state,lang,can("events"));discordPlanner.render(lang);operations.render();}
+function render(){announcementEditor.render();patchTranslations();counts();renderRoster();renderTransfers();renderLaws();renderEvents();renderSettings();eventLoans.render();eventHub.render(state,lang,can("events"));discordPlanner.render(lang);operations.render();}
 function control(label,name,value="",type="text",opts={}){
  const attr=Object.entries(opts).map(([k,v])=>' '+k+'="'+esc(v)+'"').join("");
  return '<label class="field"><span>'+esc(label)+'</span><input class="control" name="'+esc(name)+'" type="'+esc(type)+'" value="'+esc(value??"")+'"'+attr+'></label>';

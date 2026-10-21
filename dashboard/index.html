@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -23,11 +23,11 @@
   <link rel="shortcut icon" href="../assets/nrw-dashboard-icon.svg">
   <link rel="apple-touch-icon" href="../assets/nrw-dashboard-icon.svg">
   <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="stylesheet" href="./styles.css?v=layout-basefix-20261019-2"><link rel="stylesheet" href="../leitung/public-feed.css?v=pages-1">
-  
+  <link rel="stylesheet" href="./styles.css?v=player2-20261021"><link rel="stylesheet" href="../leitung/public-feed.css?v=pages-1">
+  <link rel="stylesheet" href="./player-experience.css?v=player2-20261021">
 </head>
 <body data-lang="en">
-  <div class="ambient one"></div><div class="ambient two"></div>
+  <a class="player-skip" href="#dailyPlan"><span class="de">Zum Tagesplan</span><span class="en">Skip to daily plan</span><span class="fr">Aller au programme</span></a>
   <header class="topbar">
     <a class="brand" href="../"><img data-alliance-logo src="../assets/nrw-banner.svg" alt="NRW"><span><b data-alliance-name>[NRW]United</b><small>PLAYER DASHBOARD · K1044</small></span></a>
     <section class="kvk-timer" aria-label="KvK preparation countdown">
@@ -40,15 +40,15 @@
     </section>
     <nav aria-label="Dashboard controls">
       <div class="lang-toggle"><button data-lang-btn="de">DE</button><button data-lang-btn="en">EN</button><button data-lang-btn="fr">FR</button></div>
-      <a class="bear-link" href="../bear/preview-v3.html" aria-label="Bear Optimizer" title="Bear Optimizer"><span aria-hidden="true">🐻</span><b><span class="de">Bären-Optimierer</span><span class="en">Bear Optimizer</span><span class="fr">Optimiseur Ours</span></b></a>
-      <a class="laws-link" href="../laws.html" aria-label="Server Laws" title="Server Laws"><span aria-hidden="true">⚖</span><b><span class="de">Server-Laws</span><span class="en">Server Laws</span><span class="fr">Lois du serveur</span></b></a>
-      <button class="icon-btn" id="themeBtn" aria-label="Change color scheme">☀</button>
+      <a class="bear-link" href="../bear/preview-v3.html" aria-label="Bear Optimizer" title="Bear Optimizer"><span aria-hidden="true"><img src="https://got-global-wiki.s3.us-west-1.amazonaws.com/wp-content/uploads/2026/01/jump_icon_40088.png" alt="" width="22" height="22"></span><b><span class="de">Bären-Optimierer</span><span class="en">Bear Optimizer</span><span class="fr">Optimiseur Ours</span></b></a>
+      <a class="laws-link" href="../laws.html" aria-label="Server Laws" title="Server Laws"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3v18M5 21h14M4 7h16M6 7l-4 8h8L6 7Zm12 0-4 8h8l-4-8Z"/></svg><b><span class="de">Server-Laws</span><span class="en">Server Laws</span><span class="fr">Lois du serveur</span></b></a>
+      <button class="icon-btn" id="themeBtn" aria-label="Change color scheme"><svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="4"/></svg></button>
       <a class="discord" data-discord-invite href="https://discord.gg/yxKza24dUv" target="_blank" rel="noopener">Discord ↗</a>
     </nav>
   </header>
 
-  <aside class="work-banner" role="status" aria-live="polite">
-    <span class="work-banner-icon" aria-hidden="true">🛠️</span>
+  <aside class="work-banner player-extra" role="status" aria-live="polite">
+    
     <p>
       <span class="de">Das Dashboard ist voraussichtlich noch nicht zu 100 % fertig, kann aber bereits genutzt werden. Wenn dir etwas auffällt, informiere bitte Boltotelli.</span>
       <span class="en">The dashboard may not be 100% complete yet, but it is ready to use. If you notice anything, please let Boltotelli know.</span>
@@ -57,14 +57,18 @@
   </aside>
 
   <main>
+    <section id="allianceAnnouncement" class="alliance-announcement" aria-live="polite" hidden></section>
+    <nav class="player-nav" aria-label="Player Dashboard"><a href="#dailyPlan" data-player-label="plan">Daily plan</a><a href="#eventGuides" data-player-label="guides">Event guides</a><a class="player-laws" href="../laws.html"><span class="de">Server-Laws</span><span class="en">Server Laws</span><span class="fr">Lois du serveur</span></a><div id="viewMode" role="group" aria-label="View"><button type="button" data-view="full" data-player-label="full" aria-pressed="true">Full</button><button type="button" data-view="compact" data-player-label="compact" aria-pressed="false">Compact</button></div></nav>
+    <p id="playerDataStatus" class="player-data-status" role="status" hidden></p>
     <section class="intro">
       <div>
         <div class="live-pill"><i></i><span class="de">HEUTE · SERVER 1044</span><span class="en">TODAY · SERVER 1044</span><span class="fr">AUJOURD’HUI · SERVEUR 1044</span></div>
-        <h1><span class="de">Dein Plan.<br><em>Ein Blick.</em></span><span class="en">Your plan.<br><em>One glance.</em></span><span class="fr">Ton plan.<br><em>En un coup d’œil.</em></span></h1>
+        <h1><span class="de">Dein Tag.<br><em>Dein Königreich.</em></span><span class="en">Your day.<br><em>Your kingdom.</em></span><span class="fr">Ta journée.<br><em>Ton royaume.</em></span></h1>
       </div>
-      <div class="date-block"><span id="weekday">Sunday</span><strong id="dateLabel">13 SEP</strong><small>UTC · <span id="utcClock">00:00:00</span></small></div>
+      <img class="player-hero-art" src="https://kingshotdata.com/uploads/2026/02/yang-full-image.webp" alt="" fetchpriority="high"><div class="date-block"><span id="weekday">Sunday</span><strong id="dateLabel">13 SEP</strong><small>UTC · <span id="utcClock">00:00:00</span></small></div>
     </section>
 
+    <section id="dailyMissionPanel" class="daily-mission-panel" aria-labelledby="missionHeading"><div><h2 id="missionHeading" data-player-label="progress">Your daily progress</h2><p id="progressMessage"></p><small id="progressNote"></small></div><div class="mission-meter"><strong id="progressCount">0 / 0</strong><progress id="dailyProgress" max="1" value="0"></progress></div><span id="missionFeedback" class="sr-only" role="status" aria-live="polite"></span></section>
     <section class="priority-grid" id="priorityGrid">
       <article class="focus-card bear-card">
         <div class="card-head"><span class="tag hot" id="bearTag">TODAY</span><img src="https://got-global-wiki.s3.us-west-1.amazonaws.com/wp-content/uploads/2026/01/jump_icon_40088.png" alt="Bear Trap"></div>
@@ -75,10 +79,10 @@
           <div id="bt3Row" hidden><span id="bt3Name">BT3</span><strong id="bt3Countdown">--:--:--</strong></div>
         </div>
         <p class="muted" id="bearDateNote"></p>
-        <a class="bear-optimizer-cta" href="../bear/preview-v3.html"><span aria-hidden="true">🐻</span><span class="de">Optimiere deinen Schaden</span><span class="en">Optimize your damage</span><span class="fr">Optimise tes dégâts</span><span aria-hidden="true">↗</span></a>
+        <a class="bear-optimizer-cta" href="../bear/preview-v3.html"><span aria-hidden="true"><img src="https://got-global-wiki.s3.us-west-1.amazonaws.com/wp-content/uploads/2026/01/jump_icon_40088.png" alt="" width="22" height="22"></span><span class="de">Optimiere deinen Schaden</span><span class="en">Optimize your damage</span><span class="fr">Optimise tes dégâts</span><span aria-hidden="true">↗</span></a>
       </article>
 
-      <article class="focus-card gen-card" id="gen6Card">
+      <article class="focus-card gen-card player-extra" id="gen6Card">
         <div class="card-head"><span class="tag new" id="genTag">TOMORROW</span><span class="gen-badge">GEN 6</span></div>
         <p class="overline"><span class="de">NÄCHSTER MEILENSTEIN</span><span class="en">NEXT MILESTONE</span><span class="fr">PROCHAIN PALIER</span></p>
         <h2><span class="de">Neue Helden</span><span class="en">New heroes</span><span class="fr">Nouveaux héros</span></h2>
@@ -113,7 +117,7 @@
     </section>
 
     <section class="content-grid">
-      <div class="plan-column">
+      <div class="plan-column" id="dailyPlan" tabindex="-1">
         <div class="section-title"><div><span class="eyebrow"><span class="de">DEIN TAGESPLAN</span><span class="en">YOUR DAILY PLAN</span><span class="fr">TON PROGRAMME DU JOUR</span></span><h2><span class="de">Deine Events heute</span><span class="en">Your events today</span><span class="fr">Tes événements aujourd’hui</span></h2></div><span class="source-state"><i></i><span class="de">NRW-geprüft</span><span class="en">Checked by NRW</span><span class="fr">Vérifié par NRW</span></span></div>
         <p class="section-lead"><span class="de">Jede Kachel sagt dir konkret, was jetzt sinnvoll ist. NRW- und Discord-Ansagen haben Vorrang.</span><span class="en">Each card tells you what is worth doing now. NRW and Discord calls take priority.</span><span class="fr">Chaque carte indique clairement quoi faire maintenant. Les consignes NRW et Discord restent prioritaires.</span> <a class="glossary-jump" href="#glossary"><span class="de">? Begriffe erklärt</span><span class="en">? Terms explained</span><span class="fr">? Termes expliqués</span></a></p>
         <section class="priority-rail" id="priorityRail" aria-labelledby="priorityTitle">
@@ -127,7 +131,7 @@
         </details>
       </div>
 
-      <aside>
+      <aside class="roadmap-column player-extra">
         <div class="aside-title"><span class="eyebrow"><span class="de">ROADMAP</span><span class="en">ROADMAP</span><span class="fr">FEUILLE DE ROUTE</span></span><h2><span class="de">Was als Nächstes kommt</span><span class="en">What comes next</span><span class="fr">Ce qui arrive ensuite</span></h2><p><span class="de">Server 1044 · <strong data-server-age>357</strong> Tage alt · eröffnet am 21.09.2025</span><span class="en">Server 1044 · <strong data-server-age>357</strong> days old · opened 21 Sep 2025</span><span class="fr">Serveur 1044 · <strong data-server-age>357</strong> jours · ouvert le 21/09/2025</span></p><div class="timeline-sources"><span aria-hidden="true">◷</span><strong><span class="de">Quellen</span><span class="en">Sources</span><span class="fr">Sources</span></strong><a href="https://kingshotdata.com/database/server-timeline-state-age/" target="_blank" rel="noopener">Kingshot Data ↗</a><a href="https://kingshotoptimizer.com/kingdom-timeline/1044/" target="_blank" rel="noopener">K1044 ↗</a></div></div>
         <details class="timeline-future">
           <summary><span aria-hidden="true">▦</span><strong><span class="de">Weitere Meilensteine anzeigen</span><span class="en">Show future milestones</span><span class="fr">Afficher les prochains jalons</span></strong><i aria-hidden="true"></i></summary>
@@ -169,12 +173,12 @@
       </aside>
     </section>
 
-    <section class="release-details" id="releaseDetails">
+    <section class="release-details player-extra" id="releaseDetails">
       <div class="section-title"><div><span class="eyebrow"><span class="de">NEU AUF K1044</span><span class="en">NEW ON K1044</span><span class="fr">NOUVEAU SUR K1044</span></span><h2><span class="de">Helden im Überblick</span><span class="en">Hero overview</span><span class="fr">Aperçu des héros</span></h2></div></div>
       <div id="releaseLower"></div>
     </section>
 
-    <details class="glossary-panel" id="glossary">
+    <details class="player-extra glossary-panel" id="glossary">
       <summary><div><span class="eyebrow"><span class="de">KURZ ERKLÄRT</span><span class="en">QUICK EXPLANATIONS</span><span class="fr">EXPLICATIONS RAPIDES</span></span><h2><span class="de">Kingshot-Glossar</span><span class="en">Kingshot glossary</span><span class="fr">Glossaire Kingshot</span></h2></div><span class="glossary-toggle"><span class="de">Begriffe öffnen</span><span class="en">Open terms</span><span class="fr">Ouvrir les termes</span><i aria-hidden="true"></i></span></summary>
       <div class="glossary-grid">
         <article><h3>Server-Reset</h3><p><span class="de">Um 00:00 UTC beginnt ein neuer Spiel- und Eventtag. Entscheidend ist häufig, wann eine Aktion abgeschlossen wird.</span><span class="en">A new game and event day begins at 00:00 UTC. What often matters is when an action is completed.</span><span class="fr">Une nouvelle journée de jeu et d’événement commence à 00:00 UTC. Le moment où une action se termine est souvent décisif.</span></p></article>
@@ -186,7 +190,10 @@
       </div>
     </details>
 
-    <section class="profile-panel">
+
+    <section id="eventGuides" class="player-guides" aria-labelledby="eventGuideHeading"><div class="guide-heading"><div><h2 id="eventGuideHeading" data-player-label="guides">Event guides</h2><p data-player-label="guideIntro"></p></div><span id="guideResultCount" aria-live="polite"></span></div><div class="guide-controls"><input id="guideSearch" type="search" autocomplete="off" placeholder="Search event names …" aria-label="Search event names"><select id="guideFilter" aria-label="Event guides"><option value="all">All events</option><option value="detailed">Detailed guides</option><option value="catalog">Catalog entries</option></select></div><div id="guideResults" class="guide-results"></div></section>
+    <button type="button" id="exploreExtras" class="explore-extras" aria-expanded="false" data-player-label="more">Explore more</button>
+    <section class="profile-panel player-extra">
       <div><span class="eyebrow"><span class="de">DEIN PROFIL</span><span class="en">YOUR PROFILE</span><span class="fr">TON PROFIL</span></span><h2><span class="de">Welche Sprachen sprichst du?</span><span class="en">Which languages do you speak?</span><span class="fr">Quelles langues parles-tu ?</span></h2><p><span class="de">Die Angabe landet im NRW-Spielerprofil. Nicht erkannte Spieler bleiben zur Prüfung gespeichert.</span><span class="en">This is saved to the NRW member profile. Unrecognized players remain queued for review.</span><span class="fr">L’information est enregistrée dans le profil NRW. Les joueurs non reconnus restent en attente de vérification.</span></p></div>
       <div class="profile-form">
         <div class="fields"><label><span><span class="de">Ingame-Name</span><span class="en">In-game name</span><span class="fr">Nom en jeu</span></span><input id="playerName" autocomplete="off" placeholder="Boltotelli"></label><label><span>Player ID</span><input id="playerId" inputmode="numeric" autocomplete="off" placeholder="123456789"></label></div>
@@ -200,7 +207,7 @@
   </main>
 
   <footer><a href="../">← <span class="de">Zur Willkommensseite</span><span class="en">Back to welcome page</span><span class="fr">Retour à l’accueil</span></a></footer>
-  <script src="./event-rhythm.js?v=step4-1"></script><script src="./app.js?v=step5-lang-20261019-1"></script><script src="../leitung/public-config.js?v=step5-2" defer></script><script src="../leitung/public-feed.js?v=pages-1" defer></script>
+  <script src="./event-rhythm.js?v=step4-1"></script><script src="./player-core.js?v=player2-20261021"></script><script src="./player-experience.js?v=player2-20261021"></script><script src="./app.js?v=player2-20261021"></script><script src="../leitung/public-config.js?v=step5-2" defer></script><script src="../leitung/public-feed.js?v=pages-1" defer></script>
   <script defer src="./codes.js?v=20260915a"></script>
 </body>
 </html>

@@ -183,7 +183,31 @@ async function updateAllianceLogo(req:Request,alliance:string,userId:string,staf
   return json(req,{ok:true,logo_url:nextUrl});
 }
 
+async function announcementData(req:Request,alliance:string,staff:any){
+ if(!permission(staff,"events"))throw new HttpError("permission_denied",403);
+ const row=await checked<any>(db.from("aos_alliance_announcements").select("text,status,expires_at,revision,updated_at").eq("alliance_code",alliance).maybeSingle());
+ return json(req,{announcement:row});
+}
+async function saveAnnouncement(req:Request,alliance:string,userId:string,staff:any,body:any){
+ if(!permission(staff,"events"))throw new HttpError("permission_denied",403);
+ const command=body.command;if(!["draft","publish","disable","remove"].includes(command))throw new HttpError("invalid_announcement_command",400);
+ const revision=Number(body.revision);if(!Number.isSafeInteger(revision)||revision<0)throw new HttpError("invalid_revision",400);
+ const text:any={};for(const l of ["de","en","fr"]){if(body.text?.[l]!=null&&typeof body.text[l]!=="string")throw new HttpError("invalid_announcement_text",400);const v=String(body.text?.[l]||"").trim();if(v.length>4000)throw new HttpError("announcement_too_long",400);if(v)text[l]=v;}
+ if(["draft","publish"].includes(command)&&!Object.keys(text).length)throw new HttpError("announcement_empty",400);
+ let expires_at=null;
+ if(body.expires_at){const value=String(body.expires_at);if(!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d{1,3})?)?Z$/.test(value)||!Number.isFinite(Date.parse(value)))throw new HttpError("invalid_expiry",400);expires_at=new Date(value).toISOString();if(command==="publish"&&Date.parse(expires_at)<=Date.now())throw new HttpError("announcement_expired",400);}
+ const status=command==="publish"?"published":command==="draft"?"draft":"disabled";
+ const {data,error}=await db.rpc("aos_write_announcement",{p_alliance:alliance,p_actor:userId,p_text:text,p_status:status,p_expires:expires_at,p_revision:revision,p_remove:command==="remove"});
+ if(error){if(error.code==="40001")throw new HttpError("announcement_conflict",409);throw new Error("announcement_write_failed");}
+ return json(req,{ok:true,announcement:data});
+}
+
 async function publicInfo(req: Request, alliance: string, mode: string) {
+  if(mode==="public-announcement"){
+    const row=await checked<any>(db.from("aos_alliance_announcements").select("text,status,expires_at,updated_at")
+     .eq("alliance_code",alliance).eq("status","published").or("expires_at.is.null,expires_at.gt."+new Date().toISOString()).maybeSingle());
+    return json(req,{announcement:row});
+  }
   if(mode==="public-config"){
     const row=await checked<any>(db.from("aos_alliances").select("code,name,kingdom_id,logo_url,discord_invite_url,default_language,languages").eq("code",alliance).single());
     return json(req,{alliance:publicAllianceSettings(row)});
@@ -1751,16 +1775,18 @@ Deno.serve(async(req: Request)=>{
     if(!["GET","POST"].includes(req.method))throw new HttpError("method_not_allowed",405);
     const u=new URL(req.url),alliance=str(u.searchParams.get("alliance")||"NRW",16);
     if(!/^[A-Za-z0-9_-]{2,16}$/.test(alliance))throw new HttpError("invalid_alliance",400);
-    if(req.method==="GET"&&["public-events","public-laws","public-guidance","public-schedule","public-config"].includes(u.searchParams.get("mode")||""))
+    if(req.method==="GET"&&["public-events","public-laws","public-guidance","public-schedule","public-config","public-announcement"].includes(u.searchParams.get("mode")||""))
       return await publicInfo(req,alliance,u.searchParams.get("mode")||"");
     if(req.method==="GET"&&u.searchParams.get("mode")==="public-leaders")return await publicLeaders(req,alliance);
     const {userId,staff}=await staffFor(req,alliance);
+    if(req.method==="GET"&&u.searchParams.get("mode")==="announcement")return await announcementData(req,alliance,staff);
     if(req.method==="GET"&&u.searchParams.get("mode")==="discord-bot")return await discordPlanner(req,alliance,staff,Number(u.searchParams.get("page")||0));
      if(req.method==="GET")return await bootstrap(req,alliance,staff);
     if(Number(req.headers.get("content-length")||"0")>1600000)throw new HttpError("payload_too_large",413);
     const body=await req.json().catch(()=>{throw new HttpError("invalid_json",400)});
     if(body?.action!=="alliance_logo_upload"&&Number(req.headers.get("content-length")||"0")>200000)throw new HttpError("payload_too_large",413);
     if(body?.action==="alliance_logo_upload"||body?.action==="alliance_logo_remove")return await updateAllianceLogo(req,alliance,userId,staff,body);
+    if(body?.action==="announcement")return await saveAnnouncement(req,alliance,userId,staff,body);
     if(body?.action==="staff")return await saveStaff(req,alliance,userId,staff,body);
     if(body?.action==="event_loan_data")return await eventLoanData(req,alliance,staff);
     if(body?.action==="event_loan_save")return await eventLoanSave(req,alliance,userId,staff,body);

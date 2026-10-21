@@ -14,7 +14,7 @@
 <title>AllianceOS · NRW Leitungszentrale</title>
 <meta name="description" content="Geschützte Leitungszentrale für Allianzverwaltung, Transfers, Laws und Events.">
 <link rel="icon" href="../assets/nrw-dashboard-icon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="./styles.css?v=20261020-fight-bear-v3">
+<link rel="stylesheet" href="./styles.css?v=player2-20261021">
 <!-- Shared leadership design on the approved Pages and production domains. -->
 <script>
   if (["boltotelli.github.io", "welcome-nrw.vercel.app"].includes(location.hostname)) {
@@ -167,6 +167,7 @@
         </section>
         <section class="tab-page" data-page="events" hidden>
           <div class="page-heading"><div><span class="eyebrow">EVENT HUB</span><h2 data-i18n="events">Eventplanung</h2><p data-i18n="eventsDesc">Alle Zeiten werden in UTC gespeichert und für Spieler lokal angezeigt.</p></div><button class="primary" data-create="event" data-permission="events" data-i18n="addEvent">+ Event planen</button></div>
+          <section id="announcementEditor" class="card announcement-editor" style="margin-bottom:20px" hidden></section>
           <div class="notice"><b data-i18n="eventSyncStatus">Ausspielung</b><p data-i18n="eventSyncNotice">Öffentlich veröffentlichte Termine können von den Webseiten geladen werden. Discord-Ankündigungen und Erinnerungen benötigen noch den künftigen Event-Bot.</p></div>
           <div class="card" style="margin-bottom:20px">
             <div class="filters"><div><h3 data-i18n="canonicalEvents">Events, Turnus und Tagesplanung</h3><p class="muted" data-i18n="canonicalNote">Jedes Event einmal. Darunter seine Tage und der wiederkehrende Turnus.</p></div><span class="counter" id="eventLibraryCount">–</span></div>
@@ -464,5 +465,5 @@
 <script src="../bear/combat.js?v=20261020-formation-shared"></script>
 <script src="../bear/own-baseline.js?v=20261020-formation-shared"></script>
 <script src="../bear/formation-core.js?v=20261020-formation-shared"></script>
-<script type="module" src="./app.js?v=20261021-usability-1"></script>
+<script type="module" src="./app.js?v=player2-20261021"></script>
 </body></html>

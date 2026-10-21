@@ -1,0 +1,388 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-21T00:00:00Z",
+  "title": "Design System: NRW Player Dashboard 2.0",
+  "extensions": {
+    "scope": "dashboard/ only; primitive token authority is dashboard/DESIGN.md and player-experience.css",
+    "colorMeta": {
+      "gold": {
+        "role": "primary",
+        "displayName": "NRW Gold",
+        "tonalRamp": [
+          "oklch(15% 0.04 85)",
+          "oklch(26% 0.04 85)",
+          "oklch(38% 0.04 85)",
+          "oklch(49% 0.04 85)",
+          "oklch(61% 0.04 85)",
+          "oklch(72% 0.04 85)",
+          "oklch(84% 0.04 85)",
+          "oklch(95% 0.04 85)"
+        ]
+      },
+      "green": {
+        "role": "secondary",
+        "displayName": "Completion Green",
+        "tonalRamp": [
+          "oklch(15% 0.025 125)",
+          "oklch(26% 0.025 125)",
+          "oklch(38% 0.025 125)",
+          "oklch(49% 0.025 125)",
+          "oklch(61% 0.025 125)",
+          "oklch(72% 0.025 125)",
+          "oklch(84% 0.025 125)",
+          "oklch(95% 0.025 125)"
+        ]
+      },
+      "bg": {
+        "role": "neutral",
+        "displayName": "Warm Ink Ground",
+        "tonalRamp": [
+          "oklch(15% 0.006 95)",
+          "oklch(26% 0.006 95)",
+          "oklch(38% 0.006 95)",
+          "oklch(49% 0.006 95)",
+          "oklch(61% 0.006 95)",
+          "oklch(72% 0.006 95)",
+          "oklch(84% 0.006 95)",
+          "oklch(95% 0.006 95)"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Panel",
+        "tonalRamp": [
+          "oklch(15% 0.006 95)",
+          "oklch(26% 0.006 95)",
+          "oklch(38% 0.006 95)",
+          "oklch(49% 0.006 95)",
+          "oklch(61% 0.006 95)",
+          "oklch(72% 0.006 95)",
+          "oklch(84% 0.006 95)",
+          "oklch(95% 0.006 95)"
+        ]
+      },
+      "surface2": {
+        "role": "neutral",
+        "displayName": "Inset",
+        "tonalRamp": [
+          "oklch(15% 0.006 95)",
+          "oklch(26% 0.006 95)",
+          "oklch(38% 0.006 95)",
+          "oklch(49% 0.006 95)",
+          "oklch(61% 0.006 95)",
+          "oklch(72% 0.006 95)",
+          "oklch(84% 0.006 95)",
+          "oklch(95% 0.006 95)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Reading Ink",
+        "tonalRamp": [
+          "oklch(15% 0.006 95)",
+          "oklch(26% 0.006 95)",
+          "oklch(38% 0.006 95)",
+          "oklch(49% 0.006 95)",
+          "oklch(61% 0.006 95)",
+          "oklch(72% 0.006 95)",
+          "oklch(84% 0.006 95)",
+          "oklch(95% 0.006 95)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Quiet Copy",
+        "tonalRamp": [
+          "oklch(15% 0.006 95)",
+          "oklch(26% 0.006 95)",
+          "oklch(38% 0.006 95)",
+          "oklch(49% 0.006 95)",
+          "oklch(61% 0.006 95)",
+          "oklch(72% 0.006 95)",
+          "oklch(84% 0.006 95)",
+          "oklch(95% 0.006 95)"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Divider",
+        "tonalRamp": [
+          "oklch(15% 0.006 95)",
+          "oklch(26% 0.006 95)",
+          "oklch(38% 0.006 95)",
+          "oklch(49% 0.006 95)",
+          "oklch(61% 0.006 95)",
+          "oklch(72% 0.006 95)",
+          "oklch(84% 0.006 95)",
+          "oklch(95% 0.006 95)"
+        ]
+      },
+      "light-bg": {
+        "role": "neutral",
+        "displayName": "Ivory Ground",
+        "tonalRamp": [
+          "oklch(15% 0.006 95)",
+          "oklch(26% 0.006 95)",
+          "oklch(38% 0.006 95)",
+          "oklch(49% 0.006 95)",
+          "oklch(61% 0.006 95)",
+          "oklch(72% 0.006 95)",
+          "oklch(84% 0.006 95)",
+          "oklch(95% 0.006 95)"
+        ]
+      },
+      "light-surface": {
+        "role": "neutral",
+        "displayName": "Light Panel",
+        "tonalRamp": [
+          "oklch(15% 0.006 95)",
+          "oklch(26% 0.006 95)",
+          "oklch(38% 0.006 95)",
+          "oklch(49% 0.006 95)",
+          "oklch(61% 0.006 95)",
+          "oklch(72% 0.006 95)",
+          "oklch(84% 0.006 95)",
+          "oklch(95% 0.006 95)"
+        ]
+      },
+      "light-surface2": {
+        "role": "neutral",
+        "displayName": "Light Inset",
+        "tonalRamp": [
+          "oklch(15% 0.006 95)",
+          "oklch(26% 0.006 95)",
+          "oklch(38% 0.006 95)",
+          "oklch(49% 0.006 95)",
+          "oklch(61% 0.006 95)",
+          "oklch(72% 0.006 95)",
+          "oklch(84% 0.006 95)",
+          "oklch(95% 0.006 95)"
+        ]
+      },
+      "light-ink": {
+        "role": "neutral",
+        "displayName": "Light Reading Ink",
+        "tonalRamp": [
+          "oklch(15% 0.006 95)",
+          "oklch(26% 0.006 95)",
+          "oklch(38% 0.006 95)",
+          "oklch(49% 0.006 95)",
+          "oklch(61% 0.006 95)",
+          "oklch(72% 0.006 95)",
+          "oklch(84% 0.006 95)",
+          "oklch(95% 0.006 95)"
+        ]
+      },
+      "light-muted": {
+        "role": "neutral",
+        "displayName": "Light Quiet Copy",
+        "tonalRamp": [
+          "oklch(15% 0.006 95)",
+          "oklch(26% 0.006 95)",
+          "oklch(38% 0.006 95)",
+          "oklch(49% 0.006 95)",
+          "oklch(61% 0.006 95)",
+          "oklch(72% 0.006 95)",
+          "oklch(84% 0.006 95)",
+          "oklch(95% 0.006 95)"
+        ]
+      },
+      "light-line": {
+        "role": "neutral",
+        "displayName": "Light Divider",
+        "tonalRamp": [
+          "oklch(15% 0.006 95)",
+          "oklch(26% 0.006 95)",
+          "oklch(38% 0.006 95)",
+          "oklch(49% 0.006 95)",
+          "oklch(61% 0.006 95)",
+          "oklch(72% 0.006 95)",
+          "oklch(84% 0.006 95)",
+          "oklch(95% 0.006 95)"
+        ]
+      },
+      "light-gold": {
+        "role": "primary",
+        "displayName": "Light NRW Gold",
+        "tonalRamp": [
+          "oklch(15% 0.04 85)",
+          "oklch(26% 0.04 85)",
+          "oklch(38% 0.04 85)",
+          "oklch(49% 0.04 85)",
+          "oklch(61% 0.04 85)",
+          "oklch(72% 0.04 85)",
+          "oklch(84% 0.04 85)",
+          "oklch(95% 0.04 85)"
+        ]
+      },
+      "light-green": {
+        "role": "secondary",
+        "displayName": "Light Completion Green",
+        "tonalRamp": [
+          "oklch(15% 0.025 125)",
+          "oklch(26% 0.025 125)",
+          "oklch(38% 0.025 125)",
+          "oklch(49% 0.025 125)",
+          "oklch(61% 0.025 125)",
+          "oklch(72% 0.025 125)",
+          "oklch(84% 0.025 125)",
+          "oklch(95% 0.025 125)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Player Greeting",
+        "purpose": "Expressive greeting; loaded Inter Variable registered as NRW Interface."
+      },
+      "display-emphasis": {
+        "displayName": "Italic Greeting",
+        "purpose": "Georgia italic in the greeting only.",
+        "fontStyle": "italic"
+      }
+    },
+    "shadows": [
+      {
+        "name": "player-flat",
+        "value": "none",
+        "purpose": "Tonal layering replaces raised cards and ambient glows."
+      }
+    ],
+    "motion": [
+      {
+        "name": "progress",
+        "value": "width .3s ease-out",
+        "purpose": "Meaningful completion feedback."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "animation:none;transition:none;scroll-behavior:auto",
+        "purpose": "Applied to all elements and pseudo-elements when reduced motion is requested."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "desktop-intro",
+        "value": "1000px"
+      },
+      {
+        "name": "intermediate-max",
+        "value": "1100px"
+      },
+      {
+        "name": "mobile-max",
+        "value": "760px"
+      }
+    ],
+    "focus": {
+      "outline": "3px solid var(--gold)",
+      "outlineOffset": "4px"
+    },
+    "assets": {
+      "font": "../leitung/fonts/InterVariable.woff2",
+      "portrait": "https://kingshotdata.com/uploads/2026/02/yang-full-image.webp",
+      "identity": "Existing NRW crest",
+      "newGeneratedBitmaps": false
+    },
+    "operation": {
+      "languages": [
+        "de",
+        "en",
+        "fr"
+      ],
+      "noticeFallback": "selected language, then de, en, fr",
+      "timeBasis": "UTC",
+      "completionScope": "browser + event ID + UTC date + canonical instruction identity",
+      "viewPreferenceKey": "nrw_player_view_v2",
+      "guideSource": "Incumbent guide database; no duplicate instruction source",
+      "deploymentClaim": "Local documentation only"
+    },
+    "evidence": [
+      "outputs/player-dashboard-2/after-1440.png",
+      "outputs/player-dashboard-2/after-390.png",
+      "outputs/player-dashboard-2/light-360.png",
+      "outputs/player-dashboard-2/daily-desktop.png",
+      "outputs/player-dashboard-2/daily-mobile.png",
+      "outputs/player-dashboard-2/guides-mobile.png"
+    ],
+    "tonalRampPolicy": "Synthesized OKLCH preview ramps; normative implemented colors remain in DESIGN.md frontmatter. Ramps are not additional application tokens."
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "High contrast guide-return action.",
+      "html": "<button class=\"ds-primary\" type=\"button\">Back to overview</button>",
+      "css": ".ds-primary{background:var(--ink,#f8f5e9);color:var(--bg,#10100f);border:0;border-radius:8px;padding:10px 14px;min-height:44px;font:14px 'NRW Interface',system-ui,sans-serif;cursor:pointer}.ds-primary:hover{text-decoration:underline}.ds-primary:focus-visible{outline:3px solid var(--gold,#e0bd71);outline-offset:4px}.ds-primary:active{opacity:.85}"
+    },
+    {
+      "name": "Guide Search",
+      "kind": "input",
+      "refersTo": "search-input",
+      "description": "Accessible event-name search.",
+      "html": "<input class=\"ds-search\" type=\"search\" aria-label=\"Search event names\" placeholder=\"Search event names …\">",
+      "css": ".ds-search{min-height:46px;border:1px solid var(--line,#3b3a32);background:var(--surface,#1c1c19);color:var(--ink,#f8f5e9);border-radius:8px;padding:10px 14px;font:14px 'NRW Interface',system-ui,sans-serif;caret-color:var(--gold,#e0bd71)}.ds-search::placeholder{color:var(--muted,#b9b7aa)}.ds-search:hover{border-color:var(--muted,#b9b7aa)}.ds-search:focus-visible{outline:3px solid var(--gold,#e0bd71);outline-offset:4px}"
+    },
+    {
+      "name": "Player Navigation",
+      "kind": "nav",
+      "description": "Anchor entry points available in both view modes.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"Player Dashboard\"><a href=\"#dailyPlan\">Daily plan</a><a href=\"#eventGuides\">Event guides</a></nav>",
+      "css": ".ds-nav{display:flex;gap:28px;flex-wrap:wrap;padding:18px 0;border-bottom:1px solid var(--line,#3b3a32);font:650 14px 'NRW Interface',system-ui,sans-serif}.ds-nav a{color:var(--ink,#f8f5e9);padding:8px 0;text-decoration:none}.ds-nav a:hover{text-decoration:underline;text-underline-offset:.22em}.ds-nav a:focus-visible{outline:3px solid var(--gold,#e0bd71);outline-offset:4px}"
+    },
+    {
+      "name": "Event Disclosure",
+      "kind": "card",
+      "refersTo": "event-card",
+      "description": "Native disclosure of existing event actions.",
+      "html": "<details class=\"ds-event\"><summary>Bear Hunt</summary><p>Follow the current NRW instructions.</p></details>",
+      "css": ".ds-event{background:var(--surface,#1c1c19);color:var(--ink,#f8f5e9);border:0;border-radius:12px;overflow:hidden;font-family:'NRW Interface',system-ui,sans-serif}.ds-event summary{padding:17px 18px;font-size:17px;cursor:pointer}.ds-event summary:hover{background:var(--surface2,#282822)}.ds-event summary:focus-visible{outline:3px solid var(--gold,#e0bd71);outline-offset:-4px}.ds-event[open] summary{border-bottom:1px solid var(--line,#3b3a32)}.ds-event p{padding:0 20px 22px;font-size:14px;line-height:1.65}"
+    },
+    {
+      "name": "Native Mission Checkbox",
+      "kind": "custom",
+      "description": "Native actionable task with a complete clickable label.",
+      "html": "<label class=\"ds-mission\"><input type=\"checkbox\"><span>Complete the confirmed event task</span></label>",
+      "css": ".ds-mission{display:flex;align-items:flex-start;gap:12px;padding:12px 0;color:var(--ink,#f8f5e9);font:14px/1.65 'NRW Interface',system-ui,sans-serif;cursor:pointer}.ds-mission input{appearance:auto;accent-color:var(--gold,#e0bd71);width:20px;height:20px;flex:0 0 20px;margin:2px 0}.ds-mission input:checked+span{text-decoration:line-through;color:var(--muted,#b9b7aa)}.ds-mission input:focus-visible{outline:3px solid var(--gold,#e0bd71);outline-offset:4px}"
+    },
+    {
+      "name": "Daily Progress",
+      "kind": "custom",
+      "refersTo": "daily-progress",
+      "description": "Native progress plus visible truthful count.",
+      "html": "<section class=\"ds-progress\"><strong>2 / 5 completed</strong><progress max=\"5\" value=\"2\" aria-label=\"Your daily progress\"></progress></section>",
+      "css": ".ds-progress{background:var(--surface,#1c1c19);color:var(--ink,#f8f5e9);border-radius:14px;padding:23px 28px;font:19px 'NRW Interface',system-ui,sans-serif;font-variant-numeric:tabular-nums}.ds-progress progress{display:block;appearance:none;border:0;width:100%;height:7px;border-radius:20px;overflow:hidden;background:var(--surface2,#282822);margin-top:9px}.ds-progress progress::-webkit-progress-bar{background:var(--surface2,#282822)}.ds-progress progress::-webkit-progress-value{background:var(--gold,#e0bd71);transition:width .3s ease-out}.ds-progress progress::-moz-progress-bar{background:var(--gold,#e0bd71)}@media(prefers-reduced-motion:reduce){.ds-progress progress::-webkit-progress-value{transition:none}}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Daily Alliance Companion",
+    "overview": "The player dashboard is a welcoming, expressive place to return to each day. Warm ink, ivory, NRW gold and a recognizable Kingshot character make it inviting; native task controls and an honest completion count keep the next action clear. The large greeting with italic serif emphasis is the deliberate expressive moment.\n\nThis document governs only `dashboard/`. It records the implemented player surface and its approved `BRIEF.md`; the root leadership `PRODUCT.md` and `DESIGN.md` remain separate references. It is an enhancement of the incumbent vanilla HTML/CSS/JS dashboard, retaining its event, calendar and profile sources, Bear optimizer, Discord entry and existing identity assets.",
+    "keyCharacteristics": [
+      "Warm contrast with gold tied to meaningful progress and status.",
+      "A character-led greeting followed immediately by practical daily actions.",
+      "Flat tonal surfaces, restrained corners and readable native controls.",
+      "DE, EN and FR operation, with UTC dates and browser-local completion."
+    ],
+    "rules": [
+      {
+        "name": "The Meaningful Gold Rule",
+        "body": "Keep gold attached to identity, progress, timing and useful status; do not turn every panel into a glowing highlight.",
+        "section": "colors"
+      }
+    ],
+    "dos": [
+      "Do preserve the crest, existing hero imagery and loaded Inter font.",
+      "Do keep daily actions and guide access readable in both view modes and all three languages.",
+      "Do use native checkbox, progress, button and disclosure semantics with visible keyboard focus.",
+      "Do distinguish per-event completion from completion of the entire daily plan.",
+      "Do keep guide content in its incumbent source and timing tied to confirmed UTC data."
+    ],
+    "donts": [
+      "Don't apply this player contract to the separate leadership surface.",
+      "Don't invent progress, timing windows or executable tasks from unknown leadership prose.",
+      "Don't reintroduce ambient glows, shadow-heavy cards or decorative motion.",
+      "Don't imply cross-device completion sync or successful live deployment from local checks."
+    ]
+  }
+}
