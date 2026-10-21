@@ -1,6 +1,6 @@
 ---
 name: Welcome NRW
-description: Focused charcoal and gold Kingshot welcome
+description: Cinematic citadel, Cinzel, and gold Kingshot welcome
 colors:
   bg: "#f4f3ef"
   bg2: "#e7e6e2"
@@ -25,18 +25,28 @@ colors:
   dark-brand: "#dfc185"
   dark-rose: "#f2aaa0"
   action-ink: "#24211b"
+  scene-bg: "#10141b"
+  scene-ink: "#f5f1e8"
+  scene-gold: "#dfbd79"
+  scene-action-ink: "#292419"
+  scene-action-line: "#e9ce99"
+  scene-transfer: "#141a24db"
+  scene-transfer-line: "#95805b"
+  scene-footer: "#101114"
+  scene-footer-ink: "#bcbdbb"
 typography:
   display:
-    fontFamily: "Inter, system-ui, sans-serif"
-    fontSize: "clamp(56px,6.4vw,90px)"
-    fontWeight: 600
-    lineHeight: 1.02
-    letterSpacing: "-.04em"
+    fontFamily: "Cinzel, serif"
+    fontSize: "clamp(70px,7.1vw,96px)"
+    fontWeight: 550
+    lineHeight: 1.06
+    letterSpacing: "-.025em"
   headline:
-    fontFamily: "Inter, system-ui, sans-serif"
-    fontSize: "clamp(32px,4vw,48px)"
-    lineHeight: 1.15
-    letterSpacing: "-.03em"
+    fontFamily: "Cinzel, serif"
+    fontSize: "clamp(32px,3.6vw,46px)"
+    fontWeight: 550
+    lineHeight: 1.25
+    letterSpacing: "-.02em"
   body:
     fontFamily: "Inter, system-ui, sans-serif"
     fontSize: "16px"
@@ -47,6 +57,7 @@ typography:
     fontWeight: 500
 rounded:
   square: "0"
+  path: "7px"
   control: "5px"
   compact: "6px"
   surface: "8px"
@@ -58,22 +69,22 @@ spacing:
   contact-gap: "24px"
 components:
   member-path:
-    backgroundColor: "{colors.gold}"
-    textColor: "{colors.action-ink}"
-    rounded: "{rounded.surface}"
-    padding: "18px 22px"
+    backgroundColor: "{colors.scene-gold}"
+    textColor: "{colors.scene-action-ink}"
+    rounded: "{rounded.path}"
+    padding: "19px 22px"
   transfer-path:
-    backgroundColor: "{colors.surface2}"
-    textColor: "{colors.ink}"
-    rounded: "{rounded.surface}"
-    padding: "18px 22px"
+    backgroundColor: "{colors.scene-transfer}"
+    textColor: "{colors.scene-ink}"
+    rounded: "{rounded.path}"
+    padding: "19px 22px"
   dashboard-action:
     backgroundColor: "{colors.gold}"
     textColor: "{colors.action-ink}"
     rounded: "{rounded.compact}"
     padding: "15px 22px"
   contact-card:
-    backgroundColor: "{colors.surface}"
+    backgroundColor: "color-mix(in srgb,var(--surface) 93%,transparent)"
     textColor: "{colors.ink}"
     rounded: "{rounded.surface}"
     padding: "24px"
@@ -88,72 +99,73 @@ components:
 
 ## Overview
 
-**Creative North Star: “Dark & Gold Kingshot.”** Neutral charcoal opens space for the existing crownless Helga artwork and one clear Welcome message. NRW gold identifies the primary choice; quiet neutral surfaces carry supporting information. The optional light theme uses neutral whites and grays rather than the superseded paper/forest palette.
+**Creative North Star: “The Gold-Lit Citadel.”** A midnight-blue and charcoal fantasy kingdom gives Welcome an authored game scene. Warm gold, Cinzel display type, and official crownless Helga form the foreground; Inter and two immediately usable choices keep the scene practical. Selected member and transfer views retain a subtle illustrated masthead while preserving progressive disclosure.
 
-This scanned record governs the public Welcome surface only. BRIEF.md owns audience strategy, data truth, evidence, and source fingerprints. Historical root leadership documents and the separate Dashboard remain outside its boundary.
-
-Key characteristics: dark by default, large game artwork, focused audience views, local Inter, restrained rounded controls, flat tonal depth, and progressive disclosure.
+This record governs only public Welcome. BRIEF.md carries audience strategy, data and deployment boundaries, provenance, review limits, and current source fingerprints. Root leadership documents and Dashboard identity remain untouched. The cinematic stylesheet follows welcome.css; its overrides supersede the preceding focused world without replacing its shared variable contract.
 
 ## Colors
 
 ### Primary
 
-NRW gold marks the member choice and Dashboard action; warm brand color marks clocks, links, focus, and active navigation. The transfer path uses a neutral surface and border. The frontmatter records light custom-property values; dark-prefixed entries record the dark override. Dark brand also supplies brand2, gold, cyan, and green. The legacy cyan/green variable names now resolve to gold-toned values, not those hues.
+Scene gold identifies the member path and United wordmark. The outlined transfer choice uses a translucent midnight surface and warm border. These explicit scene colors stay dark in either theme; selected views use the existing semantic theme variables.
 
 ### Neutral
 
-Charcoal background and neutral tonal surfaces define the selected dark world. Light mode switches the background, surface, ink, muted, and line roles together. Do not add green tint to backgrounds, text, or borders.
+Frontmatter retains the real light-theme variable values and dark-prefixed overrides. Dark brand supplies brand2, gold, cyan, and green; the legacy cyan/green names resolve to gold, not those hues. Scene/footer tokens describe the cinematic layer's explicit colors. Landing footer text stays at full opacity over its dark background. Do not restore forest surfaces or claim the landing follows light mode.
 
-**The Source Rule.** Final rules in welcome.css override earlier retained declarations. Document the active cascade and current markup, not the obsolete invitation grid or forest cards.
+**The Cascade Rule.** Current index.html and the final welcome-cinematic.css declarations determine what renders. Earlier invitation and focused hero declarations are retained implementation history, not the active visual contract.
 
 ## Typography
 
-Use locally hosted Inter variable (`leitung/fonts/InterVariable.woff2`, weights 100–900, swap display), then system sans-serif. The landing display balances on two lines, capped at about ten characters per line. At 930px it uses 62px; at 680px it uses 48px. The concise hero lead uses 18px/1.65 with 35ch measure, becoming 16px/1.6 and 34ch on phones.
+Cinzel Variable is self-hosted (400–900, swap display) with serif fallback. It supplies the NRW./United. wordmark, brand, audience titles, contact headings, and names. Inter remains locally hosted for body, utility navigation, and controls. Both font assets remain local; Cinzel’s bundled SIL OFL and provenance record accompany the font.
 
-Selected-view titles use the headline role and become 31px with -.025em tracking on phones. Contact section headings are 24px; contact names are 27px desktop and 24px at smaller widths. Disclosures deliberately lower heading volume: content headings are generally 25px/1.2 and summaries 17px, dropping to 16px on phones. Body uses the frontmatter base; disclosure paragraphs commonly use 15px. The scale describes existing roles, not a fixed mathematical ratio.
+The display role uses frontmatter values; United is gold, not italic. At 1100px it becomes 78px, at 800px 68px, at 680px 52px, and at 375px 48px. On phones United is .81em with -.02em tracking. Audience headings use 30px/1.3 on phones. Hero lead uses 17px/1.7, 38ch maximum, decreasing to 16px at 800px, 15px/1.65 on phones, and 14px below 375px. Choice titles use 15px desktop, 14px compact, 13px at the narrowest breakpoint; captions use 12px. Do not reintroduce equal-volume headings throughout details.
 
 ## Layout
 
-The container is 1280px maximum, with 32px side gutters, reduced to 16px at 680px. Desktop landing uses an open 1fr/1.1fr grid, 30px gap, and 650px minimum hero height; its artwork is 112% wide within an overflow-clipped area. At 930px columns become equal, hero minimum height is 560px, and artwork grows to 130%. At 680px copy and choices precede a 260px artwork region with a 330px-tall image.
+The shared container remains 1280px maximum with 32px side gutters, reduced to 16px at 680px. The desktop scene is a 1fr/1fr composition, with a quiet left text region and Helga on the right. Hero minimum height is min(820px,100svh minus 78px), becoming 820px at 1500px and above. The foreground is absolutely positioned, generally 58% wide and 94% high; responsive rules adjust crop/position. On phones artwork sits above the readable lead and choices, with a 630px hero minimum, reduced to 620px at 375px. Keep both choices immediately usable.
 
-Landing excludes both audience streams. Member and transfer views show their own content plus the one shared schedule; the audience switch and home link remain present. Member times open by default on entry; transfer times close. Other detail groups start closed. Detail containers top out at 960px. Contacts use two columns, changing to one on phones. Schedule entries are compact full-width rows, with icon/title/clock columns and local-time support beneath; they are no longer three large cards.
-
-Sections use the frontmatter spacing rather than the former 100px/64px rhythm. Contact portraits step from 92px to 76px at 930px and 74px on phones. Existing base styles and retained welcome declarations remain in the cascade, so preserve the final focused overrides when editing.
+Landing hides both audience streams. Member leads with Dashboard and utilities, transfer with fit and actual contacts. Selected views show their own content and the singleton schedule; times open on member entry and close on transfer entry. Other groups start closed. Persistent audience/home navigation, hash ancestor opening, focus transfer, history, original IDs, and listeners remain unchanged. Detail containers top out at 960px; contacts become one column on phones and schedule entries stay compact rows.
 
 ## Elevation & Depth
 
-Both shadow variables remain none. Use tonal surfaces, neutral rules, whitespace, and scale to convey depth. The artwork supplies atmosphere; no added glow, floating-card shadow system, or extra hero overlay is established.
+The semantic shadow variables remain none, but the cinematic layer adds explicit scene depth: foreground drop shadow, CTA shadows, subtle contact shadows, and a softened illustrated masthead. Exact shadows live in the sidecar. Gradient shading preserves text legibility over the citadel, and the foreground fades at its bottom edge. Do not describe this version as entirely flat or add unrelated ambient glow.
 
 ## Shapes
 
-Landing paths and contact cards have modest surface corners. Phone paths, portraits, Dashboard action, and rule callouts use compact corners. Contact copy buttons use the control radius. The theme button remains circular; legacy input/profile controls remain square where implemented. Do not impose the former all-square rule on the focused revision.
+Scene choices use the path radius; contact cards and portraits use the surface radius. Existing Dashboard action, copied-ID controls, field corners, and circular theme button retain their focused-view shapes. Inline SVG shield/check and transfer-arrow icons distinguish the paths; do not replace them with emoji or a giant crown motif.
 
 ## Components
 
-### Audience paths and switch
+### Scene and assets
 
-The gold member path and outlined neutral transfer path share stacked title/support text. Desktop padding is in frontmatter; phones use 16px 18px, 14px titles, 12px support, and compact corners. Fine-pointer hover lifts paths by 2px; press scales paths/buttons to .98. Switch links use aria-current and brand color for the selected audience, with a persistent return-home link. Hash navigation reveals audience and disclosure ancestors before focus; back/forward restores state.
+kingdom-dusk.webp is an AI fantasy illustration, not a game screenshot; its adjacent provenance JSON stores the prompt and format-only optimization record. The original generation is preserved. Helga is the existing official transparent character, replacing the former Lord; existing local contact images remain cached projections with sources.json provenance. Cinzel-Variable.ttf is accompanied by Cinzel-OFL.txt. Keep visible AI scene credit and existing official/fan context.
 
-### Disclosures and schedule
+### Choices and focus
 
-Native details/summary groups use horizontal rules and plus/minus indicators, with 64px summary minimum height (58px on phones). Keyboard focus remains visible. One schedule node serves both audiences. No duplicated schedule, form IDs, authoritative configuration, or listener bindings are permitted.
+Choices have icon/title/caption/arrow grid anatomy. Fine-pointer hover lifts them 3px, advances the arrow 4px, and sweeps a highlight; press scales to .985, including hover-plus-active. The member hover warms its fill and the transfer hover changes its fill/border. Wrapper entrances use backwards fill and never own the interactive anchor transform. The choice focus ring is 3px scene gold with 5px offset. Existing general focus uses semantic brand with 5px offset; fields/chips use 3px. The skip link follows the visible state. These are implemented provisions, not a complete accessibility certification.
 
-### Contacts and fields
+### Intro and transitions
 
-Contact cards use themed surfaces, local portraits, visible IDs, and copy status. Copy controls have at least 44px height. Inputs retain 48px minimum height and 16px text; language controls keep visible 18px checkboxes with associated labels. Image failures reveal an NRW fallback. These reflect implemented behavior rather than a complete accessibility certification.
+The first eligible landing runs six transform/opacity arrivals: backdrop 1050ms, title 800ms after 60ms, copy 650ms after 120ms, foreground 950ms after 120ms, first choice 600ms after 180ms, second choice 600ms after 240ms. Defaults remain visible and actions usable. The intro runs once, with no continuous ambient loop.
 
-### Motion and focus
+Audience changes alone use a staged native view transition: old stage exits over 80ms, new stage starts at opacity zero after an 80ms delay and enters over 180ms. Root and navigation stay still; transition overlay ignores pointers. A new transition interrupts the preceding one. Unsupported native transitions use a 220ms main-element opacity/transform fallback. Same-view anchors, keyboard activation, and reduced-motion navigation update directly. History/hash navigation retains focus and disclosure behavior.
 
-Only the current hero artwork receives a 700ms arrival using the existing portrait keyframe: opacity .7 and translateY(24px) to visible rest. No active copy-arrival element remains in the new markup. Defaults remain visible. Interaction transitions use 160ms; hover movement is gated to fine pointers. Reduced motion removes all animation and transitions and keeps automatic scrolling.
+### Pointer depth and reduced motion
 
-Keyboard outlines use a 3px brand stroke and 5px offset; fields and language-chip groups use 3px offset. The skip link appears on focus and dynamically targets the visible landing/member/transfer state. Navigation sets target focus after revealing hidden content. See the sidecar for exact curve/media rules.
+Fine hover-capable pointers drive a bounded spring (mass 1, stiffness 100, damping 10). Normalized input is clamped; backdrop displacement is at most 6px/4px and foreground 12px/8px plus 1.5deg rotation. Text never moves. requestAnimationFrame stops when settled; reset cancels it on hidden document, blur, keydown, view exit, intersection loss, reduced-motion change, or pointer-capability change. Touch input is rejected. This is conditional on actual pointer capability rather than a viewport-width test.
+
+Reduced motion removes scene arrivals, transform transitions, and native stage animations, resets depth, and bypasses animated navigation. The cinematic override permits only short 120ms background/color changes for controls. No physical-device smoothness or frame-budget certification is implied.
+
+### Data-bearing views
+
+Contact IDs, copy feedback, local-image fallback, labeled language fields, visible checkboxes, native details, and singleton schedule retain existing semantics. public-schedule remains the sole Bear-clock authority; Discord public-config remains the invite authority. No external player refresh, backend/schema/auth changes, or invented proof claims belong to this visual system.
 
 ## Do's and Don'ts
 
-- **Do** keep a short landing and show only the chosen audience stream.
-- **Do** preserve DE/EN/FR, both themes, reduced motion, and visible focus.
-- **Do** retain crownless Helga, stored-contact provenance, live public-schedule authority, and Discord public-config authority.
-- **Don't** restore forest surfaces, the giant 1044 backdrop, overlay slogans, giant crown hero, or the former Lord artwork.
-- **Don't** add invented social proof or imply cached portraits are live player data.
-- **Don't** overwrite leadership/Dashboard design or share Welcome’s isolated theme preference with other routes.
-
+- **Do** preserve the cinematic scene and immediately usable audience choices without adding a content stream to landing.
+- **Do** maintain DE/EN/FR, selected-view themes, focus, reduced motion, and state/history behavior.
+- **Do** retain AI/provenance/OFL records and separate the illustration from official game imagery claims.
+- **Don't** restore green surfaces, the former Lord, a giant crown/1044 hero, or extra overlay slogans.
+- **Don't** animate text with pointer depth, add infinite ambient loops, or bind CTA entry and hover to the same transform owner.
+- **Don't** modify Dashboard/leadership design, authoritative data sources, or deployment scope through this document.

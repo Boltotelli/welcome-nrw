@@ -1,83 +1,132 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-21T16:58:35Z",
+  "generatedAt": "2026-10-21T17:37:07Z",
   "title": "Design System: Welcome NRW",
   "extensions": {
     "colorMeta": {
-      "gold": {
+      "scene-gold": {
         "role": "primary",
-        "displayName": "NRW Gold"
+        "displayName": "Citadel Gold"
       },
-      "dark-bg": {
+      "scene-bg": {
         "role": "neutral",
-        "displayName": "Neutral Charcoal"
-      },
-      "surface2": {
-        "role": "neutral",
-        "displayName": "Secondary Surface"
+        "displayName": "Midnight Scene"
       }
     },
     "typographyMeta": {
-      "display": {
-        "displayName": "Welcome Heading",
-        "purpose": "Landing only; 62px at 930px, 48px on phones."
+      "body": {
+        "purpose": "Paragraphs and controls.",
+        "displayName": "Inter Body"
       },
       "headline": {
-        "displayName": "Audience Heading",
-        "purpose": "Member/transfer titles; 31px on phones."
+        "purpose": "Member and transfer titles.",
+        "displayName": "Cinzel Audience Heading"
+      },
+      "display": {
+        "purpose": "NRW./United. landing wordmark, 96px maximum to 48px.",
+        "displayName": "Cinzel Wordmark"
       }
     },
     "shadows": [
       {
-        "name": "shadow",
         "value": "none",
-        "purpose": "Flat tonal surfaces."
+        "name": "semantic-shadow",
+        "purpose": "Retained variable contract, not a prohibition on cinematic shadows."
       },
       {
-        "name": "shadow2",
-        "value": "none",
-        "purpose": "No secondary elevation shadow."
+        "value": "drop-shadow(0 22px 30px #0006)",
+        "name": "foreground",
+        "purpose": "Helga depth."
+      },
+      {
+        "value": "0 12px 28px #0003",
+        "name": "choice",
+        "purpose": "Scene choices."
+      },
+      {
+        "value": "0 10px 22px #0002",
+        "name": "dashboard",
+        "purpose": "Dashboard action."
+      },
+      {
+        "value": "0 14px 30px #0002",
+        "name": "contact",
+        "purpose": "Contact surfaces."
       }
     ],
     "motion": [
       {
-        "name": "ease-out",
         "value": "cubic-bezier(.23,1,.32,1)",
-        "purpose": "Arrival and interactive transforms."
+        "name": "ease-out",
+        "purpose": "Intro, response, stage transitions."
       },
       {
-        "name": "interaction",
+        "value": "backdrop 1050ms/0ms; title 800ms/60ms; copy 650ms/120ms; foreground 950ms/120ms; choice-1 600ms/180ms; choice-2 600ms/240ms",
+        "name": "intro",
+        "purpose": "First landing only; duration/delay. Choice wrappers use backwards fill."
+      },
+      {
         "value": "160ms",
-        "purpose": "Transform and background transitions; background uses ease."
+        "name": "choice-transform",
+        "purpose": "Hover -3px, arrow +4px, press .985."
       },
       {
-        "name": "portrait-arrival",
-        "value": "700ms",
-        "purpose": "Current hero artwork only; opacity .7 and translateY(24px) to rest."
+        "value": "180ms ease",
+        "name": "choice-colors",
+        "purpose": "Fill and border."
+      },
+      {
+        "value": "260ms",
+        "name": "choice-sheen",
+        "purpose": "Hover highlight."
+      },
+      {
+        "value": "80ms",
+        "name": "stage-exit",
+        "purpose": "Exit upward 8px to opacity zero."
+      },
+      {
+        "value": "180ms after 80ms",
+        "name": "stage-enter",
+        "purpose": "New stage starts at opacity zero, 14px below."
+      },
+      {
+        "value": "220ms",
+        "name": "fallback",
+        "purpose": "Main-element entry without native view transitions."
       }
     ],
     "breakpoints": [
       {
-        "name": "retained-density",
-        "value": "1100px"
+        "value": "1500px",
+        "name": "wide-scene-min"
       },
       {
-        "name": "compact-desktop",
-        "value": "930px"
+        "value": "1100px",
+        "name": "compact-scene"
       },
       {
-        "name": "phone",
-        "value": "680px"
+        "value": "800px",
+        "name": "tablet-scene"
+      },
+      {
+        "value": "680px",
+        "name": "phone"
+      },
+      {
+        "value": "375px",
+        "name": "narrow-phone"
       }
     ],
     "focus": {
       "outline": "3px solid var(--brand)",
       "offset": "5px",
       "fieldAndChipOffset": "3px",
-      "skipTarget": "Current visible state: #welcome-paths, #start, or #transfer."
+      "skipTarget": "Current visible state: #welcome-paths, #start, or #transfer.",
+      "sceneChoice": "3px solid #f5d58e, offset 5px"
     },
     "interactionMedia": "(hover:hover) and (pointer:fine)",
-    "reducedMotion": "@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}",
+    "reducedMotion": "Scene intro and native transitions off; depth reset; animated navigation bypassed. Transform transitions off; cinematic control background/color changes retain 120ms ease.",
     "themePreference": {
       "key": "nrw_welcome_theme_v3",
       "default": "dark",
@@ -86,55 +135,79 @@
     "scope": "docs/welcome/DESIGN.md only. Public root Welcome; leadership and Dashboard excluded.",
     "sourceFingerprints": {
       "algorithm": "SHA256",
-      "index.html": "2B5D3B0895B294549E3A4E95BE7E50406DE0B12BC2D8F298297FE8078A17D4A9",
+      "index.html": "A9BA1C255FEDFD8E18F33E352BF4D5033AA5E5238EABE39846C822A12BA6D2BE",
       "welcome.css": "6D847322DFEF2FE3D7AC092CC9508B50624C0267CDE5D9B111861B405683607B",
-      "welcome.js": "9470D6B4AFB2FF7D4F5298718F2A64BEEB47B6F88AC4693574183BB0BB3F7E69",
-      "app.js": "4F50683D5166320C204A1A3CCF3903B75371833EAD0724B4272D50671C5DDA4F"
+      "welcome.js": "DFA6631AF10D26D593482562350C1E4357900FC2A005DE1D4346586DE0AA68B5",
+      "app.js": "4F50683D5166320C204A1A3CCF3903B75371833EAD0724B4272D50671C5DDA4F",
+      "welcome-cinematic.css": "F25A7B4E0CBB4F4728EB5398E995566A8B41C7A945440B5F522218E3E01240BD",
+      "welcome-cinematic.js": "7724931D81978930CFDF04F72D7B098C363A4D206EEB1C2C2CB071BA95A0C834"
+    },
+    "pointerDepth": {
+      "foreground": "max 12px/8px plus 1.5deg rotateY",
+      "text": "stationary",
+      "gate": "Fine hover pointer, no reduced motion, visible intersecting landing, visible document, focused window, non-touch input",
+      "spring": {
+        "mass": 1,
+        "damping": 10,
+        "stiffness": 100
+      },
+      "backdrop": "max 6px/4px",
+      "stop": "Settled, hidden, blur, keydown, view exit, intersection loss, reduced-motion or pointer-capability change",
+      "frameDeltaCap": "32ms"
+    },
+    "navigation": {
+      "overlay": "pointer-events:none",
+      "direct": "Same-view anchors, keyboard, reduced motion, history/hash restoration",
+      "stationary": "Root and navigation",
+      "interrupt": "Skip preceding native transition",
+      "staged": "Audience-change pointer activation only"
+    },
+    "assets": {
+      "contactsAndHelga": "assets/welcome/sources.json",
+      "provenance": "assets/welcome/kingdom-dusk.provenance.json",
+      "license": "assets/welcome/Cinzel-OFL.txt",
+      "font": "assets/welcome/Cinzel-Variable.ttf",
+      "classification": "AI fantasy illustration, not a Kingshot screenshot",
+      "scene": "assets/welcome/kingdom-dusk.webp"
     }
   },
   "components": [
     {
-      "name": "Member Path",
+      "name": "Cinematic Member Choice",
       "kind": "custom",
-      "refersTo": "member-path",
-      "description": "Gold primary audience choice; mobile uses compact corners and smaller type.",
-      "html": "<a class=\"welcome-path\" href=\"#start\"><strong>I’m already with NRW</strong><span>My starting point →</span></a>",
-      "css": ".welcome-path{display:block;background:var(--gold,#dfc185);color:#24211b;padding:18px 22px;border-radius:8px;font-family:Inter,system-ui,sans-serif;text-decoration:none;transition:transform 160ms cubic-bezier(.23,1,.32,1),background-color 160ms ease}.welcome-path strong{display:block;font-size:16px;font-weight:650}.welcome-path span{display:block;font-size:13px;margin-top:5px}.welcome-path:focus-visible{outline:3px solid var(--brand,#dfc185);outline-offset:5px}.welcome-path:active{transform:scale(.98)}@media(hover:hover) and (pointer:fine){.welcome-path:hover{transform:translateY(-2px)}}@media(max-width:680px){.welcome-path{padding:16px 18px;border-radius:6px}.welcome-path strong{font-size:14px}.welcome-path span{font-size:12px}}@media(prefers-reduced-motion:reduce){.welcome-path{transition:none!important}}"
-    },
-    {
-      "name": "Information Disclosure",
-      "kind": "custom",
-      "description": "Native closed detail group with a plus/minus affordance.",
-      "html": "<details class=\"welcome-disclosure\"><summary>Our event times</summary><p>Current leadership configuration · UTC is the reference.</p></details>",
-      "css": ".welcome-disclosure{border-top:1px solid var(--line,#484848);color:var(--ink,#f4f3ef);font-family:Inter,system-ui,sans-serif}.welcome-disclosure summary{cursor:pointer;padding:20px 0;min-height:64px;display:flex;align-items:center;gap:12px;list-style:none;font-size:17px;font-weight:500}.welcome-disclosure summary::after{content:'+';font-size:23px;margin-left:auto;color:var(--brand,#dfc185);font-weight:400}.welcome-disclosure[open] summary::after{content:'−'}.welcome-disclosure summary::-webkit-details-marker{display:none}.welcome-disclosure summary:focus-visible{outline:3px solid var(--brand,#dfc185);outline-offset:5px}.welcome-disclosure p{font-size:15px;color:var(--muted,#c0c0bd)}@media(max-width:680px){.welcome-disclosure summary{font-size:16px;padding:17px 0;min-height:58px}}"
+      "css": ".scene-choice{display:block;padding:19px 22px;border-radius:7px;background:#dfbd79;color:#292419;border:1px solid #e9ce99;font-family:Inter,system-ui,sans-serif;text-decoration:none;box-shadow:0 12px 28px #0003;transition:transform 160ms cubic-bezier(.23,1,.32,1),background-color 180ms ease}.scene-choice strong{display:block;font-size:15px;font-weight:650}.scene-choice span{font-size:12px}.scene-choice:focus-visible{outline:3px solid #f5d58e;outline-offset:5px}.scene-choice:active{transform:scale(.985)}@media(hover:hover) and (pointer:fine){.scene-choice:hover{transform:translateY(-3px);background:#ebcd91}.scene-choice:hover:active{transform:scale(.985)}}@media(prefers-reduced-motion:reduce){.scene-choice{transition:background-color 120ms ease,color 120ms ease}}",
+      "description": "Interactive choice independent from its noninteractive entry wrapper.",
+      "html": "<div class=\"path-reveal\"><a class=\"scene-choice\" href=\"#start\"><strong>Already with NRW</strong><span>My starting point →</span></a></div>",
+      "refersTo": "member-path"
     }
   ],
   "narrative": {
-    "northStar": "Dark & Gold Kingshot",
-    "overview": "Neutral charcoal and NRW gold create an atmospheric setting for existing crownless Helga artwork. A focused landing leads to true member and transfer views; quiet disclosures keep each audience’s information manageable. The light alternative stays neutral.",
     "keyCharacteristics": [
-      "Dark by default",
-      "Large game artwork",
-      "Separate audience views",
-      "Progressive disclosure",
-      "DE/EN/FR",
-      "Neutral light alternative"
+      "Dark scene in both themes",
+      "Two usable audience choices",
+      "Bounded intro",
+      "Conditional spring depth",
+      "Staged native transition",
+      "Local provenance and OFL"
     ],
     "rules": [
       {
-        "name": "The Source Rule",
-        "body": "Extract the final focused cascade and current markup; obsolete invitation declarations do not describe the rendered surface.",
+        "body": "Current markup and final cinematic overrides govern Welcome.",
+        "name": "The Cascade Rule",
         "section": "colors"
       }
     ],
+    "overview": "Midnight citadel illustration, warm gold, self-hosted Cinzel, Inter, and official crownless Helga create an authored Kingshot scene. Member and transfer retain progressive disclosure.",
+    "northStar": "The Gold-Lit Citadel",
     "dos": [
-      "Keep the landing short and reveal only the selected audience.",
-      "Preserve focus, reduced motion, cache provenance, and singleton schedule authority."
+      "Keep keyboard and reduced navigation direct and choices usable during entry.",
+      "Preserve singleton schedule, cached contacts, central Discord, and deployment boundaries."
     ],
     "donts": [
-      "Do not restore forest surfaces, a giant crown, giant 1044 backdrop, or overlay slogans.",
-      "Do not invent social proof or live-contact claims.",
-      "Do not overwrite leadership or Dashboard design."
+      "Do not call the AI illustration a game screenshot.",
+      "Do not add infinite loops or move text with pointer depth.",
+      "Do not bind CTA entry and hover to the same transform owner.",
+      "Do not alter Dashboard or leadership identity."
     ]
   }
 }

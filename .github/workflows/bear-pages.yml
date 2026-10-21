@@ -422,6 +422,7 @@ jobs:
           cp v3-latest/laws.html v3-latest/laws.js v3-latest/laws.css _site/
           cp v3-latest/styles.css v3-latest/app.js _site/
           cp v3-latest/welcome.css v3-latest/welcome.js _site/
+          cp v3-latest/welcome-cinematic.css v3-latest/welcome-cinematic.js _site/
           if [ -f v3-latest/site.webmanifest ]; then cp v3-latest/site.webmanifest _site/; fi
           # Home page is a subfolder preview; the Pages root stays the Bear tool.
           cp v3-latest/index.html _site/welcome/index.html
@@ -472,6 +473,8 @@ jobs:
           test -s _site/welcome/index.html
           test -s _site/welcome.css
           test -s _site/welcome.js
+          test -s _site/welcome-cinematic.css
+          test -s _site/welcome-cinematic.js
           test -s _site/styles.css
           test -s _site/app.js
           test -s _site/assets/nrw-banner.svg

@@ -1,0 +1,16 @@
+{
+  "kind": "AI-generated illustrative fantasy backdrop; not a Kingshot screenshot",
+  "tool": "built-in image_gen",
+  "prompt": "Create a premium wide website hero BACKGROUND ASSET, 16:9 landscape, ideally 2048px wide. This is a stylized illustrative fantasy kingdom scene for a casual medieval mobile strategy game community, NOT a real game screenshot, no UI. A richly authored high-quality polished 3D animation / charming medieval strategy-game aesthetic with chunky elegant stone architecture, tactile materials, beautiful atmospheric perspective. At twilight: charcoal-blue skies, warm muted golden lantern windows, a distant stone keep and clustered medieval town on the RIGHT third, a winding stone approach and arch details lower right. Deep layered hills and settlement silhouettes, beautifully controlled warm rim lighting, cinematic depth. LEFT 55 percent is spacious quiet dark charcoal-blue atmospheric sky/haze with very little detail, suitable for large readable white website text laid over later. A large foreground game character will be composited later on the right, so leave the middle-right lower region uncluttered; architecture sits behind and above it. Rich premium image, restrained palette of graphite charcoal, dark midnight blue, muted warm antique gold, stone brown. No green tint or green vegetation; no purple neon. No dominant crown, no king, no characters, no portraits, no lettering, no numbers, no logos, no banners with symbols, no interface elements, no borders, no mockup. Not photorealistic; beautifully art-directed stylized game environment. The result is one finished background painting, with real scene substance on the right and deliberate quiet negative space left. Avoid generic gold bokeh, flat gradient as the entire picture, random floating geometric shapes, excessive embers or fog.",
+  "original_size": [
+    1672,
+    941
+  ],
+  "output": "kingdom-dusk.webp",
+  "processing": "WebP format optimization only, no visual composition edit",
+  "font": {
+    "name": "Cinzel Variable",
+    "source": "https://github.com/google/fonts/tree/main/ofl/cinzel",
+    "license": "SIL Open Font License, bundled Cinzel-OFL.txt"
+  }
+}
