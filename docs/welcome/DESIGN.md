@@ -144,7 +144,7 @@ The base container remains 1280px maximum with 32px side gutters, reducing to 16
 
 One continuous page contains banner, transfer fit, server facts, live times, guides, Dashboard, onboarding, language profile, Discord, contacts, and FAQ. Header anchors remain visible at all widths and the hero choices scroll to sections. No selected audience hides primary content. FAQ questions and historical warning remain details; major information wrappers do not. The optional configured public-feed block remains conditional.
 
-Times use a 1fr/1.1fr heading/schedule layout with 70px gap, collapsing on phones. The Bear panorama spans both desktop columns beneath that first row. Its final crop is 440px high, center top; on phones it is 220px high, 62% center. The alliance camp panorama leads server facts at 430px height, centered; phones use 245px height at 52% center. Panorama corners follow the frontmatter desktop/phone radii. Captions remain below images, never overlaid on them. Server facts and guides use two columns before stacking; onboarding uses three columns before stacking. Contact cards use two columns before stacking, with portraits stepping from 100px to 76px at 1000px and 70px on phones. Existing profile labels, IDs, status nodes, and listeners remain.
+Times use a 1fr/1.1fr heading/schedule layout with 70px gap, collapsing on phones. The Bear panorama spans both desktop columns beneath that first row. Its final crop is 440px high, center top; on phones it is 220px high, 62% center. The alliance camp panorama leads server facts at 430px height, centered; phones use 245px height at 52% center. Panorama corners follow the frontmatter desktop/phone radii. The two panorama captions are removed at the user’s request; file provenance and footer credits remain. Server facts and guides use two columns before stacking; onboarding uses three columns before stacking. Contact cards use two columns before stacking, with portraits stepping from 100px to 76px at 1000px and 70px on phones. Existing profile labels, IDs, status nodes, and listeners remain.
 
 ## Elevation & Depth
 
@@ -176,7 +176,7 @@ Conditional fine-hover pointer depth remains subordinate: spring mass 1, stiffne
 
 ### Scenic illustrations and event emblems
 
-Two new original AI images carry the world between practical sections: alliance-camp in server facts and bear-rally in event times. Both lazy-load with intrinsic 1672×941 dimensions. Their captions explicitly identify illustration; exact prompts/provenance are adjacent JSON and embedded Exif. These are not game screenshots. No new animation is attached to these images.
+Two new original AI images carry the world between practical sections: alliance-camp in server facts and bear-rally in event times. Both lazy-load with intrinsic 1672×941 dimensions. Their former captions are removed; exact prompts/provenance remain adjacent JSON and embedded Exif. These are not game screenshots. No new animation is attached to these images.
 
 Guide event containers are 96px with 88px local emblems; phones use 80px containers and 76px emblems. The crossed-swords SVG is 76px, 66px on phones; smaller server/onboarding emblems use 60px images. Existing artwork and official UI assets are not modified. Legions use two readable clock lines; on phones their secondary-event groups form two columns.
 
@@ -195,3 +195,4 @@ Bear clocks retain one public-schedule authority and no stale fallback; Discord 
 - **Don't** hijack scrolling, add fake rewards or proof, or animate factual body text out of readability.
 - **Don't** restore broken decorative media, obsolete polling-time or early/late claims, green surfaces, or a giant crown hero.
 
+The three desktop onboarding headings share an explicit 64px icon row, including the card without an icon; phones use the natural stacked layout.

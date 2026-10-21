@@ -279,6 +279,13 @@ function renderRoster(){
  for(const row of $("rosterRows").rows)for(let i=0;i<row.cells.length;i++)row.cells[i].dataset.label=headings[i]||"";
 
 }
+function transferContactLabel(person){
+ const raw=String(person?.label||"").trim();
+ const gameId=person?.game_id||/^leader-([0-9]{5,20})@accounts\.allianceos\.invalid$/i.exec(raw)?.[1];
+ const player=gameId?(state.players||[]).find(p=>String(p.game_id)===String(gameId)):null;
+ const leader=gameId?[...($("leaderSelect")?.options||[])].find(o=>o.value===String(gameId)):null;
+ return player?.name||leader?.textContent||(/^admin@nap-tracker\.invalid$/i.test(raw)?"Administration":! /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(raw)&&raw?raw:gameId?"ID "+gameId:t("contactOwner"));
+}
 function renderTransfers(){
  const filterEl=$("transferWindowFilter");
  const phase=filterEl.value||"all";
@@ -294,7 +301,7 @@ function renderTransfers(){
   const photo=/^https:\/\//i.test(candidatePic)?'<img class="avatar" src="'+esc(candidatePic)+'" alt="" loading="lazy" referrerpolicy="no-referrer">':
     '<span class="avatar">'+esc((x.player_name||"?").slice(0,1))+'</span>';
   return '<tr><td><div class="person">'+photo+'<div><strong>'+esc(x.player_name||"—")+'</strong><small>'+esc(x.game_id)+' · '+esc(t("priority"))+': '+esc(x.priority===1?t("high"):x.priority===3?t("low"):t("normal"))+(x.invitation_type==="special"?" · "+esc(t("inviteSpecial")):"")+
-   (x.contact_staff_user_id?" · "+esc(t("contactOwner"))+": "+esc((state.transferContacts||[]).find(p=>p.user_id===x.contact_staff_user_id)?.label||"—"):"")+'</small></div></div></td><td>'+badge(x.direction,x.direction==="incoming"?t("directionIncoming"):t("directionOutgoing"))+'</td><td>'+esc([x.origin_kingdom?"#"+x.origin_kingdom:"",x.previous_alliance||""].filter(Boolean).join(" · ")||"—")+'</td><td>'+esc(destination)+'</td><td>'+esc([x.window_start,x.window_end].filter(Boolean).map(dateText).join(" → ")||"—")+'</td><td>'+badge(x.status)+verified+'</td><td><button class="action-link" data-edit="transfer" data-id="'+esc(x.id)+'" '+(!can("transfers")?"disabled":"")+'>'+esc(t("edit"))+'</button></td></tr>';
+   (x.contact_staff_user_id?" · "+esc(t("contactOwner"))+": "+esc(transferContactLabel((state.transferContacts||[]).find(p=>p.user_id===x.contact_staff_user_id))):"")+'</small></div></div></td><td>'+badge(x.direction,x.direction==="incoming"?t("directionIncoming"):t("directionOutgoing"))+'</td><td>'+esc([x.origin_kingdom?"#"+x.origin_kingdom:"",x.previous_alliance||""].filter(Boolean).join(" · ")||"—")+'</td><td>'+esc(destination)+'</td><td>'+esc([x.window_start,x.window_end].filter(Boolean).map(dateText).join(" → ")||"—")+'</td><td>'+badge(x.status)+verified+'</td><td><button class="action-link" data-edit="transfer" data-id="'+esc(x.id)+'" '+(!can("transfers")?"disabled":"")+'>'+esc(t("edit"))+'</button></td></tr>';
  }).join(""):empty(t("noTransfers"));
  const moves=state.internalMoves||[],search=$("internalMoveSearch").value.toLowerCase().trim(),
     direction=$("internalMoveDirection").value,period=$("internalMovePeriod").value;
@@ -427,14 +434,13 @@ function openEdit(entity,id=null,sourcePlayer=null){
       control(t("targetKingdom"),"target_kingdom",s.target_kingdom||(s.direction==="incoming"?state.alliance.kingdom_id:""),"number",{min:1,max:99999})+
      select(t("transferWindow"),"transfer_window_id",s.transfer_window_id||"",[["",t("unassignedWindow")],...(state.transferWindows||[]).map(w=>[w.id,w.label+" · "+w.start_date+" – "+w.end_date])])+
      select(t("invitationStatus"),"invitation_status",s.invitation_status||"not_sent",[["not_sent",t("inviteNotSent")],["sent",t("inviteSent")],["accepted",t("inviteAccepted")],["declined",t("inviteDeclined")]])+
-     select(t("contactOwner"),"contact_staff_user_id",s.contact_staff_user_id||"",[["",t("noneAssigned")],...(state.transferContacts||[]).map(x=>[x.user_id,x.rank+" · "+(x.label||x.user_id.slice(0,8))])])+
+     select(t("contactOwner"),"contact_staff_user_id",s.contact_staff_user_id||"",[["",t("noneAssigned")],...(state.transferContacts||[]).map(x=>[x.user_id,x.rank+" · "+transferContactLabel(x)])])+
      control(t("previousAlliance"),"previous_alliance",s.previous_alliance||"")+
      control(t("targetAlliance"),"target_alliance",s.target_alliance||"NRW")+
      control(t("power"),"power",s.power||"","number",{min:0})+
       select(t("priority"),"priority",String(s.priority||2),[["1",t("high")],["2",t("normal")],["3",t("low")]])+
       select(t("invitation"),"invitation_type",s.invitation_type||"not_assigned",[["not_assigned",t("inviteOpen")],["ordinary",t("inviteNormal")],["special",t("inviteSpecial")]])+
-     control(t("from"),"window_start",s.window_start||"","date")+
-     control(t("to"),"window_end",s.window_end||"","date")+'</div>'+
+     '</div>'+
      '<p class="small-note">'+esc(t("externalNote"))+'</p>'+textarea(t("notes"),"notes",s.notes||"")+
      (s.direction==="incoming"&&s.status==="completed"?'<label class="field check"><input type="checkbox" name="confirm_arrival" '+(s.arrival_confirmed_at?"checked disabled":"")+' > '+esc(t("confirmObservedArrival"))+'</label>':"")+
      '<p class="small-note">'+esc(t("transferInternalOnly"))+'</p>';
@@ -545,6 +551,8 @@ async function saveDialog(event){
    }
  }
  if(entity==="transfer"){
+    data.window_start=record?.window_start??null;
+    data.window_end=record?.window_end??null;
     data.share_approved=record?.share_approved??false;
     data.confirm_arrival=fd.has("confirm_arrival");
   }
@@ -755,6 +763,12 @@ async function loadLeaderList(){
   sel.innerHTML='<option value="">'+esc(t("chooseLeader"))+'</option>'+leaders.map(x=>
     '<option value="'+esc(x.game_id)+'">'+esc(x.name)+'</option>').join("");
   if([...sel.options].some(x=>x.value===previous))sel.value=previous;
+  if(state&&can("transfers")){
+   renderTransfers();
+   if(editing?.entity==="transfer")for(const option of $("editForm").elements.contact_staff_user_id?.options||[]){
+    const person=(state.transferContacts||[]).find(x=>x.user_id===option.value);if(person)option.textContent=person.rank+" · "+transferContactLabel(person);
+   }
+  }
  }catch{
   sel.innerHTML='<option value="">'+esc(t("loadingLeaders"))+'</option>';
   $("loginError").textContent=t("genericError")+" (leader list)";

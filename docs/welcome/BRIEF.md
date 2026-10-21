@@ -55,3 +55,4 @@ SHA256 snapshot of this documentation context:
 - index.ts: 2EE5184F4CD402379CED5945EE2198076C0BE34BE5763D606591CFD1395AC26A
 - 20261021181556_event_legion_times.sql: 767856B873B67BE93AE2546BED754CE84F32C71CCCF429D73D9685468E744B43
 
+The three desktop onboarding headings share an explicit 64px icon row, including the card without an icon; phones use the natural stacked layout.

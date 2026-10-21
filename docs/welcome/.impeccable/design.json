@@ -227,7 +227,7 @@
       "phoneRadius": "8px",
       "animation": "No new effects",
       "loading": "lazy, intrinsic 1672x941",
-      "captions": "11px, var(--muted), line-height1.6, 10px top padding; below images",
+      "captions": "Removed for both panoramas at user request; provenance remains in files and footer",
       "alliance": {
         "height": "430px",
         "position": "center",
@@ -292,7 +292,7 @@
       "Keep all primary information directly available.",
       "Preserve ordinary scroll, body readability, no-JS visibility, direct hashes, and authoritative data."
     ],
-    "overview": "The cinematic citadel and Helga lead into a continuous, directly readable Welcome. The real NRW standard traces its gold edge while three localized lines build with native reversible scroll. Primary information is not hidden behind audience selection. Two captioned original AI panoramas and larger real event emblems enrich the world without changing native scroll motion. Editable persisted L1/L2 clocks use the same public schedule authority.",
+    "overview": "The cinematic citadel and Helga lead into a continuous, directly readable Welcome. The real NRW standard traces its gold edge while three localized lines build with native reversible scroll. Primary information is not hidden behind audience selection. Two original AI panoramas without inline captions and larger real event emblems enrich the world without changing native scroll motion. Editable persisted L1/L2 clocks use the same public schedule authority.",
     "rules": [
       {
         "body": "Final story styles supersede earlier hidden audience layout; current markup is authoritative.",
