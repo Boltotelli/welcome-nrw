@@ -1,0 +1,20 @@
+{
+  "retrieved_from": "Existing public.kingshot_player_cache, kingdom_id 1044; read only on 2026-10-21. No external player lookup or refresh. Local image copies from stored avatar_url.",
+  "contacts": [
+    {
+      "game_id": "151869669",
+      "name": "Jey",
+      "file": "jey.png"
+    },
+    {
+      "game_id": "155097147",
+      "name": "Demazeᴳᴱᴿ",
+      "file": "demaze.png"
+    }
+  ],
+  "images": {
+    "jey.png": "https://got-global-avatar.akamaized.net/avatar/2026/08/31/93gnrB_1788189911.png",
+    "demaze.png": "https://got-global-avatar.akamaized.net/avatar/2026/10/16/4WLM2n_1792172085.png",
+    "helga.png": "https://www.centurygames.com/wp-content/uploads/2025/04/helgachar.png"
+  }
+}

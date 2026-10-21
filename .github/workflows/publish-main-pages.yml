@@ -12,6 +12,8 @@ on:
       - 'index.html'
       - 'app.js'
       - 'styles.css'
+      - 'welcome.css'
+      - 'welcome.js'
       - 'laws.*'
       - '.github/workflows/publish-main-pages.yml'
   workflow_dispatch:

@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-21T16:21:17Z",
+  "title": "Design System: Welcome NRW",
+  "extensions": {
+    "colorMeta": {
+      "forest": {"role": "primary", "displayName": "Alliance Forest"},
+      "parchment": {"role": "secondary", "displayName": "Transfer Parchment"},
+      "bg": {"role": "neutral", "displayName": "Warm Paper"},
+      "dark-bg": {"role": "neutral", "displayName": "Night Forest"}
+    },
+    "typographyMeta": {"display": {"displayName": "Invitation Heading", "purpose": "Two-line Welcome hero heading; 52px on phones."}},
+    "shadows": [
+      {"name": "shadow", "value": "none", "purpose": "Welcome principal surfaces are flat."},
+      {"name": "shadow2", "value": "none", "purpose": "No secondary elevation shadow."}
+    ],
+    "motion": [
+      {"name": "ease-out", "value": "cubic-bezier(.23,1,.32,1)", "purpose": "Arrival and interactive transforms."},
+      {"name": "interaction", "value": "160ms", "purpose": "Transform and background transitions; background uses ease."},
+      {"name": "copy-arrival", "value": "600ms", "purpose": "Once, from opacity .6 and translateY(16px)."},
+      {"name": "portrait-arrival", "value": "800ms", "purpose": "Once, from opacity .7 and translateY(24px)."}
+    ],
+    "breakpoints": [
+      {"name": "compact-desktop", "value": "1100px"},
+      {"name": "compact-navigation", "value": "930px"},
+      {"name": "phone", "value": "680px"}
+    ],
+    "focus": {"outline": "3px solid var(--brand)", "offset": "5px", "fieldAndChipOffset": "3px"},
+    "interactionMedia": "(hover:hover) and (pointer:fine)",
+    "reducedMotion": "@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}",
+    "scope": "docs/welcome/DESIGN.md only; root public Welcome surface. Historical leadership design and dashboard routes are excluded."
+  },
+  "components": [
+    {
+      "name": "Member Path",
+      "kind": "custom",
+      "refersTo": "member-path",
+      "description": "A stacked invitation path; mobile uses 16px 18px padding and 14px title text.",
+      "html": "<a class=\"welcome-path\" href=\"#start\"><strong>I’m already with NRW</strong><span>Settle in &amp; start playing ↗</span></a>",
+      "css": ".welcome-path{display:block;background:#344032;color:#fff8e7;padding:18px 22px;border-radius:0;font-family:Inter,system-ui,sans-serif;text-decoration:none;transition:transform 160ms cubic-bezier(.23,1,.32,1),background-color 160ms ease}.welcome-path strong{display:block;font-size:16px;font-weight:650}.welcome-path span{display:block;font-size:13px;margin-top:2px}.welcome-path:focus-visible{outline:3px solid var(--brand,#73541e);outline-offset:5px}.welcome-path:active{transform:scale(.98)}@media(hover:hover) and (pointer:fine){.welcome-path:hover{transform:translateX(4px)}}@media(max-width:680px){.welcome-path{padding:16px 18px}.welcome-path strong{font-size:14px}.welcome-path span{font-size:12px}}@media(prefers-reduced-motion:reduce){.welcome-path{transition:none!important}}"
+    },
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Square action button inheriting the active Welcome theme.",
+      "html": "<button class=\"welcome-button\">Save details</button>",
+      "css": ".welcome-button{background:var(--ink,#292b24);color:var(--bg,#f3efe5);border:0;border-radius:0;min-height:46px;padding:12px 20px;font-family:Inter,system-ui,sans-serif;font-size:14px;font-weight:600;transition:transform 160ms cubic-bezier(.23,1,.32,1),background-color 160ms ease}.welcome-button:focus-visible{outline:3px solid var(--brand,#73541e);outline-offset:5px}.welcome-button:active{transform:scale(.98)}@media(hover:hover) and (pointer:fine){.welcome-button:hover{transform:translateY(-2px)}}@media(prefers-reduced-motion:reduce){.welcome-button{transition:none!important}}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Alliance Invitation",
+    "overview": "Warm paper, confident local Inter, forest accents, square surfaces, and flat tonal depth form the public Welcome invitation. This record governs Welcome only and leaves leadership and dashboard identity separate.",
+    "keyCharacteristics": ["Paper and forest", "Two visible entry paths", "Crownless Helga", "DE/EN/FR", "Light and dark", "Visible defaults with restrained motion"],
+    "rules": [{"name": "The Source Rule", "body": "Keep extracted tokens synchronized with welcome.css, the runtime authority.", "section": "colors"}],
+    "dos": ["Preserve theme/language readability, keyboard focus, and reduced motion.", "Use public-schedule alone for Bear clocks."],
+    "donts": ["Do not restore the former Lord or a giant crown hero.", "Do not invent social proof or imply cached contact portraits are live.", "Do not overwrite historical leadership design documents."]
+  }
+}

@@ -268,10 +268,4 @@ window.addEventListener('nrw-lang-change',renderSagrLocations);
  grid.appendChild(card);
 })();
 
-(function useCurrentDiscordInvite(){
- const currentDiscord='https://discord.gg/cZp27eVYXC';
- const apply=()=>document.querySelectorAll('a[href*="discord.gg"]').forEach(link=>{link.href=currentDiscord});
- apply();
- const observer=new MutationObserver(()=>apply());
- observer.observe(document.body,{childList:true,subtree:true});
-})();
+
