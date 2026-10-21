@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-21T17:37:07Z",
+  "generatedAt": "2026-10-21T17:59:12Z",
   "title": "Design System: Welcome NRW",
   "extensions": {
     "colorMeta": {
@@ -19,12 +19,16 @@
         "displayName": "Inter Body"
       },
       "headline": {
-        "purpose": "Member and transfer titles.",
-        "displayName": "Cinzel Audience Heading"
+        "purpose": "Directly visible section headings;31px phone.",
+        "displayName": "Cinzel Story Heading"
       },
       "display": {
         "purpose": "NRW./United. landing wordmark, 96px maximum to 48px.",
         "displayName": "Cinzel Wordmark"
+      },
+      "story-line": {
+        "purpose": "Three localized lines illuminated by reversible native scrolling.",
+        "displayName": "Alliance Lines"
       }
     },
     "shadows": [
@@ -49,9 +53,14 @@
         "purpose": "Dashboard action."
       },
       {
-        "value": "0 14px 30px #0002",
-        "name": "contact",
-        "purpose": "Contact surfaces."
+        "value": "none",
+        "purpose": "Story contact cards explicitly remove cinematic shadows.",
+        "name": "contact"
+      },
+      {
+        "value": "drop-shadow(0 16px 15px #0006)",
+        "purpose": "NRW crest within traced outline.",
+        "name": "standard"
       }
     ],
     "motion": [
@@ -81,19 +90,14 @@
         "purpose": "Hover highlight."
       },
       {
-        "value": "80ms",
-        "name": "stage-exit",
-        "purpose": "Exit upward 8px to opacity zero."
+        "value": "600ms cubic-bezier(.23,1,.32,1)",
+        "purpose": "Once-only clip-path reveal and 12px translate; body copy unaffected.",
+        "name": "heading-arrival"
       },
       {
-        "value": "180ms after 80ms",
-        "name": "stage-enter",
-        "purpose": "New stage starts at opacity zero, 14px below."
-      },
-      {
-        "value": "220ms",
-        "name": "fallback",
-        "purpose": "Main-element entry without native view transitions."
+        "value": "native reversible progress",
+        "purpose": "Lines .52 to 1 opacity, 12px to 0 translation, crest 16px/-4deg to rest, outline offset 1-progress.",
+        "name": "banner-scroll"
       }
     ],
     "breakpoints": [
@@ -116,17 +120,21 @@
       {
         "value": "375px",
         "name": "narrow-phone"
+      },
+      {
+        "value": "1000px",
+        "name": "story-compact"
       }
     ],
     "focus": {
       "outline": "3px solid var(--brand)",
       "offset": "5px",
       "fieldAndChipOffset": "3px",
-      "skipTarget": "Current visible state: #welcome-paths, #start, or #transfer.",
+      "skipTarget": "#alliance-story; hash targets settle immediately and receive focus.",
       "sceneChoice": "3px solid #f5d58e, offset 5px"
     },
     "interactionMedia": "(hover:hover) and (pointer:fine)",
-    "reducedMotion": "Scene intro and native transitions off; depth reset; animated navigation bypassed. Transform transitions off; cinematic control background/color changes retain 120ms ease.",
+    "reducedMotion": "Banner lines visible, crest transform reset, trace complete; heading entrances skipped; keyboard/direct hashes settle immediately. Retained hero reduced-motion safeguards remain.",
     "themePreference": {
       "key": "nrw_welcome_theme_v3",
       "default": "dark",
@@ -135,12 +143,14 @@
     "scope": "docs/welcome/DESIGN.md only. Public root Welcome; leadership and Dashboard excluded.",
     "sourceFingerprints": {
       "algorithm": "SHA256",
-      "index.html": "A9BA1C255FEDFD8E18F33E352BF4D5033AA5E5238EABE39846C822A12BA6D2BE",
+      "index.html": "5D0992F3E4F7768DA630A2A4E3F76016439D7E795C1D43E855440A28A856BB76",
       "welcome.css": "6D847322DFEF2FE3D7AC092CC9508B50624C0267CDE5D9B111861B405683607B",
-      "welcome.js": "DFA6631AF10D26D593482562350C1E4357900FC2A005DE1D4346586DE0AA68B5",
-      "app.js": "4F50683D5166320C204A1A3CCF3903B75371833EAD0724B4272D50671C5DDA4F",
       "welcome-cinematic.css": "F25A7B4E0CBB4F4728EB5398E995566A8B41C7A945440B5F522218E3E01240BD",
-      "welcome-cinematic.js": "7724931D81978930CFDF04F72D7B098C363A4D206EEB1C2C2CB071BA95A0C834"
+      "welcome-cinematic.js": "7724931D81978930CFDF04F72D7B098C363A4D206EEB1C2C2CB071BA95A0C834",
+      "welcome-story.css": "7F8C949FB67CC3BE0C87484F68A1260C1468E0610FD1AF17C61D55079FC95109",
+      "welcome-story.js": "77FD872FD4C186C5F718762B9EB3C090A7507E7212FA722C5C008B1F65FEF622",
+      "welcome.js": "7E6331802D585CC20FE755518F3E580C4172D5C240C2C85388643F012D736BEE",
+      "app.js": "4F50683D5166320C204A1A3CCF3903B75371833EAD0724B4272D50671C5DDA4F"
     },
     "pointerDepth": {
       "foreground": "max 12px/8px plus 1.5deg rotateY",
@@ -156,11 +166,9 @@
       "frameDeltaCap": "32ms"
     },
     "navigation": {
-      "overlay": "pointer-events:none",
-      "direct": "Same-view anchors, keyboard, reduced motion, history/hash restoration",
-      "stationary": "Root and navigation",
-      "interrupt": "Skip preceding native transition",
-      "staged": "Audience-change pointer activation only"
+      "details": "Only FAQ questions and historical warning retain native details; ancestors open for hash targets.",
+      "staged": "Former audience view transitions disabled and not invoked.",
+      "mode": "One continuous page; hero/header anchors navigate directly with history and focus."
     },
     "assets": {
       "contactsAndHelga": "assets/welcome/sources.json",
@@ -169,6 +177,25 @@
       "font": "assets/welcome/Cinzel-Variable.ttf",
       "classification": "AI fantasy illustration, not a Kingshot screenshot",
       "scene": "assets/welcome/kingdom-dusk.webp"
+    },
+    "scrollScene": {
+      "noJS": "Content visible by default",
+      "lineProgress": "clamp((progress-index*.16)/.35)",
+      "updates": "One scheduled frame on scroll/resize while intersecting; no continuous ticker",
+      "locale": "Finish currently visible heading effects on language change",
+      "visibility": "Finish running effects while hidden",
+      "keyboard": "Navigation/scroll keys settle all effects and keep later heading entrances direct",
+      "trace": "pathLength 1; dasharray 1; offset 1-progress",
+      "progress": "clamp((.85*viewportHeight-sceneTop)/(.7*viewportHeight+.55*sceneHeight))"
+    },
+    "storyLayout": {
+      "contacts": "Dark #191d24 section, #242a33 surfaces, 12px radius, no shadow",
+      "bannerGap": "100px",
+      "sectionPadding": "88px; 65px at1000px; 55px at680px",
+      "bannerMax": "1080px",
+      "bannerColumns": "1fr 1.4fr",
+      "contentMax": "1120px",
+      "standard": "260px by 330px; phone 125px by 158px"
     }
   },
   "components": [
@@ -179,35 +206,42 @@
       "description": "Interactive choice independent from its noninteractive entry wrapper.",
       "html": "<div class=\"path-reveal\"><a class=\"scene-choice\" href=\"#start\"><strong>Already with NRW</strong><span>My starting point →</span></a></div>",
       "refersTo": "member-path"
+    },
+    {
+      "description": "Three fully readable defaults; runtime applies bounded reversible illumination.",
+      "kind": "custom",
+      "html": "<div class=\"story-copy\"><p>Many languages.</p><p>One banner.</p><p class=\"gold\">Stronger together.</p></div>",
+      "name": "Alliance Story Lines",
+      "css": ".story-copy p{font-family:Cinzel,serif;font-size:clamp(32px,3.5vw,49px);line-height:1.25;letter-spacing:-.025em;margin:0 0 34px;color:#f5f1e8}.story-copy .gold{color:#dfbd79}@media(max-width:1000px){.story-copy p{font-size:34px}}@media(max-width:680px){.story-copy{text-align:center}.story-copy p{font-size:31px;margin-bottom:28px}}"
     }
   ],
   "narrative": {
     "keyCharacteristics": [
-      "Dark scene in both themes",
-      "Two usable audience choices",
-      "Bounded intro",
-      "Conditional spring depth",
-      "Staged native transition",
-      "Local provenance and OFL"
+      "Retained cinematic hero",
+      "Continuous information",
+      "Real crest with traced gold edge",
+      "Reversible scroll lines",
+      "Once-only heading arrivals",
+      "Keyboard/reduced settling"
     ],
+    "northStar": "One Alliance, One Journey",
+    "dos": [
+      "Keep all primary information directly available.",
+      "Preserve ordinary scroll, body readability, no-JS visibility, direct hashes, and authoritative data."
+    ],
+    "overview": "The cinematic citadel and Helga lead into a continuous, directly readable Welcome. The real NRW standard traces its gold edge while three localized lines build with native reversible scroll. Primary information is not hidden behind audience selection.",
     "rules": [
       {
-        "body": "Current markup and final cinematic overrides govern Welcome.",
-        "name": "The Cascade Rule",
-        "section": "colors"
+        "body": "Final story styles supersede earlier hidden audience layout; current markup is authoritative.",
+        "section": "colors",
+        "name": "The Cascade Rule"
       }
     ],
-    "overview": "Midnight citadel illustration, warm gold, self-hosted Cinzel, Inter, and official crownless Helga create an authored Kingshot scene. Member and transfer retain progressive disclosure.",
-    "northStar": "The Gold-Lit Citadel",
-    "dos": [
-      "Keep keyboard and reduced navigation direct and choices usable during entry.",
-      "Preserve singleton schedule, cached contacts, central Discord, and deployment boundaries."
-    ],
     "donts": [
-      "Do not call the AI illustration a game screenshot.",
-      "Do not add infinite loops or move text with pointer depth.",
-      "Do not bind CTA entry and hover to the same transform owner.",
-      "Do not alter Dashboard or leadership identity."
+      "Do not restore hidden audience streams or major information disclosures.",
+      "Do not hijack scrolling or invent game rewards or proof.",
+      "Do not restore broken decorative media or fixed early/late event claims.",
+      "Do not change Dashboard, leadership, or deployment scope."
     ]
   }
 }

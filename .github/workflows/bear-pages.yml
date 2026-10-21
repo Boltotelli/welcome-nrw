@@ -423,6 +423,7 @@ jobs:
           cp v3-latest/styles.css v3-latest/app.js _site/
           cp v3-latest/welcome.css v3-latest/welcome.js _site/
           cp v3-latest/welcome-cinematic.css v3-latest/welcome-cinematic.js _site/
+          cp v3-latest/welcome-story.css v3-latest/welcome-story.js _site/
           if [ -f v3-latest/site.webmanifest ]; then cp v3-latest/site.webmanifest _site/; fi
           # Home page is a subfolder preview; the Pages root stays the Bear tool.
           cp v3-latest/index.html _site/welcome/index.html

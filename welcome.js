@@ -30,36 +30,20 @@ window.addEventListener('focus',refresh);document.addEventListener('visibilitych
 setInterval(()=>{if(!document.hidden)refresh();},60000);refresh();
 document.querySelectorAll('[data-copy-id]').forEach(button=>button.addEventListener('click',async()=>{const status=document.getElementById('contact-status');try{await navigator.clipboard.writeText(button.dataset.copyId);status.textContent=words[language()].copied;}catch{status.textContent=words[language()].copyError;}}));
 document.querySelectorAll('.contact-portrait img').forEach(img=>img.addEventListener('error',()=>{img.hidden=true;img.nextElementSibling.hidden=false;}));
-// Two audience paths share data and original controls, but not a long mixed page.
-function showPath(view){
- document.body.dataset.welcomeView=view;
- document.querySelector('.skip-link').href=location.pathname+location.search+(view==='member'?'#start':view==='transfer'?'#transfer':'#welcome-paths');
- document.getElementById('welcome-home').hidden=view!=='landing';
- window.NRW_MOTION?.setView(view);
- document.querySelectorAll('[data-path]').forEach(el=>{el.hidden=el.dataset.path!==view;});
- document.querySelectorAll('[data-shared]').forEach(el=>{el.hidden=view==='landing';});
- const switcher=document.querySelector('.audience-switch');switcher.hidden=view==='landing';
- switcher.querySelectorAll('[data-view-link]').forEach(a=>{if(a.dataset.viewLink===view)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
-}
-// Resolve the audience before choosing motion; in-view section links stay direct.
-function viewFor(target){
- const id=target.id;
- const path=target.closest('[data-path]')?.dataset.path;
- return id==='top'||id==='welcome-paths'?'landing':path||(document.body.dataset.welcomeView==='transfer'?'transfer':'member');
-}
+// Both audience choices navigate the same continuous, fully visible document.
 function go(hash,push=false){
- const id=decodeURIComponent((hash||'#top').slice(1));const target=document.getElementById(id);if(!target)return;
- const view=viewFor(target);
- const previous=document.body.dataset.welcomeView;showPath(view);
- if(previous!==view)document.getElementById('times-disclosure').open=view==='member';
+ let id;try{id=decodeURIComponent((hash||'#top').slice(1));}catch{return;}
+ const target=document.getElementById(id);if(!target)return;
  for(let node=target.parentElement;node;node=node.parentElement){if(node.tagName==='DETAILS')node.open=true;}
  if(target.tagName==='DETAILS')target.open=true;
+ window.NRW_SCROLL?.revealTarget(target);
  if(push&&location.hash!==hash)history.pushState(null,'',location.pathname+location.search+hash);
  if(id==='top')window.scrollTo(0,0);else target.scrollIntoView({block:'start'});
  target.setAttribute('tabindex','-1');target.focus({preventScroll:true});
 }
-document.addEventListener('click',e=>{if(e.defaultPrevented||e.button!==0||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;const a=e.target.closest('a[href]');if(!a)return;const url=new URL(a.href,document.baseURI);if(url.origin!==location.origin||url.pathname!==location.pathname||url.search!==location.search||!url.hash)return;const target=document.getElementById(url.hash.slice(1));if(!target)return;e.preventDefault();const update=()=>go(url.hash,true);if(window.NRW_MOTION&&viewFor(target)!==document.body.dataset.welcomeView)window.NRW_MOTION.navigate(update,e.detail===0);else update();});
+document.addEventListener('click',e=>{if(e.defaultPrevented||e.button!==0||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;const a=e.target.closest('a[href]');if(!a)return;const url=new URL(a.href,document.baseURI);if(url.origin!==location.origin||url.pathname!==location.pathname||url.search!==location.search||!url.hash)return;let id;try{id=decodeURIComponent(url.hash.slice(1));}catch{return;}if(!document.getElementById(id))return;e.preventDefault();go(url.hash,true);});
 window.addEventListener('popstate',()=>go(location.hash||'#top'));
 window.addEventListener('hashchange',()=>go(location.hash||'#top'));
-if(location.hash)go(location.hash);else showPath('landing');
+window.NRW_MOTION?.setView('landing');
+if(location.hash)go(location.hash);
 })();
