@@ -27,7 +27,16 @@
     const moduleIcon=document.createElement('span');moduleIcon.className='os-module-icon';moduleIcon.setAttribute('aria-hidden','true');titleBlock.prepend(moduleIcon);
     const actions=document.createElement('div');actions.className='os-header-actions';
     const shortcuts=['bear','fightclub','participation'].map(tab=>{const button=document.createElement('button');button.type='button';button.className='ghost';button.addEventListener('click',()=>nav.querySelector('[data-tab="'+tab+'"]')?.click());actions.append(button);return{tab,button};});
-    header.append(titleBlock,actions);document.getElementById('liveArea')?.prepend(header);
+    const appearance=document.createElement('label');appearance.className='os-appearance';
+    const appearanceText=document.createElement('span'),appearanceSelect=document.createElement('select');
+    appearanceSelect.className='control';appearanceSelect.id='osAppearance';
+    for(const [value,text] of [['clear','Klar'],['bento','Bento'],['neumorph','Neumorph']]){const option=document.createElement('option');option.value=value;option.textContent=text;appearanceSelect.append(option);}
+    let savedAppearance='bento';try{savedAppearance=localStorage.getItem('allianceos-appearance')||'bento';}catch{}
+    if(!['clear','bento','neumorph'].includes(savedAppearance))savedAppearance='bento';
+    appearanceSelect.value=savedAppearance;document.documentElement.dataset.appearance=savedAppearance;
+    appearanceSelect.addEventListener('change',()=>{document.documentElement.dataset.appearance=appearanceSelect.value;try{localStorage.setItem('allianceos-appearance',appearanceSelect.value);}catch{}});
+    appearance.append(appearanceText,appearanceSelect);
+    header.append(titleBlock,appearance,actions);document.getElementById('liveArea')?.prepend(header);
     // Hero IDs remain intact for application renderers; only their visual role changes.
     const notice=document.querySelector('[data-page="overview"] > .notice');let noticeSummary;
     if(notice){const details=document.createElement('details');details.className='os-notice';noticeSummary=document.createElement('summary');notice.before(details);details.append(noticeSummary,notice);}
@@ -55,7 +64,10 @@
     const compact=matchMedia('(max-width:1100px)');
     const moveNav=()=>{if(menu.open)menu.close();if(compact.matches){menu.insertBefore(nav,password);if(home)menu.append(home);}else{anchor.after(nav);if(home)homeAnchor.after(home);}};compact.addEventListener('change',moveNav);moveNav();
     const update=()=>{
-      const l=words[document.getElementById('language')?.value]||words.de;
+      const language=document.getElementById('language')?.value||'de';
+      const l=words[language]||words.de;
+      appearanceText.textContent=({de:'Ansicht',en:'Appearance',fr:'Apparence',es:'Apariencia'})[language]||'Appearance';
+      appearanceSelect.options[0].textContent=({de:'Klar',en:'Clear',fr:'Épuré',es:'Simple'})[language]||'Clear';
       const active=items.find(x=>x.classList.contains('active'));
       items.forEach(x=>{if(x===active)x.setAttribute('aria-current','page');else x.removeAttribute('aria-current');});
       groups.forEach(({node,before},i)=>{node.textContent=l[i];node.hidden=before?.hidden===true;});

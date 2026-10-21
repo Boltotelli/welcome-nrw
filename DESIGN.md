@@ -253,3 +253,13 @@ details element and module listeners remain intact.
 - **Don't** add gaming effects, gradient cards, neon glows, promotional hero slogans or invented metrics.
 - **Don't** replace permission decisions with visual guesses or publish test fixtures as live data.
 - **Don't** introduce a new animation framework or restore the seed's no-sidebar shell and literal tokens over this implementation.
+
+## Optional visual studies and deployment areas
+
+The Pages preview offers Clear, Bento and Neumorph through a labelled appearance selector. The choice persists locally and is independent of light/dark mode. Bento uses a slate canvas, separate summary tiles, rounded working surfaces and a larger primary player total. Neumorph uses paired light/dark shadows with explicit control borders, selected states and focus indicators. These requested studies override the prior flat-surface preference while preserving the existing NRW identity and content.
+
+Swordland tactical North/South groups are derived from the vertical half of each map objective within the selected battle legion. Safe Zone is an explicit objective, separate from roster reserve. Map rows are scoped to event and date. Team leader configuration remains tied to the selected legion.
+
+External-account lookup uses the existing MightPulse provider on deliberate click. It fills draft name/alliance fields without saving a relationship. Changing the ID clears unchanged provider-filled fields. Manual edits survive. The dedicated action requires the existing members permission; the transfer lookup retains its transfer permission.
+
+The user explicitly authorized the two minimal shared API extensions on 2026-10-21. No schema, authentication, subscription or Vercel deployment changes accompany them.

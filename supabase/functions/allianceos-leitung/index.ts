@@ -958,7 +958,7 @@ async function saveBearPlanningSettings(req:Request,alliance:string,userId:strin
 function fightMapLocationValid(eventType:string,key:string){
  if(eventType==="triforce")return key==="temple"||/^[ABC](?:[1-9]|[12][0-9]|3[01])$/.test(key);
  return eventType==="swordland"&&[
-  "shrine","bell","mercenary","reformation","stables",
+  "shrine","bell","mercenary","reformation","stables","safe-zone",
   "sanctum-west","sanctum-east",
   "abbey-north","abbey-east","abbey-west","abbey-south",
   "under-nw","under-ne","under-sw","under-se"
@@ -1213,7 +1213,7 @@ async function memberPowerHistory(req:Request,alliance:string,staff:any,body:any
  return json(req,{ok:true,game_id:gameId,snapshots:records.reverse()});
 }
 async function lookupTransferPlayer(req:Request,alliance:string,staff:any,body:any){
- if(!permission(staff,"transfers"))throw new HttpError("permission_denied",403);
+ if(!permission(staff,body?.action==="external_alt_lookup"?"members":"transfers"))throw new HttpError("permission_denied",403);
  const id=str(body?.game_id,20);
  if(!/^[0-9]{5,20}$/.test(id))throw new HttpError("invalid_player_id",400);
  const key=Deno.env.get("KINGSHOTSTATS_API_KEY")||"";
@@ -1702,7 +1702,7 @@ Deno.serve(async(req: Request)=>{
     if(body?.action==="external_alt_save")return await saveExternalAlt(req,alliance,userId,staff,body);
     if(body?.action==="provision_leaders")return await provisionLeaders(req,alliance,userId,staff);
     if(body?.action==="reset_leader_password")return await rotateLeaderPassword(req,alliance,userId,staff,body);
-    if(body?.action==="player_lookup")return await lookupTransferPlayer(req,alliance,staff,body);
+    if(body?.action==="player_lookup"||body?.action==="external_alt_lookup")return await lookupTransferPlayer(req,alliance,staff,body);
     if(body?.action==="power_sync")return await syncRosterPower(req,alliance,staff);
     if(body?.action==="power_history")return await memberPowerHistory(req,alliance,staff,body);
     if(body?.action==="performance_dashboard")return await performanceDashboard(req,alliance,staff);

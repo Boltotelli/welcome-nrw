@@ -34,11 +34,18 @@ export function createMemberRelationships({getState,getLanguage,request,esc,flas
       linked:"Vinculado a",mainHasAlts:"Esta cuenta principal ya tiene alternativas y no puede ser alternativa."}
   };
   const extra={
-  de:{externalTitle:"Zweitaccounts außerhalb von NRW",externalHelp:"Nur eine private Übersicht. Keine NRW-Mitgliedschaft, keine Loginrechte, keine automatische Übernahme von API-Daten.",externalId:"Kingshot-ID des Zweitaccounts",externalName:"Name (optional)",externalAlliance:"Allianz (optional)",externalAdd:"Zweitaccount verknüpfen",externalRemove:"Entfernen",externalType:"Extern · manuell eingetragen",externalConfirm:"Diese externe Verknüpfung wirklich entfernen?",externalSaved:"Externer Zweitaccount gespeichert.",externalDeleted:"Externe Verknüpfung entfernt.",externalError:"Externer Zweitaccount konnte nicht gespeichert werden.",externalCount:"extern",externalNoMain:"Zuerst einen Main-Account öffnen."},
+  de:{externalTitle:"Zweitaccounts außerhalb von NRW",externalHelp:"Nur eine private Übersicht. Name und Allianz können per Spielerabruf ergänzt werden. Die Verknüpfung bestätigst du selbst; sie vergibt keine Mitgliedschaft oder Loginrechte.",externalId:"Kingshot-ID des Zweitaccounts",externalName:"Name (optional)",externalAlliance:"Allianz (optional)",externalAdd:"Zweitaccount verknüpfen",externalRemove:"Entfernen",externalType:"Extern · manuell eingetragen",externalConfirm:"Diese externe Verknüpfung wirklich entfernen?",externalSaved:"Externer Zweitaccount gespeichert.",externalDeleted:"Externe Verknüpfung entfernt.",externalError:"Externer Zweitaccount konnte nicht gespeichert werden.",externalCount:"extern",externalNoMain:"Zuerst einen Main-Account öffnen."},
   en:{externalTitle:"Second accounts outside NRW",externalHelp:"Private overview only. No NRW membership, login rights or automatic API ownership claims.",externalId:"Second account Kingshot ID",externalName:"Name (optional)",externalAlliance:"Alliance (optional)",externalAdd:"Link second account",externalRemove:"Remove",externalType:"External · entered manually",externalConfirm:"Remove this external association?",externalSaved:"External second account saved.",externalDeleted:"External link removed.",externalError:"Unable to save external second account.",externalCount:"external",externalNoMain:"Open a main account first."},
   fr:{externalTitle:"Comptes secondaires hors NRW",externalHelp:"Vue privée uniquement : aucune adhésion NRW, aucun accès ni vérification automatique de propriété.",externalId:"ID Kingshot du secondaire",externalName:"Nom (facultatif)",externalAlliance:"Alliance (facultatif)",externalAdd:"Associer ce compte",externalRemove:"Supprimer",externalType:"Externe · saisi manuellement",externalConfirm:"Supprimer cette association ?",externalSaved:"Compte secondaire externe enregistré.",externalDeleted:"Association supprimée.",externalError:"Enregistrement impossible.",externalCount:"externes",externalNoMain:"Ouvrir d'abord le compte principal."},
   es:{externalTitle:"Cuentas secundarias fuera de NRW",externalHelp:"Solo vista privada. Sin membresía NRW, acceso ni verificación automática de propiedad.",externalId:"ID Kingshot secundaria",externalName:"Nombre (opcional)",externalAlliance:"Alianza (opcional)",externalAdd:"Vincular cuenta",externalRemove:"Quitar",externalType:"Externa · introducida manualmente",externalConfirm:"¿Quitar esta vinculación?",externalSaved:"Cuenta secundaria guardada.",externalDeleted:"Vinculación eliminada.",externalError:"No se pudo guardar.",externalCount:"externas",externalNoMain:"Abre una cuenta principal primero."}
   };
+  const lookupLabels={
+   de:{lookup:"Spieler abrufen",loading:"Spieler wird abgerufen …",ready:"Name und Allianz übernommen. Bitte prüfen und anschließend verknüpfen.",failed:"Spieler konnte nicht abgerufen werden. Manuelle Eingabe bleibt möglich.",changed:"Die ID wurde geändert. Bitte erneut abrufen.",invalid:"Bitte eine gültige Kingshot-ID eingeben."},
+   en:{lookup:"Look up player",loading:"Looking up player …",ready:"Name and alliance filled. Review, then link the account.",failed:"Player lookup failed. You can still enter details manually.",changed:"The ID changed. Please look up again.",invalid:"Enter a valid Kingshot ID."},
+   fr:{lookup:"Rechercher le joueur",loading:"Recherche en cours …",ready:"Nom et alliance renseignés. Vérifiez avant d’associer.",failed:"Recherche impossible. La saisie manuelle reste disponible.",changed:"ID modifié. Relancez la recherche.",invalid:"Saisissez un ID Kingshot valide."},
+   es:{lookup:"Buscar jugador",loading:"Buscando jugador …",ready:"Nombre y alianza rellenados. Revisa antes de vincular.",failed:"No se pudo consultar. Puedes introducir los datos manualmente.",changed:"El ID cambió. Repite la búsqueda.",invalid:"Introduce una ID Kingshot válida."}
+  };
+  const lt=k=>(lookupLabels[getLanguage()]||lookupLabels.de)[k];
   const t=key=>extra[getLanguage()]?.[key]||(labels[getLanguage()]||labels.de)[key]||extra.de[key]||labels.de[key]||key;
   const player=id=>(getState()?.players||[]).find(x=>String(x.game_id)===String(id));
   const externalFor=id=>(getState()?.externalAlts||[]).filter(x=>String(x.main_game_id)===String(id));
@@ -71,7 +78,7 @@ export function createMemberRelationships({getState,getLanguage,request,esc,flas
       '<div class="form-grid"><label class="field"><span>'+esc(t("externalId"))+'</span><input class="control" name="external_alt_id" pattern="[0-9]{5,20}" inputmode="numeric" maxlength="20" placeholder="123456789"></label>'+
       '<label class="field"><span>'+esc(t("externalName"))+'</span><input class="control" name="external_alt_name" maxlength="80"></label>'+
       '<label class="field"><span>'+esc(t("externalAlliance"))+'</span><input class="control" name="external_alt_alliance" maxlength="24" placeholder="NWO / RDS"></label></div>'+
-      '<button type="button" class="ghost" data-add-external-alt>'+esc(t("externalAdd"))+'</button></div>';
+      '<div class="external-alt-actions"><button type="button" class="ghost" data-lookup-external-alt>'+esc(lt("lookup"))+'</button><button type="button" class="ghost" data-add-external-alt>'+esc(t("externalAdd"))+'</button></div><p class="small-note" data-external-lookup-status role="status" aria-live="polite"></p></div>';
     return '<section class="member-links-panel"><h3>'+esc(t("kind"))+'</h3>'+
       '<div class="form-grid"><label class="field"><span>'+esc(t("kind"))+'</span><select class="control" name="account_kind">'+
       '<option value="main" '+(!isAlt?'selected':'')+'>'+esc(t("main"))+'</option>'+
@@ -129,7 +136,41 @@ export function createMemberRelationships({getState,getLanguage,request,esc,flas
   // External references are separate actions; never create player records.
   const dialog=document.getElementById("editDialog");
   if(dialog){
+    dialog.addEventListener("input",event=>{
+      if(!event.target.matches('[name="external_alt_id"]'))return;
+      const status=dialog.querySelector('[data-external-lookup-status]');
+      if(!status?.dataset.lookupId||String(event.target.value).trim()===status.dataset.lookupId)return;
+      for(const [field,key] of [['external_alt_name','lookupName'],['external_alt_alliance','lookupAlliance']]){
+        const input=dialog.querySelector('[name="'+field+'"]');
+        if(status.dataset[key]&&input?.value===status.dataset[key])input.value="";
+        delete status.dataset[key];
+      }
+      delete status.dataset.lookupId;status.textContent=lt("changed");
+    });
     dialog.addEventListener("click",async event=>{
+      const lookup=event.target.closest("[data-lookup-external-alt]");
+      if(lookup&&dialog.open){
+        event.preventDefault();if(lookup.disabled)return;
+        const idField=dialog.querySelector('[name="external_alt_id"]'),id=String(idField?.value||"").trim();
+        const status=dialog.querySelector('[data-external-lookup-status]');
+        if(!/^[0-9]{5,20}$/.test(id)){status.textContent=lt("invalid");return;}
+        const scope=dialog.dataset.memberGameId,name=dialog.querySelector('[name="external_alt_name"]'),alliance=dialog.querySelector('[name="external_alt_alliance"]');
+        const originalName=name.value,originalAlliance=alliance.value;
+        lookup.disabled=true;status.textContent=lt("loading");
+        try{
+          const result=await request("bootstrap",{action:"external_alt_lookup",game_id:id}),p=result?.player;
+          if(!p||String(p.game_id)!==id)throw Error("invalid_player_response");
+          if(!dialog.open||dialog.dataset.memberGameId!==scope||!idField.isConnected)return;
+          if(String(idField.value).trim()!==id){status.textContent=lt("changed");return;}
+          // Do not overwrite edits made while the request was in flight.
+          status.dataset.lookupId=id;
+          if(name.value===originalName&&p.name){name.value=String(p.name).slice(0,80);status.dataset.lookupName=name.value;}
+          if(alliance.value===originalAlliance&&p.alliance){alliance.value=String(p.alliance).slice(0,24);status.dataset.lookupAlliance=alliance.value;}
+          status.textContent=lt("ready");
+        }catch(e){if(dialog.open&&dialog.dataset.memberGameId===scope&&status.isConnected)status.textContent=lt("failed");}
+        finally{if(lookup.isConnected)lookup.disabled=false;}
+        return;
+      }
       const add=event.target.closest("[data-add-external-alt]");
       const remove=event.target.closest("[data-remove-external-alt]");
       if(!add&&!remove||!dialog.open)return;
