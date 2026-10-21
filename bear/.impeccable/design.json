@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-21T17:52:54Z",
+  "title": "Design System: NRW Bear Optimizer",
+  "extensions": {
+    "colorMeta": {
+      "war-bg": {"role":"neutral","displayName":"Room Charcoal","tonalRamp":["oklch(15% .004 130)","oklch(27% .004 130)","oklch(38% .004 130)","oklch(49% .004 130)","oklch(61% .004 130)","oklch(72% .004 130)","oklch(84% .004 130)","oklch(95% .004 130)"]},
+      "war-panel": {"role":"neutral","displayName":"Panel Charcoal","tonalRamp":["oklch(15% .006 130)","oklch(27% .006 130)","oklch(38% .006 130)","oklch(49% .006 130)","oklch(61% .006 130)","oklch(72% .006 130)","oklch(84% .006 130)","oklch(95% .006 130)"]},
+      "war-raised": {"role":"neutral","displayName":"Raised Charcoal","tonalRamp":["oklch(15% .01 130)","oklch(27% .01 130)","oklch(38% .01 130)","oklch(49% .01 130)","oklch(61% .01 130)","oklch(72% .01 130)","oklch(84% .01 130)","oklch(95% .01 130)"]},
+      "war-well": {"role":"neutral","displayName":"Inset Charcoal","tonalRamp":["oklch(15% .006 130)","oklch(27% .006 130)","oklch(38% .006 130)","oklch(49% .006 130)","oklch(61% .006 130)","oklch(72% .006 130)","oklch(84% .006 130)","oklch(95% .006 130)"]},
+      "war-line": {"role":"neutral","displayName":"Frame Neutral","tonalRamp":["oklch(15% .016 130)","oklch(27% .016 130)","oklch(38% .016 130)","oklch(49% .016 130)","oklch(61% .016 130)","oklch(72% .016 130)","oklch(84% .016 130)","oklch(95% .016 130)"]},
+      "war-control": {"role":"neutral","displayName":"Control Neutral","tonalRamp":["oklch(15% .022 130)","oklch(27% .022 130)","oklch(38% .022 130)","oklch(49% .022 130)","oklch(61% .022 130)","oklch(72% .022 130)","oklch(84% .022 130)","oklch(95% .022 130)"]},
+      "war-text": {"role":"neutral","displayName":"Parchment","tonalRamp":["oklch(15% .014 100)","oklch(27% .014 100)","oklch(38% .014 100)","oklch(49% .014 100)","oklch(61% .014 100)","oklch(72% .014 100)","oklch(84% .014 100)","oklch(95% .014 100)"]},
+      "war-muted": {"role":"neutral","displayName":"Muted Parchment","tonalRamp":["oklch(15% .018 120)","oklch(27% .018 120)","oklch(38% .018 120)","oklch(49% .018 120)","oklch(61% .018 120)","oklch(72% .018 120)","oklch(84% .018 120)","oklch(95% .018 120)"]},
+      "war-gold": {"role":"primary","displayName":"NRW Gold","tonalRamp":["oklch(15% .10 85)","oklch(27% .10 85)","oklch(38% .10 85)","oklch(49% .10 85)","oklch(61% .10 85)","oklch(72% .10 85)","oklch(84% .10 85)","oklch(95% .10 85)"]},
+      "war-ink": {"role":"neutral","displayName":"Gold Ink","tonalRamp":["oklch(15% .025 85)","oklch(27% .025 85)","oklch(38% .025 85)","oklch(49% .025 85)","oklch(61% .025 85)","oklch(72% .025 85)","oklch(84% .025 85)","oklch(95% .025 85)"]},
+      "war-green": {"role":"semantic","displayName":"Success","tonalRamp":["oklch(15% .05 155)","oklch(27% .05 155)","oklch(38% .05 155)","oklch(49% .05 155)","oklch(61% .05 155)","oklch(72% .05 155)","oklch(84% .05 155)","oklch(95% .05 155)"]},
+      "war-warning": {"role":"semantic","displayName":"Warning","tonalRamp":["oklch(15% .07 75)","oklch(27% .07 75)","oklch(38% .07 75)","oklch(49% .07 75)","oklch(61% .07 75)","oklch(72% .07 75)","oklch(84% .07 75)","oklch(95% .07 75)"]},
+      "war-danger": {"role":"semantic","displayName":"Error","tonalRamp":["oklch(15% .08 35)","oklch(27% .08 35)","oklch(38% .08 35)","oklch(49% .08 35)","oklch(61% .08 35)","oklch(72% .08 35)","oklch(84% .08 35)","oklch(95% .08 35)"]},
+      "infantry": {"role":"data","displayName":"Infantry","tonalRamp":["oklch(15% .03 215)","oklch(27% .03 215)","oklch(38% .03 215)","oklch(49% .03 215)","oklch(61% .03 215)","oklch(72% .03 215)","oklch(84% .03 215)","oklch(95% .03 215)"]},
+      "cavalry": {"role":"data","displayName":"Cavalry","tonalRamp":["oklch(15% .02 75)","oklch(27% .02 75)","oklch(38% .02 75)","oklch(49% .02 75)","oklch(61% .02 75)","oklch(72% .02 75)","oklch(84% .02 75)","oklch(95% .02 75)"]}
+    },
+    "typographyMeta": {
+      "display":{"displayName":"Display","purpose":"Landing headline; responsive sizes are documented in DESIGN.md."},
+      "headline":{"displayName":"Headline","purpose":"Main working panel headings."},
+      "title":{"displayName":"Title","purpose":"Supporting panel headings."},
+      "body":{"displayName":"Body","purpose":"Main interface copy with tabular numerals."},
+      "muted":{"displayName":"Supporting copy","purpose":"Explanations and secondary context."},
+      "label":{"displayName":"Label","purpose":"Field labels and evidence summaries."}
+    },
+    "shadows":[
+      {"name":"working-surface","value":"none","purpose":"Main panels and standard controls remain flat."},
+      {"name":"pin-dialog","value":"0 25px 70px #0009","purpose":"Retained PIN modal elevation."},
+      {"name":"help-dialog","value":"0 20px 80px #000b","purpose":"Retained help modal elevation."}
+    ],
+    "motion":[
+      {"name":"war-ease","value":"cubic-bezier(.23,1,.32,1)","purpose":"Existing war room state easing."},
+      {"name":"button-color","value":"150ms","purpose":"Button background and border changes."},
+      {"name":"button-press","value":"120ms","purpose":"Button scale to .98 on press."},
+      {"name":"hero-card","value":"160ms","purpose":"Hero border and background changes."},
+      {"name":"portrait","value":"180ms","purpose":"Portrait opacity and filter changes."},
+      {"name":"result-enter","value":"240ms","purpose":"Opacity .7 to 1 and translateY(8px) to 0; disabled with reduced motion."}
+    ],
+    "breakpoints":[
+      {"name":"small-phone","value":"480px"},
+      {"name":"stacked-workspace","value":"820px"},
+      {"name":"wide-workspace","value":"1100px"}
+    ],
+    "tonalRampNote":"Tonal ramps are synthesized OKLCH panel previews only. They are not implemented application tokens; DESIGN.md frontmatter preserves the actual CSS colors."
+  },
+  "components":[
+    {
+      "name":"Primary Button","kind":"button","refersTo":"button-primary","description":"Opening and calculation actions.",
+      "html":"<button class=\"ds-primary\">Calculate formations</button>",
+      "css":".ds-primary{font:800 15px Nunito,system-ui,sans-serif;min-height:44px;padding:11px 14px;background:var(--war-gold,#eac477);color:var(--war-ink,#262012);border:1px solid var(--war-gold,#eac477);border-radius:10px;cursor:pointer;transition:background-color 150ms cubic-bezier(.23,1,.32,1),border-color 150ms cubic-bezier(.23,1,.32,1),transform 120ms cubic-bezier(.23,1,.32,1)}.ds-primary:hover{border-color:var(--war-gold,#eac477)}.ds-primary:focus-visible{outline:2px solid var(--war-gold,#eac477);outline-offset:3px}.ds-primary:active{transform:scale(.98)}.ds-primary:disabled{opacity:.48;cursor:not-allowed}@media(prefers-reduced-motion:reduce){.ds-primary{transition:none}}"
+    },
+    {
+      "name":"Secondary Button","kind":"button","refersTo":"button-secondary","description":"Secondary actions on raised charcoal.",
+      "html":"<button class=\"ds-secondary\">Choose mode</button>",
+      "css":".ds-secondary{font:800 15px Nunito,system-ui,sans-serif;min-height:44px;padding:11px 14px;background:var(--war-raised,#292c27);color:var(--war-text,#f2f0e6);border:1px solid var(--war-control,#62685a);border-radius:10px;cursor:pointer;transition:border-color 150ms cubic-bezier(.23,1,.32,1),transform 120ms cubic-bezier(.23,1,.32,1)}.ds-secondary:hover{border-color:var(--war-gold,#eac477)}.ds-secondary:focus-visible{outline:2px solid var(--war-gold,#eac477);outline-offset:3px}.ds-secondary:active{transform:scale(.98)}.ds-secondary:disabled{opacity:.48;cursor:not-allowed}@media(prefers-reduced-motion:reduce){.ds-secondary{transition:none}}"
+    },
+    {
+      "name":"Profile Search Field","kind":"input","refersTo":"input","description":"The existing player-name search with readable placeholder text.",
+      "html":"<label class=\"ds-field\">Kingshot name<input class=\"ds-input\" aria-label=\"Kingshot name\" placeholder=\"Your Kingshot name\" autocomplete=\"off\" /></label>",
+      "css":".ds-field{display:grid;gap:5px;font:800 13px Nunito,system-ui,sans-serif;color:var(--war-muted,#b7bbae)}.ds-input{font:17px Nunito,system-ui,sans-serif;min-height:44px;padding:10px 8px;border:1px solid var(--war-control,#62685a);border-radius:10px;background:var(--war-well,#191b18);color:var(--war-text,#f2f0e6);caret-color:var(--war-gold,#eac477)}.ds-input::placeholder{color:var(--war-muted,#b7bbae);opacity:1}.ds-input:focus-visible{outline:2px solid var(--war-gold,#eac477);outline-offset:3px}"
+    },
+    {
+      "name":"Language Navigation","kind":"nav","refersTo":"language-active","description":"Compact four-locale selection; active locale uses gold.",
+      "html":"<nav class=\"ds-languages\" aria-label=\"Language / Sprache\"><button class=\"ds-language ds-active\" lang=\"de\">DE</button><button class=\"ds-language\" lang=\"en\">EN</button><button class=\"ds-language\" lang=\"fr\">FR</button><button class=\"ds-language\" lang=\"es\">ES</button></nav>",
+      "css":".ds-languages{display:flex;flex-wrap:wrap;gap:4px;width:max-content;padding:4px;border:1px solid var(--war-line,#3d4138);border-radius:13px;background:var(--war-well,#191b18)}.ds-language{font:800 12px Nunito,system-ui,sans-serif;min-height:36px;padding:7px 10px;border:1px solid var(--war-control,#62685a);border-radius:8px;background:var(--war-raised,#292c27);color:var(--war-muted,#b7bbae);cursor:pointer}.ds-active{background:var(--war-gold,#eac477);color:var(--war-ink,#262012);border-color:var(--war-gold,#eac477)}.ds-language:hover{border-color:var(--war-gold,#eac477)}.ds-language:focus-visible{outline:2px solid var(--war-gold,#eac477);outline-offset:3px}.ds-language:active{transform:scale(.98)}"
+    },
+    {
+      "name":"Working Panel","kind":"card","refersTo":"panel","description":"Flat framed container for related working content.",
+      "html":"<section class=\"ds-panel\"><h2 class=\"ds-heading\">Recommended starters</h2><p class=\"ds-muted\">From your selected heroes.</p></section>",
+      "css":".ds-panel{padding:22px;border:1px solid var(--war-line,#3d4138);border-radius:16px;background:var(--war-panel,#20221f);color:var(--war-text,#f2f0e6);font:15px/1.55 Nunito,system-ui,sans-serif;box-shadow:none}.ds-heading{font-size:23px;line-height:1.25;letter-spacing:-.025em;margin:0 0 14px}.ds-muted{font-size:14px;line-height:1.6;color:var(--war-muted,#b7bbae);margin:8px 0 16px}@media(max-width:820px){.ds-panel{padding:18px}}@media(max-width:480px){.ds-heading{font-size:21px}}"
+    },
+    {
+      "name":"Recommendation Evidence","kind":"custom","refersTo":"evidence-summary","description":"Native read-only disclosure; preview contains no invented hero or score.",
+      "html":"<details class=\"ds-evidence\"><summary class=\"ds-summary\">Why this hero?</summary><div class=\"ds-evidence-body\"><p>100 = the same rally without this hero. Isolated contribution in the recommendation model; not a full team comparison or actual Bear damage.</p><h4 class=\"ds-evidence-heading\">Model assumptions</h4><p>Skill levels derived from stars are assumptions, not separately confirmed values.</p></div></details>",
+      "css":".ds-evidence{font:13px/1.55 Nunito,system-ui,sans-serif;color:var(--war-text,#f2f0e6);background:var(--war-panel,#20221f);padding:0;border:0}.ds-summary{min-height:44px;align-content:center;color:var(--war-gold,#eac477);font-size:13px;font-weight:800;cursor:pointer}.ds-summary:hover{color:var(--war-gold,#eac477)}.ds-summary:focus-visible{outline:2px solid var(--war-gold,#eac477);outline-offset:3px}.ds-evidence-body{padding:2px 0 12px;color:var(--war-muted,#b7bbae)}.ds-evidence-heading{font-size:14px;letter-spacing:-.025em;margin:22px 0 8px;color:var(--war-text,#f2f0e6)}"
+    }
+  ],
+  "narrative":{
+    "northStar":"The NRW War Room",
+    "overview":"A quiet tactical workspace puts the player's heroes, troop stock and model evidence within reach. Neutral charcoal surfaces, parchment text and restrained NRW gold retain the existing gaming identity without competing with the catalog portraits.\n\nNunito keeps dense controls approachable. Flat framed panels separate editing, recommendations and results; evidence expands in place so the player can inspect a recommendation while keeping the surrounding roster visible. This document describes the scoped Bear interface implemented by the V3 shell and its war room overrides.",
+    "keyCharacteristics":["Neutral charcoal surfaces with gold for action and selection.","Compact, legible controls and existing Nunito typography.","Flat framed panels and real catalog portraits.","Read-only evidence beside each recommendation."],
+    "rules":[
+      {"name":"The Gold Has a Job Rule","body":"Use gold for a meaningful action, selected state or model result; keep surrounding surfaces neutral.","section":"colors"},
+      {"name":"The Flat Working Surface Rule","body":"Keep ordinary editing and recommendation surfaces flat; reserve overlay depth for dialogs.","section":"elevation"}
+    ],
+    "dos":["Do use gold for actions, selection and meaningful model results.","Do preserve the existing Nunito family, catalog portraits and original media.","Do keep recommendations and actions above the editable roster on mobile.","Do preserve native disclosure and visible keyboard focus.","Do distinguish stored values, assumptions and unresolved model effects in all four locales.","Do show ready results without waiting for video playback."],
+    "donts":["Don't add decorative shadows to ordinary working panels.","Don't invent hero imagery, asset provenance or confirmed game damage claims.","Don't mutate profile values or recalculate rankings merely to open evidence.","Don't add separate skill-level inputs to this workflow.","Don't require animation to understand or access a result."]
+  }
+}
