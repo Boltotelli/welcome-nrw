@@ -75,7 +75,10 @@ function refreshSecurityStatus(){
 }
 function markReadOnly(root){
  if(canEdit||localOnly)return;
- root.querySelectorAll('input,select,textarea').forEach(el=>el.disabled=true);
+ root.querySelectorAll('input,select,textarea').forEach(el=>{
+  // Comparison is read-only evidence, not a profile edit.
+  if(!el.matches('.bear-advice-select'))el.disabled=true;
+ });
  root.querySelectorAll('button:not(.bear-name-help-trigger):not(.bear-name-action-btn)').forEach(el=>el.disabled=true);
 }
 function numberField(label,value,onChange,options={}){
