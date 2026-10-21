@@ -30,5 +30,30 @@ window.addEventListener('focus',refresh);document.addEventListener('visibilitych
 setInterval(()=>{if(!document.hidden)refresh();},60000);refresh();
 document.querySelectorAll('[data-copy-id]').forEach(button=>button.addEventListener('click',async()=>{const status=document.getElementById('contact-status');try{await navigator.clipboard.writeText(button.dataset.copyId);status.textContent=words[language()].copied;}catch{status.textContent=words[language()].copyError;}}));
 document.querySelectorAll('.contact-portrait img').forEach(img=>img.addEventListener('error',()=>{img.hidden=true;img.nextElementSibling.hidden=false;}));
-document.addEventListener('click',e=>{if(e.defaultPrevented||e.button!==0||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;const a=e.target.closest('a[href]');if(!a)return;const url=new URL(a.href,document.baseURI);if(url.origin!==location.origin||url.pathname!==location.pathname||url.search!==location.search||!url.hash)return;const target=document.getElementById(url.hash.slice(1));if(!target)return;e.preventDefault();history.replaceState(null,'',location.pathname+location.search+url.hash);target.scrollIntoView();target.setAttribute('tabindex','-1');target.focus({preventScroll:true});});
+// Two audience paths share data and original controls, but not a long mixed page.
+function showPath(view){
+ document.body.dataset.welcomeView=view;
+ document.querySelector('.skip-link').href=location.pathname+location.search+(view==='member'?'#start':view==='transfer'?'#transfer':'#welcome-paths');
+ document.getElementById('welcome-home').hidden=view!=='landing';
+ document.querySelectorAll('[data-path]').forEach(el=>{el.hidden=el.dataset.path!==view;});
+ document.querySelectorAll('[data-shared]').forEach(el=>{el.hidden=view==='landing';});
+ const switcher=document.querySelector('.audience-switch');switcher.hidden=view==='landing';
+ switcher.querySelectorAll('[data-view-link]').forEach(a=>{if(a.dataset.viewLink===view)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
+}
+function go(hash,push=false){
+ const id=decodeURIComponent((hash||'#top').slice(1));const target=document.getElementById(id);if(!target)return;
+ const path=target.closest('[data-path]')?.dataset.path;
+ const view=id==='top'||id==='welcome-paths'?'landing':path||(document.body.dataset.welcomeView==='transfer'?'transfer':'member');
+ const previous=document.body.dataset.welcomeView;showPath(view);
+ if(previous!==view)document.getElementById('times-disclosure').open=view==='member';
+ for(let node=target.parentElement;node;node=node.parentElement){if(node.tagName==='DETAILS')node.open=true;}
+ if(target.tagName==='DETAILS')target.open=true;
+ if(push&&location.hash!==hash)history.pushState(null,'',location.pathname+location.search+hash);
+ if(id==='top')window.scrollTo(0,0);else target.scrollIntoView({block:'start'});
+ target.setAttribute('tabindex','-1');target.focus({preventScroll:true});
+}
+document.addEventListener('click',e=>{if(e.defaultPrevented||e.button!==0||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;const a=e.target.closest('a[href]');if(!a)return;const url=new URL(a.href,document.baseURI);if(url.origin!==location.origin||url.pathname!==location.pathname||url.search!==location.search||!url.hash)return;if(!document.getElementById(url.hash.slice(1)))return;e.preventDefault();go(url.hash,true);});
+window.addEventListener('popstate',()=>go(location.hash||'#top'));
+window.addEventListener('hashchange',()=>go(location.hash||'#top'));
+if(location.hash)go(location.hash);else showPath('landing');
 })();

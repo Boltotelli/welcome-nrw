@@ -1,33 +1,42 @@
 # Welcome NRW surface brief
 
-Status: implemented surface record, 2026-10-21. Mode: **Persuasive**, with member orientation.
+Status: implemented focused revision, 2026-10-21. Surface mode: **Persuasive**, with a separate member utility view.
 
-## Boundary
+## Approved direction and boundary
 
-This brief and its sibling DESIGN.md govern the public root Welcome page (`index.html`, `welcome.css`, `welcome.js`, and the existing `app.js` integrations). They do not replace root PRODUCT.md or DESIGN.md, which describe historical leadership work. The dashboard and leadership routes remain separate products; no Supabase schema, function, or data changes belong to this redesign. Synced project sources remain read-only.
+The user rejected the green, overloaded page and selected **“Dunkel & Gold – atmosphärisch, mit großer Kingshot-Bildwelt.”** This supersedes the former forest/paper direction. Neutral charcoal, NRW gold, and large existing crownless Helga artwork govern Welcome. No giant crown, oversized 1044 backdrop, overlay slogan, or green cast returns.
 
-## Audience and argument
+This brief and sibling DESIGN.md govern the public root Welcome implementation: index.html, welcome.css, welcome.js, and existing app.js integrations. Root PRODUCT.md and DESIGN.md remain historical leadership references. Dashboard, leadership, NAP, and synced sources are outside this documentation change. No new raster assets or backend changes were introduced.
 
-Invite prospective transfers into NRW United, kingdom 1044, while giving existing members a clear way to start. Lead with international, casual/F2P-friendly teamwork, respect for real life, and shared KvK preparation. These are alliance positioning statements, not independently measured performance claims. Do not invent rankings, member counts, testimonials, transfer availability, or guarantees.
+## Three states, two audiences
 
-The first viewport offers two stacked paths: existing member to `#start`, prospective transfer to `#transfer`. Both jump within the page and move keyboard focus. A direct contact link follows the transfer introduction. The member route retains event times, language profile, Discord, server information, and links to separate dashboard tools.
+Landing shows only the large two-line Welcome headline, one short explanation, two choices, and game artwork, followed by a compact footer. The member and transfer streams remain hidden until chosen. On phones, both choices precede the artwork.
 
-## Surface expression
+Member view leads with the separate Player Dashboard and utility links, then current event times. Onboarding, server information, event explanations, language profile, rules, and Discord material stay in closed detail groups. Transfer view leads with fit/values, real in-game contacts, and a short process; event times and FAQ start closed. The single shared schedule opens on entry to member view and closes on entry to transfer view.
 
-A wide paper invitation pairs a large two-line heading and concise promise with kingdom 1044 and **crownless Helga**. Helga replaces the former Lord artwork; do not restore a giant crown hero. The older `work/welcome-direction.md` Lord reference describes an earlier direction, not the final asset. On phones, text and both choices precede the artwork. Use the actual stylesheet as the authority for current token values.
+Audience switching and return-home links remain available in either selected view. Direct hashes reveal the correct audience and open ancestor disclosures before scrolling and moving keyboard focus. Browser back/forward restores the appropriate view. The skip link targets the current visible state. Keep original form/feed IDs and listeners; never duplicate schedule or profile nodes.
 
-German, English, and French are available, with persisted language and light/dark preferences. Existing NRW identity and local Inter remain. Forest and parchment paths, restrained rules, square surfaces, and limited motion carry the invitation rather than a generic dashboard grid.
+NRW United, kingdom 1044, international and F2P-friendly teamwork, real-life respect, and shared KvK preparation are alliance positioning. Do not invent rankings, member counts, testimonials, transfer availability, or guarantees.
 
-## Data and contact truth
+## Data and integration invariants
 
-Bear times come solely from the live leadership `public-schedule` feed. Render enabled `bear-1` through `bear-3` cycles with valid UTC clocks; derive optional local time only from a valid published anchor date and interval. Refresh initially, on focus/visibility return, and every minute while visible. A failed refresh clears stale times and offers retry. An empty response states that no active Bear times are published. Swordland and Tri-Alliance have no hardcoded clock fallback.
+Bear times come solely from the live leadership public-schedule feed: enabled bear-1 through bear-3 with valid UTC clocks. Optional local times derive only from published valid anchors/intervals. Refresh initially, on focus/visibility return, and each minute while visible. Failed refresh clears stale clocks and offers retry; empty data gets an explicit empty state. Swordland and Tri-Alliance have no hardcoded clock fallback. Both audiences share one authoritative schedule node and configuration.
 
-Jey (151869669) and Demazeᴳᴱᴿ (155097147) are a **static contact projection** from the existing stored player/cache records. Their portraits are local files, documented in `assets/welcome/sources.json`; they are not live player lookups. The same provenance file records Helga’s artwork source. Do not call an external player provider or imply these portraits refresh themselves. Copy buttons copy the visible IDs, report status, and retain manual-copy fallback guidance.
+Jey (151869669) and Demazeᴳᴱᴿ (155097147) remain static contact projections from existing stored player/cache records. Local portraits and Helga provenance are recorded in assets/welcome/sources.json. No external player lookup or refresh was added. Copy actions retain visible IDs, success/error status, and manual-copy guidance. Discord public-config remains the sole invite authority. Existing language-profile persistence remains; no Supabase schema, functions, or data were changed for this redesign.
 
-Existing language-profile persistence and public leadership feed integrations remain existing application behavior. This redesign does not authorize backend changes.
+DE/EN/FR and light/dark choices persist. Welcome uses its own nrw_welcome_theme_v3 preference, defaulting to dark; it does not reset other routes’ theme preferences. The neutral light alternative remains available.
 
 ## Verification record and limits
 
-The implementation review reports all four material findings resolved. The final screenshot set is recorded under the task’s `outputs/welcome-recruitment` collection: all eight width/theme views plus hero views. This document was checked against source files and provenance; it does not claim a new independent browser run or full accessibility certification.
+The implementation team reports 72 state/locale/width/theme combinations passing and a full independent hierarchy/visual review completed. The single skip-link finding was fixed and tested in all three states. Reported 390px DE dark heights are landing 952px, member 1614px, transfer 1726px, versus the former combined 13334px. These are scoped fixture measurements, not production engagement evidence. Synthetic schedule fixtures were never saved to production; production checks did not submit profiles.
 
-Preserve the implemented keyboard focus outlines, skip link, labeled fields, visible checkbox controls, native FAQ disclosures, status feedback, and reduced-motion behavior. Recheck affected languages, themes, and phone layouts after subsequent edits. A source and screenshot review is not a substitute for assistive-technology testing.
+Current screenshots: outputs/welcome-focused/local/{landing,member,transfer}-{1440,768,390,360}-{dark,light}.png, captured from the top with motion disabled and images loaded. This documentation pass checked source and the supplied review record; it did not rerun the browser matrix or certify complete accessibility. Preserve visible focus, state-aware skip navigation, labels, visible checkboxes, native disclosures, status feedback, and reduced motion.
+
+## Source fingerprint
+
+SHA256 snapshot of the implementation documented here:
+
+- index.html: 2B5D3B0895B294549E3A4E95BE7E50406DE0B12BC2D8F298297FE8078A17D4A9
+- welcome.css: 6D847322DFEF2FE3D7AC092CC9508B50624C0267CDE5D9B111861B405683607B
+- welcome.js: 9470D6B4AFB2FF7D4F5298718F2A64BEEB47B6F88AC4693574183BB0BB3F7E69
+- app.js: 4F50683D5166320C204A1A3CCF3903B75371833EAD0724B4272D50671C5DDA4F

@@ -1,149 +1,159 @@
 ---
 name: Welcome NRW
-description: A paper invitation to an international Kingshot alliance
+description: Focused charcoal and gold Kingshot welcome
 colors:
-  bg: "#f3efe5"
-  bg2: "#e9e2d4"
-  surface: "#faf7ef"
-  surface2: "#e9e2d4"
-  ink: "#292b24"
-  muted: "#5c6052"
-  line: "#c9c6b8"
+  bg: "#f4f3ef"
+  bg2: "#e7e6e2"
+  surface: "#ffffff"
+  surface2: "#e7e6e2"
+  ink: "#232323"
+  muted: "#606060"
+  line: "#cdcdca"
   brand: "#73541e"
   brand2: "#73541e"
   gold: "#d3b375"
   cyan: "#73541e"
-  green: "#34664a"
+  green: "#73541e"
   rose: "#993d35"
-  dark-bg: "#171b18"
-  dark-bg2: "#212721"
-  dark-surface: "#222823"
-  dark-surface2: "#2c332b"
-  dark-ink: "#f3efe5"
-  dark-muted: "#c0c3b6"
-  dark-line: "#4c5548"
+  dark-bg: "#121212"
+  dark-bg2: "#181818"
+  dark-surface: "#1c1c1c"
+  dark-surface2: "#252525"
+  dark-ink: "#f4f3ef"
+  dark-muted: "#c0c0bd"
+  dark-line: "#484848"
   dark-brand: "#dfc185"
-  dark-green: "#a0d0a8"
   dark-rose: "#f2aaa0"
-  forest: "#344032"
-  forest-ink: "#fff8e7"
-  parchment: "#e4cc94"
-  parchment-ink: "#2b2d22"
+  action-ink: "#24211b"
 typography:
   display:
     fontFamily: "Inter, system-ui, sans-serif"
-    fontSize: "clamp(48px,5.8vw,84px)"
-    fontWeight: 650
+    fontSize: "clamp(56px,6.4vw,90px)"
+    fontWeight: 600
     lineHeight: 1.02
     letterSpacing: "-.04em"
   headline:
     fontFamily: "Inter, system-ui, sans-serif"
-    fontSize: "clamp(34px,4.1vw,58px)"
-    fontWeight: 600
-    lineHeight: 1.1
-    letterSpacing: "-.035em"
-  title:
-    fontFamily: "Inter, system-ui, sans-serif"
-    fontSize: "24px"
-    fontWeight: 600
-    lineHeight: 1.25
-    letterSpacing: "-.025em"
+    fontSize: "clamp(32px,4vw,48px)"
+    lineHeight: 1.15
+    letterSpacing: "-.03em"
   body:
     fontFamily: "Inter, system-ui, sans-serif"
     fontSize: "16px"
     lineHeight: 1.6
+  disclosure:
+    fontFamily: "Inter, system-ui, sans-serif"
+    fontSize: "17px"
+    fontWeight: 500
 rounded:
   square: "0"
+  control: "5px"
+  compact: "6px"
+  surface: "8px"
   circular: "50%"
 spacing:
-  section: "100px"
-  section-phone: "64px"
-  path-gap: "10px"
-  contact-gap: "32px"
+  section: "36px"
+  section-phone: "28px"
+  path-gap: "12px"
+  contact-gap: "24px"
 components:
-  button-primary:
-    backgroundColor: "{colors.ink}"
-    textColor: "{colors.bg}"
-    rounded: "{rounded.square}"
-    padding: "12px 20px"
-  button-soft:
-    backgroundColor: "{colors.surface2}"
-    textColor: "{colors.ink}"
-    rounded: "{rounded.square}"
-    padding: "12px 20px"
   member-path:
-    backgroundColor: "{colors.forest}"
-    textColor: "{colors.forest-ink}"
-    rounded: "{rounded.square}"
+    backgroundColor: "{colors.gold}"
+    textColor: "{colors.action-ink}"
+    rounded: "{rounded.surface}"
     padding: "18px 22px"
   transfer-path:
-    backgroundColor: "{colors.parchment}"
-    textColor: "{colors.parchment-ink}"
-    rounded: "{rounded.square}"
+    backgroundColor: "{colors.surface2}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.surface}"
     padding: "18px 22px"
+  dashboard-action:
+    backgroundColor: "{colors.gold}"
+    textColor: "{colors.action-ink}"
+    rounded: "{rounded.compact}"
+    padding: "15px 22px"
+  contact-card:
+    backgroundColor: "{colors.surface}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.surface}"
+    padding: "24px"
+  contact-copy:
+    backgroundColor: "{colors.surface2}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.control}"
+    padding: "10px 14px"
 ---
 
 # Design System: Welcome NRW
 
 ## Overview
 
-**Creative North Star: “The Alliance Invitation.”** A warm paper surface, confident type, and forest accents make an approachable place for people who play together. Broad sections and restrained decoration keep the choices and useful information clear.
+**Creative North Star: “Dark & Gold Kingshot.”** Neutral charcoal opens space for the existing crownless Helga artwork and one clear Welcome message. NRW gold identifies the primary choice; quiet neutral surfaces carry supporting information. The optional light theme uses neutral whites and grays rather than the superseded paper/forest palette.
 
-This is a scan of the implemented public Welcome surface, not a global redesign contract. See BRIEF.md for recruitment strategy and data boundaries. The root leadership design documents remain intact.
+This scanned record governs the public Welcome surface only. BRIEF.md owns audience strategy, data truth, evidence, and source fingerprints. Historical root leadership documents and the separate Dashboard remain outside its boundary.
 
-Key characteristics: local Inter, square edges, flat tonal depth, two explicit entry paths, crownless game artwork, and readable light/dark themes.
+Key characteristics: dark by default, large game artwork, focused audience views, local Inter, restrained rounded controls, flat tonal depth, and progressive disclosure.
 
 ## Colors
 
 ### Primary
 
-Forest anchors the member path and contact section; warm brand color marks links, clocks, and focus. Parchment distinguishes the transfer path. These path colors stay explicit in both themes.
+NRW gold marks the member choice and Dashboard action; warm brand color marks clocks, links, focus, and active navigation. The transfer path uses a neutral surface and border. The frontmatter records light custom-property values; dark-prefixed entries record the dark override. Dark brand also supplies brand2, gold, cyan, and green. The legacy cyan/green variable names now resolve to gold-toned values, not those hues.
 
 ### Neutral
 
-The unprefixed frontmatter colors mirror `welcome.css` light-theme custom properties. Dark-prefixed entries document the values assigned by `html[data-theme=dark]`; dark brand also supplies brand2, gold, and cyan. The existing cyan variable name is retained for compatibility, although its actual color is warm. Background, surface, muted, and line values switch together.
+Charcoal background and neutral tonal surfaces define the selected dark world. Light mode switches the background, surface, ink, muted, and line roles together. Do not add green tint to backgrounds, text, or borders.
 
-**The Source Rule.** `welcome.css` is the implementation authority. Keep these extracted tokens synchronized rather than creating a second runtime theme.
+**The Source Rule.** Final rules in welcome.css override earlier retained declarations. Document the active cascade and current markup, not the obsolete invitation grid or forest cards.
 
 ## Typography
 
-Use the locally hosted Inter variable font (`leitung/fonts/InterVariable.woff2`, weights 100–900, swap display), followed by system sans-serif. The display heading balances across two lines and is limited to about ten characters per line. At the phone breakpoint it uses 52px; section headings use 36px with 1.12 line height and -.03em tracking. Body paragraphs are capped at 72ch; the invitation lead is narrower (43ch) and uses 18px on desktop, 16px on phones. Navigation, supporting labels, and source notes use 12–14px where implemented.
+Use locally hosted Inter variable (`leitung/fonts/InterVariable.woff2`, weights 100–900, swap display), then system sans-serif. The landing display balances on two lines, capped at about ten characters per line. At 930px it uses 62px; at 680px it uses 48px. The concise hero lead uses 18px/1.65 with 35ch measure, becoming 16px/1.6 and 34ch on phones.
+
+Selected-view titles use the headline role and become 31px with -.025em tracking on phones. Contact section headings are 24px; contact names are 27px desktop and 24px at smaller widths. Disclosures deliberately lower heading volume: content headings are generally 25px/1.2 and summaries 17px, dropping to 16px on phones. Body uses the frontmatter base; disclosure paragraphs commonly use 15px. The scale describes existing roles, not a fixed mathematical ratio.
 
 ## Layout
 
-The shared content container tops out at 1280px with 32px side gutters, reducing to 16px at 680px. The invitation starts as a 1.2fr/1fr grid with a 620px minimum height. At 930px its art column narrows; at 680px it becomes a vertical sequence with copy and paths before a 270px art region. Wide navigation links disappear at 930px while language/theme controls remain.
+The container is 1280px maximum, with 32px side gutters, reduced to 16px at 680px. Desktop landing uses an open 1fr/1.1fr grid, 30px gap, and 650px minimum hero height; its artwork is 112% wide within an overflow-clipped area. At 930px columns become equal, hero minimum height is 560px, and artwork grows to 130%. At 680px copy and choices precede a 260px artwork region with a 330px-tall image.
 
-Sections use the frontmatter section spacing, with transfer-specific adjustments. Contacts use two columns before becoming one on phones. The live schedule uses three equal columns, then a single column at 680px. FAQ and transfer introduction use asymmetric columns, collapsing on phones. The implementation also has a 1100px density adjustment; exact breakpoints live in the sidecar. Existing base `styles.css` supplies structural rules overridden by `welcome.css`; this file does not describe every inherited legacy declaration.
+Landing excludes both audience streams. Member and transfer views show their own content plus the one shared schedule; the audience switch and home link remain present. Member times open by default on entry; transfer times close. Other detail groups start closed. Detail containers top out at 960px. Contacts use two columns, changing to one on phones. Schedule entries are compact full-width rows, with icon/title/clock columns and local-time support beneath; they are no longer three large cards.
+
+Sections use the frontmatter spacing rather than the former 100px/64px rhythm. Contact portraits step from 92px to 76px at 930px and 74px on phones. Existing base styles and retained welcome declarations remain in the cascade, so preserve the final focused overrides when editing.
 
 ## Elevation & Depth
 
-The Welcome layer explicitly sets both shadow variables to none and removes card shadows from its principal surfaces. Solid paper tones, forest sections, whitespace, and thin rules establish depth. Avoid ambient glow and floating dashboard-card styling on this surface.
+Both shadow variables remain none. Use tonal surfaces, neutral rules, whitespace, and scale to convey depth. The artwork supplies atmosphere; no added glow, floating-card shadow system, or extra hero overlay is established.
 
 ## Shapes
 
-Paths, buttons, input fields, and principal content surfaces have square corners. The theme button remains circular. Retain the existing crest and game artwork silhouettes; Helga occupies the invitation art panel without a giant crown motif.
+Landing paths and contact cards have modest surface corners. Phone paths, portraits, Dashboard action, and rule callouts use compact corners. Contact copy buttons use the control radius. The theme button remains circular; legacy input/profile controls remain square where implemented. Do not impose the former all-square rule on the focused revision.
 
 ## Components
 
-### Paths and buttons
+### Audience paths and switch
 
-Paths use stacked title/support text with clear member/transfer color assignments. Standard buttons have a 46px minimum height; the theme button is 44px on desktop and 40px on phones. Fine-pointer hover moves paths right by 4px and buttons up by 2px. Press scales paths/buttons to .98. Transitions last 160ms. Do not rely on motion to distinguish the choices.
+The gold member path and outlined neutral transfer path share stacked title/support text. Desktop padding is in frontmatter; phones use 16px 18px, 14px titles, 12px support, and compact corners. Fine-pointer hover lifts paths by 2px; press scales paths/buttons to .98. Switch links use aria-current and brand color for the selected audience, with a persistent return-home link. Hash navigation reveals audience and disclosure ancestors before focus; back/forward restores state.
+
+### Disclosures and schedule
+
+Native details/summary groups use horizontal rules and plus/minus indicators, with 64px summary minimum height (58px on phones). Keyboard focus remains visible. One schedule node serves both audiences. No duplicated schedule, form IDs, authoritative configuration, or listener bindings are permitted.
+
+### Contacts and fields
+
+Contact cards use themed surfaces, local portraits, visible IDs, and copy status. Copy controls have at least 44px height. Inputs retain 48px minimum height and 16px text; language controls keep visible 18px checkboxes with associated labels. Image failures reveal an NRW fallback. These reflect implemented behavior rather than a complete accessibility certification.
 
 ### Motion and focus
 
-Arrival runs once only when reduced motion is not requested: copy moves up from 16px over 600ms and Helga from 24px over 800ms, with partial opacity starts. Defaults remain visible without animation. The ease-out curve, hover media condition, and reduced-motion override are in the sidecar. Reduced motion removes all animation and transitions and keeps scrolling automatic.
+Only the current hero artwork receives a 700ms arrival using the existing portrait keyframe: opacity .7 and translateY(24px) to visible rest. No active copy-arrival element remains in the new markup. Defaults remain visible. Interaction transitions use 160ms; hover movement is gated to fine pointers. Reduced motion removes all animation and transitions and keeps automatic scrolling.
 
-The global keyboard outline is a 3px brand stroke with 5px offset; fields and language chip groups use 3px offset. The skip link appears on focus. Same-page navigation sets focus on its target without a reload. These are observed behaviors, not an accessibility certification.
-
-### Fields, disclosures, and contacts
-
-Inputs are at least 48px tall with 16px text. Language selections retain visible 18px checkboxes, associated labels, and group focus outlines. FAQ and server-account information use native details/summary. Contact cards show stored local portraits, visible IDs, copy actions, status feedback, and an NRW image-error fallback. Their visual treatment is a pale surface inside the forest section.
+Keyboard outlines use a 3px brand stroke and 5px offset; fields and language-chip groups use 3px offset. The skip link appears on focus and dynamically targets the visible landing/member/transfer state. Navigation sets target focus after revealing hidden content. See the sidecar for exact curve/media rules.
 
 ## Do's and Don'ts
 
-- **Do** preserve readable states in German, English, and French and both themes.
-- **Do** keep focus indication and reduced-motion overrides when extending components.
-- **Do** use live public-schedule results for event clocks and explicit unavailable/empty states.
-- **Don't** replace Helga with the former Lord or introduce a giant crown hero.
-- **Don't** turn the Welcome invitation into the separate dashboard's visual system.
-- **Don't** add invented social proof or describe cached contact portraits as live player data.
+- **Do** keep a short landing and show only the chosen audience stream.
+- **Do** preserve DE/EN/FR, both themes, reduced motion, and visible focus.
+- **Do** retain crownless Helga, stored-contact provenance, live public-schedule authority, and Discord public-config authority.
+- **Don't** restore forest surfaces, the giant 1044 backdrop, overlay slogans, giant crown hero, or the former Lord artwork.
+- **Don't** add invented social proof or imply cached portraits are live player data.
+- **Don't** overwrite leadership/Dashboard design or share Welcome’s isolated theme preference with other routes.
+
