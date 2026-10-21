@@ -15,6 +15,19 @@
 <meta name="description" content="Geschützte Leitungszentrale für Allianzverwaltung, Transfers, Laws und Events.">
 <link rel="icon" href="../assets/nrw-dashboard-icon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="./styles.css?v=20261020-fight-bear-v3">
+<!-- Pages-only design. This block is inert on welcome-nrw.vercel.app. -->
+<script>
+  if (location.hostname === "boltotelli.github.io") {
+    document.documentElement.classList.add("pages-atelier");
+    const design = document.createElement("link");
+    design.rel = "stylesheet";
+    design.href = "./pages-atelier.css?v=20261021-nrw-atelier-1";
+    document.head.appendChild(design);
+    const nav = document.createElement("script");
+    nav.src = "./pages-atelier.js?v=20261021-nrw-atelier-1";
+    document.head.appendChild(nav);
+  }
+</script>
 
 </head>
 <body>
