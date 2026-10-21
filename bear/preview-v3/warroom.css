@@ -1,0 +1,133 @@
+/* NRW war room: warm charcoal, parchment text, gold for action and selection.
+ * The original profile, help and computation components remain in place. */
+body.bear-name-mode{--war-bg:#151614;--war-panel:#20221f;--war-raised:#292c27;--war-well:#191b18;--war-line:#3d4138;--war-control:#62685a;--war-text:#f2f0e6;--war-muted:#b7bbae;--war-gold:#eac477;--war-ink:#262012;--war-green:#b1d9bf;--war-warning:#f5d5a4;--war-danger:#ffb8a8;--war-ease:cubic-bezier(.23,1,.32,1);background:var(--war-bg);color:var(--war-text);font-family:Nunito,system-ui,sans-serif;font-size:15px;font-variant-numeric:tabular-nums}
+#bearNewApp{background:var(--war-bg);min-height:100dvh;padding:24px max(16px,env(safe-area-inset-left)) max(32px,env(safe-area-inset-bottom));color:var(--war-text);line-height:1.55}
+#bearNewApp *{scrollbar-color:var(--war-control) var(--war-well)}
+#bearNewApp ::selection{background:var(--war-gold);color:var(--war-ink)}
+#bearNewApp h1,#bearNewApp h2,#bearNewApp h3,#bearNewApp h4{color:var(--war-text);letter-spacing:-.025em;text-wrap:balance}
+#bearNewApp h2{font-size:23px;line-height:1.25}
+#bearNewApp h3{font-size:17px}#bearNewApp h4{font-size:14px;margin:22px 0 8px}
+#bearNewApp .bear-name-muted{color:var(--war-muted);font-size:14px;line-height:1.6}
+#bearNewApp .bear-name-panel,#bearNewApp .bear-name-choice,#bearNewApp .bear-name-landing{background:var(--war-panel);border:1px solid var(--war-line);border-radius:16px;box-shadow:none}
+#bearNewApp .bear-name-panel{padding:22px}
+#bearNewApp .bear-name-choice{margin:32px auto;padding:32px}
+#bearNewApp .bear-name-landing{position:relative;margin:12px auto 20px;max-width:1000px;padding:28px 36px 24px;overflow:hidden}
+#bearNewApp .bear-warroom-brand{display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--war-line);padding-bottom:18px;font-size:14px;font-weight:800}
+#bearNewApp .bear-warroom-brand>img{width:56px;height:42px;object-fit:contain}
+#bearNewApp .bear-warroom-brand .bear-name-languages{margin-left:auto}
+#bearNewApp .bear-warroom-intro{position:relative;isolation:isolate;padding:42px 185px 26px 0;min-height:210px}
+#bearNewApp .bear-warroom-intro h1{font-size:46px;line-height:1.08;font-weight:900;max-width:620px;margin:0 0 18px;letter-spacing:-.035em}
+#bearNewApp .bear-warroom-intro p{font-size:17px;max-width:520px;margin:0}
+#bearNewApp .bear-warroom-bear{position:absolute;right:8px;top:28px;width:150px;height:150px;object-fit:contain;z-index:-1}
+#bearNewApp .bear-name-landing>.bear-name-muted{max-width:68ch}
+#bearNewApp .bear-name-landing>.bear-name-input{max-width:640px;margin:20px 0 10px;font-size:17px!important}
+#bearNewApp .bear-name-landing>.primary{min-width:200px}
+#bearNewApp .bear-warroom-paths{display:grid;grid-template-columns:1fr 1fr;gap:20px;border-top:1px solid var(--war-line);margin-top:24px;color:var(--war-muted);font-size:13px}
+#bearNewApp .bear-warroom-paths p{margin:14px 0 0}
+#bearNewApp .bear-warroom-links{display:flex;justify-content:center;gap:28px;font-size:13px;color:var(--war-muted);margin:16px auto 24px}
+#bearNewApp .bear-warroom-links a{text-decoration:underline;text-underline-offset:4px;padding:10px}
+#bearNewApp .bear-name-top{border-color:var(--war-line);padding:0 0 18px;gap:10px}
+#bearNewApp button,#bearNewApp summary,#bearNewApp a{touch-action:manipulation}
+#bearNewApp button{user-select:none;-webkit-tap-highlight-color:transparent;transition:background-color 150ms var(--war-ease),border-color 150ms var(--war-ease),transform 120ms var(--war-ease);min-height:44px}
+#bearNewApp .bear-name-btn,#bearNewApp .bear-name-top button,#bearNewApp .bear-name-saved button,#bearNewApp .bear-name-lang-button{background:var(--war-raised);border:1px solid var(--war-control);color:var(--war-text);border-radius:10px;box-shadow:none;filter:none}
+#bearNewApp .bear-name-btn.primary,#bearNewApp .bear-name-action-btn:first-child,#bearNewApp .bear-name-pin-urgent-btn{background:var(--war-gold);color:var(--war-ink);border:1px solid var(--war-gold);box-shadow:none}
+#bearNewApp .bear-name-lang-button.active{color:var(--war-gold);background:var(--war-well);border-color:var(--war-gold)}
+#bearNewApp .bear-name-languages{background:var(--war-well);border-color:var(--war-line)}
+#bearNewApp .bear-name-lang-button{min-height:36px!important;color:var(--war-muted)!important}
+#bearNewApp .bear-name-lang-button.active{background:var(--war-gold)!important;color:var(--war-ink)!important}
+#bearNewApp .bear-name-favorite-btn{background:var(--war-raised);border-color:var(--war-control);color:var(--war-gold)}
+#bearNewApp button:active:not(:disabled){transform:scale(.98)}
+#bearNewApp button:disabled{opacity:.48;cursor:not-allowed;filter:none}
+#bearNewApp :focus-visible{outline:2px solid var(--war-gold)!important;outline-offset:3px}
+#bearNewApp input,#bearNewApp select,#bearNewApp textarea{background:var(--war-well);border-color:var(--war-control);color:var(--war-text);caret-color:var(--war-gold);min-height:44px;accent-color:var(--war-gold)}
+#bearNewApp input::placeholder{color:var(--war-muted);opacity:1}
+#bearNewApp .bear-name-field{color:var(--war-muted);font-size:13px}
+#bearNewApp .bear-name-field input,#bearNewApp .bear-name-field select{font-size:16px}
+#bearNewApp .bear-name-season,#bearNewApp .bear-name-fold[open]>.bear-name-fold-heading{border-color:var(--war-line)}
+#bearNewApp summary,#bearNewApp .bear-name-fold>.bear-name-fold-heading{color:var(--war-text);min-height:48px;align-content:center;font-size:15px}
+#bearNewApp .bear-name-season>summary{padding:12px 0}
+#bearNewApp .bear-name-hero-grid{grid-template-columns:repeat(auto-fill,minmax(142px,1fr));gap:12px;padding-bottom:16px}
+#bearNewApp .bear-name-hero-card{border:1px solid var(--war-line);background:var(--war-well);border-radius:12px;transition:border-color 160ms var(--war-ease),background-color 160ms var(--war-ease);position:relative}
+#bearNewApp .bear-name-hero-card.active{border-color:var(--war-gold);background:var(--war-raised)}
+#bearNewApp .bear-name-hero-card.active::after{content:'';position:absolute;top:10px;right:12px;width:5px;height:10px;border:solid var(--war-gold);border-width:0 2px 2px 0;transform:rotate(45deg);pointer-events:none}
+#bearNewApp .bear-name-hero-pick{color:var(--war-muted);font-size:14px;gap:8px;padding:14px 8px 10px}
+#bearNewApp .bear-name-hero-card.active .bear-name-hero-pick{color:var(--war-text)}
+#bearNewApp .bear-name-hero-pick img{width:88px;height:88px;opacity:.65;transition:opacity 180ms var(--war-ease),filter 180ms var(--war-ease)}
+#bearNewApp .bear-name-hero-card.active .bear-name-hero-pick img{opacity:1}
+#bearNewApp .bear-name-hero-fields{padding:8px;gap:8px}
+#bearNewApp .bear-name-star-controls{grid-template-columns:26px minmax(0,1fr) 26px;background:var(--war-well);border-color:var(--war-line)}
+#bearNewApp .bear-name-star-step{width:26px;min-height:36px;background:var(--war-raised)!important;border-color:var(--war-control)!important;color:var(--war-text)!important}
+#bearNewApp .bear-name-flower{height:36px;min-height:36px}
+#bearNewApp .bear-name-picks{grid-template-columns:1fr;gap:0}
+#bearNewApp .bear-advice-slot{min-width:0;border-bottom:1px solid var(--war-line);padding:16px 0}
+#bearNewApp .bear-advice-slot:last-child{border-bottom:0;padding-bottom:0}
+#bearNewApp .bear-name-pick{display:grid;grid-template-columns:64px 1fr;grid-template-rows:auto auto;text-align:left;align-items:center;column-gap:14px;background:transparent;border:0;padding:0;border-radius:0;font-size:16px}
+#bearNewApp .bear-name-pick img{grid-row:1/3;width:64px;height:64px;object-fit:contain}
+#bearNewApp .bear-name-pick strong{font-size:12px;color:var(--war-muted);align-self:end;font-weight:700}
+#bearNewApp .bear-name-pick>span{align-self:start;font-weight:900}
+#bearNewApp .bear-advice{border:0;margin:10px 0 0;padding:0}
+#bearNewApp .bear-advice>summary{font-size:13px;min-height:44px;color:var(--war-gold);font-weight:800}
+#bearNewApp .bear-advice-body{min-width:0;font-size:13px;padding:2px 0 12px}
+#bearNewApp .bear-advice-body p{font-size:13px;margin:8px 0 14px}
+#bearNewApp .bear-advice-verdict{font-size:15px}
+#bearNewApp .bear-advice-caution{color:var(--war-warning);padding:10px 12px;background:var(--war-well);border-radius:8px;line-height:1.5}
+#bearNewApp .bear-advice-comparison,#bearNewApp .bear-advice-provenance{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+#bearNewApp .bear-advice-candidate{min-width:0;padding:0 10px 0 0}
+#bearNewApp .bear-advice-candidate+article{padding:0 0 0 14px;border-left:1px solid var(--war-line)}
+#bearNewApp .bear-advice-identity{display:flex;gap:8px;align-items:center;min-width:0}
+#bearNewApp .bear-advice-identity>img{width:40px;height:40px;object-fit:contain}
+#bearNewApp .bear-advice-identity strong,#bearNewApp .bear-advice-identity small{display:block;overflow-wrap:anywhere}
+#bearNewApp .bear-advice-identity small{color:var(--war-muted);font-size:12px}
+#bearNewApp .bear-advice-value{margin:14px 0;display:flex;flex-direction:column;font-size:12px;color:var(--war-muted)}
+#bearNewApp .bear-advice-value strong{font-size:25px;font-weight:800;color:var(--war-text)}
+#bearNewApp .bear-advice-effects{padding-left:16px;margin:8px 0 18px;line-height:1.5}
+#bearNewApp .bear-advice-effects li{margin-bottom:10px;overflow-wrap:anywhere}
+#bearNewApp .bear-advice-effects small{display:block;font-size:12px;color:var(--war-muted)}
+#bearNewApp .bear-advice-provenance{border-top:1px solid var(--war-line);margin-top:16px}
+#bearNewApp .bear-advice-alternatives{list-style:none;padding:0;margin:0}
+#bearNewApp .bear-advice-alternatives li{display:flex;justify-content:space-between;align-items:center;gap:12px;border-top:1px solid var(--war-line);padding:12px 0}
+#bearNewApp .bear-advice-alternatives li>span{font-size:12px;text-align:right;color:var(--war-muted)}
+#bearNewApp .bear-name-formation-card{background:var(--war-well);border-color:var(--war-line);border-radius:12px}
+#bearNewApp .bear-name-formation-card.is-starter{border-color:var(--war-gold);grid-column:1/-1}
+#bearNewApp .bear-name-formation-card.is-starter h3{color:var(--war-gold)}
+#bearNewApp .bear-name-formation-card h3{font-size:16px}
+#bearNewApp .bear-name-formation-hero img,#bearNewApp .bear-name-formation-empty{border-color:var(--war-line);background:var(--war-raised);object-fit:contain}
+#bearNewApp .bear-name-form-count,#bearNewApp .bear-name-result,#bearNewApp .bear-name-score span{color:var(--war-gold)}
+#bearNewApp .bear-name-mix-bar,#bearNewApp .bear-name-util-track{background:var(--war-raised);border:0;height:10px;border-radius:4px}
+#bearNewApp .bear-name-mix-0{background:#a5c0c7}#bearNewApp .bear-name-mix-1{background:#b6ada0}#bearNewApp .bear-name-mix-2{background:var(--war-gold)}
+#bearNewApp .bear-name-mix-part strong{color:var(--war-text)}#bearNewApp .bear-name-mix-part small{color:var(--war-muted);font-size:12px;white-space:normal;text-align:center}
+#bearNewApp .bear-name-util-fill{background:var(--war-gold)}
+#bearNewApp .bear-name-util-row{border-color:var(--war-line);background:var(--war-well)}
+#bearNewApp .bear-name-utilization{background:var(--war-well);border-color:var(--war-line)}
+#bearNewApp .bear-name-util-type-0 .bear-name-util-fill{background:#a5c0c7}
+#bearNewApp .bear-name-util-type-1 .bear-name-util-fill{background:#b6ada0}
+#bearNewApp .bear-name-util-type-2 .bear-name-util-fill{background:var(--war-gold)}
+#bearNewApp .bear-name-util-total,#bearNewApp .bear-name-util-legend{color:var(--war-muted)}
+#bearNewApp .bear-name-buff-card,#bearNewApp .bear-name-buff-card.bear-name-valora,#bearNewApp .bear-name-minister-group{background:var(--war-well);border-color:var(--war-line)}
+#bearNewApp .bear-name-buff-title,#bearNewApp .bear-name-minister-info,#bearNewApp .bear-name-minister-roles{color:var(--war-text)}
+#bearNewApp .bear-name-court-switch{background:var(--war-well);border-color:var(--war-control)}
+#bearNewApp .bear-name-court-option{color:var(--war-muted)}#bearNewApp .bear-name-court-option.active{color:var(--war-ink)}
+#bearNewApp .bear-name-court-thumb{background:var(--war-gold);box-shadow:none}
+#bearNewApp .bear-name-warning,#bearNewApp .bear-name-pin-urgent{background:var(--war-well);border:1px solid var(--war-control);color:var(--war-warning);box-shadow:none}
+#bearNewApp .bear-name-security{background:var(--war-panel);border-color:var(--war-line);color:var(--war-muted);font-size:13px}
+#bearNewApp .bear-name-security-saved,#bearNewApp .bear-name-status{color:var(--war-green)}
+#bearNewApp .bear-name-security-missing,#bearNewApp .bear-name-security-pending{color:var(--war-warning)}
+#bearNewApp .bear-name-status.error{color:var(--war-danger)}
+#bearNewApp .bear-name-search-item,#bearNewApp .bear-name-history-row{background:var(--war-well);color:var(--war-text);border-color:var(--war-line)}
+#bearNewApp .bear-name-pin-dialog,#bearNewApp .bear-name-help-dialog{background:var(--war-panel);border-color:var(--war-control);color:var(--war-text)}
+#bearNewApp .bear-name-help-trigger{background:var(--war-raised);border-color:var(--war-control);color:var(--war-text)}
+#bearNewApp .bear-name-help-trigger.bear-name-help-trigger{background:var(--war-raised);border-color:var(--war-control);color:var(--war-text);min-width:36px;width:36px;height:36px}
+#bearNewApp .bear-name-minister-role{background:var(--war-well);border-color:var(--war-line)}
+#bearNewApp .bear-name-minister-role.selected{background:var(--war-raised);border-color:var(--war-gold)}
+#bearNewApp .bear-name-loading{background:var(--war-panel);border-color:var(--war-line);color:var(--war-gold)}
+#bearNewApp .bear-name-panel>.bear-name-loading{display:flex;align-items:center;min-height:0;max-width:none;gap:16px;padding:10px;margin:0 0 20px;border:0;background:var(--war-well);text-align:left}
+#bearNewApp .bear-name-panel>.bear-name-loading video{width:120px;height:120px;flex:0 0 120px}
+#bearNewApp .bear-name-panel>.bear-name-loading .bear-name-loader-heroes{display:none}
+#bearNewApp .bear-name-formation-result{animation:warroom-result 240ms var(--war-ease)}
+@keyframes warroom-result{from{opacity:.7;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@media(hover:hover) and (pointer:fine){#bearNewApp button:hover:not(:disabled){filter:none;border-color:var(--war-gold)}#bearNewApp .bear-name-hero-card:hover{border-color:var(--war-control)}}
+@media(hover:none){#bearNewApp button:hover{filter:none}}
+@media(min-width:1100px){#bearNewApp .bear-name-two-columns{grid-template-columns:minmax(0,1.15fr) minmax(420px,.85fr);gap:24px}}
+@media(max-width:820px){#bearNewApp{padding-top:12px}#bearNewApp .bear-name-panel{padding:18px}#bearNewApp .bear-name-two-columns{display:flex;flex-direction:column}#bearNewApp .bear-name-two-columns>div{width:100%}#bearNewApp .bear-name-two-columns>div:last-child{order:-1}#bearNewApp .bear-name-landing{padding:20px}#bearNewApp .bear-warroom-intro{padding-top:28px}#bearNewApp .bear-warroom-intro h1{font-size:36px}}
+@media(max-width:480px){#bearNewApp{padding-inline:12px}#bearNewApp h2{font-size:21px}#bearNewApp .bear-name-landing{padding:18px;margin:0 0 14px}#bearNewApp .bear-warroom-brand{flex-wrap:wrap;gap:8px;font-size:12px}#bearNewApp .bear-warroom-brand>img{width:40px;height:32px}#bearNewApp .bear-warroom-brand .bear-name-languages{width:100%;justify-content:flex-start;margin:4px 0 0}#bearNewApp .bear-warroom-intro{padding:24px 64px 24px 0;min-height:0}#bearNewApp .bear-warroom-intro h1{font-size:30px}#bearNewApp .bear-warroom-intro p{font-size:14px}#bearNewApp .bear-warroom-bear{width:64px;height:80px;right:-6px;top:25px}#bearNewApp .bear-warroom-paths{grid-template-columns:1fr;gap:0;margin-top:18px}#bearNewApp .bear-name-hero-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}#bearNewApp .bear-name-star-controls{grid-template-columns:28px minmax(0,1fr) 28px}#bearNewApp .bear-name-star-step{width:28px;min-height:44px}#bearNewApp .bear-name-flower{height:44px;min-height:44px}#bearNewApp .bear-name-top{justify-content:flex-start}#bearNewApp .bear-name-identity{flex:1}#bearNewApp .bear-name-top .bear-name-languages{width:100%;justify-content:flex-start}#bearNewApp .bear-advice-comparison,#bearNewApp .bear-advice-provenance{grid-template-columns:1fr}#bearNewApp .bear-advice-candidate+article{padding:16px 0 0;border-left:0;border-top:1px solid var(--war-line)}#bearNewApp .bear-name-formations-grid{grid-template-columns:minmax(0,1fr)}#bearNewApp .bear-name-choice{padding:20px;margin:20px auto}#bearNewApp .bear-warroom-links{gap:8px;flex-wrap:wrap}}
+@media(prefers-reduced-motion:reduce){#bearNewApp *,#bearNewApp *::before,#bearNewApp *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
