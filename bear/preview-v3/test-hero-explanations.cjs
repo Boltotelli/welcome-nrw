@@ -27,6 +27,28 @@ for(const [left,right] of [['Zoe','Long Fei'],['Alcar','Zoe'],['Rosa','Yang']]){
 }
 const missing=A.recommend([{name:'Zoe',stars:null}],types,null,get,null)[0];
 assert.equal(E.comparison(missing).state,'missing');
+// The selected alternative may be any owned same-class hero, including
+// recent generations that do not occupy the automatic runner-up position.
+const cavalryNames=['Petra','Jabel','Thrud','Sophia'];
+const cavalry=A.recommend(cavalryNames.map(name=>({name,level:80,stars:4,tier:2,widget:5,skillsAssumedMax:true})),types,null,get,w.NRW_BEAR_OWN_BASELINE.widgetValue)
+ .find(g=>g.type==='cavalry');
+const cavalryBefore=JSON.stringify(cavalry);
+assert.equal(E.alternatives(cavalry).length,3);
+for(const hero of E.alternatives(cavalry)){
+ const selected=E.comparison(cavalry,hero.name);
+ assert.equal(selected.other,hero,'Explicit candidate must replace automatic runner-up');
+ assert.equal(selected.winner,cavalry.best,'Comparison never changes the recommendation');
+ assert(Math.abs(selected.gap-(cavalry.best.score/hero.score-1)*100)<1e-8);
+ assert.equal(JSON.stringify(cavalry),cavalryBefore);
+}
+const automatic=E.comparison(cavalry).other;
+for(const invalid of ['Yang','not-owned',cavalry.best.name])assert.equal(E.comparison(cavalry,invalid).other,automatic,'Invalid/cross-class/self selection falls back safely');
+const unknown={...cavalry.choices[1],name:'Missing reference',score:null};
+const partialGroup={...cavalry,choices:[...cavalry.choices,unknown]};
+const selectedUnknown=E.comparison(partialGroup,unknown.name);
+assert.equal(selectedUnknown.other,unknown);
+assert.equal(selectedUnknown.gap,null);
+assert.equal(selectedUnknown.state,'missing');
 assert.equal(E.comparison({type:'infantry',best:{score:100,type:'infantry',usesAttackReference:true,confidence:'higher'},choices:[]}).other,null);
 for(const [key,row] of Object.entries(E.words))assert(row.length===4&&row.every(s=>typeof s==='string'&&s.length>0),'Four locales: '+key);
 // Loading the diagnostics module cannot change ANY ranking or numeric field.
@@ -34,4 +56,4 @@ const full=records.map(r=>({name:r.name,level:80,stars:4,tier:2,widget:5,skillsA
 const before=JSON.stringify(A.recommend(full,types,null,get,w.NRW_BEAR_OWN_BASELINE.widgetValue));
 for(const g of A.recommend(full,types,null,get,w.NRW_BEAR_OWN_BASELINE.widgetValue))E.comparison(g);
 assert.equal(JSON.stringify(A.recommend(full,types,null,get,w.NRW_BEAR_OWN_BASELINE.widgetValue)),before);
-console.log(`PASS: ${checked} same-class scenarios, exact gaps, honest assumptions, immutable rankings, all four locales`);
+console.log(`PASS: ${checked} same-class scenarios, freely selected owned alternatives, exact gaps, missing data, immutable rankings, all four locales`);

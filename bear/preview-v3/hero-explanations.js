@@ -5,6 +5,8 @@
 const words={
  why:['Warum dieser Held?','Why this hero?','Pourquoi ce héros ?','¿Por qué este héroe?'],
  compare:['Direkter Vergleich','Direct comparison','Comparaison directe','Comparación directa'],
+ choose:['Vergleichen mit','Compare with','Comparer avec','Comparar con'],
+ chooseHint:['Aus deinen ausgewählten Helden derselben Truppenklasse. Die Auswahl ändert nur den Vergleich, nicht deine Starter oder Formationen.','From your selected heroes of the same troop class. This changes only the comparison, not your starters or formations.','Parmi tes héros sélectionnés de la même classe. Ce choix change uniquement la comparaison, pas tes lanceurs ni tes formations.','Entre tus héroes seleccionados de la misma clase. Solo cambia la comparación, no tus líderes ni tus formaciones.'],
  next:['Knapp dahinter','Next candidates','Autres candidats','Otros candidatos'],
  index:['Modellindex','Model index','Indice du modèle','Índice del modelo'],
  baseline:['100 = gleiche Rally ohne diesen Helden. Isolierter Beitrag im Empfehlungsmodell; kein vollständiger Teamvergleich und kein echter Bärenschaden.','100 = the same rally without this hero. Isolated contribution in the recommendation model; not a full team comparison or actual Bear damage.','100 = le même rally sans ce héros. Contribution isolée dans le modèle de recommandation ; ni comparaison d’équipes complètes ni dégâts réels.','100 = el mismo rally sin este héroe. Aporte aislado en el modelo de recomendación; no compara equipos completos ni representa daño real.'],
@@ -49,9 +51,14 @@ const words={
 function language(){return root.NRW_BEAR_I18N?.language?.()||'en';}
 function tr(key,args={}){const row=words[key];let s=row?.[{de:0,en:1,fr:2,es:3}[language()]??1]||key;for(const [k,v] of Object.entries(args))s=s.replaceAll('{'+k+'}',String(v));return s;}
 function fmt(x){return Number.isFinite(x)?x.toLocaleString(language(),{maximumFractionDigits:2}):'—';}
-function comparison(group){
- const winner=group?.best,other=group?.choices?.find(h=>h!==winner&&h.type===group.type&&Number.isFinite(h.score))||null;
+function alternatives(group){
+ return (group?.choices||[]).filter(h=>h.name!==group?.best?.name&&h.type===group.type);
+}
+function comparison(group,selectedName=null){
+ const winner=group?.best,available=alternatives(group);
+ const other=available.find(h=>h.name===selectedName)||available.find(h=>Number.isFinite(h.score))||null;
  if(!winner||!Number.isFinite(winner.score))return {winner,other,gap:null,state:'missing',uncertain:true};
+ if(other&&!Number.isFinite(other.score))return {winner,other,gap:null,state:'missing',uncertain:true};
  const incomplete=h=>h.confidence==='limited'||h.starPendingReview||!h.usesAttackReference||h.unmodeledSkills?.length||h.rankingBasis==='illustrative';
  const assumed=winner.assumedSkill||other?.assumedSkill;
  const overlap=Boolean(other&&Math.max(winner.conservativeScore,other.conservativeScore)<=Math.min(winner.optimisticScore,other.optimisticScore));
@@ -101,11 +108,28 @@ function candidate(hero,image){
  return col;
 }
 function render(group,imageFor=()=>null){
- const info=comparison(group),{winner,other}=info;
  const details=node('details','bear-advice');details.dataset.heroClass=group.type;
  details.append(node('summary','',tr('why')));
+ const available=alternatives(group),initial=comparison(group);
+ let select=null;
+ if(initial.winner&&available.length){
+  const picker=node('label','bear-name-field bear-advice-picker');
+  picker.append(node('span','',tr('choose')));
+  select=node('select','bear-advice-select');
+  select.setAttribute('aria-label',tr('choose'));
+  select.dataset.bearComparison=group.type;
+  for(const h of available){
+   const option=node('option','',h.name+(Number.isFinite(h.score)?'':' · '+tr('missing')));
+   option.value=h.name;select.append(option);
+  }
+  select.value=initial.other?.name||available[0].name;
+  picker.append(select);details.append(picker,p(tr('chooseHint')));
+ }
  const body=node('div','bear-advice-body');details.append(body);
- if(!winner){body.append(p(tr('missing')));return details;}
+ function paint(){
+ const info=comparison(group,select?.value),{winner,other}=info;
+ body.replaceChildren();
+ if(!winner){body.append(p(tr('missing')));return;}
  if(info.strength)body.append(node('strong','bear-advice-verdict',tr(info.strength)));
  if(info.gap!==null)body.append(p(info.strength==='tie'?tr('tied'):tr('gap',{winner:winner.name,other:other.name,gap:fmt(info.gap)})));
  if(info.uncertain)body.append(p(tr(info.state==='missing'?'missing':info.state),'bear-advice-caution'));
@@ -117,10 +141,14 @@ function render(group,imageFor=()=>null){
  const provenance=node('div','bear-advice-provenance');
  for(const h of [winner,other].filter(Boolean)){const section=node('section');section.append(node('h4','',h.name),evidence(h));provenance.append(section);}
  body.append(provenance);
- const alternatives=group.choices.filter(h=>h!==winner&&h.type===group.type).slice(0,3);
- if(alternatives.length){body.append(node('h4','',tr('next')));const list=node('ul','bear-advice-alternatives');
-  for(const h of alternatives){const li=node('li');li.append(identity(h,imageFor(h.name)),node('span','',Number.isFinite(h.score)?tr('index')+' '+fmt(h.score):tr('missing')));list.append(li);}body.append(list);
- }return details;
+ const next=available.slice(0,3);
+ if(next.length){body.append(node('h4','',tr('next')));const list=node('ul','bear-advice-alternatives');
+  for(const h of next){const li=node('li');li.append(identity(h,imageFor(h.name)),node('span','',Number.isFinite(h.score)?tr('index')+' '+fmt(h.score):tr('missing')));list.append(li);}body.append(list);
+ }
+ }
+ // Repaint only the evidence. Keep the native selector, keyboard focus and
+ // disclosure in place; never invoke ranking, saving or formation code.
+ select?.addEventListener('change',paint);paint();return details;
 }
-root.NRW_BEAR_HERO_EXPLANATIONS={comparison,render,tr,words};
+root.NRW_BEAR_HERO_EXPLANATIONS={comparison,alternatives,render,tr,words};
 })(window);

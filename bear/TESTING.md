@@ -12,6 +12,8 @@ SHA-256 comparisons against baseline `24ecfa9b9165f59873d878052c8aaebe19ccfbb5` 
 
 ## Automated checks
 
+The selectable comparison update adds every owned same-class candidate to a native selector, including Petra/Jabel/Thrud/Sophia. Tests verify explicit selection, exact gaps, fallback for wrong-class/unknown/self choices and missing-reference warnings. A local browser fixture confirms Petra can be compared with Jabel, Thrud and Sophia in a locked profile: profile data unchanged, zero remote save calls, other inputs still disabled. The selector and hint have DE/EN/FR/ES text; English and German native-label interaction were exercised directly. No ranking, formation, reference or API changes are required.
+
 - All 14 `bear/preview-v3/test-*.cjs` tests pass, including minister modes, mixed troop stock, constrained allocation, seven marches, relative leaders, profile service, PIN gates, independent base stats and all translated help guides.
 - The new evidence test covers 72 combinations for Zoe/Long Fei, Alcar/Zoe and Rosa/Yang: multiple stars, tiers, widgets and known/missing stats. It checks exact gaps, same-class alternatives, immutable outputs and explicit assumptions; it does not hardcode winners.
 - All 41 Bear test scripts were exercised. Six older root tests also fail on the unchanged baseline: `test-github-profiles.cjs` (old cache assertion), `test-hero-reference-ui.cjs` (literal invalid newline token), `test-hero-stars.cjs` and `test-troop-entries.cjs` (legacy OCR assertions), `test-score-bonuses.cjs` and `test-wizard.cjs` (workflow only present on the publisher branch). The unrelated OCR workflow was not revived.

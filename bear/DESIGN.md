@@ -184,6 +184,8 @@ Main panels frame related work. Hero cards use an inset background, a gold selec
 
 Each recommended starter has a native details/summary disclosure, styled as a compact gold question. Opening it reveals the advisor's existing model index, next eligible same-class candidate, offensive effects, stored inputs, star-derived assumptions and unresolved effects. The index uses a same-rally baseline of 100; it is not presented as actual game damage. The presentation reads the advisor's output without changing saved inputs, candidate order or calculations. Native keyboard operation remains available.
 
+The labeled "Compare with" native select lists every other owned hero of the same troop class, initially choosing the next scored candidate. Changing it updates only the evidence below, retaining the selector and open disclosure. It remains usable in a read-only profile; profile-editing controls stay disabled. Missing scores remain unavailable rather than being inferred from generation.
+
 ### Results and Motion
 
 Results appear immediately while the complete existing formation or Bear action video accompanies the ready result. Playback does not gate computation. Keep original media and existing linked assets; there are no newly fabricated game assets. An unavailable video has the existing fallback. Reduced-motion users skip playback and receive no transitions or result entrance animation.
