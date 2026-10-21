@@ -10,7 +10,7 @@ export function createEventLoans({getState,getLanguage,request,esc,flash}){
  const t=i=>(labels[getLanguage()]||labels.de)[i],staff=()=>getState()?.staff||{};
  const canRead=()=>staff().is_owner||staff().permissions?.members||staff().permissions?.transfers;
  const admin=()=>staff().is_owner===true;
- let data=null,loading=null,selected="";
+ let data=null,loading=null,selected="",expanded=false;
  const utcDay=date=>new Date(date).toISOString().slice(0,10);
  const lastDay=end=>new Date(Date.parse(end)-86400000).toISOString().slice(0,10);
  const gameDayToday=()=>new Date().toISOString().slice(0,10);
@@ -44,8 +44,9 @@ export function createEventLoans({getState,getLanguage,request,esc,flash}){
     '<label>Notiz<input class="control" name="note" maxlength="500"></label>'+
     '<label class="loan-protect"><input type="checkbox" name="protect_leadership">'+esc(t(7))+'</label>'+
     '<p class="small-note loan-date-note">'+esc(t(15))+'</p><button type="submit" class="primary">'+esc(t(2))+'</button></form>':'<p>'+esc(t(10))+'</p>';
-  root.innerHTML='<header class="loan-header"><h3>'+esc(t(0))+'</h3><button type="button" data-loan-refresh>'+esc(t(12))+'</button></header>'+
-    '<p>'+esc(t(1))+'</p>'+form+'<div class="loan-entries">'+(entries||esc(t(9)))+'</div>';
+  root.innerHTML='<details class="ux-disclosure" data-loan-details '+(expanded?'open':'')+'><summary><span>'+esc(t(0))+'</span><small>'+String((data.loans||[]).filter(l=>l.status==="approved").length)+'</small></summary><div class="ux-disclosure-body"><header class="loan-header"><button type="button" data-loan-refresh>'+esc(t(12))+'</button></header>'+
+    '<p>'+esc(t(1))+'</p>'+form+'<div class="loan-entries">'+(entries||esc(t(9)))+'</div></div></details>';
+  root.querySelector('[data-loan-details]')?.addEventListener('toggle',e=>{expanded=e.target.open;});
  }
  async function open(force=false){
   if(!root||!enabled||!canRead())return;
@@ -70,7 +71,7 @@ export function createEventLoans({getState,getLanguage,request,esc,flash}){
    const btn=e.target.closest("[data-loan-action]");if(btn&&admin()&&window.confirm(t(11)))save({command:btn.dataset.loanAction,id:btn.dataset.id});
   });
  }
- function selectPlayer(id){selected=String(id);render();const input=root?.querySelector("#loanPlayer");if(input){input.value=selected;input.focus();}}
- function reset(){data=null;loading=null;selected="";if(root)root.innerHTML="";}
+ function selectPlayer(id){selected=String(id);expanded=true;render();const input=root?.querySelector("#loanPlayer");if(input){input.value=selected;input.focus();}}
+ function reset(){expanded=false;data=null;loading=null;selected="";if(root)root.innerHTML="";}
  return {enabled,open,render,selectPlayer,reset};
 }

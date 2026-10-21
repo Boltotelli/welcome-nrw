@@ -1,0 +1,110 @@
+[
+  {
+    "source": "https://www.kingshot.wiki/events/bear-hunt",
+    "id": "bear",
+    "file": "bear-trap.png",
+    "url": "https://www.kingshot.wiki/knowledge-assets/0474_jump_icon_40088.png"
+  },
+  {
+    "source": "https://www.kingshot.wiki/events/viking-vengeance",
+    "id": "viking",
+    "file": "viking-vengeance.png",
+    "url": "https://www.kingshot.wiki/knowledge-assets/0473_jump_icon_40086.png"
+  },
+  {
+    "source": "https://www.kingshot.wiki/events/eternitys-reach",
+    "id": "eternity",
+    "file": "eternitys-reach.png",
+    "url": "https://www.kingshot.wiki/knowledge-assets/0469_activity_icon_56.png"
+  },
+  {
+    "source": "https://kingshotdata.com/events/golden-glaives-event/",
+    "id": "golden",
+    "file": "golden-glaives.webp",
+    "url": "https://kingshotdata.com/uploads/2025/05/golden-glaives-event-icon.webp"
+  },
+  {
+    "source": "https://kingshotdata.com/events/alliance-brawl-event/",
+    "id": "brawl",
+    "file": "alliance-brawl.webp",
+    "url": "https://kingshotdata.com/uploads/2025/07/alliance-brawl-event-icon.webp"
+  },
+  {
+    "source": "https://kingshotdata.com/events/strongest-governor-event/",
+    "id": "strongest",
+    "file": "strongest-governor.webp",
+    "url": "https://kingshotdata.com/uploads/2025/06/strongest-governor-event-icon.webp"
+  },
+  {
+    "source": "https://kingshotdata.com/events/kingdom-of-power-kvk-event/",
+    "id": "kvk",
+    "file": "kingdom-of-power.webp",
+    "url": "https://kingshotdata.com/uploads/2025/05/kingdom-of-power-event-icon.webp"
+  },
+  {
+    "source": "https://kingshotdata.com/events/merchant-empire-event/",
+    "id": "merchant",
+    "file": "merchant-empire.webp",
+    "url": "https://kingshotdata.com/uploads/2025/07/merchant-empire-event-icon.webp"
+  },
+  {
+    "source": "https://kingshotdata.com/events/armament-competition/",
+    "id": "armament",
+    "file": "armament-competition.webp",
+    "url": "https://kingshotdata.com/uploads/2025/04/city-development-event-icon.webp"
+  },
+  {
+    "source": "https://kingshotdata.com/events/officer-project-event/",
+    "id": "officer",
+    "file": "officer-project.webp",
+    "url": "https://kingshotdata.com/uploads/2025/03/power-up-event-icon.webp"
+  },
+  {
+    "source": "https://kingshotdata.com/events/hero-roulette/",
+    "id": "roulette",
+    "file": "hero-roulette.webp",
+    "url": "https://kingshotdata.com/uploads/2025/03/hero-roulette-event-icon.webp"
+  },
+  {
+    "source": "https://kingshotdata.com/events/champagne-fair/",
+    "id": "champagne",
+    "file": "champagne-fair.webp",
+    "url": "https://kingshotdata.com/uploads/2025/04/champagne-fair-event-icon.webp"
+  },
+  {
+    "source": "https://kingshotdata.com/events/kingdom-transfer-event/",
+    "id": "transfer",
+    "file": "kingdom-transfer.webp",
+    "url": "https://kingshotdata.com/uploads/2025/09/kingdom-transfer-event-icon.webp"
+  },
+  {
+    "source": "https://kingshotdata.com/events/all-out-event/",
+    "id": "kill",
+    "file": "all-out.webp",
+    "url": "https://kingshotdata.com/uploads/2025/03/all-out-event-icon.webp"
+  },
+  {
+    "source": "https://kingshotdata.com/events/mystic-trial/",
+    "id": "mythic",
+    "file": "mystic-trial.webp",
+    "url": "https://kingshotdata.com/uploads/2025/10/mystrical-trial.webp"
+  },
+  {
+    "source": "https://www.kingshot.wiki/events/fishing-tournament",
+    "id": "fishing",
+    "file": "fishing-tournament.png",
+    "url": "https://got-global-wiki.s3.us-west-1.amazonaws.com/wp-content/uploads/2026/01/jump_icon_40179.png"
+  },
+  {
+    "id": "championship",
+    "file": "alliance-championship.webp",
+    "url": "https://kingshotguides.com/wp-content/uploads/2025/06/alliance-championship-icon.webp",
+    "source": "https://kingshotguides.com/"
+  },
+  {
+    "id": "cesare",
+    "file": "cesares-fury.webp",
+    "url": "https://kingshotdata.com/uploads/2025/03/cesares-fury-event-icon.webp",
+    "source": "https://kingshotdata.com/events/cesares-fury/"
+  }
+]

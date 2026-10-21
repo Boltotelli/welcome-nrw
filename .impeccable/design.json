@@ -1,0 +1,260 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-21T07:05:53Z",
+  "title": "Design System: AllianceOS — Einsatzbuch",
+  "extensions": {
+    "provenance": {
+      "scope": "https://boltotelli.github.io/welcome-nrw/leitung/",
+      "source": [
+        "leitung/pages-atelier.css",
+        "leitung/pages-atelier.js"
+      ],
+      "direction": "true-black-flat",
+      "seed": 1309344843,
+      "adaptation": "Pinned NRW gold, near-black ground, compact corners and a labeled sidebar for eleven modules replace the seed's literal lime, radii and no-sidebar shell.",
+      "themes": "Unprefixed frontmatter colors are dark; light-prefixed colors supply matching light roles.",
+      "permissionBoundary": "Application modules own visibility and permissions. Original navigation nodes move into compact navigation; no clones.",
+      "locales": [
+        "de",
+        "en",
+        "fr",
+        "es"
+      ],
+      "backendBoundary": "Presentation only. No auth, Supabase, database, Edge Function, API or Vercel configuration changes. Other Pages routes and Vercel production remain outside scope."
+    },
+    "colorMeta": {
+      "nrw-gold": {
+        "role": "primary",
+        "displayName": "NRW Gold",
+        "canonical": "#d8ba73",
+        "tonalRamp": [
+          "oklch(15% 0.09 85)",
+          "oklch(27% 0.09 85)",
+          "oklch(38% 0.09 85)",
+          "oklch(49% 0.09 85)",
+          "oklch(61% 0.09 85)",
+          "oklch(72% 0.09 85)",
+          "oklch(84% 0.09 85)",
+          "oklch(95% 0.09 85)"
+        ],
+        "rampPurpose": "Synthesized panel preview only; not implementation tokens."
+      },
+      "ground": {
+        "role": "neutral",
+        "displayName": "Near-black Ground",
+        "canonical": "#0c0d0e",
+        "tonalRamp": [
+          "oklch(15% 0.003 250)",
+          "oklch(27% 0.003 250)",
+          "oklch(38% 0.003 250)",
+          "oklch(49% 0.003 250)",
+          "oklch(61% 0.003 250)",
+          "oklch(72% 0.003 250)",
+          "oklch(84% 0.003 250)",
+          "oklch(95% 0.003 250)"
+        ],
+        "rampPurpose": "Synthesized panel preview only; not implementation tokens."
+      }
+    },
+    "typographyMeta": {
+      "headline": {
+        "displayName": "Workspace Headline",
+        "purpose": "Current module title; 22px on phones."
+      },
+      "body": {
+        "displayName": "Operational Body",
+        "purpose": "Local Inter variable WOFF2; 400/500/600 hierarchy, with tabular numerals in numeric interfaces."
+      }
+    },
+    "shadows": [
+      {
+        "name": "application-modal",
+        "value": "0 24px 80px #0006",
+        "purpose": "Structural modal exception; cards and navigation remain shadowless."
+      }
+    ],
+    "motion": [
+      {
+        "name": "reduced-motion",
+        "value": "animation:none!important;transition:none!important;scroll-behavior:auto!important",
+        "purpose": "Scoped prefers-reduced-motion override; no new animation framework."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "wide-gutters",
+        "value": "min-width:1600px",
+        "purpose": "Main horizontal padding 40px."
+      },
+      {
+        "name": "assignment-wrap",
+        "value": "max-width:1250px",
+        "purpose": "Fast forms use two columns; participation save moves to its own row."
+      },
+      {
+        "name": "participation-eight",
+        "value": "min-width:1200px",
+        "purpose": "Eight count columns with 12px 0 outer padding and 6px 12px cells."
+      },
+      {
+        "name": "compact-navigation",
+        "value": "max-width:1100px",
+        "purpose": "Original navigation and Welcome link move to native dialog. Main padding 24px 20px 48px; top bar minimum height 64px."
+      },
+      {
+        "name": "phone",
+        "value": "max-width:700px",
+        "purpose": "Main padding 22px 16px 40px plus bottom safe area; cards 16px; title 22px; controls minimum 44px; inputs 16px; stacked content and two-column metrics."
+      }
+    ],
+    "interaction": {
+      "focus": "2px solid var(--accent); outline-offset:3px",
+      "hoverQuery": "(hover:hover) and (pointer:fine)",
+      "primaryHover": "brightness(.92)",
+      "buttonPress": "brightness(.86)",
+      "coarsePointer": "16px input text; 44px minimum button and summary height",
+      "contrast": "Preserve theme-specific pairs. Validate actual text and control combinations; decorative dividers do not stand in for control strokes. No universal contrast certification is implied."
+    },
+    "roleSelection": {
+      "type": "radio-group",
+      "values": [
+        "starter",
+        "joiner"
+      ],
+      "visual": "sliding selection segment",
+      "preserves": "original checkbox checked-value save contract",
+      "pointerDuration": "160ms",
+      "easing": "cubic-bezier(.23,1,.32,1)",
+      "keyboardMotion": false,
+      "reducedMotion": false,
+      "colors": {
+        "selected": {
+          "dark": "#e3d2a9",
+          "light": "#e9dcc0"
+        },
+        "ink": {
+          "dark": "#292417",
+          "light": "#382c12"
+        }
+      }
+    },
+    "surfaceEdge": {
+      "dark": "#292c2f",
+      "light": "#e2e5e7"
+    }
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Neutral inversion identifies the main operation.",
+      "html": "<button class=\"ds-primary\">Speichern</button>",
+      "css": ".ds-primary{font:500 13px/1.4 Inter,system-ui,sans-serif;min-height:36px;padding:8px 12px;border-radius:6px;border:1px solid var(--os-primary,#eeefed);background:var(--os-primary,#eeefed);color:var(--os-primary-ink,#151617)}@media(hover:hover) and (pointer:fine){.ds-primary:hover{filter:brightness(.92)}}.ds-primary:focus-visible{outline:2px solid var(--accent,#d8ba73);outline-offset:3px}.ds-primary:active{filter:brightness(.86)}@media(max-width:700px),(pointer:coarse){.ds-primary{min-height:44px}}"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Outlined secondary action without an accent fill.",
+      "html": "<button class=\"ds-ghost\">Kopieren</button>",
+      "css": ".ds-ghost{font:500 13px/1.4 Inter,system-ui,sans-serif;min-height:36px;padding:8px 12px;border-radius:6px;border:1px solid var(--os-control,#484b4e);background:transparent;color:var(--text,#f3f3f1)}@media(hover:hover) and (pointer:fine){.ds-ghost:hover{background:var(--panel,#222325)}}.ds-ghost:focus-visible{outline:2px solid var(--accent,#d8ba73);outline-offset:3px}.ds-ghost:active{filter:brightness(.86)}@media(max-width:700px),(pointer:coarse){.ds-ghost{min-height:44px}}"
+    },
+    {
+      "name": "Search Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Labeled compact field with a visible control boundary.",
+      "html": "<label class=\"ds-field\">Spieler suchen<input class=\"ds-input\" type=\"search\" placeholder=\"Name\"></label>",
+      "css": ".ds-field{display:grid;gap:6px;font:500 13px/1.5 Inter,system-ui,sans-serif;color:var(--text,#f3f3f1)}.ds-input{font:400 13px/1.5 Inter,system-ui,sans-serif;min-height:36px;padding:8px 10px;border:1px solid var(--os-control,#484b4e);border-radius:6px;background:var(--bg,#0c0d0e);color:var(--text,#f3f3f1);caret-color:var(--accent,#d8ba73)}.ds-input::placeholder{color:var(--muted,#b4b6b8);opacity:1}.ds-input:focus-visible{outline:2px solid var(--accent,#d8ba73);outline-offset:3px}@media(max-width:700px),(pointer:coarse){.ds-input{font-size:16px;min-height:44px}}"
+    },
+    {
+      "name": "Module Navigation",
+      "kind": "nav",
+      "refersTo": "navigation-active",
+      "description": "Labeled neutral navigation; runtime permissions remain authoritative.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"Module\"><button class=\"ds-nav-item ds-current\" aria-current=\"page\">Übersicht</button><button class=\"ds-nav-item\">Mitglieder</button></nav>",
+      "css": ".ds-nav{display:grid;gap:2px}.ds-nav-item{font:400 13px/1.35 Inter,system-ui,sans-serif;text-align:left;min-height:38px;padding:9px 12px;border:0;border-radius:6px;background:transparent;color:var(--muted,#b4b6b8)}.ds-current{background:var(--os-selected,#292b2d);color:var(--text,#f3f3f1);font-weight:600}@media(hover:hover) and (pointer:fine){.ds-nav-item:hover{background:var(--panel,#222325);color:var(--text,#f3f3f1)}}.ds-nav-item:focus-visible{outline:2px solid var(--accent,#d8ba73);outline-offset:3px}.ds-nav-item:active{filter:brightness(.86)}@media(max-width:1100px){.ds-nav-item{min-height:44px;font-size:14px}}"
+    },
+    {
+      "name": "Confirmed Chip",
+      "kind": "chip",
+      "refersTo": "chip-confirmed",
+      "description": "Text and semantic color communicate confirmed state.",
+      "html": "<span class=\"ds-chip\">Bestätigt</span>",
+      "css": ".ds-chip{display:inline-block;font:500 11px/1.5 Inter,system-ui,sans-serif;min-height:20px;padding:3px 6px;white-space:nowrap;border:0;border-radius:4px;background:var(--os-good-bg,#1b3026);color:var(--green,#8dc8a7)}"
+    },
+    {
+      "name": "Operational Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Flat tonal surface for real operational content.",
+      "html": "<section class=\"ds-card\"><h3 class=\"ds-card-title\">Planung</h3><p class=\"ds-card-note\">Bestehende Zuweisungen und Antworten prüfen.</p></section>",
+      "css": ".ds-card{background:var(--surface,#171819);color:var(--text,#f3f3f1);border:0;border-radius:8px;padding:24px;box-shadow:none;font:400 14px/1.5 Inter,system-ui,sans-serif}.ds-card-title{font-size:16px;line-height:1.3;letter-spacing:-.02em;font-weight:600;margin:0 0 16px}.ds-card-note{font-size:12px;color:var(--muted,#b4b6b8);margin:0}@media(max-width:700px){.ds-card{padding:16px}}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Einsatzbuch",
+    "overview": "Einsatzbuch is a calm operational register: readable names, visible response states and compact, dependable controls. The existing NRW crest, AllianceOS name and restrained NRW gold anchor the interface. Dense repeated work takes priority over promotional space, decorative effects or invented metrics.\n\nThis document applies exclusively to `https://boltotelli.github.io/welcome-nrw/leitung/`. Its authority is the implemented `leitung/pages-atelier.css` and `leitung/pages-atelier.js`, with the exact-host loader as the boundary. It does not authorize changes to other Pages routes or Vercel production. The world adapts the `true-black-flat` direction, seed `1309344843`: near-black tonal surfaces, inverted primary controls and restrained color. The pinned NRW gold replaces the dealt lime. The implemented labeled sidebar deliberately replaces the dealt no-sidebar shell because the product has eleven modules. The seed's literal palette, pill controls and 20px card radius are not the implementation tokens.",
+    "keyCharacteristics": [
+      "Tonal surfaces and restrained NRW gold.",
+      "Labeled, grouped navigation for eleven modules.",
+      "Compact, searchable operational lists and predictable forms.",
+      "Equivalent dark and light themes; four preserved locales.",
+      "Existing static HTML, CSS and vanilla ES modules; no new framework or animation system."
+    ],
+    "rules": [
+      {
+        "name": "The Restrained Gold Rule",
+        "body": "Use NRW gold as a precise cue, never as the routine fill for navigation or primary buttons.",
+        "section": "colors"
+      },
+      {
+        "name": "The Contrast Role Rule",
+        "body": "Preserve the theme-specific text, status and control pairs. Dividers are structural separators, not substitutes for the stronger control stroke. Test actual foreground/background combinations in each theme; do not infer universal accessibility conformance from the palette alone.",
+        "section": "colors"
+      }
+    ],
+    "dos": [
+      "Do preserve the exact-host and `/leitung/` scope of this visual system.",
+      "Do use both theme-specific palettes and check actual contrast in context.",
+      "Do retain German, English, French and Spanish labels, translations and application formatting.",
+      "Do move existing navigation nodes so event handlers, URLs and permission states remain authoritative.",
+      "Do preserve every module, save, delete, copy, filter and navigation function."
+    ],
+    "donts": [
+      "Don't apply this document to Vercel production, the Bear optimizer, Welcome or other Pages routes.",
+      "Don't change authentication, Supabase, databases, Edge Functions, APIs or Vercel configuration as part of this visual system.",
+      "Don't add gaming effects, gradient cards, neon glows, promotional hero slogans or invented metrics.",
+      "Don't replace permission decisions with visual guesses or publish test fixtures as live data.",
+      "Don't introduce a new animation framework or restore the seed's no-sidebar shell and literal tokens over this implementation."
+    ]
+  },
+  "roleSelection": {
+    "type": "radio-group",
+    "values": [
+      "starter",
+      "joiner"
+    ],
+    "visual": "sliding selection segment",
+    "preserves": "original checkbox checked-value save contract",
+    "pointerDuration": "160ms",
+    "easing": "cubic-bezier(.23,1,.32,1)",
+    "keyboardMotion": false,
+    "reducedMotion": false,
+    "colors": {
+      "selected": {
+        "dark": "#e3d2a9",
+        "light": "#e9dcc0"
+      },
+      "ink": {
+        "dark": "#292417",
+        "light": "#382c12"
+      }
+    }
+  },
+  "surfaceEdge": {
+    "dark": "#292c2f",
+    "light": "#e2e5e7"
+  }
+}

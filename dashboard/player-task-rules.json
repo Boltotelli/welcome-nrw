@@ -1,0 +1,718 @@
+{
+  "version": 1,
+  "note": "Metadata only. Text remains in existing event/guide sources. Unknown leadership prose stays informational. Timing references incumbent 00/08/16 UTC Intel and 10h merchant guidance.",
+  "rules": {
+    "i3g02n": {
+      "action": true
+    },
+    "160dmdt": {
+      "action": true
+    },
+    "1oysrg6": {
+      "action": true
+    },
+    "1jkdti0": {
+      "action": true
+    },
+    "iiyryb": {
+      "action": true
+    },
+    "10s3gdd": {
+      "action": true
+    },
+    "1gygu2l": {
+      "action": false
+    },
+    "1uzi584": {
+      "action": true
+    },
+    "1ekzapv": {
+      "action": true
+    },
+    "hwsol9": {
+      "action": true
+    },
+    "9p13jk": {
+      "action": true
+    },
+    "16jlv7a": {
+      "action": true
+    },
+    "1wsc4i6": {
+      "action": false
+    },
+    "1nn9r5m": {
+      "action": true
+    },
+    "xjqym": {
+      "action": true,
+      "timing": {
+        "fromMinute": 0
+      }
+    },
+    "fj7jno": {
+      "action": true,
+      "timing": {
+        "fromMinute": 480
+      }
+    },
+    "1yf9y19": {
+      "action": true,
+      "timing": {
+        "fromMinute": 960
+      }
+    },
+    "pd1nl1": {
+      "action": true,
+      "timing": {
+        "afterReset": true
+      }
+    },
+    "vz4b67": {
+      "action": false
+    },
+    "177am9y": {
+      "action": false
+    },
+    "135va8n": {
+      "action": true
+    },
+    "oj92fh": {
+      "action": true
+    },
+    "qzn77m": {
+      "action": true
+    },
+    "1v7iidq": {
+      "action": true
+    },
+    "1m21jeb": {
+      "action": true
+    },
+    "1fei48u": {
+      "action": true
+    },
+    "18gn11r": {
+      "action": true
+    },
+    "1au80mn": {
+      "action": true
+    },
+    "113li4h": {
+      "action": true
+    },
+    "1x4xm0k": {
+      "action": true
+    },
+    "dtpv1c": {
+      "action": true,
+      "timing": {
+        "prepare": true
+      }
+    },
+    "1gtzy89": {
+      "action": true,
+      "timing": {
+        "prepare": true
+      }
+    },
+    "1sybv89": {
+      "action": false,
+      "timing": {
+        "prepare": true
+      }
+    },
+    "1s2za8c": {
+      "action": true,
+      "timing": {
+        "prepare": true
+      }
+    },
+    "11hz5pv": {
+      "action": true,
+      "timing": {
+        "prepare": true
+      }
+    },
+    "12o9nye": {
+      "action": true,
+      "timing": {
+        "prepare": true
+      }
+    },
+    "1m6ya0h": {
+      "action": true,
+      "timing": {
+        "prepare": true
+      }
+    },
+    "x0gvor": {
+      "action": true,
+      "timing": {
+        "prepare": true
+      }
+    },
+    "7i525u": {
+      "action": true,
+      "timing": {
+        "fromMinute": 0
+      }
+    },
+    "mzedra": {
+      "action": true,
+      "timing": {
+        "fromMinute": 480
+      }
+    },
+    "1idswgh": {
+      "action": true,
+      "timing": {
+        "fromMinute": 960
+      }
+    },
+    "j5ftrj": {
+      "action": true,
+      "timing": {
+        "afterReset": true
+      }
+    },
+    "8wy2n8": {
+      "action": true
+    },
+    "1p0o3ow": {
+      "action": true
+    },
+    "t2k9wd": {
+      "action": true
+    },
+    "1yh3as7": {
+      "action": false
+    },
+    "dglde7": {
+      "action": true,
+      "timing": {
+        "fromMinute": 0,
+        "prepare": true
+      }
+    },
+    "1qk9r87": {
+      "action": true,
+      "timing": {
+        "fromMinute": 480,
+        "prepare": true
+      }
+    },
+    "1n04h5z": {
+      "action": true,
+      "timing": {
+        "fromMinute": 960,
+        "prepare": true
+      }
+    },
+    "1czg97l": {
+      "action": true,
+      "timing": {
+        "afterReset": true
+      }
+    },
+    "ceaxh7": {
+      "action": true
+    },
+    "fv0xsv": {
+      "action": false
+    },
+    "1h8c6sc": {
+      "action": true
+    },
+    "as6z83": {
+      "action": false
+    },
+    "7lkpip": {
+      "action": true,
+      "timing": {
+        "prepare": true
+      }
+    },
+    "172ebin": {
+      "action": true,
+      "timing": {
+        "prepare": true
+      }
+    },
+    "1wxg8bs": {
+      "action": false,
+      "timing": {
+        "prepare": true
+      }
+    },
+    "1fhg6ec": {
+      "action": true,
+      "timing": {
+        "prepare": true
+      }
+    },
+    "1e3bhn5": {
+      "action": true
+    },
+    "1h80egp": {
+      "action": true
+    },
+    "1h6s5uf": {
+      "action": true
+    },
+    "5tzk5h": {
+      "action": true
+    },
+    "vibg2k": {
+      "action": false
+    },
+    "y47k2q": {
+      "action": true,
+      "timing": {
+        "prepare": true
+      }
+    },
+    "igq6lv": {
+      "action": true,
+      "timing": {
+        "fromMinute": 960,
+        "prepare": true
+      }
+    },
+    "z58xec": {
+      "action": true,
+      "timing": {
+        "prepare": true
+      }
+    },
+    "16lzlu8": {
+      "action": true,
+      "timing": {
+        "afterReset": true
+      }
+    },
+    "17poccx": {
+      "action": true,
+      "timing": {
+        "afterReset": true
+      }
+    },
+    "12yoxd2": {
+      "action": true
+    },
+    "11rnc94": {
+      "action": true
+    },
+    "vf3m0u": {
+      "action": true
+    },
+    "1xngh99": {
+      "action": false
+    },
+    "1hr2367": {
+      "action": false
+    },
+    "1puiy4c": {
+      "action": false,
+      "timing": {
+        "prepare": true
+      }
+    },
+    "3js2r8": {
+      "action": true,
+      "timing": {
+        "prepare": true
+      }
+    },
+    "1fspzjx": {
+      "action": true,
+      "timing": {
+        "afterReset": true
+      }
+    },
+    "5bem9": {
+      "action": true,
+      "timing": {
+        "afterReset": true
+      }
+    },
+    "z820jj": {
+      "action": true
+    },
+    "iez2w5": {
+      "action": true
+    },
+    "883et5": {
+      "action": false
+    },
+    "ohu2n5": {
+      "action": false
+    },
+    "lsa4gq": {
+      "action": false
+    },
+    "13cvwpo": {
+      "action": false,
+      "timing": {
+        "prepare": true
+      }
+    },
+    "73p736": {
+      "action": true,
+      "timing": {
+        "prepare": true
+      }
+    },
+    "yhcjoa": {
+      "action": true,
+      "timing": {
+        "prepare": true
+      }
+    },
+    "ifln2g": {
+      "action": true,
+      "timing": {
+        "prepare": true
+      }
+    },
+    "cvr58c": {
+      "action": true
+    },
+    "1ygmfbm": {
+      "action": true
+    },
+    "1keurz4": {
+      "action": false
+    },
+    "lrfnk": {
+      "action": false
+    },
+    "8r0nip": {
+      "action": false,
+      "timing": {
+        "afterReset": true
+      }
+    },
+    "8wy5bn": {
+      "action": false,
+      "timing": {
+        "prepare": true
+      }
+    },
+    "tc9dn0": {
+      "action": true,
+      "timing": {
+        "afterReset": true
+      }
+    },
+    "1mfn0yf": {
+      "action": true,
+      "timing": {
+        "prepare": true
+      }
+    },
+    "1smra27": {
+      "action": true
+    },
+    "11iic49": {
+      "action": false
+    },
+    "pujky1": {
+      "action": false
+    },
+    "xf01kb": {
+      "action": false
+    },
+    "136tyy9": {
+      "action": false,
+      "timing": {
+        "prepare": true
+      }
+    },
+    "1n3vdkr": {
+      "action": false,
+      "timing": {
+        "prepare": true
+      }
+    },
+    "1spd8s5": {
+      "action": false,
+      "timing": {
+        "prepare": true
+      }
+    },
+    "1a0ce04": {
+      "action": false
+    },
+    "pr17rr": {
+      "action": false
+    },
+    "t12nnu": {
+      "action": false
+    },
+    "bn755m": {
+      "action": true
+    },
+    "1ig7jck": {
+      "action": true
+    },
+    "1qlkpul": {
+      "action": true
+    },
+    "1cn5cln": {
+      "action": false
+    },
+    "1bcju6z": {
+      "action": true
+    },
+    "1vgkw8": {
+      "action": true
+    },
+    "1p81ndg": {
+      "action": true
+    },
+    "1v33fk": {
+      "action": false
+    },
+    "1b8x9bo": {
+      "action": false
+    },
+    "1g8g7re": {
+      "action": true
+    },
+    "orpviq": {
+      "action": true
+    },
+    "xudy1w": {
+      "action": false
+    },
+    "1no54za": {
+      "action": true
+    },
+    "yqhbgp": {
+      "action": true
+    },
+    "vdlwbq": {
+      "action": false
+    },
+    "1u7bstm": {
+      "action": false
+    },
+    "1rrev2r": {
+      "action": true
+    },
+    "tcijsv": {
+      "action": false
+    },
+    "1vgs83c": {
+      "action": false
+    },
+    "1u3panb": {
+      "action": false
+    },
+    "1y1sh15": {
+      "action": true
+    },
+    "17oar7p": {
+      "action": true
+    },
+    "1ilfdjx": {
+      "action": false
+    },
+    "wzkoc8": {
+      "action": true
+    },
+    "1muiye3": {
+      "action": true
+    },
+    "1h7bipg": {
+      "action": true
+    },
+    "o3wzva": {
+      "action": false
+    },
+    "60oruk": {
+      "action": false
+    },
+    "pex4c3": {
+      "action": true
+    },
+    "cu84hr": {
+      "action": false
+    },
+    "ra1roz": {
+      "action": false
+    },
+    "c6o7qp": {
+      "action": true
+    },
+    "1pvzde7": {
+      "action": true
+    },
+    "hl32t": {
+      "action": false
+    },
+    "t38q6b": {
+      "action": true
+    },
+    "lwhcyy": {
+      "action": true
+    },
+    "ytlqrc": {
+      "action": true
+    },
+    "1d029rp": {
+      "action": false
+    },
+    "1t8w1db": {
+      "action": false
+    },
+    "15nb4lv": {
+      "action": false
+    },
+    "358y7g": {
+      "action": false
+    },
+    "18mmshf": {
+      "action": false
+    },
+    "167ysjh": {
+      "action": false
+    },
+    "oi9yub": {
+      "action": false
+    },
+    "h3urp7": {
+      "action": false
+    },
+    "lsn1i4": {
+      "action": false
+    },
+    "1ozck04": {
+      "action": false
+    },
+    "eb01vx": {
+      "action": false
+    },
+    "n62y47": {
+      "action": false
+    },
+    "xl6r02": {
+      "action": false
+    },
+    "beztxl": {
+      "action": false
+    },
+    "13b0a2v": {
+      "action": false
+    },
+    "4ok3qz": {
+      "action": false
+    },
+    "1assp5r": {
+      "action": false
+    },
+    "1uurw0i": {
+      "action": false
+    },
+    "1hxkdo0": {
+      "action": true
+    },
+    "rql14t": {
+      "action": false
+    },
+    "qab9g3": {
+      "action": false
+    },
+    "4qowfw": {
+      "action": true,
+      "timing": {
+        "fromMinute": 600
+      }
+    },
+    "nvsgmo": {
+      "action": true
+    },
+    "mc8y0z": {
+      "action": true
+    },
+    "190i6db": {
+      "action": false
+    },
+    "w90hm6": {
+      "action": false
+    },
+    "i04048": {
+      "action": false
+    },
+    "a8cue8": {
+      "action": false
+    },
+    "g5xmfm": {
+      "action": false
+    },
+    "1hxadkt": {
+      "action": false
+    },
+    "7lh3l9": {
+      "action": true
+    },
+    "1mgz33t": {
+      "action": false
+    },
+    "1xdxpbw": {
+      "action": true
+    },
+    "18ia8px": {
+      "action": false
+    },
+    "lnptl": {
+      "action": false
+    },
+    "1i5x1g0": {
+      "action": false
+    },
+    "g1ksjn": {
+      "action": false
+    },
+    "mzwour": {
+      "action": true
+    },
+    "n0zvk4": {
+      "action": false
+    },
+    "12zkzf": {
+      "action": true
+    },
+    "1cca2xv": {
+      "action": true
+    },
+    "j4fobs": {
+      "action": true
+    },
+    "1sjdal9": {
+      "action": true
+    },
+    "wylqkx": {
+      "action": true
+    },
+    "lft972": {
+      "action": true
+    },
+    "1cuch8r": {
+      "action": false
+    },
+    "17l3jl2": {
+      "action": true
+    },
+    "e2lc3s": {
+      "action": true
+    },
+    "g7rj9a": {
+      "action": true
+    },
+    "1ra18y3": {
+      "action": true
+    }
+  }
+}

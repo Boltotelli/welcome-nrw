@@ -1,12 +1,13 @@
 
 (function(){
  const root=document.documentElement, body=document.body;
- const savedTheme=localStorage.getItem('nrw_theme') || (matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
+ const themeKey='nrw_welcome_theme_v3';
+ const savedTheme=localStorage.getItem(themeKey) || 'dark';
  root.dataset.theme=savedTheme;
  const themeBtn=document.getElementById('themeBtn');
  function themeIcon(){ if(themeBtn) themeBtn.textContent=root.dataset.theme==='dark'?'☀':'☾'; }
  themeIcon();
- themeBtn?.addEventListener('click',()=>{root.dataset.theme=root.dataset.theme==='dark'?'light':'dark';localStorage.setItem('nrw_theme',root.dataset.theme);themeIcon();});
+ themeBtn?.addEventListener('click',()=>{root.dataset.theme=root.dataset.theme==='dark'?'light':'dark';localStorage.setItem(themeKey,root.dataset.theme);themeIcon();});
  const storedLanguage=localStorage.getItem('nrw_page_lang');
  const savedLang=['de','en','fr'].includes(storedLanguage)?storedLanguage:'en';
  body.dataset.lang=savedLang;document.documentElement.lang=savedLang;
@@ -268,10 +269,4 @@ window.addEventListener('nrw-lang-change',renderSagrLocations);
  grid.appendChild(card);
 })();
 
-(function useCurrentDiscordInvite(){
- const currentDiscord='https://discord.gg/cZp27eVYXC';
- const apply=()=>document.querySelectorAll('a[href*="discord.gg"]').forEach(link=>{link.href=currentDiscord});
- apply();
- const observer=new MutationObserver(()=>apply());
- observer.observe(document.body,{childList:true,subtree:true});
-})();
+

@@ -1,0 +1,524 @@
+name: NRW Bear Optimizer - GitHub Pages test
+
+on:
+  push:
+    branches:
+      - feature/bear-optimizer-nrw-prototype
+    paths:
+      - 'bear/**'
+      - '.github/workflows/bear-pages.yml'
+  workflow_dispatch:
+  # Can also be called by the lightweight main-branch publishing workflow.
+  workflow_call:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: nrw-bear-github-pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: bear-pages-preview
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Tests and the Bear root still rely on this stable source branch.
+          # Leadership, dashboard, and latest Bear V3 come from main below.
+          ref: feature/bear-optimizer-nrw-prototype
+      - uses: actions/configure-pages@v5
+      - name: Verify Bear scripts and combat data
+        run: |
+          node --check bear/catalog.js
+          node --check bear/hero-reference/test-hero-reference.cjs
+          node bear/hero-reference/test-hero-reference.cjs
+          node --check bear/combat.js
+          node --check bear/v2.js
+          node --check bear/ux.js
+          node --check bear/charm-references.js
+          node --check bear/charm-shapes.js
+          node --check bear/charm-guide-silhouettes.js
+          node --check bear/charm-guide-matcher.js
+          node bear/test-charm-guide.cjs
+          node --check bear/tier-recognizer.js
+          node --check bear/gear-layout.js
+          node --check bear/troop-badges.js
+          node --check bear/troop-entries.js
+          node bear/test-troop-entries.cjs
+          node bear/test-gear-layout.cjs
+          node bear/test-troop-badges.cjs
+          node --check bear/screenshot-importer.js
+          node --check bear/intake-core.js
+          node --check bear/portrait-matcher.js
+          node --check bear/hero-grid.js
+          node --check bear/hero-stars.js
+          node --check bear/hero-level.js
+          node bear/test-hero-level.cjs
+          node bear/test-hero-stars.cjs
+          node --check bear/intake-ui.js
+          node --check bear/hero-reference.js
+          node bear/test-hero-reference-ui.cjs
+          node --check bear/hero-advisor.js
+          node --check bear/github-profiles.js
+          node bear/test-github-profiles.cjs
+          node --check bear/wizard.js
+          node bear/test-hero-advisor.cjs
+          node bear/test-wizard.cjs
+          node --check bear/buff-intake-core.js
+          node --check bear/buff-import.js
+          node bear/test-buff-import.cjs
+          node --check bear/capacity-core.js
+          node --check bear/capacity-ui.js
+          node bear/test-capacity.cjs
+          node --check bear/formation-core.js
+          node --check bear/formation-ui.js
+          node bear/test-formation.cjs
+          node --check bear/simulation-core.js
+          node --check bear/simulation-ui.js
+          node bear/test-simulation.cjs
+          node --check bear/own-baseline.js
+          node bear/test-own-baseline.cjs
+          node --check bear/proc-expectation.js
+          node bear/test-proc-expectation.cjs
+          node --check bear/score-bonuses.js
+          node bear/test-score-bonuses.cjs
+          node bear/test-personal-damage.cjs
+          node bear/test-intake.cjs
+          node bear/test-portrait.cjs
+          node bear/test-hud-portraits.cjs
+          node bear/test-hero-grid.cjs
+          node bear/test-tier.cjs
+          python3 -m py_compile bear/build-charm-shapes.py bear/build-hero-signatures.py
+          node bear/test-screenshot.cjs
+          node - <<'NODE'
+          global.window = {};
+          require('./bear/charm-references.js');
+          const v = window.NRW_BEAR_CHARM_REFERENCES;
+          if(v.maxLevel !== 22 || v.sourceImages.length !== 22 || v.sourceImages.some((x,i)=>x.level!==i+1 || !x.reference.includes('infantry_lvl'+(i+1)+'.webp')))process.exit(1);
+          console.log('Charm reference metadata: 22 levels valid');
+          NODE
+          node bear/test-combat.cjs
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          text = Path('bear/index.html').read_text()
+          scripts = re.findall(r'<script(?:[^>]*)>(.*?)</script>', text, re.S)
+          Path('/tmp/bear-inline.js').write_text('\n'.join(scripts))
+          PY
+          node --check /tmp/bear-inline.js
+      - name: Build isolated static test
+        run: |
+          mkdir -p _site/assets
+          cp bear/index.html _site/index.html
+          cp bear/hero-hud-fingerprints.json _site/hero-hud-fingerprints.json
+          # Public-only, version-pinned data from its own independent GitHub repo.
+          # No personal player files and NO Supabase. Fail deployment if unavailable.
+          curl --fail --silent --show-error --location --retry 3 --max-time 40 \
+            https://raw.githubusercontent.com/Boltotelli/kingshot-data/8947b4813ac2b82b1c3672a9d59c7eb014b843c8/heroes.v1.json \
+            --output _site/hero-reference.json
+          node - <<'NODE'
+          const fs=require('node:fs'),vm=require('node:vm');
+          const ref=JSON.parse(fs.readFileSync('_site/hero-reference.json','utf8'));
+          const context={window:{}};
+          vm.runInNewContext(fs.readFileSync('bear/hero-reference.js','utf8'),context);
+          if(!context.window.NRW_BEAR_HERO_REFERENCE.validate(ref))process.exit(2);
+          if(ref.records.find(h=>h.name==='Marlin').expeditionSkills.length!==2)process.exit(3);
+          console.log('Verified external 37-hero source and Marlin correction');
+          NODE
+          cp bear/catalog.js bear/combat.js bear/v2.js bear/v2.css bear/ux.js bear/ux.css bear/charm-references.js bear/charm-shapes.js bear/charm-guide-silhouettes.js bear/charm-guide-matcher.js bear/tier-recognizer.js bear/gear-layout.js bear/troop-badges.js bear/troop-entries.js bear/hero-grid.js bear/hero-stars.js bear/hero-level.js bear/portrait-matcher.js bear/hero-reference.js bear/hero-advisor.js bear/buff-intake-core.js bear/buff-import.js bear/buff-import.css bear/capacity-core.js bear/capacity-ui.js bear/formation-core.js bear/formation-ui.js bear/simulation-core.js bear/simulation-ui.js bear/own-baseline.js bear/proc-expectation.js bear/score-bonuses.js bear/screenshot-importer.js bear/screenshot-importer.css bear/intake-core.js bear/intake-ui.js bear/intake-ui.css bear/github-profiles.js bear/wizard.js bear/wizard.css _site/
+          # Real game screenshots, only when the user provides unmodified originals.
+          if [ -d bear/examples ]; then
+            mkdir -p _site/examples
+            find bear/examples -maxdepth 1 -type f -name '*.jpg' -exec cp '{}' _site/examples/ \;
+            # A single user-supplied ZIP can carry all nine unmodified assets.
+            if [ -f bear/examples/nrw-bear-assets.zip ]; then
+              unzip -tq bear/examples/nrw-bear-assets.zip
+              zip_sha="$(sha256sum bear/examples/nrw-bear-assets.zip | cut -d ' ' -f 1)"
+              # This first approved ZIP was packed with four mislabeled JPGs.
+              # Detect the exact uploaded original so later corrected ZIPs
+              # retain conventional filenames and never get swapped again.
+              needs_mapping_fix=false
+              if [ "$zip_sha" = "57bd5246b3e9c21904ef2f11ae4db246c5cd9780d55a333efd0bbadfa41e9418" ]; then
+                needs_mapping_fix=true
+                echo "Applying verified source-to-screen mapping for the uploaded seven examples."
+              fi
+              for name in troops.jpg stats.jpg stats-extra.jpg roster.jpg hero-details.jpg pets.jpg valora.jpg; do
+                source="$name"
+                if [ "$needs_mapping_fix" = true ]; then
+                  case "$name" in
+                    troops.jpg) source="roster.jpg" ;;
+                    stats.jpg) source="troops.jpg" ;;
+                    stats-extra.jpg) source="stats.jpg" ;;
+                    roster.jpg) source="stats-extra.jpg" ;;
+                  esac
+                fi
+                if [ ! -f "_site/examples/$name" ]; then
+                  unzip -p bear/examples/nrw-bear-assets.zip "$source" > "_site/examples/$name"
+                fi
+                test -s "_site/examples/$name" || { echo "Missing example: $name (ZIP source: $source)"; exit 1; }
+                echo "Example: $name <= ZIP $source"
+              done
+            fi
+          fi
+          # Optional opt-in player snapshots. Never expose local browser data
+          # or fetch a secure API key during the static build.
+          if [ -d bear/profiles ]; then
+            mkdir -p _site/profiles
+            find bear/profiles -maxdepth 1 -type f -name '*.json' -exec cp '{}' _site/profiles/ \;
+          fi
+          # The approved V3 transparent animation is intentionally NOT rebuilt:
+          # when the user supplies the original binary assets, ship them unchanged.
+          for name in kingshot_beartrap_v3_action_transparent.webm kingshot_beartrap_v3_action_transparent.webp; do
+            # One-folder manual upload: keep the nine approved files together
+            # in bear/examples. Do not recompress or alter original media.
+            if [ -f "bear/examples/$name" ]; then
+              cp "bear/examples/$name" "_site/assets/$name"
+            elif [ -f "bear/assets/$name" ]; then
+              cp "bear/assets/$name" "_site/assets/$name"
+            elif [ -f bear/examples/nrw-bear-assets.zip ]; then
+              unzip -p bear/examples/nrw-bear-assets.zip "$name" > "_site/assets/$name"
+            fi
+            if [ -f bear/examples/nrw-bear-assets.zip ]; then
+              test -s "_site/assets/$name" || { echo "Missing combat media: $name"; exit 1; }
+            fi
+          done
+          cp assets/nrw-banner.svg _site/assets/nrw-banner.svg
+          sed -i 's|/assets/nrw-banner.svg|./assets/nrw-banner.svg|g' _site/index.html
+          sed -i 's|href="/dashboard/"|href="https://welcome-nrw.vercel.app/dashboard/"|g' _site/index.html
+          # Best effort: only compact shape signatures (no copied artwork).
+          if python3 -m venv /tmp/bear-charm-venv && /tmp/bear-charm-venv/bin/pip install --quiet Pillow; then
+            /tmp/bear-charm-venv/bin/python bear/build-charm-shapes.py _site/charm-signatures.json || true
+          else
+            echo 'Online charm signatures unavailable; local Lv3–Lv8 examples remain usable.'
+          fi
+          # In-game 6x6 signatures are prebuilt and shipped with the test.\n          touch _site/.nojekyll
+      # This workflow (not 'main' pushes) owns the existing GitHub Pages
+      # deployment. Preserve the current isolated Bear preview at site root
+      # and add the new name-first V3 preview at /bear/preview-v3.html.
+      - name: Checkout latest Bear V3 sources
+        uses: actions/checkout@v4
+        with:
+          ref: design/allianceos-pages-operations
+          path: v3-latest
+          persist-credentials: false
+      - name: Install lightweight video encoder for preview cloud loader
+        run: |
+          if ! command -v ffmpeg >/dev/null 2>&1; then
+            sudo apt-get update -qq
+            sudo apt-get install -y --no-install-recommends ffmpeg
+          fi
+      - name: Add isolated V3 route to GitHub Pages artifact
+        run: |
+          mkdir -p _site/bear/assets _site/bear/preview-v3
+          find v3-latest/bear -maxdepth 1 -type f -exec cp '{}' _site/bear/ \;
+          find v3-latest/bear/preview-v3 -maxdepth 1 -type f -exec cp '{}' _site/bear/preview-v3/ \;
+          cp v3-latest/bear/assets/kingshot_formations_loading.webm _site/bear/assets/
+          # The original transparent 512px Kingshot video is already in the
+          # archived user-provided bear/examples/nrw-bear-assets.zip on this
+          # workflow's source branch. Reuse those original bytes unmodified.
+          if [ -s _site/assets/kingshot_beartrap_v3_action_transparent.webm ]; then
+            cp _site/assets/kingshot_beartrap_v3_action_transparent.webm _site/bear/assets/kingshot_beartrap_v3_action_transparent.webm
+            echo 'Original Bear damage video SHA-256:'
+            sha256sum _site/bear/assets/kingshot_beartrap_v3_action_transparent.webm
+            ffprobe -v error -show_entries stream=width,height,codec_name:format=duration,size -of default=noprint_wrappers=1 _site/bear/assets/kingshot_beartrap_v3_action_transparent.webm
+          else
+            echo 'WARN: Original Bear video not in base Pages artifact; use compressed fallback.'
+          fi
+          cp v3-latest/bear/assets/pet-valora-sprite.webp _site/bear/assets/
+          cp v3-latest/bear/assets/minister-field-commander.webp _site/bear/assets/
+          cp v3-latest/bear/assets/minister-marshal.webp _site/bear/assets/
+          test -s _site/bear/assets/minister-field-commander.webp
+          test -s _site/bear/assets/minister-marshal.webp
+          test -s _site/bear/assets/pet-valora-sprite.webp
+          # Verify bit-identical copy of the user's ORIGINAL VP9 source
+          # (512 x 512, 5.0 s, 2,003,443 bytes). Never re-encode or upscale.
+          test -s _site/bear/assets/kingshot_beartrap_v3_action_transparent.webm
+          echo "822e9bd9d5c4a3221539357dddfc05f512b839d1b6f35e747a014cc47315b93b  _site/bear/assets/kingshot_beartrap_v3_action_transparent.webm" | sha256sum --check
+          cp v3-latest/assets/nrw-banner.svg _site/bear/assets/nrw-banner.svg
+          cp _site/hero-reference.json _site/bear/hero-reference.json
+          node --check _site/bear/preview-v3/skill-effects.js
+          node --check _site/bear/preview-v3/damage-skills.js
+          node --check _site/bear/preview-v3/hero-advisor.js
+          # Regression resolves JS modules relative to the deployed test file.
+          node _site/bear/preview-v3/test-starter-zoe-alcar.cjs _site/bear/hero-reference.json
+          echo 'All 37 heroes and their additional Expedition effects validated in CI.'
+          grep -Fq 'preview-v3/hero-advisor.js' _site/bear/preview-v3.html
+          grep -Fq 'preview-v3/skill-effects.js' _site/bear/preview-v3.html
+          grep -Fq 'preview-v3/damage-skills.js' _site/bear/preview-v3.html
+          node --check _site/bear/preview-v3/i18n.js
+          # The initial screen must show ONLY starter portraits; joiner
+          # lineup cards belong to the separate Calculate Formations result.
+          ! grep -Fq 'Joiner: erster Held = relevante Fähigkeit' _site/bear/preview-v3/name-flow.js
+          grep -Fq "Empfohlene Starter" _site/bear/preview-v3/name-flow.js
+          grep -Fq "bear-name-languages" _site/bear/preview-v3/name-flow.js
+          grep -Fq "nrw_page_lang" _site/bear/preview-v3/i18n.js
+          node --check _site/bear/minister-buffs.js
+          node _site/bear/preview-v3/test-minister-switch.cjs
+          grep -Fq 'minister-field-commander.webp' _site/bear/preview-v3/name-flow.js
+          grep -Fq 'minister-marshal.webp' _site/bear/preview-v3/name-flow.js
+          grep -Fq 'bear-name-court-option' _site/bear/preview-v3/name-flow.css
+          grep -Fq '<script src="./minister-buffs.js?v=20261013-2"></script>' _site/bear/preview-v3.html
+          grep -Fq 'function ministerSection()' _site/bear/preview-v3/name-flow.js
+          grep -Fq 'function troopUtilization(plan)' _site/bear/preview-v3/name-flow.js
+          node - <<'NODE'
+          const fs=require('node:fs'),vm=require('node:vm');
+          const w={};
+          vm.runInNewContext(fs.readFileSync('_site/bear/minister-buffs.js','utf8'),{window:w});
+          const module=w.NRW_BEAR_MINISTERS;
+          const expectation={king:[10,5,2500],highKing:[15,8,3750]};
+          for(const court of ['king','highKing']){
+           for(const fc of [false,true])for(const m of [false,true]){
+            const model={v2:{ministers:{court,fc,m}}};
+            const buff=module.derived(model),[lethality,attack,cap]=expectation[court];
+            if(buff.lethality!==(fc?lethality:0)||
+               buff.attack!==(m?attack:0)||buff.capacity!==(m?cap:0))
+               process.exit(11);
+            const a=module.applyStats(model,{iAtk:100,iLet:200,cAtk:300,cLet:400,aAtk:500,aLet:600});
+            if(a.aLet!==600+buff.lethality||a.cAtk!==300+buff.attack)process.exit(12);
+           }
+          }
+          const old=module.normalized({king:{fc:false,m:false},
+           highKing:{fc:true,m:true},highKingValues:{}});
+          if(old.court!=='highKing'||old.fc!==true||old.m!==true)process.exit(13);
+          const page=fs.readFileSync('_site/bear/preview-v3/name-flow.js','utf8');
+          if(page.includes("range.type='range'")||
+             !page.includes("bear-name-court-option")||
+             page.includes("option('ministerBuffCapturedInStats'")||
+             page.includes("option('ministerCapacityInBase'")||
+             page.includes('Aktive Pet-ATK/LET-Buffs sind bereits in diesen Werten enthalten'))
+             process.exit(14);
+          console.log('King/High King two-button slider, confirmed court bonuses, unbuffed-only inputs: PASS');
+          NODE
+          node --check _site/bear/preview-v3/name-flow.js
+          grep -Fq 'Empfohlene Starter' _site/bear/preview-v3/name-flow.js
+          grep -Fq 'function formationCards()' _site/bear/preview-v3/name-flow.js
+          grep -Fq 'Schadenswert berechnen' _site/bear/preview-v3/name-flow.js
+          grep -Fq 'bear-name-game-icon' _site/bear/preview-v3/name-flow.js
+          grep -Fq 'Ironclad War Bear' _site/bear/preview-v3/name-flow.js
+          grep -Fq 'ursas-rage.webp' _site/bear/preview-v3/name-flow.js
+          grep -Fq 'Mighty Bison' _site/bear/preview-v3/name-flow.js
+          grep -Fq 'bear-name-languages' _site/bear/preview-v3/name-flow.js
+          grep -Fq 'Formationen berechnen' _site/bear/preview-v3/name-flow.js
+          grep -Fq 'kingshot_beartrap_v3_action_transparent.webm' _site/bear/preview-v3/name-flow.js
+          grep -Fq '.bear-name-formations-grid' _site/bear/preview-v3/name-flow.css
+          if command -v ffprobe >/dev/null; then
+            ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1 _site/bear/assets/kingshot_beartrap_v3_action_transparent.webm
+          fi
+          grep -Fq 'saveLocal();refreshHeroRecommendations()' _site/bear/preview-v3/name-flow.js
+          # Hero stars: five clickable six-petal flowers, +/- and live result.
+          grep -Fq 'function starProgressField(heroName)' _site/bear/preview-v3/name-flow.js
+          grep -Fq 'const angle=-90-petal*60;' _site/bear/preview-v3/name-flow.js
+          grep -Fq "meta.append(starProgressField(n))" _site/bear/preview-v3/name-flow.js
+          grep -Fq '.bear-name-star-controls' _site/bear/preview-v3/name-flow.css
+          ! grep -Fq "choose('Sterne / Tier'" _site/bear/preview-v3/name-flow.js
+          grep -Fq "section.id='bearHeroRecommendation'" _site/bear/preview-v3/name-flow.js
+          node --check _site/bear/preview-v3/joiner-skills.js
+          node _site/bear/preview-v3/test-optimize-troops.cjs _site/bear/hero-reference.json
+          node _site/bear/preview-v3/test-relative-leaders.cjs
+          node --check _site/bear/preview-v3/test-physical-optimum.cjs
+          node _site/bear/preview-v3/test-physical-optimum.cjs
+          node --check _site/bear/preview-v3/profile-service.js
+          node --check _site/bear/preview-v3/test-profile-service.cjs
+          node _site/bear/preview-v3/test-profile-service.cjs
+          node --check _site/bear/preview-v3/test-separate-stats.cjs
+          node _site/bear/preview-v3/test-separate-stats.cjs
+          node --check _site/bear/preview-v3/help-locales.js
+          node --check _site/bear/preview-v3/test-help-locales.cjs
+          node _site/bear/preview-v3/test-help-locales.cjs
+          grep -Fq 'help-locales.js?v=20261017-all-guides-1' _site/bear/preview-v3.html
+          node --check _site/bear/preview-v3/help-ui.js
+          node --check _site/bear/preview-v3/test-security-help.cjs
+          node _site/bear/preview-v3/test-security-help.cjs
+          node --check _site/bear/preview-v3/test-help-overlay.cjs
+          node _site/bear/preview-v3/test-help-overlay.cjs
+          node --check _site/bear/preview-v3/help-image-pack.js
+          node --check _site/bear/preview-v3/test-help-screenshots.cjs
+          node _site/bear/preview-v3/test-help-screenshots.cjs
+          grep -Fq 'const GUIDE_CROPS=' _site/bear/preview-v3/help-ui.js
+          grep -Fq "contents.append(photo(step,key,index))" _site/bear/preview-v3/help-ui.js
+          grep -Fq "max-height:min(94dvh,840px)" _site/bear/preview-v3/name-flow.css
+          grep -Fq 'help-ui.js?v=20261017-all-guides-1' _site/bear/preview-v3.html
+          grep -Fq 'vollständige Truppenübersicht' _site/bear/preview-v3/help-ui.js
+          grep -Fq "help-image-pack.js?v=20261016-final-guides-1" _site/bear/preview-v3/help-ui.js
+          test -s _site/bear/preview-v3/help-image-pack.js
+          grep -Fq "helpHeading('Deine Helden','heroes','h2')" _site/bear/preview-v3/name-flow.js
+          grep -Fq "helpHeading('Heldenausrüstung nach dem Umziehen prüfen','expedition','h2')" _site/bear/preview-v3/name-flow.js
+          grep -Fq "helpHeading('Infanterie, Kavallerie, Bogenschützen & Schwadron','combatStats')" _site/bear/preview-v3/name-flow.js
+          grep -Fq "helpHeading('Pets','pets')" _site/bear/preview-v3/name-flow.js
+          ! grep -Fq "icon('stars')" _site/bear/preview-v3/name-flow.js
+          ! grep -Fq 'function resolveField(label)' _site/bear/preview-v3/help-ui.js
+          grep -Fq 'help-ui.js?v=20261017-all-guides-1' _site/bear/preview-v3.html
+          grep -Fq 'function markReadOnly(root)' _site/bear/preview-v3/name-flow.js
+          ! grep -Fq "choose('Herkunft dieser Werte'" _site/bear/preview-v3/name-flow.js
+          grep -Fq "m.v2.combatStatOrigin='separate-overview'" _site/bear/preview-v3/name-flow.js
+          grep -Fq 'getLegacyEditKey' _site/bear/preview-v3/profile-service.js
+          grep -Fq 'PROFILES.migratePin' _site/bear/preview-v3/name-flow.js
+          grep -Fq "if(options.preserveAllocation && next[2]>desired[i][2])return;" _site/bear/preview-v3/formation-core.js
+          node --check _site/bear/preview-v3/test-priority-joiner.cjs
+          node _site/bear/preview-v3/test-priority-joiner.cjs
+          grep -Fq 'if(!choice&&options.preserveAllocation)' _site/bear/preview-v3/formation-core.js
+          grep -Fq 'JOIN_STANDARD=Object.freeze([5,15,80])' _site/bear/preview-v3/formation-core.js
+          grep -Fq 'needsPinMigration=remote.profile.pinSetupRequired===true' _site/bear/preview-v3/name-flow.js
+          grep -Fq 'function requestNumericPin(create)' _site/bear/preview-v3/name-flow.js
+          grep -Fq 'playableProjection(rows,inventory,caps,weights,{preserveAllocation:true})' _site/bear/preview-v3/formation-core.js
+          grep -Fq 'profile-service.js?v=20261013-priority-pin-2' _site/bear/preview-v3.html
+          grep -Fq 'PROFILES.save' _site/bear/preview-v3/name-flow.js
+          grep -Fq 'PROFILES?.toggleFavorite' _site/bear/preview-v3/name-flow.js
+          grep -Fq 'playerPicture(activePlayer)' _site/bear/preview-v3/name-flow.js
+          ! grep -Fq '/api/bear-players' _site/bear/preview-v3/name-flow.js
+          grep -Fq 'hero-advisor.js?v=20261013-math1' _site/bear/preview-v3.html
+          echo '60 randomized whole-percent Kingshot formations checked for exact troop counts and shared stock.'
+          echo 'Validated: physical coefficients, audited hero coupling, scenario weighting, deterministic shared inventory, stock-safe integer percent, no infantry floor.'
+          grep -Fq 'preview-v3/joiner-skills.js' _site/bear/preview-v3.html
+          grep -Fq 'formation-core.js?v=20261013-priority-2' _site/bear/preview-v3.html
+          grep -Fq 'name-flow.js?v=20261016-help-layout-1' _site/bear/preview-v3.html
+          grep -Fq 'name-flow.css?v=20261016-focused-help-2' _site/bear/preview-v3.html
+          grep -Fq 'i18n.js?v=20261017-help-headings-1' _site/bear/preview-v3.html
+          grep -Fq 'const expandedSeasons=new Set();' _site/bear/preview-v3/name-flow.js
+          grep -Fq "return foldingPanel('troops'" _site/bear/preview-v3/name-flow.js
+          grep -Fq "foldingPanel('baseStats'" _site/bear/preview-v3/name-flow.js
+          grep -Fq "foldingPanel('ministers'" _site/bear/preview-v3/name-flow.js
+          grep -Fq "foldingPanel('pets'" _site/bear/preview-v3/name-flow.js
+          ! grep -Fq "const overall=el('div','bear-name-util-track')" _site/bear/preview-v3/name-flow.js
+          node --check _site/bear/preview-v3/formation-core.js
+          node --check _site/bear/preview-v3/combat.js
+          test -s _site/bear/preview-v3.html
+          grep -Fq '<base href="./">' _site/bear/preview-v3.html
+          echo 'Published GitHub Pages V3 at /bear/preview-v3.html'
+          # UI update: KAC provider details are now internal-only (2026-10-12).
+      # Keep the verified production help screenshots and use the current
+      # translated source from main. No Pages-only older German overlay:
+      # it would overwrite translations and break script cache versions.
+      - name: Validate translated V3 Pages artifact
+        run: |
+          set -euo pipefail
+          node --check _site/bear/preview-v3/help-locales.js
+          node --check _site/bear/preview-v3/help-ui.js
+          node _site/bear/preview-v3/test-help-locales.cjs
+          grep -Fq "const GUIDE_CROPS=" _site/bear/preview-v3/help-ui.js
+          grep -Fq "frame.style.background='transparent'" _site/bear/preview-v3/help-ui.js
+          grep -Fq 'help-locales.js?v=20261017-all-guides-1' _site/bear/preview-v3.html
+          echo 'DE/EN/FR/ES help guides verified from main.'
+      # Publish the latest AllianceOS leadership + public pages from main.
+      # IMPORTANT: preserve the existing Bear Optimizer at Pages root.
+      # All new user-facing previews live under /leitung/, /dashboard/,
+      # and /welcome/; Vercel production is never touched by this workflow.
+      - name: Publish current AllianceOS and public preview from main
+        run: |
+          set -euo pipefail
+          test -s v3-latest/leitung/index.html
+          test -s v3-latest/dashboard/index.html
+          test -s v3-latest/leitung/public-config.js
+          mkdir -p _site/leitung _site/dashboard _site/assets _site/welcome
+          cp -a v3-latest/leitung/. _site/leitung/
+          cp -a v3-latest/dashboard/. _site/dashboard/
+          cp -a v3-latest/assets/. _site/assets/
+          cp v3-latest/laws.html v3-latest/laws.js v3-latest/laws.css _site/
+          cp v3-latest/styles.css v3-latest/app.js _site/
+          cp v3-latest/welcome.css v3-latest/welcome.js _site/
+          cp v3-latest/welcome-cinematic.css v3-latest/welcome-cinematic.js _site/
+          cp v3-latest/welcome-story.css v3-latest/welcome-story.js _site/
+          if [ -f v3-latest/site.webmanifest ]; then cp v3-latest/site.webmanifest _site/; fi
+          # Home page is a subfolder preview; the Pages root stays the Bear tool.
+          cp v3-latest/index.html _site/welcome/index.html
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('_site/welcome/index.html')
+          html=p.read_text()
+          html=html.replace('<head>','<head>'+chr(10)+'<base href="../">',1)
+          # With a project-root base, hash links must point back to /welcome/.
+          html=html.replace('href="#','href="welcome/#')
+          html=html.replace('href="/site.webmanifest"','href="site.webmanifest"')
+          html=html.replace('<script defer src="/_vercel/insights/script.js"></script>','')
+          assert '<head>'+chr(92)+'n' not in html
+          p.write_text(html)
+          PY
+          # Essential Step 5 files and wiring must all be included, not just
+          # the old event library and login page.
+          test -s _site/index.html
+          test -s _site/leitung/index.html
+          test -s _site/leitung/app.js
+          test -s _site/leitung/discord-events.js
+          # Verify AllianceOS Phases 1–5 reached the actual Pages artifact.
+          test -s _site/leitung/member-relationships.js
+          test -s _site/leitung/performance.js
+          test -s _site/leitung/bear-management.js
+          test -s _site/leitung/fightclub.js
+          test -s _site/leitung/event-participation.js
+          # Prevent stale Phase 1–5 bundles from silently being redeployed.
+          grep -Fq 'createMemberRelationships' _site/leitung/app.js
+          grep -Fq 'createPerformance' _site/leitung/app.js
+          grep -Fq 'createBearManagement' _site/leitung/app.js
+          grep -Fq 'createFightClub' _site/leitung/app.js
+          grep -Fq 'createEventParticipation' _site/leitung/app.js
+          grep -Fq 'data-tab="performance"' _site/leitung/index.html
+          grep -Fq 'data-tab="bear"' _site/leitung/index.html
+          grep -Fq 'data-tab="fightclub"' _site/leitung/index.html
+          grep -Fq 'data-tab="participation"' _site/leitung/index.html
+          test -s _site/leitung/event-library.js
+          test -s _site/leitung/operations.js
+          test -s _site/leitung/public-config.js
+          test -s _site/leitung/styles.css
+          test -s _site/dashboard/index.html
+          test -s _site/dashboard/app.js
+          test -s _site/dashboard/styles.css
+          test -s _site/dashboard/events.json
+          test -s _site/dashboard/event-guides.json
+          test -s _site/dashboard/event-rhythm.js
+          test -s _site/welcome/index.html
+          test -s _site/welcome.css
+          test -s _site/welcome.js
+          test -s _site/welcome-cinematic.css
+          test -s _site/welcome-cinematic.js
+          test -s _site/styles.css
+          test -s _site/app.js
+          test -s _site/assets/nrw-banner.svg
+          test -s _site/assets/nrw-dashboard-icon.svg
+          grep -Fq 'id="uploadAllianceLogo"' _site/leitung/index.html
+          grep -Fq 'id="removeAllianceLogo"' _site/leitung/index.html
+          grep -Fq 'name="discord_invite_url"' _site/leitung/index.html
+          grep -Fq 'alliance_logo_upload' _site/leitung/app.js
+          grep -Fq 'public-config.js' _site/dashboard/index.html
+          grep -Fq 'public-config.js' _site/welcome/index.html
+          grep -Fq 'data-alliance-logo' _site/welcome/index.html
+          grep -Fq 'data-alliance-logo' _site/dashboard/index.html
+          grep -Fq 'id="bt3Row" hidden' _site/dashboard/index.html
+          grep -Fq 'id="defaultLanguage"' _site/leitung/index.html
+          grep -Fq 'data-tab="discord"' _site/leitung/index.html
+          grep -Fq 'id="discordRuleForm"' _site/leitung/index.html
+          grep -Fq 'createDiscordEventPlanner' _site/leitung/app.js
+          node --input-type=module --check < _site/leitung/discord-events.js
+          node v3-latest/leitung/test-discord-catalog.cjs
+          # Confirm current page module reference, not a historical cache-busting tag.
+          grep -Fq 'type="module" src="./app.js?v=' _site/leitung/index.html
+          node v3-latest/leitung/test-roster-dossier.cjs
+          grep -Fq 'data-edit-member=' _site/leitung/app.js
+          grep -Fq 'event-library.js?v=step6-iteratorfix-1' _site/leitung/app.js
+          grep -Fq 'catalog=eventHub.catalog(language)' _site/leitung/discord-events.js
+          grep -Fq 'id="discordDayTabs"' _site/leitung/index.html
+          grep -Fq 'id="discordAllDaysPreset"' _site/leitung/index.html
+          grep -Fq 'id="saveDiscordAllAnchors"' _site/leitung/index.html
+          grep -Fq 'const DAY_UI=' _site/leitung/discord-events.js
+          grep -Fq 'action:"discord_event_day_time"' _site/leitung/discord-events.js
+          grep -Fq 'duration_days:total,days' _site/leitung/event-library.js
+          grep -Fq 'id="discordDayTabs"' _site/leitung/index.html
+          node --input-type=module --check < _site/leitung/app.js
+          node --input-type=module --check < _site/leitung/event-library.js
+          node --input-type=module --check < _site/leitung/operations.js
+          node --check _site/leitung/public-config.js
+          node --check _site/dashboard/app.js
+          node --check _site/dashboard/event-rhythm.js
+          node --check _site/app.js
+          echo 'Pages preview paths verified: /welcome/, /leitung/, /dashboard/'
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - name: Deploy to GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v4

@@ -1,9 +1,9 @@
-name: Publish Welcome NRW GitHub Pages on main changes
+name: Publish AllianceOS design to GitHub Pages only
 
 on:
   push:
     branches:
-      - main
+      - design/allianceos-pages-operations
     paths:
       - 'leitung/**'
       - 'dashboard/**'
@@ -12,8 +12,11 @@ on:
       - 'index.html'
       - 'app.js'
       - 'styles.css'
+      - 'welcome*.css'
+      - 'welcome*.js'
       - 'laws.*'
       - '.github/workflows/publish-main-pages.yml'
+      - '.github/workflows/bear-pages.yml'
   workflow_dispatch:
 
 permissions:
@@ -26,4 +29,4 @@ permissions:
 # This does not deploy to Vercel or modify Supabase.
 jobs:
   publish:
-    uses: Boltotelli/welcome-nrw/.github/workflows/bear-pages.yml@feature/bear-optimizer-nrw-prototype
+    uses: ./.github/workflows/bear-pages.yml

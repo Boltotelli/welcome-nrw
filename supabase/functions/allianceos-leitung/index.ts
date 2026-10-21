@@ -183,14 +183,38 @@ async function updateAllianceLogo(req:Request,alliance:string,userId:string,staf
   return json(req,{ok:true,logo_url:nextUrl});
 }
 
+async function announcementData(req:Request,alliance:string,staff:any){
+ if(!permission(staff,"events"))throw new HttpError("permission_denied",403);
+ const row=await checked<any>(db.from("aos_alliance_announcements").select("text,status,expires_at,revision,updated_at").eq("alliance_code",alliance).maybeSingle());
+ return json(req,{announcement:row});
+}
+async function saveAnnouncement(req:Request,alliance:string,userId:string,staff:any,body:any){
+ if(!permission(staff,"events"))throw new HttpError("permission_denied",403);
+ const command=body.command;if(!["draft","publish","disable","remove"].includes(command))throw new HttpError("invalid_announcement_command",400);
+ const revision=Number(body.revision);if(!Number.isSafeInteger(revision)||revision<0)throw new HttpError("invalid_revision",400);
+ const text:any={};for(const l of ["de","en","fr"]){if(body.text?.[l]!=null&&typeof body.text[l]!=="string")throw new HttpError("invalid_announcement_text",400);const v=String(body.text?.[l]||"").trim();if(v.length>4000)throw new HttpError("announcement_too_long",400);if(v)text[l]=v;}
+ if(["draft","publish"].includes(command)&&!Object.keys(text).length)throw new HttpError("announcement_empty",400);
+ let expires_at=null;
+ if(body.expires_at){const value=String(body.expires_at);if(!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d{1,3})?)?Z$/.test(value)||!Number.isFinite(Date.parse(value)))throw new HttpError("invalid_expiry",400);expires_at=new Date(value).toISOString();if(command==="publish"&&Date.parse(expires_at)<=Date.now())throw new HttpError("announcement_expired",400);}
+ const status=command==="publish"?"published":command==="draft"?"draft":"disabled";
+ const {data,error}=await db.rpc("aos_write_announcement",{p_alliance:alliance,p_actor:userId,p_text:text,p_status:status,p_expires:expires_at,p_revision:revision,p_remove:command==="remove"});
+ if(error){if(error.code==="40001")throw new HttpError("announcement_conflict",409);throw new Error("announcement_write_failed");}
+ return json(req,{ok:true,announcement:data});
+}
+
 async function publicInfo(req: Request, alliance: string, mode: string) {
+  if(mode==="public-announcement"){
+    const row=await checked<any>(db.from("aos_alliance_announcements").select("text,status,expires_at,updated_at")
+     .eq("alliance_code",alliance).eq("status","published").or("expires_at.is.null,expires_at.gt."+new Date().toISOString()).maybeSingle());
+    return json(req,{announcement:row});
+  }
   if(mode==="public-config"){
     const row=await checked<any>(db.from("aos_alliances").select("code,name,kingdom_id,logo_url,discord_invite_url,default_language,languages").eq("code",alliance).single());
     return json(req,{alliance:publicAllianceSettings(row)});
   }
   if(mode==="public-schedule"){
     const [cycles,phases]=await Promise.all([
-      checked<any[]>(db.from("aos_event_cycles").select("group_key,anchor_date,interval_days,duration_days,phase_count,enabled,title,override_schedule,start_time_utc")
+      checked<any[]>(db.from("aos_event_cycles").select("group_key,anchor_date,interval_days,duration_days,phase_count,enabled,title,override_schedule,start_time_utc,legion1_time_utc,legion2_time_utc")
        .eq("alliance_code",alliance).limit(200)),
       checked<any[]>(db.from("aos_event_day_templates").select("group_key,day_number,instructions")
        .eq("alliance_code",alliance).eq("status","published").limit(300))
@@ -364,7 +388,7 @@ async function rosterFor(alliance: string, kingdom: number) {
       responsibilities:overlay.responsibilities||"", avatar_url:cache.avatar_url||null,
       tc_level:cache.tc_level??null,
       power:overlay.power_override!=null?Number(overlay.power_override):api.power!=null?Number(api.power):power.power!=null?Number(power.power):null,
-      power_source:overlay.power_override!=null?"manual":api.power!=null?"mightpulse_roster":power.power!=null?"bear_buff":null,
+      power_source:overlay.power_override!=null?"manual":api.power!=null?(api.source||"mightpulse_roster"):power.power!=null?"bear_buff":null,
       power_override:overlay.power_override??null,
       power_observed_at:overlay.power_override!=null?overlay.power_override_at||null:api.power!=null?api.fetched_at||null:power.fetched_at||null,
       // Existing NRW onboarding and manually linked IDs are compared by immutable roster player ID.
@@ -718,6 +742,64 @@ function profileAvatar(raw:any,upload:any):string|null{
 }
 // Full NRW strength can be read in ONE MightPulse alliance-roster request (rather than
 // calling the player endpoint 70+ times). Cache solely within AllianceOS.
+// Manual roster refresh: authorize every ID from the same server-side roster
+// shown in player management. Never accept arbitrary client-supplied IDs.
+async function syncListedRosterPower(req:Request,alliance:string,staff:any,body:any){
+ if(!permission(staff,"members"))throw new HttpError("permission_denied",403);
+ if(alliance!=="NRW")throw new HttpError("unsupported_alliance",400);
+ const key=Deno.env.get("KINGSHOTSTATS_API_KEY")||"";
+ if(!key)throw new HttpError("player_provider_unconfigured",503);
+ const config=await checked<any>(db.from("aos_alliances").select("kingdom_id").eq("code",alliance).single());
+ const people=await rosterFor(alliance,config.kingdom_id);
+ const ids=[...new Set(people.map((p:any)=>String(p.game_id||"")).filter(isId))].sort();
+ if(!ids.length)throw new HttpError("roster_missing",409);
+ const cursor=Number(body?.cursor??0);
+ if(!Number.isInteger(cursor)||cursor<0||cursor>=ids.length)throw new HttpError("invalid_sync_cursor",400);
+ const allowed=new Set(ids),batch=ids.slice(cursor,cursor+20),now=new Date().toISOString();
+ const snapshots=await checked<any[]>(db.from("aos_member_power_snapshot")
+  .select("game_id,power,fetched_at").eq("alliance_code",alliance).in("game_id",ids).limit(1000));
+ const validPower=(n:any)=>n!==null&&n!==undefined&&n!==""&&Number.isSafeInteger(Number(n))&&Number(n)>=0&&Number(n)<=9999999999999;
+ const fresh=new Set(snapshots.filter(p=>validPower(p.power)&&Date.now()-Date.parse(p.fetched_at)>=0&&Date.now()-Date.parse(p.fetched_at)<25*60*1000).map(p=>String(p.game_id)));
+ const values=new Map<string,any>(),failed:any[]=[];let rateLimited=false,providerCalls=0;
+ // Retain the existing roster-refresh cache tag (schema enum), regardless of endpoint.
+ const add=(id:string,power:any)=>{if(allowed.has(id)&&validPower(power))values.set(id,{alliance_code:alliance,game_id:id,power:Number(power),fetched_at:now,source:"mightpulse_roster"});};
+ // One aggregate request covers current NRW members; absent/away/left accounts
+ // are subsequently resolved through the player endpoint, irrespective of tag.
+ if(cursor===0&&people.some((p:any)=>p.active&&!p.is_event_loan&&!fresh.has(String(p.game_id)))){
+  try{
+   providerCalls++;
+   const response=await fetch("https://api.mightpulse.com/v1/alliances/"+encodeURIComponent(String(config.kingdom_id))+"/"+encodeURIComponent(alliance)+"?include=info,roster",{headers:{Accept:"application/json",Authorization:"Bearer "+key},signal:AbortSignal.timeout(30000)});
+   if(response.status===429)throw new HttpError("provider_rate_limited",429);
+   if(response.ok){const raw=await response.json().catch(()=>null),rows=raw?.members??raw?.roster?.members??raw?.data?.members??raw?.data?.roster?.members;
+    if(Array.isArray(rows))for(const p of rows)add(String(p?.governor_id??p?.fid??p?.player_id??""),p?.power);}
+  }catch(e){if(e instanceof HttpError&&e.httpStatus===429)throw e;}
+ }
+ const pending=batch.filter(id=>!fresh.has(id)&&!values.has(id));let index=0;
+ async function worker(){
+  while(index<pending.length){const id=pending[index++];
+   if(rateLimited){failed.push({game_id:id,error:"provider_rate_limited"});continue;}
+   try{
+    providerCalls++;
+    const response=await fetch("https://api.mightpulse.com/v1/players/"+encodeURIComponent(id)+"?include=base",{headers:{Accept:"application/json",Authorization:"Bearer "+key},signal:AbortSignal.timeout(12000)});
+    if(response.status===429)rateLimited=true;
+    if(!response.ok)throw Error(response.status===404?"player_not_found":response.status===429?"provider_rate_limited":"player_provider_unavailable");
+    const wire=await response.json(),p=wire?.player??wire?.data?.player;
+    const responseId=p?.governor_id??p?.game_id??p?.fid??p?.player_id;
+    if(!p||(responseId!=null&&String(responseId)!==id)||!validPower(p.power??p.total_power))throw Error("player_power_unavailable");
+    add(id,p.power??p.total_power);
+   }catch(e){failed.push({game_id:id,error:String((e as Error)?.message||"player_provider_unavailable")});}
+  }
+ }
+ await Promise.all(Array.from({length:Math.min(3,pending.length)},()=>worker()));
+ const updates=[...values.values()];
+ for(let i=0;i<updates.length;i+=100){const part=updates.slice(i,i+100);
+  await checked<any>(db.from("aos_member_power_history").upsert(part.map(p=>({...p,observed_on:now.slice(0,10)})),{onConflict:"alliance_code,game_id,observed_on"}).select("game_id"));
+  await checked<any>(db.from("aos_member_power_snapshot").upsert(part,{onConflict:"alliance_code,game_id"}).select("game_id"));
+ }
+ return json(req,{ok:true,source:providerCalls?"mightpulse_mixed":"cache",matched:new Set([...fresh,...values.keys()]).size,updated:updates.length,requested:ids.length,failed,
+  rate_limited:rateLimited,next_cursor:!rateLimited&&cursor+batch.length<ids.length?cursor+batch.length:null,fetched_at:now});
+}
+
 async function syncRosterPower(req:Request,alliance:string,staff:any){
  if(!permission(staff,"members"))throw new HttpError("permission_denied",403);
  if(alliance!=="NRW")throw new HttpError("unsupported_alliance",400);
@@ -956,9 +1038,16 @@ async function saveBearPlanningSettings(req:Request,alliance:string,userId:strin
 // Protected FightClub battlefield objectives. Map links are private planning
 // records, never registered automatically in Kingshot or the Discord bot.
 function fightMapLocationValid(eventType:string,key:string){
+ if(!["swordland","triforce"].includes(eventType))return false;
+ if(["safe-zone","guerrilla"].includes(key))return true;
+ const qualified=/^(north|south):([^:]+)$/.exec(key);
+ if(qualified){
+   if(["safe-zone","guerrilla"].includes(qualified[2]))return false;
+   key=qualified[2];
+ }
  if(eventType==="triforce")return key==="temple"||/^[ABC](?:[1-9]|[12][0-9]|3[01])$/.test(key);
  return eventType==="swordland"&&[
-  "shrine","bell","mercenary","reformation","stables",
+  "shrine","bell","mercenary","reformation","stables","safe-zone",
   "sanctum-west","sanctum-east",
   "abbey-north","abbey-east","abbey-west","abbey-south",
   "under-nw","under-ne","under-sw","under-se"
@@ -1213,7 +1302,7 @@ async function memberPowerHistory(req:Request,alliance:string,staff:any,body:any
  return json(req,{ok:true,game_id:gameId,snapshots:records.reverse()});
 }
 async function lookupTransferPlayer(req:Request,alliance:string,staff:any,body:any){
- if(!permission(staff,"transfers"))throw new HttpError("permission_denied",403);
+ if(!permission(staff,body?.action==="external_alt_lookup"?"members":"transfers"))throw new HttpError("permission_denied",403);
  const id=str(body?.game_id,20);
  if(!/^[0-9]{5,20}$/.test(id))throw new HttpError("invalid_player_id",400);
  const key=Deno.env.get("KINGSHOTSTATS_API_KEY")||"";
@@ -1391,10 +1480,21 @@ async function saveEventCycle(req:Request,alliance:string,userId:string,staff:an
   if(start_time_utc&&!/^([01]\d|2[0-3]):[0-5]\d$/.test(start_time_utc))throw new HttpError("invalid_utc_time",400);
   const enabled=title_only?(previous?.enabled??!isBearSlot):payload.enabled!==false;
   if(isBearSlot&&enabled&&!start_time_utc&&!title_only)throw new HttpError("bear_time_required",400);
+  const isLegionEvent=["catalog-swordland-showdown","catalog-tri-alliance-clash"].includes(group_key);
+  const hasLegionTimes=!title_only&&(Object.hasOwn(payload,"legion1_time_utc")||Object.hasOwn(payload,"legion2_time_utc"));
+  if(hasLegionTimes&&!isLegionEvent)throw new HttpError("legion_times_not_supported",400);
+  const legionTime=(value:unknown)=>{
+    if(value===null||value==="")return null;
+    if(typeof value!=="string"||!/^([01]\d|2[0-3]):[0-5]\d$/.test(value))throw new HttpError("invalid_legion_time",400);
+    return value;
+  };
+  const legion1_time_utc=hasLegionTimes?legionTime(payload.legion1_time_utc):(previous?.legion1_time_utc??null);
+  const legion2_time_utc=hasLegionTimes?legionTime(payload.legion2_time_utc):(previous?.legion2_time_utc??null);
+  if((legion1_time_utc===null)!==(legion2_time_utc===null))throw new HttpError("both_legion_times_required",400);
   const cycle=await checked<any>(db.from("aos_event_cycles").upsert({
     alliance_code:alliance,group_key,anchor_date,interval_days,duration_days,phase_count,
     enabled,override_schedule:title_only?(previous?.override_schedule===true):true,
-    start_time_utc:isBearSlot?start_time_utc:null,
+    start_time_utc:isBearSlot?start_time_utc:null,legion1_time_utc,legion2_time_utc,
     title:localized(payload.title,120),updated_at:new Date().toISOString(),updated_by:userId
   },{onConflict:"alliance_code,group_key"}).select("*").single());
   await audit(alliance,userId,title_only?"event_title":"event_cycle",group_key,"save");
@@ -1686,24 +1786,26 @@ Deno.serve(async(req: Request)=>{
     if(!["GET","POST"].includes(req.method))throw new HttpError("method_not_allowed",405);
     const u=new URL(req.url),alliance=str(u.searchParams.get("alliance")||"NRW",16);
     if(!/^[A-Za-z0-9_-]{2,16}$/.test(alliance))throw new HttpError("invalid_alliance",400);
-    if(req.method==="GET"&&["public-events","public-laws","public-guidance","public-schedule","public-config"].includes(u.searchParams.get("mode")||""))
+    if(req.method==="GET"&&["public-events","public-laws","public-guidance","public-schedule","public-config","public-announcement"].includes(u.searchParams.get("mode")||""))
       return await publicInfo(req,alliance,u.searchParams.get("mode")||"");
     if(req.method==="GET"&&u.searchParams.get("mode")==="public-leaders")return await publicLeaders(req,alliance);
     const {userId,staff}=await staffFor(req,alliance);
+    if(req.method==="GET"&&u.searchParams.get("mode")==="announcement")return await announcementData(req,alliance,staff);
     if(req.method==="GET"&&u.searchParams.get("mode")==="discord-bot")return await discordPlanner(req,alliance,staff,Number(u.searchParams.get("page")||0));
      if(req.method==="GET")return await bootstrap(req,alliance,staff);
     if(Number(req.headers.get("content-length")||"0")>1600000)throw new HttpError("payload_too_large",413);
     const body=await req.json().catch(()=>{throw new HttpError("invalid_json",400)});
     if(body?.action!=="alliance_logo_upload"&&Number(req.headers.get("content-length")||"0")>200000)throw new HttpError("payload_too_large",413);
     if(body?.action==="alliance_logo_upload"||body?.action==="alliance_logo_remove")return await updateAllianceLogo(req,alliance,userId,staff,body);
+    if(body?.action==="announcement")return await saveAnnouncement(req,alliance,userId,staff,body);
     if(body?.action==="staff")return await saveStaff(req,alliance,userId,staff,body);
     if(body?.action==="event_loan_data")return await eventLoanData(req,alliance,staff);
     if(body?.action==="event_loan_save")return await eventLoanSave(req,alliance,userId,staff,body);
     if(body?.action==="external_alt_save")return await saveExternalAlt(req,alliance,userId,staff,body);
     if(body?.action==="provision_leaders")return await provisionLeaders(req,alliance,userId,staff);
     if(body?.action==="reset_leader_password")return await rotateLeaderPassword(req,alliance,userId,staff,body);
-    if(body?.action==="player_lookup")return await lookupTransferPlayer(req,alliance,staff,body);
-    if(body?.action==="power_sync")return await syncRosterPower(req,alliance,staff);
+    if(body?.action==="player_lookup"||body?.action==="external_alt_lookup")return await lookupTransferPlayer(req,alliance,staff,body);
+    if(body?.action==="power_sync")return body?.include_listed===true?await syncListedRosterPower(req,alliance,staff,body):await syncRosterPower(req,alliance,staff);
     if(body?.action==="power_history")return await memberPowerHistory(req,alliance,staff,body);
     if(body?.action==="performance_dashboard")return await performanceDashboard(req,alliance,staff);
     if(body?.action==="bear_management")return await bearManagement(req,alliance,staff);

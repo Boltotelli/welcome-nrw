@@ -1,14 +1,15 @@
+import {createAnnouncementEditor} from "./announcement.js?v=player2-20261021";
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.58.0/+esm";
 import {createEventHub} from "./event-library.js?v=step6-iteratorfix-1";
 import {createOperations} from "./operations.js?v=pages-4";
 import {createDiscordEventPlanner} from "./discord-events.js?v=eventbot-4lang-20261019";
-import {createEventBotStatusPanel} from "./event-bot-status.js?v=eventbot-4lang-20261019";
-import {createMemberRelationships} from "./member-relationships.js?v=vercel-release-20261020-1";
-import {createPerformance} from "./performance.js?v=vercel-release-20261020-1";
+import {createEventBotStatusPanel} from "./event-bot-status.js?v=20261021-usability-1";
+import {createMemberRelationships} from "./member-relationships.js?v=20261021-usability-1";
+import {createPerformance} from "./performance.js?v=20261021-usability-1";
 import {createBearManagement} from "./bear-management.js?v=20261020-fight-bear-v3";
-import {createFightClub} from "./fightclub.js?v=20261020-fight-bear-v3";
+import {createFightClub} from "./fightclub.js?v=20261021-plan-1";
 import {createEventParticipation} from "./event-participation.js?v=vercel-release-20261020-1";
-import {createEventLoans} from "./event-loans.js?v=vercel-release-20261020-1";
+import {createEventLoans} from "./event-loans.js?v=20261021-usability-1";
 
 // Private AllianceOS pilot. Data is NEVER stored in localStorage; only auth session is.
 // All records and permissions are issued by the authenticated Edge Function.
@@ -121,8 +122,10 @@ function setTab(name){
  if(name==="performance"&&!performance.enabled)return;
  const required=modulePermission[name]||(["transfers","laws","events","settings"].includes(name)?name:null);
  if(required&&state&&!can(required))name="overview";
-  if(name==="discord"&&state&&!can("events")&&!can("settings"))name="overview";
+  if(name==="discord"&&state&&!can("event_bot"))name="overview";
+ const changedModule=tab!==name;
  tab=name;q(".tab-page").forEach(p=>p.hidden=p.dataset.page!==name);
+ if(changedModule){window.scrollTo({top:0,left:0,behavior:"instant"});$("flash").hidden=true;}
  q(".nav-item").forEach(b=>b.classList.toggle("active",b.dataset.tab===name));
  $("pageLabel").textContent=t(name);
  history.replaceState(null,"",LEITUNG_PATH+(name==="overview"?"":"?tab="+encodeURIComponent(name)));
@@ -132,6 +135,7 @@ function setTab(name){
   if(name==="fightclub"&&state)fightclub.open();
   if(name==="participation"&&state)participation.open();
   if(name==="transfers"&&state)eventLoans.open();
+  if(name==="events"&&state)announcementEditor.open();
 }
 function flash(message,error=false){
  const el=$("flash");el.textContent=message;el.classList.toggle("error",error);el.hidden=false;
@@ -161,18 +165,27 @@ function grantButtons(){
  }
 }
 let powerSyncStarted=false;
-async function syncPlayerPower(){
+async function syncPlayerPower({allListed=false}={}){
  if(!state||!can("members"))return;
  const button=$("syncPlayerPower"),status=$("powerSyncStatus");
  button.disabled=true;status.textContent=t("powerFetching");
  try{
-   const result=await request("bootstrap",{action:"power_sync"});
-   status.textContent=t("powerUpdated").replace("{n}",result.matched||0)+(result.source==="cache"?" · "+t("powerCached"):"");
-   await refresh();
+   let result,cursor=0,failed=0;
+   do{
+    result=await request("bootstrap",{action:"power_sync",include_listed:allListed,cursor});
+    failed+=(result.failed||[]).length;
+    status.textContent=t("powerUpdated").replace("{n}",result.matched||0)+(result.requested?" / "+result.requested:"");
+    cursor=result.next_cursor;
+   }while(allListed&&Number.isInteger(cursor)&&cursor>0);
+   if(failed)status.textContent+=' · '+({de:'Nicht abrufbar: ',en:'Unavailable: ',fr:'Indisponibles : ',es:'No disponibles: '}[lang]||'Unavailable: ')+failed;
+   if(result.rate_limited)status.textContent+=' · '+({de:'API-Limit erreicht. Später erneut abrufen.',en:'API limit reached. Try again later.',fr:'Limite API atteinte. Réessayez plus tard.',es:'Límite de API alcanzado. Reinténtalo más tarde.'}[lang]||'API limit reached.');
+   if(result.source==="cache")status.textContent+=" · "+t("powerCached");
+   const syncStatus=status.textContent;await refresh();status.textContent=syncStatus;
  }catch(e){
    status.textContent=t("powerUpdateError")+": "+String(e.message||"unknown");
  }finally{button.disabled=!can("members");}
 }
+const announcementEditor=createAnnouncementEditor({request,can,getLanguage:()=>lang,esc});
 const eventHub=createEventHub({request,flash,esc,t});
  const discordPlanner=createDiscordEventPlanner({request,flash,esc,can,eventHub});
 const eventBotStatusPanel=createEventBotStatusPanel({supabase,flash,can,esc});
@@ -189,6 +202,7 @@ const participation=createEventParticipation({getState:()=>state,getLanguage:()=
   openPlayer:gameId=>openEdit("member",gameId),navigate:name=>setTab(name)});
 const eventLoans=createEventLoans({getState:()=>state,getLanguage:()=>lang,request,esc,flash});
 function showLogin(message=""){
+ announcementEditor.reset();
  $("liveArea").hidden=true;$("loginArea").hidden=false;$("logoutBtn").hidden=true;
  $("roleChip").textContent="R4 / R5";$("loginError").textContent=message;$("changePasswordBtn").hidden=true;
 }
@@ -255,12 +269,15 @@ function formattedPower(value){
 function renderRoster(){
  const search=$("rosterSearch").value.toLowerCase().trim(),status=$("rosterStatus").value,sort=$("rosterSort").value;
  const list=state.players.filter(p=>(!search||String(p.name||"").toLowerCase().includes(search)||String(p.game_id||"").includes(search))&&(status==="all"||p.member_status===status)).slice();
- list.sort((a,b)=>sort==="power"?(Number(b.power??-1)-Number(a.power??-1)):sort==="rank"?(Number(b.rank||0)-Number(a.rank||0)):sort==="id"?String(a.game_id).localeCompare(String(b.game_id)):String(a.name||"").localeCompare(String(b.name||""),lang));
+ list.sort((a,b)=>sort==="power"?(Number(b.power??-1)-Number(a.power??-1)):sort==="rank"?((Number(b.rank||0)-Number(a.rank||0)||String(a.name||"").localeCompare(String(b.name||""),lang))):sort==="id"?String(a.game_id).localeCompare(String(b.game_id)):String(a.name||"").localeCompare(String(b.name||""),lang));
  $("rosterCount").textContent=fmtInt(list.length);
  $("rosterRows").innerHTML=list.length?list.map(p=>{
   const id=esc(p.game_id||""),name=esc(p.name),avatar=/^https:\/\//i.test(p.avatar_url||"")?'<img class="avatar" src="'+esc(p.avatar_url)+'" alt="">':'<span class="avatar">'+esc((p.name||"?").slice(0,1))+'</span>';
   return '<tr><td><div class="person">'+avatar+'<div><strong>'+name+'</strong><small>'+id+relationships.rowBadge(p)+(p.is_event_loan?' · ⏱ '+esc(p.current_alliance||"")+" ("+esc(p.event_loan_type||"")+")":'')+'</small></div></div></td><td>'+'<span class="rank-and-tg"><strong>'+esc(p.rank?"R"+p.rank:"—")+'</strong><span class="level">· '+esc(cityLevel(p.tc_level))+'</span></span>'+'</td><td>'+(p.power==null?'<span class="muted">'+esc(t("noPower"))+'</span>':'<strong title="'+esc(fmtInt(p.power))+'">'+esc(formattedPower(p.power))+'</strong><small title="'+esc(p.power_source||"")+'">'+esc(dateText(p.power_observed_at))+'</small>')+'</td><td>'+languageChips(p.languages)+'</td><td>'+'<span class="discord-presence '+(p.discord_connected?"connected":"unlinked")+'" title="'+esc(p.discord_connected?t("discordLinked"):t("discordUnlinked"))+'">'+esc(p.discord_connected?t("yes"):t("no"))+'</span>'+'</td><td>'+badge(p.member_status)+'</td><td><button type="button" class="action-link" data-edit-member="'+id+'" aria-label="'+esc(t("dossier"))+' · '+name+'" '+(!can("members")?"disabled":"")+'>'+esc(t("dossier"))+'</button></td></tr>';
  }).join(""):empty(t("noPlayers"));
+ const headings=[...document.querySelectorAll('[data-page="roster"] thead th')].map(x=>x.textContent);
+ for(const row of $("rosterRows").rows)for(let i=0;i<row.cells.length;i++)row.cells[i].dataset.label=headings[i]||"";
+
 }
 function renderTransfers(){
  const filterEl=$("transferWindowFilter");
@@ -352,12 +369,12 @@ function renderSettings(){
  const sel=$("staffAccountSelect");
  sel.innerHTML='<option value="">'+esc(t("chooseLeader"))+'</option>'+
  members.filter(x=>/^leader-/.test(x.email||"")).map(x=>
-   '<option value="'+esc(x.email)+'" '+(x.is_admin||x.protected_account?"disabled":"")+'>'+esc(lookupName(x.email))+(x.is_admin?" · "+esc(t("rightsProtected")):"")+'</option>').join("");
+   '<option value="'+esc(x.email)+'" '+(x.is_admin||x.protected_account?"disabled":"")+'>'+esc(lookupName(x.email))+" · "+esc(x.rank)+(x.is_admin?" · "+esc(t("rightsProtected")):"")+'</option>').join("");
  const selected=members.find(m=>m.email===selectedStaffEmail&&!m.is_admin&&!m.protected_account);
  if(!selected)selectedStaffEmail="";
  sel.value=selectedStaffEmail;
  const rights=$("staffRightsFieldset"),permissionForm=$("r4Form");
- rights.disabled=!selected;
+ rights.disabled=!selected;rights.hidden=!selected;$("staffEditActions").hidden=!selected;$("staffSelectionInfo").hidden=!selected;
  for(const key of STAFF_KEYS)permissionForm.elements[key].checked=selected?.permissions?.[key]===true;
  permissionForm.elements.enabled.checked=selected?.enabled===true;
  $("staffSelectionInfo").textContent=selected?
@@ -368,7 +385,7 @@ function renderSettings(){
  }
  if(!members.length)$("staffSelectionInfo").textContent=t("rightsSelected");
 }
-function render(){patchTranslations();counts();renderRoster();renderTransfers();renderLaws();renderEvents();renderSettings();eventLoans.render();eventHub.render(state,lang,can("events"));discordPlanner.render(lang);operations.render();}
+function render(){announcementEditor.render();patchTranslations();counts();renderRoster();renderTransfers();renderLaws();renderEvents();renderSettings();eventLoans.render();eventHub.render(state,lang,can("events"));discordPlanner.render(lang);operations.render();}
 function control(label,name,value="",type="text",opts={}){
  const attr=Object.entries(opts).map(([k,v])=>' '+k+'="'+esc(v)+'"').join("");
  return '<label class="field"><span>'+esc(label)+'</span><input class="control" name="'+esc(name)+'" type="'+esc(type)+'" value="'+esc(value??"")+'"'+attr+'></label>';
@@ -552,7 +569,7 @@ q(".nav-item").forEach(el=>el.addEventListener("click",()=>setTab(el.dataset.tab
 q("[data-jump]").forEach(el=>el.addEventListener("click",()=>setTab(el.dataset.jump)));
 $("language").addEventListener("change",e=>{lang=e.target.value;localStorage.setItem("nrw_page_lang",lang);if(state){render();if(tab==="performance")performance.render();if(tab==="bear")bearManagement.render();if(tab==="fightclub")fightclub.render();if(tab==="participation")participation.render();if(tab==="transfers")eventLoans.render();}else{patchTranslations();loadLeaderList();$("toggleLegacyLogin").textContent=t(legacyLogin?"normalSignIn":"legacySignIn");}});
 $("themeToggle").addEventListener("click",()=>{const next=document.documentElement.dataset.theme==="dark"?"light":"dark";document.documentElement.dataset.theme=next;localStorage.setItem("nrw_theme",next);});
-$("syncPlayerPower").addEventListener("click",syncPlayerPower);
+$("syncPlayerPower").addEventListener("click",()=>syncPlayerPower({allListed:true}));
 $("rosterSearch").addEventListener("input",()=>state&&renderRoster());
 $("rosterStatus").addEventListener("change",()=>state&&renderRoster());
 $("rosterSort").addEventListener("change",()=>state&&renderRoster());

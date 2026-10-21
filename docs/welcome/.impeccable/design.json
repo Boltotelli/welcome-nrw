@@ -1,0 +1,311 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-21T18:25:03Z",
+  "title": "Design System: Welcome NRW",
+  "extensions": {
+    "colorMeta": {
+      "scene-gold": {
+        "role": "primary",
+        "displayName": "Citadel Gold"
+      },
+      "scene-bg": {
+        "role": "neutral",
+        "displayName": "Midnight Scene"
+      }
+    },
+    "typographyMeta": {
+      "body": {
+        "purpose": "Paragraphs and controls.",
+        "displayName": "Inter Body"
+      },
+      "headline": {
+        "purpose": "Directly visible section headings;31px phone.",
+        "displayName": "Cinzel Story Heading"
+      },
+      "display": {
+        "purpose": "NRW./United. landing wordmark, 96px maximum to 48px.",
+        "displayName": "Cinzel Wordmark"
+      },
+      "story-line": {
+        "purpose": "Three localized lines illuminated by reversible native scrolling.",
+        "displayName": "Alliance Lines"
+      }
+    },
+    "shadows": [
+      {
+        "value": "none",
+        "name": "semantic-shadow",
+        "purpose": "Retained variable contract, not a prohibition on cinematic shadows."
+      },
+      {
+        "value": "drop-shadow(0 22px 30px #0006)",
+        "name": "foreground",
+        "purpose": "Helga depth."
+      },
+      {
+        "value": "0 12px 28px #0003",
+        "name": "choice",
+        "purpose": "Scene choices."
+      },
+      {
+        "value": "0 10px 22px #0002",
+        "name": "dashboard",
+        "purpose": "Dashboard action."
+      },
+      {
+        "value": "none",
+        "purpose": "Story contact cards explicitly remove cinematic shadows.",
+        "name": "contact"
+      },
+      {
+        "value": "drop-shadow(0 16px 15px #0006)",
+        "purpose": "NRW crest within traced outline.",
+        "name": "standard"
+      }
+    ],
+    "motion": [
+      {
+        "value": "cubic-bezier(.23,1,.32,1)",
+        "name": "ease-out",
+        "purpose": "Intro, response, stage transitions."
+      },
+      {
+        "value": "backdrop 1050ms/0ms; title 800ms/60ms; copy 650ms/120ms; foreground 950ms/120ms; choice-1 600ms/180ms; choice-2 600ms/240ms",
+        "name": "intro",
+        "purpose": "First landing only; duration/delay. Choice wrappers use backwards fill."
+      },
+      {
+        "value": "160ms",
+        "name": "choice-transform",
+        "purpose": "Hover -3px, arrow +4px, press .985."
+      },
+      {
+        "value": "180ms ease",
+        "name": "choice-colors",
+        "purpose": "Fill and border."
+      },
+      {
+        "value": "260ms",
+        "name": "choice-sheen",
+        "purpose": "Hover highlight."
+      },
+      {
+        "value": "600ms cubic-bezier(.23,1,.32,1)",
+        "purpose": "Once-only clip-path reveal and 12px translate; body copy unaffected.",
+        "name": "heading-arrival"
+      },
+      {
+        "value": "native reversible progress",
+        "purpose": "Lines .52 to 1 opacity, 12px to 0 translation, crest 16px/-4deg to rest, outline offset 1-progress.",
+        "name": "banner-scroll"
+      }
+    ],
+    "breakpoints": [
+      {
+        "value": "1500px",
+        "name": "wide-scene-min"
+      },
+      {
+        "value": "1100px",
+        "name": "compact-scene"
+      },
+      {
+        "value": "800px",
+        "name": "tablet-scene"
+      },
+      {
+        "value": "680px",
+        "name": "phone"
+      },
+      {
+        "value": "375px",
+        "name": "narrow-phone"
+      },
+      {
+        "value": "1000px",
+        "name": "story-compact"
+      }
+    ],
+    "focus": {
+      "outline": "3px solid var(--brand)",
+      "offset": "5px",
+      "fieldAndChipOffset": "3px",
+      "skipTarget": "#alliance-story; hash targets settle immediately and receive focus.",
+      "sceneChoice": "3px solid #f5d58e, offset 5px"
+    },
+    "interactionMedia": "(hover:hover) and (pointer:fine)",
+    "reducedMotion": "Banner lines visible, crest transform reset, trace complete; heading entrances skipped; keyboard/direct hashes settle immediately. Retained hero reduced-motion safeguards remain.",
+    "themePreference": {
+      "key": "nrw_welcome_theme_v3",
+      "default": "dark",
+      "scope": "Welcome only; other route preferences remain unchanged."
+    },
+    "scope": "docs/welcome/DESIGN.md only. Public root Welcome; leadership and Dashboard excluded.",
+    "sourceFingerprints": {
+      "algorithm": "SHA256",
+      "index.html": "B34F35D5A3A2A47F4AB05DA2BD10C59B85A701D342181A60EBB22A141028491E",
+      "welcome.css": "6D847322DFEF2FE3D7AC092CC9508B50624C0267CDE5D9B111861B405683607B",
+      "welcome-cinematic.css": "F25A7B4E0CBB4F4728EB5398E995566A8B41C7A945440B5F522218E3E01240BD",
+      "welcome-cinematic.js": "7724931D81978930CFDF04F72D7B098C363A4D206EEB1C2C2CB071BA95A0C834",
+      "welcome-story.css": "5AA4992104153E6A07FC92314C23049E4384716B2A8F97346350A99B9F4D6579",
+      "welcome-story.js": "77FD872FD4C186C5F718762B9EB3C090A7507E7212FA722C5C008B1F65FEF622",
+      "welcome.js": "AC71CB2C5D4056742E11AB05531CA9269231E18595341AE1CF8FF10117101015",
+      "app.js": "4F50683D5166320C204A1A3CCF3903B75371833EAD0724B4272D50671C5DDA4F",
+      "leitung/event-library.js": "62F1A1BADE2A72AE15F1394593C45CE9548DB0C15064DB275AC6BA8768A709B8",
+      "supabase/functions/allianceos-leitung/index.ts": "2EE5184F4CD402379CED5945EE2198076C0BE34BE5763D606591CFD1395AC26A",
+      "supabase/migrations/20261021181556_event_legion_times.sql": "767856B873B67BE93AE2546BED754CE84F32C71CCCF429D73D9685468E744B43"
+    },
+    "pointerDepth": {
+      "foreground": "max 12px/8px plus 1.5deg rotateY",
+      "text": "stationary",
+      "gate": "Fine hover pointer, no reduced motion, visible intersecting landing, visible document, focused window, non-touch input",
+      "spring": {
+        "mass": 1,
+        "damping": 10,
+        "stiffness": 100
+      },
+      "backdrop": "max 6px/4px",
+      "stop": "Settled, hidden, blur, keydown, view exit, intersection loss, reduced-motion or pointer-capability change",
+      "frameDeltaCap": "32ms"
+    },
+    "navigation": {
+      "details": "Only FAQ questions and historical warning retain native details; ancestors open for hash targets.",
+      "staged": "Former audience view transitions disabled and not invoked.",
+      "mode": "One continuous page; hero/header anchors navigate directly with history and focus."
+    },
+    "assets": {
+      "contactsAndHelga": "assets/welcome/sources.json",
+      "provenance": "assets/welcome/kingdom-dusk.provenance.json",
+      "license": "assets/welcome/Cinzel-OFL.txt",
+      "font": "assets/welcome/Cinzel-Variable.ttf",
+      "classification": "AI fantasy illustration, not a Kingshot screenshot",
+      "scene": "assets/welcome/kingdom-dusk.webp",
+      "panoramas": [
+        {
+          "dimensions": "1672x941",
+          "kind": "Original AI fantasy illustration, not screenshot",
+          "provenance": "assets/welcome/alliance-camp.provenance.json",
+          "bytes": 336082,
+          "file": "assets/welcome/alliance-camp.webp"
+        },
+        {
+          "dimensions": "1672x941",
+          "kind": "Original AI fantasy illustration, not screenshot",
+          "provenance": "assets/welcome/bear-rally.provenance.json",
+          "bytes": 350806,
+          "file": "assets/welcome/bear-rally.webp"
+        }
+      ]
+    },
+    "scrollScene": {
+      "noJS": "Content visible by default",
+      "lineProgress": "clamp((progress-index*.16)/.35)",
+      "updates": "One scheduled frame on scroll/resize while intersecting; no continuous ticker",
+      "locale": "Finish currently visible heading effects on language change",
+      "visibility": "Finish running effects while hidden",
+      "keyboard": "Navigation/scroll keys settle all effects and keep later heading entrances direct",
+      "trace": "pathLength 1; dasharray 1; offset 1-progress",
+      "progress": "clamp((.85*viewportHeight-sceneTop)/(.7*viewportHeight+.55*sceneHeight))"
+    },
+    "storyLayout": {
+      "contacts": "Dark #191d24 section, #242a33 surfaces, 12px radius, no shadow",
+      "bannerGap": "100px",
+      "sectionPadding": "88px; 65px at1000px; 55px at680px",
+      "bannerMax": "1080px",
+      "bannerColumns": "1fr 1.4fr",
+      "contentMax": "1120px",
+      "standard": "260px by 330px; phone 125px by 158px"
+    },
+    "panoramas": {
+      "bear": {
+        "height": "440px",
+        "position": "center top",
+        "phoneHeight": "220px",
+        "phonePosition": "62% center"
+      },
+      "radius": "12px",
+      "phoneRadius": "8px",
+      "animation": "No new effects",
+      "loading": "lazy, intrinsic 1672x941",
+      "captions": "11px, var(--muted), line-height1.6, 10px top padding; below images",
+      "alliance": {
+        "height": "430px",
+        "position": "center",
+        "phoneHeight": "245px",
+        "phonePosition": "52% center"
+      }
+    },
+    "eventEmblems": {
+      "smallEmblems": "60px",
+      "swords": "76px; phone66px",
+      "phoneContainer": "80px",
+      "container": "96px",
+      "phoneImage": "76px",
+      "image": "88px",
+      "shadow": "drop-shadow(0 8px 7px #0003)"
+    },
+    "legionConfiguration": {
+      "constraint": "Both null or paired minute-precision values for supported groups",
+      "editor": "Event Planning/Event Library/Turnus; two inputs for SL/Tri only; read-only disabled",
+      "compatibility": "Old client/title-only preserve clocks",
+      "bear": "Existing17:00/18:30 untouched",
+      "backend": "Active Edge v64, existing events ACL/audit, strict HH:mm, paired clear",
+      "seed": "NRW Swordland and Tri-Alliance only:14:00/19:00 UTC",
+      "migration": "20261021181556_event_legion_times.sql",
+      "copy": "Group assignments coordinated in game; clocks set by leadership",
+      "authentication": "Existing manual auth and verify_jwt=false unchanged",
+      "fields": [
+        "legion1_time_utc",
+        "legion2_time_utc"
+      ],
+      "source": "Same persisted public-schedule response; no frontend fallback"
+    }
+  },
+  "components": [
+    {
+      "name": "Cinematic Member Choice",
+      "kind": "custom",
+      "css": ".scene-choice{display:block;padding:19px 22px;border-radius:7px;background:#dfbd79;color:#292419;border:1px solid #e9ce99;font-family:Inter,system-ui,sans-serif;text-decoration:none;box-shadow:0 12px 28px #0003;transition:transform 160ms cubic-bezier(.23,1,.32,1),background-color 180ms ease}.scene-choice strong{display:block;font-size:15px;font-weight:650}.scene-choice span{font-size:12px}.scene-choice:focus-visible{outline:3px solid #f5d58e;outline-offset:5px}.scene-choice:active{transform:scale(.985)}@media(hover:hover) and (pointer:fine){.scene-choice:hover{transform:translateY(-3px);background:#ebcd91}.scene-choice:hover:active{transform:scale(.985)}}@media(prefers-reduced-motion:reduce){.scene-choice{transition:background-color 120ms ease,color 120ms ease}}",
+      "description": "Interactive choice independent from its noninteractive entry wrapper.",
+      "html": "<div class=\"path-reveal\"><a class=\"scene-choice\" href=\"#start\"><strong>Already with NRW</strong><span>My starting point →</span></a></div>",
+      "refersTo": "member-path"
+    },
+    {
+      "description": "Three fully readable defaults; runtime applies bounded reversible illumination.",
+      "kind": "custom",
+      "html": "<div class=\"story-copy\"><p>Many languages.</p><p>One banner.</p><p class=\"gold\">Stronger together.</p></div>",
+      "name": "Alliance Story Lines",
+      "css": ".story-copy p{font-family:Cinzel,serif;font-size:clamp(32px,3.5vw,49px);line-height:1.25;letter-spacing:-.025em;margin:0 0 34px;color:#f5f1e8}.story-copy .gold{color:#dfbd79}@media(max-width:1000px){.story-copy p{font-size:34px}}@media(max-width:680px){.story-copy{text-align:center}.story-copy p{font-size:31px;margin-bottom:28px}}"
+    }
+  ],
+  "narrative": {
+    "keyCharacteristics": [
+      "Retained cinematic hero",
+      "Continuous information",
+      "Real crest with traced gold edge",
+      "Reversible scroll lines",
+      "Once-only heading arrivals",
+      "Keyboard/reduced settling"
+    ],
+    "northStar": "One Alliance, One Journey",
+    "dos": [
+      "Keep all primary information directly available.",
+      "Preserve ordinary scroll, body readability, no-JS visibility, direct hashes, and authoritative data."
+    ],
+    "overview": "The cinematic citadel and Helga lead into a continuous, directly readable Welcome. The real NRW standard traces its gold edge while three localized lines build with native reversible scroll. Primary information is not hidden behind audience selection. Two captioned original AI panoramas and larger real event emblems enrich the world without changing native scroll motion. Editable persisted L1/L2 clocks use the same public schedule authority.",
+    "rules": [
+      {
+        "body": "Final story styles supersede earlier hidden audience layout; current markup is authoritative.",
+        "section": "colors",
+        "name": "The Cascade Rule"
+      }
+    ],
+    "donts": [
+      "Do not restore hidden audience streams or major information disclosures.",
+      "Do not hijack scrolling or invent game rewards or proof.",
+      "Do not call AI panoramas game screenshots or overlay factual text on them.",
+      "Do not hardcode legion clock fallbacks or restore obsolete polling-time claims.",
+      "Do not expand the narrowly authorized legion feature into unrelated backend or leadership changes."
+    ]
+  }
+}
