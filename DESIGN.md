@@ -263,3 +263,13 @@ Swordland tactical North/South groups are derived from the vertical half of each
 External-account lookup uses the existing MightPulse provider on deliberate click. It fills draft name/alliance fields without saving a relationship. Changing the ID clears unchanged provider-filled fields. Manual edits survive. The dedicated action requires the existing members permission; the transfer lookup retains its transfer permission.
 
 The user explicitly authorized the two minimal shared API extensions on 2026-10-21. No schema, authentication, subscription or Vercel deployment changes accompany them.
+
+## Automatic deployment groups
+
+Neumorph is the default appearance for a browser without an explicit saved preference. Existing local appearance choices remain available.
+
+The deployment planner works only within an existing Legion 1 or Legion 2. It never assigns players to another legion. The native preset dialog configures top-N GUERILLA, weakest remaining SECURE, the North/South headcount ratio, strong players per priority objective, preserved positions, unknown availability and one account per person. SL defaults to Bell Tower and Stables. Tri requires an explicit starting side and priority targets. No provider lookup is required to calculate a proposal.
+
+The deterministic engine uses documented cached power. Missing power is excluded from redistribution. Existing retained positions take precedence over automatic target counts. Preview shows exclusions, actual counts, known-power coverage and copyable labels. Group-qualified map keys preserve North/South intent on Tri without a new database schema; virtual SECURE/GUERILLA destinations have no invented map coordinates.
+
+Applying is explicit. A fresh roster and player snapshot must match the proposal, including active status and main/alt links. Stale data refreshes the local snapshot and requires a new proposal. Sequential writes update only map assignments through the existing permission-protected action. A partial error stops the run; successful assignments remain saved and retry handles only the remainder. No live alliance planning data is modified during QA.

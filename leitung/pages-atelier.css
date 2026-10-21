@@ -374,3 +374,36 @@ html.pages-atelier[data-appearance=neumorph] .ghost:active{box-shadow:inset 2px 
 html.pages-atelier[data-appearance=neumorph] .nav-item.active{background:var(--os-selected);box-shadow:inset 2px 2px 4px var(--neo-dark);border:1px solid var(--os-edge)}
 @media(max-width:1100px){html.pages-atelier[data-appearance=bento] .two-col{grid-template-columns:1fr}}
 @media(max-width:600px){html.pages-atelier .os-appearance{margin-left:0;align-self:flex-start}html.pages-atelier[data-appearance=bento] .stat-grid .stat{padding:16px}html.pages-atelier[data-appearance=bento] .stat-grid .stat strong{font-size:27px}html.pages-atelier[data-appearance=bento] .two-col>.card{min-height:0}html.pages-atelier[data-appearance=neumorph] :is(.card,.stat-grid,.bear-fast-assign,.bear-roster,.bear-slot-card,.perf-panel,.fight-map-detail,.fight-map-team-card){box-shadow:4px 4px 9px var(--neo-dark),-4px -4px 9px var(--neo-light)}}
+html.pages-atelier .fight-map-actions{display:flex;flex-wrap:wrap;gap:8px}
+html.pages-atelier .deployment-dialog{width:min(1080px,calc(100vw - 32px));max-width:1080px;max-height:90dvh;padding:24px;margin:auto;border:1px solid var(--border);border-radius:18px;background:var(--bg);color:var(--text);overflow-y:auto;overscroll-behavior:contain;box-sizing:border-box}
+html.pages-atelier .deployment-dialog::backdrop{background:rgb(0 0 0 / .65)}
+html.pages-atelier .deployment-dialog-head{display:flex;justify-content:space-between;align-items:start;gap:20px;margin-bottom:24px}
+html.pages-atelier .deployment-dialog-head h2{font-size:22px;line-height:1.3;margin:0 0 8px}
+html.pages-atelier .deployment-dialog-head p{margin:0 0 8px;color:var(--muted);max-width:70ch}
+html.pages-atelier .deployment-dialog-head small{color:var(--accent)}
+html.pages-atelier .deployment-dialog-head>button{flex-shrink:0}
+html.pages-atelier .deployment-fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+html.pages-atelier .deployment-fields label{display:flex;flex-direction:column;gap:8px;font-size:13px;min-width:0;color:var(--muted)}
+html.pages-atelier .deployment-fields .control{width:100%;min-width:0;color:var(--text)}
+html.pages-atelier .deployment-options{display:flex;flex-wrap:wrap;gap:12px 24px;margin:20px 0}
+html.pages-atelier .deployment-options label{display:flex;align-items:center;gap:8px;font-size:13px}
+html.pages-atelier .deployment-options input{accent-color:var(--accent);width:18px;height:18px;flex-shrink:0}
+html.pages-atelier .deployment-dialog .small-note{margin:12px 0;color:var(--muted);line-height:1.6}
+html.pages-atelier .deployment-status{min-height:1.5em;margin:20px 0;color:var(--text);overflow-wrap:anywhere}
+html.pages-atelier .deployment-status.is-error{color:var(--red)}
+html.pages-atelier .deployment-preview-head{display:flex;justify-content:space-between;align-items:start;gap:16px;border-top:1px solid var(--border);padding-top:20px;margin-bottom:18px}
+html.pages-atelier .deployment-preview-head p{color:var(--muted);font-size:12px;margin:6px 0}
+html.pages-atelier .deployment-groups{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+html.pages-atelier .deployment-group{background:var(--surface);border:1px solid var(--os-edge);border-radius:12px;padding:18px;min-width:0}
+html.pages-atelier .deployment-group header{display:flex;justify-content:space-between;align-items:center;gap:12px}
+html.pages-atelier .deployment-group h3{margin:0;font-size:16px;letter-spacing:0}
+html.pages-atelier .deployment-group header span,html.pages-atelier .deployment-group>p{font-size:12px;color:var(--muted)}
+html.pages-atelier .deployment-group pre{font-family:inherit;font-size:13px;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere;background:var(--panel);padding:12px;border-radius:8px;color:var(--text);user-select:text}
+html.pages-atelier .deployment-group details{margin-top:12px;border-top:1px solid var(--border);padding-top:12px;font-size:12px;overflow-wrap:anywhere}
+html.pages-atelier .deployment-group summary,html.pages-atelier .deployment-excluded summary{cursor:pointer}
+html.pages-atelier .deployment-excluded{margin-top:20px;font-size:13px;color:var(--muted)}
+html.pages-atelier .deployment-excluded li{margin:6px 0;overflow-wrap:anywhere}
+html.pages-atelier .deployment-dialog footer{position:sticky;bottom:-24px;display:flex;justify-content:flex-end;gap:10px;padding:16px 0 0;margin-top:20px;background:var(--bg);border-top:1px solid var(--border)}
+html.pages-atelier[data-appearance=neumorph] .deployment-group{box-shadow:4px 4px 9px var(--neo-dark),-4px -4px 9px var(--neo-light)}
+@media(max-width:760px){html.pages-atelier .deployment-fields{grid-template-columns:repeat(2,minmax(0,1fr))}html.pages-atelier .deployment-groups{grid-template-columns:1fr}}
+@media(max-width:480px){html.pages-atelier .deployment-dialog{width:calc(100vw - 20px);padding:16px;max-height:94dvh}html.pages-atelier .deployment-dialog-head{gap:10px;flex-wrap:wrap}html.pages-atelier .deployment-dialog-head h2{font-size:20px}html.pages-atelier .deployment-fields{grid-template-columns:1fr}html.pages-atelier .deployment-preview-head{flex-direction:column}html.pages-atelier .deployment-dialog footer{bottom:-16px;flex-wrap:wrap}html.pages-atelier .deployment-dialog footer button{flex:1;min-width:120px}html.pages-atelier .deployment-options{flex-direction:column;align-items:start}}

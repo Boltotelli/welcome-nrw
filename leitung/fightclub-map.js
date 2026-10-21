@@ -1,3 +1,5 @@
+import {decodeDeployment} from './deployment-engine.js?v=20261021-plan-1';
+import {createDeploymentPlanner} from './deployment-planner.js?v=20261021-plan-1';
 /* FightClub battlefield planning: private, date-scoped map objectives for both legions.
  * Maps are planning aids; no Kingshot orders, registration or Discord posts are sent.
  * TriAlliance map illustration credited to its author; pin geometry remains usable
@@ -64,10 +66,11 @@ const WORDS={
 export function createFightClubMap({getContext,getLanguage,request,flash,esc,onUpdated}){
  let selected="shrine",legion=1,selectedPlayer="",busy=false,scope="",leaderChoice={1:"",2:""};
  const t=k=>(WORDS[getLanguage()]||WORDS.de)[k]||WORDS.de[k]||k;
- const sites=()=>getContext()?.eventType==="triforce"?TRI:SWORD;
+ const sites=()=>(getContext()?.eventType==="triforce"?TRI:SWORD).concat([{key:"guerrilla",name:"GUERILLA",group:"guerrilla",virtual:true}],getContext()?.eventType==="triforce"?[{key:"safe-zone",name:"SECURE · Safe Zone",group:"safe",virtual:true}]:[]);
  const ctx=()=>getContext()||{};
  const roster=()=>ctx().assignments||[];
- const mapRows=()=>(ctx().mapAssignments||[]).filter(m=>m.event_type===ctx().eventType&&m.battle_date===ctx().date);
+ const mapRows=()=>(ctx().mapAssignments||[]).filter(m=>m.event_type===ctx().eventType&&m.battle_date===ctx().date).map(m=>{const d=decodeDeployment(m.location_key,sites());return {...m,location_key:d.location,deployment_group:d.group};});
+ const planner=createDeploymentPlanner({getContext:()=>({...ctx(),legion}),getSites:sites,getLanguage,request,esc,onUpdated});
  const leaders=()=>ctx().state?.leaders?.filter(l=>l.event_type===ctx().eventType&&l.battle_date===ctx().date)||[];
  const leaderFor=lg=>leaders().find(l=>Number(l.legion)===lg)?.game_id||"";
  const siteList=()=>sites().map(s=>s.key);
@@ -97,7 +100,7 @@ export function createFightClubMap({getContext,getLanguage,request,flash,esc,onU
    '</svg>';
  }
  function pins(){
-  return sites().map(s=>{
+  return sites().filter(s=>!s.virtual).map(s=>{
    const n=rowsForLocation(s.key).length,selectedClass=s.key===selected?" selected":"";
    return '<button type="button" class="fight-map-pin fight-map-pin--'+esc(s.group)+selectedClass+(n?" occupied":"")+
     '" style="left:'+s.x.toFixed(3)+'%;top:'+s.y.toFixed(3)+'%" data-map-site="'+esc(s.key)+
@@ -132,16 +135,17 @@ export function createFightClubMap({getContext,getLanguage,request,flash,esc,onU
   const seen=new Set();
   // A legion is a battle roster; North/South are geographic deployment areas
   // within the selected legion. Reserve accounts never imply Safe Zone.
-  const locations=new Set(sites().filter(s=>s.key==="safe-zone"?team===0:team===(s.y<50?2:1)).map(s=>s.key));
-  const ids=new Set(renderedAssigned().filter(m=>locations.has(m.location_key)).map(m=>String(m.game_id)));
+  const group=team===0?'secure':team===3?'guerrilla':team===2?'north':'south';
+  const ids=new Set(renderedAssigned().filter(m=>m.deployment_group===group).map(m=>String(m.game_id)));
   return activeLegion().filter(a=>ids.has(String(a.game_id))).filter(a=>{
    const id=String(a.game_id);if(seen.has(id))return false;seen.add(id);return true;
   });
  }
  function teamMessage(team){
+  if(team===3)return "GUERILLA\n"+(teamMembers(3).map(a=>"• "+playerName(a.game_id)).join("\n")||"—");
   if(team===0){
    const names=teamMembers(0).map(a=>"• "+playerName(a.game_id)).join("\n")||"—";
-   return "📛 SAFE ZONE\n"+names+"\n\n"+
+   return "SECURE · SAFE ZONE\n"+names+"\n\n"+
      "Stay in the Safe Zone as long as possible.\n"+
      "Before battle: reinforce Guerrilla players or Team Leaders.\n"+
      "Join rallies in your assigned area – use free troop speed-ups if necessary.\n"+
@@ -149,7 +153,7 @@ export function createFightClubMap({getContext,getLanguage,request,flash,esc,onU
   }
   const leader=teamMembers(team).some(a=>String(a.game_id)===String(leaderFor(legion)))?leaderFor(legion):"",members=teamMembers(team).filter(a=>String(a.game_id)!==String(leader))
     .map(a=>"• "+playerName(a.game_id)).join("\n")||"—";
-  return (team===2?"🔴 TEAM 2 – NORTH":"🟢 TEAM 1 – SOUTH")+"\n👑 Leader: "+
+  return (team===2?"NORD · NORTH":"SÜD · SOUTH")+"\n👑 Leader: "+
     (leader?playerName(leader):"—")+"\n\n"+members;
  }
  function legionLeaderEditor(){
@@ -159,7 +163,7 @@ export function createFightClubMap({getContext,getLanguage,request,flash,esc,onU
    '<button class="ghost" type="button" data-map-leader-save="'+legion+'" '+(busy?'disabled':'')+'>'+esc(t("leaderSave"))+'</button></div>';
  }
  function teamCard(team){
-  const name=team===2?"🔴 TEAM 2 – NORTH":team===1?"🟢 TEAM 1 – SOUTH":"📛 SAFE ZONE";
+  const name=team===3?"GUERILLA":team===2?"NORD · NORTH":team===1?"SÜD · SOUTH":"SECURE · SAFE ZONE";
   const people=teamMembers(team);
   return '<article class="fight-map-team-card"><div class="fight-map-team-header"><strong>'+name+'</strong><small>'+people.length+' '+esc(t("assigned"))+'</small></div>'+
     '<pre>'+esc(teamMessage(team))+'</pre>'+
@@ -194,7 +198,7 @@ export function createFightClubMap({getContext,getLanguage,request,flash,esc,onU
     nPlayers=renderedAssigned().length;
   return '<section class="card fight-map-card" aria-label="'+esc(t("heading"))+'">'+
    '<div class="fight-map-title"><div><h3>'+esc(t("heading"))+'</h3><p class="small-note">'+esc(t("hint"))+'</p></div>'+
-   '<button type="button" class="ghost" data-map-export>'+esc(t("clipboard"))+' ↗</button></div>'+
+   '<div class="fight-map-actions"><button type="button" class="primary" data-map-auto-plan>'+esc(planner.label())+'</button><button type="button" class="ghost" data-map-export>'+esc(t("clipboard"))+' ↗</button></div></div>'+
    '<div class="fight-map-topbar"><label>'+esc(t("legion"))+
       '<select class="control" data-map-legion>'+options([["1","1"],["2","2"]],String(legion))+'</select></label>'+
       '<span>'+nPlayers+' '+esc(t("assigned"))+' · '+used+' '+esc(t("count"))+'</span></div>'+
@@ -202,7 +206,7 @@ export function createFightClubMap({getContext,getLanguage,request,flash,esc,onU
    '<div class="fight-map-layout"><div class="fight-map-scroll" tabindex="0"><div class="fight-map-stage '+(tri?"fight-map-tri":"fight-map-sword")+'">'+
      (tri?'<img class="fight-map-photo" src="https://kingshotguides.com/wp-content/uploads/2025/10/tri-alliance-clash-map-by-daryl-scaled.webp" alt="" loading="lazy" referrerpolicy="no-referrer">':swordBackdrop())+
      pins()+'</div></div>'+siteDetail()+'</div>'+ 
-   (tri?'':'<div class="fight-map-team-section"><h4>'+esc(t("teamTexts"))+' · '+esc(t("legion"))+' '+legion+'</h4>'+legionLeaderEditor()+'<div class="fight-map-team-grid">'+[1,2,0].map(teamCard).join("")+'</div></div>')+
+   ('<div class="fight-map-team-section"><h4>'+esc(t("teamTexts"))+' · '+esc(t("legion"))+' '+legion+'</h4>'+legionLeaderEditor()+'<div class="fight-map-team-grid">'+[1,2,0,3].map(teamCard).join("")+'</div></div>')+
    '<p class="small-note">'+esc(t("hintMobile"))+(tri?' · <a href="https://kingshotguides.com/guide/tri-alliance-clash-map/" target="_blank" rel="noopener noreferrer">'+esc(t("source"))+'</a>':"")+'</p>'+
    '</section>';
  }
@@ -251,6 +255,7 @@ export function createFightClubMap({getContext,getLanguage,request,flash,esc,onU
  }
  async function click(e){
   const el=e.target;
+  const auto=el.closest("[data-map-auto-plan]");if(auto){planner.open(auto);return true;}
   const site=el.closest("[data-map-site]");
   if(site){selected=site.dataset.mapSite;selectedPlayer="";onUpdated();return true;}
   if(el.closest("[data-map-copy-position]")){await copyText(rowsForLocation(selected).map(x=>playerName(x.game_id)).join(", "),t("copiedNames"));return true;}
@@ -267,5 +272,5 @@ export function createFightClubMap({getContext,getLanguage,request,flash,esc,onU
   }
   return false;
  }
- return {render,change,click,reset(){scope="";selected="shrine";selectedPlayer="";legion=1;busy=false;leaderChoice={1:"",2:""};}};
+ return {render,change,click,reset(){planner.reset();scope="";selected="shrine";selectedPlayer="";legion=1;busy=false;leaderChoice={1:"",2:""};}};
 }

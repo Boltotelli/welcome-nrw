@@ -1,7 +1,7 @@
 /* AllianceOS Phase 4 – GitHub Pages only: FightClub draft rosters.
  * Distinguishes confirmed source schedules from a manually chosen planning date.
  * No Discord role/slot/bot changes, no automatic player assignments. */
-import {createFightClubMap} from "./fightclub-map.js?v=20261021-zones-1";
+import {createFightClubMap} from "./fightclub-map.js?v=20261021-plan-1";
 export function createFightClub({getState,getLanguage,request,flash,esc,openPlayer}){
  const canDossier=()=>getState()?.staff?.is_owner===true||getState()?.staff?.permissions?.members===true;
  const root=document.getElementById("fightclubRoot");
@@ -121,16 +121,16 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
  const powers=()=>new Map((state?.powers||[]).map(p=>[String(p.game_id),p]));
  const assignments=()=>state?.assignments?.filter(a=>a.event_type===eventType&&a.battle_date===date)||[];
  const mapUI=createFightClubMap({
-  getContext:()=>({eventType,date,assignments:assignments(),mapAssignments:state?.map_assignments||[],players:players(),state}),
+  getContext:()=>({eventType,date,assignments:assignments(),mapAssignments:state?.map_assignments||[],powers:state?.powers||[],players:players(),state,allianceState:getState()}),
   getLanguage,request,flash,esc,onUpdated:()=>draw()
  });
  const assignment=id=>assignments().find(a=>String(a.game_id)===String(id));
  const cycles=()=>state?.cycles?.filter(c=>c.event_type===eventType)||[];
  const cycle=()=>cycles().find(c=>c.battle_date===date);
- const legionName=v=>v===1?t("l1"):v===2?t("l2"):v===0?(eventType==="swordland"?"📛 SAFE ZONE":t("reserve")):t("empty");
+ const legionName=v=>v===1?t("l1"):v===2?t("l2"):v===0?t("reserve"):t("empty");
  function selectOptions(items,value,attr){return '<select class="control" '+attr+'>'+items.map(([v,name])=>
   '<option value="'+esc(String(v))+'" '+(String(value)===String(v)?"selected":"")+'>'+esc(name)+'</option>').join("")+'</select>';}
- function optLegion(){return [["-1",t("empty")],["1",t("l1")],["2",t("l2")],["0",eventType==="swordland"?"📛 SAFE ZONE":t("reserve")]];}
+ function optLegion(){return [["-1",t("empty")],["1",t("l1")],["2",t("l2")],["0",t("reserve")]];}
  function optAvailability(){return [["unknown",t("unknown")],["full",t("full")],["partial",t("partial")],["unavailable",t("unavailable")]];}
  function optRole(){return [["flex",t("flex")],["attack",t("attack")],["defense",t("defense")],["support",t("support")]];}
  function minutes(utc){return utc?new Intl.DateTimeFormat(locale(),{hour:"2-digit",minute:"2-digit",hour12:false,timeZone:"UTC"}).format(new Date(utc))+" UTC":t("noTime");}

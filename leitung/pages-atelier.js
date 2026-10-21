@@ -31,8 +31,8 @@
     const appearanceText=document.createElement('span'),appearanceSelect=document.createElement('select');
     appearanceSelect.className='control';appearanceSelect.id='osAppearance';
     for(const [value,text] of [['clear','Klar'],['bento','Bento'],['neumorph','Neumorph']]){const option=document.createElement('option');option.value=value;option.textContent=text;appearanceSelect.append(option);}
-    let savedAppearance='bento';try{savedAppearance=localStorage.getItem('allianceos-appearance')||'bento';}catch{}
-    if(!['clear','bento','neumorph'].includes(savedAppearance))savedAppearance='bento';
+    let savedAppearance='neumorph';try{savedAppearance=localStorage.getItem('allianceos-appearance')||'neumorph';}catch{}
+    if(!['clear','bento','neumorph'].includes(savedAppearance))savedAppearance='neumorph';
     appearanceSelect.value=savedAppearance;document.documentElement.dataset.appearance=savedAppearance;
     appearanceSelect.addEventListener('change',()=>{document.documentElement.dataset.appearance=appearanceSelect.value;try{localStorage.setItem('allianceos-appearance',appearanceSelect.value);}catch{}});
     appearance.append(appearanceText,appearanceSelect);

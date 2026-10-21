@@ -956,6 +956,13 @@ async function saveBearPlanningSettings(req:Request,alliance:string,userId:strin
 // Protected FightClub battlefield objectives. Map links are private planning
 // records, never registered automatically in Kingshot or the Discord bot.
 function fightMapLocationValid(eventType:string,key:string){
+ if(!["swordland","triforce"].includes(eventType))return false;
+ if(["safe-zone","guerrilla"].includes(key))return true;
+ const qualified=/^(north|south):([^:]+)$/.exec(key);
+ if(qualified){
+   if(["safe-zone","guerrilla"].includes(qualified[2]))return false;
+   key=qualified[2];
+ }
  if(eventType==="triforce")return key==="temple"||/^[ABC](?:[1-9]|[12][0-9]|3[01])$/.test(key);
  return eventType==="swordland"&&[
   "shrine","bell","mercenary","reformation","stables","safe-zone",
