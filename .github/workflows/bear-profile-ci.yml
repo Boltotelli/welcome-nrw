@@ -1,0 +1,24 @@
+name: Bear Profile GitHub Storage (tests only)
+on:
+  push:
+    branches: [bear-rework-oct12]
+    paths:
+      - api/bear-players.js
+      - api/test-bear-players.cjs
+      - .github/workflows/bear-profile-ci.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  profile-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test API without token or network writes
+        run: |
+          node --check api/bear-players.js
+          node --check api/test-bear-players.cjs
+          node api/test-bear-players.cjs

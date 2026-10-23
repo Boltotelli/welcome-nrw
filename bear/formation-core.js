@@ -1,7 +1,7 @@
 /* Inventory-constrained Bear Trap starter + join formation suggestions.
  * Uses ONLY scanned/owned heroes; no invented hero skill levels, no external
  * leader damage stats. One starter plus at most six parallel joins.
- * This is a provisional allocation/search model, not true game damage.
+ * Generation-based general joiner baseline with inventory constraints; not guaranteed optimal for every leader.
  */
 (function(root){
 'use strict';
@@ -45,7 +45,12 @@ function chooseHeroes(model,catalog){
   const join=joinMap.get(h.name);if(!join)return -1;
   const first=Array.isArray(h.skills)?Number(h.skills[0]):0;
   const confirmed=h.skillsAssumedMax===false&&Number.isInteger(first)&&first>=1&&first<=5;
-  return join.score+(confirmed?first*12:0)+(confirmed?35:0);
+  const stars=Number(h.stars),assumedCap=Number.isInteger(stars)&&stars>=0&&stars<=5?
+   Math.min(5,stars+1):0;
+  const level=confirmed?first:assumedCap;
+  // Prioritize better first-expedition SKILL ranks, including visibly
+  // marked star-derived upper bounds. Do not claim unconfirmed ranks are owned.
+  return join.score+level*12+(confirmed?35:0);
  };
  const joinCount=Math.max(0,Math.min(6,Math.floor(Number(v.joinCount)||0)));
  const reserved=owned.filter(h=>!taken.has(h.name)&&joinMap.has(h.name)&&classOf(h.name,catalog))
@@ -94,13 +99,16 @@ function splitShares(total,caps){
 function integerPercentages(row){
  const total=row.reduce((a,b)=>a+b,0);
  if(!total)return [0,0,0];
- const values=row.map(n=>100*n/total);
- const result=values.map(Math.floor);
- let diff=100-result.reduce((a,b)=>a+b,0);
- for(const i of [0,1,2].sort((a,b)=>(values[b]-result[b])-(values[a]-result[a])||a-b)){
-  if(diff<=0)break;result[i]++;diff--;
+ // Kingshot's formation selector accepts integer percentages only.
+ const exact=row.map(n=>100*n/total);
+ const rounded=exact.map(Math.floor);
+ let remaining=100-rounded.reduce((a,b)=>a+b,0);
+ for(const k of [0,1,2].sort((a,b)=>
+   (exact[b]-rounded[b])-(exact[a]-rounded[a])||a-b)){
+  if(!remaining)break;
+  rounded[k]++;remaining--;
  }
- return result;
+ return rounded;
 }
 function composition(target,inf,cav){
  if(!target)return [0,0,0];
@@ -111,28 +119,310 @@ function composition(target,inf,cav){
 // out, redistribute its exact integer stock fairly across ALL marches,
 // then backfill the unfilled slots with other classes that actually exist.
 function allocate(targets,stock,starterRatio,joinRatio){
+ // All simultaneous marches spend ONE shared troop inventory.
+ // Archers are reserved for JOIN marches before the player's own rally.
+ // This is an allocation rule, NOT a damage prediction.
  const rows=targets.map((t,i)=>composition(t,...(i===0?starterRatio:(Array.isArray(joinRatio[0])?(joinRatio[i-1]||joinRatio[0]):joinRatio))));
- for(let k=0;k<3;k++){
+ for(const k of [2,0,1]){
   const requests=rows.map(row=>row[k]);
   const want=requests.reduce((a,b)=>a+b,0);
   if(want<=stock[k])continue;
-  const fair=splitShares(stock[k],requests);
-  for(let i=0;i<rows.length;i++)rows[i][k]=fair[i];
+  if(k===2&&rows.length>1){
+   const joins=requests.slice(1),need=joins.reduce((a,b)=>a+b,0);
+   const share=splitShares(Math.min(stock[k],need),joins);
+   const remainder=Math.max(0,stock[k]-share.reduce((a,b)=>a+b,0));
+   rows[0][k]=Math.min(requests[0],remainder);
+   for(let i=1;i<rows.length;i++)rows[i][k]=share[i-1];
+  }else{
+   const fair=splitShares(stock[k],requests);
+   for(let i=0;i<rows.length;i++)rows[i][k]=fair[i];
+  }
  }
  const remaining=stock.map((n,k)=>n-rows.reduce((s,row)=>s+row[k],0));
+ // Backfill shortages with physically available troops; never reuse stock.
  for(const k of [2,1,0]){
   if(!remaining[k])continue;
   const room=rows.map((row,i)=>targets[i]-row.reduce((a,b)=>a+b,0));
   const totalRoom=room.reduce((a,b)=>a+b,0);
   if(!totalRoom)break;
-  const allot=splitShares(Math.min(remaining[k],totalRoom),room);
-  for(let i=0;i<rows.length;i++)rows[i][k]+=allot[i];
+  if(k===2&&rows.length>1){
+   const joinRoom=room.slice(1),take=splitShares(Math.min(remaining[k],joinRoom.reduce((a,b)=>a+b,0)),joinRoom);
+   for(let i=1;i<rows.length;i++)rows[i][k]+=take[i-1];
+   const spare=remaining[k]-take.reduce((a,b)=>a+b,0);
+   rows[0][k]+=Math.min(spare,room[0]);
+  }else{
+   const allot=splitShares(Math.min(remaining[k],totalRoom),room);
+   for(let i=0;i<rows.length;i++)rows[i][k]+=allot[i];
+  }
  }
  return rows;
 }
+
+function availableStock(model){
+ const v=model?.values||{},ext=model?.v2||{};
+ // Source of truth: multiple troop groups by T and TG, never use one
+ // best-T for every march.
+ const groups=Array.isArray(ext.troopGroups)?ext.troopGroups:[];
+ const stock=['troopsI','troopsC','troopsA'].map(k=>int(v[k]));
+ const keys=['infantry','cavalry','archer'];
+ if(groups.length)for(let k=0;k<3;k++){
+  const relevant=groups.filter(g=>g.type===keys[k]);
+  if(relevant.length)stock[k]=relevant.reduce((n,g)=>n+int(g.count),0);
+ }
+ return stock;
+}
+// A joiner attacks with UNKNOWN rally-leader combat stats and hero skills.
+// T/TG base attack alone and an arbitrary +4% Archer factor cannot identify
+// the best mixture for an "average" leader. Use literature-backed
+// generation-specific Bear presets instead, adapting to actual march size.
+const GENERATION_BASELINES={
+  1:[10,30,60],2:[10,20,70],3:[10,10,80]
+};
+function ratioForTarget(target,baseline){
+ const t=int(target);if(!t)return [0,0];
+ const [baseInf,baseCav]=baseline;
+ // A late-generation 1/10/89 is a community starting point,
+ // NOT a mandate to bring 5,000 ATTACKING Infantry. In the
+ // published combat formula, 5,000 denotes the DEFENDING Bear army
+ // and the army_min factor. No abrupt Infantry threshold was shown.
+ const i=Math.min(t,Math.max(0,Math.round(t*baseInf/100)));
+ const c=Math.min(t-i,Math.max(0,Math.round(t*baseCav/100)));
+ return [100*i/t,100*c/t];
+}
+function joinerBaseline(model,catalog){
+ // NRW #1044 is in the late-game (Gen4+) Bear meta. The age of the
+ // kingdom is NOT the generation of the player's strongest owned hero:
+ // a small account without Gen4+ heroes still joins late-game leaders.
+ // An explicit server generation, if known from a future import, takes
+ // precedence. Never infer kingdom age from hero ownership.
+ const raw=model?.v2?.kingdomGeneration;
+ const number=Number(raw);
+ const generation=Number.isInteger(number)&&number>=1&&number<=8?number:4;
+ const proportions=GENERATION_BASELINES[generation]||[1,10,89];
+ return {generation,generationLabel:Number.isInteger(number)&&number>=1&&number<=8?
+  String(number):'4+',proportions,
+  source:'Gen4+ community Bear joiner baseline for kingdom 1044; rally-leader unknown'};
+}
+/* Relative total-damage allocation. No real leader stats are known.
+ * Approximate each march's damage as sum(classWeight * sqrt(classTroops *
+ * min(allTroops,5000))).  Class weights are calibrated to the community
+ * reference ratios (Gen4+ ~1/10/89; 5k is the DEFENDING Bear army).
+ * We compare MARGINAL increases between own starter and all joins,
+ * consuming actual troop stock once. Foreign strength is a user-selected
+ * scenario (weaker/similar/stronger), not a measured player stat.
+ * No claim of official optimal Kingshot damage.
+ */
+const LEADER_SCENARIOS=Object.freeze({
+ weaker:{foreign:0.70,meaning:'Other rally leaders usually weaker'},
+ similar:{foreign:1.00,meaning:'Other rally leaders approximately equal'},
+ stronger:{foreign:1.40,meaning:'Other rally leaders usually stronger'}
+});
+function scenario(model){
+ const selected=model?.v2?.joinLeaderComparison;
+ const key=Object.hasOwn(LEADER_SCENARIOS,selected)?selected:'similar';
+ return {key,...LEADER_SCENARIOS[key],assumed:true};
+}
+function scoreFor(row,weights){
+ const total=row[0]+row[1]+row[2];
+ if(!total)return 0;
+ const army=Math.sqrt(Math.min(total,5000));
+ return army*row.reduce((sum,n,k)=>sum+weights[k]*Math.sqrt(n),0);
+}
+function estimateClassQuality(model,combat,stock){
+ const cfg=combat?.configure?.(model?.v2),keys=['infantry','cavalry','archer'],
+  base=[472,1416,1888],quality=[1,1,1];
+ for(let k=0;k<3;k++){
+  if(stock[k]<=0)continue;
+  const lvl=cfg?.[k];
+  let atk=null;
+  if(Array.isArray(lvl?.groups)&&lvl.groups.length){
+   const n=lvl.groups.reduce((sum,g)=>sum+Number(g.count||0),0);
+   atk=n?lvl.groups.reduce((sum,g)=>sum+Number(g.count||0)*
+    (Number(combat.troopAttack(keys[k],g.tier,g.tg))||0),0)/n:null;
+  }else if(lvl?.tier&&combat?.troopAttack)
+   atk=combat.troopAttack(keys[k],lvl.tier,lvl.tg);
+  if(Number.isFinite(atk)&&atk>0)quality[k]=atk/base[k];
+ }
+ // Preserve differences between classes due to T/TG without treating
+ // modern troop power as extra free damage vs foreign leaders.
+ const mean=quality.reduce((a,b)=>a+b,0)/3||1;
+ return quality.map(n=>n/mean);
+}
+function ownHeroModifiers(model,catalog){
+ const ref=root.NRW_BEAR_HERO_REFERENCE,dmg=root.NRW_BEAR_SKILL_DAMAGE;
+ if(ref?.status?.()!=='ready'||!dmg?.prepare)return [1,1,1];
+ const prepared=dmg.prepare(model,ref,catalog,root.NRW_BEAR_SCORE_BONUSES,
+  root.NRW_BEAR_OWN_BASELINE);
+ if(!prepared?.ready)return [1,1,1];
+ const m=prepared.modifiers;
+ // Buffs are lower-bound only: disputed enemy debuff uptime is excluded.
+ const base=(1+(m.attack||0)/100)*(1+(m.lethality||0)/100)*(m.lowDamage||1);
+ return [0,1,2].map(k=>Math.max(0.01,base*
+  (1+(m.classAttack?.[k]||0)/100)*(m.lowClassDamage?.[k]||1)));
+}
+function relativeTypeStats(model){
+ const stats=root.NRW_BEAR_OWN_BASELINE?.currentStats?.(model)||model?.values||{};
+ const keys=['i','c','a'];
+ if(keys.some(k=>!Number.isFinite(Number(stats[k+'Atk']))||
+  !Number.isFinite(Number(stats[k+'Let']))))return [1,1,1];
+ const powers=keys.map(k=>(1+Math.max(0,Number(stats[k+'Atk']))/100)*
+  (1+Math.max(0,Number(stats[k+'Let']))/100));
+ const mean=powers.reduce((a,b)=>a+b,0)/3||1;
+ // We don't know foreigners' absolute stats. Only class distribution is
+ // informative; the *relative* overall strength comes from the dropdown.
+ return powers.map(p=>p/mean);
+}
+function expectedWeights(targets,model,catalog,combat,stock){
+ const baseline=joinerBaseline(model,catalog),relative=scenario(model);
+ const quality=estimateClassQuality(model,combat,stock);
+ const personal=relativeTypeStats(model),hero=ownHeroModifiers(model,catalog);
+ const weights=targets.map((target,i)=>{
+  const [inf,cav]=ratioForTarget(target,baseline.proportions);
+  const pct=[inf,cav,Math.max(0,100-inf-cav)];
+  return pct.map((percent,k)=>Math.sqrt(Math.max(.01,percent)/100)*quality[k]*
+   (i===0?personal[k]*hero[k]:relative.foreign));
+ });
+ return {weights,baseline,relative};
+}
+function allocateByMarginal(targets,stock,weights){
+ const rows=targets.map(()=>[0,0,0]),remaining=stock.map(int);
+ // No arbitrary class minimum: compare the actual marginal estimated
+ // benefit of each troop type using the same continuous damage model.
+ // Special hero-activation rules must be supported by evidence before
+ // being enforced as a hard requirement.
+ let left=Math.min(targets.reduce((n,x)=>n+int(x),0),
+  remaining.reduce((n,x)=>n+x,0));
+ // Coarse-to-fine marginal allocation is O(21 * allocated/512), and
+ // always respects one global inventory and per-march capacity.
+ // Test all candidate increments with the exact same concave scoring
+ // formula. A stronger own rally naturally wins more marginal stock.
+ let passes=0;
+ while(left>0){
+  let best=-Infinity,winner=null;
+  for(let i=0;i<targets.length;i++){
+   const room=targets[i]-rows[i][0]-rows[i][1]-rows[i][2];
+   if(room<=0)continue;
+   const start=scoreFor(rows[i],weights[i]);
+   for(let k=0;k<3;k++){
+    if(remaining[k]===0)continue;
+    const add=Math.min(512,room,remaining[k],left);
+    if(add<=0)continue;
+    rows[i][k]+=add;
+    const gain=(scoreFor(rows[i],weights[i])-start)/add;
+    rows[i][k]-=add;
+    if(gain>best+1e-12){
+     best=gain;winner={i,k,add};
+    }
+   }
+  }
+  if(!winner)break;
+  rows[winner.i][winner.k]+=winner.add;
+  remaining[winner.k]-=winner.add;
+  left-=winner.add;
+  if(++passes>180000)throw Error('Bear optimizer exceeded iteration budget');
+ }
+ if(left>0||remaining.some(n=>n<0)||rows.some((r,i)=>
+  r.reduce((a,b)=>a+b,0)>targets[i]))throw Error('Unsafe expected-damage allocation');
+ return {rows,remaining,modeledTotal:rows.reduce((sum,row,i)=>
+  sum+scoreFor(row,weights[i]),0)};
+}
+// Project unconstrained theoretical troop splits onto REAL game inputs:
+// whole percentages (1% increments), integer unit counts, one shared stock.
+// Count prediction uses exactly the same composition() as the displayed
+// percentage. Rounding may leave a few troops unused instead of claiming
+// impossible ratios or overlapping inventory.
+function playableProjection(desired,stock,capacities,weights){
+ const size=desired.map((row,i)=>Math.min(int(capacities[i]),row.reduce((n,v)=>n+v,0)));
+ const percents=desired.map((row,i)=>{
+  const p=integerPercentages(row);
+  if(!size[i])return p;
+  // 0.45% Infantry with 858 units is NOT a selectable 0.45% input.
+  // Use a 1% step when a troop type was positively selected, or
+  // allow a real 0% with zero units when inventory is insufficient.
+  for(let k=0;k<3;k++)if(row[k]>0&&p[k]===0){
+   const donors=[0,1,2].filter(j=>j!==k&&p[j]>1)
+    .sort((a,b)=>p[b]-p[a]||a-b);
+   if(donors.length){p[donors[0]]--;p[k]++;}
+  }
+  return p;
+ });
+ const make=(i,n=size[i],p=percents[i])=>composition(n,p[0],p[1]);
+ let rows=size.map((_,i)=>make(i));
+ const expenditure=()=>stock.map((_,k)=>rows.reduce((n,r)=>n+r[k],0));
+ let used=expenditure();
+ const shortage=arr=>arr.reduce((n,v,k)=>n+Math.max(0,v-stock[k]),0);
+ let currentShort=shortage(used);
+ let turns=0;
+ while(currentShort){
+  if(++turns>2500)throw Error('Unresolvable integer Bear proportions');
+  let choice=null;
+  function consider(i,newSize,p){
+   const next=make(i,newSize,p);
+   const nextUsed=used.map((v,k)=>v-rows[i][k]+next[k]);
+   const smaller=shortage(nextUsed);
+   const benefit=currentShort-smaller;
+   if(benefit<=0)return;
+   const lost=scoreFor(rows[i],weights[i])-scoreFor(next,weights[i]);
+   const relativeLoss=lost/benefit;
+   if(!choice||relativeLoss<choice.relativeLoss-1e-10||
+      (Math.abs(relativeLoss-choice.relativeLoss)<1e-10&&benefit>choice.benefit))
+    choice={i,newSize,p,next,nextUsed,smaller,relativeLoss,benefit};
+  }
+  for(let i=0;i<size.length;i++)if(size[i]>0)
+   for(let k=0;k<3;k++)if(used[k]>stock[k]&&percents[i][k]>0){
+    for(let j=0;j<3;j++)if(j!==k&&percents[i][j]<100){
+     const p=percents[i].slice();p[k]--;p[j]++;
+     consider(i,size[i],p);
+    }
+    // If no whole-percent exchange fits available stock, decrease march
+    // troop count instead; do NOT invent a fractional game setting.
+    const dec=Math.min(size[i],
+      Math.max(1,Math.ceil((used[k]-stock[k])*100/percents[i][k])));
+    consider(i,size[i]-dec,percents[i]);
+   }
+  if(!choice)throw Error('Cannot fit integer percentages to shared inventory');
+  size[choice.i]=choice.newSize;percents[choice.i]=choice.p;
+  rows[choice.i]=choice.next;used=choice.nextUsed;currentShort=choice.smaller;
+ }
+ // Where capacity and troop class stock permit, refill the same integer
+ // ratios without going over any other simultaneous march's allocation.
+ for(let pass=0;pass<size.length;pass++){
+  let best=null;
+  for(let i=0;i<size.length;i++){
+   if(size[i]===0||size[i]>=int(capacities[i]))continue;
+   const other=used.map((v,k)=>v-rows[i][k]);
+   const fits=n=>make(i,n).every((v,k)=>v+other[k]<=stock[k]);
+   let low=size[i],high=int(capacities[i]);
+   while(low<high){
+    const mid=Math.floor((low+high+1)/2);
+    if(fits(mid))low=mid;else high=mid-1;
+   }
+   if(low<=size[i])continue;
+   const next=make(i,low);
+   const gain=scoreFor(next,weights[i])-scoreFor(rows[i],weights[i]);
+   if(!best||gain>best.gain)best={i,low,next,gain};
+  }
+  if(!best)break;
+  size[best.i]=best.low;rows[best.i]=best.next;used=expenditure();
+ }
+ for(let i=0;i<rows.length;i++){
+  const p=percents[i],r=rows[i];
+  if(p.some(v=>!Number.isInteger(v)||v<0||v>100)||
+     (p.reduce((a,b)=>a+b,0)!==(size[i]===0&&p.every(x=>x===0)?0:100))||
+     r.some(n=>!Number.isSafeInteger(n)||n<0)||
+     r.reduce((a,b)=>a+b,0)!==size[i]||
+     size[i]>capacities[i]||
+     r.some((n,k)=>n!==make(i)[k]))
+   throw Error('Invalid in-game integer ratio');
+ }
+ used=expenditure();
+ if(shortage(used))throw Error('Playable projection exceeds troop inventory');
+ return {rows,ratios:percents,used,unallocated:stock.map((v,k)=>v-used[k]),
+  modeledTotal:rows.reduce((sum,r,i)=>sum+scoreFor(r,weights[i]),0)};
+}
 function plan(model,catalog,combat,capacityCore){
  const v=model?.values||{},cap=capacityCore?.breakdown(model,catalog);
- const stock=[int(v.troopsI),int(v.troopsC),int(v.troopsA)];
+ const stock=availableStock(model);
  const selected=chooseHeroes(model,catalog);
  const missing=[];
  if(!cap?.hasBase||!cap.complete)missing.push('capacity');
@@ -161,51 +451,44 @@ function plan(model,catalog,combat,capacityCore){
  const availableTotal=stock.reduce((a,b)=>a+b,0),demand=caps.reduce((a,b)=>a+b,0);
  const total=Math.min(availableTotal,demand);
  if(total===0)return {ready:false,missing:['capacity'],stock,marches,selected};
- // Spread limited capacity fairly across the seven marches; then maximize
- // the *relative* local battle index while obeying three inventory totals.
- const targets=splitShares(total,caps);
+ // For JOINERS the leader's effective stats are unknown. Select an
+ // average Gen-based Bear ratio instead of maximizing arbitrary T/TG
+ // √troop weights. Scarce archers go to JOIN marches first. Each
+ // unit is assigned exactly once and not beyond a march's capacity.
+ // Never pre-split scarce troop stock equally: doing so would prevent
+ // the stronger own rally from receiving extra troops.
+ const targets=caps;
+ const expected=expectedWeights(targets,model,catalog,combat,stock);
+ const distribution=allocateByMarginal(targets,stock,expected.weights);
+ // Quantize before exposing formations OR calculating damage.
+ const playable=playableProjection(distribution.rows,stock,targets,expected.weights);
+ const actual=playable.rows;
+ const baseline=expected.baseline;
+ const leaderStrength=expected.relative;
  const engineReady=Boolean(combat?.ready&&combat?.configure&&combat?.damage);
  const tiers=engineReady?combat.configure(model.v2):null;
  const useDamage=engineReady&&combat.ready(v,tiers);
- // ONE authoritative stat-composition path: class Bonus Overview +
- // separately recorded squad and three own Starter Expedition details.
  const ownStats=root.NRW_BEAR_OWN_BASELINE?.currentStats?.(model)||{...v};
- // Join-leader stats are unavailable. Use the user's class stats as a
- // relative PROXY (as in the previous analysis), not an actual join score.
- // Hero expedition proc/widget effects are not independently simulated.
- const relative=(row,isOwn)=>{
-  if(useDamage){
-   const score=combat.damage(row,isOwn?ownStats:v,tiers,5 /* NRW trap Lv5 */);
-   return Number.isFinite(score)?score:0;
-  }
-  return row[0]*.76+row[1]*1.02+row[2]*1.18;
- };
- const candidatesI=[1,2,3,4,5,6,8,10],candidatesC=[9,10,11,12,13,14,15,16,17,18,20,22,24,26];
- let best=null,score=-Infinity;
- for(const si of candidatesI)for(const sc of candidatesC){
-  const start=[si,sc];
-  for(const ji of candidatesI)for(const jc of candidatesC){
-   const join=[ji,jc],rows=allocate(targets,stock,start,join);
-   const value=rows.reduce((sum,row,i)=>sum+relative(row,i===0)*(i===0?1:.72),0);
-   // Deterministic preference for lower infantry and fewer needless archers
-   // only when the battle index is mathematically indistinguishable.
-   if(value>score+1e-7){score=value;best=rows;}
-  }
- }
- const actual=best||allocate(targets,stock,[2,15],[2,15]);
  const used=[0,1,2].map(k=>actual.reduce((sum,row)=>sum+row[k],0));
  const leftover=stock.map((s,k)=>s-used[k]);
  if(leftover.some(x=>x<0)||actual.some((row,i)=>row.reduce((a,b)=>a+b,0)>caps[i]))
   throw Error('Unsafe formation: inventory or capacity exceeded');
- const ratios=actual.map(integerPercentages);
- const full=useDamage?relative(actual[0],true):null;
+ const ratios=playable.ratios;
+ const tierPriority=leaderStrength.key==='weaker'?
+  [0,...Array.from({length:actual.length-1},(_,i)=>i+1)]:
+  [...Array.from({length:actual.length-1},(_,i)=>i+1),0];
+ const ownedLevels=useDamage?combat.allocateLevels?.(actual,tiers,tierPriority)?.[0]||tiers:null;
+ const full=useDamage?combat.damage(actual[0],ownStats,ownedLevels,5):null;
  return {ready:true,stock,used,leftover,targets,total,availableTotal,demand,
   marches:marches.map((m,i)=>({...m,troops:actual[i],ratio:ratios[i],filled:actual[i].reduce((a,b)=>a+b,0),
    shortage:Math.max(0,m.capacity-actual[i].reduce((a,b)=>a+b,0))})),
-  starterScore:full,scoreType:useDamage?'starter-plus-join-proxy':'troop-only',
+  starterScore:full,scoreType:'community-joiner-bear-baseline',
+  ratioMethod:'marginal-expected-damage',joinerBaseline:baseline,
+  leaderStrength,tierPriority,modeledTotal:playable.modeledTotal,
+  quantizedToWholePercent:true,
   allHeroLevelsKnown:marches.every(m=>m.capacityKnown),
   allHeroesAssigned:marches.every(m=>m.missingHeroSlots===0),
   joinCount:selected.joins.length,selected};
 }
-root.NRW_BEAR_FORMATION={plan,chooseHeroes,JOIN_PRIORITIES,allocateStock:allocate,integerPercentages};
+root.NRW_BEAR_FORMATION={plan,chooseHeroes,JOIN_PRIORITIES,allocateStock:allocate,integerPercentages,availableStock,joinerBaseline,ratioForTarget,scenario,scoreFor,expectedWeights,allocateByMarginal,playableProjection};
 })(window);
