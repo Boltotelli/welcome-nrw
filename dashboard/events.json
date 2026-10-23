@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "kingdom": 1044,
   "timezone": "UTC",
-  "updatedAt": "2026-10-22T00:17:38Z",
+  "updatedAt": "2026-10-23T00:14:08Z",
   "events": [
     {
       "id": "golden-glaives-prep-2026-09-20",
@@ -1089,92 +1089,6 @@
         }
       },
       "sourceUrl": "https://kingshotdata.com/events/strongest-governor-event/"
-    },
-    {
-      "id": "viking-vengeance-2026-10-20",
-      "start": "2026-10-20",
-      "end": "2026-10-22",
-      "icon": "🛡️",
-      "confidence": "public-timeline",
-      "name": {
-        "de": "Wikinger-Vergeltung",
-        "en": "Vikings’ Vengeance",
-        "fr": "Vengeance des Vikings"
-      },
-      "tips": {
-        "de": [
-          "Die Kampfwellen finden im öffentlichen Rhythmus am Dienstag und Donnerstag statt; die genaue Startzeit legt die Allianz fest.",
-          "Nach zwei verlorenen Verteidigungen wirst du nicht mehr direkt angegriffen, kannst aber weiterhin durch Verstärkungen Punkte verdienen.",
-          "Wer nicht online sein kann, schickt vorher alle Truppen als Verstärkung zu anderen Mitgliedern."
-        ],
-        "en": [
-          "Combat waves follow the public Tuesday and Thursday cadence; the alliance sets the exact start time.",
-          "After two failed defenses, your city is no longer attacked directly, but you can still score through reinforcements.",
-          "If you cannot be online, send all troops to reinforce other members beforehand."
-        ],
-        "fr": [
-          "Les vagues suivent le rythme public du mardi et du jeudi ; l’alliance fixe l’heure exacte.",
-          "Après deux défenses perdues, ta ville n’est plus attaquée directement, mais tu peux encore marquer via les renforcements.",
-          "Si tu ne peux pas être en ligne, envoie auparavant toutes tes troupes renforcer d’autres membres."
-        ]
-      },
-      "dailyPlans": {
-        "2026-10-20": {
-          "points": {
-            "de": "Punkte durch getötete Wikinger in deiner Stadt und beim Verstärken von Verbündeten · mindestens 50 % der angreifenden Truppen töten, um die Welle zu verteidigen",
-            "en": "Points from Vikings killed in your city and while reinforcing allies · kill at least 50% of the attacking troops to defend the wave",
-            "fr": "Points pour les Vikings tués dans ta ville et en renforçant les alliés · éliminer au moins 50 % des troupes attaquantes pour défendre la vague"
-          },
-          "steps": {
-            "de": [
-              "Vor dem Start ALLE Truppen aus deiner Stadt zu anderen Mitgliedern schicken; nur deine drei stärksten Helden bleiben in der Stadt.",
-              "Mit einem Mitglied gegenseitige Verstärkung absprechen, damit beide Städte verteidigt werden und beide Spieler Punkte erhalten.",
-              "Während des Events nicht heilen. Brennt deine Stadt, das Feuer löschen.",
-              "Bei Welle 10 und 20 die Truppen zum bevorzugten Ebenen-Allianz-HQ schicken."
-            ],
-            "en": [
-              "Before the event starts, send ALL troops out of your city to reinforce other members; only your three strongest heroes stay in the city.",
-              "Arrange mutual reinforcement with another member so both cities are defended and both players earn points.",
-              "Do not heal during the event. If your city is burning, extinguish the fire.",
-              "For waves 10 and 20, send troops to the preferred Plains Alliance HQ."
-            ],
-            "fr": [
-              "Avant le début, envoie TOUTES les troupes hors de ta ville pour renforcer d’autres membres ; seuls tes trois héros les plus puissants restent en ville.",
-              "Organise un renforcement mutuel avec un membre afin que les deux villes soient défendues et que les deux joueurs marquent.",
-              "Ne soigne pas pendant l’événement. Si ta ville brûle, éteins le feu.",
-              "Aux vagues 10 et 20, envoie les troupes vers le QG d’alliance des Plaines, qui est prioritaire."
-            ]
-          }
-        },
-        "2026-10-22": {
-          "points": {
-            "de": "Punkte durch getötete Wikinger in deiner Stadt und beim Verstärken von Verbündeten · mindestens 50 % der angreifenden Truppen töten, um die Welle zu verteidigen",
-            "en": "Points from Vikings killed in your city and while reinforcing allies · kill at least 50% of the attacking troops to defend the wave",
-            "fr": "Points pour les Vikings tués dans ta ville et en renforçant les alliés · éliminer au moins 50 % des troupes attaquantes pour défendre la vague"
-          },
-          "steps": {
-            "de": [
-              "Vor dem Start ALLE Truppen aus deiner Stadt zu anderen Mitgliedern schicken; nur deine drei stärksten Helden bleiben in der Stadt.",
-              "Mit einem Mitglied gegenseitige Verstärkung absprechen, damit beide Städte verteidigt werden und beide Spieler Punkte erhalten.",
-              "Während des Events nicht heilen. Brennt deine Stadt, das Feuer löschen.",
-              "Bei Welle 10 und 20 die Truppen zum bevorzugten Ebenen-Allianz-HQ schicken."
-            ],
-            "en": [
-              "Before the event starts, send ALL troops out of your city to reinforce other members; only your three strongest heroes stay in the city.",
-              "Arrange mutual reinforcement with another member so both cities are defended and both players earn points.",
-              "Do not heal during the event. If your city is burning, extinguish the fire.",
-              "For waves 10 and 20, send troops to the preferred Plains Alliance HQ."
-            ],
-            "fr": [
-              "Avant le début, envoie TOUTES les troupes hors de ta ville pour renforcer d’autres membres ; seuls tes trois héros les plus puissants restent en ville.",
-              "Organise un renforcement mutuel avec un membre afin que les deux villes soient défendues et que les deux joueurs marquent.",
-              "Ne soigne pas pendant l’événement. Si ta ville brûle, éteins le feu.",
-              "Aux vagues 10 et 20, envoie les troupes vers le QG d’alliance des Plaines, qui est prioritaire."
-            ]
-          }
-        }
-      },
-      "sourceUrl": "https://ks-toolkit.com/data/events/vikings-vengeance/"
     },
     {
       "id": "all-out-2026-10-23",
