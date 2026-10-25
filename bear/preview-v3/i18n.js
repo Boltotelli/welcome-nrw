@@ -254,6 +254,10 @@ const table=[
 ["Theoretisches Maximum: ","Theoretical maximum: ","Maximum théorique : ","Máximo teórico: "],
 ["Unbestätigte Helden-Effekte: mögliche Modellobergrenze ","Unverified hero effects: possible model upper bound ","Effets de héros non vérifiés : borne haute possible du modèle ","Efectos de héroes sin verificar: límite superior posible del modelo "],
 ["Simulation berücksichtigt die bekannten T-/TG-Truppenfähigkeiten. Nicht verifizierte Helden-Auslösungen und fremde Rallywerte bleiben Modellannahmen.","Simulation covers known T/TG troop skills. Unverified hero skill timing and other leaders' stats remain model assumptions.","La simulation tient compte des compétences T/TG connues. Le déclenchement des compétences de héros non vérifiées et les stats d'autres chefs restent des hypothèses.","La simulación incluye habilidades T/TG conocidas. La activación de habilidades de héroes sin verificar y los valores de otros líderes siguen siendo suposiciones."],
+["Fünf simulierte Rallys vergleichen","Compare five simulated rallies","Comparer cinq rallys simulés","Comparar cinco rallies simulados"],
+["Summe dieser fünf Simulationen: ","Total of these five simulations: ","Total de ces cinq simulations : ","Suma de estas cinco simulaciones: "],
+["Erwartungswert × 5: ","Expected value × 5: ","Valeur attendue × 5 : ","Valor esperado × 5: "],
+["Simulationsdurchschnitt × 5: ","Simulated average × 5: ","Moyenne simulée × 5 : ","Promedio simulado × 5: "],
 ];
 const catalog={en:1,fr:2,es:3};
 const exact=new Map(table.map(row=>[row[0],row]));
