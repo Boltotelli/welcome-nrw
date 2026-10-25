@@ -249,6 +249,11 @@ const table=[
 ["incomplete-starter","Starter heroes incomplete","Héros lanceurs incomplets","Héroes de inicio incompletos"],
 ["invalid-hero-stars","Invalid hero star level","Étoiles du héros invalides","Nivel de estrellas de héroe no válido"],
 ["missing-pet-rank","Active pet skill level missing","Niveau de compétence de familier actif manquant","Falta el nivel de habilidad de mascota activa"],
+["Ø 1.000 Simulationen (Truppen-Procs): ","Average of 1,000 simulations (troop procs): ","Moyenne sur 1 000 simulations (effets de troupes) : ","Promedio de 1.000 simulaciones (efectos de tropas): "],
+["95. Perzentil: ","95th percentile: ","95e percentile : ","Percentil 95: "],
+["Theoretisches Maximum: ","Theoretical maximum: ","Maximum théorique : ","Máximo teórico: "],
+["Unbestätigte Helden-Effekte: mögliche Modellobergrenze ","Unverified hero effects: possible model upper bound ","Effets de héros non vérifiés : borne haute possible du modèle ","Efectos de héroes sin verificar: límite superior posible del modelo "],
+["Simulation berücksichtigt die bekannten T-/TG-Truppenfähigkeiten. Nicht verifizierte Helden-Auslösungen und fremde Rallywerte bleiben Modellannahmen.","Simulation covers known T/TG troop skills. Unverified hero skill timing and other leaders' stats remain model assumptions.","La simulation tient compte des compétences T/TG connues. Le déclenchement des compétences de héros non vérifiées et les stats d'autres chefs restent des hypothèses.","La simulación incluye habilidades T/TG conocidas. La activación de habilidades de héroes sin verificar y los valores de otros líderes siguen siendo suposiciones."],
 ];
 const catalog={en:1,fr:2,es:3};
 const exact=new Map(table.map(row=>[row[0],row]));
