@@ -16,6 +16,7 @@ const num=x=>Number(x||0).toLocaleString(document.documentElement.lang==='de'?'d
 const valid=x=>typeof x==='string'&&x.trim().length>=2&&x.trim().length<=50;
 let name='',mode='',version=null,editKey=null,syncTimer=null,syncInFlight=false,dirty=false,heroInfoCache={},lastResult=null;
 let activePlayer=null,canEdit=false,localOnly=false,editCount=0,opening=0,needsPinMigration=false,legacyCombinedStats=false,pinPending=false;
+let lastStatusMessage=null;
 // Preserve expanded generations when hero tiles refresh.
 const expandedSeasons=new Set();
 const app=el('main','bear-name-app');app.id='bearNewApp';document.body.prepend(app);document.body.classList.add('bear-name-mode');
@@ -58,6 +59,7 @@ function saveLocal(){
  else if(activePlayer)showStatus('Lokale Änderung – für gemeinsames Speichern wird deine PIN benötigt.');
 }
 function showStatus(s,error=false){
+ lastStatusMessage=s;
  status.textContent=T(s);status.classList.toggle('error',error);refreshSecurityStatus();
 }
 function securityState(){
@@ -1087,6 +1089,7 @@ function languageSwitcher(){
  for(const lang of ['de','en','fr','es']){
   const b=button(lang.toUpperCase(),()=>{
    I18N?.setLanguage?.(lang);
+   if(lastStatusMessage!==null)status.textContent=T(lastStatusMessage);
    render();
   },'bear-name-lang-button');
   b.setAttribute('lang',lang);
