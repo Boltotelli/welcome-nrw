@@ -187,7 +187,7 @@ const table=[
 ['Nur lokal gespeichert – GitHub nicht erreichbar.','Saved locally only – GitHub unavailable.','Sauvegarde locale – GitHub indisponible.','Solo guardado local – GitHub no disponible.'],
 ['Noch fehlende Helden-/Pet-Angaben: ','Hero/pet info missing: ','Données héros/animaux manquantes : ','Faltan datos de héroes/mascotas: '],
 ['Generation ','Generation ','Génération ','Generación '],
-['★','★','★','★']
+['★','★','★','★'],
 ["⚪ Nur lokal gespeichert","⚪ Saved locally only","⚪ Enregistré localement","⚪ Solo guardado localmente"],
 ["🟡 PIN wird eingerichtet …","🟡 Setting up PIN…","🟡 Configuration du code PIN…","🟡 Configurando PIN…"],
 ["🔴 PIN fehlt – Profil noch nicht gesichert","🔴 PIN missing — profile not secured","🔴 Code PIN manquant — profil non sécurisé","🔴 Falta PIN: perfil sin proteger"],
