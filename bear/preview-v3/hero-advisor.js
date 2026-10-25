@@ -106,12 +106,14 @@ function modelContext(model,combat,ratioOverride){
    const total=groups.reduce((n,g)=>n+Number(g.count||0),0);
    if(total>0){
     const mean=groups.reduce((n,g)=>n+Number(g.count||0)*
-     (combat?.troopAttack?.(type,g.tier,g.tg)||0),0)/total;
+     (combat?.effectiveTroopAttack?.(type,g.tier,g.tg)??combat?.troopAttack?.(type,g.tier,g.tg)??0),0)/total;
     if(mean>0)return mean;
    }
   }
-  return combat?.troopAttack?.(type,lvl?.tier,lvl?.tg)||
-   combat?.troopAttack?.(type,10,0)||[472,1416,1888][i];
+  return (combat?.effectiveTroopAttack?.(type,lvl?.tier,lvl?.tg)??
+   combat?.troopAttack?.(type,lvl?.tier,lvl?.tg))||
+   (combat?.effectiveTroopAttack?.(type,10,0)??combat?.troopAttack?.(type,10,0))||
+   [472,1416,1888][i];
  });
  const attackKeys=['iAtk','cAtk','aAtk'],lethalityKeys=['iLet','cLet','aLet'];
  const coeff=tierAttack.map((base,i)=>base*(i===2?1.10:1)*
