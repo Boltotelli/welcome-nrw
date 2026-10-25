@@ -38,3 +38,10 @@ Taste draw, lint and browser inspector were used; lint has no failures. The insp
 Publish and verify Pages first. Vercel's existing production baseline is `22a58321273360123a707cb4941aafde1348ad73`; apply only this Bear change there so other live NRW sections are retained. Record actual resulting commit, Pages run and production state in the delivery report.
 
 Real-phone Safari/hardware testing is still needed. Live PIN writes to other players' profiles were intentionally not used for QA. No official Kingshot mathematical verification is claimed.
+
+
+## 2026-10-25 — TG3/TG5/TG8 damage QA
+- Added `preview-v3/test-troop-procs.cjs` for T7 Archer Volley, TG3-to-TG5 upgrades, TG8 Truegold Wind, source-based mixed-tier weighted attack, seeded 1,000 × 10-turn troop-only simulation, five-run score sums, and zero-own-Infantry/no-5,000-Infantry floor.
+- Community T6 reference remains `ceil(16796.46...) = 16797`; the 5,000 is the defending Bear's army size, not a minimum player Infantry count.
+- Executed direct JavaScript regression checks for the troop engine and physical optimizer plus source-based hero and Joiner regressions; no profile migrations or remote writes. The live browser has not been manually tested.
+- The Pages reusable workflow assertions are updated to recognize versioned TG asset URLs and to execute the new test. Vercel production remains outside this QA release.
