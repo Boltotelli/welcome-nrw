@@ -55,6 +55,126 @@ function troopAttack(className,tier,tg){
  if(!attack[className]||!validTier(tier)||!validTG(tg))return null;
  return attack[className][Number(tier)-1][Number(tg)];
 }
+/* Published community troop skill levels (KingShot Toolkit / Kingshot Bear calculators).
+ * TG3 unlocks level 1; TG5 upgrades to level 2. These skills are
+ * troop-specific; the defending Bear army has 5,000 infantry, but there is
+ * NO minimum requirement for the player's own Infantry count.
+ * References: ks-toolkit.com/data/troops/archer/ , /cavalry/ ;
+ * hededal.com (bear calculator). This is not an official game formula.
+ */
+function troopSkills(type,tier,tg){
+ if(!validTier(tier)||!validTG(tg)||!attack[type])return null;
+ const t=Number(tier),gold=Number(tg);
+ if(type==='archer'){
+  const volley=t>=7?0.10:0;
+  const howling=gold>=5?0.30:gold>=3?0.20:0;
+  const extra=gold>=8?0.75:0.50;
+  const basic=gold>=8?1.04:1;
+  return {basic,volley,howling,extra,assault:0,
+   mean:basic*(1+volley)*(1+howling*extra),
+   maximum:basic*(1+(volley>0?1:0))*(1+(howling>0?extra:0))};
+ }
+ if(type==='cavalry'){
+  const assault=gold>=5?0.15:gold>=3?0.10:0;
+  return {basic:1,volley:0,howling:0,extra:0,assault,
+   mean:1+assault,maximum:assault>0?2:1};
+ }
+ return {basic:1,volley:0,howling:0,extra:0,assault:0,mean:1,maximum:1};
+}
+function effectiveTroopAttack(type,tier,tg){
+ const basic=troopAttack(type,tier,tg),skill=troopSkills(type,tier,tg);
+ return basic===null||!skill?null:basic*skill.mean;
+}
+/* A mixed tier's effective attack is the arithmetic average of the selected
+ * units' attack × expected skill factor. Select stronger available groups
+ * first, matching the existing shared-inventory allocator.
+ */
+function effectiveAttackForGroup(level,type,requested){
+ if(requested===0)return 0;
+ if(!Array.isArray(level?.groups))return effectiveTroopAttack(type,level?.tier,level?.tg);
+ let left=requested,total=0;
+ const sorted=level.groups.slice().sort((a,b)=>
+  troopAttack(type,b.tier,b.tg)-troopAttack(type,a.tier,a.tg));
+ for(const g of sorted){
+  if(left<=0)break;
+  const n=Math.min(left,Number(g.count));
+  const attackValue=effectiveTroopAttack(type,g.tier,g.tg);
+  if(attackValue===null)return null;
+  total+=n*attackValue;left-=n;
+ }
+ return left>0?null:total/requested;
+}
+function selectedGroups(level,type,requested){
+ if(!requested)return [];
+ if(!Array.isArray(level?.groups))
+  return [{tier:level?.tier,tg:level?.tg,count:requested}];
+ let left=requested;const groups=[];
+ for(const g of level.groups.slice().sort((a,b)=>
+  troopAttack(type,b.tier,b.tg)-troopAttack(type,a.tier,a.tg))){
+  if(left<=0)break;
+  const n=Math.min(left,Number(g.count));if(n>0)groups.push({...g,count:n});
+  left-=n;
+ }
+ return left===0?groups:null;
+}
+/* Repeatable pseudo-random sequence for comparative damage simulations.
+ * It is a distribution over modeled TROOP procs, not a guarantee about
+ * unknown Expedition skill timing or real in-game damage variance.
+ */
+function troopDistribution(troops,stats,levels,pitfall=0,samples=1000){
+ const base=breakdown(troops,stats,levels,pitfall);
+ if(!base)return null;
+ const total=base.totalTroops;
+ const armyScale=Math.sqrt(Math.min(total,base.bearTotal));
+ const entries=[];
+ for(let i=0;i<3;i++){
+  const groups=selectedGroups(levels[i],troopKeys[i],Number(troops[i]));
+  if(groups===null)return null;
+  for(const g of groups){
+   const skill=troopSkills(troopKeys[i],g.tier,g.tg),atk=troopAttack(troopKeys[i],g.tier,g.tg);
+   if(!skill||atk===null)return null;
+   const quantity=Number(troops[i]);
+   // Split a class's sqrt(count) contribution by its share of troop count.
+   const weight=quantity?g.count/quantity:0;
+   const factor=(quantity?Math.sqrt(quantity)*armyScale:0)*atk*
+    (1+base.types[i].appliedAttackPct/100)*10*
+    (1+base.types[i].lethalityPct/100)/100/
+    base.bearDefensePerUnit/100*(i===2?1.10:1)*weight;
+   entries.push({type:i,factor,skill});
+  }
+ }
+ let seed=0x1044cafe;
+ for(const n of [...troops,...base.types.map(t=>t.appliedAttackPct),...base.types.map(t=>t.lethalityPct)])
+  seed=(Math.imul(seed^Math.round(Number(n)*100),1664525)+1013904223)>>>0;
+ function random(){seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;}
+ function oneRally(){
+  let totalDamage=0;
+  for(let turn=0;turn<10;turn++)for(const {factor,skill} of entries){
+   const volley=skill.volley>0&&random()<skill.volley?2:1;
+   const howl=skill.howling>0&&random()<skill.howling?1+skill.extra:1;
+   const lance=skill.assault>0&&random()<skill.assault?2:1;
+   totalDamage+=factor*skill.basic*volley*howl*lance;
+  }
+  return totalDamage;
+ }
+ const n=Math.max(1,Math.min(5000,Math.floor(samples)||1000));
+ const rolls=Array.from({length:n},()=>oneRally()).sort((a,b)=>a-b);
+ const mean=rolls.reduce((a,b)=>a+b,0)/n;
+ const perClass=base.types.map((t,i)=>({
+  type:t.type,
+  expected:t.damageTenRounds,
+  maximum:10*entries.filter(e=>e.type===i).reduce((sum,e)=>sum+
+   e.factor*e.skill.maximum,0)
+ }));
+ const theoreticalMaximum=perClass.reduce((sum,p)=>sum+p.maximum,0);
+ return {ready:true,samples:n,baseline:base.totalTenRounds,average:mean,
+  percentile95:rolls[Math.max(0,Math.ceil(0.95*n)-1)],
+  theoreticalMaximum,
+  firstFive:rolls.slice(0,Math.min(5,n)),
+  modeledTroopProcOnly:true,unit:'community-model-estimated-damage',
+  perClass};
+}
+
 function validLevel(x){
  if(Array.isArray(x?.groups))return x.groups.every(g=>validTier(g.tier)&&validTG(g.tg)&&
   Number.isSafeInteger(Number(g.count))&&Number(g.count)>0);
@@ -97,12 +217,15 @@ function breakdown(troops,stats,levels,pitfall=0){
   const lethalityPct=Number(stats[statKeys[i][1]]);
   const appliedAttackPct=capturedAttackPct+trapBonus;
   // Base lethality 10 for every class; source T/TG tables are *raw* attack.
+  const effectiveAttack=effectiveAttackForGroup(levels[i],troopKeys[i],quantity);
+  if(effectiveAttack===null)return null;
+  const troopSkillFactor=quantity&&baseAttack>0?effectiveAttack/baseAttack:1;
   const attPerUnit=baseAttack*(1+appliedAttackPct/100)*10*(1+lethalityPct/100)/100;
   const armyFactor=Math.sqrt(quantity*armyMin);
   const typeBonus=i===2?1.10:1;
-  const damagePerRound=armyFactor*attPerUnit/bearDefensePerUnit/100*typeBonus;
+  const damagePerRound=armyFactor*attPerUnit/bearDefensePerUnit/100*typeBonus*troopSkillFactor;
   return {type:troopKeys[i],count:quantity,tier:levels[i].tier,tg:levels[i].tg,
-   baseAttack,capturedAttackPct,trapAttackPct:trapBonus,appliedAttackPct,lethalityPct,
+   baseAttack,effectiveAttack,troopSkillFactor,capturedAttackPct,trapAttackPct:trapBonus,appliedAttackPct,lethalityPct,
    attackPerUnit:attPerUnit,armyFactor,typeBonus,
    damagePerRound,damageTenRounds:damagePerRound*rounds};
  });
@@ -166,5 +289,5 @@ function allocateLevels(marches,levels,prioritizeJoinArchers=false){
  return results;
 }
 
-root.NRW_BEAR_COMBAT={troopKeys,attack,troopAttack,ready,damage,breakdown,configure,allocateLevels,attackForGroup,statKeys};
+root.NRW_BEAR_COMBAT={troopKeys,attack,troopAttack,troopSkills,effectiveTroopAttack,effectiveAttackForGroup,troopDistribution,ready,damage,breakdown,configure,allocateLevels,attackForGroup,statKeys};
 })(window);
