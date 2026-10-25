@@ -177,8 +177,8 @@ function troopDistribution(troops,stats,levels,pitfall=0,samples=1000,options={}
   percentile95:rolls[Math.max(0,Math.ceil(0.95*n)-1)],
   theoreticalMaximum,
   firstFive:firstRolls.slice(0,Math.min(5,n)),
-  fiveRunSum:firstRolls.slice(0,Math.min(5,n)).reduce((a,b)=>a+b,0),
-  baselineFive:perClass.reduce((a,b)=>a+b.expected,0)*5,
+  fiveRunSum:firstRolls.slice(0,Math.min(5,n)).reduce((a,b)=>a+Math.ceil(b),0),
+  baselineFive:Math.ceil(perClass.reduce((a,b)=>a+b.expected,0))*5,
   averageFive:mean*5,
   modeledTroopProcOnly:true,unit:'community-model-estimated-damage',
   perClass};
