@@ -1040,7 +1040,7 @@ function predicted(){
  // rally abilities enter the same calculation. No Zoe/Yang/Petra-only code.
  const prepared=skillDamage.prepare(model,ref,C,scores,window.NRW_BEAR_OWN_BASELINE);
  if(!prepared.ready){
-  out.append(el('p','bear-name-muted','Noch fehlende Helden-/Pet-Angaben: '+prepared.reason));
+  out.append(el('p','bear-name-muted','Noch fehlende Helden-/Pet-Angaben: '+T(prepared.reason)));
   return out;
  }
  // Both result buttons MUST use the exact same simultaneous formation.
@@ -1069,7 +1069,7 @@ function predicted(){
     skillDamage.evaluate(prepared,counts,best.leader,current,combat,combo.multiplier):
     {ready:false};
   const line=el('div','bear-name-score');
-  const label=sc.label.replace('(Lv5)',T('(Lv5)'));
+  const label=T(sc.label).replace('(Lv5)',T('(Lv5)'));
   line.append(el('strong','',label),
    el('span','',answer.ready?num(answer.estimatedIndex)+
     (answer.isUpperConditional?' – '+num(answer.upper):'')+' '+T('Modellindex')+
