@@ -56,6 +56,12 @@ body.bear-name-mode>*:not(#bearNewApp){display:none!important}
 .bear-name-score-list{display:grid;gap:7px;margin-top:18px}
 .bear-name-score{display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid #45566b;padding:10px 5px;font-size:14px}
 .bear-name-score span{font-weight:900;color:#ffc97c;white-space:nowrap}
+.bear-name-score:has(.bear-name-score-detail){flex-wrap:wrap}
+.bear-name-score .bear-name-score-detail{
+ display:block;flex:1 0 100%;min-width:0;color:var(--war-muted,#b8c6d6);
+ font-size:12px;line-height:1.5;font-weight:500;overflow-wrap:anywhere
+}
+
 .bear-name-result{font-size:18px;font-weight:900;color:#ffd284}
 .bear-name-warning{padding:13px;background:#4c3421;border:1px solid #98703b;border-radius:12px;color:#ffe1bc;font-size:12px}
 .bear-name-status{max-width:1200px;margin:15px auto;padding:10px 15px;color:#9fe5c4}
