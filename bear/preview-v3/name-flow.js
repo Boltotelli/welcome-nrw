@@ -1071,16 +1071,26 @@ function predicted(){
   const line=el('div','bear-name-score');
   const label=T(sc.label).replace('(Lv5)',T('(Lv5)'));
   line.append(el('strong','',label),
-   el('span','',answer.ready?num(answer.estimatedIndex)+
-    (answer.isUpperConditional?' – '+num(answer.upper):'')+' '+T('Modellindex')+
+   el('span','',answer.ready?num(answer.estimatedIndex)+' '+T('Modellindex')+
     ' · ×'+combo.multiplier.toFixed(2):
     T('Berechnung nicht verfügbar')));
+  if(answer.ready&&answer.distribution?.ready){
+   const dist=answer.distribution;
+   line.append(el('small','bear-name-score-detail',
+    T('Ø 1.000 Simulationen (Truppen-Procs): ')+num(dist.average)+
+    ' · '+T('95. Perzentil: ')+num(dist.percentile95)+
+    ' · '+T('Theoretisches Maximum: ')+num(dist.theoreticalMaximum)));
+   if(answer.isUpperConditional)
+    line.append(el('small','bear-name-score-detail',
+     T('Unbestätigte Helden-Effekte: mögliche Modellobergrenze ')+num(answer.upper)));
+  }
   lines.append(line);
  }
  out.append(el('p','bear-name-muted',
   'Die Starter-Truppenzahlen stehen ausschließlich in der Formationskarte. Beide Berechnungen verwenden dieselbe Aufstellung.'),
   lines,el('p','bear-name-warning',
-   '⚠ Geschätzter Modellwert – kein bestätigter Kingshot-Schadenswert.'));
+   '⚠ Geschätzter Modellwert – kein bestätigter Kingshot-Schadenswert.'),
+  el('p','bear-name-muted','Simulation berücksichtigt die bekannten T-/TG-Truppenfähigkeiten. Nicht verifizierte Helden-Auslösungen und fremde Rallywerte bleiben Modellannahmen.'));
  lastResult=best;return out;
 }
 function languageSwitcher(){
