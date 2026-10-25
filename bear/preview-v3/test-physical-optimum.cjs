@@ -41,8 +41,9 @@ assert(!w.hasKnownHeroEffects);
 assert(w.assumptions.includes('foreign-leader-class-stats-unknown'));
 const types=['infantry','cavalry','archer'];
 const tg=[6,5,6],a=['iAtk','cAtk','aAtk'],l=['iLet','cLet','aLet'];
-const raw=types.map((type,i)=>c.troopAttack(type,10,tg[i])*
+const raw=types.map((type,i)=>c.effectiveTroopAttack(type,10,tg[i])*
  (i===2?1.1:1)*(1+(values[a[i]]+25)/100)*(1+values[l[i]]/100));
+// Same TG-aware expected troop skills as the physical damage engine.
 const squares=raw.map(x=>x*x),sum=squares.reduce((n,x)=>n+x,0);
 for(let i=0;i<3;i++)approx(w.ownOptimal[i],100*squares[i]/sum);
 assert(w.ownOptimal[1]>5,'Cavalry must not be discarded by a 1/10/89 prior');
