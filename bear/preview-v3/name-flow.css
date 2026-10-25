@@ -376,3 +376,7 @@ body.bear-name-mode>*:not(#bearNewApp){display:none!important}
 .bear-name-help-nav .bear-name-btn{padding:8px 11px;min-height:35px;font-size:13px}
 @media(max-width:430px){.bear-name-help-dialog{max-height:96dvh}.bear-name-help-legend{gap:4px 7px}.bear-name-help-legend-item{font-size:11px}}
 @media(max-height:690px){.bear-name-help-explainer{margin:2px 0 6px}.bear-name-help-dialog{max-height:96dvh}.bear-name-help-zoom{min-height:30px}}
+
+.bear-name-score .bear-name-score-samples{flex:1 0 100%;min-width:0;padding:7px 0;color:var(--war-muted,#b8c6d6);font-size:12px}
+.bear-name-score .bear-name-score-samples summary{cursor:pointer;font-weight:700;color:var(--war-gold,#ffc97c)}
+.bear-name-score .bear-name-score-samples p{margin:6px 0;overflow-wrap:anywhere}
