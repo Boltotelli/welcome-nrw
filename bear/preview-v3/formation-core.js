@@ -219,12 +219,12 @@ function classAttack(model,combat){
   if(Array.isArray(groups)&&groups.length){
    const count=groups.reduce((n,g)=>n+Number(g.count||0),0);
    const avg=count>0?groups.reduce((n,g)=>n+Number(g.count||0)*
-    (combat?.troopAttack?.(type,g.tier,g.tg)||0),0)/count:0;
+    (combat?.effectiveTroopAttack?.(type,g.tier,g.tg)??combat?.troopAttack?.(type,g.tier,g.tg)??0),0)/count:0;
    if(Number.isFinite(avg)&&avg>0)return {attack:avg,confirmed:true};
   }
-  const known=combat?.troopAttack?.(type,level?.tier,level?.tg);
+  const known=combat?.effectiveTroopAttack?.(type,level?.tier,level?.tg)??combat?.troopAttack?.(type,level?.tier,level?.tg);
   if(Number.isFinite(known)&&known>0)return {attack:known,confirmed:true};
-  return {attack:combat?.troopAttack?.(type,10,0)||
+  return {attack:(combat?.effectiveTroopAttack?.(type,10,0)??combat?.troopAttack?.(type,10,0))||
    [472,1416,1888][k],confirmed:false};
  });
 }
