@@ -245,6 +245,10 @@ const table=[
 ["FC · Schwerter","FC · Swords","FC · Épées","FC · Espadas"],
 ["M · Faust","M · Fist","M · Poing","M · Puño"],
 ["Joiner bekommen zunächst 5 % Infanterie, 15 % Kavallerie und 80 % Bogenschützen. Der Starter wird anhand seiner eigenen Angriffswerte berechnet. Wenn Bogenschützen nicht reichen, werden sie entsprechend der Priorität reserviert und innerhalb der Joiner proportional zu ihrer tatsächlichen Marschkapazität verteilt.","Joiners start with 5% Infantry, 15% Cavalry and 80% Archers. Your starter uses your own attack stats. Scarce archers are reserved by priority and shared among joiners according to actual march capacity.","Les renforts commencent avec 5 % d’infanterie, 15 % de cavalerie et 80 % d’archers. Le lanceur utilise tes propres stats d’attaque. Si les archers manquent, ils sont réservés par priorité puis répartis selon la capacité réelle des renforts.","Los apoyos empiezan con 5 % de infantería, 15 % de caballería y 80 % de arqueros. El inicio usa tus valores de ataque. Si faltan arqueros, se reservan por prioridad y se reparten según la capacidad real de los apoyos."],
+["missing-skill-reference","Hero reference unavailable","Référence des héros indisponible","Referencia de héroes no disponible"],
+["incomplete-starter","Starter heroes incomplete","Héros lanceurs incomplets","Héroes de inicio incompletos"],
+["invalid-hero-stars","Invalid hero star level","Étoiles du héros invalides","Nivel de estrellas de héroe no válido"],
+["missing-pet-rank","Active pet skill level missing","Niveau de compétence de familier actif manquant","Falta el nivel de habilidad de mascota activa"],
 ];
 const catalog={en:1,fr:2,es:3};
 const exact=new Map(table.map(row=>[row[0],row]));
@@ -269,6 +273,10 @@ function tr(v){
  if(classStat){
   const cls=exact.get(classStat[1]),metric=exact.get(classStat[2]);
   if(cls&&metric)return cls[ix]+' · '+metric[ix]+' %';
+ }
+ if(v.startsWith('missing-source-for-')){
+  const prefix={en:'Missing hero reference for ',fr:'Référence de héros manquante pour ',es:'Falta referencia de héroe para '}[language()];
+  return prefix+v.slice('missing-source-for-'.length);
  }
  for(const prefix of ['Infanterie','Kavallerie','Bogenschützen','Starter ','Generation ','Gemeinsames Profil geladen: ','✓ Gespeichert (privates GitHub-Profil): ','Noch fehlende Helden-/Pet-Angaben: ','Truppenpriorität: ','Tatsächlicher Starter: ']){
   if(v.startsWith(prefix)){const item=exact.get(prefix);
