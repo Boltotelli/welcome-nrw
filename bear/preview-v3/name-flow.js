@@ -1055,6 +1055,7 @@ function predicted(){
  const best={rows,leader:ownLevels,ratio:plan.marches[0].ratio,
   score:plan.starterScore,method:plan.ratioMethod};
  const counts=best.rows[0],lines=el('div','bear-name-score-list');
+ const whole=x=>num(Math.ceil(Number(x)||0));
  const stack=window.NRW_BEAR_JOINER_SKILLS;
  const referenceMap=Object.fromEntries((C.heroes||[]).map(x=>[x.name,x]));
  const refSkill=name=>{
@@ -1071,18 +1072,18 @@ function predicted(){
   const line=el('div','bear-name-score');
   const label=T(sc.label).replace('(Lv5)',T('(Lv5)'));
   line.append(el('strong','',label),
-   el('span','',answer.ready?num(answer.estimatedIndex)+' '+T('Modellindex')+
+   el('span','',answer.ready?whole(answer.estimatedIndex)+' '+T('Modellindex')+
     ' · ×'+combo.multiplier.toFixed(2):
     T('Berechnung nicht verfügbar')));
   if(answer.ready&&answer.distribution?.ready){
    const dist=answer.distribution;
    line.append(el('small','bear-name-score-detail',
-    T('Ø 1.000 Simulationen (Truppen-Procs): ')+num(dist.average)+
-    ' · '+T('95. Perzentil: ')+num(dist.percentile95)+
-    ' · '+T('Theoretisches Maximum: ')+num(dist.theoreticalMaximum)));
+    T('Ø 1.000 Simulationen (Truppen-Procs): ')+whole(dist.average)+
+    ' · '+T('95. Perzentil: ')+whole(dist.percentile95)+
+    ' · '+T('Theoretisches Maximum: ')+whole(dist.theoreticalMaximum)));
    if(answer.isUpperConditional)
     line.append(el('small','bear-name-score-detail',
-     T('Unbestätigte Helden-Effekte: mögliche Modellobergrenze ')+num(answer.upper)));
+     T('Unbestätigte Helden-Effekte: mögliche Modellobergrenze ')+whole(answer.upper)));
   }
   lines.append(line);
  }
