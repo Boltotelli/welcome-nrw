@@ -121,9 +121,13 @@ function selectedGroups(level,type,requested){
  * It is a distribution over modeled TROOP procs, not a guarantee about
  * unknown Expedition skill timing or real in-game damage variance.
  */
-function troopDistribution(troops,stats,levels,pitfall=0,samples=1000){
+function troopDistribution(troops,stats,levels,pitfall=0,samples=1000,options={}){
  const base=breakdown(troops,stats,levels,pitfall);
  if(!base)return null;
+ const globalFactor=Number(options.globalFactor??1);
+ const classFactors=Array.isArray(options.classFactors)?options.classFactors:[1,1,1];
+ if(!Number.isFinite(globalFactor)||globalFactor<0||classFactors.length!==3||
+   classFactors.some(x=>!Number.isFinite(Number(x))||Number(x)<0))return null;
  const total=base.totalTroops;
  const armyScale=Math.sqrt(Math.min(total,base.bearTotal));
  const entries=[];
@@ -149,28 +153,30 @@ function troopDistribution(troops,stats,levels,pitfall=0,samples=1000){
  function random(){seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;}
  function oneRally(){
   let totalDamage=0;
-  for(let turn=0;turn<10;turn++)for(const {factor,skill} of entries){
+  for(let turn=0;turn<10;turn++)for(const {factor,skill,type} of entries){
    const volley=skill.volley>0&&random()<skill.volley?2:1;
    const howl=skill.howling>0&&random()<skill.howling?1+skill.extra:1;
    const lance=skill.assault>0&&random()<skill.assault?2:1;
-   totalDamage+=factor*skill.basic*volley*howl*lance;
+   totalDamage+=factor*Number(classFactors[type])*skill.basic*volley*howl*lance;
   }
-  return totalDamage;
+  return totalDamage*globalFactor;
  }
  const n=Math.max(1,Math.min(5000,Math.floor(samples)||1000));
- const rolls=Array.from({length:n},()=>oneRally()).sort((a,b)=>a-b);
+ const firstRolls=Array.from({length:n},()=>oneRally());
+ const rolls=firstRolls.slice().sort((a,b)=>a-b);
  const mean=rolls.reduce((a,b)=>a+b,0)/n;
  const perClass=base.types.map((t,i)=>({
   type:t.type,
-  expected:t.damageTenRounds,
+  expected:t.damageTenRounds*Number(classFactors[i])*globalFactor,
   maximum:10*entries.filter(e=>e.type===i).reduce((sum,e)=>sum+
-   e.factor*e.skill.maximum,0)
+   e.factor*e.skill.maximum*Number(classFactors[i])*globalFactor,0)
  }));
  const theoreticalMaximum=perClass.reduce((sum,p)=>sum+p.maximum,0);
- return {ready:true,samples:n,baseline:base.totalTenRounds,average:mean,
+ return {ready:true,samples:n,
+  baseline:perClass.reduce((s,x)=>s+x.expected,0),average:mean,
   percentile95:rolls[Math.max(0,Math.ceil(0.95*n)-1)],
   theoreticalMaximum,
-  firstFive:rolls.slice(0,Math.min(5,n)),
+  firstFive:firstRolls.slice(0,Math.min(5,n)),
   modeledTroopProcOnly:true,unit:'community-model-estimated-damage',
   perClass};
 }
