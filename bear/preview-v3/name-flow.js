@@ -86,7 +86,7 @@ function numberField(label,value,onChange,options={}){
  input.type='number';input.min=options.min??0;input.max=options.max??100000000;input.step=options.step??1;
  input.value=value===undefined||value===null?'':value;input.placeholder=options.placeholder||'';
  input.addEventListener('change',()=>{const n=input.value===''?null:Number(input.value);
-  if(n!==null&&(!Number.isFinite(n)||n<Number(input.min)||n>Number(input.max)))return input.setCustomValidity('Ungültiger Wert');
+  if(n!==null&&(!Number.isFinite(n)||n<Number(input.min)||n>Number(input.max)))return input.setCustomValidity(T('Ungültiger Wert'));
   input.setCustomValidity('');onChange(n);});
  wrap.append(span,input);return options.helpKey?HELP?.decorateField?.(wrap,label,options.helpKey)||wrap:wrap;
 }
@@ -122,7 +122,7 @@ function starProgressField(heroName){
  let currentStep=Math.max(0,Math.min(30,Math.floor(Number(initial.stars||0))*6+Math.floor(Number(initial.tier||0))));
  for(let i=0;i<5;i++){
   const flower=button('',()=>changeStep((i+1)*6),'bear-name-flower');
-  flower.setAttribute('aria-label',(i+1)+' Sterne einstellen');
+  flower.setAttribute('aria-label',(i+1)+T(' Sterne einstellen'));
   const svg=svgNode('svg',{viewBox:'0 0 24 24','aria-hidden':'true',focusable:'false'});
   const id='nrw-bear-flower-'+(++bearFlowerSequence),defs=svgNode('defs');
   const gradient=svgNode('linearGradient',{id,x1:'0%',y1:'0%',x2:'80%',y2:'100%'});
@@ -144,7 +144,7 @@ function starProgressField(heroName){
  function repaint(){
   minus.disabled=currentStep<=0;plus.disabled=currentStep>=30;
   const stars=Math.floor(currentStep/6),tier=currentStep%6;
-  const description=stars+' Sterne'+(tier?' · T'+tier:'')+' von 5';
+  const description=stars+T(' Sterne')+(tier?' · T'+tier:'')+T(' von 5');
   wrap.title=description;live.textContent=description;
   for(let i=0;i<nodes.length;i++){
    const item=nodes[i],lit=Math.max(0,Math.min(6,currentStep-i*6));
@@ -157,7 +157,7 @@ function starProgressField(heroName){
    item.center.setAttribute('stroke',lit? '#a97230':'#202a3b');
    item.flower.classList.toggle('is-lit',lit>0);
    item.flower.setAttribute('aria-pressed',lit===6?'true':'false');
-   item.flower.title=(i+1)+' Sterne wählen';
+   item.flower.title=(i+1)+T(' Sterne wählen');
   }
  }
  function changeStep(next){
@@ -861,7 +861,7 @@ function formationCards(){
   const allocationMode=plan.allocationPriority==='starter'?
    'Starter zuerst':plan.allocationPriority==='joins'?'Joiner zuerst':'Gleich stark: Joiner zuerst (geteilte Berechnung)';
   diag.append(el('p','',
-   'Truppenpriorität: '+allocationMode));
+   'Truppenpriorität: '+T(allocationMode)));
   diag.append(el('p','bear-name-muted',
    'Joiner bekommen zunächst 5 % Infanterie, 15 % Kavallerie und 80 % Bogenschützen. Der Starter wird anhand seiner eigenen Angriffswerte berechnet. Wenn Bogenschützen nicht reichen, werden sie entsprechend der Priorität reserviert und innerhalb der Joiner proportional zu ihrer tatsächlichen Marschkapazität verteilt.'));
   diag.append(el('p','',
