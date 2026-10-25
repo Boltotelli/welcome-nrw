@@ -254,7 +254,23 @@ function tr(v){
  const ix=catalog[language()];
  const entry=exact.get(v);if(entry)return entry[ix];
  // Dynamic labels assembled with a known translated static prefix.
- for(const prefix of ['Infanterie','Kavallerie','Bogenschützen','Starter ','Generation ','Gemeinsames Profil geladen: ','✓ Gespeichert (privates GitHub-Profil): ','Noch fehlende Helden-/Pet-Angaben: ']){
+ // Translate numeric messages after substituting only their stable text segments.
+ const dynamic=[
+  [/^(✓ Gemeinsam gespeichert · Version )(\d+)$/, [1,2]],
+  [/^(Zu viele PIN-Versuche\. Bitte nach )(\d+)( Minuten erneut versuchen\.)$/, [1,2,3]],
+  [/^(Bogenschützenbedarf für alle )(\d+)( Märsche: )([\d.,\s]+)( · Bestand: )([\d.,\s]+)$/, [1,2,3,4,5,6]],
+  [/^(Es fehlen )([\d.,\s]+)( Bogenschützen für die vorgesehenen Marschverhältnisse\. Die betroffenen Formationen wurden angepasst\.)$/, [1,2,3]]
+ ];
+ for(const [pattern,fields] of dynamic){
+  const match=v.match(pattern);if(!match)continue;
+  return fields.map(f=>exact.get(match[f])?.[ix]??match[f]).join('');
+ }
+ const classStat=v.match(/^(Infanterie|Kavallerie|Bogenschützen) · (Angriff|Tödlichkeit) %$/);
+ if(classStat){
+  const cls=exact.get(classStat[1]),metric=exact.get(classStat[2]);
+  if(cls&&metric)return cls[ix]+' · '+metric[ix]+' %';
+ }
+ for(const prefix of ['Infanterie','Kavallerie','Bogenschützen','Starter ','Generation ','Gemeinsames Profil geladen: ','✓ Gespeichert (privates GitHub-Profil): ','Noch fehlende Helden-/Pet-Angaben: ','Truppenpriorität: ','Tatsächlicher Starter: ']){
   if(v.startsWith(prefix)){const item=exact.get(prefix);
    if(item)return item[ix]+v.slice(prefix.length);}
  }
