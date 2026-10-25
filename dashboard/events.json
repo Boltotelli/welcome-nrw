@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "kingdom": 1044,
   "timezone": "UTC",
-  "updatedAt": "2026-10-23T00:14:08Z",
+  "updatedAt": "2026-10-25T00:15:40Z",
   "events": [
     {
       "id": "golden-glaives-prep-2026-09-20",
@@ -1091,96 +1091,6 @@
       "sourceUrl": "https://kingshotdata.com/events/strongest-governor-event/"
     },
     {
-      "id": "all-out-2026-10-23",
-      "start": "2026-10-23",
-      "end": "2026-10-24",
-      "icon": "⚔️",
-      "iconUrl": "https://kingshotdata.com/uploads/2025/03/all-out-event-icon.webp",
-      "confidence": "public-timeline",
-      "name": {
-        "de": "All Out · Kill Event",
-        "en": "All Out · Kill Event",
-        "fr": "All Out · Événement d’élimination"
-      },
-      "tips": {
-        "de": [
-          "NRW-Serverregel: Angriffe auf Städte sind verboten. Ausnahmen sind Städte ohne Allianz, Allianzen mit nur einem Mitglied und die KOK-Allianz.",
-          "Angriffe auf Sammler sind erlaubt. Während des Kill Events nicht sammeln; innerhalb des Allianz-Hubs besteht der einzige geschützte Sammelbereich.",
-          "Aufgrund der Serverregeln ist kein Schutzschild erforderlich, solange du nicht sammelst und keine Ausnahme-Stadt führst.",
-          "Lazarett vor dem Event leeren und NRW-/Discord-Ansagen beachten."
-        ],
-        "en": [
-          "NRW server rule: city attacks are prohibited. Exceptions are cities without an alliance, one-member alliances and the KOK alliance.",
-          "Gatherer attacks are allowed. Do not gather during the Kill Event; the Alliance Hub is the only protected gathering area.",
-          "Server laws mean no shield is required as long as you do not gather and are not running an exception city.",
-          "Clear your Infirmary before the event and follow NRW/Discord announcements."
-        ],
-        "fr": [
-          "Règle du serveur NRW : les attaques de villes sont interdites. Exceptions : villes sans alliance, alliances d’un seul membre et alliance KOK.",
-          "Les attaques de collecteurs sont autorisées. Ne collecte pas pendant le Kill Event ; le Hub d’alliance est la seule zone de collecte protégée.",
-          "Grâce aux lois du serveur, aucun bouclier n’est nécessaire tant que tu ne collectes pas et que ta ville ne fait pas partie des exceptions.",
-          "Vide l’Infirmerie avant l’événement et suis les annonces NRW/Discord."
-        ]
-      },
-      "dailyPlans": {
-        "2026-10-23": {
-          "points": {
-            "de": "Feindliche Truppen besiegen oder schwer verwunden · T1–T10: 1/1/2/3/4/5/7/9/11/13 Punkte je Truppe",
-            "en": "Defeat or severely wound enemy troops · T1–T10: 1/1/2/3/4/5/7/9/11/13 points per troop",
-            "fr": "Vaincre ou blesser gravement des troupes ennemies · T1–T10 : 1/1/2/3/4/5/7/9/11/13 points par troupe"
-          },
-          "steps": {
-            "de": [
-              "Vor dem Reset alle Sammler zurückrufen und das Lazarett möglichst leeren.",
-              "Während des Events nicht sammeln. Sammler dürfen serverweit angegriffen werden.",
-              "Keine Städte angreifen, außer ohne Allianz, in einer Ein-Mitglied-Allianz oder in KOK.",
-              "Punkte nur über erlaubte Ziele, Verteidigung oder koordinierte Kämpfe erzielen; NRW-/Discord-Absprachen haben Vorrang."
-            ],
-            "en": [
-              "Before reset, recall all gatherers and clear as much Infirmary space as possible.",
-              "Do not gather during the event. Gatherers may be attacked across the server.",
-              "Do not attack cities except those without an alliance, in a one-member alliance or in KOK.",
-              "Score only through permitted targets, defense or coordinated fights; NRW/Discord coordination takes priority."
-            ],
-            "fr": [
-              "Avant le reset, rappelle tous les collecteurs et libère autant de place que possible dans l’Infirmerie.",
-              "Ne collecte pas pendant l’événement. Les collecteurs peuvent être attaqués sur tout le serveur.",
-              "N’attaque aucune ville, sauf sans alliance, dans une alliance d’un seul membre ou dans KOK.",
-              "Marque uniquement sur les cibles autorisées, en défense ou lors de combats coordonnés ; les consignes NRW/Discord sont prioritaires."
-            ]
-          }
-        },
-        "2026-10-24": {
-          "points": {
-            "de": "Feindliche Truppen besiegen oder schwer verwunden · T1–T10: 1/1/2/3/4/5/7/9/11/13 Punkte je Truppe",
-            "en": "Defeat or severely wound enemy troops · T1–T10: 1/1/2/3/4/5/7/9/11/13 points per troop",
-            "fr": "Vaincre ou blesser gravement des troupes ennemies · T1–T10 : 1/1/2/3/4/5/7/9/11/13 points par troupe"
-          },
-          "steps": {
-            "de": [
-              "Vor Kampfbeginn Lazarettkapazität prüfen und Sammler zurückholen.",
-              "Die Burgschlacht für Kill-Event-Punkte nutzen; nur nach NRW-/Discord-Plan kämpfen.",
-              "Stadtangriffsverbot und die drei bekannten Ausnahmen bleiben bestehen.",
-              "Nach Ende der Burgschlacht kann gemäß NRW-Ansage wieder sicher gesammelt werden."
-            ],
-            "en": [
-              "Before fighting begins, check Infirmary capacity and recall gatherers.",
-              "Use the Castle Battle for Kill Event points; fight only according to the NRW/Discord plan.",
-              "The city-attack ban and its three known exceptions remain in force.",
-              "After the Castle Battle ends, gathering is safe again according to the NRW announcement."
-            ],
-            "fr": [
-              "Avant le début des combats, vérifie la capacité de l’Infirmerie et rappelle les collecteurs.",
-              "Utilise la Bataille du Château pour marquer au Kill Event ; combats uniquement selon le plan NRW/Discord.",
-              "L’interdiction d’attaquer les villes et ses trois exceptions restent en vigueur.",
-              "Après la fin de la Bataille du Château, la collecte redevient sûre selon l’annonce NRW."
-            ]
-          }
-        }
-      },
-      "sourceUrl": "https://kingshotdata.com/events/all-out-event/"
-    },
-    {
       "id": "alliance-mobilization-2026-10-26",
       "start": "2026-10-26",
       "end": "2026-10-31",
@@ -1376,6 +1286,178 @@
               "de": "930.000 Punkte sind die strikte 3×-Gesamtgrenze – keine Empfehlung.",
               "en": "930,000 points is the strict 3× total limit, not a recommendation.",
               "fr": "930 000 points constituent la limite totale stricte de 3×, pas une recommandation."
+            }
+          }
+        }
+      },
+      "sourceUrl": "https://kingshotdata.com/events/officer-project-event/"
+    },
+    {
+      "id": "armament-competition-type2-2026-10-30",
+      "start": "2026-10-30",
+      "end": "2026-10-31",
+      "icon": "🛡️",
+      "iconUrl": "https://kingshotdata.com/uploads/2025/04/city-development-event-icon.webp",
+      "confidence": "public-timeline",
+      "name": {
+        "de": "Rüstungswettbewerb · Truegold",
+        "en": "Armament Competition · Truegold",
+        "fr": "Compétition d’armement · Or véritable"
+      },
+      "dailyPlans": {
+        "2026-10-30": {
+          "points": {
+            "de": "Truegold: 100 · Truegoldstaub: 50 · Gehärtetes Truegold: 1.500 · Ausrüstungswert +1: 3 · Schmiedehammer: 800 · Mithril: 8.000 · Widget: 1.600 · 1 Min. Bau-/Forschungs-/Trainingsbeschleuniger: 1",
+            "en": "Truegold: 100 · Truegold Dust: 50 · Tempered Truegold: 1,500 · Gear score +1: 3 · Forgehammer: 800 · Mithril: 8,000 · Widget: 1,600 · 1 min construction/research/training speedup: 1",
+            "fr": "Or véritable : 100 · Poussière : 50 · Or trempé : 1 500 · score d’Équipement +1 : 3 · Marteau : 800 · Mithril : 8 000 · Widget : 1 600 · 1 min d’accélération construction/recherche/entraînement : 1"
+          },
+          "steps": {
+            "de": [
+              "Vor dem Reset Truegold, Ausrüstungsmaterialien, Schmiedehämmer, Widgets, Mithril und Beschleuniger zurückhalten.",
+              "Dieses Event kann vollständig ausgelassen werden; die Truegold-Belohnung rechtfertigt keinen zusätzlichen Verbrauch von KvK-Ressourcen.",
+              "Wenn du ohnehin geplante Upgrades ausführst, nach dem Reset zuerst diese Aktionen nutzen und keine Ressourcen allein für Ranglistenpunkte einsetzen.",
+              "Spätestens bei insgesamt 114.000 Punkten stoppen. Das ist die strikte 3×-Gesamtgrenze und ausdrücklich kein Ziel."
+            ],
+            "en": [
+              "Before reset, hold Truegold, Gear materials, Forgehammers, Widgets, Mithril and speedups.",
+              "This event can be skipped completely; the Truegold reward does not justify extra KvK-resource spending.",
+              "If you already planned upgrades, use those actions after reset first and do not spend resources solely for ranking points.",
+              "Stop at 114,000 total points at the latest. This is the strict 3× total limit and explicitly not a target."
+            ],
+            "fr": [
+              "Avant le reset, conserve l’Or véritable, les matériaux d’Équipement, les Marteaux, Widgets, Mithril et accélérateurs.",
+              "Cet événement peut être entièrement ignoré ; la récompense en Or véritable ne justifie aucune dépense supplémentaire de ressources KvK.",
+              "Si des améliorations sont déjà prévues, effectue-les d’abord après le reset et ne dépense aucune ressource uniquement pour le classement.",
+              "Arrête-toi au plus tard à 114 000 points au total. C’est la limite stricte de 3× et non un objectif."
+            ]
+          },
+          "limits": {
+            "hardCap": 114000,
+            "note": {
+              "de": "114.000 Punkte sind die strikte 3×-Gesamtgrenze – keine Empfehlung.",
+              "en": "114,000 points is the strict 3× total limit, not a recommendation.",
+              "fr": "114 000 points constituent la limite totale stricte de 3×, pas une recommandation."
+            }
+          }
+        },
+        "2026-10-31": {
+          "points": {
+            "de": "Truegold: 100 · Truegoldstaub: 50 · Gehärtetes Truegold: 1.500 · Ausrüstungswert +1: 3 · Schmiedehammer: 800 · Mithril: 8.000 · Widget: 1.600 · 1 Min. Bau-/Forschungs-/Trainingsbeschleuniger: 1",
+            "en": "Truegold: 100 · Truegold Dust: 50 · Tempered Truegold: 1,500 · Gear score +1: 3 · Forgehammer: 800 · Mithril: 8,000 · Widget: 1,600 · 1 min construction/research/training speedup: 1",
+            "fr": "Or véritable : 100 · Poussière : 50 · Or trempé : 1 500 · score d’Équipement +1 : 3 · Marteau : 800 · Mithril : 8 000 · Widget : 1 600 · 1 min d’accélération construction/recherche/entraînement : 1"
+          },
+          "steps": {
+            "de": [
+              "Vor dem Reset Truegold, Ausrüstungsmaterialien, Schmiedehämmer, Widgets, Mithril und Beschleuniger zurückhalten.",
+              "Dieses Event kann vollständig ausgelassen werden; die Truegold-Belohnung rechtfertigt keinen zusätzlichen Verbrauch von KvK-Ressourcen.",
+              "Wenn du ohnehin geplante Upgrades ausführst, nach dem Reset zuerst diese Aktionen nutzen und keine Ressourcen allein für Ranglistenpunkte einsetzen.",
+              "Spätestens bei insgesamt 114.000 Punkten stoppen. Das ist die strikte 3×-Gesamtgrenze und ausdrücklich kein Ziel."
+            ],
+            "en": [
+              "Before reset, hold Truegold, Gear materials, Forgehammers, Widgets, Mithril and speedups.",
+              "This event can be skipped completely; the Truegold reward does not justify extra KvK-resource spending.",
+              "If you already planned upgrades, use those actions after reset first and do not spend resources solely for ranking points.",
+              "Stop at 114,000 total points at the latest. This is the strict 3× total limit and explicitly not a target."
+            ],
+            "fr": [
+              "Avant le reset, conserve l’Or véritable, les matériaux d’Équipement, les Marteaux, Widgets, Mithril et accélérateurs.",
+              "Cet événement peut être entièrement ignoré ; la récompense en Or véritable ne justifie aucune dépense supplémentaire de ressources KvK.",
+              "Si des améliorations sont déjà prévues, effectue-les d’abord après le reset et ne dépense aucune ressource uniquement pour le classement.",
+              "Arrête-toi au plus tard à 114 000 points au total. C’est la limite stricte de 3× et non un objectif."
+            ]
+          },
+          "limits": {
+            "hardCap": 114000,
+            "note": {
+              "de": "114.000 Punkte sind die strikte 3×-Gesamtgrenze – keine Empfehlung.",
+              "en": "114,000 points is the strict 3× total limit, not a recommendation.",
+              "fr": "114 000 points constituent la limite totale stricte de 3×, pas une recommandation."
+            }
+          }
+        }
+      },
+      "sourceUrl": "https://kingshotdata.com/events/armament-competition/"
+    },
+    {
+      "id": "officer-project-charm-designs-2026-11-01",
+      "start": "2026-11-01",
+      "end": "2026-11-02",
+      "icon": "🎖️",
+      "iconUrl": "https://kingshotdata.com/uploads/2025/03/power-up-event-icon.webp",
+      "confidence": "public-timeline",
+      "name": {
+        "de": "Offiziersprojekt · Amulettdesigns",
+        "en": "Officer Project · Charm Designs",
+        "fr": "Projet d’officier · Plans d’amulette"
+      },
+      "dailyPlans": {
+        "2026-11-01": {
+          "points": {
+            "de": "Ausrüstungswert +1: 70 · Heldensplitter selten/episch/mythisch: 350/1.220/3.040 · Schmiedehammer: 6.000 · Widget: 12.000",
+            "en": "Gear score +1: 70 · rare/epic/mythic Hero Shard: 350/1,220/3,040 · Forgehammer: 6,000 · Widget: 12,000",
+            "fr": "score d’Équipement +1 : 70 · fragment de héros rare/épique/mythique : 350/1 220/3 040 · Marteau : 6 000 · Widget : 12 000"
+          },
+          "steps": {
+            "de": [
+              "Vor dem Reset Ausrüstungsverbesserungen, Heldensplitter, Schmiedehämmer und Widgets zurückhalten.",
+              "Nach dem Reset nur ohnehin geplante Upgrades oder einen lohnenden persönlichen Meilenstein abschließen.",
+              "Splitter, Schmiedehämmer und Widgets möglichst für die nächste KvK-Vorbereitung sparen; keine Ranglistenjagd ohne NRW-Abstimmung.",
+              "Spätestens bei insgesamt 1.359.000 Punkten stoppen. Das ist die strikte 3×-Gesamtgrenze und ausdrücklich kein Ziel."
+            ],
+            "en": [
+              "Before reset, hold Gear upgrades, Hero Shards, Forgehammers and Widgets.",
+              "After reset, complete only upgrades already planned or a worthwhile personal milestone.",
+              "Save Shards, Forgehammers and Widgets for the next KvK preparation whenever possible; do not chase rankings without NRW coordination.",
+              "Stop at 1,359,000 total points at the latest. This is the strict 3× total limit and explicitly not a target."
+            ],
+            "fr": [
+              "Avant le reset, conserve les améliorations d’Équipement, fragments de héros, Marteaux et Widgets.",
+              "Après le reset, effectue uniquement les améliorations déjà prévues ou un palier personnel rentable.",
+              "Conserve autant que possible les fragments, Marteaux et Widgets pour la prochaine préparation KvK ; ne vise pas le classement sans coordination NRW.",
+              "Arrête-toi au plus tard à 1 359 000 points au total. C’est la limite stricte de 3× et non un objectif."
+            ]
+          },
+          "limits": {
+            "hardCap": 1359000,
+            "note": {
+              "de": "1.359.000 Punkte sind die strikte 3×-Gesamtgrenze – keine Empfehlung.",
+              "en": "1,359,000 points is the strict 3× total limit, not a recommendation.",
+              "fr": "1 359 000 points constituent la limite totale stricte de 3×, pas une recommandation."
+            }
+          }
+        },
+        "2026-11-02": {
+          "points": {
+            "de": "Ausrüstungswert +1: 70 · Heldensplitter selten/episch/mythisch: 350/1.220/3.040 · Schmiedehammer: 6.000 · Widget: 12.000",
+            "en": "Gear score +1: 70 · rare/epic/mythic Hero Shard: 350/1,220/3,040 · Forgehammer: 6,000 · Widget: 12,000",
+            "fr": "score d’Équipement +1 : 70 · fragment de héros rare/épique/mythique : 350/1 220/3 040 · Marteau : 6 000 · Widget : 12 000"
+          },
+          "steps": {
+            "de": [
+              "Vor dem Reset Ausrüstungsverbesserungen, Heldensplitter, Schmiedehämmer und Widgets zurückhalten.",
+              "Nach dem Reset nur ohnehin geplante Upgrades oder einen lohnenden persönlichen Meilenstein abschließen.",
+              "Splitter, Schmiedehämmer und Widgets möglichst für die nächste KvK-Vorbereitung sparen; keine Ranglistenjagd ohne NRW-Abstimmung.",
+              "Spätestens bei insgesamt 1.359.000 Punkten stoppen. Das ist die strikte 3×-Gesamtgrenze und ausdrücklich kein Ziel."
+            ],
+            "en": [
+              "Before reset, hold Gear upgrades, Hero Shards, Forgehammers and Widgets.",
+              "After reset, complete only upgrades already planned or a worthwhile personal milestone.",
+              "Save Shards, Forgehammers and Widgets for the next KvK preparation whenever possible; do not chase rankings without NRW coordination.",
+              "Stop at 1,359,000 total points at the latest. This is the strict 3× total limit and explicitly not a target."
+            ],
+            "fr": [
+              "Avant le reset, conserve les améliorations d’Équipement, fragments de héros, Marteaux et Widgets.",
+              "Après le reset, effectue uniquement les améliorations déjà prévues ou un palier personnel rentable.",
+              "Conserve autant que possible les fragments, Marteaux et Widgets pour la prochaine préparation KvK ; ne vise pas le classement sans coordination NRW.",
+              "Arrête-toi au plus tard à 1 359 000 points au total. C’est la limite stricte de 3× et non un objectif."
+            ]
+          },
+          "limits": {
+            "hardCap": 1359000,
+            "note": {
+              "de": "1.359.000 Punkte sind die strikte 3×-Gesamtgrenze – keine Empfehlung.",
+              "en": "1,359,000 points is the strict 3× total limit, not a recommendation.",
+              "fr": "1 359 000 points constituent la limite totale stricte de 3×, pas une recommandation."
             }
           }
         }
