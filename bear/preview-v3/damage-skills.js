@@ -90,11 +90,19 @@ function evaluate(prepared,counts,levels,stats,combat,joinerMultiplier=1){
   return {ready:false,reason:'invalid-joiner-stacking'};
  const lower=low*m.lowDamage*pointFactor*joinerMultiplier;
  const upper=high*m.damage*pointFactor*joinerMultiplier;
+ // This simulation covers verified troop proc unlock levels only. The
+ // applied hero expedition effects remain expected values or sensitivity
+ // estimates; they are not misrepresented as independently timed RNG rolls.
+ const distribution=typeof combat.troopDistribution==='function'?
+  combat.troopDistribution(counts,values,levels,5,1000,{
+   classFactors:m.lowClassDamage,
+   globalFactor:m.lowDamage*pointFactor*joinerMultiplier
+  }):null;
  return {ready:true,estimatedIndex:lower,lower,upper,
   isUpperConditional:upper>lower+1e-6,unmodeled:prepared.unmodeled,
   classBreakdown:data.types.map((t,i)=>({type:keys[i],damage:t.damageTenRounds})),
-  source:'all-owned-starters-expedition-skills',pitfallLevel:5,
-  warning:'Relative Bear damage index, not actual Kingshot damage points.'};
+  distribution,source:'all-owned-starters-expedition-skills',pitfallLevel:5,
+  warning:'Estimated community Bear score: troop procs modeled over 10 turns, hero timing not fully verified.'};
 }
 root.NRW_BEAR_SKILL_DAMAGE={prepare,evaluate,
  version:'all-starters-generic-expected-damage-20261012'};
