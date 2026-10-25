@@ -60,16 +60,32 @@ function validLevel(x){
   Number.isSafeInteger(Number(g.count))&&Number(g.count)>0);
  return Boolean(x&&validTier(x.tier)&&validTG(x.tg));
 }
+// Offensive troop skills: expected-value multipliers from published troop mechanics.
+// T7+ Archers: Volley 10% double attack; TG5+ Archers: Howling Wind 30%
+// chance for +50%; TG8 Archers: extra 25% on Howling Wind proc.
+// TG5+ Cavalry: Assault Lance 15% double attack.
+// Infantry TG skills and cavalry TG8 Warding Impaler are defensive.
+function offensiveSkillMultiplier(type,tier,tg){
+ const t=Number(tier),g=Number(tg);
+ if(!validTier(t)||!validTG(g))return null;
+ if(type==='archer')return (t>=7?1.10:1)*(g>=5?(g>=8?1.225:1.15):1);
+ if(type==='cavalry')return g>=5?1.15:1;
+ return 1;
+}
+function effectiveAttack(type,tier,tg){
+ const base=troopAttack(type,tier,tg),skill=offensiveSkillMultiplier(type,tier,tg);
+ return base===null||skill===null?null:base*skill;
+}
 function attackForGroup(level,type,requested){
  if(requested===0)return 0;
- if(!Array.isArray(level?.groups))return troopAttack(type,level?.tier,level?.tg);
+ if(!Array.isArray(level?.groups))return effectiveAttack(type,level?.tier,level?.tg);
  let remaining=requested,total=0;
  const available=level.groups.slice().sort((a,b)=>
-  troopAttack(type,b.tier,b.tg)-troopAttack(type,a.tier,a.tg));
+  effectiveAttack(type,b.tier,b.tg)-effectiveAttack(type,a.tier,a.tg));
  for(const group of available){
   if(remaining<=0)break;
   const count=Math.min(remaining,Number(group.count));
-  total+=count*troopAttack(type,group.tier,group.tg);
+  total+=count*effectiveAttack(type,group.tier,group.tg);
   remaining-=count;
  }
  return remaining>0?null:total/requested;
@@ -141,7 +157,7 @@ function allocateLevels(marches,levels,prioritizeJoinArchers=false){
    for(let march=0;march<marches.length;march++)results[march][type]=lvl;
    continue;
   }
-  const remaining=lvl.groups.map(g=>({...g,attack:troopAttack(troopKeys[type],g.tier,g.tg)}))
+  const remaining=lvl.groups.map(g=>({...g,attack:effectiveAttack(troopKeys[type],g.tier,g.tg)}))
    .sort((a,b)=>b.attack-a.attack);
   // The same relative-leader decision used by the formation planner
   // determines which march receives the strongest mixed-T/TG groups.
@@ -166,5 +182,5 @@ function allocateLevels(marches,levels,prioritizeJoinArchers=false){
  return results;
 }
 
-root.NRW_BEAR_COMBAT={troopKeys,attack,troopAttack,ready,damage,breakdown,configure,allocateLevels,attackForGroup,statKeys};
+root.NRW_BEAR_COMBAT={troopKeys,attack,troopAttack,effectiveAttack,offensiveSkillMultiplier,ready,damage,breakdown,configure,allocateLevels,attackForGroup,statKeys};
 })(window);
