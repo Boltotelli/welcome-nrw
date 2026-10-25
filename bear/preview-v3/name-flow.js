@@ -1084,6 +1084,13 @@ function predicted(){
    if(answer.isUpperConditional)
     line.append(el('small','bear-name-score-detail',
      T('Unbestätigte Helden-Effekte: mögliche Modellobergrenze ')+whole(answer.upper)));
+   const sampleDetails=el('details','bear-name-score-samples');
+   sampleDetails.append(el('summary','',T('Fünf simulierte Rallys vergleichen')));
+   sampleDetails.append(el('p','',dist.firstFive.map(whole).join(' · ')));
+   sampleDetails.append(el('p','',T('Summe dieser fünf Simulationen: ')+whole(dist.fiveRunSum)));
+   sampleDetails.append(el('p','',T('Erwartungswert × 5: ')+whole(dist.baselineFive)+
+    ' · '+T('Simulationsdurchschnitt × 5: ')+whole(dist.averageFive)));
+   line.append(sampleDetails);
   }
   lines.append(line);
  }
