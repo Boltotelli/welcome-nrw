@@ -322,6 +322,8 @@ jobs:
           node _site/bear/preview-v3/test-optimize-troops.cjs _site/bear/hero-reference.json
           node --check _site/bear/preview-v3/test-troop-procs.cjs
           node _site/bear/preview-v3/test-troop-procs.cjs
+          node --check _site/bear/preview-v3/test-joiner-stacking.cjs
+          node _site/bear/preview-v3/test-joiner-stacking.cjs
           node _site/bear/preview-v3/test-relative-leaders.cjs
           node --check _site/bear/preview-v3/test-physical-optimum.cjs
           node _site/bear/preview-v3/test-physical-optimum.cjs
@@ -378,10 +380,11 @@ jobs:
           echo '60 randomized whole-percent Kingshot formations checked for exact troop counts and shared stock.'
           echo 'Validated: physical coefficients, audited hero coupling, scenario weighting, deterministic shared inventory, stock-safe integer percent, no infantry floor.'
           grep -Fq 'preview-v3/joiner-skills.js' _site/bear/preview-v3.html
+          grep -Fq 'joiner-skills.js?v=20261026-effect-op2' _site/bear/preview-v3.html
           grep -Fq 'formation-core.js?v=20261025-tg3-tg5-v1' _site/bear/preview-v3.html
-          grep -Fq 'name-flow.js?v=20261025-tg3-tg5-v1' _site/bear/preview-v3.html
+          grep -Fq 'name-flow.js?v=20261026-effect-op2' _site/bear/preview-v3.html
           grep -Fq 'name-flow.css?v=20261025-tg3-tg5-v1' _site/bear/preview-v3.html
-          grep -Fq 'i18n.js?v=20261025-tg3-tg5-v1' _site/bear/preview-v3.html
+          grep -Fq 'i18n.js?v=20261026-effect-op2' _site/bear/preview-v3.html
           grep -Fq 'const expandedSeasons=new Set();' _site/bear/preview-v3/name-flow.js
           grep -Fq "return foldingPanel('troops'" _site/bear/preview-v3/name-flow.js
           grep -Fq "foldingPanel('baseStats'" _site/bear/preview-v3/name-flow.js
