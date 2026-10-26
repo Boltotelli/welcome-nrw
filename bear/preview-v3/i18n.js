@@ -258,6 +258,10 @@ const table=[
 ["Summe dieser fünf Simulationen: ","Total of these five simulations: ","Total de ces cinq simulations : ","Suma de estas cinco simulaciones: "],
 ["Erwartungswert × 5: ","Expected value × 5: ","Valeur attendue × 5 : ","Valor esperado × 5: "],
 ["Simulationsdurchschnitt × 5: ","Simulated average × 5: ","Moyenne simulée × 5 : ","Promedio simulado × 5: "],
+["Beste geprüfte Level-5-Kombination","Best tested Level 5 combination","Meilleure combinaison de niveau 5 testée","Mejor combinación probada de nivel 5"],
+["Gruppe 101 (Tödlichkeit): ","Group 101 (Lethality): ","Groupe 101 (létalité) : ","Grupo 101 (letalidad): "],
+["Gruppe 102 (Angriff): ","Group 102 (Attack): ","Groupe 102 (attaque) : ","Grupo 102 (ataque): "],
+["Maximal vier erste Joiner-Expeditionsfähigkeiten wirken. Innerhalb derselben Effektgruppe addieren sich alle aktiven Boni – auch viermal Chenko. Zwischen Gruppe 101 und Gruppe 102 werden die Summen multipliziert. Vier Chenko ergeben 2,00×, zwei Chenko plus zwei Amane 2,25×.","Up to four first Expedition skills from joiners apply. All active bonuses within one effect group add up—even four Chenkos. Group 101 and Group 102 multiply their totals. Four Chenkos give 2.00×, while two Chenko plus two Amane give 2.25×.","Jusqu’à quatre premières compétences d’expédition des renforts s’appliquent. Les bonus du même groupe s’additionnent, même avec quatre Chenko. Les totaux des groupes 101 et 102 se multiplient : quatre Chenko donnent 2,00× ; deux Chenko et deux Amane donnent 2,25×.","Se aplican hasta cuatro primeras habilidades de expedición de los apoyos. Las bonificaciones del mismo grupo se suman, incluso con cuatro Chenko. Los totales de los grupos 101 y 102 se multiplican: cuatro Chenko dan 2,00× y dos Chenko más dos Amane dan 2,25×."],
 ];
 const catalog={en:1,fr:2,es:3};
 const exact=new Map(table.map(row=>[row[0],row]));
