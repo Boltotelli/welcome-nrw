@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "kingdom": 1044,
   "timezone": "UTC",
-  "updatedAt": "2026-10-25T00:15:40Z",
+  "updatedAt": "2026-10-26T00:13:20Z",
   "events": [
     {
       "id": "golden-glaives-prep-2026-09-20",
@@ -869,228 +869,6 @@
       "display": "timeline-only"
     },
     {
-      "id": "strongest-governor-2026-10-19",
-      "start": "2026-10-19",
-      "end": "2026-10-25",
-      "icon": "👑",
-      "iconUrl": "https://kingshotdata.com/uploads/2025/06/strongest-governor-event-icon.webp",
-      "confidence": "public-timeline",
-      "name": {
-        "de": "Stärkster Gouverneur",
-        "en": "Strongest Governor",
-        "fr": "Gouverneur le plus puissant"
-      },
-      "tips": {
-        "de": [
-          "NRW priorisiert die beiden Truppentage sowie einen weiteren, per Discord festgelegten Tag – nicht Tag 1.",
-          "Die angekündigte Obergrenze ist eine strikte Grenze und ausdrücklich kein Ziel.",
-          "NRW-/Discord-Absprachen haben immer Vorrang vor der allgemeinen Tagesempfehlung."
-        ],
-        "en": [
-          "NRW prioritizes both troop-training days plus one additional day chosen on Discord—not Day 1.",
-          "The announced cap is a strict limit and explicitly not a target.",
-          "NRW/Discord coordination always takes priority over the general daily recommendation."
-        ],
-        "fr": [
-          "NRW donne la priorité aux deux jours d’entraînement et à un jour supplémentaire choisi sur Discord — pas le Jour 1.",
-          "La limite annoncée est stricte et n’est explicitement pas un objectif.",
-          "Les consignes NRW/Discord sont toujours prioritaires sur la recommandation générale."
-        ]
-      },
-      "dailyPlans": {
-        "2026-10-19": {
-          "points": {
-            "de": "Tag 1 · Stadtbau: Amulettwert +1: 70 · Truegold: 2.000 · Truegoldstaub: 1.000 · Gehärtetes Truegold: 30.000 · 1 Min. Beschleuniger: 30",
-            "en": "Day 1 · City Construction: Charm score +1: 70 · Truegold: 2,000 · Truegold Dust: 1,000 · Tempered Truegold: 30,000 · 1 min speedup: 30",
-            "fr": "Jour 1 · Construction : score d’Amulette +1 : 70 · Or véritable : 2 000 · Poussière : 1 000 · Or trempé : 30 000 · 1 min d’accélération : 30"
-          },
-          "steps": {
-            "de": [
-              "Vor dem Reset keine Bau-/Forschungsabschlüsse, Amulettverbesserungen oder Truegold-Ausgaben vorziehen.",
-              "Nach dem Reset zuerst bereits geplante Bau- und Forschungsabschlüsse durchführen.",
-              "Truegold, Staub, gehärtetes Truegold und Beschleuniger nur entsprechend NRW-/Discord-Plan einsetzen.",
-              "Tag 1 ist kein NRW-Fokustag: kein unnötiges Pushen nur für Ranglistenpunkte."
-            ],
-            "en": [
-              "Before reset, do not finish construction/research or spend Charms and Truegold early.",
-              "After reset, complete construction and research already planned first.",
-              "Use Truegold, Dust, Tempered Truegold and speedups only according to the NRW/Discord plan.",
-              "Day 1 is not an NRW focus day: do not push unnecessarily for ranking points."
-            ],
-            "fr": [
-              "Avant le reset, ne termine pas de construction/recherche et ne dépense pas d’Amulettes ou d’Or véritable à l’avance.",
-              "Après le reset, termine d’abord les constructions et recherches déjà prévues.",
-              "Utilise l’Or véritable, la Poussière, l’Or trempé et les accélérateurs uniquement selon le plan NRW/Discord.",
-              "Le Jour 1 n’est pas un jour prioritaire NRW : ne pousse pas inutilement pour le classement."
-            ]
-          }
-        },
-        "2026-10-20": {
-          "points": {
-            "de": "Tag 2 · Heldenentwicklung: Truegold 2.000 · Staub 1.000 · Gehärtetes Truegold 30.000 · Meisteremblem 6.000 · Manuskript 60 · Roulette 8.000 · Splitter selten/episch/mythisch 350/1.220/3.040 · Hammer 4.000 · Widget 8.000 · Mithril 40.000 · 1 Min. Beschleuniger 30",
-            "en": "Day 2 · Hero Development: Truegold 2,000 · Dust 1,000 · Tempered Truegold 30,000 · Master Emblem 6,000 · Manuscript 60 · Roulette 8,000 · rare/epic/mythic shard 350/1,220/3,040 · Forgehammer 4,000 · Widget 8,000 · Mithril 40,000 · 1 min speedup 30",
-            "fr": "Jour 2 · Héros : Or véritable 2 000 · Poussière 1 000 · Or trempé 30 000 · Emblème 6 000 · Manuscrit 60 · Roulette 8 000 · fragment rare/épique/mythique 350/1 220/3 040 · Marteau 4 000 · Widget 8 000 · Mithril 40 000 · 1 min d’accélération 30"
-          },
-          "steps": {
-            "de": [
-              "Vor dem Reset Heldensplitter, Roulette, Meistermaterialien, Schmiedehämmer, Widgets und Mithril zurückhalten.",
-              "Nach dem Reset nur die für NRW oder deinen geplanten Meilenstein vorgesehenen Heldenaktionen ausführen.",
-              "Überlappungen mit Golden Glaives zuerst nutzen, ohne zusätzliche KvK-Ressourcen auszugeben.",
-              "Keine Ranglistenjagd ohne ausdrückliche NRW-Abstimmung."
-            ],
-            "en": [
-              "Before reset, hold Hero Shards, Roulette, Master materials, Forgehammers, Widgets and Mithril.",
-              "After reset, perform only hero actions planned for NRW or your intended milestone.",
-              "Use overlaps with Golden Glaives first without spending extra KvK resources.",
-              "Do not chase rankings without explicit NRW coordination."
-            ],
-            "fr": [
-              "Avant le reset, conserve les fragments, la Roulette, les matériaux de Maître, Marteaux, Widgets et Mithril.",
-              "Après le reset, effectue uniquement les actions de héros prévues pour NRW ou ton palier.",
-              "Profite d’abord des chevauchements avec Golden Glaives sans dépenser de ressources KvK supplémentaires.",
-              "Ne vise pas le classement sans coordination NRW explicite."
-            ]
-          }
-        },
-        "2026-10-21": {
-          "points": {
-            "de": "Tag 3 · Grundfähigkeiten: Pet-Fortschritt +1: 50 · Zähmungsmarke fortgeschritten/gewöhnlich: 15.000/1.150 · Meisteremblem 6.000 · Manuskript 60 · Amulettwert +1: 70 · Roulette 8.000 · Splitter selten/episch/mythisch 350/1.220/3.040",
-            "en": "Day 3 · Basic Skill Up: Pet Advancement +1: 50 · Advanced/Common Taming Mark: 15,000/1,150 · Master Emblem 6,000 · Manuscript 60 · Charm score +1: 70 · Roulette 8,000 · rare/epic/mythic shard 350/1,220/3,040",
-            "fr": "Jour 3 · Compétences : progression de familier +1 : 50 · marque avancée/ordinaire : 15 000/1 150 · Emblème 6 000 · Manuscrit 60 · score d’Amulette +1 : 70 · Roulette 8 000 · fragment rare/épique/mythique 350/1 220/3 040"
-          },
-          "steps": {
-            "de": [
-              "Vor dem Reset Pet-Fortschritt, Zähmungsmarken, Meistermaterialien, Amulette, Roulette und Heldensplitter zurückhalten.",
-              "Nach dem Reset zuerst kostenlose bzw. ohnehin geplante Aktionen nutzen.",
-              "Pet- und Meistermaterialien nur einsetzen, wenn der NRW-Plan oder ein lohnender persönlicher Meilenstein dies vorsieht.",
-              "Keine Ressourcen allein für einen Ranglistenplatz verbrauchen."
-            ],
-            "en": [
-              "Before reset, hold Pet Advancement, Taming Marks, Master materials, Charms, Roulette and Hero Shards.",
-              "After reset, use free or already planned actions first.",
-              "Spend Pet and Master materials only when required by the NRW plan or a worthwhile personal milestone.",
-              "Do not consume resources solely for a ranking position."
-            ],
-            "fr": [
-              "Avant le reset, conserve la progression de familier, les marques, matériaux de Maître, Amulettes, Roulette et fragments.",
-              "Après le reset, utilise d’abord les actions gratuites ou déjà prévues.",
-              "Dépense les matériaux de familier et de Maître uniquement selon le plan NRW ou un palier personnel rentable.",
-              "Ne consomme aucune ressource uniquement pour une place au classement."
-            ]
-          }
-        },
-        "2026-10-22": {
-          "points": {
-            "de": "Tag 4 · Truppentraining: Amulettwert +1: 70 · Hammer 4.000 · Widget 8.000 · Mithril 40.000 · Truppen T11–T1: 49/39/30/23/16/11/7/5/3/2/1",
-            "en": "Day 4 · Combat Training: Charm score +1: 70 · Forgehammer 4,000 · Widget 8,000 · Mithril 40,000 · troops T11–T1: 49/39/30/23/16/11/7/5/3/2/1",
-            "fr": "Jour 4 · Entraînement : score d’Amulette +1 : 70 · Marteau 4 000 · Widget 8 000 · Mithril 40 000 · troupes T11–T1 : 49/39/30/23/16/11/7/5/3/2/1"
-          },
-          "steps": {
-            "de": [
-              "Truppen so vorbereiten, dass sie erst nach dem Reset abgeschlossen werden.",
-              "Ministerposten „Edler Berater“ rechtzeitig reservieren und bei geplanter Ausbildung mit dem 3.000-Edelstein-Trainingsbonus kombinieren.",
-              "Nach dem Reset vorbereitete Truppen abschließen, danach neue Trainingsserien starten.",
-              "Dies ist ein NRW-Fokustag; Discord-Vorgaben zu Ziel und Timing haben Vorrang."
-            ],
-            "en": [
-              "Prepare troop batches so they finish only after reset.",
-              "Reserve the Noble Advisor minister post in time and combine it with the 3,000-gem training boost when training is planned.",
-              "After reset, finish prepared troops first, then start new training batches.",
-              "This is an NRW focus day; Discord targets and timing take priority."
-            ],
-            "fr": [
-              "Prépare les troupes afin qu’elles se terminent seulement après le reset.",
-              "Réserve à temps le poste de Conseiller noble et combine-le avec le bonus d’entraînement à 3 000 gemmes si prévu.",
-              "Après le reset, termine d’abord les troupes préparées, puis lance de nouvelles séries.",
-              "C’est un jour prioritaire NRW ; les objectifs et horaires Discord sont prioritaires."
-            ]
-          }
-        },
-        "2026-10-23": {
-          "points": {
-            "de": "Tag 5 · Grundfähigkeiten: Hammer 4.000 · Widget 8.000 · Mithril 40.000 · Truegold 2.000 · Staub 1.000 · Gehärtetes Truegold 30.000 · 1 Min. Beschleuniger 30",
-            "en": "Day 5 · Basic Skill Up: Forgehammer 4,000 · Widget 8,000 · Mithril 40,000 · Truegold 2,000 · Dust 1,000 · Tempered Truegold 30,000 · 1 min speedup 30",
-            "fr": "Jour 5 · Compétences : Marteau 4 000 · Widget 8 000 · Mithril 40 000 · Or véritable 2 000 · Poussière 1 000 · Or trempé 30 000 · 1 min d’accélération 30"
-          },
-          "steps": {
-            "de": [
-              "Vor dem Reset Schmiedehämmer, Widgets, Mithril, Truegold und Beschleuniger zurückhalten.",
-              "Nach dem Reset zuerst die von NRW ausgewählten Aktionen und bereits geplanten Upgrades durchführen.",
-              "Nur bis zum angekündigten Ziel spielen; die zulässige Obergrenze ist ausdrücklich kein Ziel.",
-              "Discord-Absprachen bestimmen, ob Tag 5 der zusätzliche NRW-Fokustag ist."
-            ],
-            "en": [
-              "Before reset, hold Forgehammers, Widgets, Mithril, Truegold and speedups.",
-              "After reset, perform NRW-selected actions and upgrades already planned first.",
-              "Play only to the announced target; the permitted cap is explicitly not a target.",
-              "Discord coordination determines whether Day 5 is the additional NRW focus day."
-            ],
-            "fr": [
-              "Avant le reset, conserve Marteaux, Widgets, Mithril, Or véritable et accélérateurs.",
-              "Après le reset, effectue d’abord les actions choisies par NRW et les améliorations déjà prévues.",
-              "Joue uniquement jusqu’à l’objectif annoncé ; la limite autorisée n’est explicitement pas un objectif.",
-              "La coordination Discord détermine si le Jour 5 est le jour prioritaire supplémentaire."
-            ]
-          }
-        },
-        "2026-10-24": {
-          "points": {
-            "de": "Tag 6 · Truppentraining: Ausrüstungswert +1: 36 · Truppen T11–T1: 49/39/30/23/16/11/7/5/3/2/1",
-            "en": "Day 6 · Combat Training: Gear score +1: 36 · troops T11–T1: 49/39/30/23/16/11/7/5/3/2/1",
-            "fr": "Jour 6 · Entraînement : score d’Équipement +1 : 36 · troupes T11–T1 : 49/39/30/23/16/11/7/5/3/2/1"
-          },
-          "steps": {
-            "de": [
-              "Truppen so vorbereiten, dass sie erst nach dem Reset abgeschlossen werden.",
-              "Ministerposten und Trainingsbonus wie an Tag 4 nur für geplante Ausbildung kombinieren.",
-              "Nach dem Reset vorbereitete Truppen abschließen und anschließend weitere Trainingsserien starten.",
-              "Dies ist ein NRW-Fokustag; vor dem Tagesende zusätzlich lange Sammler für Tag 7 losschicken und Bison während des Sammelns aktivieren."
-            ],
-            "en": [
-              "Prepare troop batches so they finish only after reset.",
-              "Combine the minister post and training boost as on Day 4, but only for planned training.",
-              "After reset, finish prepared troops and then start further training batches.",
-              "This is an NRW focus day; before the day ends, send long gathering marches for Day 7 and activate Bison while they gather."
-            ],
-            "fr": [
-              "Prépare les troupes afin qu’elles se terminent seulement après le reset.",
-              "Combine le poste ministériel et le bonus comme au Jour 4, uniquement pour un entraînement prévu.",
-              "Après le reset, termine les troupes préparées puis lance d’autres séries.",
-              "C’est un jour prioritaire NRW ; avant la fin, envoie de longues collectes pour le Jour 7 et active le Bison pendant la collecte."
-            ]
-          }
-        },
-        "2026-10-25": {
-          "points": {
-            "de": "Tag 7 · Heldenentwicklung: Pet-Fortschritt +1: 50 · Zähmungsmarke fortgeschritten/gewöhnlich 15.000/1.150 · Ausrüstungswert +1: 36 · Truegold 2.000 · Staub 1.000 · Gehärtetes Truegold 30.000 · 1 Min. Beschleuniger 30 · Splitter selten/episch/mythisch 350/1.220/3.040 · Sammeln 3 Punkte je 2.500 Brot/Holz, 500 Stein oder 100 Eisen",
-            "en": "Day 7 · Hero Development: Pet Advancement +1: 50 · Advanced/Common Taming Mark 15,000/1,150 · Gear score +1: 36 · Truegold 2,000 · Dust 1,000 · Tempered Truegold 30,000 · 1 min speedup 30 · rare/epic/mythic shard 350/1,220/3,040 · gathering 3 points per 2,500 Bread/Wood, 500 Stone or 100 Iron",
-            "fr": "Jour 7 · Héros : progression de familier +1 : 50 · marque avancée/ordinaire 15 000/1 150 · score d’Équipement +1 : 36 · Or véritable 2 000 · Poussière 1 000 · Or trempé 30 000 · 1 min d’accélération 30 · fragment rare/épique/mythique 350/1 220/3 040 · collecte 3 points pour 2 500 Pain/Bois, 500 Pierre ou 100 Fer"
-          },
-          "steps": {
-            "de": [
-              "Die vor dem Reset gestarteten Sammler erst nach dem Reset zurückkehren lassen.",
-              "Danach einen neuen Sammelmarsch senden: Die vorbereitete Bison-Fähigkeit lässt ihn sofort vollständig gesammelt zurückkehren.",
-              "Nach Ablauf des tatsächlichen Bison-Cooldowns Bison erneut für eine weitere Sofort-Sammlung nutzen.",
-              "Weitere Helden-, Pet-, Gear- und Truegold-Aktionen nur nach NRW-/Discord-Plan durchführen."
-            ],
-            "en": [
-              "Let gathering marches sent before reset return only after reset.",
-              "Then send a new gathering march: the prepared Bison ability makes it return immediately with a full load.",
-              "After Bison’s actual cooldown ends, use Bison again for another instant collection.",
-              "Perform further Hero, Pet, Gear and Truegold actions only according to the NRW/Discord plan."
-            ],
-            "fr": [
-              "Laisse les collecteurs envoyés avant le reset revenir uniquement après le reset.",
-              "Envoie ensuite une nouvelle collecte : la compétence préparée du Bison la fait revenir immédiatement avec une charge complète.",
-              "Après le véritable temps de recharge, utilise de nouveau le Bison pour une autre collecte instantanée.",
-              "Effectue les autres actions de Héros, Familier, Équipement et Or véritable uniquement selon le plan NRW/Discord."
-            ]
-          }
-        }
-      },
-      "sourceUrl": "https://kingshotdata.com/events/strongest-governor-event/"
-    },
-    {
       "id": "alliance-mobilization-2026-10-26",
       "start": "2026-10-26",
       "end": "2026-10-31",
@@ -1463,6 +1241,201 @@
         }
       },
       "sourceUrl": "https://kingshotdata.com/events/officer-project-event/"
+    },
+    {
+      "id": "kingdom-of-power-2026-11-02",
+      "start": "2026-11-02",
+      "end": "2026-11-08",
+      "icon": "👑",
+      "iconUrl": "https://kingshotdata.com/uploads/2025/05/kingdom-of-power-event-icon.webp",
+      "confidence": "public-timeline",
+      "name": {
+        "de": "Königreich der Macht · KvK",
+        "en": "Kingdom of Power · KvK",
+        "fr": "Royaume de puissance · KvK"
+      },
+      "tips": {
+        "de": [
+          "KvK ist der NRW-Hauptfokus: Ressourcen entsprechend der Discord-Abstimmung einsetzen.",
+          "Die Vorbereitung läuft fünf Tage; die Kampfphase beginnt am Samstag um 10:00 UTC.",
+          "Individuelle Kampfaufstellungen und Ziele werden nicht im Feed festgelegt – Discord-Anweisungen haben Vorrang."
+        ],
+        "en": [
+          "KvK is NRW’s main focus: spend resources according to Discord coordination.",
+          "Preparation runs for five days; the Battle Phase starts Saturday at 10:00 UTC.",
+          "Individual battle formations and targets are not set in the feed—Discord instructions take priority."
+        ],
+        "fr": [
+          "Le KvK est la priorité principale de NRW : utilise les ressources selon la coordination Discord.",
+          "La préparation dure cinq jours ; la phase de bataille commence samedi à 10:00 UTC.",
+          "Les formations et objectifs de combat individuels ne sont pas définis ici — les consignes Discord sont prioritaires."
+        ]
+      },
+      "dailyPlans": {
+        "2026-11-02": {
+          "points": {
+            "de": "Tag 1 · Stadtbau: Amulettwert +1: 70 · Truegold: 2.000 · Truegoldstaub: 1.000 · Gehärtetes Truegold: 30.000 · 1 Min. Bau-/Forschungs-/Trainings-/Meister-Beschleuniger: 30 · Intel-Mission: 6.000",
+            "en": "Day 1 · City Construction: Charm score +1: 70 · Truegold: 2,000 · Truegold Dust: 1,000 · Tempered Truegold: 30,000 · 1 min construction/research/training/Master speedup: 30 · Intel Mission: 6,000",
+            "fr": "Jour 1 · Construction : score d’Amulette +1 : 70 · Or véritable : 2 000 · Poussière : 1 000 · Or trempé : 30 000 · 1 min d’accélération construction/recherche/entraînement/Maître : 30 · Mission Intel : 6 000"
+          },
+          "steps": {
+            "de": [
+              "Vor dem Reset Bau- und Forschungsabschlüsse, Amulettverbesserungen, Truegold sowie Beschleuniger zurückhalten.",
+              "Intel-Missionen so vorbereiten, dass sie erst nach dem Reset abgeschlossen werden; Punkte entstehen beim Abschluss.",
+              "Nach dem Reset zuerst vorbereitete Abschlüsse und Intel-Missionen ausführen, danach geplante Truegold- und Amulettverbesserungen.",
+              "Ressourcen nach NRW-/Discord-Ziel einsetzen; KvK hat Vorrang vor parallelen Nebenevents."
+            ],
+            "en": [
+              "Before reset, hold construction/research completions, Charm upgrades, Truegold and speedups.",
+              "Prepare Intel Missions so they are completed only after reset; points are awarded on completion.",
+              "After reset, finish prepared upgrades and Intel Missions first, then perform planned Truegold and Charm upgrades.",
+              "Spend resources according to the NRW/Discord target; KvK takes priority over side events."
+            ],
+            "fr": [
+              "Avant le reset, conserve les fins de construction/recherche, améliorations d’Amulette, Or véritable et accélérateurs.",
+              "Prépare les Missions Intel afin de les terminer seulement après le reset ; les points sont accordés à la fin.",
+              "Après le reset, termine d’abord les améliorations et Missions Intel préparées, puis les améliorations d’Or véritable et d’Amulette prévues.",
+              "Utilise les ressources selon l’objectif NRW/Discord ; le KvK est prioritaire sur les événements secondaires."
+            ]
+          }
+        },
+        "2026-11-03": {
+          "points": {
+            "de": "Tag 2 · Grundfähigkeiten: Truegold 2.000 · Staub 1.000 · Gehärtetes Truegold 30.000 · 1 Min. Beschleuniger 30 · Roulette 8.000 · Splitter selten/episch/mythisch 350/1.220/3.040 · Meisteremblem 6.000 · Manuskript 60 · Sammeln: 2 Punkte je 1.000 Brot/Holz, 200 Stein oder 50 Eisen",
+            "en": "Day 2 · Basic Skills: Truegold 2,000 · Dust 1,000 · Tempered Truegold 30,000 · 1 min speedup 30 · Roulette 8,000 · rare/epic/mythic shard 350/1,220/3,040 · Master Emblem 6,000 · Manuscript 60 · gathering: 2 points per 1,000 Bread/Wood, 200 Stone or 50 Iron",
+            "fr": "Jour 2 · Compétences : Or véritable 2 000 · Poussière 1 000 · Or trempé 30 000 · 1 min d’accélération 30 · Roulette 8 000 · fragment rare/épique/mythique 350/1 220/3 040 · Emblème 6 000 · Manuscrit 60 · collecte : 2 points pour 1 000 Pain/Bois, 200 Pierre ou 50 Fer"
+          },
+          "steps": {
+            "de": [
+              "Vor dem Reset lange Sammler losschicken und erst nach dem Reset zurückkehren lassen; Heldensplitter, Roulette und Meistermaterialien zurückhalten.",
+              "Nach dem Reset zuerst die vorbereiteten Sammler zurückholen, danach Roulette, Splitter und Meisteraktionen gemäß NRW-Plan ausführen.",
+              "Wenn die Bison-Sofortsammlung verfügbar ist, nach der vorbereiteten Rückkehr einen neuen Sammelmarsch senden und Bison nutzen.",
+              "Bison erst nach seinem tatsächlichen Cooldown erneut einsetzen; keine Fähigkeit vorzeitig verschwenden."
+            ],
+            "en": [
+              "Before reset, send long gathering marches to return only after reset; hold Hero Shards, Roulette and Master materials.",
+              "After reset, recall prepared gatherers first, then use Roulette, Shards and Master actions according to the NRW plan.",
+              "If Bison’s instant collection is available, send a new gathering march after the prepared returns and use Bison.",
+              "Use Bison again only after its actual cooldown; do not waste the skill early."
+            ],
+            "fr": [
+              "Avant le reset, envoie de longues collectes qui reviennent seulement après le reset ; conserve fragments, Roulette et matériaux de Maître.",
+              "Après le reset, récupère d’abord les collecteurs préparés, puis utilise Roulette, fragments et actions de Maître selon le plan NRW.",
+              "Si la collecte instantanée du Bison est disponible, envoie une nouvelle collecte après les retours préparés puis utilise le Bison.",
+              "Réutilise le Bison seulement après son véritable temps de recharge ; ne gaspille pas la compétence."
+            ]
+          }
+        },
+        "2026-11-04": {
+          "points": {
+            "de": "Tag 3 · Pet-Training: Pet-Fortschritt +1: 50 · Zähmungsmarke fortgeschritten/gewöhnlich: 15.000/1.150 · Amulettwert +1: 70 · Roulette: 8.000 · Splitter selten/episch/mythisch: 350/1.220/3.040 · Intel-Mission: 6.000 · Meisteremblem: 6.000 · Manuskript: 60",
+            "en": "Day 3 · Pet Training: Pet Advancement +1: 50 · Advanced/Common Taming Mark: 15,000/1,150 · Charm score +1: 70 · Roulette: 8,000 · rare/epic/mythic shard: 350/1,220/3,040 · Intel Mission: 6,000 · Master Emblem: 6,000 · Manuscript: 60",
+            "fr": "Jour 3 · Familiers : progression +1 : 50 · marque avancée/ordinaire : 15 000/1 150 · score d’Amulette +1 : 70 · Roulette : 8 000 · fragment rare/épique/mythique : 350/1 220/3 040 · Mission Intel : 6 000 · Emblème : 6 000 · Manuscrit : 60"
+          },
+          "steps": {
+            "de": [
+              "Vor dem Reset Pet-Fortschritt, Zähmungsmarken, Amulettmaterialien, Roulette, Splitter und Meistermaterialien zurückhalten.",
+              "Intel-Missionen so vorbereiten, dass der Abschluss erst nach dem Reset erfolgt.",
+              "Nach dem Reset zuerst Intel und kostenlose bzw. ohnehin geplante Aktionen nutzen, danach die NRW-priorisierten Pet-, Helden- und Meistermaterialien.",
+              "Pet-Fähigkeiten mit Cooldown sind für diese Punktequellen nicht erforderlich; nicht unnötig aktivieren."
+            ],
+            "en": [
+              "Before reset, hold Pet Advancement, Taming Marks, Charm materials, Roulette, Shards and Master materials.",
+              "Prepare Intel Missions so completion happens only after reset.",
+              "After reset, use Intel and free or already planned actions first, then NRW-prioritized Pet, Hero and Master materials.",
+              "Cooldown-based Pet skills are not required for these scoring sources; do not activate them unnecessarily."
+            ],
+            "fr": [
+              "Avant le reset, conserve progression de familier, marques, matériaux d’Amulette, Roulette, fragments et matériaux de Maître.",
+              "Prépare les Missions Intel afin de les terminer seulement après le reset.",
+              "Après le reset, utilise d’abord Intel et les actions gratuites ou déjà prévues, puis les matériaux de Familier, Héros et Maître prioritaires NRW.",
+              "Les compétences de Familier avec recharge ne sont pas nécessaires pour ces sources de points ; ne les active pas inutilement."
+            ]
+          }
+        },
+        "2026-11-05": {
+          "points": {
+            "de": "Tag 4 · Heldenentwicklung: Amulettwert +1: 70 · Schmiedehammer: 4.000 · Widget: 8.000 · Mithril: 40.000 · Truppen T11–T1: 75/60/45/35/25/18/12/8/5/4/3 · Sammeln: 2 Punkte je 1.000 Brot/Holz, 200 Stein oder 50 Eisen",
+            "en": "Day 4 · Hero Development: Charm score +1: 70 · Forgehammer: 4,000 · Widget: 8,000 · Mithril: 40,000 · troops T11–T1: 75/60/45/35/25/18/12/8/5/4/3 · gathering: 2 points per 1,000 Bread/Wood, 200 Stone or 50 Iron",
+            "fr": "Jour 4 · Héros : score d’Amulette +1 : 70 · Marteau : 4 000 · Widget : 8 000 · Mithril : 40 000 · troupes T11–T1 : 75/60/45/35/25/18/12/8/5/4/3 · collecte : 2 points pour 1 000 Pain/Bois, 200 Pierre ou 50 Fer"
+          },
+          "steps": {
+            "de": [
+              "Vor dem Reset Truppenserien so vorbereiten, dass sie erst danach abgeschlossen werden; zusätzlich lange Sammler losschicken.",
+              "Ministerposten „Edler Berater“ rechtzeitig reservieren und bei geplanter Ausbildung mit dem 3.000-Edelstein-Trainingsbonus kombinieren.",
+              "Nach dem Reset zuerst vorbereitete Truppen und Sammler abschließen, danach neue Trainingsserien starten.",
+              "Schmiedehämmer, Widgets, Mithril und Amulette erst anschließend entsprechend dem NRW-Tagesziel einsetzen."
+            ],
+            "en": [
+              "Before reset, prepare troop batches to finish only afterward and send long gathering marches.",
+              "Reserve the Noble Advisor minister post in time and combine it with the 3,000-gem training boost when training is planned.",
+              "After reset, finish prepared troops and gatherers first, then start new training batches.",
+              "Use Forgehammers, Widgets, Mithril and Charms afterward according to the NRW daily target."
+            ],
+            "fr": [
+              "Avant le reset, prépare les séries de troupes pour qu’elles se terminent après et envoie de longues collectes.",
+              "Réserve à temps le poste de Conseiller noble et combine-le avec le bonus d’entraînement à 3 000 gemmes si prévu.",
+              "Après le reset, termine d’abord les troupes et collecteurs préparés, puis lance de nouvelles séries.",
+              "Utilise ensuite Marteaux, Widgets, Mithril et Amulettes selon l’objectif quotidien NRW."
+            ]
+          }
+        },
+        "2026-11-06": {
+          "points": {
+            "de": "Tag 5 · Machtsteigerung: Pet-Fortschritt +1: 50 · Zähmungsmarke fortgeschritten/gewöhnlich: 15.000/1.150 · Mithril: 40.000 · Ausrüstungswert +1: 36 · Hammer: 4.000 · Widget: 8.000 · Truegold: 2.000 · Staub: 1.000 · Gehärtetes Truegold: 30.000 · 1 Min. Beschleuniger: 30 · Intel: 6.000 · Sammeln: 2 Punkte je 1.000 Brot/Holz, 200 Stein oder 50 Eisen",
+            "en": "Day 5 · Power Boost: Pet Advancement +1: 50 · Advanced/Common Taming Mark: 15,000/1,150 · Mithril: 40,000 · Gear score +1: 36 · Forgehammer: 4,000 · Widget: 8,000 · Truegold: 2,000 · Dust: 1,000 · Tempered Truegold: 30,000 · 1 min speedup: 30 · Intel: 6,000 · gathering: 2 points per 1,000 Bread/Wood, 200 Stone or 50 Iron",
+            "fr": "Jour 5 · Puissance : progression de familier +1 : 50 · marque avancée/ordinaire : 15 000/1 150 · Mithril : 40 000 · score d’Équipement +1 : 36 · Marteau : 4 000 · Widget : 8 000 · Or véritable : 2 000 · Poussière : 1 000 · Or trempé : 30 000 · 1 min d’accélération : 30 · Intel : 6 000 · collecte : 2 points pour 1 000 Pain/Bois, 200 Pierre ou 50 Fer"
+          },
+          "steps": {
+            "de": [
+              "Vor dem Reset Intel-Missionen, lange Sammler und alle vorgesehenen Pet-, Gear- und Truegold-Materialien vorbereiten beziehungsweise zurückhalten.",
+              "Nach dem Reset zuerst Intel-Missionen und vorbereitete Sammler abschließen.",
+              "Danach Pet-, Gear-, Schmiedehammer-, Widget-, Mithril- und Truegold-Aktionen in der von NRW festgelegten Reihenfolge ausführen.",
+              "Bison nur für eine zusätzliche Sofortsammlung nutzen, wenn die Fähigkeit verfügbar ist; den tatsächlichen Cooldown beachten."
+            ],
+            "en": [
+              "Before reset, prepare Intel Missions and long gathering marches, and hold all planned Pet, Gear and Truegold materials.",
+              "After reset, complete Intel Missions and prepared gatherers first.",
+              "Then perform Pet, Gear, Forgehammers, Widgets, Mithril and Truegold actions in the order set by NRW.",
+              "Use Bison for an extra instant collection only when the skill is available; respect its actual cooldown."
+            ],
+            "fr": [
+              "Avant le reset, prépare Missions Intel et longues collectes, puis conserve tous les matériaux de Familier, Équipement et Or véritable prévus.",
+              "Après le reset, termine d’abord les Missions Intel et les collecteurs préparés.",
+              "Effectue ensuite les actions de Familier, Équipement, Marteaux, Widgets, Mithril et Or véritable dans l’ordre fixé par NRW.",
+              "Utilise le Bison pour une collecte instantanée supplémentaire uniquement si la compétence est disponible ; respecte son véritable temps de recharge."
+            ]
+          }
+        },
+        "2026-11-07": {
+          "points": {
+            "de": "Kampfphase: 1 Punkt je 1.000 Besetzungsmacht pro 60 Sek. · besiegte/verlorene feindliche Truppen T1–T10: 1/1/2/3/4/5/7/9/11/13",
+            "en": "Battle Phase: 1 point per 1,000 occupation power per 60 sec · defeated/lost enemy troops T1–T10: 1/1/2/3/4/5/7/9/11/13",
+            "fr": "Phase de bataille : 1 point par 1 000 de puissance d’occupation pendant 60 s · troupes ennemies vaincues/perdues T1–T10 : 1/1/2/3/4/5/7/9/11/13"
+          },
+          "steps": {
+            "de": [
+              "Vor 10:00 UTC Schild, Teleporter, Heilressourcen und die Discord-Kommunikation vorbereiten.",
+              "Die serverübergreifende Kampfphase läuft ab 10:00 UTC; die Burgschlacht beginnt um 12:00 UTC.",
+              "Nur nach der für deinen Kampf festgelegten Formation und Rolle handeln; individuelle Strategien werden im Feed bewusst nicht vorgegeben.",
+              "Wer nicht aktiv kämpft, bleibt geschützt und folgt den NRW-/Serveranweisungen."
+            ],
+            "en": [
+              "Before 10:00 UTC, prepare shield, teleporters, healing resources and Discord communication.",
+              "Cross-kingdom battle starts at 10:00 UTC; the Castle battle begins at 12:00 UTC.",
+              "Act only according to the formation and role assigned for your battle; individual strategies are intentionally not prescribed in the feed.",
+              "Anyone not fighting actively stays shielded and follows NRW/server instructions."
+            ],
+            "fr": [
+              "Avant 10:00 UTC, prépare bouclier, téléporteurs, ressources de soin et communication Discord.",
+              "Le combat inter-royaumes commence à 10:00 UTC ; la bataille du Château commence à 12:00 UTC.",
+              "Agis uniquement selon la formation et le rôle attribués à ton combat ; les stratégies individuelles ne sont volontairement pas imposées ici.",
+              "Toute personne ne combattant pas activement reste protégée et suit les consignes NRW/serveur."
+            ]
+          }
+        }
+      },
+      "sourceUrl": "https://kingshotdata.com/events/kingdom-of-power-kvk-event/"
     }
   ]
 }
