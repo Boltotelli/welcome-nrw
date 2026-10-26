@@ -1076,10 +1076,23 @@ function predicted(){
     {ready:false};
   const line=el('div','bear-name-score');
   const label=T(sc.label).replace('(Lv5)',T('(Lv5)'));
-  line.append(el('strong','',label),
-   el('span','',answer.ready?whole(answer.estimatedIndex)+' '+T('Modellindex')+
-    ' · ×'+combo.multiplier.toFixed(2):
-    T('Berechnung nicht verfügbar')));
+  line.append(el('strong','',label));
+  // Show modeled damage distribution, not the old relative model index, as
+  // the primary result. The two figures use the SAME troop-proc simulation.
+  if(answer.ready&&answer.distribution?.ready){
+   const dist=answer.distribution;
+   const primary=el('div','bear-name-score-primary');
+   for(const [heading,value] of [
+    ['Ø Schaden (1.000 Simulationen)',dist.average],
+    ['Theoretisches Maximum (Truppen-Procs)',dist.theoreticalMaximum]
+   ]){
+    const metric=el('div','bear-name-score-metric');
+    metric.append(el('small','bear-name-score-metric-label',heading),
+     el('strong','bear-name-score-metric-value',whole(value)));
+    primary.append(metric);
+   }
+   line.append(primary);
+  }else line.append(el('span','',T('Berechnung nicht verfügbar')));
   if(combo.ready){
    if(sc.id==='mixed'&&compared[0]?.combo?.multiplier===combo.multiplier)
     line.append(el('small','bear-name-score-detail',T('Beste geprüfte Level-5-Kombination')));
@@ -1092,9 +1105,7 @@ function predicted(){
   if(answer.ready&&answer.distribution?.ready){
    const dist=answer.distribution;
    line.append(el('small','bear-name-score-detail',
-    T('Ø 1.000 Simulationen (Truppen-Procs): ')+whole(dist.average)+
-    ' · '+T('95. Perzentil: ')+whole(dist.percentile95)+
-    ' · '+T('Theoretisches Maximum: ')+whole(dist.theoreticalMaximum)));
+    T('95. Perzentil: ')+whole(dist.percentile95)));
    if(answer.isUpperConditional)
     line.append(el('small','bear-name-score-detail',
      T('Unbestätigte Helden-Effekte: mögliche Modellobergrenze ')+whole(answer.upper)));
@@ -1112,8 +1123,9 @@ function predicted(){
   'Die Starter-Truppenzahlen stehen ausschließlich in der Formationskarte. Beide Berechnungen verwenden dieselbe Aufstellung.'),
   el('p','bear-name-muted','Maximal vier erste Joiner-Expeditionsfähigkeiten wirken. Innerhalb derselben Effektgruppe addieren sich alle aktiven Boni – auch viermal Chenko. Zwischen Gruppe 101 und Gruppe 102 werden die Summen multipliziert. Vier Chenko ergeben 2,00×, zwei Chenko plus zwei Amane 2,25×.'),
   lines,el('p','bear-name-warning',
-   '⚠ Geschätzter Modellwert – kein bestätigter Kingshot-Schadenswert.'),
-  el('p','bear-name-muted','Simulation berücksichtigt die bekannten T-/TG-Truppenfähigkeiten. Nicht verifizierte Helden-Auslösungen und fremde Rallywerte bleiben Modellannahmen.'));
+   '⚠ Geschätzter Schaden – kein bestätigter Kingshot-Schadenswert.'),
+  el('p','bear-name-muted','Simulation berücksichtigt die bekannten T-/TG-Truppenfähigkeiten. Nicht verifizierte Helden-Auslösungen und fremde Rallywerte bleiben Modellannahmen.'),
+  el('p','bear-name-muted','Das theoretische Maximum setzt alle berücksichtigten Truppen-Procs in jeder Runde voraus und ist kein realistischer Erwartungswert.'));
  lastResult=best;return out;
 }
 function languageSwitcher(){
