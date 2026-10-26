@@ -61,6 +61,33 @@ body.bear-name-mode>*:not(#bearNewApp){display:none!important}
  display:block;flex:1 0 100%;min-width:0;color:var(--war-muted,#b8c6d6);
  font-size:12px;line-height:1.5;font-weight:500;overflow-wrap:anywhere
 }
+/* The average and theoretical maximum are the primary damage results.
+ * Keep both fully visible on phones instead of forcing nowrap or overflow. */
+.bear-name-score .bear-name-score-primary{
+ display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;
+ flex:1 0 100%;width:100%;min-width:0;margin:4px 0 2px
+}
+.bear-name-score .bear-name-score-metric{
+ display:flex;flex-direction:column;align-items:flex-start;justify-content:center;
+ min-width:0;gap:5px;padding:13px 14px;border-radius:12px;
+ border:1px solid #5b6675;background:#223348
+}
+.bear-name-score .bear-name-score-metric:first-child{
+ border-color:#b98a52;background:#3a3440
+}
+.bear-name-score .bear-name-score-metric-label{
+ display:block;color:#d0dbe7;font-size:12px;font-weight:650;
+ line-height:1.35;overflow-wrap:anywhere
+}
+.bear-name-score .bear-name-score-metric-value{
+ display:block;max-width:100%;color:#ffd48b;font-size:clamp(18px,2.5vw,25px);
+ line-height:1.1;font-weight:900;letter-spacing:.01em;overflow-wrap:anywhere
+}
+@media(max-width:540px){
+ .bear-name-score .bear-name-score-primary{grid-template-columns:1fr;gap:7px}
+ .bear-name-score .bear-name-score-metric{padding:11px 12px}
+ .bear-name-score .bear-name-score-metric-value{font-size:23px}
+}
 
 .bear-name-result{font-size:18px;font-weight:900;color:#ffd284}
 .bear-name-warning{padding:13px;background:#4c3421;border:1px solid #98703b;border-radius:12px;color:#ffe1bc;font-size:12px}
