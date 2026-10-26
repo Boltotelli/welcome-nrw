@@ -1,0 +1,91 @@
+import {buildDeployment,deploymentTargets} from './deployment-engine.js?v=20261021-plan-1';
+
+const en={title:'Plan deployment groups',intro:'Existing legions stay unchanged. Generate a proposal, review it, then apply the map assignments.',legion:'Legion',guerrilla:'Top players as GUERILLA',secure:'Weakest remaining players as SECURE',ratio:'NORTH share of North/South players (%)',priority:'Strong players per priority objective',side:'Confirmed TriAlliance starting side',choose:'Choose …',north:'NORTH priority objective',south:'SOUTH priority objective',keep:'Keep existing map assignments',unknown:'Include unknown availability',family:'Only one account per person',preview:'Generate preview',apply:'Apply assignments',close:'Close',cancel:'Cancel',draft:'Preview · not saved',groups:'Deployment groups',copy:'Copy labels',names:'Copy names',excluded:'Not redistributed',power:'Recorded power',target:'Objective',player:'Player',count:'Players',retained:'Retained',empty:'No eligible players. Check legion, availability and recorded power.',saved:'Assignments saved.',failed:'Saving stopped. Completed assignments remain saved; retry the remaining ones.',stale:'The roster, power values or map plan changed. Generate a new preview.',pending:'Saving',copied:'Copied',copyFail:'Clipboard unavailable. Select and copy the displayed text.',rules:'GUERILLA takes the strongest eligible players first. SECURE takes the weakest remaining players. North/South is balanced by recorded power and player count. Priority objectives receive their group’s strongest players first.',triNote:'Choose the actual starting side. North/South refers to the upper/lower half of its numbered positions. No starting side is inferred.',missing:'Accounts without recorded power are not redistributed. General power is only a planning aid.',invalid_settings:'Enter valid values within the shown limits.',choose_side:'Choose the confirmed starting side.',choose_targets:'Choose a priority objective for North and South.',inactive:'Inactive account',unavailable:'Unavailable',availability:'Availability unknown',familyReason:'Another account of this person is included',powerReason:'No recorded power',error:'Unable to generate proposal.',scope:'Proposal for',changes:'changes',partial:'already saved',update:'Settings changed. Generate a fresh preview.'};
+const words={en,de:{...en,title:'Einsatzgruppen automatisch planen',intro:'Die bestehenden Legionen bleiben unverändert. Erst Vorschlag berechnen, dann prüfen und die Kartenpositionen übernehmen.',legion:'Legion',guerrilla:'Stärkste Spieler als GUERILLA',secure:'Schwächste verbleibende Spieler als SECURE',ratio:'NORD-Anteil der Nord-/Süd-Spieler (%)',priority:'Starke Spieler pro Schwerpunkt',side:'Bestätigte Startseite bei TriAlliance',choose:'Bitte wählen …',north:'NORD-Schwerpunkt',south:'SÜD-Schwerpunkt',keep:'Vorhandene Kartenpositionen beibehalten',unknown:'Unklare Verfügbarkeit einbeziehen',family:'Nur ein Account pro Person',preview:'Vorschau berechnen',apply:'Zuordnungen übernehmen',close:'Schließen',cancel:'Abbrechen',draft:'Vorschau · noch nicht gespeichert',groups:'Einsatzgruppen',copy:'Labels kopieren',names:'Namen kopieren',excluded:'Nicht umverteilt',power:'Erfasste Kraft',target:'Ziel',player:'Spieler',count:'Spieler',retained:'Beibehalten',empty:'Keine geeigneten Spieler. Legion, Verfügbarkeit und erfasste Kraft prüfen.',saved:'Zuordnungen gespeichert.',failed:'Speichern angehalten. Erfolgreiche Zuordnungen bleiben gespeichert; die übrigen können erneut übernommen werden.',stale:'Legion, Kraftwerte oder Kartenplanung haben sich geändert. Bitte eine neue Vorschau berechnen.',pending:'Speichert',copied:'Kopiert',copyFail:'Zwischenablage nicht verfügbar. Den angezeigten Text markieren und kopieren.',rules:'GUERILLA erhält zuerst die stärksten geeigneten Spieler. SECURE erhält die schwächsten verbleibenden Spieler. Nord/Süd wird nach Kraft und Spielerzahl ausgeglichen. Die Schwerpunkte erhalten zuerst die stärksten Spieler ihrer Gruppe.',triNote:'Die tatsächliche Startseite wählen. Nord/Süd bezieht sich auf die obere/untere Hälfte ihrer nummerierten Positionen. Eine Startseite wird nicht automatisch angenommen.',missing:'Accounts ohne erfasste Kraft werden nicht umverteilt. Allgemeine Spielerkraft ist nur eine Planungshilfe.',invalid_settings:'Bitte gültige Werte innerhalb der angezeigten Grenzen eingeben.',choose_side:'Bitte die bestätigte Startseite wählen.',choose_targets:'Bitte einen Schwerpunkt für Nord und Süd wählen.',inactive:'Inaktiver Account',unavailable:'Nicht verfügbar',availability:'Verfügbarkeit unklar',familyReason:'Ein anderer Account dieser Person ist eingeplant',powerReason:'Keine erfasste Kraft',error:'Vorschlag konnte nicht berechnet werden.',scope:'Vorschlag für',changes:'Änderungen',partial:'bereits gespeichert',update:'Vorgaben geändert. Bitte Vorschau neu berechnen.'},
+fr:{...en,title:'Planifier les groupes',intro:'Les légions existantes restent inchangées. Vérifiez la proposition avant de l’appliquer.',legion:'Légion',guerrilla:'Joueurs les plus forts en GUERILLA',secure:'Joueurs les plus faibles restants en SECURE',ratio:'Part NORD des joueurs Nord/Sud (%)',priority:'Joueurs forts par objectif prioritaire',side:'Côté de départ confirmé',choose:'Choisir …',north:'Objectif prioritaire NORD',south:'Objectif prioritaire SUD',keep:'Conserver les positions existantes',unknown:'Inclure la disponibilité inconnue',family:'Un compte par personne',preview:'Calculer l’aperçu',apply:'Appliquer les affectations',close:'Fermer',cancel:'Annuler',draft:'Aperçu · non enregistré',copy:'Copier les libellés',names:'Copier les noms',excluded:'Non réaffectés',power:'Puissance enregistrée',target:'Objectif',player:'Joueur',count:'Joueurs',retained:'Conservé',saved:'Affectations enregistrées.',pending:'Enregistrement',copied:'Copié',scope:'Proposition pour',changes:'modifications'},
+es:{...en,title:'Planificar grupos',intro:'Las legiones existentes no cambian. Revisa la propuesta antes de aplicarla.',legion:'Legión',guerrilla:'Jugadores más fuertes en GUERILLA',secure:'Jugadores más débiles restantes en SECURE',ratio:'Porcentaje NORTE de jugadores Norte/Sur (%)',priority:'Jugadores fuertes por objetivo prioritario',side:'Lado inicial confirmado',choose:'Elige …',north:'Objetivo prioritario NORTE',south:'Objetivo prioritario SUR',keep:'Mantener posiciones existentes',unknown:'Incluir disponibilidad desconocida',family:'Una cuenta por persona',preview:'Calcular vista previa',apply:'Aplicar asignaciones',close:'Cerrar',cancel:'Cancelar',draft:'Vista previa · sin guardar',copy:'Copiar etiquetas',names:'Copiar nombres',excluded:'Sin redistribuir',power:'Poder registrado',target:'Objetivo',player:'Jugador',count:'Jugadores',retained:'Conservado',saved:'Asignaciones guardadas.',pending:'Guardando',copied:'Copiado',scope:'Propuesta para',changes:'cambios'}};
+const GROUPS=['north','south','secure','guerrilla'],groupName=g=>({north:'NORD',south:'SÜD',secure:'SECURE',guerrilla:'GUERILLA'})[g];
+export function createDeploymentPlanner({getContext,getSites,getLanguage,request,esc,onUpdated}){
+ let dialog=null,proposal=null,revision='',busy=false,completed=new Set(),opener=null;
+ const t=k=>(words[getLanguage()]||words.en)[k]||en[k]||k;
+ const ctx=()=>getContext(),sites=()=>getSites();
+ const num=n=>Number(n).toLocaleString(getLanguage());
+ const titleFor=key=>sites().find(s=>s.key===key)?.name||key;
+ const signature=(data=null)=>{
+  const c=ctx(),fresh=Boolean(data);data||=c;
+  const roster=(data.assignments||[]).filter(a=>a.event_type===c.eventType&&a.battle_date===c.date&&Number(a.legion)===Number(dialog.querySelector('[name=legion]').value));
+  const ids=new Set(roster.map(a=>String(a.game_id)));
+  const sorted=a=>a.slice().sort((x,y)=>String(x.game_id).localeCompare(String(y.game_id)));
+  const playerRows=fresh?data.players:(c.allianceState?.players||c.players);
+  const people=new Map((playerRows||[]).map(p=>[String(p.game_id),p]));
+  return JSON.stringify([c.eventType,c.date,sorted(roster).map(a=>[a.game_id,a.legion,a.availability]),[...ids].sort().map(id=>{const p=people.get(id);return p?[id,p.name,p.active,p.member_status,p.main_game_id||'']:null;}),sorted(data.mapAssignments||data.map_assignments||[]).filter(m=>m.event_type===c.eventType&&m.battle_date===c.date&&ids.has(String(m.game_id))).map(m=>[m.game_id,m.location_key,m.updated_at||'']),sorted(data.powers||[]).filter(p=>ids.has(String(p.game_id))).map(p=>[p.game_id,p.power])]);
+ };
+ function settings(){const f=new FormData(dialog.querySelector('form'));return Object.fromEntries(['guerrilla','secure','northPercent','priorityCount','side','northTarget','southTarget'].map(k=>[k,f.get(k)]) .concat(['keepExisting','includeUnknown','onePerFamily'].map(k=>[k,f.has(k)])));}
+ function options(list,value){return '<option value="">'+esc(t('choose'))+'</option>'+list.map(s=>'<option value="'+esc(s.key)+'" '+(value===s.key?'selected':'')+'>'+esc(s.name)+'</option>').join('');}
+ function targetFields(){const c=ctx(),s=settings(),targets=deploymentTargets(c.eventType,sites(),s.side);
+  for(const g of ['north','south']){const select=dialog.querySelector('[name='+g+'Target]');const fallback=c.eventType==='swordland'?(g==='north'?'bell':'stables'):'';select.innerHTML=options(targets[g],targets[g].some(x=>x.key===s[g+'Target'])?s[g+'Target']:fallback);}
+ }
+ function status(message,error=false){const e=dialog.querySelector('[data-plan-status]');e.textContent=message;e.classList.toggle('is-error',error);}
+ function invalidate(){proposal=null;completed.clear();dialog.querySelector('[data-plan-results]').innerHTML='';dialog.querySelector('[data-plan-apply]').disabled=true;status(t('update'));}
+ function groupText(group,location=null){const list=proposal.rows.filter(p=>p.group===group&&(!location||p.location===location));return groupName(group)+(location?' · '+titleFor(location):'')+'\n'+list.map(p=>p.name).join(', ');}
+ function renderPreview(){
+  const result=dialog.querySelector('[data-plan-results]');
+  const cards=GROUPS.map(g=>{
+   const list=proposal.rows.filter(p=>p.group===g),locations=[...new Set(list.map(p=>p.location))];
+   return '<section class="deployment-group"><header><h3>'+groupName(g)+'</h3><span>'+list.length+' '+esc(t('count'))+'</span></header><p>'+esc(t('power'))+': <b>'+esc(proposal.groups[g].known?num(proposal.groups[g].power):'—')+'</b> · '+proposal.groups[g].known+'/'+list.length+'</p>'+
+    '<pre>'+esc(groupText(g))+'</pre><button class="ghost" type="button" data-plan-copy="'+g+'">'+esc(t('names'))+'</button>'+
+    locations.map(location=>'<details><summary>'+esc(titleFor(location))+' · '+list.filter(p=>p.location===location).length+'</summary><p>'+esc(list.filter(p=>p.location===location).map(p=>p.name+(p.locked?' · '+t('retained'):'')).join(', '))+'</p><button class="ghost" type="button" data-plan-copy="'+g+'" data-plan-location="'+esc(location)+'">'+esc(t('names'))+'</button></details>').join('')+'</section>';
+  }).join('');
+  result.innerHTML='<div class="deployment-preview-head"><div><strong>'+esc(t('draft'))+'</strong><p>'+esc(t('scope'))+' '+esc(proposal.eventType==='swordland'?'Swordland':'TriAlliance')+' · '+esc(proposal.date)+' · '+esc(t('legion'))+' '+proposal.legion+' · '+proposal.changes.length+' '+esc(t('changes'))+'</p></div><button class="ghost" type="button" data-plan-copy-all>'+esc(t('copy'))+'</button></div><div class="deployment-groups">'+cards+'</div>'+
+   (proposal.excluded.length?'<details class="deployment-excluded"><summary>'+esc(t('excluded'))+' · '+proposal.excluded.length+'</summary><ul>'+proposal.excluded.map(p=>'<li>'+esc(p.name)+' — '+esc(t(p.reason==='power'?'powerReason':p.reason==='family'?'familyReason':p.reason))+'</li>').join('')+'</ul></details>':'');
+  dialog.querySelector('[data-plan-apply]').disabled=!proposal.changes.length;
+  const heading=result.querySelector('.deployment-preview-head strong');heading.tabIndex=-1;heading.focus({preventScroll:true});result.scrollIntoView({block:'start',behavior:'instant'});
+ }
+ function generate(){
+  if(!dialog.querySelector('form').reportValidity())return;
+  try{proposal=buildDeployment({...ctx(),sites:sites(),legion:Number(dialog.querySelector('[name=legion]').value),settings:settings()});revision=signature();completed.clear();renderPreview();status(proposal.rows.length?'':t('empty'));}
+  catch(e){invalidate();status(t(e.message)||t('error'),true);}
+ }
+ async function apply(){
+  if(busy||!proposal)return;
+  if(revision!==signature()){invalidate();status(t('stale'),true);return;}
+  busy=true;dialog.querySelectorAll('button,input,select').forEach(e=>e.disabled=true);
+  try{
+   const [fresh,people]=await Promise.all([request('bootstrap',{action:'fightclub_data'}),request('bootstrap')]);
+   if(!fresh?.ok||!Array.isArray(people?.players))throw Error('invalid_fresh_data');
+   if(revision!==signature({...fresh,players:people.players})){
+    Object.assign(ctx().state,fresh);if(ctx().allianceState)ctx().allianceState.players=people.players;
+    status(t('stale'),true);proposal=null;onUpdated();return;
+   }
+   const todo=proposal.changes.filter(p=>!completed.has(p.game_id));
+   for(const p of todo){
+    status(t('pending')+' '+(completed.size+1)+' / '+proposal.changes.length);
+    const response=await request('bootstrap',{action:'fightclub_map_save',event_type:proposal.eventType,battle_date:proposal.date,game_id:p.game_id,location_key:p.location_key});
+    if(!response?.ok||!response.assignment)throw Error('save_failed');
+    const state=ctx().state;state.map_assignments=(state.map_assignments||[]).filter(m=>!(m.event_type===proposal.eventType&&m.battle_date===proposal.date&&String(m.game_id)===p.game_id));state.map_assignments.push(response.assignment);
+    completed.add(p.game_id);revision=signature();
+   }
+   status(t('saved')+' '+completed.size+' / '+proposal.changes.length);dialog.querySelector('.deployment-preview-head strong').textContent=t('saved');onUpdated();
+  }catch{status(t('failed')+' '+completed.size+' '+t('partial')+'.',true);onUpdated();}
+  finally{busy=false;dialog.querySelectorAll('button,input,select').forEach(e=>e.disabled=false);dialog.querySelector('[data-plan-apply]').disabled=!proposal||completed.size===proposal.changes.length;}
+ }
+ async function copy(value){try{await navigator.clipboard.writeText(value);status(t('copied'));}catch{status(t('copyFail'),true);}}
+ function close(){if(!busy)dialog.close();}
+ function open(button){
+  if(busy)return;opener=button;dialog?.remove();proposal=null;completed.clear();
+  const c=ctx();dialog=document.createElement('dialog');dialog.className='deployment-dialog';dialog.setAttribute('aria-labelledby','deploymentTitle');
+  const field=(label,name,value,min,max)=>'<label>'+esc(t(label))+'<input class="control" name="'+name+'" type="number" value="'+value+'" min="'+min+'" max="'+max+'" step="1" required></label>';
+  dialog.innerHTML='<header class="deployment-dialog-head"><div><h2 id="deploymentTitle">'+esc(t('title'))+'</h2><p>'+esc(t('intro'))+'</p><small>'+esc(c.eventType==='swordland'?'Swordland':'TriAlliance')+' · '+esc(c.date)+'</small></div><button class="ghost" type="button" data-plan-close>'+esc(t('close'))+'</button></header><form><div class="deployment-fields">'+
+   '<label>'+esc(t('legion'))+'<select class="control" name="legion"><option value="1">1</option><option value="2">2</option></select></label>'+field('guerrilla','guerrilla',2,0,50)+field('secure','secure',0,0,100)+field('ratio','northPercent',50,0,100)+field('priority','priorityCount',2,1,50)+
+   (c.eventType==='triforce'?'<label>'+esc(t('side'))+'<select class="control" name="side" required><option value="">'+esc(t('choose'))+'</option><option>A</option><option>B</option><option>C</option></select></label>':'<input type="hidden" name="side" value="">')+
+   '<label>'+esc(t('north'))+'<select class="control" name="northTarget" required></select></label><label>'+esc(t('south'))+'<select class="control" name="southTarget" required></select></label></div><div class="deployment-options">'+[['keepExisting','keep'],['includeUnknown','unknown'],['onePerFamily','family']].map(([name,label])=>'<label><input type="checkbox" name="'+name+'" '+(name==='includeUnknown'?'':'checked')+'>'+esc(t(label))+'</label>').join('')+'</div><p class="small-note">'+esc(t('rules'))+'</p><p class="small-note">'+esc(t(c.eventType==='triforce'?'triNote':'missing'))+'</p><button class="primary" type="submit" data-plan-generate>'+esc(t('preview'))+'</button></form><p class="deployment-status" data-plan-status role="status" aria-live="polite"></p><div data-plan-results></div><footer><button type="button" class="ghost" data-plan-close>'+esc(t('cancel'))+'</button><button type="button" class="primary" data-plan-apply disabled>'+esc(t('apply'))+'</button></footer>';
+  document.body.append(dialog);dialog.querySelector('[name=legion]').value=String(c.legion||1);targetFields();
+  dialog.querySelector('form').addEventListener('submit',e=>{e.preventDefault();generate();});
+  dialog.querySelector('form').addEventListener('change',e=>{if(e.target.name==='side')targetFields();invalidate();});
+  dialog.querySelector('form').addEventListener('input',e=>{if(e.target.type==='number')invalidate();});
+  dialog.addEventListener('cancel',e=>{if(busy)e.preventDefault();});dialog.addEventListener('close',()=>{const target=opener?.isConnected?opener:document.querySelector('[data-map-auto-plan]');target?.focus();});
+  dialog.addEventListener('click',e=>{const button=e.target.closest('button');if(!button)return;if(button.matches('[data-plan-close]'))close();else if(button.matches('[data-plan-apply]'))apply();else if(proposal&&button.matches('[data-plan-copy-all]'))copy(GROUPS.map(g=>groupText(g)).join('\n\n'));else if(proposal&&button.matches('[data-plan-copy]'))copy(groupText(button.dataset.planCopy,button.dataset.planLocation));});
+  dialog.showModal();dialog.querySelector('[name=legion]').focus();
+ }
+ return {open,label:()=>t('title'),reset(){if(busy)return;dialog?.close();dialog?.remove();dialog=null;proposal=null;}};
+}

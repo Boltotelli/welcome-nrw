@@ -12,7 +12,7 @@ export function createEventBotStatusPanel({supabase,can,flash,esc}){
  .aos-bot-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin:16px 0;}
  .aos-bot-stats>div{background:var(--surface-2,rgba(127,127,127,.08));border-radius:10px;padding:12px;}
  .aos-bot-stats b{display:block;font-size:1.05rem;overflow-wrap:anywhere}
- .aos-bot-table{overflow:auto;max-height:340px}
+ .aos-bot-table{overflow-x:auto;overscroll-behavior:auto;max-height:none}
  .aos-bot-table table{border-collapse:collapse;width:100%;min-width:760px;font-size:12px}
  .aos-bot-table td,.aos-bot-table th{padding:7px 9px;border-bottom:1px solid rgba(128,128,128,.25);text-align:left;}
  .aos-bot-warning{padding:7px 10px;border-left:3px solid #f59e0b;background:rgba(245,158,11,.09);margin:6px 0;}
@@ -21,11 +21,12 @@ export function createEventBotStatusPanel({supabase,can,flash,esc}){
  .aos-bot-filter>*{width:auto;min-width:155px}
  </style>
  <div class="filters"><div><span class="eyebrow">ALLIANCEOS · EVENT DISPATCHER</span>
- <h3>Bot-Status, Vorschau & Versandhistorie</h3>
- <p class="muted">Alle Zeiten UTC. Der Liveversand ist bis zur ausdrücklichen Freigabe zentral gesperrt.</p></div>
+ <h3>Bot-Status</h3>
+ <p class="muted">Verbindung, Versand und Scheduler · alle Zeiten UTC.</p></div>
  <button type="button" id="aosBotRefresh" class="ghost">↻ Aktualisieren</button></div>
  <p id="aosBotProgress" role="status" class="small-note">Status wird geladen…</p>
  <div id="aosBotSummary"></div>
+ <details class="ux-disclosure aos-bot-more"><summary>Vorschau, Versandhistorie & Bot-Steuerung</summary><div class="ux-disclosure-body">
  <div class="aos-bot-toolbar">
  <label class="field"><span>Testkanal</span><select id="aosBotTestLang" class="control">
  <option value="de">🇩🇪 DE</option><option value="en">🇬🇧 EN</option><option value="fr">🇫🇷 FR</option><option value="es">🇪🇸 ES</option></select></label>
@@ -52,10 +53,11 @@ export function createEventBotStatusPanel({supabase,can,flash,esc}){
   <input class="control" id="aosBotEventFilter" placeholder="Event filtern…">
  </div>
  <div id="aosBotHistory" class="aos-bot-table"></div>
- <p class="muted">Unklar = Discord könnte trotz technischer Unterbrechung versendet haben. Vor manuellem Eingriff im Kanal prüfen.</p>
+ <p class="muted">Unklar = Discord könnte trotz technischer Unterbrechung versendet haben. Vor manuellem Eingriff im Kanal prüfen.</p></div></details>
  `;
  const target=document.querySelector('[data-page="discord"] .discord-bot-layout');
- if(target)target.before(root);
+ const heading=document.querySelector('[data-page="discord"] .page-heading');
+ if(heading)heading.after(root);else if(target)target.before(root);
  const $=id=>document.getElementById(id);
  const at=x=>x?new Date(x).toISOString().slice(0,16).replace("T"," ")+" UTC":"—";
  let state=null,working=false;

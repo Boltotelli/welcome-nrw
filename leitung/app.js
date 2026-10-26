@@ -1,14 +1,15 @@
+import {createAnnouncementEditor} from "./announcement.js?v=player2-20261021";
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.58.0/+esm";
 import {createEventHub} from "./event-library.js?v=step6-iteratorfix-1";
 import {createOperations} from "./operations.js?v=pages-4";
 import {createDiscordEventPlanner} from "./discord-events.js?v=eventbot-4lang-20261019";
-import {createEventBotStatusPanel} from "./event-bot-status.js?v=eventbot-4lang-20261019";
-import {createMemberRelationships} from "./member-relationships.js?v=vercel-release-20261020-1";
-import {createPerformance} from "./performance.js?v=vercel-release-20261020-1";
+import {createEventBotStatusPanel} from "./event-bot-status.js?v=20261021-usability-1";
+import {createMemberRelationships} from "./member-relationships.js?v=20261021-usability-1";
+import {createPerformance} from "./performance.js?v=20261021-usability-1";
 import {createBearManagement} from "./bear-management.js?v=20261020-fight-bear-v3";
-import {createFightClub} from "./fightclub.js?v=20261020-fight-bear-v3";
+import {createFightClub} from "./fightclub.js?v=20261021-plan-1";
 import {createEventParticipation} from "./event-participation.js?v=vercel-release-20261020-1";
-import {createEventLoans} from "./event-loans.js?v=vercel-release-20261020-1";
+import {createEventLoans} from "./event-loans.js?v=20261021-usability-1";
 
 // Private AllianceOS pilot. Data is NEVER stored in localStorage; only auth session is.
 // All records and permissions are issued by the authenticated Edge Function.
@@ -121,8 +122,10 @@ function setTab(name){
  if(name==="performance"&&!performance.enabled)return;
  const required=modulePermission[name]||(["transfers","laws","events","settings"].includes(name)?name:null);
  if(required&&state&&!can(required))name="overview";
-  if(name==="discord"&&state&&!can("events")&&!can("settings"))name="overview";
+  if(name==="discord"&&state&&!can("event_bot"))name="overview";
+ const changedModule=tab!==name;
  tab=name;q(".tab-page").forEach(p=>p.hidden=p.dataset.page!==name);
+ if(changedModule){window.scrollTo({top:0,left:0,behavior:"instant"});$("flash").hidden=true;}
  q(".nav-item").forEach(b=>b.classList.toggle("active",b.dataset.tab===name));
  $("pageLabel").textContent=t(name);
  history.replaceState(null,"",LEITUNG_PATH+(name==="overview"?"":"?tab="+encodeURIComponent(name)));
@@ -132,6 +135,7 @@ function setTab(name){
   if(name==="fightclub"&&state)fightclub.open();
   if(name==="participation"&&state)participation.open();
   if(name==="transfers"&&state)eventLoans.open();
+  if(name==="events"&&state)announcementEditor.open();
 }
 function flash(message,error=false){
  const el=$("flash");el.textContent=message;el.classList.toggle("error",error);el.hidden=false;
@@ -161,18 +165,27 @@ function grantButtons(){
  }
 }
 let powerSyncStarted=false;
-async function syncPlayerPower(){
+async function syncPlayerPower({allListed=false}={}){
  if(!state||!can("members"))return;
  const button=$("syncPlayerPower"),status=$("powerSyncStatus");
  button.disabled=true;status.textContent=t("powerFetching");
  try{
-   const result=await request("bootstrap",{action:"power_sync"});
-   status.textContent=t("powerUpdated").replace("{n}",result.matched||0)+(result.source==="cache"?" · "+t("powerCached"):"");
-   await refresh();
+   let result,cursor=0,failed=0;
+   do{
+    result=await request("bootstrap",{action:"power_sync",include_listed:allListed,cursor});
+    failed+=(result.failed||[]).length;
+    status.textContent=t("powerUpdated").replace("{n}",result.matched||0)+(result.requested?" / "+result.requested:"");
+    cursor=result.next_cursor;
+   }while(allListed&&Number.isInteger(cursor)&&cursor>0);
+   if(failed)status.textContent+=' · '+({de:'Nicht abrufbar: ',en:'Unavailable: ',fr:'Indisponibles : ',es:'No disponibles: '}[lang]||'Unavailable: ')+failed;
+   if(result.rate_limited)status.textContent+=' · '+({de:'API-Limit erreicht. Später erneut abrufen.',en:'API limit reached. Try again later.',fr:'Limite API atteinte. Réessayez plus tard.',es:'Límite de API alcanzado. Reinténtalo más tarde.'}[lang]||'API limit reached.');
+   if(result.source==="cache")status.textContent+=" · "+t("powerCached");
+   const syncStatus=status.textContent;await refresh();status.textContent=syncStatus;
  }catch(e){
    status.textContent=t("powerUpdateError")+": "+String(e.message||"unknown");
  }finally{button.disabled=!can("members");}
 }
+const announcementEditor=createAnnouncementEditor({request,can,getLanguage:()=>lang,esc});
 const eventHub=createEventHub({request,flash,esc,t});
  const discordPlanner=createDiscordEventPlanner({request,flash,esc,can,eventHub});
 const eventBotStatusPanel=createEventBotStatusPanel({supabase,flash,can,esc});
@@ -189,6 +202,7 @@ const participation=createEventParticipation({getState:()=>state,getLanguage:()=
   openPlayer:gameId=>openEdit("member",gameId),navigate:name=>setTab(name)});
 const eventLoans=createEventLoans({getState:()=>state,getLanguage:()=>lang,request,esc,flash});
 function showLogin(message=""){
+ announcementEditor.reset();
  $("liveArea").hidden=true;$("loginArea").hidden=false;$("logoutBtn").hidden=true;
  $("roleChip").textContent="R4 / R5";$("loginError").textContent=message;$("changePasswordBtn").hidden=true;
 }
@@ -255,12 +269,22 @@ function formattedPower(value){
 function renderRoster(){
  const search=$("rosterSearch").value.toLowerCase().trim(),status=$("rosterStatus").value,sort=$("rosterSort").value;
  const list=state.players.filter(p=>(!search||String(p.name||"").toLowerCase().includes(search)||String(p.game_id||"").includes(search))&&(status==="all"||p.member_status===status)).slice();
- list.sort((a,b)=>sort==="power"?(Number(b.power??-1)-Number(a.power??-1)):sort==="rank"?(Number(b.rank||0)-Number(a.rank||0)):sort==="id"?String(a.game_id).localeCompare(String(b.game_id)):String(a.name||"").localeCompare(String(b.name||""),lang));
+ list.sort((a,b)=>sort==="power"?(Number(b.power??-1)-Number(a.power??-1)):sort==="rank"?((Number(b.rank||0)-Number(a.rank||0)||String(a.name||"").localeCompare(String(b.name||""),lang))):sort==="id"?String(a.game_id).localeCompare(String(b.game_id)):String(a.name||"").localeCompare(String(b.name||""),lang));
  $("rosterCount").textContent=fmtInt(list.length);
  $("rosterRows").innerHTML=list.length?list.map(p=>{
   const id=esc(p.game_id||""),name=esc(p.name),avatar=/^https:\/\//i.test(p.avatar_url||"")?'<img class="avatar" src="'+esc(p.avatar_url)+'" alt="">':'<span class="avatar">'+esc((p.name||"?").slice(0,1))+'</span>';
   return '<tr><td><div class="person">'+avatar+'<div><strong>'+name+'</strong><small>'+id+relationships.rowBadge(p)+(p.is_event_loan?' · ⏱ '+esc(p.current_alliance||"")+" ("+esc(p.event_loan_type||"")+")":'')+'</small></div></div></td><td>'+'<span class="rank-and-tg"><strong>'+esc(p.rank?"R"+p.rank:"—")+'</strong><span class="level">· '+esc(cityLevel(p.tc_level))+'</span></span>'+'</td><td>'+(p.power==null?'<span class="muted">'+esc(t("noPower"))+'</span>':'<strong title="'+esc(fmtInt(p.power))+'">'+esc(formattedPower(p.power))+'</strong><small title="'+esc(p.power_source||"")+'">'+esc(dateText(p.power_observed_at))+'</small>')+'</td><td>'+languageChips(p.languages)+'</td><td>'+'<span class="discord-presence '+(p.discord_connected?"connected":"unlinked")+'" title="'+esc(p.discord_connected?t("discordLinked"):t("discordUnlinked"))+'">'+esc(p.discord_connected?t("yes"):t("no"))+'</span>'+'</td><td>'+badge(p.member_status)+'</td><td><button type="button" class="action-link" data-edit-member="'+id+'" aria-label="'+esc(t("dossier"))+' · '+name+'" '+(!can("members")?"disabled":"")+'>'+esc(t("dossier"))+'</button></td></tr>';
  }).join(""):empty(t("noPlayers"));
+ const headings=[...document.querySelectorAll('[data-page="roster"] thead th')].map(x=>x.textContent);
+ for(const row of $("rosterRows").rows)for(let i=0;i<row.cells.length;i++)row.cells[i].dataset.label=headings[i]||"";
+
+}
+function transferContactLabel(person){
+ const raw=String(person?.label||"").trim();
+ const gameId=person?.game_id||/^leader-([0-9]{5,20})@accounts\.allianceos\.invalid$/i.exec(raw)?.[1];
+ const player=gameId?(state.players||[]).find(p=>String(p.game_id)===String(gameId)):null;
+ const leader=gameId?[...($("leaderSelect")?.options||[])].find(o=>o.value===String(gameId)):null;
+ return player?.name||leader?.textContent||(/^admin@nap-tracker\.invalid$/i.test(raw)?"Administration":! /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(raw)&&raw?raw:gameId?"ID "+gameId:t("contactOwner"));
 }
 function renderTransfers(){
  const filterEl=$("transferWindowFilter");
@@ -277,7 +301,7 @@ function renderTransfers(){
   const photo=/^https:\/\//i.test(candidatePic)?'<img class="avatar" src="'+esc(candidatePic)+'" alt="" loading="lazy" referrerpolicy="no-referrer">':
     '<span class="avatar">'+esc((x.player_name||"?").slice(0,1))+'</span>';
   return '<tr><td><div class="person">'+photo+'<div><strong>'+esc(x.player_name||"—")+'</strong><small>'+esc(x.game_id)+' · '+esc(t("priority"))+': '+esc(x.priority===1?t("high"):x.priority===3?t("low"):t("normal"))+(x.invitation_type==="special"?" · "+esc(t("inviteSpecial")):"")+
-   (x.contact_staff_user_id?" · "+esc(t("contactOwner"))+": "+esc((state.transferContacts||[]).find(p=>p.user_id===x.contact_staff_user_id)?.label||"—"):"")+'</small></div></div></td><td>'+badge(x.direction,x.direction==="incoming"?t("directionIncoming"):t("directionOutgoing"))+'</td><td>'+esc([x.origin_kingdom?"#"+x.origin_kingdom:"",x.previous_alliance||""].filter(Boolean).join(" · ")||"—")+'</td><td>'+esc(destination)+'</td><td>'+esc([x.window_start,x.window_end].filter(Boolean).map(dateText).join(" → ")||"—")+'</td><td>'+badge(x.status)+verified+'</td><td><button class="action-link" data-edit="transfer" data-id="'+esc(x.id)+'" '+(!can("transfers")?"disabled":"")+'>'+esc(t("edit"))+'</button></td></tr>';
+   (x.contact_staff_user_id?" · "+esc(t("contactOwner"))+": "+esc(transferContactLabel((state.transferContacts||[]).find(p=>p.user_id===x.contact_staff_user_id))):"")+'</small></div></div></td><td>'+badge(x.direction,x.direction==="incoming"?t("directionIncoming"):t("directionOutgoing"))+'</td><td>'+esc([x.origin_kingdom?"#"+x.origin_kingdom:"",x.previous_alliance||""].filter(Boolean).join(" · ")||"—")+'</td><td>'+esc(destination)+'</td><td>'+esc([x.window_start,x.window_end].filter(Boolean).map(dateText).join(" → ")||"—")+'</td><td>'+badge(x.status)+verified+'</td><td><button class="action-link" data-edit="transfer" data-id="'+esc(x.id)+'" '+(!can("transfers")?"disabled":"")+'>'+esc(t("edit"))+'</button></td></tr>';
  }).join(""):empty(t("noTransfers"));
  const moves=state.internalMoves||[],search=$("internalMoveSearch").value.toLowerCase().trim(),
     direction=$("internalMoveDirection").value,period=$("internalMovePeriod").value;
@@ -352,12 +376,12 @@ function renderSettings(){
  const sel=$("staffAccountSelect");
  sel.innerHTML='<option value="">'+esc(t("chooseLeader"))+'</option>'+
  members.filter(x=>/^leader-/.test(x.email||"")).map(x=>
-   '<option value="'+esc(x.email)+'" '+(x.is_admin||x.protected_account?"disabled":"")+'>'+esc(lookupName(x.email))+(x.is_admin?" · "+esc(t("rightsProtected")):"")+'</option>').join("");
+   '<option value="'+esc(x.email)+'" '+(x.is_admin||x.protected_account?"disabled":"")+'>'+esc(lookupName(x.email))+" · "+esc(x.rank)+(x.is_admin?" · "+esc(t("rightsProtected")):"")+'</option>').join("");
  const selected=members.find(m=>m.email===selectedStaffEmail&&!m.is_admin&&!m.protected_account);
  if(!selected)selectedStaffEmail="";
  sel.value=selectedStaffEmail;
  const rights=$("staffRightsFieldset"),permissionForm=$("r4Form");
- rights.disabled=!selected;
+ rights.disabled=!selected;rights.hidden=!selected;$("staffEditActions").hidden=!selected;$("staffSelectionInfo").hidden=!selected;
  for(const key of STAFF_KEYS)permissionForm.elements[key].checked=selected?.permissions?.[key]===true;
  permissionForm.elements.enabled.checked=selected?.enabled===true;
  $("staffSelectionInfo").textContent=selected?
@@ -368,7 +392,7 @@ function renderSettings(){
  }
  if(!members.length)$("staffSelectionInfo").textContent=t("rightsSelected");
 }
-function render(){patchTranslations();counts();renderRoster();renderTransfers();renderLaws();renderEvents();renderSettings();eventLoans.render();eventHub.render(state,lang,can("events"));discordPlanner.render(lang);operations.render();}
+function render(){announcementEditor.render();patchTranslations();counts();renderRoster();renderTransfers();renderLaws();renderEvents();renderSettings();eventLoans.render();eventHub.render(state,lang,can("events"));discordPlanner.render(lang);operations.render();}
 function control(label,name,value="",type="text",opts={}){
  const attr=Object.entries(opts).map(([k,v])=>' '+k+'="'+esc(v)+'"').join("");
  return '<label class="field"><span>'+esc(label)+'</span><input class="control" name="'+esc(name)+'" type="'+esc(type)+'" value="'+esc(value??"")+'"'+attr+'></label>';
@@ -410,14 +434,13 @@ function openEdit(entity,id=null,sourcePlayer=null){
       control(t("targetKingdom"),"target_kingdom",s.target_kingdom||(s.direction==="incoming"?state.alliance.kingdom_id:""),"number",{min:1,max:99999})+
      select(t("transferWindow"),"transfer_window_id",s.transfer_window_id||"",[["",t("unassignedWindow")],...(state.transferWindows||[]).map(w=>[w.id,w.label+" · "+w.start_date+" – "+w.end_date])])+
      select(t("invitationStatus"),"invitation_status",s.invitation_status||"not_sent",[["not_sent",t("inviteNotSent")],["sent",t("inviteSent")],["accepted",t("inviteAccepted")],["declined",t("inviteDeclined")]])+
-     select(t("contactOwner"),"contact_staff_user_id",s.contact_staff_user_id||"",[["",t("noneAssigned")],...(state.transferContacts||[]).map(x=>[x.user_id,x.rank+" · "+(x.label||x.user_id.slice(0,8))])])+
+     select(t("contactOwner"),"contact_staff_user_id",s.contact_staff_user_id||"",[["",t("noneAssigned")],...(state.transferContacts||[]).map(x=>[x.user_id,x.rank+" · "+transferContactLabel(x)])])+
      control(t("previousAlliance"),"previous_alliance",s.previous_alliance||"")+
      control(t("targetAlliance"),"target_alliance",s.target_alliance||"NRW")+
      control(t("power"),"power",s.power||"","number",{min:0})+
       select(t("priority"),"priority",String(s.priority||2),[["1",t("high")],["2",t("normal")],["3",t("low")]])+
       select(t("invitation"),"invitation_type",s.invitation_type||"not_assigned",[["not_assigned",t("inviteOpen")],["ordinary",t("inviteNormal")],["special",t("inviteSpecial")]])+
-     control(t("from"),"window_start",s.window_start||"","date")+
-     control(t("to"),"window_end",s.window_end||"","date")+'</div>'+
+     '</div>'+
      '<p class="small-note">'+esc(t("externalNote"))+'</p>'+textarea(t("notes"),"notes",s.notes||"")+
      (s.direction==="incoming"&&s.status==="completed"?'<label class="field check"><input type="checkbox" name="confirm_arrival" '+(s.arrival_confirmed_at?"checked disabled":"")+' > '+esc(t("confirmObservedArrival"))+'</label>':"")+
      '<p class="small-note">'+esc(t("transferInternalOnly"))+'</p>';
@@ -528,6 +551,8 @@ async function saveDialog(event){
    }
  }
  if(entity==="transfer"){
+    data.window_start=record?.window_start??null;
+    data.window_end=record?.window_end??null;
     data.share_approved=record?.share_approved??false;
     data.confirm_arrival=fd.has("confirm_arrival");
   }
@@ -552,7 +577,7 @@ q(".nav-item").forEach(el=>el.addEventListener("click",()=>setTab(el.dataset.tab
 q("[data-jump]").forEach(el=>el.addEventListener("click",()=>setTab(el.dataset.jump)));
 $("language").addEventListener("change",e=>{lang=e.target.value;localStorage.setItem("nrw_page_lang",lang);if(state){render();if(tab==="performance")performance.render();if(tab==="bear")bearManagement.render();if(tab==="fightclub")fightclub.render();if(tab==="participation")participation.render();if(tab==="transfers")eventLoans.render();}else{patchTranslations();loadLeaderList();$("toggleLegacyLogin").textContent=t(legacyLogin?"normalSignIn":"legacySignIn");}});
 $("themeToggle").addEventListener("click",()=>{const next=document.documentElement.dataset.theme==="dark"?"light":"dark";document.documentElement.dataset.theme=next;localStorage.setItem("nrw_theme",next);});
-$("syncPlayerPower").addEventListener("click",syncPlayerPower);
+$("syncPlayerPower").addEventListener("click",()=>syncPlayerPower({allListed:true}));
 $("rosterSearch").addEventListener("input",()=>state&&renderRoster());
 $("rosterStatus").addEventListener("change",()=>state&&renderRoster());
 $("rosterSort").addEventListener("change",()=>state&&renderRoster());
@@ -738,6 +763,12 @@ async function loadLeaderList(){
   sel.innerHTML='<option value="">'+esc(t("chooseLeader"))+'</option>'+leaders.map(x=>
     '<option value="'+esc(x.game_id)+'">'+esc(x.name)+'</option>').join("");
   if([...sel.options].some(x=>x.value===previous))sel.value=previous;
+  if(state&&can("transfers")){
+   renderTransfers();
+   if(editing?.entity==="transfer")for(const option of $("editForm").elements.contact_staff_user_id?.options||[]){
+    const person=(state.transferContacts||[]).find(x=>x.user_id===option.value);if(person)option.textContent=person.rank+" · "+transferContactLabel(person);
+   }
+  }
  }catch{
   sel.innerHTML='<option value="">'+esc(t("loadingLeaders"))+'</option>';
   $("loginError").textContent=t("genericError")+" (leader list)";

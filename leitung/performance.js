@@ -9,7 +9,7 @@ export function createPerformance({getState,getLanguage,request,esc,openPlayer})
  de:{title:"Performance",subtitle:"Kraftentwicklung, KvK Prep und Allianzmobilisierung – ausschließlich dokumentierte Werte.",
    power:"Kraftentwicklung",events:"Event-Rankings",powerType:"Ansicht",allPlayers:"Erfasste Allianz-Accounts",player:"Spieler",
    days:"Zeitraum",coverage:"Erfasste Accounts",powerTotal:"Summe erfasster Kraft",noTotal:"Keine vollständige Allianzkraft: nur tatsächlich erfasste Accounts.",
-   source:"Quelle: MightPulse-Allianzabruf · Tagesdatum UTC",sync:"Letzter API-Snapshot",delta:"Veränderung vergleichbarer Spieler",
+   source:"Quelle: MightPulse-Spielerdaten · Tagesdatum UTC",sync:"Letzter API-Snapshot",delta:"Veränderung vergleichbarer Spieler",
    comparable:"Vergleich nur für Accounts, die an beiden Endtagen gemessen wurden.",
    noComparison:"Noch keine zwei Tage mit denselben gemessenen Accounts.",
    kvk:"KvK Prep",am:"Allianzmobilisierung",event:"Durchlauf",recorded:"Erfasste Spieler",
@@ -26,7 +26,7 @@ export function createPerformance({getState,getLanguage,request,esc,openPlayer})
  en:{title:"Performance",subtitle:"Power development, KvK Prep and Alliance Mobilization – recorded values only.",
    power:"Power development",events:"Event rankings",powerType:"View",allPlayers:"Observed alliance accounts",player:"Player",
    days:"Period",coverage:"Observed accounts",powerTotal:"Sum of observed power",noTotal:"Not the full alliance power: includes observed accounts only.",
-   source:"Source: MightPulse alliance roster · UTC dates",sync:"Latest API snapshot",delta:"Change for comparable players",
+   source:"Source: MightPulse player data · UTC dates",sync:"Latest API snapshot",delta:"Change for comparable players",
    comparable:"Only accounts measured on both endpoint dates are compared.",
    noComparison:"No two days with overlapping observed accounts yet.",
    kvk:"KvK Prep",am:"Alliance Mobilization",event:"Cycle",recorded:"Observed players",
@@ -43,7 +43,7 @@ export function createPerformance({getState,getLanguage,request,esc,openPlayer})
  fr:{title:"Performance",subtitle:"Évolution de puissance, préparation KvK et mobilisation – valeurs enregistrées uniquement.",
    power:"Évolution de puissance",events:"Classements d'événements",powerType:"Vue",allPlayers:"Comptes d'alliance observés",player:"Joueur",
    days:"Période",coverage:"Comptes observés",powerTotal:"Somme des puissances observées",noTotal:"Pas la puissance totale de l'alliance : uniquement les comptes observés.",
-   source:"Source : effectif MightPulse · jours UTC",sync:"Dernier relevé API",delta:"Évolution des joueurs comparables",
+   source:"Source : données joueurs MightPulse · jours UTC",sync:"Dernier relevé API",delta:"Évolution des joueurs comparables",
    comparable:"Seuls les comptes relevés aux deux dates extrêmes sont comparés.",
    noComparison:"Pas encore deux dates avec des comptes observés en commun.",
    kvk:"Préparation KvK",am:"Mobilisation d'alliance",event:"Cycle",recorded:"Joueurs observés",
@@ -60,7 +60,7 @@ export function createPerformance({getState,getLanguage,request,esc,openPlayer})
  es:{title:"Rendimiento",subtitle:"Evolución de poder, preparación KvK y movilización – solo datos registrados.",
    power:"Evolución de poder",events:"Clasificaciones de eventos",powerType:"Vista",allPlayers:"Cuentas de alianza registradas",player:"Jugador",
    days:"Periodo",coverage:"Cuentas registradas",powerTotal:"Suma del poder registrado",noTotal:"No es el poder total de la alianza: solo cuentas registradas.",
-   source:"Fuente: plantilla MightPulse · fechas UTC",sync:"Última lectura de API",delta:"Variación de jugadores comparables",
+   source:"Fuente: datos de jugadores MightPulse · fechas UTC",sync:"Última lectura de API",delta:"Variación de jugadores comparables",
    comparable:"Solo se comparan cuentas medidas en ambas fechas.",
    noComparison:"Aún no hay dos fechas con cuentas medidas en común.",
    kvk:"Preparación KvK",am:"Movilización de alianza",event:"Ciclo",recorded:"Jugadores registrados",
@@ -190,12 +190,11 @@ export function createPerformance({getState,getLanguage,request,esc,openPlayer})
        events.map(e=>'<option value="'+esc(e.id)+'" '+(e.id===eventId?'selected':'')+'>'+
          esc(e.label||e.event_name||e.period_start)+'</option>').join("")+'</select></label></div>'+
      (current?
-       '<div class="perf-stats"><div class="perf-stat"><span>'+esc(t("recorded"))+'</span><strong>'+num(all.length)+'</strong>'+
+       '<div class="perf-stats perf-event-stats"><div class="perf-stat"><span>'+esc(t("recorded"))+'</span><strong>'+num(all.length)+'</strong>'+
        '<small>'+esc(fmtDate(current.period_start))+'</small></div>'+
        '<div class="perf-stat"><span>'+esc(t("total"))+'</span><strong>'+esc(compact(total))+'</strong>'+
        '<small>'+esc(t("notComplete"))+'</small></div>'+
-       '<div class="perf-stat"><span>'+esc(t("current"))+'</span><strong class="perf-status">'+esc(current.finalized?t("finalized"):t("provisional"))+'</strong>'+
-       '<small>'+esc(t("source"))+'</small></div></div>'+
+       '</div>'+
        contributionChart+
        '<div class="perf-filter"><input type="search" class="control" data-perf-search placeholder="'+esc(t("search"))+'" value="'+esc(search)+'">'+
        '<span class="counter">'+num(filtered.length)+' / '+num(all.length)+'</span></div>'+
