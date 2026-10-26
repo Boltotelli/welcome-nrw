@@ -31,9 +31,13 @@ function process(joiners,getReference){
  const supported=selected.filter(j=>j.eligible&&j.category);
  const sums={101:0,102:0};
  for(const x of supported)sums[x.category]+=x.amount;
- const multiplier=(1+sums[101]/100)*(1+sums[102]/100);
+ const groupFactor101=1+sums[101]/100,groupFactor102=1+sums[102]/100;
+ // Community effect_op rule: *all four* valid skills in a group add.
+ // There is no two-Chenko cap. Two of each group is optimal for four
+ // equal +25% skills because the two group totals then multiply.
+ const multiplier=groupFactor101*groupFactor102;
  return {ready:unsupported.length===0,multiplier,
-  group101:sums[101],group102:sums[102],
+  group101:sums[101],group102:sums[102],groupFactor101,groupFactor102,
   active:supported.map(x=>({name:x.name,group:x.category,value:x.amount,skill:x.source})),
   unsupported:unsupported.map(x=>({name:x.name,effect:x.source,reason:!x.eligible?'unknown-skill':'stacking-unverified'})),
   method:'DamageUp effect_op 101/102 (community documented), highest-4 first skills'};
@@ -43,13 +47,15 @@ function apply(ownDamage,joiners,getReference){
  if(!j.ready||!Number.isFinite(ownDamage)||ownDamage<0)return {ready:false,reason:'unsupported-effects',joiners:j};
  return {...j,estimatedIndex:ownDamage*j.multiplier};
 }
+// Order is educational; the UI independently sorts scenarios by actual
+// source-based multiplier and displays all four skill contributions.
 const SCENARIOS=[
- {id:'none',label:'Ohne Joinerfähigkeiten',heroes:[]},
- {id:'two-chenko',label:'2× Chenko (Lv5)',heroes:['Chenko','Chenko']},
- {id:'four-chenko',label:'4× Chenko (Lv5)',heroes:['Chenko','Chenko','Chenko','Chenko']},
  {id:'mixed',label:'2× Chenko + 2× Amane (Lv5)',heroes:['Chenko','Chenko','Amane','Amane']},
  {id:'mixed-other',label:'Chenko + Yeonwoo + Amane + Margot (Lv5)',
-  heroes:['Chenko','Yeonwoo','Amane','Margot']}
+  heroes:['Chenko','Yeonwoo','Amane','Margot']},
+ {id:'four-chenko',label:'4× Chenko (Lv5)',heroes:['Chenko','Chenko','Chenko','Chenko']},
+ {id:'two-chenko',label:'2× Chenko (Lv5)',heroes:['Chenko','Chenko']},
+ {id:'none',label:'Ohne Joinerfähigkeiten',heroes:[]}
 ];
-root.NRW_BEAR_JOINER_SKILLS={process,apply,SCENARIOS,GROUP_BY_EFFECT,version:'effect-op-101-102-v1'};
+root.NRW_BEAR_JOINER_SKILLS={process,apply,SCENARIOS,GROUP_BY_EFFECT,version:'effect-op-101-102-verified-20261026'};
 })(window);
