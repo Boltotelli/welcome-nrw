@@ -1064,8 +1064,13 @@ function predicted(){
   const skill=ref.get?.(name,5,0);
   return skill?{skills:skill.skills}:null;
  };
- for(const sc of stack?.SCENARIOS||[]){
-  const combo=stack.process(sc.heroes,refSkill);
+ // Rank scenarios by the computed source-backed four-skill multiplier:
+ // a displayed "best" order may not silently assume one fixed hero name.
+ const compared=(stack?.SCENARIOS||[]).map((sc,index)=>({
+  sc,index,combo:stack.process(sc.heroes,refSkill)
+ })).sort((a,b)=>(b.combo.ready?b.combo.multiplier:-1)-
+  (a.combo.ready?a.combo.multiplier:-1)||a.index-b.index);
+ for(const {sc,combo} of compared){
   const answer=combo.ready?
     skillDamage.evaluate(prepared,counts,best.leader,current,combat,combo.multiplier):
     {ready:false};
@@ -1075,6 +1080,15 @@ function predicted(){
    el('span','',answer.ready?whole(answer.estimatedIndex)+' '+T('Modellindex')+
     ' · ×'+combo.multiplier.toFixed(2):
     T('Berechnung nicht verfügbar')));
+  if(combo.ready){
+   if(sc.id==='mixed'&&compared[0]?.combo?.multiplier===combo.multiplier)
+    line.append(el('small','bear-name-score-detail',T('Beste geprüfte Level-5-Kombination')));
+   line.append(el('small','bear-name-score-detail',
+    T('Gruppe 101 (Tödlichkeit): ')+ '+'+num(combo.group101)+' % · '+
+    T('Gruppe 102 (Angriff): ')+ '+'+num(combo.group102)+' % · '+
+    combo.groupFactor101.toFixed(2)+' × '+combo.groupFactor102.toFixed(2)+
+    ' = '+combo.multiplier.toFixed(2)+'×'));
+  }
   if(answer.ready&&answer.distribution?.ready){
    const dist=answer.distribution;
    line.append(el('small','bear-name-score-detail',
@@ -1096,6 +1110,7 @@ function predicted(){
  }
  out.append(el('p','bear-name-muted',
   'Die Starter-Truppenzahlen stehen ausschließlich in der Formationskarte. Beide Berechnungen verwenden dieselbe Aufstellung.'),
+  el('p','bear-name-muted','Maximal vier erste Joiner-Expeditionsfähigkeiten wirken. Innerhalb derselben Effektgruppe addieren sich alle aktiven Boni – auch viermal Chenko. Zwischen Gruppe 101 und Gruppe 102 werden die Summen multipliziert. Vier Chenko ergeben 2,00×, zwei Chenko plus zwei Amane 2,25×.'),
   lines,el('p','bear-name-warning',
    '⚠ Geschätzter Modellwert – kein bestätigter Kingshot-Schadenswert.'),
   el('p','bear-name-muted','Simulation berücksichtigt die bekannten T-/TG-Truppenfähigkeiten. Nicht verifizierte Helden-Auslösungen und fremde Rallywerte bleiben Modellannahmen.'));
