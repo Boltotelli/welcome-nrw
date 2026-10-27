@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "kingdom": 1044,
   "timezone": "UTC",
-  "updatedAt": "2026-10-26T00:13:20Z",
+  "updatedAt": "2026-10-27T00:11:45Z",
   "events": [
     {
       "id": "golden-glaives-prep-2026-09-20",
@@ -1436,6 +1436,82 @@
         }
       },
       "sourceUrl": "https://kingshotdata.com/events/kingdom-of-power-kvk-event/"
+    },
+    {
+      "id": "viking-vengeance-2026-11-03",
+      "start": "2026-11-03",
+      "end": "2026-11-05",
+      "icon": "🪓",
+      "iconUrl": "https://kingshotdata.com/uploads/2025/07/viking-vengeance-event.webp",
+      "confidence": "public-timeline",
+      "name": {
+        "de": "Wikinger-Vergeltung",
+        "en": "Viking Vengeance",
+        "fr": "Vengeance viking"
+      },
+      "dailyPlans": {
+        "2026-11-03": {
+          "points": {
+            "de": "Verteidigungspunkte für besiegte Wikingerwellen · Verstärkung bei normalen Wellen: 50 % der Wellenpunkte · HQ-Wellen 10/20: volle Wellenpunkte als Verstärkung",
+            "en": "Defense points for defeating Viking waves · reinforcement on normal waves: 50% of wave points · HQ waves 10/20: full wave score as reinforcement",
+            "fr": "Points de défense pour les vagues vikings vaincues · renfort sur les vagues normales : 50 % des points de la vague · vagues QG 10/20 : score complet de la vague en renfort"
+          },
+          "steps": {
+            "de": [
+              "Vor dem Start durch R4+ alle Truppen zu Allianzmitgliedern schicken und gegenseitige Verstärkung koordinieren; nach NRW-Vorgabe die eigene Stadt leer lassen.",
+              "Während der laufenden Wellen nicht heilen; Brände löschen und die Märsche für weitere Verstärkungen verfügbar halten.",
+              "Wellen 7, 14 und 17 greifen nur Online-Mitglieder an; für Wellen 10 und 20 rechtzeitig das Allianz-HQ verstärken.",
+              "Nach zwei gescheiterten Verteidigungen wird die eigene Stadt nicht mehr angegriffen; danach weiter andere Mitglieder beziehungsweise das HQ verstärken.",
+              "Für diese Punktequellen ist keine bestätigte Pet-Fähigkeit oder Cooldown-Kombination erforderlich."
+            ],
+            "en": [
+              "Before R4+ starts the event, send all troops to alliance members and coordinate mutual reinforcement; follow NRW’s instruction to leave your own city empty.",
+              "Do not heal while waves are running; extinguish fires and keep marches available for further reinforcement.",
+              "Waves 7, 14 and 17 attack online members only; reinforce Alliance HQ in time for waves 10 and 20.",
+              "After two failed defenses, your city is no longer attacked; then continue reinforcing other members or the HQ.",
+              "No confirmed Pet skill or cooldown combination is required for these scoring sources."
+            ],
+            "fr": [
+              "Avant le lancement par R4+, envoie toutes les troupes chez les membres de l’alliance et coordonne les renforts mutuels ; suis la consigne NRW de laisser ta propre ville vide.",
+              "Ne soigne pas pendant les vagues ; éteins les incendies et garde les marches disponibles pour d’autres renforts.",
+              "Les vagues 7, 14 et 17 attaquent uniquement les membres en ligne ; renforce le QG d’alliance à temps pour les vagues 10 et 20.",
+              "Après deux défenses échouées, ta ville n’est plus attaquée ; continue alors à renforcer les autres membres ou le QG.",
+              "Aucune compétence de Familier ni combinaison de temps de recharge confirmée n’est requise pour ces sources de points."
+            ]
+          }
+        },
+        "2026-11-05": {
+          "points": {
+            "de": "Verteidigungspunkte für besiegte Wikingerwellen · Verstärkung bei normalen Wellen: 50 % der Wellenpunkte · HQ-Wellen 10/20: volle Wellenpunkte als Verstärkung",
+            "en": "Defense points for defeating Viking waves · reinforcement on normal waves: 50% of wave points · HQ waves 10/20: full wave score as reinforcement",
+            "fr": "Points de défense pour les vagues vikings vaincues · renfort sur les vagues normales : 50 % des points de la vague · vagues QG 10/20 : score complet de la vague en renfort"
+          },
+          "steps": {
+            "de": [
+              "Vor dem Start durch R4+ alle Truppen zu Allianzmitgliedern schicken und gegenseitige Verstärkung koordinieren; nach NRW-Vorgabe die eigene Stadt leer lassen.",
+              "Während der laufenden Wellen nicht heilen; Brände löschen und die Märsche für weitere Verstärkungen verfügbar halten.",
+              "Wellen 7, 14 und 17 greifen nur Online-Mitglieder an; für Wellen 10 und 20 rechtzeitig das Allianz-HQ verstärken.",
+              "Nach zwei gescheiterten Verteidigungen wird die eigene Stadt nicht mehr angegriffen; danach weiter andere Mitglieder beziehungsweise das HQ verstärken.",
+              "Für diese Punktequellen ist keine bestätigte Pet-Fähigkeit oder Cooldown-Kombination erforderlich."
+            ],
+            "en": [
+              "Before R4+ starts the event, send all troops to alliance members and coordinate mutual reinforcement; follow NRW’s instruction to leave your own city empty.",
+              "Do not heal while waves are running; extinguish fires and keep marches available for further reinforcement.",
+              "Waves 7, 14 and 17 attack online members only; reinforce Alliance HQ in time for waves 10 and 20.",
+              "After two failed defenses, your city is no longer attacked; then continue reinforcing other members or the HQ.",
+              "No confirmed Pet skill or cooldown combination is required for these scoring sources."
+            ],
+            "fr": [
+              "Avant le lancement par R4+, envoie toutes les troupes chez les membres de l’alliance et coordonne les renforts mutuels ; suis la consigne NRW de laisser ta propre ville vide.",
+              "Ne soigne pas pendant les vagues ; éteins les incendies et garde les marches disponibles pour d’autres renforts.",
+              "Les vagues 7, 14 et 17 attaquent uniquement les membres en ligne ; renforce le QG d’alliance à temps pour les vagues 10 et 20.",
+              "Après deux défenses échouées, ta ville n’est plus attaquée ; continue alors à renforcer les autres membres ou le QG.",
+              "Aucune compétence de Familier ni combinaison de temps de recharge confirmée n’est requise pour ces sources de points."
+            ]
+          }
+        }
+      },
+      "sourceUrl": "https://kingshotdata.com/events/viking-vengeance-level-stats/"
     }
   ]
 }
