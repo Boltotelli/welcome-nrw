@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "kingdom": 1044,
   "timezone": "UTC",
-  "updatedAt": "2026-10-27T00:11:45Z",
+  "updatedAt": "2026-10-28T00:12:50Z",
   "events": [
     {
       "id": "golden-glaives-prep-2026-09-20",
@@ -899,90 +899,37 @@
       "sourceUrl": "https://ksamp.io/ms/calendar"
     },
     {
-      "id": "armament-competition-type1-2026-10-26",
-      "start": "2026-10-26",
-      "end": "2026-10-27",
-      "icon": "🛡️",
-      "iconUrl": "https://kingshotdata.com/uploads/2025/04/city-development-event-icon.webp",
+      "id": "halloween-party-2026",
+      "start": "2026-10-27",
+      "end": "2026-11-03",
+      "icon": "🎃",
       "confidence": "public-timeline",
       "name": {
-        "de": "Rüstungswettbewerb · Handwerkervision",
-        "en": "Armament Competition · Artisan’s Vision",
-        "fr": "Compétition d’armement · Vision d’artisan"
+        "de": "Halloween-Party · Hexenzirkel-Kampf",
+        "en": "Halloween Party · Coven Clash",
+        "fr": "Fête d’Halloween · Affrontement du Coven"
       },
-      "dailyPlans": {
-        "2026-10-26": {
-          "points": {
-            "de": "Ausrüstung +1: 3 · Truegold: 100 · Truegoldstaub: 50 · Gehärtetes Truegold: 1.500 · Splitter mythisch/episch/selten: 125/50/15 · Meisteremblem: 200 · Manuskript: 2 · 1 Min. Beschleuniger: 1",
-            "en": "Gear +1: 3 · Truegold: 100 · Truegold Dust: 50 · Tempered Truegold: 1,500 · mythic/epic/rare shard: 125/50/15 · Master Emblem: 200 · Manuscript: 2 · 1 min speedup: 1",
-            "fr": "Équipement +1 : 3 · Or véritable : 100 · Poussière : 50 · Or trempé : 1 500 · fragment mythique/épique/rare : 125/50/15 · Emblème : 200 · Manuscrit : 2 · 1 min d’accélération : 1"
-          },
-          "steps": {
-            "de": [
-              "Dieses Event kann vollständig ausgelassen werden; die Belohnungen rechtfertigen den Einsatz von KvK-Ressourcen nicht.",
-              "Truegold, Gehärtetes Truegold, Splitter, Meistermaterialien und Beschleuniger für die KvK-Vorbereitung sparen.",
-              "Wenn du trotzdem Punkte machst, ausschließlich ohnehin geplante Aktionen nutzen und spätestens bei insgesamt 60.000 Punkten stoppen.",
-              "60.000 Punkte sind die strikte 3×-Gesamtgrenze und ausdrücklich keine Empfehlung."
-            ],
-            "en": [
-              "This event can be skipped completely; the rewards do not justify spending KvK resources.",
-              "Save Truegold, Tempered Truegold, shards, Master materials and speedups for KvK preparation.",
-              "If you score anyway, use only actions you already planned and stop at 60,000 total points at the latest.",
-              "60,000 points is the strict 3× total limit and explicitly not a recommendation."
-            ],
-            "fr": [
-              "Cet événement peut être entièrement ignoré ; les récompenses ne justifient pas l’utilisation de ressources KvK.",
-              "Conserve l’Or véritable, l’Or trempé, les fragments, les matériaux de Maître et les accélérateurs pour la préparation KvK.",
-              "Si tu marques malgré tout, utilise uniquement des actions déjà prévues et arrête-toi au plus tard à 60 000 points au total.",
-              "60 000 points constituent la limite totale stricte de 3× et ne sont explicitement pas une recommandation."
-            ]
-          },
-          "limits": {
-            "hardCap": 60000,
-            "note": {
-              "de": "60.000 Punkte sind die strikte 3×-Gesamtgrenze – keine Empfehlung.",
-              "en": "60,000 points is the strict 3× total limit, not a recommendation.",
-              "fr": "60 000 points constituent la limite totale stricte de 3×, pas une recommandation."
-            }
-          }
-        },
-        "2026-10-27": {
-          "points": {
-            "de": "Ausrüstung +1: 3 · Truegold: 100 · Truegoldstaub: 50 · Gehärtetes Truegold: 1.500 · Splitter mythisch/episch/selten: 125/50/15 · Meisteremblem: 200 · Manuskript: 2 · 1 Min. Beschleuniger: 1",
-            "en": "Gear +1: 3 · Truegold: 100 · Truegold Dust: 50 · Tempered Truegold: 1,500 · mythic/epic/rare shard: 125/50/15 · Master Emblem: 200 · Manuscript: 2 · 1 min speedup: 1",
-            "fr": "Équipement +1 : 3 · Or véritable : 100 · Poussière : 50 · Or trempé : 1 500 · fragment mythique/épique/rare : 125/50/15 · Emblème : 200 · Manuscrit : 2 · 1 min d’accélération : 1"
-          },
-          "steps": {
-            "de": [
-              "Dieses Event kann vollständig ausgelassen werden; die Belohnungen rechtfertigen den Einsatz von KvK-Ressourcen nicht.",
-              "Truegold, Gehärtetes Truegold, Splitter, Meistermaterialien und Beschleuniger für die KvK-Vorbereitung sparen.",
-              "Wenn du trotzdem Punkte machst, ausschließlich ohnehin geplante Aktionen nutzen und spätestens bei insgesamt 60.000 Punkten stoppen.",
-              "60.000 Punkte sind die strikte 3×-Gesamtgrenze und ausdrücklich keine Empfehlung."
-            ],
-            "en": [
-              "This event can be skipped completely; the rewards do not justify spending KvK resources.",
-              "Save Truegold, Tempered Truegold, shards, Master materials and speedups for KvK preparation.",
-              "If you score anyway, use only actions you already planned and stop at 60,000 total points at the latest.",
-              "60,000 points is the strict 3× total limit and explicitly not a recommendation."
-            ],
-            "fr": [
-              "Cet événement peut être entièrement ignoré ; les récompenses ne justifient pas l’utilisation de ressources KvK.",
-              "Conserve l’Or véritable, l’Or trempé, les fragments, les matériaux de Maître et les accélérateurs pour la préparation KvK.",
-              "Si tu marques malgré tout, utilise uniquement des actions déjà prévues et arrête-toi au plus tard à 60 000 points au total.",
-              "60 000 points constituent la limite totale stricte de 3× et ne sont explicitement pas une recommandation."
-            ]
-          },
-          "limits": {
-            "hardCap": 60000,
-            "note": {
-              "de": "60.000 Punkte sind die strikte 3×-Gesamtgrenze – keine Empfehlung.",
-              "en": "60,000 points is the strict 3× total limit, not a recommendation.",
-              "fr": "60 000 points constituent la limite totale stricte de 3×, pas une recommandation."
-            }
-          }
-        }
+      "tips": {
+        "de": [
+          "Die Hauptreihe läuft bis 02.11.; der Hexenzirkel-Kampf und die Nutzung der Halloween-Süßigkeiten bleiben bis 03.11. verfügbar.",
+          "Halloween-Süßigkeiten entstehen durch die zugehörigen Eventmissionen und werden im Hexenzirkel-Kampf gegen Kürbislaternen eingesetzt.",
+          "Für Candy Party sind Bestien, Sammeln, Edelsteine und Beschleuniger als Quellen genannt; da keine verlässlichen tagesgenauen Punktwerte veröffentlicht sind, enthält der Feed bewusst keinen Tagesplan.",
+          "Nicht verwendete Halloween-Süßigkeiten werden nach Eventende in gesicherte Ressourcen umgewandelt."
+        ],
+        "en": [
+          "The main event series runs through Nov 2; Coven Clash and the use of Halloween Candy remain available through Nov 3.",
+          "Halloween Candy comes from the related event missions and is used against Jack-O’-Lanterns in Coven Clash.",
+          "Candy Party lists beasts, gathering, Gems and speedups as sources; because no reliable day-specific point values are published, the feed intentionally has no daily plan.",
+          "Unused Halloween Candy is converted into secured resources after the event ends."
+        ],
+        "fr": [
+          "La série principale se déroule jusqu’au 2 novembre ; l’Affrontement du Coven et l’utilisation des Bonbons d’Halloween restent disponibles jusqu’au 3 novembre.",
+          "Les Bonbons d’Halloween proviennent des missions associées et servent à attaquer les citrouilles-lanternes dans l’Affrontement du Coven.",
+          "Candy Party cite les bêtes, la collecte, les Gemmes et les accélérateurs comme sources ; faute de valeurs quotidiennes fiables, aucun plan journalier n’est ajouté.",
+          "Les Bonbons d’Halloween non utilisés sont convertis en ressources sécurisées après la fin de l’événement."
+        ]
       },
-      "sourceUrl": "https://kingshotdata.com/events/armament-competition/"
+      "sourceUrl": "https://kingshotwiki.com/sneak-peek/102566583en/"
     },
     {
       "id": "officer-project-forgehammers-2026-10-28",
