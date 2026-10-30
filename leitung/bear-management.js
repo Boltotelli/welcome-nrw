@@ -97,7 +97,7 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
  const pct=n=>n===null||n===undefined||n===""?"–":Number(n).toLocaleString(locale(),{maximumFractionDigits:2})+"%";
  const when=raw=>raw?new Date(raw).toLocaleDateString(locale()):"–";
  const hhmm=s=>String(s||"").slice(0,5);
- let cache=null,loading=null,generation=0,filter="all",query="",pending=new Set(),recommendations=new Map(),settingsBusy=false,quickSlot="",quickAttendance="confirmed",quickJoiner=false,rosterExpanded=false;
+ let cache=null,loading=null,generation=0,filter="all",query="",pending=new Set(),recommendations=new Map(),settingsBusy=false,quickSlot="",quickAttendance="confirmed",quickJoiner=false,rosterExpanded=true;
  const byId=()=>new Map((getState()?.players||[]).map(p=>[String(p.game_id),p]));
  function active(){return (getState()?.players||[]).filter(p=>p.active&&p.member_status!=="left"&&/^[0-9]{1,20}$/.test(String(p.game_id||""))).slice().sort((a,b)=>String(a.name).localeCompare(String(b.name),locale()));}
  function assignment(id){return (cache?.assignments||[]).find(x=>String(x.game_id)===String(id));}
@@ -193,14 +193,15 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
   const parent=p.main_game_id?(byId().get(String(p.main_game_id))?.name||p.main_game_id):null;
   const no=a.attendance==="no";
   const readyFormation=formation(prof);
-  return '<article class="bear-member-row bear-member-compact" data-bear-row="'+esc(p.game_id)+'">'+
+  return '<tr data-bear-row="'+esc(p.game_id)+'"><td>'+
    '<div class="bear-member-head"><button type="button" class="bear-member-name" data-bear-open="'+esc(p.game_id)+'" '+(!canDossier()?'disabled':'')+'>'+esc(p.name||p.game_id)+'</button>'+
    '<small>'+esc(p.game_id)+(parent?' · '+esc(t("altInfo"))+' → '+esc(parent):'')+'</small>'+
    '<span class="bear-opt-flag '+(strong(p)?'ready':'')+'">'+esc(pow?fmt(pow.power):"—")+
      (threshold()===null?'':' · '+esc(t(strong(p)?"strong":"weak")))+'</span>'+
    (readyFormation?'<span class="bear-formation-badge" title="'+esc(t("validStarter"))+'">🐻 '+esc(formationText(readyFormation))+'</span>':"")+
-   '</div><div class="bear-fields">'+
-   '<label><span>'+esc(t("time"))+'</span>'+
+   '</div></td>'+(cache.slots||[]).map(sl=>'<td class="assignment-check-cell"><label class="assignment-check"><input type="checkbox" data-bear-check="'+esc(sl.slot_key)+'" aria-label="'+esc(p.name+' · '+slotLabel(sl))+'" '+(!no&&a.slot_key===sl.slot_key?'checked ':'')+(pending.has(String(p.game_id))?'disabled':'')+'></label></td>').join('')+'<td><div class="bear-fields">'+
+   '<label hidden><span>'+esc(t("time"))+'</span>'+ // Checkbox columns edit this existing save field.
+
       select([["",t("empty")],...(cache.slots||[]).map(slot=>[slot.slot_key,slotLabel(slot)])],a.slot_key||"",'data-bear-slot')+'</label>'+
    '<label><span>'+esc(t("attendance"))+'</span>'+
       select([["tentative",t("tentative")],["confirmed",t("confirmed")],["no",t("no")]],a.attendance||"tentative",'data-bear-attendance')+'</label>'+
@@ -210,7 +211,7 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
    '<details class="bear-row-more"><summary>'+esc(t("showAll"))+' · '+esc(t("note"))+(prof?' · '+esc(t("withProfile")):'')+'</summary>'+
       '<label>'+esc(t("note"))+' <input type="text" maxlength="500" class="control" data-bear-note placeholder="'+esc(t("notePlaceholder"))+'" value="'+esc(a.notes||"")+'"></label>'+
       (prof?dataProfile(prof):'<p class="small-note">'+esc(t("noData"))+'</p>')+'</details>'+
-   '</article>';
+   '</td></tr>';
  }
  function eligible(){
   const all=active();
@@ -294,8 +295,7 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
       ...slots.map(s=>[s.slot_key,slotLabel(s)])].map(([value,label])=>
        '<option value="'+esc(value)+'" '+(filter===value?'selected':'')+'>'+esc(label)+'</option>').join("")+'</select>'+
      '<span class="counter">'+all.length+' / '+active().length+'</span></div>'+
-     '<div class="bear-member-list">'+(all.length?all.map(row).join(""):'<p class="perf-empty">'+esc(t("noPlayers"))+'</p>')+
-     '</div></details>';
+     '<div class="assignment-table-scroll" role="region" aria-label="'+esc(t('assignment'))+'" tabindex="0"><table class="assignment-table"><thead><tr><th scope="col">'+esc(t('player'))+'</th>'+(cache.slots||[]).map((sl,i)=>'<th scope="col" title="'+esc(slotLabel(sl))+'">'+esc(i<2?'BT'+(i+1):slotLabel(sl))+'</th>').join('')+'<th scope="col">'+esc(t('attendance'))+' / '+esc(t('role'))+'</th></tr></thead><tbody>'+(all.length?all.map(row).join(''):'<tr><td colspan="'+(2+cache.slots.length)+'">'+esc(t('noPlayers'))+'</td></tr>')+'</tbody></table></div></details>';
   const details=root.querySelector("[data-bear-roster]");
   details?.addEventListener("toggle",()=>{rosterExpanded=details.open;});
   pending.forEach(id=>{
@@ -317,7 +317,7 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
     .finally(()=>{if(ticket===generation)loading=null;});
   return loading;
  }
- async function save(id){
+ async function save(id,fromCheckbox=false){
   if(pending.has(id))return;
   const item=root.querySelector('[data-bear-row="'+id+'"]');if(!item)return;
   const slotKey=item.querySelector("[data-bear-slot]")?.value||"";
@@ -325,7 +325,8 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
   const attendance=item.querySelector("[data-bear-attendance]")?.value||"tentative";
   const notes=item.querySelector("[data-bear-note]")?.value||"";
   if(slotKey&&!slot(slotKey)){flash(t("required"),true);return;}
-  const ticket=generation;pending.add(id);
+  const ticket=generation,focusChoice=document.activeElement?.dataset.bearCheck;pending.add(id);
+  if(fromCheckbox)item.querySelectorAll('[data-bear-check]').forEach(e=>{e.disabled=true;});
   const button=item.querySelector("[data-bear-save]");if(button){button.disabled=true;button.textContent=t("saving");}
   try{
    const result=await request("bootstrap",{action:"bear_assignment",game_id:id,slot_key:attendance==="no"?"":slotKey,role,attendance,notes});
@@ -335,7 +336,7 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
    else cache.assignments=[...cache.assignments.filter(a=>String(a.game_id)!==id),result.assignment];
    flash(t(result.removed?"removed":"saved"));render();
   }catch(e){if(ticket===generation)flash(t("error")+" ("+String(e.message||e)+")",true);}
-  finally{pending.delete(id);if(ticket===generation){const b=root.querySelector('[data-bear-save="'+id+'"]');if(b){b.disabled=false;b.textContent=t("save");}}}
+  finally{pending.delete(id);if(ticket===generation){if(fromCheckbox){render();root.querySelector('[data-bear-row="'+id+'"] [data-bear-check="'+(focusChoice||cache.slots[0].slot_key)+'"]')?.focus();}const b=root.querySelector('[data-bear-save="'+id+'"]');if(b){b.disabled=false;b.textContent=t("save");}}}
  }
  function exportText(){
   const ids=new Set(active().map(p=>String(p.game_id))),people=byId();
@@ -368,6 +369,12 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
   });
   root.addEventListener("change",e=>{
    const el=e.target;
+   if(el.matches('[data-bear-check]')){
+     const row=el.closest('[data-bear-row]');
+     row.querySelector('[data-bear-slot]').value=el.checked?el.dataset.bearCheck:'';
+     if(el.checked&&row.querySelector('[data-bear-attendance]').value==='no')row.querySelector('[data-bear-attendance]').value='tentative';
+     save(row.dataset.bearRow,true);return;
+   }
    if(el.matches("[data-bear-filter]")){filter=el.value;render();}
    if(el.matches("[data-bear-quick-slot]"))quickSlot=el.value;
    if(el.matches("[data-bear-quick-attendance]"))quickAttendance=el.value;
@@ -382,6 +389,6 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
    next?.focus();if(Number.isInteger(pos))next?.setSelectionRange(pos,pos);
   });
  }
- function reset(){generation++;cache=null;loading=null;pending.clear();recommendations.clear();quickSlot="";quickAttendance="confirmed";quickJoiner=false;rosterExpanded=false;filter="all";query="";if(root){root.innerHTML="";root.textContent="";}}
+ function reset(){generation++;cache=null;loading=null;pending.clear();recommendations.clear();quickSlot="";quickAttendance="confirmed";quickJoiner=false;rosterExpanded=true;filter="all";query="";if(root){root.innerHTML="";root.textContent="";}}
  return {enabled,open,render,reset};
 }

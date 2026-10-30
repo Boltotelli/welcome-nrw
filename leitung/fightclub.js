@@ -1,37 +1,37 @@
 /* AllianceOS Phase 4 – GitHub Pages only: FightClub draft rosters.
  * Distinguishes confirmed source schedules from a manually chosen planning date.
  * No Discord role/slot/bot changes, no automatic player assignments. */
-import {createFightClubMap} from "./fightclub-map.js?v=20261021-plan-1";
+import {createFightClubMap} from "./fightclub-map.js?v=20261030-matrix-1";
 export function createFightClub({getState,getLanguage,request,flash,esc,openPlayer}){
  const canDossier=()=>getState()?.staff?.is_owner===true||getState()?.staff?.permissions?.members===true;
  const root=document.getElementById("fightclubRoot");
  const enabled=true; // Released for both GitHub Pages and Vercel; access is enforced by server-side module permissions.
  const copy={
- de:{intro:"Swordland und TriAlliance: Legionen planen, Verfügbarkeit berücksichtigen und Spieler nach dokumentierter Kraft vergleichen.",
+ de:{intro:"Swordland und TriAlliance: Legionen planen, Verfügbarkeit berücksichtigen und Spieler nach ihrem Mystic-Trial-Score vergleichen.",
    swordland:"Swordland",triforce:"TriAlliance",type:"Event",date:"Planungsdatum",dateMissing:"Wähle ein Planungsdatum oder einen vorhandenen bestätigten Termin.",
    knownDates:"Vorhandene Event-Termine",manual:"Manuell geplantes Datum – nicht automatisch als Event bestätigt",
    verified:"Im Discord-Kalender erfasster Termin",source:"Datenquelle: bestehender Discord-Eventkalender (nur lesend)",
    noTime:"Legion-Zeit nicht bestätigt",utc:"UTC",head:"Legionenübersicht",l1:"Legion 1",l2:"Legion 2",reserve:"Reserve",
    full:"Vollständig verfügbar",partial:"Eingeschränkt verfügbar",unknown:"Noch unklar",unavailable:"Nicht verfügbar",
    availability:"Verfügbarkeit",legion:"Legion",role:"Kampfrolle",flex:"Flexibel",attack:"Angriff",defense:"Verteidigung",support:"Unterstützung",
-   empty:"Nicht eingeteilt",confirmed:"Eingeplant",members:"Spieler",observed:"Kraft erfasst",
-   sum:"Erfasste Kraft (Summe)",sourcePower:"Kraft aus letztem MightPulse-API-Abruf (kein Nachweis der Kampfstärke).",
-   missingPower:"Keine verifizierte Kraft",note:"Leitungsnotiz",noteHint:"Intern, optional",
+   empty:"Nicht eingeteilt",confirmed:"Eingeplant",members:"Spieler",observed:"Mystic Trial erfasst",
+   sum:"Mystic-Trial-Score (Summe)",sourcePower:"Mystic Trial aus letztem MightPulse-API-Abruf (kein Nachweis der Kampfstärke).",
+   missingPower:"Kein Mystic-Trial-Score",note:"Leitungsnotiz",noteHint:"Intern, optional",
    plans:"Spielerplanung",filter:"Filter",all:"Alle aktiven Spieler",unassigned:"Nicht eingeteilt",assigned:"Eingeteilt",
    search:"Spielername oder ID suchen …",save:"Speichern",saving:"Speichert …",remove:"Zurücksetzen",
    copyList:"Listen kopieren",copied:"Legionlisten kopiert",copyError:"Kopieren fehlgeschlagen",
-   suggestions:"Kandidaten nach Spielerkraft",suggestionHint:"Unverbindliche Sortierung nach API-Kraft: vollständig verfügbare Kandidaten für Legion 1, eingeschränkt verfügbare für Legion 2. Keine automatische Zuteilung.",
-   l1Candidates:"Für Legion 1 vormerken",l2Candidates:"Für Legion 2 vormerken",none:"Noch keine geeigneten Kandidaten mit dokumentierter Kraft und Verfügbarkeit.",
+   suggestions:"Kandidaten nach Mystic Trial",suggestionHint:"Unverbindliche Sortierung nach Mystic Trial: vollständig verfügbare Kandidaten für Legion 1, eingeschränkt verfügbare für Legion 2. Keine automatische Zuteilung.",
+   l1Candidates:"Für Legion 1 vormerken",l2Candidates:"Für Legion 2 vormerken",none:"Noch keine geeigneten Kandidaten mit Mystic-Trial-Score und Verfügbarkeit.",
    family:"Main-/Alt-Warnung",familyHint:"Main und Alt derselben Person sind für dieses Event gleichzeitig eingetragen. Prüfe, ob beide Accounts tatsächlich bespielt werden können.",
-   stale:"Letzter Kraftabruf",missing:"Unbekannt",registration:"Die Verfügbarkeit wird von R4/R5 eingetragen – keine automatische Spieleranmeldung.",
+   stale:"Letzter Mystic Trialabruf",missing:"Unbekannt",registration:"Die Verfügbarkeit wird von R4/R5 eingetragen – keine automatische Spieleranmeldung.",
    planningNote:"Ein Spieler kann pro Eventtermin nur einer Legion oder der Reserve zugeordnet werden. Es gibt keine festen, erfundenen Legion-Kapazitäten.",
    noPlayers:"Keine passenden Spieler.",loading:"FightClub wird geladen …",error:"FightClub-Daten konnten nicht geladen werden.",
    saved:"FightClub-Zuordnung gespeichert",removed:"Planungseintrag gelöscht",selectDate:"Bitte zuerst ein Datum wählen.",
    refresh:"Aktualisieren",alts:"Alt von",noPrevious:"Für dieses Event liegen bisher keine bestätigten Termine vor.",
-   snapshotHint:"Allgemeine Spielerkraft ist kein Ersatz für Kampfboni, Marschkapazität oder reale Eventleistung.",
+   snapshotHint:"Der Mystic-Trial-Score ist kein Ersatz für Kampfboni, Marschkapazität oder reale Eventleistung.",
    assignmentNone:"Nicht zugeordnet",manualDate:"Planungsdatum auswählen",noAutomatic:"Es erfolgt keine automatische Anmeldung bei Swordland oder TriAlliance."
  },
- en:{intro:"Plan Swordland and TriAlliance legions using availability and recorded player power.",
+ en:{intro:"Plan Swordland and TriAlliance legions using availability and recorded Mystic Trial.",
    swordland:"Swordland",triforce:"TriAlliance",type:"Event",date:"Planning date",dateMissing:"Choose a planning date or an existing confirmed event date.",
    knownDates:"Existing event dates",manual:"Manually chosen planning date – not a confirmed event",
    verified:"Event date recorded in the Discord calendar",source:"Source: existing Discord event calendar (read-only)",
@@ -39,75 +39,75 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
    full:"Fully available",partial:"Partially available",unknown:"Unknown",unavailable:"Unavailable",
    availability:"Availability",legion:"Legion",role:"Battle role",flex:"Flexible",attack:"Attack",defense:"Defense",support:"Support",
    empty:"Unassigned",confirmed:"Planned",members:"Players",observed:"Power observed",
-   sum:"Observed power total",sourcePower:"Power from latest MightPulse API reading (not proof of combat strength).",
-   missingPower:"No verified power",note:"Leadership note",noteHint:"Internal, optional",
+   sum:"Observed Mystic Trial",sourcePower:"Mystic Trial latest MightPulse API reading (not proof of combat strength).",
+   missingPower:"No Mystic Trial",note:"Leadership note",noteHint:"Internal, optional",
    plans:"Player planning",filter:"Filter",all:"All active players",unassigned:"Unassigned",assigned:"Assigned",
    search:"Search player or game ID …",save:"Save",saving:"Saving …",remove:"Reset",
    copyList:"Copy lists",copied:"Legion lists copied",copyError:"Copy failed",
-   suggestions:"Candidates by recorded power",suggestionHint:"Advisory sorting by API power: fully available candidates for Legion 1, partially available for Legion 2. No automatic assignments.",
-   l1Candidates:"Legion 1 candidates",l2Candidates:"Legion 2 candidates",none:"No candidates with verified power and availability.",
+   suggestions:"Candidates by Mystic Trial",suggestionHint:"Advisory sorting by Mystic Trial: fully available candidates for Legion 1, partially available for Legion 2. No automatic assignments.",
+   l1Candidates:"Legion 1 candidates",l2Candidates:"Legion 2 candidates",none:"No candidates with Mystic Trial and availability.",
    family:"Main/alt warning",familyHint:"A main and alt of the same person are assigned to this event. Check whether both accounts can participate.",
-   stale:"Last power update",missing:"Unknown",registration:"Availability is entered by leadership; this is not player-confirmed registration.",
+   stale:"Mystic Trial update",missing:"Unknown",registration:"Availability is entered by leadership; this is not player-confirmed registration.",
    planningNote:"One player can only join one legion or reserve for this event date. Legion capacities have not been assumed.",
    noPlayers:"No matching players.",loading:"Loading FightClub …",error:"Could not load FightClub data.",
    saved:"FightClub assignment saved",removed:"Planning entry removed",selectDate:"Choose a date first.",
    refresh:"Refresh",alts:"Alt of",noPrevious:"No previously confirmed dates found for this event.",
-   snapshotHint:"General player power is not a substitute for battle buffs, march capacity or real event performance.",
+   snapshotHint:"The Mystic Trial score is not a substitute for battle buffs, march capacity or real event performance.",
    assignmentNone:"Unassigned",manualDate:"Choose planning date",noAutomatic:"No automatic Swordland or TriAlliance registration."
  },
- fr:{intro:"Planifier les légions Swordland et TriAlliance selon la disponibilité et la puissance mesurée.",
+ fr:{intro:"Planifier les légions Swordland et TriAlliance selon la disponibilité et la Mystic Trial mesurée.",
    swordland:"Swordland",triforce:"TriAlliance",type:"Événement",date:"Date de planification",dateMissing:"Choisir une date de planification ou une date confirmée.",
    knownDates:"Dates d'événements existantes",manual:"Date manuelle – événement non confirmé",
    verified:"Date enregistrée dans le calendrier Discord",source:"Source : calendrier Discord existant (lecture seule)",
    noTime:"Heure de légion non confirmée",utc:"UTC",head:"Vue des légions",l1:"Légion 1",l2:"Légion 2",reserve:"Réserve",
    full:"Disponible entièrement",partial:"Disponible partiellement",unknown:"Inconnu",unavailable:"Indisponible",
    availability:"Disponibilité",legion:"Légion",role:"Rôle",flex:"Flexible",attack:"Attaque",defense:"Défense",support:"Soutien",
-   empty:"Non attribué",confirmed:"Planifié",members:"Joueurs",observed:"Puissance relevée",
-   sum:"Puissance relevée cumulée",sourcePower:"Puissance du dernier relevé API MightPulse (pas une mesure du combat).",
-   missingPower:"Puissance non vérifiée",note:"Note de direction",noteHint:"Interne, facultatif",
+   empty:"Non attribué",confirmed:"Planifié",members:"Joueurs",observed:"Mystic Trial relevée",
+   sum:"Mystic Trial relevée cumulée",sourcePower:"Mystic Trial du dernier relevé API MightPulse (pas une mesure du combat).",
+   missingPower:"Mystic Trial non vérifiée",note:"Note de direction",noteHint:"Interne, facultatif",
    plans:"Planification des joueurs",filter:"Filtre",all:"Tous les membres actifs",unassigned:"Non attribué",assigned:"Attribué",
    search:"Nom ou ID du joueur …",save:"Enregistrer",saving:"Enregistrement …",remove:"Réinitialiser",
    copyList:"Copier les listes",copied:"Listes copiées",copyError:"Échec de la copie",
-   suggestions:"Candidats selon la puissance",suggestionHint:"Tri indicatif selon la puissance API : disponibles totalement pour L1, partiellement pour L2. Aucune attribution automatique.",
-   l1Candidates:"Candidats légion 1",l2Candidates:"Candidats légion 2",none:"Aucun candidat disponible avec puissance vérifiée.",
+   suggestions:"Candidats selon la Mystic Trial",suggestionHint:"Tri indicatif selon la Mystic Trial API : disponibles totalement pour L1, partiellement pour L2. Aucune attribution automatique.",
+   l1Candidates:"Candidats légion 1",l2Candidates:"Candidats légion 2",none:"Aucun candidat disponible avec Mystic Trial vérifiée.",
    family:"Alerte principal/secondaire",familyHint:"Un principal et un secondaire de la même personne sont inscrits. Vérifier la possibilité de jouer les deux.",
-   stale:"Dernier relevé de puissance",missing:"Inconnu",registration:"La disponibilité est saisie par la direction, pas confirmée par le joueur.",
+   stale:"Dernier relevé de Mystic Trial",missing:"Inconnu",registration:"La disponibilité est saisie par la direction, pas confirmée par le joueur.",
    planningNote:"Un joueur ne peut rejoindre qu'une légion ou la réserve pour cette date. Aucune capacité fictive n'est imposée.",
    noPlayers:"Aucun joueur correspondant.",loading:"Chargement de FightClub …",error:"Impossible de charger FightClub.",
    saved:"Affectation enregistrée",removed:"Entrée supprimée",selectDate:"Choisir une date.",
    refresh:"Actualiser",alts:"Secondaire de",noPrevious:"Aucune date confirmée pour cet événement.",
-   snapshotHint:"La puissance générale n'est pas équivalente aux bonus de combat ou aux performances réelles.",
+   snapshotHint:"La Mystic Trial générale n'est pas équivalente aux bonus de combat ou aux performances réelles.",
    assignmentNone:"Non attribué",manualDate:"Choisir une date",noAutomatic:"Aucune inscription automatique aux événements."
  },
- es:{intro:"Planifica las legiones de Swordland y TriAlliance según disponibilidad y poder registrado.",
+ es:{intro:"Planifica las legiones de Swordland y TriAlliance según disponibilidad y Mystic Trial registrado.",
    swordland:"Swordland",triforce:"TriAlliance",type:"Evento",date:"Fecha de planificación",dateMissing:"Elige una fecha o un evento confirmado.",
    knownDates:"Fechas de eventos existentes",manual:"Fecha elegida manualmente – evento no confirmado",
    verified:"Fecha registrada en el calendario de Discord",source:"Fuente: calendario de Discord existente (solo lectura)",
    noTime:"Hora de legión sin confirmar",utc:"UTC",head:"Resumen de legiones",l1:"Legión 1",l2:"Legión 2",reserve:"Reserva",
    full:"Disponible totalmente",partial:"Disponible parcialmente",unknown:"Sin confirmar",unavailable:"No disponible",
    availability:"Disponibilidad",legion:"Legión",role:"Rol de combate",flex:"Flexible",attack:"Ataque",defense:"Defensa",support:"Apoyo",
-   empty:"Sin asignar",confirmed:"Planificado",members:"Jugadores",observed:"Poder registrado",
-   sum:"Suma del poder registrado",sourcePower:"Poder del último registro de API MightPulse (no mide la fuerza de combate).",
-   missingPower:"Sin poder verificado",note:"Nota de dirección",noteHint:"Interna, opcional",
+   empty:"Sin asignar",confirmed:"Planificado",members:"Jugadores",observed:"Mystic Trial registrado",
+   sum:"Suma del Mystic Trial registrado",sourcePower:"Mystic Trial del último registro de API MightPulse (no mide la fuerza de combate).",
+   missingPower:"Sin Mystic Trial verificado",note:"Nota de dirección",noteHint:"Interna, opcional",
    plans:"Planificación de jugadores",filter:"Filtro",all:"Todos los activos",unassigned:"Sin asignar",assigned:"Asignados",
    search:"Buscar nombre o ID …",save:"Guardar",saving:"Guardando …",remove:"Restablecer",
    copyList:"Copiar listas",copied:"Listas copiadas",copyError:"Error al copiar",
-   suggestions:"Candidatos por poder registrado",suggestionHint:"Orden orientativo por poder API: disponibilidad total para L1, parcial para L2. Sin asignación automática.",
-   l1Candidates:"Candidatos para legión 1",l2Candidates:"Candidatos para legión 2",none:"No hay candidatos con poder verificado y disponibilidad.",
+   suggestions:"Candidatos por Mystic Trial registrado",suggestionHint:"Orden orientativo por Mystic Trial API: disponibilidad total para L1, parcial para L2. Sin asignación automática.",
+   l1Candidates:"Candidatos para legión 1",l2Candidates:"Candidatos para legión 2",none:"No hay candidatos con Mystic Trial verificado y disponibilidad.",
    family:"Aviso de cuenta principal/alternativa",familyHint:"Se han asignado una cuenta principal y otra alternativa de la misma persona. Comprueba que ambas puedan participar.",
-   stale:"Último registro de poder",missing:"Desconocido",registration:"La disponibilidad la introduce la dirección, no el jugador.",
+   stale:"Último registro de Mystic Trial",missing:"Desconocido",registration:"La disponibilidad la introduce la dirección, no el jugador.",
    planningNote:"Cada jugador solo puede tener una legión o reserva por fecha. No se inventan cupos por legión.",
    noPlayers:"Sin jugadores que coincidan.",loading:"Cargando FightClub …",error:"No se pudieron cargar datos.",
    saved:"Asignación guardada",removed:"Entrada eliminada",selectDate:"Elige una fecha.",
    refresh:"Actualizar",alts:"Alternativa de",noPrevious:"No hay fechas confirmadas para este evento.",
-   snapshotHint:"El poder general no equivale a bonificaciones ni rendimiento real en combate.",
+   snapshotHint:"El Mystic Trial general no equivale a bonificaciones ni rendimiento real en combate.",
    assignmentNone:"Sin asignar",manualDate:"Elegir fecha",noAutomatic:"No hay inscripciones automáticas a eventos."
  }
  };
  const t=k=>(copy[getLanguage()]||copy.de)[k]||copy.de[k]||k;
  const locale=()=>({de:"de-DE",en:"en-GB",fr:"fr-FR",es:"es-ES"}[getLanguage()]||"de-DE");
  const number=n=>Number(n).toLocaleString(locale());
- const powerFormat=n=>n==null?"–":new Intl.NumberFormat(locale(),{notation:"compact",maximumFractionDigits:2}).format(Number(n));
+ const powerFormat=n=>n==null?"–":new Intl.NumberFormat(locale(),{maximumFractionDigits:0}).format(Number(n));
  const iso=d=>d?String(d).slice(0,10):"";
  const goodDate=v=>/^\d{4}-\d{2}-\d{2}$/.test(v)&&!Number.isNaN(Date.parse(v+"T00:00:00Z"))&&new Date(v+"T00:00:00Z").toISOString().slice(0,10)===v;
  const nextDateValid=v=>{
@@ -115,13 +115,14 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
    const diff=Date.parse(v+"T00:00:00Z")-Date.now();
    return diff>=-120*86400000 && diff<=540*86400000;
  };
- let state=null,loading=null,generation=0,eventType="swordland",date="",search="",filter="all",pending=new Set(),warning="",fastLegion=1,fastAvailability="full",rosterExpanded=false;
+ let state=null,loading=null,generation=0,eventType="swordland",date="",search="",filter="all",pending=new Set(),warning="",fastLegion=1,fastAvailability="full",rosterExpanded=true;
  function players(){return (getState()?.players||[]).filter(p=>p.active&&p.member_status!=="left"&&/^[0-9]{1,20}$/.test(String(p.game_id||""))).slice().sort((a,b)=>String(a.name||"").localeCompare(String(b.name||""),locale()));}
  const playerMap=()=>new Map(players().map(p=>[String(p.game_id),p]));
- const powers=()=>new Map((state?.powers||[]).map(p=>[String(p.game_id),p]));
+ const scorePowers=()=>(state?.powers||[]).map(p=>({...p,power:p.mystic_trial??null}));
+ const powers=()=>new Map(scorePowers().map(p=>[String(p.game_id),p]));
  const assignments=()=>state?.assignments?.filter(a=>a.event_type===eventType&&a.battle_date===date)||[];
  const mapUI=createFightClubMap({
-  getContext:()=>({eventType,date,assignments:assignments(),mapAssignments:state?.map_assignments||[],powers:state?.powers||[],players:players(),state,allianceState:getState()}),
+  getContext:()=>({eventType,date,assignments:assignments(),mapAssignments:state?.map_assignments||[],powers:scorePowers(),players:players(),state,allianceState:getState()}),
   getLanguage,request,flash,esc,onUpdated:()=>draw()
  });
  const assignment=id=>assignments().find(a=>String(a.game_id)===String(id));
@@ -168,7 +169,7 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
    const free=players().filter(p=>!listed.some(a=>String(a.game_id)===String(p.game_id)&&[1,2].includes(Number(a.legion))));
    const candidates=(availability)=>free.filter(p=>{
      const a=assignment(p.game_id);
-     return a?.availability===availability && powerById.has(String(p.game_id));
+     return a?.availability===availability && powerById.get(String(p.game_id))?.power!=null;
    }).sort((a,b)=>Number(powerById.get(String(b.game_id))?.power)-Number(powerById.get(String(a.game_id))?.power)).slice(0,8);
    const build=(status,key)=>{
      const sorted=candidates(status);
@@ -186,12 +187,13 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
   const family=conflicts.get(String(p.game_id));
   const pw=powers().get(String(p.game_id));
   const main=p.main_game_id?playerMap().get(String(p.main_game_id))?.name||p.main_game_id:null;
-  return '<article class="fight-player fight-player-compact" data-fight-row="'+esc(p.game_id)+'">'+
+  return '<tr data-fight-row="'+esc(p.game_id)+'"><td>'+
    '<div class="fight-player-top"><button type="button" data-fight-profile="'+esc(p.game_id)+'" class="fight-player-name" '+(!canDossier()?'disabled':'')+'>'+esc(p.name)+'</button>'+
     '<small>'+esc(p.game_id)+(main?' · '+esc(t("alts"))+' '+esc(main):'')+'</small>'+
-    '<span class="fight-power">'+esc(pw?powerFormat(pw.power):t("missingPower"))+'</span></div>'+
+    '</div></td><td>'+esc(pw?.power==null?'—':powerFormat(pw.power))+'</td>'+
+   [1,2].map(l=>'<td class="assignment-check-cell"><label class="assignment-check"><input type="checkbox" data-fight-check="'+l+'" aria-label="'+esc(p.name+' · L'+l)+'" '+(Number(val)===l?'checked ':'')+(pending.has(String(p.game_id))?'disabled':'')+'><span class="sr-only">L'+l+'</span></label></td>').join('')+'<td>'+
    '<div class="fight-player-fields">'+
-    '<label><span>'+esc(t("legion"))+'</span>'+
+    '<label hidden><span>'+esc(t("legion"))+'</span>'+
     selectOptions(optLegion(),String(val),'data-fight-legion')+'</label>'+
     '<label><span>'+esc(t("availability"))+'</span>'+
     selectOptions(optAvailability(),a?.availability||"unknown",'data-fight-availability')+'</label>'+
@@ -202,7 +204,7 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
     (a?'<button type="button" class="ghost" data-fight-remove="'+esc(p.game_id)+'">'+esc(t("remove"))+'</button>':"")+
     '</details></div>'+
    (family?'<p class="fight-conflict">⚠ '+esc(t("family"))+': '+esc(family)+'</p>':"")+
-   '</article>';
+   '</td></tr>';
  }
  function list(){
    const conflicts=overlap(),powerById=powers();
@@ -221,8 +223,8 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
        selectOptions([["all",t("all")],["assigned",t("assigned")],["unassigned",t("unassigned")],
         ["1",t("l1")],["2",t("l2")],["0",t("reserve")]],filter,'data-fight-filter')+
         '<span>'+visible.length+' / '+players().length+'</span></div>'+
-     '<div class="fight-player-list">'+(visible.length?visible.map(p=>row(p,conflicts)).join(""):
-       '<p class="perf-empty">'+esc(t("noPlayers"))+'</p>')+'</div></details>';
+     '<div class="assignment-table-scroll" role="region" aria-label="'+esc(t('plans'))+'" tabindex="0"><table class="assignment-table"><thead><tr><th scope="col">'+esc(t('player'))+'</th><th scope="col">Mystic Trial</th><th scope="col">L1</th><th scope="col">L2</th><th scope="col">'+esc(t('availability'))+' / '+esc(t('note'))+'</th></tr></thead><tbody>'+
+       (visible.length?visible.map(p=>row(p,conflicts)).join(''):'<tr><td colspan="5">'+esc(t('noPlayers'))+'</td></tr>')+'</tbody></table></div></details>';
  }
  function fastAssign(){
    const availPlayers=players();
@@ -291,7 +293,7 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
        '<p>'+esc(t("snapshotHint"))+' '+esc(t("noAutomatic"))+'</p></div>'+
        '<section class="fight-overview"><h3>'+esc(t("head"))+'</h3><div class="fight-summary-grid">'+summary()+'</div></section>'+
        (conflicts.size?'<div class="fight-conflict">⚠ '+esc(t("familyHint"))+'</div>':'')+
-       candidateLists()+fastAssign()+mapUI.render()+list();
+       list()+fastAssign()+candidateLists()+mapUI.render();
    }
    root.innerHTML=html;
    const expanded=root.querySelector(".fight-roster-collapsible");
@@ -313,7 +315,7 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
      .finally(()=>{if(ticket===generation)loading=null;});
    return loading;
  }
- async function save(id,remove=false){
+ async function save(id,remove=false,fromCheckbox=false){
    if(!date||!nextDateValid(date)){flash(t("selectDate"),true);return;}
    if(pending.has(id))return;
    const rowEl=root.querySelector('[data-fight-row="'+id+'"]');
@@ -322,9 +324,10 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
    const avail=rowEl.querySelector("[data-fight-availability]")?.value||"unknown";
    const role=rowEl.querySelector("[data-fight-role]")?.value||"flex";
    const notes=rowEl.querySelector("[data-fight-note]")?.value||"";
-   const ticket=generation,whichEvent=eventType,whichDate=date;
+   const ticket=generation,whichEvent=eventType,whichDate=date,focusChoice=document.activeElement?.dataset.fightCheck;
    // -1 preserves a participant's availability without assigning a legion.
    pending.add(id);
+   if(fromCheckbox)rowEl.querySelectorAll('[data-fight-check]').forEach(e=>{e.disabled=true;});
    const button=rowEl.querySelector('[data-fight-save]');if(button){button.disabled=true;button.textContent=t("saving");}
    try{
      const result=await request("bootstrap",{action:"fightclub_save",event_type:whichEvent,battle_date:whichDate,
@@ -341,7 +344,7 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
      }
      flash(t(result.removed?"removed":"saved"));draw();
    }catch(e){if(ticket===generation)flash(t("error")+" ("+String(e.message||e)+")",true);}
-   finally{pending.delete(id);if(ticket===generation){const b=root.querySelector('[data-fight-save="'+id+'"]');if(b){b.disabled=false;b.textContent=t("save");}}}
+   finally{pending.delete(id);if(ticket===generation){if(fromCheckbox){draw();root.querySelector('[data-fight-row="'+id+'"] [data-fight-check="'+(focusChoice||1)+'"]')?.focus();}const b=root.querySelector('[data-fight-save="'+id+'"]');if(b){b.disabled=false;b.textContent=t("save");}}}
  }
  function exportText(){
    if(!date)return "";
@@ -361,6 +364,11 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
    root.addEventListener("change",e=>{
      if(mapUI.change(e))return;
      const el=e.target;
+     if(el.matches('[data-fight-check]')){
+       const row=el.closest('[data-fight-row]'),id=row.dataset.fightRow;
+       row.querySelector('[data-fight-legion]').value=el.checked?el.dataset.fightCheck:'-1';
+       save(id,false,true);return;
+     }
      if(el.matches("[data-fight-fast-legion]")){fastLegion=Number(el.value);return;}
      if(el.matches("[data-fight-fast-availability]")){fastAvailability=el.value;return;}
      if(el.matches("[data-fight-type]")){eventType=el.value;date="";filter="all";search="";draw();}
@@ -392,6 +400,6 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
      }
    });
  }
- function reset(){fastLegion=1;fastAvailability="full";rosterExpanded=false;mapUI.reset();generation++;state=null;loading=null;pending.clear();date="";search="";filter="all";eventType="swordland";if(root){root.innerHTML="";root.textContent="";}}
+ function reset(){fastLegion=1;fastAvailability="full";rosterExpanded=true;mapUI.reset();generation++;state=null;loading=null;pending.clear();date="";search="";filter="all";eventType="swordland";if(root){root.innerHTML="";root.textContent="";}}
  return {enabled,open:load,render:draw,reset};
 }

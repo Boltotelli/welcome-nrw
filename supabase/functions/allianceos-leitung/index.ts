@@ -361,7 +361,7 @@ async function rosterFor(alliance: string, kingdom: number) {
     .select("game_id,power,fetched_at").eq("alliance_code",alliance)
     .in("game_id",cacheIds).limit(500));
   const apiPowers=cacheIds.length?await checked<any[]>(db.from("aos_member_power_snapshot")
-    .select("game_id,power,fetched_at,source").eq("alliance_code",alliance).in("game_id",cacheIds).limit(500)):[];
+    .select("game_id,power,fetched_at,source,mystic_trial,mystic_trial_fetched_at").eq("alliance_code",alliance).in("game_id",cacheIds).limit(500)):[];
   const byApiPower=new Map(apiPowers.map(x=>[x.game_id,x]));
   const byPower=new Map(powers.map(x=>[x.game_id,x]));
   const dbIds=players.map(p=>p.id).filter(Boolean);
@@ -388,6 +388,7 @@ async function rosterFor(alliance: string, kingdom: number) {
       responsibilities:overlay.responsibilities||"", avatar_url:cache.avatar_url||null,
       tc_level:cache.tc_level??null,
       power:overlay.power_override!=null?Number(overlay.power_override):api.power!=null?Number(api.power):power.power!=null?Number(power.power):null,
+      mystic_trial:api.mystic_trial??null,mystic_trial_fetched_at:api.mystic_trial_fetched_at??null,
       power_source:overlay.power_override!=null?"manual":api.power!=null?(api.source||"mightpulse_roster"):power.power!=null?"bear_buff":null,
       power_override:overlay.power_override??null,
       power_observed_at:overlay.power_override!=null?overlay.power_override_at||null:api.power!=null?api.fetched_at||null:power.fetched_at||null,
@@ -755,14 +756,15 @@ async function syncListedRosterPower(req:Request,alliance:string,staff:any,body:
  if(!ids.length)throw new HttpError("roster_missing",409);
  const cursor=Number(body?.cursor??0);
  if(!Number.isInteger(cursor)||cursor<0||cursor>=ids.length)throw new HttpError("invalid_sync_cursor",400);
- const allowed=new Set(ids),batch=ids.slice(cursor,cursor+20),now=new Date().toISOString();
+ const allowed=new Set(ids),batch=ids.slice(cursor,cursor+3),now=new Date().toISOString();
  const snapshots=await checked<any[]>(db.from("aos_member_power_snapshot")
-  .select("game_id,power,fetched_at").eq("alliance_code",alliance).in("game_id",ids).limit(1000));
+  .select("game_id,power,fetched_at,mystic_trial,mystic_trial_fetched_at").eq("alliance_code",alliance).in("game_id",ids).limit(1000));
  const validPower=(n:any)=>n!==null&&n!==undefined&&n!==""&&Number.isSafeInteger(Number(n))&&Number(n)>=0&&Number(n)<=9999999999999;
  const fresh=new Set(snapshots.filter(p=>validPower(p.power)&&Date.now()-Date.parse(p.fetched_at)>=0&&Date.now()-Date.parse(p.fetched_at)<25*60*1000).map(p=>String(p.game_id)));
  const values=new Map<string,any>(),failed:any[]=[];let rateLimited=false,providerCalls=0;
  // Retain the existing roster-refresh cache tag (schema enum), regardless of endpoint.
- const add=(id:string,power:any)=>{if(allowed.has(id)&&validPower(power))values.set(id,{alliance_code:alliance,game_id:id,power:Number(power),fetched_at:now,source:"mightpulse_roster"});};
+ const snapshotById=new Map(snapshots.map(p=>[String(p.game_id),p]));
+ const add=(id:string,power:any)=>{if(allowed.has(id)&&validPower(power))values.set(id,{alliance_code:alliance,game_id:id,power:Number(power),fetched_at:now,source:"mightpulse_roster",mystic_trial:snapshotById.get(id)?.mystic_trial??null,mystic_trial_fetched_at:snapshotById.get(id)?.mystic_trial_fetched_at??null});};
  // One aggregate request covers current NRW members; absent/away/left accounts
  // are subsequently resolved through the player endpoint, irrespective of tag.
  if(cursor===0&&people.some((p:any)=>p.active&&!p.is_event_loan&&!fresh.has(String(p.game_id)))){
@@ -774,19 +776,25 @@ async function syncListedRosterPower(req:Request,alliance:string,staff:any,body:
     if(Array.isArray(rows))for(const p of rows)add(String(p?.governor_id??p?.fid??p?.player_id??""),p?.power);}
   }catch(e){if(e instanceof HttpError&&e.httpStatus===429)throw e;}
  }
- const pending=batch.filter(id=>!fresh.has(id)&&!values.has(id));let index=0;
+ // Mystic Trial requires per-player ranks; the alliance roster contains power only.
+ const scoreFresh=new Set(snapshots.filter(p=>p.mystic_trial!=null&&Date.now()-Date.parse(p.mystic_trial_fetched_at)>=0&&Date.now()-Date.parse(p.mystic_trial_fetched_at)<60*60*1000).map(p=>String(p.game_id)));
+ const pending=batch.filter(id=>!scoreFresh.has(id)||(!fresh.has(id)&&!values.has(id)));let index=0;
  async function worker(){
   while(index<pending.length){const id=pending[index++];
    if(rateLimited){failed.push({game_id:id,error:"provider_rate_limited"});continue;}
    try{
     providerCalls++;
-    const response=await fetch("https://api.mightpulse.com/v1/players/"+encodeURIComponent(id)+"?include=base",{headers:{Accept:"application/json",Authorization:"Bearer "+key},signal:AbortSignal.timeout(12000)});
+    const response=await fetch("https://api.mightpulse.com/v1/players/"+encodeURIComponent(id)+"?include=base,ranks",{headers:{Accept:"application/json",Authorization:"Bearer "+key},signal:AbortSignal.timeout(90000)});
     if(response.status===429)rateLimited=true;
     if(!response.ok)throw Error(response.status===404?"player_not_found":response.status===429?"provider_rate_limited":"player_provider_unavailable");
     const wire=await response.json(),p=wire?.player??wire?.data?.player;
     const responseId=p?.governor_id??p?.game_id??p?.fid??p?.player_id;
     if(!p||(responseId!=null&&String(responseId)!==id)||!validPower(p.power??p.total_power))throw Error("player_power_unavailable");
     add(id,p.power??p.total_power);
+    const ranks=wire?.ranks??wire?.data?.ranks??p?.ranks,score=ranks?.mystic_trial;
+    // Missing scores stay unknown, never substitute general power.
+    const value=values.get(id);
+    if(value){value.mystic_trial=validPower(score)?Number(score):null;value.mystic_trial_fetched_at=now;}
    }catch(e){failed.push({game_id:id,error:String((e as Error)?.message||"player_provider_unavailable")});}
   }
  }
@@ -934,7 +942,7 @@ async function bearManagement(req:Request,alliance:string,staff:any){
    checked<any>(db.from("aos_bear_planning_settings")
      .select("strong_power_threshold").eq("alliance_code",alliance).maybeSingle()),
    checked<any[]>(db.from("aos_member_power_snapshot")
-     .select("game_id,power,fetched_at,source").eq("alliance_code",alliance).limit(500))
+     .select("game_id,power,fetched_at,source,mystic_trial,mystic_trial_fetched_at").eq("alliance_code",alliance).limit(500))
  ]);
  const rawProfiles:any[]=[];
  for(let i=0;i<allIds.length;i+=100){
@@ -1103,7 +1111,7 @@ async function fightClubData(req:Request,alliance:string,staff:any){
    .eq("alliance_code",alliance).gte("battle_date",since)
    .order("battle_date",{ascending:false}).limit(2000)),
   checked<any[]>(db.from("aos_member_power_snapshot")
-   .select("game_id,power,fetched_at,source").eq("alliance_code",alliance).limit(500)),
+   .select("game_id,power,fetched_at,source,mystic_trial,mystic_trial_fetched_at").eq("alliance_code",alliance).limit(500)),
   checked<any[]>(db.from("aos_fightclub_map_assignments")
    .select("event_type,battle_date,game_id,location_key,updated_at")
    .eq("alliance_code",alliance).gte("battle_date",since)
@@ -1120,7 +1128,7 @@ async function fightClubData(req:Request,alliance:string,staff:any){
  for(const p of powers){
   const n=Number(p.power);
   if(isId(p.game_id)&&p.power!==null&&Number.isSafeInteger(n)&&n>=0){
-   verified.set(p.game_id,{game_id:p.game_id,power:n,fetched_at:p.fetched_at,source:p.source});
+   verified.set(p.game_id,{game_id:p.game_id,power:n,fetched_at:p.fetched_at,source:p.source,mystic_trial:p.mystic_trial??null,mystic_trial_fetched_at:p.mystic_trial_fetched_at??null});
   }
  }
  return json(req,{ok:true,cycles:cycles.map(c=>({

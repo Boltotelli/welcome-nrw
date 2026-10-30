@@ -7,6 +7,7 @@ export function decodeDeployment(key,sites=[]){
 }
 export function deploymentTargets(eventType,sites,side=''){
  let list=sites.filter(s=>!s.virtual&&!['safe-zone','guerrilla'].includes(s.key));
+ if(eventType==='swordland')list=list.filter(s=>!['mercenary','shrine','reformation'].includes(s.key)&&!s.key.startsWith('under-'));
  if(eventType==='triforce')list=list.filter(s=>s.key.startsWith(side)&&side&&s.key!==side+'1');
  const midpoint=eventType==='triforce'&&list.length?(Math.min(...list.map(s=>s.y))+Math.max(...list.map(s=>s.y)))/2:50;
  return {north:list.filter(s=>s.y<midpoint),south:list.filter(s=>s.y>=midpoint)};

@@ -687,3 +687,19 @@
 }
 
 .announcement-editor summary{cursor:pointer;padding:8px 0}.announcement-fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.announcement-editor textarea,.announcement-editor input{display:block;width:100%;max-width:100%;padding:10px;border:1px solid var(--line);background:var(--surface);color:inherit;border-radius:8px}.announcement-editor label{display:block;margin:12px 0}.announcement-actions{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}.announcement-editor button{padding:10px 14px;border:1px solid var(--line);border-radius:8px;cursor:pointer}.announcement-editor [data-ann-preview] article{margin:12px 0;padding:12px;border:1px solid var(--line);border-radius:8px}.announcement-editor [hidden]{display:none!important}@media(max-width:760px){.announcement-fields{grid-template-columns:1fr}}
+
+/* Assignment matrices: native table structure, touch and keyboard targets. */
+.assignment-table-scroll{max-width:100%;overflow-x:auto;overscroll-behavior-x:contain}
+.assignment-table{width:100%;border-collapse:collapse;text-align:left;font-variant-numeric:tabular-nums}
+.assignment-table th,.assignment-table td{padding:12px;border-bottom:1px solid var(--line,#ffffff20);vertical-align:top}
+.assignment-table th{font-size:.8rem;color:var(--muted,#b7bdc8);white-space:nowrap}
+.assignment-table td:first-child{min-width:150px;overflow-wrap:anywhere}
+.assignment-table .fight-player-top,.assignment-table .bear-member-head{display:flex;flex-direction:column;align-items:flex-start;gap:5px}
+.assignment-table .fight-player-fields,.assignment-table .bear-fields{display:flex;flex-wrap:wrap;align-items:end;gap:8px;min-width:250px}
+.assignment-table [hidden]{display:none!important}
+.assignment-check{display:flex;min-width:44px;min-height:44px;align-items:center;justify-content:center;cursor:pointer;border-radius:10px}
+.assignment-check:hover{background:#c8a96818}.assignment-check:focus-within{outline:2px solid #d8b66c;outline-offset:2px}
+.assignment-check input{width:22px;height:22px;accent-color:#c8a968;cursor:pointer}
+.assignment-check:has(input:disabled){opacity:.55;cursor:wait}
+.assignment-table .fight-row-more{min-width:44px}.assignment-table .bear-row-more{margin-top:8px}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}

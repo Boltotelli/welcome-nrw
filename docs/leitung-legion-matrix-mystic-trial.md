@@ -1,0 +1,13 @@
+# Legion matrix and Mystic Trial · 2026-10-30
+
+SL/Tri player planning uses a table with mutually exclusive L1/L2 checkboxes. Bear planning uses one checkbox per configured trap (BT1/BT2). Checking a different column moves the player; unchecking the current column removes that assignment. Availability, notes and roles remain editable. Saving uses existing permission checks and assignment endpoints. Failed writes restore the stored selection. Tables open by default and support keyboard input and horizontal scrolling on narrow screens.
+
+FightClub displays, sorts and balances by the provider's `ranks.mystic_trial`, rather than general power. The player dossier displays the same score and retrieval time. Missing scores are unknown and excluded from new automatic placements. Bear planning retains general power. Source: https://api.mightpulse.com/ (Player / ranks).
+
+The manual roster refresh requests `include=base,ranks` for authorized listed IDs, including external accounts. Each batch contains at most three concurrent player requests. Scores have a one-hour cache, matching provider freshness; rate limiting stops the run. General roster refreshes preserve existing scores. No automatic score backfill or scheduled provider requests are added.
+
+The additive Supabase migration `member_mystic_trial_scores` adds nullable `mystic_trial bigint` and `mystic_trial_fetched_at timestamptz` columns to `aos_member_power_snapshot` and `aos_member_power_history`. Scores are constrained to 0…9999999999999. Existing RLS and authorization remain unchanged. API version 65 supplies these fields.
+
+Automatic Swordland placements exclude Mercenary, Swordshrine, Reformation and all four Undercellars positions. Existing manual positions remain when requested. TriAlliance still requires an explicitly selected starting side. Team messages include the supplied English North/South/Guerilla duties beneath player names; individual game-label copies remain compact.
+
+Validation: `node tests/mystic-sync.cjs`, `node tests/deployment-start-objectives.cjs`, `node tests/legion-matrix.cjs`. Browser tests require Playwright (`PLAYWRIGHT_MODULE` optionally overrides its module location; `CHROMIUM_PATH` optionally selects a browser executable). UI fixtures do not write live assignments. Additional browser coverage verifies preview/apply, stale-roster rejection, partial failure retry, copied messages, modal focus and four viewport widths.

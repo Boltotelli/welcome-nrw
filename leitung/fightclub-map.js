@@ -1,5 +1,5 @@
-import {decodeDeployment} from './deployment-engine.js?v=20261021-plan-1';
-import {createDeploymentPlanner} from './deployment-planner.js?v=20261021-plan-1';
+import {decodeDeployment} from './deployment-engine.js?v=20261030-matrix-1';
+import {createDeploymentPlanner} from './deployment-planner.js?v=20261030-matrix-1';
 /* FightClub battlefield planning: private, date-scoped map objectives for both legions.
  * Maps are planning aids; no Kingshot orders, registration or Discord posts are sent.
  * TriAlliance map illustration credited to its author; pin geometry remains usable
@@ -142,7 +142,7 @@ export function createFightClubMap({getContext,getLanguage,request,flash,esc,onU
   });
  }
  function teamMessage(team){
-  if(team===3)return "GUERILLA\n"+(teamMembers(3).map(a=>"• "+playerName(a.game_id)).join("\n")||"—");
+  if(team===3)return "GUERILLA\n"+(teamMembers(3).map(a=>"• "+playerName(a.game_id)).join("\n")||"—")+"\n\nEarly Occupation & fast support for North/South.\nStay mobile and help wherever needed.";
   if(team===0){
    const names=teamMembers(0).map(a=>"• "+playerName(a.game_id)).join("\n")||"—";
    return "SECURE · SAFE ZONE\n"+names+"\n\n"+
@@ -154,7 +154,7 @@ export function createFightClubMap({getContext,getLanguage,request,flash,esc,onU
   const leader=teamMembers(team).some(a=>String(a.game_id)===String(leaderFor(legion)))?leaderFor(legion):"",members=teamMembers(team).filter(a=>String(a.game_id)!==String(leader))
     .map(a=>"• "+playerName(a.game_id)).join("\n")||"—";
   return (team===2?"NORD · NORTH":"SÜD · SOUTH")+"\n👑 Leader: "+
-    (leader?playerName(leader):"—")+"\n\n"+members;
+    (leader?playerName(leader):"—")+"\n\n"+members+"\n\nCapture "+(team===2?"NORTH":"SOUTH")+" as quickly as possible.\nJoin rallies and reinforce occupied strongholds.";
  }
  function legionLeaderEditor(){
   const people=sortedPlayers(),leader=leaderFor(legion);
