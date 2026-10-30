@@ -1,4 +1,4 @@
-import {createAnnouncementEditor} from "./announcement.js?v=20261030-matrix-1";
+import {createAnnouncementEditor} from "./announcement.js?v=20261030-bulk-1";
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.58.0/+esm";
 import {createEventHub} from "./event-library.js?v=step6-iteratorfix-1";
 import {createOperations} from "./operations.js?v=pages-4";
@@ -6,8 +6,8 @@ import {createDiscordEventPlanner} from "./discord-events.js?v=eventbot-4lang-20
 import {createEventBotStatusPanel} from "./event-bot-status.js?v=20261021-usability-1";
 import {createMemberRelationships} from "./member-relationships.js?v=20261021-usability-1";
 import {createPerformance} from "./performance.js?v=20261021-usability-1";
-import {createBearManagement} from "./bear-management.js?v=20261030-matrix-1";
-import {createFightClub} from "./fightclub.js?v=20261030-matrix-1";
+import {createBearManagement} from "./bear-management.js?v=20261030-bulk-1";
+import {createFightClub} from "./fightclub.js?v=20261030-bulk-1";
 import {createEventParticipation} from "./event-participation.js?v=vercel-release-20261020-1";
 import {createEventLoans} from "./event-loans.js?v=20261021-usability-1";
 

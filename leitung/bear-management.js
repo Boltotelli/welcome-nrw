@@ -1,3 +1,4 @@
+import {createRosterDrafts} from "./roster-drafts.js?v=20261030-bulk-1";
 /* AllianceOS Phase 3 – Leadership Bear Trap planner (GitHub Pages pilot).
    Source schedule and optimizer profiles are read-only; this only saves AllianceOS
    participation, attendance, role, and leadership notes by immutable game ID. */
@@ -100,7 +101,11 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
  let cache=null,loading=null,generation=0,filter="all",query="",pending=new Set(),recommendations=new Map(),settingsBusy=false,quickSlot="",quickAttendance="confirmed",quickJoiner=false,rosterExpanded=true;
  const byId=()=>new Map((getState()?.players||[]).map(p=>[String(p.game_id),p]));
  function active(){return (getState()?.players||[]).filter(p=>p.active&&p.member_status!=="left"&&/^[0-9]{1,20}$/.test(String(p.game_id||""))).slice().sort((a,b)=>String(a.name).localeCompare(String(b.name),locale()));}
- function assignment(id){return (cache?.assignments||[]).find(x=>String(x.game_id)===String(id));}
+ function storedAssignment(id){return (cache?.assignments||[]).find(x=>String(x.game_id)===String(id));}
+ function assignment(id){return drafts.get(id)||storedAssignment(id);}
+ const drafts=createRosterDrafts({root,scope:()=>"bear",getLanguage,esc,request,flash,redraw:()=>render(),onSaved:(body,result)=>{
+  cache.assignments=cache.assignments.filter(a=>String(a.game_id)!==body.game_id);if(!result.removed)cache.assignments.push(result.assignment);
+ }});
  function profile(id){return (cache?.profiles||[]).find(x=>String(x.game_id)===String(id));}
  function slot(id){return (cache?.slots||[]).find(x=>x.slot_key===id);}
  function slotLabel(s){return (s.slot_label?s.slot_label+" · ":"")+hhmm(s.start_time)+" UTC";}
@@ -193,7 +198,7 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
   const parent=p.main_game_id?(byId().get(String(p.main_game_id))?.name||p.main_game_id):null;
   const no=a.attendance==="no";
   const readyFormation=formation(prof);
-  return '<tr data-bear-row="'+esc(p.game_id)+'"><td>'+
+  return '<tr data-bear-row="'+esc(p.game_id)+'" '+(drafts.has(p.game_id)?'data-roster-dirty':'')+'><td>'+
    '<div class="bear-member-head"><button type="button" class="bear-member-name" data-bear-open="'+esc(p.game_id)+'" '+(!canDossier()?'disabled':'')+'>'+esc(p.name||p.game_id)+'</button>'+
    '<small>'+esc(p.game_id)+(parent?' · '+esc(t("altInfo"))+' → '+esc(parent):'')+'</small>'+
    '<span class="bear-opt-flag '+(strong(p)?'ready':'')+'">'+esc(pow?fmt(pow.power):"—")+
@@ -207,7 +212,7 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
       select([["tentative",t("tentative")],["confirmed",t("confirmed")],["no",t("no")]],a.attendance||"tentative",'data-bear-attendance')+'</label>'+
    '<label class="bear-switch-label"><span>'+esc(t("role"))+'</span>'+
       '<span class="bear-switch"><span>'+esc(t("starter"))+'</span><input type="checkbox" role="switch" data-bear-role '+(a.role==="joiner"?'checked':'')+'><span>'+esc(t("joiner"))+'</span></span></label>'+
-   '<button class="primary" type="button" data-bear-save="'+esc(p.game_id)+'">'+esc(t("save"))+'</button></div>'+
+   '</div>'+
    '<details class="bear-row-more"><summary>'+esc(t("showAll"))+' · '+esc(t("note"))+(prof?' · '+esc(t("withProfile")):'')+'</summary>'+
       '<label>'+esc(t("note"))+' <input type="text" maxlength="500" class="control" data-bear-note placeholder="'+esc(t("notePlaceholder"))+'" value="'+esc(a.notes||"")+'"></label>'+
       (prof?dataProfile(prof):'<p class="small-note">'+esc(t("noData"))+'</p>')+'</details>'+
@@ -253,6 +258,7 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
    finally{settingsBusy=false;}
  }
  async function quickSave(){
+   if(drafts.count()||drafts.isBusy())return;
    const id=root.querySelector("[data-bear-quick-player]")?.value||"";
    if(!id){flash(t("player"),true);return;}
    if(pending.has(id))return;
@@ -289,13 +295,15 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
    '<details class="card bear-roster-card bear-roster-collapsible" data-bear-roster '+(rosterExpanded?'open':'')+'><summary>'+esc(t("assignment"))+' · '+all.length+' / '+active().length+'</summary><div class="bear-section-heading"><h3>'+esc(t("assignment"))+'</h3>'+
    '<button type="button" class="ghost" data-bear-copy>'+esc(t("export"))+' ↗</button></div>'+
    '<p class="small-note">'+esc(t("noteSource"))+' '+esc(t("activeOnly"))+'</p>'+
-   '<div class="bear-filter-row"><input class="control" type="search" data-bear-search value="'+esc(query)+'" placeholder="'+esc(t("search"))+'">'+
+   drafts.toolbar()+'<div class="bear-filter-row"><input class="control" type="search" data-bear-search value="'+esc(query)+'" placeholder="'+esc(t("search"))+'">'+
     '<select class="control" data-bear-filter>'+
      [["all",t("all")],["unassigned",t("empty")],["optimizer",t("withProfile")],
       ...slots.map(s=>[s.slot_key,slotLabel(s)])].map(([value,label])=>
        '<option value="'+esc(value)+'" '+(filter===value?'selected':'')+'>'+esc(label)+'</option>').join("")+'</select>'+
      '<span class="counter">'+all.length+' / '+active().length+'</span></div>'+
      '<div class="assignment-table-scroll" role="region" aria-label="'+esc(t('assignment'))+'" tabindex="0"><table class="assignment-table"><thead><tr><th scope="col">'+esc(t('player'))+'</th>'+(cache.slots||[]).map((sl,i)=>'<th scope="col" title="'+esc(slotLabel(sl))+'">'+esc(i<2?'BT'+(i+1):slotLabel(sl))+'</th>').join('')+'<th scope="col">'+esc(t('attendance'))+' / '+esc(t('role'))+'</th></tr></thead><tbody>'+(all.length?all.map(row).join(''):'<tr><td colspan="'+(2+cache.slots.length)+'">'+esc(t('noPlayers'))+'</td></tr>')+'</tbody></table></div></details>';
+  if(drafts.isBusy())root.querySelectorAll('input,select,button').forEach(el=>{el.disabled=true;});
+  if(drafts.count()){const quick=root.querySelector('[data-bear-quick-save]');if(quick)quick.disabled=true;}
   const details=root.querySelector("[data-bear-roster]");
   details?.addEventListener("toggle",()=>{rosterExpanded=details.open;});
   pending.forEach(id=>{
@@ -317,26 +325,14 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
     .finally(()=>{if(ticket===generation)loading=null;});
   return loading;
  }
- async function save(id,fromCheckbox=false){
-  if(pending.has(id))return;
-  const item=root.querySelector('[data-bear-row="'+id+'"]');if(!item)return;
-  const slotKey=item.querySelector("[data-bear-slot]")?.value||"";
-  const role=item.querySelector("[data-bear-role]")?.checked?"joiner":"starter";
-  const attendance=item.querySelector("[data-bear-attendance]")?.value||"tentative";
-  const notes=item.querySelector("[data-bear-note]")?.value||"";
-  if(slotKey&&!slot(slotKey)){flash(t("required"),true);return;}
-  const ticket=generation,focusChoice=document.activeElement?.dataset.bearCheck;pending.add(id);
-  if(fromCheckbox)item.querySelectorAll('[data-bear-check]').forEach(e=>{e.disabled=true;});
-  const button=item.querySelector("[data-bear-save]");if(button){button.disabled=true;button.textContent=t("saving");}
-  try{
-   const result=await request("bootstrap",{action:"bear_assignment",game_id:id,slot_key:attendance==="no"?"":slotKey,role,attendance,notes});
-   if(ticket!==generation)return;
-   if(!result.ok)throw Error("save_failed");
-   if(result.removed)cache.assignments=cache.assignments.filter(a=>String(a.game_id)!==id);
-   else cache.assignments=[...cache.assignments.filter(a=>String(a.game_id)!==id),result.assignment];
-   flash(t(result.removed?"removed":"saved"));render();
-  }catch(e){if(ticket===generation)flash(t("error")+" ("+String(e.message||e)+")",true);}
-  finally{pending.delete(id);if(ticket===generation){if(fromCheckbox){render();root.querySelector('[data-bear-row="'+id+'"] [data-bear-check="'+(focusChoice||cache.slots[0].slot_key)+'"]')?.focus();}const b=root.querySelector('[data-bear-save="'+id+'"]');if(b){b.disabled=false;b.textContent=t("save");}}}
+ function stage(id){
+  if(drafts.isBusy())return;
+  const row=root.querySelector('[data-bear-row="'+id+'"]');if(!row)return;
+  const old=storedAssignment(id),base={action:'bear_assignment',game_id:id,slot_key:old?.slot_key||'',role:old?.role||'starter',attendance:old?.attendance||'tentative',notes:old?.notes||''};
+  const attendance=row.querySelector('[data-bear-attendance]').value;
+  const payload={...base,slot_key:attendance==='no'?'':row.querySelector('[data-bear-slot]').value,role:row.querySelector('[data-bear-role]').checked?'joiner':'starter',attendance,notes:row.querySelector('[data-bear-note]').value};
+  drafts.set(id,payload,base);row.toggleAttribute('data-roster-dirty',drafts.has(id));
+  const quick=root.querySelector('[data-bear-quick-save]');if(quick)quick.disabled=drafts.count()>0;
  }
  function exportText(){
   const ids=new Set(active().map(p=>String(p.game_id))),people=byId();
@@ -355,6 +351,7 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
  }
  if(root){
   root.addEventListener("click",async e=>{
+   if(drafts.click(e))return;
    const target=e.target;
    if(target.closest("[data-bear-threshold-save]")){await saveThreshold();return;}
    if(target.closest("[data-bear-quick-save]")){await quickSave();return;}
@@ -363,7 +360,7 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
    const copy=target.closest("[data-bear-copy]");
    if(copy){try{await navigator.clipboard.writeText(exportText());flash(t("copied"));}catch{flash(t("copyFailed"),true);}return;}
    const saveBtn=target.closest("[data-bear-save]");
-   if(saveBtn){save(saveBtn.dataset.bearSave);return;}
+   if(saveBtn){stage(saveBtn.dataset.bearSave);return;}
    const dossier=target.closest("[data-bear-open]");
    if(dossier)openPlayer(dossier.dataset.bearOpen);
   });
@@ -373,22 +370,27 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
      const row=el.closest('[data-bear-row]');
      row.querySelector('[data-bear-slot]').value=el.checked?el.dataset.bearCheck:'';
      if(el.checked&&row.querySelector('[data-bear-attendance]').value==='no')row.querySelector('[data-bear-attendance]').value='tentative';
-     save(row.dataset.bearRow,true);return;
+     row.querySelectorAll('[data-bear-check]').forEach(box=>{box.checked=box===el&&el.checked;});
+     stage(row.dataset.bearRow);return;
    }
    if(el.matches("[data-bear-filter]")){filter=el.value;render();}
    if(el.matches("[data-bear-quick-slot]"))quickSlot=el.value;
    if(el.matches("[data-bear-quick-attendance]"))quickAttendance=el.value;
    if(el.matches("[data-bear-quick-role]"))quickJoiner=el.checked;
-   // Row-level role/time fields deliberately do not auto-save.
+   if(el.matches('[data-bear-attendance],[data-bear-role]')){
+    const row=el.closest('[data-bear-row]');if(el.matches('[data-bear-attendance]')&&el.value==='no')row.querySelectorAll('[data-bear-check]').forEach(box=>{box.checked=false;});
+    stage(row.dataset.bearRow);
+   }
   });
   root.addEventListener("input",e=>{
    const el=e.target;
+   if(el.matches('[data-bear-note]')){stage(el.closest('[data-bear-row]').dataset.bearRow);return;}
    if(!el.matches("[data-bear-search]"))return;
    query=el.value;const pos=el.selectionStart;render();
    const next=root.querySelector("[data-bear-search]");
    next?.focus();if(Number.isInteger(pos))next?.setSelectionRange(pos,pos);
   });
  }
- function reset(){generation++;cache=null;loading=null;pending.clear();recommendations.clear();quickSlot="";quickAttendance="confirmed";quickJoiner=false;rosterExpanded=true;filter="all";query="";if(root){root.innerHTML="";root.textContent="";}}
+ function reset(){drafts.reset();generation++;cache=null;loading=null;pending.clear();recommendations.clear();quickSlot="";quickAttendance="confirmed";quickJoiner=false;rosterExpanded=true;filter="all";query="";if(root){root.innerHTML="";root.textContent="";}}
  return {enabled,open,render,reset};
 }
