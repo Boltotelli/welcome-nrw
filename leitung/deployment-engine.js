@@ -5,9 +5,10 @@ export function decodeDeployment(key,sites=[]){
  const legacyGroup=/^[ABC]\d+$/.test(location)?(deploymentTargets('triforce',sites,location[0]).north.some(s=>s.key===location)?'north':'south'):(site&&site.y<50?'north':'south');
  return {location,group:location==='guerrilla'?'guerrilla':location==='safe-zone'?'secure':match?.[1]||legacyGroup};
 }
+export const isClosedStartingObjective=(eventType,key)=>eventType==='swordland'&&(['mercenary','shrine','reformation'].includes(key)||String(key).startsWith('under-'));
 export function deploymentTargets(eventType,sites,side=''){
  let list=sites.filter(s=>!s.virtual&&!['safe-zone','guerrilla'].includes(s.key));
- if(eventType==='swordland')list=list.filter(s=>!['mercenary','shrine','reformation'].includes(s.key)&&!s.key.startsWith('under-'));
+ list=list.filter(s=>!isClosedStartingObjective(eventType,s.key));
  if(eventType==='triforce')list=list.filter(s=>s.key.startsWith(side)&&side&&s.key!==side+'1');
  const midpoint=eventType==='triforce'&&list.length?(Math.min(...list.map(s=>s.y))+Math.max(...list.map(s=>s.y)))/2:50;
  return {north:list.filter(s=>s.y<midpoint),south:list.filter(s=>s.y>=midpoint)};
@@ -24,8 +25,8 @@ export function buildDeployment({players,assignments,mapAssignments,powers,sites
  const maps=new Map(mapAssignments.filter(a=>a.event_type===eventType&&a.battle_date===date).map(a=>[String(a.game_id),a]));
  const excluded=[],rows=[],pool=[],families=new Set();
  const item=a=>{const id=String(a.game_id),p=people.get(id);return{game_id:id,name:p?.name||id,family:String(p?.main_game_id||id),power:power.get(id)??null};};
- // Retained map orders are never silently moved, including duplicate families.
- for(const a of roster){const p=item(a),m=maps.get(p.game_id);if(settings.keepExisting&&m&&people.has(p.game_id)&&a.availability!=='unavailable'){
+ // Keep open objectives, but replan closed starting objectives in the preview.
+ for(const a of roster){const p=item(a),m=maps.get(p.game_id);if(settings.keepExisting&&m&&!isClosedStartingObjective(eventType,decodeDeployment(m.location_key,sites).location)&&people.has(p.game_id)&&a.availability!=='unavailable'){
    rows.push({...p,...decodeDeployment(m.location_key,sites),location_key:m.location_key,locked:true});families.add(p.family);
  }}
  const retained=new Set(rows.map(p=>p.game_id));

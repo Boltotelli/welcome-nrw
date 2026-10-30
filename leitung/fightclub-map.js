@@ -1,5 +1,5 @@
-import {decodeDeployment} from './deployment-engine.js?v=20261030-matrix-1';
-import {createDeploymentPlanner} from './deployment-planner.js?v=20261030-matrix-1';
+import {decodeDeployment} from './deployment-engine.js?v=20261030-map-2';
+import {createDeploymentPlanner} from './deployment-planner.js?v=20261030-map-2';
 /* FightClub battlefield planning: private, date-scoped map objectives for both legions.
  * Maps are planning aids; no Kingshot orders, registration or Discord posts are sent.
  * TriAlliance map illustration credited to its author; pin geometry remains usable
@@ -64,7 +64,7 @@ const WORDS={
    waiting:"Guardando…",confirmRemove:"¿Quitar esta asignación del mapa?",noDate:"Elige una fecha.",hintMobile:"En el móvil, desplaza el mapa o usa la lista de objetivos."}
 };
 export function createFightClubMap({getContext,getLanguage,request,flash,esc,onUpdated}){
- let selected="shrine",legion=1,selectedPlayer="",busy=false,scope="",leaderChoice={1:"",2:""};
+ let selected="shrine",legion=1,selectedPlayer="",busy=false,scope="",unassignedOpen=false,leaderChoice={1:"",2:""};
  const t=k=>(WORDS[getLanguage()]||WORDS.de)[k]||WORDS.de[k]||k;
  const sites=()=>(getContext()?.eventType==="triforce"?TRI:SWORD).concat([{key:"guerrilla",name:"GUERILLA",group:"guerrilla",virtual:true}],getContext()?.eventType==="triforce"?[{key:"safe-zone",name:"SECURE · Safe Zone",group:"safe",virtual:true}]:[]);
  const ctx=()=>getContext()||{};
@@ -82,7 +82,7 @@ export function createFightClubMap({getContext,getLanguage,request,flash,esc,onU
  const renderedAssigned=()=>mapRows().filter(m=>activeLegion().some(a=>String(a.game_id)===String(m.game_id)));
  function resetIfScope(){
   const key=ctx().eventType+"|"+ctx().date;
-  if(scope!==key){scope=key;selected=ctx().eventType==="triforce"?"A24":"shrine";legion=1;selectedPlayer="";}
+  if(scope!==key){scope=key;selected=ctx().eventType==="triforce"?"A24":"shrine";legion=1;selectedPlayer="";unassignedOpen=false;}
   if(!siteList().includes(selected))selected=siteList()[0];
  }
  const options=(values,choice)=>values.map(([v,label])=>'<option value="'+esc(v)+'" '+(String(v)===String(choice)?"selected":"")+'>'+esc(label)+'</option>').join("");
@@ -109,6 +109,11 @@ export function createFightClubMap({getContext,getLanguage,request,flash,esc,onU
     (n?'<span class="fight-map-pin-count">'+n+'</span>':"")+'</button>';
   }).join("");
  }
+ const unassignedWords={de:['Noch ohne Kartenposition','Auswählen','Alle verfügbaren Spieler dieser Legion haben eine Kartenposition.'],en:['Without a map position','Select','All available players in this legion have a map position.'],fr:['Sans position sur la carte','Sélectionner','Tous les joueurs disponibles de cette légion ont une position.'],es:['Sin posición en el mapa','Seleccionar','Todos los jugadores disponibles de esta legión tienen una posición.']};
+ function unassignedPanel(){
+  const words=unassignedWords[getLanguage()]||unassignedWords.en,assigned=new Set(renderedAssigned().filter(m=>siteList().includes(m.location_key)).map(m=>String(m.game_id))),free=sortedPlayers().filter(p=>!assigned.has(String(p.game_id)));
+  return '<details class="fight-map-unassigned" data-map-unassigned '+(unassignedOpen?'open':'')+'><summary>'+esc(words[0])+' · '+free.length+'</summary><div class="fight-map-unassigned-list">'+(free.length?free.map(p=>'<div class="fight-map-occupant"><span><strong>'+esc(playerName(p.game_id))+'</strong><small>'+esc(p.game_id)+'</small></span><button type="button" class="ghost" data-map-pick-unassigned="'+esc(p.game_id)+'" aria-pressed="'+(String(p.game_id)===selectedPlayer)+'" '+(busy?'disabled':'')+' aria-label="'+esc(words[1]+' · '+playerName(p.game_id))+'">'+esc(words[1])+'</button></div>').join(''):'<p class="small-note">'+esc(words[2])+'</p>')+'</div></details>';
+ }
  function siteDetail(){
   const key=selected,site=sites().find(s=>s.key===key),listed=rowsForLocation(key),everyone=sortedPlayers();
   const rosterSize=everyone.length,chosen=everyone.some(p=>String(p.game_id)===selectedPlayer)?selectedPlayer:"";
@@ -128,7 +133,7 @@ export function createFightClubMap({getContext,getLanguage,request,flash,esc,onU
        '<button class="primary fight-map-submit" type="button" data-map-save '+(busy?"disabled":"")+'>'
          +esc(busy?t("waiting"):t("save"))+'</button>':
        '<p class="small-note">'+esc(t("noLegion"))+'</p>')+
-     '</aside>';
+     unassignedPanel()+'</aside>';
  }
 
  function teamMembers(team){
@@ -191,6 +196,7 @@ export function createFightClubMap({getContext,getLanguage,request,flash,esc,onU
  }
 
  function render(){
+  const previous=document.querySelector('[data-map-unassigned]');if(previous)unassignedOpen=previous.open;
   if(!ctx().date)return "";
   resetIfScope();
   const tri=ctx().eventType==="triforce";
@@ -255,6 +261,8 @@ export function createFightClubMap({getContext,getLanguage,request,flash,esc,onU
  }
  async function click(e){
   const el=e.target;
+  const pick=el.closest('[data-map-pick-unassigned]');
+  if(pick){selectedPlayer=pick.dataset.mapPickUnassigned;onUpdated();document.querySelector('[data-map-player]')?.focus();return true;}
   const auto=el.closest("[data-map-auto-plan]");if(auto){planner.open(auto);return true;}
   const site=el.closest("[data-map-site]");
   if(site){selected=site.dataset.mapSite;selectedPlayer="";onUpdated();return true;}
@@ -272,5 +280,5 @@ export function createFightClubMap({getContext,getLanguage,request,flash,esc,onU
   }
   return false;
  }
- return {render,change,click,reset(){planner.reset();scope="";selected="shrine";selectedPlayer="";legion=1;busy=false;leaderChoice={1:"",2:""};}};
+ return {render,change,click,reset(){planner.reset();unassignedOpen=false;scope="";selected="shrine";selectedPlayer="";legion=1;busy=false;leaderChoice={1:"",2:""};}};
 }

@@ -709,3 +709,9 @@
 .roster-batch-buttons{display:flex;flex-wrap:wrap;gap:8px;flex-shrink:0}
 .assignment-table tr[data-roster-dirty] td:first-child{box-shadow:inset 3px 0 #d8b66c}
 @media(max-width:700px){.roster-batch-actions{flex-direction:column;align-items:stretch;top:64px}.roster-batch-buttons{flex-shrink:1}.roster-batch-buttons button{flex:1;white-space:normal}}
+
+.fight-map-unassigned{margin-top:16px;border-top:1px solid var(--border,#ffffff25);padding-top:12px}
+.fight-map-unassigned>summary{cursor:pointer;font-weight:650;min-height:44px;align-content:center}
+.fight-map-unassigned-list{max-height:320px;overflow-y:auto;overscroll-behavior-y:contain;margin-top:8px}
+.fight-map-unassigned-list .fight-map-occupant span{min-width:0;overflow-wrap:anywhere}
+.fight-map-unassigned-list button[aria-pressed=true]{outline:2px solid var(--accent,#d8b66c)}
