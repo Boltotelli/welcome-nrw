@@ -715,3 +715,7 @@
 .fight-map-unassigned-list{max-height:320px;overflow-y:auto;overscroll-behavior-y:contain;margin-top:8px}
 .fight-map-unassigned-list .fight-map-occupant span{min-width:0;overflow-wrap:anywhere}
 .fight-map-unassigned-list button[aria-pressed=true]{outline:2px solid var(--accent,#d8b66c)}
+
+.assignment-table .fight-no-show-control{display:flex;align-items:center;gap:8px;min-height:44px;max-width:250px;cursor:pointer;font-size:.82rem}
+.fight-no-show-control input{width:20px;height:20px;flex-shrink:0;accent-color:#d8b66c}
+.fight-no-show-badge{font-size:.75rem;border:1px solid #d8b66c80;color:var(--text,#fff);padding:3px 7px;border-radius:6px}

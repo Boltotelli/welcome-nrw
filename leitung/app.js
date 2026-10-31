@@ -7,7 +7,7 @@ import {createEventBotStatusPanel} from "./event-bot-status.js?v=20261021-usabil
 import {createMemberRelationships} from "./member-relationships.js?v=20261021-usability-1";
 import {createPerformance} from "./performance.js?v=20261021-usability-1";
 import {createBearManagement} from "./bear-management.js?v=20261030-map-2";
-import {createFightClub} from "./fightclub.js?v=20261030-map-2";
+import {createFightClub} from "./fightclub.js?v=20261031-attendance-1";
 import {createEventParticipation} from "./event-participation.js?v=vercel-release-20261020-1";
 import {createEventLoans} from "./event-loans.js?v=20261021-usability-1";
 

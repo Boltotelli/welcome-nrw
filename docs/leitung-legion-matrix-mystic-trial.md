@@ -12,4 +12,10 @@ Automatic Swordland placements exclude Mercenary, Swordshrine, Reformation and a
 
 A collapsible "Without a map position" panel appears below Assign / move. It lists available players in the selected legion with no valid map objective, scoped to the current event/date. Selecting a name fills the assignment selector without saving. Assigning or removing a player updates this list.
 
+## Registered but absent · 2026-10-31
+
+Each SL/Tri roster row has a "Registered, did not attend" checkbox and optional event note. It stages changes through the existing Save all flow. A badge and No-shows filter surface these records. The annotation is stored as the readable `[NO-SHOW]` prefix in the existing event/date-specific `notes` field; the note editor displays the remaining free text. Removing the checkbox removes only that prefix. No schema or API deployment is required. Legion, combat role, availability and map assignments are unaffected. Unmarked notes retain their original 500-character allowance; marked notes reserve 10 characters for the annotation and allow 490 free-text characters. An overlong existing note is never silently truncated. Attendance does not carry over to another event/date.
+
+Browser regression: `node tests/fightclub-no-show.cjs` verifies staging, persistence/readback, failed-write retry, event/date isolation, filtering, note preservation, unmarking, length safety and mobile layout.
+
 Validation: `node tests/mystic-sync.cjs`, `node tests/deployment-start-objectives.cjs`, `node tests/legion-matrix.cjs`, `node tests/map-objectives.cjs`. Browser tests require Playwright (`PLAYWRIGHT_MODULE` optionally overrides its module location; `CHROMIUM_PATH` optionally selects a browser executable). UI fixtures do not write live assignments. Additional browser coverage verifies preview/apply, stale-roster rejection, partial failure retry, copied messages, modal focus and four viewport widths.

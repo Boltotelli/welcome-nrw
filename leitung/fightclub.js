@@ -3,6 +3,7 @@
  * No Discord role/slot/bot changes, no automatic player assignments. */
 import {createFightClubMap} from "./fightclub-map.js?v=20261030-map-2";
 import {createRosterDrafts} from "./roster-drafts.js?v=20261030-map-2";
+import {readAttendanceNote,writeAttendanceNote,attendanceNoteLimit} from "./fightclub-attendance.js?v=20261031-attendance-1";
 export function createFightClub({getState,getLanguage,request,flash,esc,openPlayer}){
  const canDossier=()=>getState()?.staff?.is_owner===true||getState()?.staff?.permissions?.members===true;
  const root=document.getElementById("fightclubRoot");
@@ -192,14 +193,16 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
      '<p class="small-note">'+esc(t("suggestionHint"))+'</p>'+
      '<div class="fight-suggestion-grid">'+build("full","l1Candidates")+build("partial","l2Candidates")+'</div></details>';
  }
+ const attendanceWords={de:{label:'Angemeldet, nicht erschienen',badge:'Nicht erschienen',filter:'Nicht erschienen',note:'Optional: Grund oder Rückmeldung',tooLong:'Bitte die Notiz auf höchstens 490 Zeichen kürzen, damit der Teilnahmevermerk mitgespeichert werden kann.'},en:{label:'Registered, did not attend',badge:'No-show',filter:'No-shows',note:'Optional: reason or response',tooLong:'Shorten the note to 490 characters so the attendance annotation fits.'},fr:{label:'Inscrit, absent',badge:'Absent',filter:'Inscrits absents',note:'Facultatif : motif ou retour',tooLong:'Réduisez la note à 490 caractères pour ajouter la mention.'},es:{label:'Inscrito, no asistió',badge:'No asistió',filter:'Inscritos ausentes',note:'Opcional: motivo o respuesta',tooLong:'Reduce la nota a 490 caracteres para añadir la anotación.'}};
+ const at=k=>(attendanceWords[getLanguage()]||attendanceWords.en)[k];
  function row(p,conflicts){
-  const a=assignment(p.game_id),val=a?.legion??-1;
+  const a=assignment(p.game_id),val=a?.legion??-1,attendance=readAttendanceNote(a?.notes);
   const family=conflicts.get(String(p.game_id));
   const pw=powers().get(String(p.game_id));
   const main=p.main_game_id?playerMap().get(String(p.main_game_id))?.name||p.main_game_id:null;
   return '<tr data-fight-row="'+esc(p.game_id)+'" '+(drafts.has(p.game_id)?'data-roster-dirty':'')+'><td>'+
    '<div class="fight-player-top"><button type="button" data-fight-profile="'+esc(p.game_id)+'" class="fight-player-name" '+(!canDossier()?'disabled':'')+'>'+esc(p.name)+'</button>'+
-    '<small>'+esc(p.game_id)+(main?' · '+esc(t("alts"))+' '+esc(main):'')+'</small>'+
+    '<small>'+esc(p.game_id)+(main?' · '+esc(t("alts"))+' '+esc(main):'')+'</small><span class="fight-no-show-badge" data-fight-no-show-badge '+(attendance.noShow?'':'hidden')+'>'+esc(at('badge'))+'</span>'+
     '</div></td><td>'+esc(pw?.power==null?'—':powerFormat(pw.power))+'</td>'+
    [1,2].map(l=>'<td class="assignment-check-cell"><label class="assignment-check"><input type="checkbox" data-fight-check="'+l+'" aria-label="'+esc(p.name+' · L'+l)+'" '+(Number(val)===l?'checked ':'')+(pending.has(String(p.game_id))?'disabled':'')+'><span class="sr-only">L'+l+'</span></label></td>').join('')+'<td>'+
    '<div class="fight-player-fields">'+
@@ -207,9 +210,10 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
     selectOptions(optLegion(),String(val),'data-fight-legion')+'</label>'+
     '<label><span>'+esc(t("availability"))+'</span>'+
     selectOptions(optAvailability(),a?.availability||"unknown",'data-fight-availability')+'</label>'+
+    '<label class="fight-no-show-control"><input type="checkbox" data-fight-no-show '+(attendance.noShow?'checked':'')+' aria-label="'+esc(p.name+' · '+at('label'))+'"><span>'+esc(at('label'))+'</span></label>'+
     '<details class="fight-row-more"><summary>⋯</summary>'+
     '<label><span>'+esc(t("role"))+'</span>'+selectOptions(optRole(),a?.combat_role||"flex",'data-fight-role')+'</label>'+
-    '<label><span>'+esc(t("note"))+'</span><input class="control" type="text" maxlength="500" data-fight-note value="'+esc(a?.notes||"")+'"></label>'+
+    '<label><span>'+esc(t("note"))+'</span><input class="control" type="text" maxlength="'+attendanceNoteLimit(attendance.noShow)+'" data-fight-note placeholder="'+esc(at('note'))+'" value="'+esc(attendance.note)+'"></label>'+
     (a?'<button type="button" class="ghost" data-fight-remove="'+esc(p.game_id)+'">'+esc(t("remove"))+'</button>':"")+
     '</details></div>'+
    (family?'<p class="fight-conflict">⚠ '+esc(t("family"))+': '+esc(family)+'</p>':"")+
@@ -219,7 +223,7 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
    const conflicts=overlap(),powerById=powers();
    const visible=players().filter(p=>(!search||String(p.name||"").toLocaleLowerCase().includes(search.toLocaleLowerCase())||
       String(p.game_id).includes(search))&&
-      (filter==="all"||filter==="assigned"&&[0,1,2].includes(Number(assignment(p.game_id)?.legion))||
+      (filter==="all"||filter==="no-show"&&readAttendanceNote(assignment(p.game_id)?.notes).noShow||filter==="assigned"&&[0,1,2].includes(Number(assignment(p.game_id)?.legion))||
        filter==="unassigned"&&(!assignment(p.game_id)||Number(assignment(p.game_id)?.legion)===-1)||filter==="1"&&Number(assignment(p.game_id)?.legion)===1||
        filter==="2"&&Number(assignment(p.game_id)?.legion)===2||
        filter==="0"&&assignment(p.game_id)&&Number(assignment(p.game_id).legion)===0));
@@ -229,7 +233,7 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
        '<button class="ghost" type="button" data-fight-export>'+esc(t("copyList"))+' ↗</button></div>'+
      '<p class="small-note">'+esc(t("registration"))+' '+esc(t("planningNote"))+'</p>'+
      drafts.toolbar()+'<div class="fight-filterbar"><input class="control" data-fight-search type="search" value="'+esc(search)+'" placeholder="'+esc(t("search"))+'">'+
-       selectOptions([["all",t("all")],["assigned",t("assigned")],["unassigned",t("unassigned")],
+       selectOptions([["all",t("all")],["assigned",t("assigned")],["unassigned",t("unassigned")],["no-show",at("filter")],
         ["1",t("l1")],["2",t("l2")],["0",t("reserve")]],filter,'data-fight-filter')+
         '<span>'+visible.length+' / '+players().length+'</span></div>'+
      '<div class="assignment-table-scroll" role="region" aria-label="'+esc(t('plans'))+'" tabindex="0"><table class="assignment-table"><thead><tr><th scope="col">'+esc(t('members'))+'</th><th scope="col">Mystic Trial</th><th scope="col">L1</th><th scope="col">L2</th><th scope="col">'+esc(t('availability'))+' / '+esc(t('note'))+'</th></tr></thead><tbody>'+
@@ -331,8 +335,12 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
  function stage(id,remove=false){
   if(!date||!nextDateValid(date)||drafts.isBusy())return;
   const row=root.querySelector('[data-fight-row="'+id+'"]');if(!row)return;
+  let notes;
+  const noteInput=row.querySelector('[data-fight-note]'),noShow=row.querySelector('[data-fight-no-show]');
+  try{notes=writeAttendanceNote(noteInput.value,noShow.checked);}catch{noShow.checked=false;flash(at('tooLong'),true);notes=noteInput.value;}
+  noteInput.maxLength=attendanceNoteLimit(noShow.checked);row.querySelector('[data-fight-no-show-badge]').hidden=!noShow.checked;
   const old=storedAssignment(id),base={action:'fightclub_save',event_type:eventType,battle_date:date,game_id:id,legion:old?.legion??-1,availability:old?.availability||'unknown',combat_role:old?.combat_role||'flex',notes:old?.notes||'',remove:false};
-  const payload={...base,legion:remove?-1:Number(row.querySelector('[data-fight-legion]').value),availability:row.querySelector('[data-fight-availability]').value,combat_role:row.querySelector('[data-fight-role]').value,notes:row.querySelector('[data-fight-note]').value,remove};
+  const payload={...base,legion:remove?-1:Number(row.querySelector('[data-fight-legion]').value),availability:row.querySelector('[data-fight-availability]').value,combat_role:row.querySelector('[data-fight-role]').value,notes,remove};
   drafts.set(id,payload,base);row.toggleAttribute('data-roster-dirty',drafts.has(id));
   const auto=root.querySelector('[data-map-auto-plan]');if(auto)auto.disabled=drafts.count()>0;
   const quick=root.querySelector('[data-fight-fast-save]');if(quick)quick.disabled=drafts.count()>0;
@@ -361,6 +369,7 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
        row.querySelectorAll('[data-fight-check]').forEach(box=>{box.checked=box===el&&el.checked;});
        stage(id);return;
      }
+     if(el.matches('[data-fight-no-show]')){const row=el.closest('[data-fight-row]');stage(row.dataset.fightRow);if(el.checked)row.querySelector('.fight-row-more').open=true;return;}
      if(el.matches('[data-fight-availability],[data-fight-role]')){stage(el.closest('[data-fight-row]').dataset.fightRow);return;}
      if(el.matches("[data-fight-fast-legion]")){fastLegion=Number(el.value);return;}
      if(el.matches("[data-fight-fast-availability]")){fastAvailability=el.value;return;}
