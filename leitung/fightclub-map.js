@@ -70,6 +70,7 @@ export function createFightClubMap({getContext,getLanguage,request,flash,esc,onU
  const t=k=>(WORDS[getLanguage()]||WORDS.de)[k]||WORDS.de[k]||k;
  const sites=()=>(getContext()?.eventType==="triforce"?TRI:SWORD).concat([{key:"guerrilla",name:"GUERILLA",group:"guerrilla",virtual:true}],getContext()?.eventType==="triforce"?[{key:"safe-zone",name:"SECURE · Safe Zone",group:"safe",virtual:true}]:[]);
  const ctx=()=>getContext()||{};
+ const readOnly=()=>ctx().readOnly===true;
  const roster=()=>ctx().assignments||[];
  const mapRows=()=>(ctx().mapAssignments||[]).filter(m=>m.event_type===ctx().eventType&&m.battle_date===ctx().date).map(m=>{const d=decodeDeployment(m.location_key,sites());return {...m,location_key:d.location,deployment_group:d.group};});
  const planner=createDeploymentPlanner({getContext:()=>({...ctx(),legion}),getSites:sites,getLanguage,request,esc,onUpdated});
@@ -116,7 +117,12 @@ export function createFightClubMap({getContext,getLanguage,request,flash,esc,onU
   const words=unassignedWords[getLanguage()]||unassignedWords.en,assigned=new Set(renderedAssigned().filter(m=>siteList().includes(m.location_key)).map(m=>String(m.game_id))),free=sortedPlayers().filter(p=>!assigned.has(String(p.game_id)));
   return '<details class="fight-map-unassigned" data-map-unassigned '+(unassignedOpen?'open':'')+'><summary>'+esc(words[0])+' · '+free.length+'</summary><div class="fight-map-unassigned-list">'+(free.length?free.map(p=>'<div class="fight-map-occupant"><span><strong>'+esc(playerName(p.game_id))+'</strong><small>'+esc(p.game_id)+'</small></span><button type="button" class="ghost" data-map-pick-unassigned="'+esc(p.game_id)+'" aria-pressed="'+(String(p.game_id)===selectedPlayer)+'" '+(busy?'disabled':'')+' aria-label="'+esc(words[1]+' · '+playerName(p.game_id))+'">'+esc(words[1])+'</button></div>').join(''):'<p class="small-note">'+esc(words[2])+'</p>')+'</div></details>';
  }
+ function readOnlyDetail(){
+  const site=sites().find(s=>s.key===selected),listed=rowsForLocation(selected);
+  return '<aside class="fight-map-detail"><div class="fight-map-detail-heading"><h4>'+esc(site?.name||selected)+'</h4><span>'+listed.length+' '+esc(t('assigned'))+'</span></div><button class="ghost" data-map-copy-position>'+esc(t('positionCopy'))+' 📋</button><label class="fight-map-field">'+esc(t('location'))+'<select class="control" data-map-location>'+options(sites().map(s=>[s.key,s.name]),selected)+'</select></label><div class="fight-map-occupants">'+(listed.length?listed.map(m=>'<div class="fight-map-occupant"><span><strong>'+esc(playerName(m.game_id))+'</strong><small>'+esc(m.game_id)+'</small></span></div>').join(''):'<p class="small-note">'+esc(t('locationEmpty'))+'</p>')+'</div></aside>';
+ }
  function siteDetail(){
+  if(readOnly())return readOnlyDetail();
   const key=selected,site=sites().find(s=>s.key===key),listed=rowsForLocation(key),everyone=sortedPlayers();
   const rosterSize=everyone.length,chosen=everyone.some(p=>String(p.game_id)===selectedPlayer)?selectedPlayer:"";
   return '<aside class="fight-map-detail"><div class="fight-map-detail-heading"><h4>'+esc(site?.name||key)+'</h4>'+
@@ -181,7 +187,7 @@ export function createFightClubMap({getContext,getLanguage,request,flash,esc,onU
   catch{flash(t("error"),true);}
  }
  async function saveLeader(team){
-  if(busy)return;
+  if(readOnly()||busy)return;
   const gameId=leaderChoice[team]??leaderFor(team);
   const {eventType,date}=ctx();busy=true;onUpdated();
   try{
@@ -206,7 +212,7 @@ export function createFightClubMap({getContext,getLanguage,request,flash,esc,onU
     nPlayers=renderedAssigned().length;
   return '<section class="card fight-map-card" aria-label="'+esc(t("heading"))+'">'+
    '<div class="fight-map-title"><div><h3>'+esc(t("heading"))+'</h3><p class="small-note">'+esc(t("hint"))+'</p></div>'+
-   '<div class="fight-map-actions"><button type="button" class="primary" data-map-auto-plan>'+esc(planner.label())+'</button><button type="button" class="ghost" data-map-export>'+esc(t("clipboard"))+' ↗</button></div></div>'+
+   '<div class="fight-map-actions">'+(readOnly()?'':'<button type="button" class="primary" data-map-auto-plan>'+esc(planner.label())+'</button>')+'<button type="button" class="ghost" data-map-export>'+esc(t("clipboard"))+' ↗</button></div></div>'+
    '<div class="fight-map-topbar"><label>'+esc(t("legion"))+
       '<select class="control" data-map-legion>'+options([["1","1"],["2","2"]],String(legion))+'</select></label>'+
       '<span>'+nPlayers+' '+esc(t("assigned"))+' · '+used+' '+esc(t("count"))+'</span></div>'+
@@ -214,7 +220,7 @@ export function createFightClubMap({getContext,getLanguage,request,flash,esc,onU
    '<div class="fight-map-layout"><div class="fight-map-scroll" tabindex="0"><div class="fight-map-stage '+(tri?"fight-map-tri":"fight-map-sword")+'">'+
      (tri?'<img class="fight-map-photo" src="https://kingshotguides.com/wp-content/uploads/2025/10/tri-alliance-clash-map-by-daryl-scaled.webp" alt="" loading="lazy" referrerpolicy="no-referrer">':swordBackdrop())+
      pins()+'</div></div>'+siteDetail()+'</div>'+ 
-   ('<div class="fight-map-team-section"><h4>'+esc(t("teamTexts"))+' · '+esc(t("legion"))+' '+legion+'</h4>'+legionLeaderEditor()+'<div class="fight-map-team-grid">'+[1,2,0,3].map(teamCard).join("")+'</div></div>')+
+   ('<div class="fight-map-team-section"><h4>'+esc(t("teamTexts"))+' · '+esc(t("legion"))+' '+legion+'</h4>'+(readOnly()?'':legionLeaderEditor())+'<div class="fight-map-team-grid">'+[1,2,0,3].map(teamCard).join("")+'</div></div>')+
    '<p class="small-note">'+esc(t("hintMobile"))+(tri?' · <a href="https://kingshotguides.com/guide/tri-alliance-clash-map/" target="_blank" rel="noopener noreferrer">'+esc(t("source"))+'</a>':"")+'</p>'+
    '</section>';
  }
@@ -235,6 +241,7 @@ export function createFightClubMap({getContext,getLanguage,request,flash,esc,onU
   return lines.join("\n").trim();
  }
  async function save(gameId,remove=false){
+  if(readOnly())return;
   const {eventType,date}=ctx();
   if(!date){flash(t("noDate"),true);return;}
   if(busy)return;
@@ -257,12 +264,14 @@ export function createFightClubMap({getContext,getLanguage,request,flash,esc,onU
  function change(e){
   const el=e.target;if(el.matches("[data-map-legion]")){legion=Number(el.value)===2?2:1;selectedPlayer="";onUpdated();return true;}
   if(el.matches("[data-map-location]")){selected=el.value;selectedPlayer="";onUpdated();return true;}
+  if(readOnly())return false;
   if(el.matches("[data-map-leader]")){leaderChoice[Number(el.dataset.mapLeader)]=el.value;return true;}
   if(el.matches("[data-map-player]")){selectedPlayer=el.value;return true;}
   return false;
  }
  async function click(e){
   const el=e.target;
+  if(readOnly()&&el.closest("[data-map-pick-unassigned],[data-map-auto-plan],[data-map-leader-save],[data-map-save],[data-map-remove]"))return true;
   const pick=el.closest('[data-map-pick-unassigned]');
   if(pick){selectedPlayer=pick.dataset.mapPickUnassigned;onUpdated();document.querySelector('[data-map-player]')?.focus();return true;}
   const auto=el.closest("[data-map-auto-plan]");if(auto){planner.open(auto);return true;}

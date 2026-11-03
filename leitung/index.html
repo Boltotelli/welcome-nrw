@@ -14,7 +14,7 @@
 <title>AllianceOS · NRW Leitungszentrale</title>
 <meta name="description" content="Geschützte Leitungszentrale für Allianzverwaltung, Transfers, Laws und Events.">
 <link rel="icon" href="../assets/nrw-dashboard-icon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="./styles.css?v=20261103-access-1">
+<link rel="stylesheet" href="./styles.css?v=20261103-integrated-1">
 <!-- Shared leadership design on the approved Pages and production domains. -->
 <script>
   if (["boltotelli.github.io", "welcome-nrw.vercel.app"].includes(location.hostname)) {
@@ -255,7 +255,7 @@
                       <section class="staff-permission-group"><h4 data-ux-label="playersGroup">Spieler &amp; Einsatz</h4><label class="staff-permission-toggle"><input type="checkbox" name="members"><span data-i18n="roster">Spielerverwaltung</span></label>
                       <label class="staff-permission-toggle"><input type="checkbox" name="performance"><span data-i18n="performance">Performance</span></label>
                       <label class="staff-permission-toggle"><input type="checkbox" name="bear"><span data-i18n="bearManagement">Bärenfalle</span></label>
-                      <label class="staff-permission-toggle"><input type="checkbox" name="fightclub"><span data-i18n="fightclub">FightClub</span></label>
+                      <label class="staff-permission-toggle"><input type="checkbox" name="ssl_read"><span data-i18n="sslRead">SSL · nur lesen</span></label><label class="staff-permission-toggle"><input type="checkbox" name="fightclub"><span data-i18n="fightclub">FightClub</span></label>
                       <label class="staff-permission-toggle"><input type="checkbox" name="participation"><span data-i18n="participation">Event-Teilnahme</span></label>
                       </section><section class="staff-permission-group"><h4 data-ux-label="contentGroup">Inhalte &amp; Organisation</h4><label class="staff-permission-toggle"><input type="checkbox" name="transfers"><span data-i18n="transfers">Transferplanung</span></label>
                       <label class="staff-permission-toggle"><input type="checkbox" name="laws"><span data-i18n="laws">Laws-Verwaltung</span></label>
@@ -313,7 +313,7 @@
           <div class="lock-symbol">♜</div><span class="eyebrow">ALLIANCEOS · R4 / R5</span>
           <h1 data-i18n="loginTitle">Zugang zur Leitungszentrale</h1>
           <p data-i18n="loginText">Die Spielerlisten und internen Planungen sind geschützt. Melde dich mit einem bereits freigeschalteten Konto an.</p>
-          <p><a href="./ssl.html">SSL-Gastzugang · nur lesen →</a></p><form id="loginForm"><label class="field" id="leaderPickerField"><span data-i18n="chooseLeader">Spielernamen auswählen</span><select id="leaderSelect" class="control" required><option value="" data-i18n="loadingLeaders">R4/R5 werden geladen …</option></select></label>
+          <form id="loginForm"><label class="field" id="leaderPickerField"><span data-i18n="chooseLeader">Spielernamen auswählen</span><select id="leaderSelect" class="control" required><option value="" data-i18n="loadingLeaders">R4/R5 werden geladen …</option></select></label>
           <label class="field" id="legacyEmailField" hidden><span data-i18n="legacyEmail">Bestehender Admin-Zugang (E-Mail)</span><input type="email" id="email" class="control" autocomplete="username"></label>
           <label class="field"><span data-i18n="password">Passwort</span><input type="password" id="password" class="control" autocomplete="current-password" required></label>
           <button class="primary full" type="submit" data-i18n="login">Anmelden</button></form>
@@ -474,5 +474,5 @@
 <script src="../bear/combat.js?v=20261020-formation-shared"></script>
 <script src="../bear/own-baseline.js?v=20261020-formation-shared"></script>
 <script src="../bear/formation-core.js?v=20261020-formation-shared"></script>
-<script type="module" src="./app.js?v=20261103-login-2"></script>
+<script type="module" src="./app.js?v=20261103-integrated-1"></script>
 </body></html>

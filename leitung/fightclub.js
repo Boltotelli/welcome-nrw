@@ -1,12 +1,13 @@
 /* AllianceOS Phase 4 – GitHub Pages only: FightClub draft rosters.
  * Distinguishes confirmed source schedules from a manually chosen planning date.
  * No Discord role/slot/bot changes, no automatic player assignments. */
-import {createFightClubMap} from "./fightclub-map.js?v=20261103-ssl-1";
+import {createFightClubMap} from "./fightclub-map.js?v=20261103-integrated-1";
 import {createRosterDrafts} from "./roster-drafts.js?v=20261103-ssl-1";
 import {readAttendanceNote,writeAttendanceNote,attendanceNoteLimit} from "./fightclub-attendance.js?v=20261103-ssl-1";
 import {SSL_EVENT,fightEventName,mergeFightPlayers} from "./fightclub-events.js?v=20261103-ssl-1";
 import {createFightclubGuests} from "./fightclub-guests.js?v=20261103-ssl-1";
 export function createFightClub({getState,getLanguage,request,flash,esc,openPlayer}){
+ const readOnly=()=>getState()?.staff?.permissions?.ssl_read===true&&getState()?.staff?.is_owner!==true&&getState()?.staff?.permissions?.fightclub!==true;
  const canDossier=()=>getState()?.staff?.is_owner===true||getState()?.staff?.permissions?.members===true;
  const root=document.getElementById("fightclubRoot");
  const enabled=true; // Released for both GitHub Pages and Vercel; access is enforced by server-side module permissions.
@@ -120,7 +121,7 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
    return diff>=-120*86400000 && diff<=540*86400000;
  };
  let state=null,loading=null,generation=0,eventType="swordland",date="",search="",filter="all",pending=new Set(),warning="",fastLegion=1,fastAvailability="full",rosterExpanded=true;
- function players(){return mergeFightPlayers(getState()?.players||[],state?.guests||[],state?.assignments||[],eventType,date).filter(p=>p.active&&p.member_status!=="left"&&/^[0-9]{1,20}$/.test(String(p.game_id||""))).slice().sort((a,b)=>String(a.name||"").localeCompare(String(b.name||""),locale()));}
+ function players(){return mergeFightPlayers((readOnly()?state?.players:getState()?.players)||[],state?.guests||[],state?.assignments||[],eventType,date).filter(p=>p.active&&p.member_status!=="left"&&/^[0-9]{1,20}$/.test(String(p.game_id||""))).slice().sort((a,b)=>String(a.name||"").localeCompare(String(b.name||""),locale()));}
  const playerMap=()=>new Map(players().map(p=>[String(p.game_id),p]));
  const scorePowers=()=>{
   const ids=new Set((getState()?.players||[]).filter(p=>p.active&&p.member_status!=='left').map(p=>String(p.game_id))),guestPowers=eventType===SSL_EVENT?(state?.guests||[]).filter(p=>!ids.has(String(p.game_id))):[];
@@ -129,7 +130,7 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
  const powers=()=>new Map(scorePowers().map(p=>[String(p.game_id),p]));
  const assignments=()=>state?.assignments?.filter(a=>a.event_type===eventType&&a.battle_date===date)||[];
  const mapUI=createFightClubMap({
-  getContext:()=>({eventType,date,assignments:assignments(),mapAssignments:state?.map_assignments||[],powers:scorePowers(),players:players(),state,allianceState:getState()}),
+  getContext:()=>({readOnly:readOnly(),eventType,date,assignments:assignments(),mapAssignments:state?.map_assignments||[],powers:scorePowers(),players:players(),state,allianceState:getState()}),
   getLanguage,request,flash,esc,onUpdated:()=>draw()
  });
  const storedAssignment=id=>assignments().find(a=>String(a.game_id)===String(id));
@@ -287,7 +288,7 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
    return '<section class="card fight-dates"><div class="fight-heading"><h3>'+esc(t("date"))+'</h3>'+
      '<button class="ghost" type="button" data-fight-refresh>'+esc(t("refresh"))+' ↻</button></div>'+
      '<div class="fight-switches"><label><span>'+esc(t("type"))+'</span>'+
-     selectOptions([["swordland",t("swordland")],["triforce",t("triforce")],[SSL_EVENT,fightEventName(SSL_EVENT,getLanguage())]],eventType,'data-fight-type')+'</label>'+
+     selectOptions(readOnly()?[[SSL_EVENT,fightEventName(SSL_EVENT,getLanguage())]]:[["swordland",t("swordland")],["triforce",t("triforce")],[SSL_EVENT,fightEventName(SSL_EVENT,getLanguage())]],eventType,'data-fight-type')+'</label>'+
      '<label><span>'+esc(t("date"))+'</span><input class="control" type="date" data-fight-date value="'+esc(date)+'"></label></div>'+
      '<p class="small-note">'+esc(t("knownDates"))+'</p>'+
      '<div class="fight-past-dates">'+(options.length?options.map(d=>{
@@ -299,14 +300,19 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
        '<p class="small-note">'+esc(t("dateMissing"))+'</p>')+
      '</section>';
  }
+ function readOnlyList(){
+  const people=playerMap(),ps=powers(),rows=assignments().filter(a=>people.has(String(a.game_id))&&(filter==='all'||String(a.legion)===filter)&&(!search||String(people.get(String(a.game_id))?.name+' '+a.game_id).toLowerCase().includes(search.toLowerCase())));
+  return '<section class="card"><div class="fight-heading"><h3>'+esc(t('plans'))+' · '+rows.length+'</h3><button class="ghost" data-fight-export>'+esc(t('copyList'))+'</button></div><div class="fight-switches"><input class="control" type="search" data-fight-search aria-label="'+esc(t('search'))+'" placeholder="'+esc(t('search'))+'" value="'+esc(search)+'">'+selectOptions([['all',t('all')],['1',t('l1')],['2',t('l2')],['0',t('reserve')]],filter,'data-fight-filter aria-label="'+esc(t('legion'))+'"')+'</div><div class="assignment-table-scroll" role="region" aria-label="SSL-Roster" tabindex="0"><table class="assignment-table"><thead><tr><th>'+esc(t('members'))+'</th><th>Mystic Trial</th><th>'+esc(t('legion'))+'</th><th>'+esc(t('availability'))+'</th></tr></thead><tbody>'+rows.map(a=>'<tr><td><strong>'+esc(people.get(String(a.game_id)).name)+'</strong><small>'+esc(a.game_id)+'</small></td><td>'+esc(powerFormat(ps.get(String(a.game_id))?.power))+'</td><td>'+esc(legionName(Number(a.legion)))+'</td><td>'+esc(t(a.availability))+'</td></tr>').join('')+'</tbody></table></div>'+(rows.length?'':'<p class="small-note">'+esc(t('noPlayers'))+'</p>')+'</section>';
+ }
  function draw(){
    if(!root||!enabled)return;
+   if(readOnly())eventType=SSL_EVENT;
    const subtitle=document.getElementById("fightclubSubtitle");
-   if(subtitle)subtitle.textContent="Swordland · TriAlliance · SSL — "+t("intro");
+   if(subtitle)subtitle.textContent=readOnly()?fightEventName(SSL_EVENT,getLanguage())+" · "+({de:"Nur lesen",en:"Read only",fr:"Lecture seule",es:"Solo lectura"}[getLanguage()]||"Read only"):"Swordland · TriAlliance · SSL — "+t("intro");
    if(!state){root.textContent=loading?t("loading"):t("error");return;}
    let html=dateBar();
    if(eventType===SSL_EVENT)html+='<p class="small-note">'+esc(getLanguage()==='de'?'SSL: Den tatsächlichen Spieltermin wählen. Spielzeiten und Anmeldung richten sich nach der Gipfel-Liga; SL-Termine werden nicht übernommen.':'SSL: Choose the actual match date. League registration and match times are separate from regular Swordland.')+'</p>';
-   if(date&&!nextDateValid(date)){
+   if(date&&!nextDateValid(date)&&!readOnly()){
      html+='<p class="fight-conflict">'+esc(t("selectDate"))+'</p>';
    }else if(date){
      const conflicts=overlap();
@@ -314,7 +320,7 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
        '<p>'+esc(t("snapshotHint"))+' '+esc(t("noAutomatic"))+'</p></div>'+
        '<section class="fight-overview"><h3>'+esc(t("head"))+'</h3><div class="fight-summary-grid">'+summary()+'</div></section>'+
        (conflicts.size?'<div class="fight-conflict">⚠ '+esc(t("familyHint"))+'</div>':'')+
-       guestUI.render()+list()+fastAssign()+candidateLists()+mapUI.render();
+       (readOnly()?readOnlyList():guestUI.render()+list()+fastAssign()+candidateLists())+mapUI.render();
    }
    root.innerHTML=html;
    if(drafts.isBusy())root.querySelectorAll('input,select,button').forEach(el=>{el.disabled=true;});
@@ -334,12 +340,13 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
      if(ticket!==generation)return;
      if(!value?.ok||!Array.isArray(value.cycles)||!Array.isArray(value.assignments)||!Array.isArray(value.powers))
        throw Error("invalid_fightclub_response");
-     state=value;warning="";draw();
-   }).catch(e=>{if(ticket!==generation)return;root.textContent=t("error")+" ("+String(e.message||e)+")";})
+     state=value;if(readOnly()){eventType=SSL_EVENT;if(!date)date=value.assignments[0]?.battle_date||"";}warning="";draw();
+   }).catch(e=>{if(ticket!==generation)return;if(readOnly())state=null;root.textContent=t("error")+" ("+String(e.message||e)+")";})
      .finally(()=>{if(ticket===generation)loading=null;});
    return loading;
  }
  function stage(id,remove=false){
+  if(readOnly())return;
   if(!date||!nextDateValid(date)||drafts.isBusy())return;
   const row=root.querySelector('[data-fight-row="'+id+'"]');if(!row)return;
   let notes;
@@ -381,7 +388,7 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
      if(el.matches('[data-fight-availability],[data-fight-role]')){stage(el.closest('[data-fight-row]').dataset.fightRow);return;}
      if(el.matches("[data-fight-fast-legion]")){fastLegion=Number(el.value);return;}
      if(el.matches("[data-fight-fast-availability]")){fastAvailability=el.value;return;}
-     if(el.matches("[data-fight-type]")){eventType=el.value;date="";filter="all";search="";draw();}
+     if(el.matches("[data-fight-type]")){if(readOnly())return;eventType=el.value;date="";filter="all";search="";draw();}
      else if(el.matches("[data-fight-date]")){date=el.value;filter="all";search="";draw();}
      else if(el.matches("[data-fight-filter]")){filter=el.value;draw();}
    });
@@ -394,6 +401,12 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
      if(Number.isInteger(pos))input?.setSelectionRange(pos,pos);
    });
    root.addEventListener("click",async e=>{
+     if(readOnly()){
+      if(await mapUI.click(e))return;
+      if(e.target.closest('[data-fight-refresh]')){load(true);return;}
+      const known=e.target.closest('[data-fight-known]');if(known){date=known.dataset.fightKnown;filter='all';search='';draw();return;}
+      if(e.target.closest('[data-fight-export]')){try{await navigator.clipboard.writeText(exportText());flash(t('copied'));}catch{flash(t('copyError'),true);}}return;
+     }
      if(drafts.click(e))return;
      if(await guestUI.click(e))return;
      if(await mapUI.click(e))return;

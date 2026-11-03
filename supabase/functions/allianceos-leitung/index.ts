@@ -41,7 +41,7 @@ function localized(raw: unknown, max = 10000) {
   return Object.fromEntries(langs.map(l => [l, str(obj[l], max)]).filter(([,v]) => v));
 }
 // Phase 1–5 module access is independent of player-dossier rights.
-const STAFF_PERMISSION_KEYS=["members","performance","bear","fightclub","participation","transfers","laws","events","event_bot","settings"] as const;
+const STAFF_PERMISSION_KEYS=["members","performance","bear","fightclub","participation","transfers","laws","events","event_bot","settings","ssl_read"] as const;
 function permission(staff: any, feature: string) {
   return staff?.is_owner===true || staff?.permissions?.[feature]===true;
 }
@@ -94,6 +94,7 @@ async function staffFor(req: Request, alliance: string) {
   const staff = await checked<any>(db.from("aos_staff")
     .select("rank,permissions,enabled,is_admin").eq("user_id",who.user.id)
     .eq("alliance_code",alliance).maybeSingle());
+  if(!staff){const guest=await sslAccess.grantFor(alliance,who.user.id);if(guest)return {userId:who.user.id,staff:guest};}
   if (!staff?.enabled || !["R4","R5"].includes(staff.rank)) throw new HttpError("not_authorized",403);
   // Ownership is tied to a verified, pre-existing Auth identity, NEVER user metadata.
   staff.is_owner=(staff.rank==="R5"&&who.user.email?.toLowerCase()==="admin@nap-tracker.invalid") || staff.is_admin===true;
@@ -116,6 +117,7 @@ async function staffFor(req: Request, alliance: string) {
       staff.event_loan_until=exception.ends_at;
     }
   }
+  staff.ssl_readonly=!staff.is_owner&&staff.permissions?.ssl_read===true&&!STAFF_PERMISSION_KEYS.some(k=>k!=="ssl_read"&&staff.permissions?.[k]===true);
   return {userId: who.user.id, staff};
 }
 async function audit(alliance: string, user: string, entity: string, id: string, action: string) {
@@ -251,7 +253,7 @@ async function publicLeaders(req:Request,alliance:string){
  const leaders=await checked<any[]>(db.from("players")
    .select("game_id,name,alliance_rank").eq("alliance_code",alliance)
    .eq("active",true).in("alliance_rank",[4,5]).order("name",{ascending:true}).limit(50));
- const guests=await checked<any[]>(db.from('aos_ssl_viewers').select('name,login_name').eq('alliance_code',alliance).eq('enabled',true).order('name').limit(100));
+ const guests=await checked<any[]>(db.from('aos_ssl_viewers').select('name,login_name').eq('alliance_code',alliance).eq('enabled',true).eq('ssl_read',true).order('name').limit(100));
  return json(req,{guests,leaders:leaders.filter(x=>/^[0-9]{5,20}$/.test(x.game_id||""))
    .map(x=>({game_id:x.game_id,name:x.name,rank:"R"+x.alliance_rank}))});
 }
@@ -671,6 +673,7 @@ async function eventLoanData(req:Request,alliance:string,staff:any){
    observed,can_approve:staff.is_owner===true});
 }
 async function bootstrap(req: Request, alliance: string, staff: any) {
+  if(staff.ssl_readonly||(!permission(staff,"fightclub")&&permission(staff,"ssl_read")&&!STAFF_PERMISSION_KEYS.some(k=>k!=="ssl_read"&&permission(staff,k))))return await sslAccess.bootstrap(req,alliance,staff);
   const config=await checked<any>(db.from("aos_alliances").select("*").eq("code",alliance).single());
   const [players, transfers, laws, events, internalMoves, eventMessages, eventGuidance, eventCycles, eventDayTemplates, transferWindows, lawVersions, lawPublications, auditTrail]=await Promise.all([
     rosterFor(alliance,config.kingdom_id),
@@ -714,7 +717,7 @@ async function bootstrap(req: Request, alliance: string, staff: any) {
         label:error?"":(data?.user?.email||"")};
     }));
   }
-  return json(req,{alliance:config,staff:{rank:staff.rank,permissions:staff.permissions,is_owner:staff.is_owner},staffMembers,transferContacts,externalAlts,
+  return json(req,{alliance:config,staff:{rank:staff.rank,permissions:staff.permissions,is_owner:staff.is_owner},staffMembers:staff.is_owner?[...staffMembers,...await sslAccess.grants(alliance)]:staffMembers,transferContacts,externalAlts,
     players:permission(staff,"members")?players:
       ["performance","bear","fightclub","participation"].some(feature=>permission(staff,feature))?
         players.filter(p=>p.active&&p.member_status!=="left")
@@ -1103,6 +1106,7 @@ async function fightClubMapSave(req:Request,alliance:string,userId:string,staff:
 }
 
 async function fightClubData(req:Request,alliance:string,staff:any){
+ if(!permission(staff,"fightclub")&&permission(staff,"ssl_read"))return json(req,await sslAccess.fightData(req,alliance,staff));
  if(!permission(staff,"fightclub"))throw new HttpError("permission_denied",403);
  const since=new Date(Date.now()-120*86400000).toISOString().slice(0,10);
  const [cycles,assignments,powers,mapAssignments,leaders]=await Promise.all([
@@ -1440,6 +1444,7 @@ async function inviteR4(req:Request,alliance:string,userId:string,staff:any,payl
 async function saveStaff(req:Request,alliance:string,userId:string,staff:any,payload:any){
   if(!staff.is_owner)throw new HttpError("permission_denied",403);
   const email=str(payload.email,255).toLowerCase(),enabled=payload.enabled!==false;
+  if(email.endsWith("@guests.allianceos.invalid"))return await sslAccess.saveGrant(req,alliance,userId,staff,{...payload,email});
   if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))throw new HttpError("invalid_email",400);
   const {data,error}=await db.auth.admin.listUsers({page:1,perPage:1000});
   if(error)throw new HttpError("user_lookup_failed",500);
@@ -1798,13 +1803,14 @@ Deno.serve(async(req: Request)=>{
     if(req.method==="GET"&&["public-events","public-laws","public-guidance","public-schedule","public-config","public-announcement"].includes(u.searchParams.get("mode")||""))
       return await publicInfo(req,alliance,u.searchParams.get("mode")||"");
     if(req.method==="GET"&&u.searchParams.get("mode")==="public-leaders")return await publicLeaders(req,alliance);
-    if(req.method==="GET"&&u.searchParams.get("mode")==="ssl-view")return await sslAccess.read(req,alliance);
     const {userId,staff}=await staffFor(req,alliance);
+    if(staff.ssl_readonly&&req.method==="GET"&&!["bootstrap",""].includes(u.searchParams.get("mode")||""))throw new HttpError("permission_denied",403);
     if(req.method==="GET"&&u.searchParams.get("mode")==="announcement")return await announcementData(req,alliance,staff);
     if(req.method==="GET"&&u.searchParams.get("mode")==="discord-bot")return await discordPlanner(req,alliance,staff,Number(u.searchParams.get("page")||0));
      if(req.method==="GET")return await bootstrap(req,alliance,staff);
     if(Number(req.headers.get("content-length")||"0")>1600000)throw new HttpError("payload_too_large",413);
     const body=await req.json().catch(()=>{throw new HttpError("invalid_json",400)});
+    if(staff.ssl_readonly&&body?.action!=="fightclub_data")throw new HttpError("permission_denied",403);
     if(body?.action!=="alliance_logo_upload"&&Number(req.headers.get("content-length")||"0")>200000)throw new HttpError("payload_too_large",413);
     if(body?.action==="alliance_logo_upload"||body?.action==="alliance_logo_remove")return await updateAllianceLogo(req,alliance,userId,staff,body);
     if(body?.action==="announcement")return await saveAnnouncement(req,alliance,userId,staff,body);

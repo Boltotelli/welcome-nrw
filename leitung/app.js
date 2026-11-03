@@ -1,5 +1,5 @@
-import {identityOptions,selectedLogin,sslSessionOptions} from "./login-identities.js?v=20261103-1";
-import {createSslAccessAdmin} from "./ssl-access-admin.js?v=20261103-1";
+import {identityOptions,selectedLogin} from "./login-identities.js?v=20261103-integrated-1";
+import {createSslAccessAdmin} from "./ssl-access-admin.js?v=20261103-integrated-1";
 import {createAnnouncementEditor} from "./announcement.js?v=20261103-ssl-1";
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.58.0/+esm";
 import {createEventHub} from "./event-library.js?v=step6-iteratorfix-1";
@@ -9,7 +9,7 @@ import {createEventBotStatusPanel} from "./event-bot-status.js?v=20261021-usabil
 import {createMemberRelationships} from "./member-relationships.js?v=20261021-usability-1";
 import {createPerformance} from "./performance.js?v=20261021-usability-1";
 import {createBearManagement} from "./bear-management.js?v=20261103-ssl-1";
-import {createFightClub} from "./fightclub.js?v=20261103-ssl-1";
+import {createFightClub} from "./fightclub.js?v=20261103-integrated-1";
 import {createEventParticipation} from "./event-participation.js?v=vercel-release-20261020-1";
 import {createEventLoans} from "./event-loans.js?v=20261021-usability-1";
 
@@ -99,14 +99,14 @@ en:{moduleRights:"Module permissions",rightsHelp:"Switch off to revoke a permiss
 fr:{moduleRights:"Autorisations par module",rightsHelp:"Désactivez le bouton pour retirer un droit, puis enregistrez. Application immédiate côté serveur.",undoRights:"Annuler les modifications",clearRights:"Retirer tous les droits",disableStaffAccount:"Bloquer cet accès",rightsSelected:"Choisissez un compte pour gérer ses droits.",rightsCount:"droits actifs",rightsDisabled:"Compte désactivé",rightsProtected:"Administrateur · modification interdite",rightsEnabled:"Compte actif",rightsNone:"Aucun droit",rightsClearConfirm:"Retirer tous les droits de {name} ? Le compte reste actif mais sans accès aux modules.",rightsDisableConfirm:"Bloquer complètement {name} et retirer tous les droits ? Ce compte ne pourra plus se connecter.",rightsCleared:"Tous les droits retirés.",rightsAccountDisabled:"Accès bloqué.",rightsSaved:"Droits enregistrés.",rightsAdminNote:"Les comptes administrateurs sont protégés et disposent de tous les droits.",rolesFuture:"Choisissez un R4/R5 pour gérer ses droits. Les retraits sont appliqués immédiatement après l'enregistrement.",saveR4:"Enregistrer",noStaffSelection:"Choisissez d'abord un R4/R5."},
 es:{moduleRights:"Permisos por módulo",rightsHelp:"Desactiva una opción para quitar su permiso y guarda. Se aplica inmediatamente en el servidor.",undoRights:"Descartar cambios",clearRights:"Quitar todos los permisos",disableStaffAccount:"Bloquear acceso",rightsSelected:"Selecciona una cuenta para editar permisos.",rightsCount:"permisos activos",rightsDisabled:"Cuenta desactivada",rightsProtected:"Administrador · no editable",rightsEnabled:"Cuenta activa",rightsNone:"Sin permisos",rightsClearConfirm:"¿Quitar todos los permisos de {name}? La cuenta seguirá activa, pero sin acceso a módulos.",rightsDisableConfirm:"¿Bloquear por completo la cuenta de {name} y quitar todos los permisos? Ya no podrá iniciar sesión.",rightsCleared:"Permisos retirados.",rightsAccountDisabled:"Cuenta bloqueada.",rightsSaved:"Permisos guardados.",rightsAdminNote:"Las cuentas administradoras están protegidas y tienen acceso completo.",rolesFuture:"Selecciona un R4/R5 para gestionar derechos. Los cambios se aplican inmediatamente al guardar.",saveR4:"Guardar cambios",noStaffSelection:"Primero selecciona un R4/R5."}
 };
-const STAFF_FEATURES=[["members","roster"],["performance","performance"],["bear","bearManagement"],["fightclub","fightclub"],["participation","participation"],["transfers","transfers"],["laws","laws"],["events","events"],["event_bot","discordBot"],["settings","settings"]];
+const STAFF_FEATURES=[["ssl_read","sslRead"],["members","roster"],["performance","performance"],["bear","bearManagement"],["fightclub","fightclub"],["participation","participation"],["transfers","transfers"],["laws","laws"],["events","events"],["event_bot","discordBot"],["settings","settings"]];
 const STAFF_KEYS=STAFF_FEATURES.map(([key])=>key);
 const modulePermission={roster:"members",performance:"performance",bear:"bear",fightclub:"fightclub",participation:"participation"};
 const phase2Labels={de:{performance:"Performance",bearManagement:"Bärenfalle",fightclub:"FightClub",participation:"Event-Teilnahme"},
 en:{performance:"Performance",bearManagement:"Bear Trap",fightclub:"FightClub",participation:"Event participation"},
 fr:{performance:"Performance",bearManagement:"Piège à ours",fightclub:"FightClub",participation:"Participation aux événements"},
 es:{performance:"Rendimiento",bearManagement:"Trampa de oso",fightclub:"FightClub",participation:"Participación en eventos"}};
-const t=k=>rightsCopy[lang]?.[k]||phase2Labels[lang]?.[k]||rosterDossierError[lang]?.[k]||step6DaysCopy[lang]?.[k]||step6DaysCopy.de[k]||step6Copy[lang]?.[k]||step6Copy.de[k]||step5Copy[lang]?.[k]||lawCategoryLabels[lang]?.[k]||lawUiCopy[lang]?.[k]||manualPhasesCopy[lang]?.[k]||transferUiCopy[lang]?.[k]||powerLabels[lang]?.[k]||rosterLabels[lang]?.[k]||leaderUiCopy[lang]?.[k]||latestModuleCopy[lang]?.[k]||opsUI[lang]?.[k]||groupUI[lang]?.[k]||eventLabels[lang]?.[k]||phase1Labels[lang]?.[k]||staffExtra[lang]?.[k]||copy[lang]?.[k]||lawCategoryLabels.de[k]||lawUiCopy.de[k]||manualPhasesCopy.de[k]||transferUiCopy.de[k]||powerLabels.de[k]||rosterLabels.de[k]||leaderUiCopy.de[k]||latestModuleCopy.de[k]||opsUI.de[k]||groupUI.de[k]||eventLabels.de[k]||phase1Labels.de[k]||staffExtra.de[k]||copy.de[k]||k;
+const t=k=>k==="sslRead"?({de:"SSL · nur lesen",en:"SSL · read only",fr:"SSL · lecture seule",es:"SSL · solo lectura"}[lang]):k==="staffUser"?({de:"Zugang auswählen",en:"Choose account",fr:"Choisir un accès",es:"Elegir acceso"}[lang]):rightsCopy[lang]?.[k]||phase2Labels[lang]?.[k]||rosterDossierError[lang]?.[k]||step6DaysCopy[lang]?.[k]||step6DaysCopy.de[k]||step6Copy[lang]?.[k]||step6Copy.de[k]||step5Copy[lang]?.[k]||lawCategoryLabels[lang]?.[k]||lawUiCopy[lang]?.[k]||manualPhasesCopy[lang]?.[k]||transferUiCopy[lang]?.[k]||powerLabels[lang]?.[k]||rosterLabels[lang]?.[k]||leaderUiCopy[lang]?.[k]||latestModuleCopy[lang]?.[k]||opsUI[lang]?.[k]||groupUI[lang]?.[k]||eventLabels[lang]?.[k]||phase1Labels[lang]?.[k]||staffExtra[lang]?.[k]||copy[lang]?.[k]||lawCategoryLabels.de[k]||lawUiCopy.de[k]||manualPhasesCopy.de[k]||transferUiCopy.de[k]||powerLabels.de[k]||rosterLabels.de[k]||leaderUiCopy.de[k]||latestModuleCopy.de[k]||opsUI.de[k]||groupUI.de[k]||eventLabels.de[k]||phase1Labels.de[k]||staffExtra.de[k]||copy.de[k]||k;
 const locale={de:"de-DE",en:"en-GB",fr:"fr-FR",es:"es-ES"}[lang];
 function txt(obj){return typeof obj==="string"?obj:(obj?.[lang]||obj?.[state?.alliance?.default_language]||obj?.de||obj?.en||"");}
 function patchTranslations(){
@@ -117,13 +117,14 @@ function patchTranslations(){
  $("pageLabel").textContent=t(tab);
 }
 function setTab(name){
+ if(state?.staff?.ssl_readonly)name="fightclub";
  if(!["overview","roster","performance","bear","fightclub","participation","transfers","laws","events","discord","settings"].includes(name))return;
  if(name==="bear"&&!bearManagement.enabled)return;
  if(name==="fightclub"&&!fightclub.enabled)return;
  if(name==="participation"&&!participation.enabled)return;
  if(name==="performance"&&!performance.enabled)return;
  const required=modulePermission[name]||(["transfers","laws","events","settings"].includes(name)?name:null);
- if(required&&state&&!can(required))name="overview";
+ if(required&&state&&!can(required)&&!(name==="fightclub"&&can("ssl_read")))name="overview";
   if(name==="discord"&&state&&!can("event_bot"))name="overview";
  const changedModule=tab!==name;
  tab=name;q(".tab-page").forEach(p=>p.hidden=p.dataset.page!==name);
@@ -160,6 +161,8 @@ function can(feature){return state?.staff?.is_owner===true||state?.staff?.permis
 function grantButtons(){
  q("[data-permission]").forEach(el=>{el.disabled=!can(el.dataset.permission);el.title=el.disabled?t("permissionDenied"):"";});
  for(const el of q(".nav-item[data-tab]")){
+  if(state?.staff?.ssl_readonly){el.hidden=el.dataset.tab!=="fightclub";continue;}
+  if(el.dataset.tab==="fightclub"&&can("ssl_read")){el.hidden=false;continue;}
   const required=modulePermission[el.dataset.tab]||(["transfers","laws","events","settings"].includes(el.dataset.tab)?el.dataset.tab:null);
   el.hidden=el.dataset.tab==="discord"?!can("event_bot"):
    ["performance","bear","fightclub","participation"].includes(el.dataset.tab)?
@@ -218,6 +221,7 @@ async function refresh(){
  state=data;
  if(!localStorage.getItem("nrw_page_lang")&&LANGS.includes(state.alliance.default_language))lang=state.alliance.default_language;
  showLive();
+ if(state.staff.ssl_readonly){setTab("fightclub");return;}
  if(!powerSyncStarted&&can("members")){
    powerSyncStarted=true;
    Promise.resolve().then(syncPlayerPower);
@@ -342,7 +346,7 @@ function renderEvents(){
  const list=state.events.slice().sort((a,b)=>Date.parse(a.start_at)-Date.parse(b.start_at));
  $("eventList").innerHTML=list.length?list.map(x=>'<article class="list-card"><div><span class="eyebrow">'+esc(localTime(x.start_at))+' <span class="muted">· '+esc(new Date(x.start_at).toISOString().slice(11,16))+' UTC</span></span><h3>'+esc(txt(x.title))+'</h3><p>'+esc(txt(x.description)||x.requirements||"")+'</p></div><div class="card-actions">'+badge(x.status)+'<button data-edit="event" data-id="'+esc(x.id)+'" class="ghost" '+(!can("events")?"disabled":"")+'>'+esc(t("edit"))+'</button></div></article>').join(""):'<div class="card empty">'+esc(t("noEvents"))+'</div>';
 }
-const sslAccessAdmin=createSslAccessAdmin({root:$("sslAccessAdmin"),request,esc,flash,showCredentials});
+const sslAccessAdmin=createSslAccessAdmin({root:$("sslAccessAdmin"),request,esc,flash,showCredentials,onChanged:async()=>{await refresh();setTab("settings");}});
 function renderSettings(){
  const config=state.alliance, form=$("settingsForm");
  for(const name of ["name","capacity","discord_invite_url"]){form.elements[name].value=config[name]??"";}
@@ -354,7 +358,7 @@ function renderSettings(){
  q("#activeLanguages input").forEach(x=>x.checked=(config.languages||[]).includes(x.value));
  $("defaultLanguage").value=config.default_language;
  const options=STAFF_FEATURES.map(([key,label])=>[key,t(label)]);
- const grants=(state.staffMembers||[]).filter(x=>/^leader-[0-9]+@accounts\.allianceos\.invalid$/i.test(x.email||""));
+ const grants=(state.staffMembers||[]).filter(x=>x.ssl_readonly||/^leader-[0-9]+@accounts\.allianceos\.invalid$/i.test(x.email||""));
  $("permissionTable").innerHTML='<div><strong>'+esc(t("permissions"))+'</strong><b>R4/R5</b></div>'+
    options.map(([feature,label])=>'<div><span>'+esc(label)+'</span><b>'+
      esc(state.staff.is_owner?(grants.filter(x=>x.enabled&&(x.is_admin||x.permissions?.[feature]===true)).length+" / "+grants.length):(can(feature)?"✓":"—"))+
@@ -363,13 +367,14 @@ function renderSettings(){
  if(state.staff.is_owner)sslAccessAdmin.load();
  const members=(state.staffMembers||[]).filter(x=>x.email);
  const lookupName=email=>{
+    const guest=(state.staffMembers||[]).find(m=>m.email===email&&m.ssl_readonly);if(guest)return guest.name;
     const m=/^leader-([0-9]+)@accounts\.allianceos\.invalid$/i.exec(email||"");
     const p=m&&state.players.find(x=>String(x.game_id)===m[1]);
     return p?String(p.name):t("legacyAdmin");
  };
  $("staffList").innerHTML=members.length?'<p class="eyebrow">'+esc(t("staffList"))+'</p>'+
  members.map(m=>{
-   const protectedAccount=m.is_admin||m.protected_account||!/^leader-[0-9]+@accounts\.allianceos\.invalid$/i.test(m.email||"");
+   const protectedAccount=m.is_admin||m.protected_account||(!m.ssl_readonly&&!/^leader-[0-9]+@accounts\.allianceos\.invalid$/i.test(m.email||""));
    const activeCount=protectedAccount?STAFF_KEYS.length:STAFF_KEYS.filter(k=>m.permissions?.[k]===true).length;
    const status=protectedAccount?t("rightsProtected"):m.enabled?t("rightsEnabled"):t("rightsDisabled");
    return '<button type="button" class="staff-row staff-access-row'+(selectedStaffEmail===m.email?" selected":"")+'" data-staff-email="'+esc(m.email)+'" aria-pressed="'+(selectedStaffEmail===m.email)+'" '+
@@ -379,14 +384,17 @@ function renderSettings(){
  }).join(""):"";
  const sel=$("staffAccountSelect");
  sel.innerHTML='<option value="">'+esc(t("chooseLeader"))+'</option>'+
- members.filter(x=>/^leader-/.test(x.email||"")).map(x=>
+ members.filter(x=>x.ssl_readonly||/^leader-/.test(x.email||"")).map(x=>
    '<option value="'+esc(x.email)+'" '+(x.is_admin||x.protected_account?"disabled":"")+'>'+esc(lookupName(x.email))+" · "+esc(x.rank)+(x.is_admin?" · "+esc(t("rightsProtected")):"")+'</option>').join("");
  const selected=members.find(m=>m.email===selectedStaffEmail&&!m.is_admin&&!m.protected_account);
  if(!selected)selectedStaffEmail="";
  sel.value=selectedStaffEmail;
  const rights=$("staffRightsFieldset"),permissionForm=$("r4Form");
  rights.disabled=!selected;rights.hidden=!selected;$("staffEditActions").hidden=!selected;$("staffSelectionInfo").hidden=!selected;
- for(const key of STAFF_KEYS)permissionForm.elements[key].checked=selected?.permissions?.[key]===true;
+ for(const key of STAFF_KEYS){permissionForm.elements[key].checked=selected?.permissions?.[key]===true;permissionForm.elements[key].disabled=Boolean(selected?.ssl_readonly&&key!=="ssl_read");}
+ q(".staff-permission-toggle",rights).forEach(el=>el.hidden=Boolean(selected?.ssl_readonly&&!el.querySelector('[name="ssl_read"]')));
+ q(".staff-permission-group",rights).forEach(el=>el.hidden=Boolean(selected?.ssl_readonly&&!el.querySelector('[name="ssl_read"]')));
+ permissionForm.querySelector('[data-i18n="r4Enabled"]').textContent=selected?.ssl_readonly?"Gastzugang aktiviert":t("r4Enabled");
  permissionForm.elements.enabled.checked=selected?.enabled===true;
  $("staffSelectionInfo").textContent=selected?
   lookupName(selected.email)+" · "+selected.rank+" · "+(selected.enabled?t("rightsEnabled"):t("rightsDisabled")):
@@ -396,7 +404,7 @@ function renderSettings(){
  }
  if(!members.length)$("staffSelectionInfo").textContent=t("rightsSelected");
 }
-function render(){announcementEditor.render();patchTranslations();counts();renderRoster();renderTransfers();renderLaws();renderEvents();renderSettings();eventLoans.render();eventHub.render(state,lang,can("events"));discordPlanner.render(lang);operations.render();}
+function render(){if(state?.staff?.ssl_readonly){patchTranslations();q("[data-alliance-logo]").forEach(img=>img.src=state.alliance.logo_url||"../assets/nrw-banner.svg");return;}announcementEditor.render();patchTranslations();counts();renderRoster();renderTransfers();renderLaws();renderEvents();renderSettings();eventLoans.render();eventHub.render(state,lang,can("events"));discordPlanner.render(lang);operations.render();}
 function control(label,name,value="",type="text",opts={}){
  const attr=Object.entries(opts).map(([k,v])=>' '+k+'="'+esc(v)+'"').join("");
  return '<label class="field"><span>'+esc(label)+'</span><input class="control" name="'+esc(name)+'" type="'+esc(type)+'" value="'+esc(value??"")+'"'+attr+'></label>';
@@ -621,7 +629,7 @@ $("cancelDialog").addEventListener("click",()=>$("editDialog").close());
 $("editForm").addEventListener("submit",saveDialog);
 function chooseStaffAccount(email,scroll=false){
  const member=(state?.staffMembers||[]).find(m=>m.email===email);
- selectedStaffEmail=member&&!member.is_admin&&!member.protected_account&&/^leader-/.test(email)?email:"";
+ selectedStaffEmail=member&&!member.is_admin&&!member.protected_account&&(member.ssl_readonly||/^leader-/.test(email))?email:"";
  renderSettings();
  if(scroll&&selectedStaffEmail)$("r4Form").scrollIntoView({behavior:"smooth",block:"center"});
 }
@@ -755,7 +763,7 @@ $("removeAllianceLogo").addEventListener("click",async()=>{
  finally{button.disabled=!can("settings")||!state?.alliance?.logo_url;}
 });
 
-let legacyLogin=false,sslLoginClient=null;
+let legacyLogin=false;
 async function loadLeaderList(){
  const sel=$("leaderSelect");
  try{
@@ -838,15 +846,12 @@ $("loginForm").addEventListener("submit",async(e)=>{
  e.preventDefault();
  const button=e.currentTarget.querySelector("button");button.disabled=true;$("loginError").textContent="";
  const identity=selectedLogin($("leaderSelect").value);
- const guestLogin=$("legacyEmailField").hidden&&identity.guest;
  const email=$("legacyEmailField").hidden?identity.email:$("email").value.trim();
  const password=$("password").value;
  if(!email){$("loginError").textContent=t("noLeaderSelected");button.disabled=false;return;}
  try{
-   const client=guestLogin?(sslLoginClient??=createClient(BASE,"sb_publishable_8i1ismeQtj9WM-xVN_Vm0w_Tj7AvVtL",sslSessionOptions)):supabase;
-   const {error}=await client.auth.signInWithPassword({email,password});
+   const {error}=await supabase.auth.signInWithPassword({email,password});
    if(error)throw error;
-   if(guestLogin){$("password").value="";location.assign(new URL("./ssl.html",import.meta.url).href);return;}
    await refresh();setTab(new URLSearchParams(location.search).get("tab")||"overview");
    $("password").value="";
  }catch(error){

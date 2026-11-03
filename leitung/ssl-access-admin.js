@@ -1,4 +1,4 @@
-export function createSslAccessAdmin({root,request,esc,flash,showCredentials}){
+export function createSslAccessAdmin({root,request,esc,flash,showCredentials,onChanged=async()=>{}}){
  let busy=false,rows=[];
  async function load(){
   try{rows=(await request('bootstrap',{action:'ssl_viewers_list'})).viewers||[];draw();}
@@ -9,7 +9,7 @@ export function createSslAccessAdmin({root,request,esc,flash,showCredentials}){
  }
  async function run(body){
   if(busy)return;busy=true;root.querySelectorAll('button').forEach(b=>b.disabled=true);
-  try{const r=await request('bootstrap',body);if(r.password)showCredentials(['SSL-Gastzugang · nur lesen','Anmeldung: '+new URL('./ssl.html',location.href).href,'Benutzername: '+r.login_name,'Passwort: '+r.password],'Zugangsdaten werden nur jetzt angezeigt. Sicher an den Gast weitergeben.');flash('SSL-Gastzugang aktualisiert.');await load();}
+  try{const r=await request('bootstrap',body);if(r.password)showCredentials(['SSL-Gastzugang · nur lesen','Anmeldung: '+new URL('./',location.href).href,'Benutzername: '+r.login_name,'Passwort: '+r.password],'Zugangsdaten werden nur jetzt angezeigt. Sicher an den Gast weitergeben.');flash('SSL-Gastzugang aktualisiert.');await load();await onChanged();}
   catch{flash('Gastzugang konnte nicht aktualisiert werden.',true);}
   finally{busy=false;root.querySelectorAll('button').forEach(b=>b.disabled=false);}
  }

@@ -1,4 +1,3 @@
-export const sslSessionOptions={auth:{storageKey:'aos_ssl_readonly_auth_v1',persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}};
 export const isSslLogin=value=>/^ssl-[a-f0-9]{16}$/.test(String(value||''));
 export function selectedLogin(value){
  const id=String(value||'');
