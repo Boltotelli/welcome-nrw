@@ -1,3 +1,4 @@
+import {createSslAccessAdmin} from "./ssl-access-admin.js?v=20261103-1";
 import {createAnnouncementEditor} from "./announcement.js?v=20261103-ssl-1";
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.58.0/+esm";
 import {createEventHub} from "./event-library.js?v=step6-iteratorfix-1";
@@ -340,6 +341,7 @@ function renderEvents(){
  const list=state.events.slice().sort((a,b)=>Date.parse(a.start_at)-Date.parse(b.start_at));
  $("eventList").innerHTML=list.length?list.map(x=>'<article class="list-card"><div><span class="eyebrow">'+esc(localTime(x.start_at))+' <span class="muted">· '+esc(new Date(x.start_at).toISOString().slice(11,16))+' UTC</span></span><h3>'+esc(txt(x.title))+'</h3><p>'+esc(txt(x.description)||x.requirements||"")+'</p></div><div class="card-actions">'+badge(x.status)+'<button data-edit="event" data-id="'+esc(x.id)+'" class="ghost" '+(!can("events")?"disabled":"")+'>'+esc(t("edit"))+'</button></div></article>').join(""):'<div class="card empty">'+esc(t("noEvents"))+'</div>';
 }
+const sslAccessAdmin=createSslAccessAdmin({root:$("sslAccessAdmin"),request,esc,flash,showCredentials});
 function renderSettings(){
  const config=state.alliance, form=$("settingsForm");
  for(const name of ["name","capacity","discord_invite_url"]){form.elements[name].value=config[name]??"";}
@@ -357,6 +359,7 @@ function renderSettings(){
      esc(state.staff.is_owner?(grants.filter(x=>x.enabled&&(x.is_admin||x.permissions?.[feature]===true)).length+" / "+grants.length):(can(feature)?"✓":"—"))+
      '</b></div>').join("")+'<p class="small-note">'+esc(t("individualRights"))+'</p>';
  $("staffControls").hidden=!state.staff.is_owner;
+ if(state.staff.is_owner)sslAccessAdmin.load();
  const members=(state.staffMembers||[]).filter(x=>x.email);
  const lookupName=email=>{
     const m=/^leader-([0-9]+)@accounts\.allianceos\.invalid$/i.exec(email||"");

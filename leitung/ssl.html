@@ -1,0 +1,7 @@
+<!doctype html>
+<html lang="de" data-theme="dark"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>NRW · SSL Gastansicht</title><link rel="stylesheet" href="./ssl-view.css?v=20261103-1"></head>
+<body><main><header><div><p class="eyebrow">NRW · SCHWERTLAND GIPFEL LIGA</p><h1>Gemeinsam in SSL.</h1><p>Gastansicht · nur lesen</p></div><button id="logout" hidden>Abmelden</button></header>
+<p id="status" role="status" aria-live="polite"></p>
+<section id="login" class="panel"><h2>SSL-Gastzugang</h2><p>Die Zugangsdaten erhältst du von der NRW-Leitung.</p><form id="loginForm"><label>Benutzername<input name="username" autocomplete="username" required maxlength="40" autocapitalize="none" spellcheck="false"></label><label>Passwort<input name="password" type="password" autocomplete="current-password" required></label><button>Anmelden</button></form><a href="./">Zur Leitungsanmeldung</a></section>
+<section id="view" hidden><div class="toolbar"><label>Planungsdatum<select id="date"></select></label><label>Legion<select id="legion"><option value="1">Legion 1</option><option value="2">Legion 2</option><option value="0">Reserve</option></select></label><button id="refresh">Aktualisieren</button></div><p id="summary"></p><div id="plan"></div></section>
+</main><script type="module" src="./ssl-view.js?v=20261103-1"></script></body></html>

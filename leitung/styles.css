@@ -724,3 +724,5 @@
 .ssl-guest-result>span{min-width:0;overflow-wrap:anywhere}.ssl-guest-result small{display:block;color:var(--muted,#adb6c6);margin-top:4px}
 .ssl-guest-result>div{display:flex;flex-wrap:wrap;gap:8px}.ssl-guest-results{max-height:400px;overflow:auto}
 @media(max-width:600px){.ssl-guest-result{align-items:stretch;flex-direction:column}.ssl-guest-result button{min-height:44px}}
+
+.ssl-access-list{display:grid;gap:12px;margin-top:24px}.ssl-access-row{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;padding:16px 0;border-top:1px solid var(--line,#46515b)}.ssl-access-row small{display:block;margin-top:6px;overflow-wrap:anywhere}.ssl-access-row>div{min-width:0}

@@ -14,7 +14,7 @@
 <title>AllianceOS · NRW Leitungszentrale</title>
 <meta name="description" content="Geschützte Leitungszentrale für Allianzverwaltung, Transfers, Laws und Events.">
 <link rel="icon" href="../assets/nrw-dashboard-icon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="./styles.css?v=20261103-ssl-1">
+<link rel="stylesheet" href="./styles.css?v=20261103-access-1">
 <!-- Shared leadership design on the approved Pages and production domains. -->
 <script>
   if (["boltotelli.github.io", "welcome-nrw.vercel.app"].includes(location.hostname)) {
@@ -278,7 +278,8 @@
                   <p id="staffFormInfo" class="small-note" role="status"></p>
                 </form>
 <details class="ux-disclosure ux-staff-overview"><summary data-ux-label="accountsOverview">Leitungskonten im Überblick</summary><div id="staffList" class="staff-list" aria-label="Leitungskonten"></div></details>
-                <details class="ops-audit"><summary data-i18n="accessAudit">Letzte Änderungen / Rechteprotokoll</summary><div id="accessAuditRows"></div></details>
+                <details class="ux-disclosure"><summary>SSL-Gastzugänge · nur lesen</summary><div class="ux-disclosure-body" id="sslAccessAdmin"></div></details>
+<details class="ops-audit"><summary data-i18n="accessAudit">Letzte Änderungen / Rechteprotokoll</summary><div id="accessAuditRows"></div></details>
               </div>
               <h3 data-i18n="pilotLabel">Pilotprojekt</h3><div class="status-line"><span data-i18n="pilotFree">NRW bleibt kostenlos und werbefrei.</span><strong>✓</strong></div></div><form class="card" id="settingsForm"><details class="ux-disclosure" id="allianceConfigDetails"><summary data-i18n="allianceConfig">Allianzkonfiguration</summary><div class="ux-disclosure-body">
               <label class="field"><span data-i18n="allianceName">Allianzname</span><input class="control" name="name" required maxlength="100"></label>
@@ -312,7 +313,7 @@
           <div class="lock-symbol">♜</div><span class="eyebrow">ALLIANCEOS · R4 / R5</span>
           <h1 data-i18n="loginTitle">Zugang zur Leitungszentrale</h1>
           <p data-i18n="loginText">Die Spielerlisten und internen Planungen sind geschützt. Melde dich mit einem bereits freigeschalteten Konto an.</p>
-          <form id="loginForm"><label class="field" id="leaderPickerField"><span data-i18n="chooseLeader">Spielernamen auswählen</span><select id="leaderSelect" class="control" required><option value="" data-i18n="loadingLeaders">R4/R5 werden geladen …</option></select></label>
+          <p><a href="./ssl.html">SSL-Gastzugang · nur lesen →</a></p><form id="loginForm"><label class="field" id="leaderPickerField"><span data-i18n="chooseLeader">Spielernamen auswählen</span><select id="leaderSelect" class="control" required><option value="" data-i18n="loadingLeaders">R4/R5 werden geladen …</option></select></label>
           <label class="field" id="legacyEmailField" hidden><span data-i18n="legacyEmail">Bestehender Admin-Zugang (E-Mail)</span><input type="email" id="email" class="control" autocomplete="username"></label>
           <label class="field"><span data-i18n="password">Passwort</span><input type="password" id="password" class="control" autocomplete="current-password" required></label>
           <button class="primary full" type="submit" data-i18n="login">Anmelden</button></form>
@@ -473,5 +474,5 @@
 <script src="../bear/combat.js?v=20261020-formation-shared"></script>
 <script src="../bear/own-baseline.js?v=20261020-formation-shared"></script>
 <script src="../bear/formation-core.js?v=20261020-formation-shared"></script>
-<script type="module" src="./app.js?v=20261103-ssl-1"></script>
+<script type="module" src="./app.js?v=20261103-access-1"></script>
 </body></html>

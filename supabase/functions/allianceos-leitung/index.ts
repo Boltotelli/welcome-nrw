@@ -1043,7 +1043,9 @@ async function saveBearPlanningSettings(req:Request,alliance:string,userId:strin
 }
 // FightClub Phase 4: isolated draft rosters. Historical Discord event cycles
 // and timestamps are read-only. Manual planning dates are NOT official dates.
+import {createSslAccess} from './ssl-access.ts';
 import {createSslGuests} from './fightclub-ssl.ts';
+const sslAccess=createSslAccess({db,auth,checked,HttpError,json,audit,temporaryPassword});
 const sslGuests=createSslGuests({db,checked,permission,HttpError,json,audit});
 // Protected FightClub battlefield objectives. Map links are private planning
 // records, never registered automatically in Kingshot or the Discord bot.
@@ -1795,6 +1797,7 @@ Deno.serve(async(req: Request)=>{
     if(req.method==="GET"&&["public-events","public-laws","public-guidance","public-schedule","public-config","public-announcement"].includes(u.searchParams.get("mode")||""))
       return await publicInfo(req,alliance,u.searchParams.get("mode")||"");
     if(req.method==="GET"&&u.searchParams.get("mode")==="public-leaders")return await publicLeaders(req,alliance);
+    if(req.method==="GET"&&u.searchParams.get("mode")==="ssl-view")return await sslAccess.read(req,alliance);
     const {userId,staff}=await staffFor(req,alliance);
     if(req.method==="GET"&&u.searchParams.get("mode")==="announcement")return await announcementData(req,alliance,staff);
     if(req.method==="GET"&&u.searchParams.get("mode")==="discord-bot")return await discordPlanner(req,alliance,staff,Number(u.searchParams.get("page")||0));
@@ -1804,6 +1807,7 @@ Deno.serve(async(req: Request)=>{
     if(body?.action!=="alliance_logo_upload"&&Number(req.headers.get("content-length")||"0")>200000)throw new HttpError("payload_too_large",413);
     if(body?.action==="alliance_logo_upload"||body?.action==="alliance_logo_remove")return await updateAllianceLogo(req,alliance,userId,staff,body);
     if(body?.action==="announcement")return await saveAnnouncement(req,alliance,userId,staff,body);
+    if(["ssl_viewers_list","ssl_viewer_create","ssl_viewer_toggle","ssl_viewer_reset"].includes(body?.action))return await sslAccess.manage(req,alliance,userId,staff,body);
     if(body?.action==="staff")return await saveStaff(req,alliance,userId,staff,body);
     if(body?.action==="event_loan_data")return await eventLoanData(req,alliance,staff);
     if(body?.action==="event_loan_save")return await eventLoanSave(req,alliance,userId,staff,body);
