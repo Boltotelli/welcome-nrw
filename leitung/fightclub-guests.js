@@ -1,0 +1,30 @@
+import {SSL_EVENT} from './fightclub-events.js?v=20261103-ssl-1';
+export function createFightclubGuests({getContext,getLanguage,request,esc,onUpdated,flash,canMutate}){
+ let query='',results=[],status='',busy=false,generation=0;
+ const labels={de:['SSL-Gastspieler · Königreich 1044','Name oder Spieler-ID','Suchen','ID abrufen','Zum SSL-Roster hinzufügen','Aktualisieren','Aus Gastliste entfernen','Namenssuche im vorhandenen 1044-Datenbestand. Nicht gefunden? Spieler-ID eingeben und gezielt abrufen.','Nur das SSL-Roster wird ergänzt; Heimatallianz und Zugangsrechte bleiben erhalten. Die Ingame-Anmeldung erfolgt separat.','Noch keine Treffer.','Gastspieler hinzugefügt.','Nur Spieler aus Königreich 1044 sind möglich.','Abfrage fehlgeschlagen. Bitte erneut versuchen.','Keine Berechtigung.','Erst Änderungen in der Spielerliste speichern oder verwerfen.','Dieser Spieler gehört bereits zum NRW-Roster.','Aus der Gastliste entfernt. Vorhandene Terminzuordnungen bleiben erhalten.'],en:['SSL guests · Kingdom 1044','Name or player ID','Search','Look up ID','Add to SSL roster','Refresh','Remove from guest list','Name search uses existing 1044 profiles. Not found? Enter a player ID and look it up.','Only the SSL roster changes; home alliance and access permissions stay unchanged. In-game registration is separate.','No results yet.','Guest added.','Only players from Kingdom 1044 are supported.','Lookup failed. Please try again.','Permission denied.','Save or discard pending roster changes first.','This player is already in the NRW roster.','Removed from guest list. Existing dated assignments are retained.']};
+ const t=i=>(labels[getLanguage()]||labels.en)[i],guests=()=>getContext().state?.guests||[];
+ function render(){if(getContext().eventType!==SSL_EVENT)return '';
+  const ids=new Set(guests().filter(g=>g.active).map(g=>String(g.game_id))),disabled=busy||!canMutate();
+  const card=(p,member=false)=>'<div class="ssl-guest-result"><span><strong>'+esc(p.name||p.game_id)+'</strong><small>'+esc(p.game_id)+' · K'+esc(p.kingdom_id||1044)+' · '+esc(p.home_alliance||'—')+(p.mystic_trial!=null?' · Mystic Trial '+esc(p.mystic_trial):'')+'</small></span><div><button type="button" class="ghost" data-ssl-add="'+esc(p.game_id)+'" '+(disabled?'disabled':'')+'>'+esc(member?t(5):t(4))+'</button>'+(member?'<button type="button" class="ghost" data-ssl-remove="'+esc(p.game_id)+'" '+(disabled?'disabled':'')+'>'+esc(t(6))+'</button>':'')+'</div></div>';
+  return '<section class="card ssl-guests" aria-busy="'+busy+'"><h3>'+esc(t(0))+'</h3><p class="small-note">'+esc(t(8))+'</p><label>'+esc(t(1))+'<input class="control" type="search" maxlength="80" data-ssl-query value="'+esc(query)+'" '+(busy?'disabled':'')+'></label><div class="ssl-guest-actions"><button type="button" class="ghost" data-ssl-search '+(busy?'disabled':'')+'>'+esc(t(2))+'</button><button type="button" class="ghost" data-ssl-lookup '+(busy||!/^\d{1,20}$/.test(query)?'disabled':'')+'>'+esc(t(3))+'</button></div><p class="small-note">'+esc(t(7))+'</p><p role="status" data-ssl-status>'+esc(status)+'</p><div class="ssl-guest-results">'+results.map(p=>card(p,ids.has(String(p.game_id)))).join('')+'</div><details><summary>'+esc(t(0))+' · '+ids.size+'</summary>'+guests().filter(g=>g.active).map(p=>card(p,true)).join('')+'</details></section>';
+ }
+ function input(e){if(!e.target.matches('[data-ssl-query]'))return false;query=e.target.value;const button=e.target.closest('.ssl-guests').querySelector('[data-ssl-lookup]');button.disabled=busy||!/^\d{1,20}$/.test(query);return true;}
+ async function click(e){
+  const button=e.target.closest('[data-ssl-search],[data-ssl-lookup],[data-ssl-add],[data-ssl-remove]');if(!button)return false;
+  if(busy||getContext().eventType!==SSL_EVENT)return true;
+  const write=button.matches('[data-ssl-add],[data-ssl-remove]');if(write&&!canMutate()){flash(t(14),true);return true;}
+  const action=button.matches('[data-ssl-search]')?'ssl_guest_search':button.matches('[data-ssl-lookup]')?'ssl_guest_lookup':button.matches('[data-ssl-add]')?'ssl_guest_add':'ssl_guest_remove';
+  const id=button.dataset.sslAdd||button.dataset.sslRemove||query.trim(),ticket=generation;
+  busy=true;status='…';onUpdated();
+  try{const value=await request('bootstrap',{action,query:query.trim(),game_id:id});if(ticket!==generation)return true;if(!value?.ok)throw Error('lookup_failed');
+   if(action==='ssl_guest_search'){results=value.players||[];status=results.length?'':t(9);}
+   else if(action==='ssl_guest_lookup'){results=[value.player];status='';}
+   else if(action==='ssl_guest_add'){
+    if(value.player){const state=getContext().state;state.guests=[...(state.guests||[]).filter(g=>String(g.game_id)!==id),value.player];}status=value.already_member?t(15):t(10);flash(status);
+   }else{const state=getContext().state;state.guests=(state.guests||[]).map(g=>String(g.game_id)===id?{...g,active:false}:g);status=t(16);flash(status);}
+  }catch(err){if(ticket===generation){status=String(err?.message||'').includes('requires_kingdom_1044')?t(11):String(err?.message||'').includes('permission_denied')?t(13):t(12);flash(status,true);}}
+  finally{if(ticket===generation){busy=false;onUpdated();}}
+  return true;
+ }
+ return {render,input,click,reset(){generation++;query='';results=[];status='';busy=false;}};
+}

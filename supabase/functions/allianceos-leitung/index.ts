@@ -1043,10 +1043,12 @@ async function saveBearPlanningSettings(req:Request,alliance:string,userId:strin
 }
 // FightClub Phase 4: isolated draft rosters. Historical Discord event cycles
 // and timestamps are read-only. Manual planning dates are NOT official dates.
+import {createSslGuests} from './fightclub-ssl.ts';
+const sslGuests=createSslGuests({db,checked,permission,HttpError,json,audit});
 // Protected FightClub battlefield objectives. Map links are private planning
 // records, never registered automatically in Kingshot or the Discord bot.
 function fightMapLocationValid(eventType:string,key:string){
- if(!["swordland","triforce"].includes(eventType))return false;
+ if(!["swordland","triforce","swordland_summit"].includes(eventType))return false;
  if(["safe-zone","guerrilla"].includes(key))return true;
  const qualified=/^(north|south):([^:]+)$/.exec(key);
  if(qualified){
@@ -1054,7 +1056,7 @@ function fightMapLocationValid(eventType:string,key:string){
    key=qualified[2];
  }
  if(eventType==="triforce")return key==="temple"||/^[ABC](?:[1-9]|[12][0-9]|3[01])$/.test(key);
- return eventType==="swordland"&&[
+ return ["swordland","swordland_summit"].includes(eventType)&&[
   "shrine","bell","mercenary","reformation","stables","safe-zone",
   "sanctum-west","sanctum-east",
   "abbey-north","abbey-east","abbey-west","abbey-south",
@@ -1065,7 +1067,7 @@ async function fightClubMapSave(req:Request,alliance:string,userId:string,staff:
  if(!permission(staff,"fightclub"))throw new HttpError("permission_denied",403);
  const eventType=str(body?.event_type,30),battleDate=str(body?.battle_date,10),
    gameId=str(body?.game_id,20),locationKey=str(body?.location_key,32);
- if(!["swordland","triforce"].includes(eventType)||!isId(gameId))
+ if(!["swordland","triforce","swordland_summit"].includes(eventType)||!isId(gameId))
    throw new HttpError("invalid_map_assignment",400);
  const parsed=Date.parse(battleDate+"T00:00:00Z");
  if(!/^\d{4}-\d{2}-\d{2}$/.test(battleDate)||!Number.isFinite(parsed)||
@@ -1087,9 +1089,7 @@ async function fightClubMapSave(req:Request,alliance:string,userId:string,staff:
    .eq("game_id",gameId).maybeSingle());
  if(!record||![1,2].includes(record.legion)||record.availability==="unavailable")
    throw new HttpError("player_must_be_assigned_to_available_legion",409);
- const account=await checked<any>(db.from("players").select("id")
-   .eq("game_id",gameId).eq("alliance_code",alliance).eq("active",true).maybeSingle());
- if(!account)throw new HttpError("player_not_active_in_alliance",403);
+ if(!await sslGuests.eligible(alliance,eventType,gameId,battleDate))throw new HttpError("player_not_active_in_alliance",403);
  const assignment=await checked<any>(db.from("aos_fightclub_map_assignments").upsert({
    alliance_code:alliance,event_type:eventType,battle_date:battleDate,game_id:gameId,
    location_key:locationKey,updated_at:new Date().toISOString(),updated_by:userId
@@ -1105,7 +1105,7 @@ async function fightClubData(req:Request,alliance:string,staff:any){
  const [cycles,assignments,powers,mapAssignments,leaders]=await Promise.all([
   checked<any[]>(db.from("discord_special_event_cycles")
    .select("id,event_type,battle_date,source_begin_at,source_end_at")
-   .in("event_type",["swordland","triforce"]).order("battle_date",{ascending:false}).limit(60)),
+   .in("event_type",["swordland","triforce","swordland_summit"]).order("battle_date",{ascending:false}).limit(60)),
   checked<any[]>(db.from("aos_fightclub_assignments")
    .select("event_type,battle_date,game_id,legion,availability,combat_role,notes,updated_at")
    .eq("alliance_code",alliance).gte("battle_date",since)
@@ -1134,12 +1134,12 @@ async function fightClubData(req:Request,alliance:string,staff:any){
  return json(req,{ok:true,cycles:cycles.map(c=>({
   event_type:c.event_type,battle_date:c.battle_date,
   times:legionTimes.filter(l=>l.cycle_id===c.id).map(l=>({legion:l.legion,starts_at:l.starts_at}))
- })),assignments,powers:[...verified.values()],map_assignments:mapAssignments,leaders,since});
+ })),assignments,powers:[...verified.values()],map_assignments:mapAssignments,leaders,guests:await sslGuests.list(alliance),since});
 }
 async function saveFightClub(req:Request,alliance:string,userId:string,staff:any,body:any){
  if(!permission(staff,"fightclub"))throw new HttpError("permission_denied",403);
  const eventType=str(body?.event_type,30),battleDate=str(body?.battle_date,10),gameId=str(body?.game_id,20);
- if(!["swordland","triforce"].includes(eventType))throw new HttpError("invalid_fight_event",400);
+ if(!["swordland","triforce","swordland_summit"].includes(eventType))throw new HttpError("invalid_fight_event",400);
  // Calendar date only. Do not invent an event or trust client timestamps.
  const parsed=Date.parse(battleDate+"T00:00:00Z");
  if(!/^\d{4}-\d{2}-\d{2}$/.test(battleDate)||
@@ -1149,9 +1149,7 @@ async function saveFightClub(req:Request,alliance:string,userId:string,staff:any
  if(!Number.isFinite(delta)||delta < -120*86400000||delta>540*86400000)
    throw new HttpError("battle_date_out_of_range",400);
  if(!isId(gameId))throw new HttpError("invalid_player_id",400);
- const p=await checked<any>(db.from("players").select("id").eq("alliance_code",alliance)
-   .eq("game_id",gameId).eq("active",true).maybeSingle());
- if(!p)throw new HttpError("player_not_active_in_alliance",403);
+ if(!await sslGuests.eligible(alliance,eventType,gameId,battleDate))throw new HttpError("player_not_active_in_alliance",403);
  if(body?.remove===true){
   await checked<any>(db.from("aos_fightclub_assignments").delete()
    .eq("alliance_code",alliance).eq("event_type",eventType)
@@ -1193,7 +1191,7 @@ async function saveFightClubLeader(req:Request,alliance:string,userId:string,sta
  const eventType=str(body?.event_type,30),battleDate=str(body?.battle_date,10),
        legion=Number(body?.legion),gameId=str(body?.game_id||"",20);
  const parsed=Date.parse(battleDate+"T00:00:00Z");
- if(!["swordland","triforce"].includes(eventType)||![1,2].includes(legion)||
+ if(!["swordland","triforce","swordland_summit"].includes(eventType)||![1,2].includes(legion)||
     !/^\d{4}-\d{2}-\d{2}$/.test(battleDate)||!Number.isFinite(parsed)||
     new Date(parsed).toISOString().slice(0,10)!==battleDate||
     parsed-Date.now() < -120*86400000||parsed-Date.now() > 540*86400000)
@@ -1820,6 +1818,7 @@ Deno.serve(async(req: Request)=>{
     if(body?.action==="bear_assignment")return await saveBearAssignment(req,alliance,userId,staff,body);
     if(body?.action==="bear_settings_save")return await saveBearPlanningSettings(req,alliance,userId,staff,body);
     if(body?.action==="fightclub_data")return await fightClubData(req,alliance,staff);
+    if(["ssl_guest_search","ssl_guest_lookup","ssl_guest_add","ssl_guest_remove"].includes(body?.action))return await sslGuests.handle(req,alliance,userId,staff,body);
     if(body?.action==="fightclub_save")return await saveFightClub(req,alliance,userId,staff,body);
     if(body?.action==="fightclub_map_save")return await fightClubMapSave(req,alliance,userId,staff,body);
     if(body?.action==="fightclub_leader_save")return await saveFightClubLeader(req,alliance,userId,staff,body);

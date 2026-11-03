@@ -719,3 +719,8 @@
 .assignment-table .fight-no-show-control{display:flex;align-items:center;gap:8px;min-height:44px;max-width:250px;cursor:pointer;font-size:.82rem}
 .fight-no-show-control input{width:20px;height:20px;flex-shrink:0;accent-color:#d8b66c}
 .fight-no-show-badge{font-size:.75rem;border:1px solid #d8b66c80;color:var(--text,#fff);padding:3px 7px;border-radius:6px}
+.ssl-guest-actions{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.ssl-guest-result{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border,#ffffff20)}
+.ssl-guest-result>span{min-width:0;overflow-wrap:anywhere}.ssl-guest-result small{display:block;color:var(--muted,#adb6c6);margin-top:4px}
+.ssl-guest-result>div{display:flex;flex-wrap:wrap;gap:8px}.ssl-guest-results{max-height:400px;overflow:auto}
+@media(max-width:600px){.ssl-guest-result{align-items:stretch;flex-direction:column}.ssl-guest-result button{min-height:44px}}

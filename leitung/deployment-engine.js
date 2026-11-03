@@ -5,7 +5,7 @@ export function decodeDeployment(key,sites=[]){
  const legacyGroup=/^[ABC]\d+$/.test(location)?(deploymentTargets('triforce',sites,location[0]).north.some(s=>s.key===location)?'north':'south'):(site&&site.y<50?'north':'south');
  return {location,group:location==='guerrilla'?'guerrilla':location==='safe-zone'?'secure':match?.[1]||legacyGroup};
 }
-export const isClosedStartingObjective=(eventType,key)=>eventType==='swordland'&&(['mercenary','shrine','reformation'].includes(key)||String(key).startsWith('under-'));
+export const isClosedStartingObjective=(eventType,key)=>['swordland','swordland_summit'].includes(eventType)&&(['mercenary','shrine','reformation'].includes(key)||String(key).startsWith('under-'));
 export function deploymentTargets(eventType,sites,side=''){
  let list=sites.filter(s=>!s.virtual&&!['safe-zone','guerrilla'].includes(s.key));
  list=list.filter(s=>!isClosedStartingObjective(eventType,s.key));

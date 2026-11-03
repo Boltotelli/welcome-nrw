@@ -1,16 +1,18 @@
 /* AllianceOS Phase 4 – GitHub Pages only: FightClub draft rosters.
  * Distinguishes confirmed source schedules from a manually chosen planning date.
  * No Discord role/slot/bot changes, no automatic player assignments. */
-import {createFightClubMap} from "./fightclub-map.js?v=20261030-map-2";
-import {createRosterDrafts} from "./roster-drafts.js?v=20261030-map-2";
-import {readAttendanceNote,writeAttendanceNote,attendanceNoteLimit} from "./fightclub-attendance.js?v=20261031-attendance-1";
+import {createFightClubMap} from "./fightclub-map.js?v=20261103-ssl-1";
+import {createRosterDrafts} from "./roster-drafts.js?v=20261103-ssl-1";
+import {readAttendanceNote,writeAttendanceNote,attendanceNoteLimit} from "./fightclub-attendance.js?v=20261103-ssl-1";
+import {SSL_EVENT,fightEventName,mergeFightPlayers} from "./fightclub-events.js?v=20261103-ssl-1";
+import {createFightclubGuests} from "./fightclub-guests.js?v=20261103-ssl-1";
 export function createFightClub({getState,getLanguage,request,flash,esc,openPlayer}){
  const canDossier=()=>getState()?.staff?.is_owner===true||getState()?.staff?.permissions?.members===true;
  const root=document.getElementById("fightclubRoot");
  const enabled=true; // Released for both GitHub Pages and Vercel; access is enforced by server-side module permissions.
  const copy={
  de:{intro:"Swordland und TriAlliance: Legionen planen, Verfügbarkeit berücksichtigen und Spieler nach ihrem Mystic-Trial-Score vergleichen.",
-   swordland:"Swordland",triforce:"TriAlliance",type:"Event",date:"Planungsdatum",dateMissing:"Wähle ein Planungsdatum oder einen vorhandenen bestätigten Termin.",
+   swordland:"Swordland",triforce:"TriAlliance",swordland_summit:"SSL · Schwertland Gipfel Liga",type:"Event",date:"Planungsdatum",dateMissing:"Wähle ein Planungsdatum oder einen vorhandenen bestätigten Termin.",
    knownDates:"Vorhandene Event-Termine",manual:"Manuell geplantes Datum – nicht automatisch als Event bestätigt",
    verified:"Im Discord-Kalender erfasster Termin",source:"Datenquelle: bestehender Discord-Eventkalender (nur lesend)",
    noTime:"Legion-Zeit nicht bestätigt",utc:"UTC",head:"Legionenübersicht",l1:"Legion 1",l2:"Legion 2",reserve:"Reserve",
@@ -34,7 +36,7 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
    assignmentNone:"Nicht zugeordnet",manualDate:"Planungsdatum auswählen",noAutomatic:"Es erfolgt keine automatische Anmeldung bei Swordland oder TriAlliance."
  },
  en:{intro:"Plan Swordland and TriAlliance legions using availability and recorded Mystic Trial.",
-   swordland:"Swordland",triforce:"TriAlliance",type:"Event",date:"Planning date",dateMissing:"Choose a planning date or an existing confirmed event date.",
+   swordland:"Swordland",triforce:"TriAlliance",swordland_summit:"SSL · Schwertland Gipfel Liga",type:"Event",date:"Planning date",dateMissing:"Choose a planning date or an existing confirmed event date.",
    knownDates:"Existing event dates",manual:"Manually chosen planning date – not a confirmed event",
    verified:"Event date recorded in the Discord calendar",source:"Source: existing Discord event calendar (read-only)",
    noTime:"Legion time unconfirmed",utc:"UTC",head:"Legion overview",l1:"Legion 1",l2:"Legion 2",reserve:"Reserve",
@@ -58,7 +60,7 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
    assignmentNone:"Unassigned",manualDate:"Choose planning date",noAutomatic:"No automatic Swordland or TriAlliance registration."
  },
  fr:{intro:"Planifier les légions Swordland et TriAlliance selon la disponibilité et la Mystic Trial mesurée.",
-   swordland:"Swordland",triforce:"TriAlliance",type:"Événement",date:"Date de planification",dateMissing:"Choisir une date de planification ou une date confirmée.",
+   swordland:"Swordland",triforce:"TriAlliance",swordland_summit:"SSL · Schwertland Gipfel Liga",type:"Événement",date:"Date de planification",dateMissing:"Choisir une date de planification ou une date confirmée.",
    knownDates:"Dates d'événements existantes",manual:"Date manuelle – événement non confirmé",
    verified:"Date enregistrée dans le calendrier Discord",source:"Source : calendrier Discord existant (lecture seule)",
    noTime:"Heure de légion non confirmée",utc:"UTC",head:"Vue des légions",l1:"Légion 1",l2:"Légion 2",reserve:"Réserve",
@@ -82,7 +84,7 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
    assignmentNone:"Non attribué",manualDate:"Choisir une date",noAutomatic:"Aucune inscription automatique aux événements."
  },
  es:{intro:"Planifica las legiones de Swordland y TriAlliance según disponibilidad y Mystic Trial registrado.",
-   swordland:"Swordland",triforce:"TriAlliance",type:"Evento",date:"Fecha de planificación",dateMissing:"Elige una fecha o un evento confirmado.",
+   swordland:"Swordland",triforce:"TriAlliance",swordland_summit:"SSL · Schwertland Gipfel Liga",type:"Evento",date:"Fecha de planificación",dateMissing:"Elige una fecha o un evento confirmado.",
    knownDates:"Fechas de eventos existentes",manual:"Fecha elegida manualmente – evento no confirmado",
    verified:"Fecha registrada en el calendario de Discord",source:"Fuente: calendario de Discord existente (solo lectura)",
    noTime:"Hora de legión sin confirmar",utc:"UTC",head:"Resumen de legiones",l1:"Legión 1",l2:"Legión 2",reserve:"Reserva",
@@ -118,9 +120,12 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
    return diff>=-120*86400000 && diff<=540*86400000;
  };
  let state=null,loading=null,generation=0,eventType="swordland",date="",search="",filter="all",pending=new Set(),warning="",fastLegion=1,fastAvailability="full",rosterExpanded=true;
- function players(){return (getState()?.players||[]).filter(p=>p.active&&p.member_status!=="left"&&/^[0-9]{1,20}$/.test(String(p.game_id||""))).slice().sort((a,b)=>String(a.name||"").localeCompare(String(b.name||""),locale()));}
+ function players(){return mergeFightPlayers(getState()?.players||[],state?.guests||[],state?.assignments||[],eventType,date).filter(p=>p.active&&p.member_status!=="left"&&/^[0-9]{1,20}$/.test(String(p.game_id||""))).slice().sort((a,b)=>String(a.name||"").localeCompare(String(b.name||""),locale()));}
  const playerMap=()=>new Map(players().map(p=>[String(p.game_id),p]));
- const scorePowers=()=>(state?.powers||[]).map(p=>({...p,power:p.mystic_trial??null}));
+ const scorePowers=()=>{
+  const ids=new Set((getState()?.players||[]).filter(p=>p.active&&p.member_status!=='left').map(p=>String(p.game_id))),guestPowers=eventType===SSL_EVENT?(state?.guests||[]).filter(p=>!ids.has(String(p.game_id))):[];
+  return [...(state?.powers||[]),...guestPowers].map(p=>({...p,power:p.mystic_trial??null}));
+ };
  const powers=()=>new Map(scorePowers().map(p=>[String(p.game_id),p]));
  const assignments=()=>state?.assignments?.filter(a=>a.event_type===eventType&&a.battle_date===date)||[];
  const mapUI=createFightClubMap({
@@ -195,14 +200,15 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
  }
  const attendanceWords={de:{label:'Angemeldet, nicht erschienen',badge:'Nicht erschienen',filter:'Nicht erschienen',note:'Optional: Grund oder Rückmeldung',tooLong:'Bitte die Notiz auf höchstens 490 Zeichen kürzen, damit der Teilnahmevermerk mitgespeichert werden kann.'},en:{label:'Registered, did not attend',badge:'No-show',filter:'No-shows',note:'Optional: reason or response',tooLong:'Shorten the note to 490 characters so the attendance annotation fits.'},fr:{label:'Inscrit, absent',badge:'Absent',filter:'Inscrits absents',note:'Facultatif : motif ou retour',tooLong:'Réduisez la note à 490 caractères pour ajouter la mention.'},es:{label:'Inscrito, no asistió',badge:'No asistió',filter:'Inscritos ausentes',note:'Opcional: motivo o respuesta',tooLong:'Reduce la nota a 490 caracteres para añadir la anotación.'}};
  const at=k=>(attendanceWords[getLanguage()]||attendanceWords.en)[k];
+ const guestUI=createFightclubGuests({getContext:()=>({eventType,state}),getLanguage,request,esc,onUpdated:()=>draw(),flash,canMutate:()=>!drafts.count()&&!drafts.isBusy()});
  function row(p,conflicts){
   const a=assignment(p.game_id),val=a?.legion??-1,attendance=readAttendanceNote(a?.notes);
   const family=conflicts.get(String(p.game_id));
   const pw=powers().get(String(p.game_id));
   const main=p.main_game_id?playerMap().get(String(p.main_game_id))?.name||p.main_game_id:null;
   return '<tr data-fight-row="'+esc(p.game_id)+'" '+(drafts.has(p.game_id)?'data-roster-dirty':'')+'><td>'+
-   '<div class="fight-player-top"><button type="button" data-fight-profile="'+esc(p.game_id)+'" class="fight-player-name" '+(!canDossier()?'disabled':'')+'>'+esc(p.name)+'</button>'+
-    '<small>'+esc(p.game_id)+(main?' · '+esc(t("alts"))+' '+esc(main):'')+'</small><span class="fight-no-show-badge" data-fight-no-show-badge '+(attendance.noShow?'':'hidden')+'>'+esc(at('badge'))+'</span>'+
+   '<div class="fight-player-top"><button type="button" data-fight-profile="'+esc(p.game_id)+'" class="fight-player-name" '+(!canDossier()||p.is_ssl_guest?'disabled':'')+'>'+esc(p.name)+'</button>'+
+    '<small>'+esc(p.game_id)+(p.is_ssl_guest?' · SSL Gast · '+esc(p.home_alliance||'—'):'')+(main?' · '+esc(t("alts"))+' '+esc(main):'')+'</small><span class="fight-no-show-badge" data-fight-no-show-badge '+(attendance.noShow?'':'hidden')+'>'+esc(at('badge'))+'</span>'+
     '</div></td><td>'+esc(pw?.power==null?'—':powerFormat(pw.power))+'</td>'+
    [1,2].map(l=>'<td class="assignment-check-cell"><label class="assignment-check"><input type="checkbox" data-fight-check="'+l+'" aria-label="'+esc(p.name+' · L'+l)+'" '+(Number(val)===l?'checked ':'')+(pending.has(String(p.game_id))?'disabled':'')+'><span class="sr-only">L'+l+'</span></label></td>').join('')+'<td>'+
    '<div class="fight-player-fields">'+
@@ -281,7 +287,7 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
    return '<section class="card fight-dates"><div class="fight-heading"><h3>'+esc(t("date"))+'</h3>'+
      '<button class="ghost" type="button" data-fight-refresh>'+esc(t("refresh"))+' ↻</button></div>'+
      '<div class="fight-switches"><label><span>'+esc(t("type"))+'</span>'+
-     selectOptions([["swordland",t("swordland")],["triforce",t("triforce")]],eventType,'data-fight-type')+'</label>'+
+     selectOptions([["swordland",t("swordland")],["triforce",t("triforce")],[SSL_EVENT,fightEventName(SSL_EVENT,getLanguage())]],eventType,'data-fight-type')+'</label>'+
      '<label><span>'+esc(t("date"))+'</span><input class="control" type="date" data-fight-date value="'+esc(date)+'"></label></div>'+
      '<p class="small-note">'+esc(t("knownDates"))+'</p>'+
      '<div class="fight-past-dates">'+(options.length?options.map(d=>{
@@ -296,9 +302,10 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
  function draw(){
    if(!root||!enabled)return;
    const subtitle=document.getElementById("fightclubSubtitle");
-   if(subtitle)subtitle.textContent=t("intro");
+   if(subtitle)subtitle.textContent="Swordland · TriAlliance · SSL — "+t("intro");
    if(!state){root.textContent=loading?t("loading"):t("error");return;}
    let html=dateBar();
+   if(eventType===SSL_EVENT)html+='<p class="small-note">'+esc(getLanguage()==='de'?'SSL: Den tatsächlichen Spieltermin wählen. Spielzeiten und Anmeldung richten sich nach der Gipfel-Liga; SL-Termine werden nicht übernommen.':'SSL: Choose the actual match date. League registration and match times are separate from regular Swordland.')+'</p>';
    if(date&&!nextDateValid(date)){
      html+='<p class="fight-conflict">'+esc(t("selectDate"))+'</p>';
    }else if(date){
@@ -307,7 +314,7 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
        '<p>'+esc(t("snapshotHint"))+' '+esc(t("noAutomatic"))+'</p></div>'+
        '<section class="fight-overview"><h3>'+esc(t("head"))+'</h3><div class="fight-summary-grid">'+summary()+'</div></section>'+
        (conflicts.size?'<div class="fight-conflict">⚠ '+esc(t("familyHint"))+'</div>':'')+
-       list()+fastAssign()+candidateLists()+mapUI.render();
+       guestUI.render()+list()+fastAssign()+candidateLists()+mapUI.render();
    }
    root.innerHTML=html;
    if(drafts.isBusy())root.querySelectorAll('input,select,button').forEach(el=>{el.disabled=true;});
@@ -357,9 +364,10 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
          return String(p.name)+" | "+a.game_id+" | "+t(a.availability)+" | "+t(a.combat_role);
        }).join("\n"):"—");
    });
-   return t(eventType)+" · "+date+"\n"+groups.join("\n\n");
+   return fightEventName(eventType,getLanguage())+" · "+date+"\n"+groups.join("\n\n");
  }
  if(root){
+   root.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.matches('[data-ssl-query]')){e.preventDefault();e.target.closest('.ssl-guests').querySelector('[data-ssl-search]')?.click();}});
    root.addEventListener("change",e=>{
      if(mapUI.change(e))return;
      const el=e.target;
@@ -378,6 +386,7 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
      else if(el.matches("[data-fight-filter]")){filter=el.value;draw();}
    });
    root.addEventListener("input",e=>{
+     if(guestUI.input(e))return;
      if(e.target.matches('[data-fight-note]')){stage(e.target.closest('[data-fight-row]').dataset.fightRow);return;}
      if(!e.target.matches("[data-fight-search]"))return;
      search=e.target.value;const pos=e.target.selectionStart;draw();
@@ -386,6 +395,7 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
    });
    root.addEventListener("click",async e=>{
      if(drafts.click(e))return;
+     if(await guestUI.click(e))return;
      if(await mapUI.click(e))return;
      if(e.target.closest("[data-fight-fast-save]")){await fastSave();return;}
      const target=e.target;
@@ -404,6 +414,6 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
      }
    });
  }
- function reset(){drafts.reset();fastLegion=1;fastAvailability="full";rosterExpanded=true;mapUI.reset();generation++;state=null;loading=null;pending.clear();date="";search="";filter="all";eventType="swordland";if(root){root.innerHTML="";root.textContent="";}}
+ function reset(){guestUI.reset();drafts.reset();fastLegion=1;fastAvailability="full";rosterExpanded=true;mapUI.reset();generation++;state=null;loading=null;pending.clear();date="";search="";filter="all";eventType="swordland";if(root){root.innerHTML="";root.textContent="";}}
  return {enabled,open:load,render:draw,reset};
 }

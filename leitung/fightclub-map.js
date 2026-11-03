@@ -1,5 +1,6 @@
-import {decodeDeployment} from './deployment-engine.js?v=20261030-map-2';
-import {createDeploymentPlanner} from './deployment-planner.js?v=20261030-map-2';
+import {fightEventName} from './fightclub-events.js?v=20261103-ssl-1';
+import {decodeDeployment} from './deployment-engine.js?v=20261103-ssl-1';
+import {createDeploymentPlanner} from './deployment-planner.js?v=20261103-ssl-1';
 /* FightClub battlefield planning: private, date-scoped map objectives for both legions.
  * Maps are planning aids; no Kingshot orders, registration or Discord posts are sent.
  * TriAlliance map illustration credited to its author; pin geometry remains usable
@@ -218,7 +219,7 @@ export function createFightClubMap({getContext,getLanguage,request,flash,esc,onU
  }
  function exportText(){
   if(!ctx().date)return "";
-  const lines=[(ctx().eventType==="triforce"?"TriAlliance":"Swordland")+' · '+ctx().date];
+  const lines=[fightEventName(ctx().eventType,getLanguage())+' · '+ctx().date];
   for(const lg of [1,2]){
    lines.push("Legion "+lg);
    const all=roster().filter(a=>Number(a.legion)===lg);

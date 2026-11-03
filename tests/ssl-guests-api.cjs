@@ -1,0 +1,34 @@
+const fs=require('fs'),path=require('path'),vm=require('vm'),assert=require('assert'),{stripTypeScriptTypes}=require('node:module');
+const raw=fs.readFileSync(path.join(__dirname,'../supabase/functions/allianceos-leitung/fightclub-ssl.ts'),'utf8');
+const source=stripTypeScriptTypes(raw,{mode:'transform'}).replace('export function','function');
+const tables={players:[{id:'member',alliance_code:'NRW',game_id:'100001',active:true}],aos_fightclub_ssl_guests:[],aos_fightclub_assignments:[],kingshot_player_cache:[{kingdom_id:1044,player_id:'200001',name:'Guest Ally',alliance:'ABC',x:123,y:456},{kingdom_id:100,player_id:'300001',name:'Guest Away',alliance:'XYZ'}]},queries=[],writes=[],providerCalls=[];
+function from(table){let filters=[],payload,operation='read',one=false;const q={select(){return q},eq(k,v){filters.push(p=>p[k]===v);return q},ilike(k,v){queries.push({table,k,v});filters.push(p=>p[k].toLowerCase().includes(v.replaceAll('%','').replaceAll('\\','').toLowerCase()));return q},order(){return q},limit(){return q},maybeSingle(){one=true;return q},single(){one=true;return q},upsert(p){operation='upsert';payload=p;return q},update(p){operation='update';payload=p;return q},then(resolve,reject){return Promise.resolve().then(()=>{let list=tables[table];assert(list,table);if(operation==='upsert'){writes.push(table);let row=list.find(p=>p.alliance_code===payload.alliance_code&&p.game_id===payload.game_id);if(row)Object.assign(row,payload);else list.push({...payload});return {...payload};}const rows=list.filter(p=>filters.every(f=>f(p)));if(operation==='update'){writes.push(table);rows.forEach(p=>Object.assign(p,payload));}return one?(rows[0]||null):rows.map(p=>({...p}));}).then(resolve,reject)}};return q;}
+class HttpError extends Error{constructor(m,s){super(m);this.status=s;}}
+const ctx={Deno:{env:{get:()=> 'test-key'}},AbortSignal,fetch:async url=>{providerCalls.push(url);const id=/players\/(\d+)/.exec(url)[1];return {ok:true,json:async()=>({player:{governor_id:id==='999999'?'999998':id,nick_name:'Verified '+id,kid:id==='300001'?100:1044,power:123,alliance:{abbr:'ABC'}},ranks:{mystic_trial:987}})};}};
+vm.createContext(ctx);vm.runInContext(source+';this.make=createSslGuests;',ctx);const api=ctx.make({db:{from},checked:async q=>await q,permission:s=>s.permissions?.fightclub===true,HttpError,json:(_,x)=>x,audit:async()=>{}}),staff={permissions:{fightclub:true}};
+(async()=>{
+await assert.rejects(api.handle(null,'NRW','u',{permissions:{}},{action:'ssl_guest_search',query:'Guest'}),/permission_denied/);await assert.rejects(api.handle(null,'ABC','u',staff,{action:'ssl_guest_lookup',game_id:'200001'}),/permission_denied/);assert.equal(providerCalls.length,0);
+const search=await api.handle(null,'NRW','u',staff,{action:'ssl_guest_search',query:'Guest'});assert.equal(search.players.length,1);assert.equal(search.players[0].kingdom_id,1044);assert(!('x' in search.players[0]));
+await api.handle(null,'NRW','u',staff,{action:'ssl_guest_search',query:'A_%'});assert(queries.at(-1).v.includes('\\_')&&queries.at(-1).v.includes('\\%'),'SQL wildcard characters escaped');
+await assert.rejects(api.handle(null,'NRW','u',staff,{action:'ssl_guest_add',game_id:'300001',kingdom_id:1044}),/requires_kingdom_1044/);await assert.rejects(api.handle(null,'NRW','u',staff,{action:'ssl_guest_lookup',game_id:'999999'}),/invalid_provider_response/);
+const add=await api.handle(null,'NRW','u',staff,{action:'ssl_guest_add',game_id:'200001',name:'Forged',kingdom_id:100});assert.equal(add.player.name,'Verified 200001');assert.equal(add.player.mystic_trial,987);assert.equal(tables.players.length,1,'No membership row added');assert(writes.every(t=>t==='aos_fightclub_ssl_guests'));
+assert(await api.eligible('NRW','swordland_summit','200001','2026-11-03'));assert(!(await api.eligible('NRW','swordland','200001','2026-11-03')));assert(!(await api.eligible('ABC','swordland_summit','200001','2026-11-03')));
+const own=await api.handle(null,'NRW','u',staff,{action:'ssl_guest_add',game_id:'100001'});assert(own.already_member);assert.equal(tables.aos_fightclub_ssl_guests.length,1);
+await api.handle(null,'NRW','u',staff,{action:'ssl_guest_remove',game_id:'200001'});assert(!(await api.eligible('NRW','swordland_summit','200001','2026-11-04')));
+tables.aos_fightclub_assignments.push({alliance_code:'NRW',event_type:'swordland_summit',battle_date:'2026-11-03',game_id:'200001'});assert(await api.eligible('NRW','swordland_summit','200001','2026-11-03'),'Existing history can still be edited');
+assert(providerCalls.every(u=>u.includes('include=base,ranks')));console.log('PASS: FightClub permission and alliance scope; K1044 cache search; escaped names; provider ID/kingdom validation; untrusted profile ignored; no membership/auth writes; SSL-only eligibility; deactivation retains dated history');
+// Execute the actual entrypoint's save, map, and leader handlers with this helper.
+const main=stripTypeScriptTypes(fs.readFileSync(path.join(__dirname,'../supabase/functions/allianceos-leitung/index.ts'),'utf8'),{mode:'transform'});
+Object.assign(ctx,{db:{from},checked:async q=>await q,permission:s=>s.permissions?.fightclub===true,HttpError,json:(_,x)=>x,audit:async()=>{},str:(s,n)=>String(s??'').trim().slice(0,n),isId:s=>/^\d{1,20}$/.test(s),sslGuests:api});
+const cut=(a,b)=>main.slice(main.indexOf(a),main.indexOf(b,main.indexOf(a)));
+vm.runInContext(cut('function fightMapLocationValid(', 'async function fightClubData(')+cut('async function saveFightClub(', 'async function eventParticipationData('),ctx);
+tables.aos_fightclub_assignments=[];tables.aos_fightclub_map_assignments=[];tables.aos_fightclub_team_leaders=[];tables.aos_fightclub_ssl_guests[0].active=true;
+const date=new Date().toISOString().slice(0,10),body={event_type:'swordland_summit',battle_date:date,game_id:'200001',legion:1,availability:'full',combat_role:'flex',notes:'[NO-SHOW] SSL test'};
+const plan=await ctx.saveFightClub(null,'NRW','u',staff,body);assert.equal(plan.assignment.event_type,'swordland_summit');assert.equal(plan.assignment.notes,body.notes);
+const map=await ctx.fightClubMapSave(null,'NRW','u',staff,{...body,location_key:'north:bell'});assert.equal(map.assignment.location_key,'north:bell');
+const leader=await ctx.saveFightClubLeader(null,'NRW','u',staff,body);assert.equal(leader.leader.game_id,'200001');
+await assert.rejects(ctx.saveFightClub(null,'NRW','u',staff,{...body,event_type:'swordland'}),/player_not_active_in_alliance/);
+await assert.rejects(ctx.saveFightClub(null,'ABC','u',staff,body),/player_not_active_in_alliance/);
+assert(ctx.fightMapLocationValid('swordland_summit','north:bell'));assert(!ctx.fightMapLocationValid('swordland_summit','A24'));
+console.log('PASS: actual SSL assignment, map and leader handlers accept verified guest; SL and other alliance refuse guest; no permanent membership row created');
+})().catch(e=>{console.error(e);process.exitCode=1});
