@@ -1,8 +1,9 @@
+import {sslSessionOptions} from "./login-identities.js?v=20261103-1";
 import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.58.0/+esm';
 import {SSL_SITES} from './fightclub-map.js?v=20261103-access-1';
 import {decodeDeployment} from './deployment-engine.js?v=20261103-ssl-1';
 const BASE='https://bdzlgirowutasrsycjfj.supabase.co',KEY='sb_publishable_8i1ismeQtj9WM-xVN_Vm0w_Tj7AvVtL';
-const auth=createClient(BASE,KEY,{auth:{storageKey:'aos_ssl_readonly_auth_v1',persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
+const auth=createClient(BASE,KEY,sslSessionOptions);
 const $=id=>document.getElementById(id),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let data=null,generation=0;
 const status=(s,error=false)=>{$('status').textContent=s;$('status').classList.toggle('error',error);};

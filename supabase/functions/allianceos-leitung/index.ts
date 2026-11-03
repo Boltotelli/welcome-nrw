@@ -251,7 +251,8 @@ async function publicLeaders(req:Request,alliance:string){
  const leaders=await checked<any[]>(db.from("players")
    .select("game_id,name,alliance_rank").eq("alliance_code",alliance)
    .eq("active",true).in("alliance_rank",[4,5]).order("name",{ascending:true}).limit(50));
- return json(req,{leaders:leaders.filter(x=>/^[0-9]{5,20}$/.test(x.game_id||""))
+ const guests=await checked<any[]>(db.from('aos_ssl_viewers').select('name,login_name').eq('alliance_code',alliance).eq('enabled',true).order('name').limit(100));
+ return json(req,{guests,leaders:leaders.filter(x=>/^[0-9]{5,20}$/.test(x.game_id||""))
    .map(x=>({game_id:x.game_id,name:x.name,rank:"R"+x.alliance_rank}))});
 }
 async function provisionLeaders(req:Request,alliance:string,userId:string,staff:any){

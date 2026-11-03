@@ -1,3 +1,4 @@
+import {identityOptions,selectedLogin,sslSessionOptions} from "./login-identities.js?v=20261103-1";
 import {createSslAccessAdmin} from "./ssl-access-admin.js?v=20261103-1";
 import {createAnnouncementEditor} from "./announcement.js?v=20261103-ssl-1";
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.58.0/+esm";
@@ -754,17 +755,15 @@ $("removeAllianceLogo").addEventListener("click",async()=>{
  finally{button.disabled=!can("settings")||!state?.alliance?.logo_url;}
 });
 
-let legacyLogin=false;
+let legacyLogin=false,sslLoginClient=null;
 async function loadLeaderList(){
  const sel=$("leaderSelect");
  try{
   const r=await fetch(FUNCTION+"?alliance=NRW&mode=public-leaders",{cache:"no-store",headers:{Accept:"application/json"}});
   if(!r.ok)throw new Error("leader_lookup_failed");
   const data=await r.json();
-  const leaders=Array.isArray(data.leaders)?data.leaders:[];
   const previous=sel.value;
-  sel.innerHTML='<option value="">'+esc(t("chooseLeader"))+'</option>'+leaders.map(x=>
-    '<option value="'+esc(x.game_id)+'">'+esc(x.name)+'</option>').join("");
+  sel.innerHTML=identityOptions(data,esc,t("chooseLeader"));
   if([...sel.options].some(x=>x.value===previous))sel.value=previous;
   if(state&&can("transfers")){
    renderTransfers();
@@ -838,14 +837,16 @@ $("resetLeaderPassword").addEventListener("click",async()=>{
 $("loginForm").addEventListener("submit",async(e)=>{
  e.preventDefault();
  const button=e.currentTarget.querySelector("button");button.disabled=true;$("loginError").textContent="";
- const email=$("legacyEmailField").hidden?
-   ($("leaderSelect").value?"leader-"+$("leaderSelect").value+"@accounts.allianceos.invalid":""):
-   $("email").value.trim();
+ const identity=selectedLogin($("leaderSelect").value);
+ const guestLogin=$("legacyEmailField").hidden&&identity.guest;
+ const email=$("legacyEmailField").hidden?identity.email:$("email").value.trim();
  const password=$("password").value;
  if(!email){$("loginError").textContent=t("noLeaderSelected");button.disabled=false;return;}
  try{
-   const {error}=await supabase.auth.signInWithPassword({email,password});
+   const client=guestLogin?(sslLoginClient??=createClient(BASE,"sb_publishable_8i1ismeQtj9WM-xVN_Vm0w_Tj7AvVtL",sslSessionOptions)):supabase;
+   const {error}=await client.auth.signInWithPassword({email,password});
    if(error)throw error;
+   if(guestLogin){$("password").value="";location.assign(new URL("./ssl.html",import.meta.url).href);return;}
    await refresh();setTab(new URLSearchParams(location.search).get("tab")||"overview");
    $("password").value="";
  }catch(error){

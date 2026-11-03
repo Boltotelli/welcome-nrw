@@ -16,3 +16,5 @@ Verification:
 - Existing SSL guest API and Playwright suites pass.
 
 API source documentation: https://supabase.com/docs/reference/javascript/auth-admin-createuser
+
+The main leadership name dropdown also lists enabled SSL viewers in a separate SSL group. Selecting one signs in using the dedicated SSL session key and redirects directly to `ssl.html`; no leadership bootstrap is requested. The existing public login directory exposes only display name and generated login identifier for these enabled entries, never Auth UUIDs, passwords or permissions. Disabled viewers are omitted. `tests/ssl-login.cjs` tests the actual main login form, incorrect passwords, session handoff and redirect.
