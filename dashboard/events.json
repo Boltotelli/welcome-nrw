@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "kingdom": 1044,
   "timezone": "UTC",
-  "updatedAt": "2026-11-02T00:18:10Z",
+  "updatedAt": "2026-11-03T00:15:07Z",
   "events": [
     {
       "id": "golden-glaives-prep-2026-09-20",
@@ -900,92 +900,6 @@
         ]
       },
       "sourceUrl": "https://kingshotwiki.com/sneak-peek/102566583en/"
-    },
-    {
-      "id": "officer-project-charm-designs-2026-11-01",
-      "start": "2026-11-01",
-      "end": "2026-11-02",
-      "icon": "🎖️",
-      "iconUrl": "https://kingshotdata.com/uploads/2025/03/power-up-event-icon.webp",
-      "confidence": "public-timeline",
-      "name": {
-        "de": "Offiziersprojekt · Amulettdesigns",
-        "en": "Officer Project · Charm Designs",
-        "fr": "Projet d’officier · Plans d’amulette"
-      },
-      "dailyPlans": {
-        "2026-11-01": {
-          "points": {
-            "de": "Ausrüstungswert +1: 70 · Heldensplitter selten/episch/mythisch: 350/1.220/3.040 · Schmiedehammer: 6.000 · Widget: 12.000",
-            "en": "Gear score +1: 70 · rare/epic/mythic Hero Shard: 350/1,220/3,040 · Forgehammer: 6,000 · Widget: 12,000",
-            "fr": "score d’Équipement +1 : 70 · fragment de héros rare/épique/mythique : 350/1 220/3 040 · Marteau : 6 000 · Widget : 12 000"
-          },
-          "steps": {
-            "de": [
-              "Vor dem Reset Ausrüstungsverbesserungen, Heldensplitter, Schmiedehämmer und Widgets zurückhalten.",
-              "Nach dem Reset nur ohnehin geplante Upgrades oder einen lohnenden persönlichen Meilenstein abschließen.",
-              "Splitter, Schmiedehämmer und Widgets möglichst für die nächste KvK-Vorbereitung sparen; keine Ranglistenjagd ohne NRW-Abstimmung.",
-              "Spätestens bei insgesamt 1.359.000 Punkten stoppen. Das ist die strikte 3×-Gesamtgrenze und ausdrücklich kein Ziel."
-            ],
-            "en": [
-              "Before reset, hold Gear upgrades, Hero Shards, Forgehammers and Widgets.",
-              "After reset, complete only upgrades already planned or a worthwhile personal milestone.",
-              "Save Shards, Forgehammers and Widgets for the next KvK preparation whenever possible; do not chase rankings without NRW coordination.",
-              "Stop at 1,359,000 total points at the latest. This is the strict 3× total limit and explicitly not a target."
-            ],
-            "fr": [
-              "Avant le reset, conserve les améliorations d’Équipement, fragments de héros, Marteaux et Widgets.",
-              "Après le reset, effectue uniquement les améliorations déjà prévues ou un palier personnel rentable.",
-              "Conserve autant que possible les fragments, Marteaux et Widgets pour la prochaine préparation KvK ; ne vise pas le classement sans coordination NRW.",
-              "Arrête-toi au plus tard à 1 359 000 points au total. C’est la limite stricte de 3× et non un objectif."
-            ]
-          },
-          "limits": {
-            "hardCap": 1359000,
-            "note": {
-              "de": "1.359.000 Punkte sind die strikte 3×-Gesamtgrenze – keine Empfehlung.",
-              "en": "1,359,000 points is the strict 3× total limit, not a recommendation.",
-              "fr": "1 359 000 points constituent la limite totale stricte de 3×, pas une recommandation."
-            }
-          }
-        },
-        "2026-11-02": {
-          "points": {
-            "de": "Ausrüstungswert +1: 70 · Heldensplitter selten/episch/mythisch: 350/1.220/3.040 · Schmiedehammer: 6.000 · Widget: 12.000",
-            "en": "Gear score +1: 70 · rare/epic/mythic Hero Shard: 350/1,220/3,040 · Forgehammer: 6,000 · Widget: 12,000",
-            "fr": "score d’Équipement +1 : 70 · fragment de héros rare/épique/mythique : 350/1 220/3 040 · Marteau : 6 000 · Widget : 12 000"
-          },
-          "steps": {
-            "de": [
-              "Vor dem Reset Ausrüstungsverbesserungen, Heldensplitter, Schmiedehämmer und Widgets zurückhalten.",
-              "Nach dem Reset nur ohnehin geplante Upgrades oder einen lohnenden persönlichen Meilenstein abschließen.",
-              "Splitter, Schmiedehämmer und Widgets möglichst für die nächste KvK-Vorbereitung sparen; keine Ranglistenjagd ohne NRW-Abstimmung.",
-              "Spätestens bei insgesamt 1.359.000 Punkten stoppen. Das ist die strikte 3×-Gesamtgrenze und ausdrücklich kein Ziel."
-            ],
-            "en": [
-              "Before reset, hold Gear upgrades, Hero Shards, Forgehammers and Widgets.",
-              "After reset, complete only upgrades already planned or a worthwhile personal milestone.",
-              "Save Shards, Forgehammers and Widgets for the next KvK preparation whenever possible; do not chase rankings without NRW coordination.",
-              "Stop at 1,359,000 total points at the latest. This is the strict 3× total limit and explicitly not a target."
-            ],
-            "fr": [
-              "Avant le reset, conserve les améliorations d’Équipement, fragments de héros, Marteaux et Widgets.",
-              "Après le reset, effectue uniquement les améliorations déjà prévues ou un palier personnel rentable.",
-              "Conserve autant que possible les fragments, Marteaux et Widgets pour la prochaine préparation KvK ; ne vise pas le classement sans coordination NRW.",
-              "Arrête-toi au plus tard à 1 359 000 points au total. C’est la limite stricte de 3× et non un objectif."
-            ]
-          },
-          "limits": {
-            "hardCap": 1359000,
-            "note": {
-              "de": "1.359.000 Punkte sind die strikte 3×-Gesamtgrenze – keine Empfehlung.",
-              "en": "1,359,000 points is the strict 3× total limit, not a recommendation.",
-              "fr": "1 359 000 points constituent la limite totale stricte de 3×, pas une recommandation."
-            }
-          }
-        }
-      },
-      "sourceUrl": "https://kingshotdata.com/events/officer-project-event/"
     },
     {
       "id": "kingdom-of-power-2026-11-02",
