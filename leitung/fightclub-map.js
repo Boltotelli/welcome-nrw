@@ -1,6 +1,6 @@
 import {fightEventName} from './fightclub-events.js?v=20261103-ssl-1';
-import {decodeDeployment} from './deployment-engine.js?v=20261103-ssl-1';
-import {createDeploymentPlanner} from './deployment-planner.js?v=20261103-ssl-1';
+import {decodeDeployment} from './deployment-engine.js?v=20261104-reserves-1';
+import {createDeploymentPlanner} from './deployment-planner.js?v=20261104-reserves-1';
 /* FightClub battlefield planning: private, date-scoped map objectives for both legions.
  * Maps are planning aids; no Kingshot orders, registration or Discord posts are sent.
  * TriAlliance map illustration credited to its author; pin geometry remains usable
@@ -77,7 +77,7 @@ export function createFightClubMap({getContext,getLanguage,request,flash,esc,onU
  const leaders=()=>ctx().state?.leaders?.filter(l=>l.event_type===ctx().eventType&&l.battle_date===ctx().date)||[];
  const leaderFor=lg=>leaders().find(l=>Number(l.legion)===lg)?.game_id||"";
  const siteList=()=>sites().map(s=>s.key);
- const activeLegion=()=>roster().filter(x=>Number(x.legion)===legion&&x.availability!=="unavailable");
+ const activeLegion=()=>roster().filter(x=>Number(x.legion)===legion&&!x.is_reserve&&x.availability!=="unavailable");
  const seenIds=()=>new Map((ctx().players||[]).map(p=>[String(p.game_id),p]));
  const playerName=id=>seenIds().get(String(id))?.name||String(id);
  const rowsForLocation=key=>mapRows().filter(m=>m.location_key===key&&activeLegion().some(a=>String(a.game_id)===String(m.game_id)));
@@ -229,7 +229,7 @@ export function createFightClubMap({getContext,getLanguage,request,flash,esc,onU
   const lines=[fightEventName(ctx().eventType,getLanguage())+' · '+ctx().date];
   for(const lg of [1,2]){
    lines.push("Legion "+lg);
-   const all=roster().filter(a=>Number(a.legion)===lg);
+   const all=roster().filter(a=>Number(a.legion)===lg&&!a.is_reserve);
    for(const s of sites()){
     const list=mapRows().filter(m=>m.location_key===s.key&&all.some(a=>String(a.game_id)===String(m.game_id)));
     if(list.length)lines.push(s.name+": "+list.map(m=>playerName(m.game_id)+" ("+m.game_id+")").join(", "));

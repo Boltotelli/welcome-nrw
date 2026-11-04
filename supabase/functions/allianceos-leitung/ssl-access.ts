@@ -39,7 +39,7 @@ export function createSslAccess({db,auth,checked,HttpError,json,audit,temporaryP
  async function fightData(req:Request,alliance:string,staff:any){
   if(alliance!=='NRW'||staff?.permissions?.ssl_read!==true)throw new HttpError('permission_denied',403);
   const [assignments,mapAssignments,leaders]=await Promise.all([
-   checked(db.from('aos_fightclub_assignments').select('event_type,battle_date,game_id,legion,availability,combat_role').eq('alliance_code',alliance).eq('event_type',event).order('battle_date',{ascending:false}).limit(2000)),
+   checked(db.from('aos_fightclub_assignments').select('event_type,battle_date,game_id,legion,is_reserve,availability,combat_role').eq('alliance_code',alliance).eq('event_type',event).order('battle_date',{ascending:false}).limit(2000)),
    checked(db.from('aos_fightclub_map_assignments').select('event_type,battle_date,game_id,location_key').eq('alliance_code',alliance).eq('event_type',event).limit(2000)),
    checked(db.from('aos_fightclub_team_leaders').select('event_type,battle_date,game_id,legion').eq('alliance_code',alliance).eq('event_type',event).limit(350))
   ]);
@@ -52,7 +52,7 @@ export function createSslAccess({db,auth,checked,HttpError,json,audit,temporaryP
    ]);
    players=ids.map(id=>{const g=guests.find((p:any)=>p.game_id===id),m=members.find((p:any)=>p.game_id===id);return {game_id:id,name:g?.name||m?.name||id,home_alliance:g?.home_alliance||'NRW',mystic_trial:g?.mystic_trial??scores.find((p:any)=>p.game_id===id)?.mystic_trial??null,active:true,member_status:'active'};});
   }
-  const has=(x:any)=>assignments.some((a:any)=>a.game_id===x.game_id&&a.battle_date===x.battle_date);
+  const has=(x:any)=>assignments.some((a:any)=>a.game_id===x.game_id&&a.battle_date===x.battle_date&&!a.is_reserve);
   return {ok:true,cycles:[],assignments,players,powers:players.map(p=>({game_id:p.game_id,power:null,mystic_trial:p.mystic_trial})),guests:[],map_assignments:mapAssignments.filter(has),leaders:leaders.filter(has)};
  }
  async function bootstrap(req:Request,alliance:string,staff:any){

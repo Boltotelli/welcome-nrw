@@ -21,7 +21,7 @@ export function buildDeployment({players,assignments,mapAssignments,powers,sites
  if(!targets.north.some(s=>s.key===settings.northTarget)||!targets.south.some(s=>s.key===settings.southTarget))throw Error('choose_targets');
  const people=new Map(players.filter(p=>p.active&&p.member_status!=='left').map(p=>[String(p.game_id),p]));
  const power=new Map(powers.filter(p=>p.power!=null&&Number.isSafeInteger(Number(p.power))&&Number(p.power)>0).map(p=>[String(p.game_id),Number(p.power)]));
- const roster=[...new Map(assignments.filter(a=>a.event_type===eventType&&a.battle_date===date&&Number(a.legion)===Number(legion)).map(a=>[String(a.game_id),a])).values()];
+ const roster=[...new Map(assignments.filter(a=>a.event_type===eventType&&a.battle_date===date&&Number(a.legion)===Number(legion)&&!a.is_reserve).map(a=>[String(a.game_id),a])).values()];
  const maps=new Map(mapAssignments.filter(a=>a.event_type===eventType&&a.battle_date===date).map(a=>[String(a.game_id),a]));
  const excluded=[],rows=[],pool=[],families=new Set();
  const item=a=>{const id=String(a.game_id),p=people.get(id);return{game_id:id,name:p?.name||id,family:String(p?.main_game_id||id),power:power.get(id)??null};};

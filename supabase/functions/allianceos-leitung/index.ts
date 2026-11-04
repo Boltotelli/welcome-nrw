@@ -1090,10 +1090,10 @@ async function fightClubMapSave(req:Request,alliance:string,userId:string,staff:
  if(!fightMapLocationValid(eventType,locationKey))
    throw new HttpError("invalid_map_location",400);
  const record=await checked<any>(db.from("aos_fightclub_assignments")
-   .select("legion,availability").eq("alliance_code",alliance)
+   .select("legion,is_reserve,availability").eq("alliance_code",alliance)
    .eq("event_type",eventType).eq("battle_date",battleDate)
    .eq("game_id",gameId).maybeSingle());
- if(!record||![1,2].includes(record.legion)||record.availability==="unavailable")
+ if(!record||record.is_reserve||![1,2].includes(record.legion)||record.availability==="unavailable")
    throw new HttpError("player_must_be_assigned_to_available_legion",409);
  if(!await sslGuests.eligible(alliance,eventType,gameId,battleDate))throw new HttpError("player_not_active_in_alliance",403);
  const assignment=await checked<any>(db.from("aos_fightclub_map_assignments").upsert({
@@ -1114,7 +1114,7 @@ async function fightClubData(req:Request,alliance:string,staff:any){
    .select("id,event_type,battle_date,source_begin_at,source_end_at")
    .in("event_type",["swordland","triforce","swordland_summit"]).order("battle_date",{ascending:false}).limit(60)),
   checked<any[]>(db.from("aos_fightclub_assignments")
-   .select("event_type,battle_date,game_id,legion,availability,combat_role,notes,updated_at")
+   .select("event_type,battle_date,game_id,legion,is_reserve,availability,combat_role,notes,updated_at")
    .eq("alliance_code",alliance).gte("battle_date",since)
    .order("battle_date",{ascending:false}).limit(2000)),
   checked<any[]>(db.from("aos_member_power_snapshot")
@@ -1170,18 +1170,21 @@ async function saveFightClub(req:Request,alliance:string,userId:string,staff:any
   !["unknown","full","partial","unavailable"].includes(availability)||
   !["flex","attack","defense","support"].includes(combatRole))
    throw new HttpError("invalid_fight_assignment",400);
- if([1,2].includes(legion)&&availability==="unavailable")throw new HttpError("unavailable_cannot_join_legion",409);
  const previous=await checked<any>(db.from("aos_fightclub_assignments")
-  .select("legion").eq("alliance_code",alliance).eq("event_type",eventType)
+  .select("legion,is_reserve").eq("alliance_code",alliance).eq("event_type",eventType)
   .eq("battle_date",battleDate).eq("game_id",gameId).maybeSingle());
+ if(body?.is_reserve!==undefined&&typeof body.is_reserve!=="boolean")throw new HttpError("invalid_fight_assignment",400);
+ const isReserve=body?.is_reserve??([1,2].includes(legion)&&previous?.is_reserve===true);
+ if(isReserve&&![1,2].includes(legion))throw new HttpError("invalid_fight_assignment",400);
+ if([1,2].includes(legion)&&availability==="unavailable")throw new HttpError("unavailable_cannot_join_legion",409);
  const a=await checked<any>(db.from("aos_fightclub_assignments").upsert({
    alliance_code:alliance,event_type:eventType,battle_date:battleDate,game_id:gameId,
-   legion,availability,combat_role:combatRole,notes,
+   legion,is_reserve:isReserve,availability,combat_role:combatRole,notes,
    updated_at:new Date().toISOString(),updated_by:userId
  },{onConflict:"alliance_code,event_type,battle_date,game_id"})
-   .select("event_type,battle_date,game_id,legion,availability,combat_role,notes,updated_at").single());
+   .select("event_type,battle_date,game_id,legion,is_reserve,availability,combat_role,notes,updated_at").single());
  // Reassigning a participant to another legion invalidates an old map order.
- if(previous && Number(previous.legion)!==legion){
+ if(isReserve||(previous && (Number(previous.legion)!==legion||Boolean(previous.is_reserve)!==isReserve))){
    await checked<any>(db.from("aos_fightclub_map_assignments").delete()
     .eq("alliance_code",alliance).eq("event_type",eventType)
     .eq("battle_date",battleDate).eq("game_id",gameId));
@@ -1213,7 +1216,7 @@ async function saveFightClubLeader(req:Request,alliance:string,userId:string,sta
  if(!isId(gameId))throw new HttpError("invalid_player_id",400);
  const present=await checked<any>(db.from("aos_fightclub_assignments")
    .select("game_id").eq("alliance_code",alliance).eq("event_type",eventType)
-   .eq("battle_date",battleDate).eq("legion",legion)
+   .eq("battle_date",battleDate).eq("legion",legion).eq("is_reserve",false)
    .eq("game_id",gameId).maybeSingle());
  if(!present)throw new HttpError("leader_must_join_legion",409);
  const saved=await checked<any>(db.from("aos_fightclub_team_leaders").upsert({

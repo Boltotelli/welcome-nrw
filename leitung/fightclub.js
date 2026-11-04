@@ -1,7 +1,7 @@
 /* AllianceOS Phase 4 – GitHub Pages only: FightClub draft rosters.
  * Distinguishes confirmed source schedules from a manually chosen planning date.
  * No Discord role/slot/bot changes, no automatic player assignments. */
-import {createFightClubMap} from "./fightclub-map.js?v=20261103-integrated-1";
+import {createFightClubMap} from "./fightclub-map.js?v=20261104-reserves-1";
 import {createRosterDrafts} from "./roster-drafts.js?v=20261103-ssl-1";
 import {readAttendanceNote,writeAttendanceNote,attendanceNoteLimit} from "./fightclub-attendance.js?v=20261103-ssl-1";
 import {SSL_EVENT,fightEventName,mergeFightPlayers} from "./fightclub-events.js?v=20261103-ssl-1";
@@ -139,16 +139,19 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
   const id=body.game_id,old=state.assignments.find(a=>a.event_type===body.event_type&&a.battle_date===body.battle_date&&String(a.game_id)===id);
   const same=a=>a.event_type===body.event_type&&a.battle_date===body.battle_date&&String(a.game_id)===id;
   state.assignments=state.assignments.filter(a=>!same(a));if(!result.removed)state.assignments.push(result.assignment);
-  if(result.removed||(old&&Number(old.legion)!==body.legion)){
+  if(result.removed||body.is_reserve||(old&&(Number(old.legion)!==body.legion||Boolean(old.is_reserve)!==Boolean(body.is_reserve)))){
    state.map_assignments=(state.map_assignments||[]).filter(a=>!same(a));state.leaders=(state.leaders||[]).filter(a=>!same(a));
   }
  }});
  const cycles=()=>state?.cycles?.filter(c=>c.event_type===eventType)||[];
  const cycle=()=>cycles().find(c=>c.battle_date===date);
- const legionName=v=>v===1?t("l1"):v===2?t("l2"):v===0?t("reserve"):t("empty");
+ const legionName=(v,reserve=false)=>(v===1?t("l1"):v===2?t("l2"):v===0?t("reserve")+" · "+({de:"ohne Legion",en:"no legion",fr:"sans légion",es:"sin legión"}[getLanguage()]||"no legion"):t("empty"))+(reserve?' '+t('reserve'):'');
+ const slotValue=a=>a&&[1,2].includes(Number(a.legion))?String(a.legion)+(a.is_reserve?'r':''):String(a?.legion??-1);
+ const slotFields=value=>({legion:['1','1r','2','2r','0'].includes(String(value))?Number(String(value)[0]):-1,is_reserve:['1r','2r'].includes(String(value))});
+ const rosterSlots=()=>[{legion:1,is_reserve:false},{legion:1,is_reserve:true},{legion:2,is_reserve:false},{legion:2,is_reserve:true},...(assignments().some(a=>Number(a.legion)===0)?[{legion:0,is_reserve:false}]:[])];
  function selectOptions(items,value,attr){return '<select class="control" '+attr+'>'+items.map(([v,name])=>
   '<option value="'+esc(String(v))+'" '+(String(value)===String(v)?"selected":"")+'>'+esc(name)+'</option>').join("")+'</select>';}
- function optLegion(){return [["-1",t("empty")],["1",t("l1")],["2",t("l2")],["0",t("reserve")]];}
+ function optLegion(){return [["-1",t("empty")],["1",t("l1")],["1r",legionName(1,true)],["2",t("l2")],["2r",legionName(2,true)]];}
  function optAvailability(){return [["unknown",t("unknown")],["full",t("full")],["partial",t("partial")],["unavailable",t("unavailable")]];}
  function optRole(){return [["flex",t("flex")],["attack",t("attack")],["defense",t("defense")],["support",t("support")]];}
  function minutes(utc){return utc?new Intl.DateTimeFormat(locale(),{hour:"2-digit",minute:"2-digit",hour12:false,timeZone:"UTC"}).format(new Date(utc))+" UTC":t("noTime");}
@@ -168,12 +171,12 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
  }
  function summary(){
    const byGame=playerMap(),powersById=powers(),assign=assignments().filter(a=>byGame.has(String(a.game_id)));
-   return [1,2,0].map(legion=>{
-     const rows=assign.filter(a=>Number(a.legion)===legion),
+   return rosterSlots().map(({legion,is_reserve})=>{
+     const rows=assign.filter(a=>Number(a.legion)===legion&&Boolean(a.is_reserve)===is_reserve),
        known=rows.map(a=>powersById.get(String(a.game_id))?.power).filter(n=>Number.isSafeInteger(Number(n))&&n!=null);
      const total=known.reduce((s,n)=>s+Number(n),0),full=rows.filter(a=>a.availability==="full").length,
        partial=rows.filter(a=>a.availability==="partial").length;
-     return '<article class="fight-summary-card"><strong>'+esc(legionName(legion))+'</strong>'+
+     return '<article class="fight-summary-card"><strong>'+esc(legionName(legion,is_reserve))+'</strong>'+
       (legion!==0?'<small>'+esc(minutes(legionTime(legion)))+'</small>':'')+
       '<div class="fight-summary-big">'+number(rows.length)+' <span>'+esc(t("members"))+'</span></div>'+
       '<div class="fight-summary-stats"><span>'+esc(t("full"))+': '+number(full)+'</span><span>'+esc(t("partial"))+': '+number(partial)+'</span></div>'+
@@ -203,7 +206,7 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
  const at=k=>(attendanceWords[getLanguage()]||attendanceWords.en)[k];
  const guestUI=createFightclubGuests({getContext:()=>({eventType,state}),getLanguage,request,esc,onUpdated:()=>draw(),flash,canMutate:()=>!drafts.count()&&!drafts.isBusy()});
  function row(p,conflicts){
-  const a=assignment(p.game_id),val=a?.legion??-1,attendance=readAttendanceNote(a?.notes);
+  const a=assignment(p.game_id),val=slotValue(a),attendance=readAttendanceNote(a?.notes);
   const family=conflicts.get(String(p.game_id));
   const pw=powers().get(String(p.game_id));
   const main=p.main_game_id?playerMap().get(String(p.main_game_id))?.name||p.main_game_id:null;
@@ -211,10 +214,10 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
    '<div class="fight-player-top"><button type="button" data-fight-profile="'+esc(p.game_id)+'" class="fight-player-name" '+(!canDossier()||p.is_ssl_guest?'disabled':'')+'>'+esc(p.name)+'</button>'+
     '<small>'+esc(p.game_id)+(p.is_ssl_guest?' · SSL Gast · '+esc(p.home_alliance||'—'):'')+(main?' · '+esc(t("alts"))+' '+esc(main):'')+'</small><span class="fight-no-show-badge" data-fight-no-show-badge '+(attendance.noShow?'':'hidden')+'>'+esc(at('badge'))+'</span>'+
     '</div></td><td>'+esc(pw?.power==null?'—':powerFormat(pw.power))+'</td>'+
-   [1,2].map(l=>'<td class="assignment-check-cell"><label class="assignment-check"><input type="checkbox" data-fight-check="'+l+'" aria-label="'+esc(p.name+' · L'+l)+'" '+(Number(val)===l?'checked ':'')+(pending.has(String(p.game_id))?'disabled':'')+'><span class="sr-only">L'+l+'</span></label></td>').join('')+'<td>'+
+   [['1','L1'],['1r','L1 '+t('reserve')],['2','L2'],['2r','L2 '+t('reserve')]].map(([v,label])=>'<td class="assignment-check-cell"><label class="assignment-check"><input type="checkbox" data-fight-check="'+v+'" aria-label="'+esc(p.name+' · '+label)+'" '+(val===v?'checked ':'')+(pending.has(String(p.game_id))?'disabled':'')+'><span class="sr-only">'+esc(label)+'</span></label></td>').join('')+'<td>'+
    '<div class="fight-player-fields">'+
     '<label hidden><span>'+esc(t("legion"))+'</span>'+
-    selectOptions(optLegion(),String(val),'data-fight-legion')+'</label>'+
+    selectOptions([...optLegion(),...(val==="0"?[["0",legionName(0)]]:[])],String(val),'data-fight-legion')+'</label>'+
     '<label><span>'+esc(t("availability"))+'</span>'+
     selectOptions(optAvailability(),a?.availability||"unknown",'data-fight-availability')+'</label>'+
     '<label class="fight-no-show-control"><input type="checkbox" data-fight-no-show '+(attendance.noShow?'checked':'')+' aria-label="'+esc(p.name+' · '+at('label'))+'"><span>'+esc(at('label'))+'</span></label>'+
@@ -231,8 +234,7 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
    const visible=players().filter(p=>(!search||String(p.name||"").toLocaleLowerCase().includes(search.toLocaleLowerCase())||
       String(p.game_id).includes(search))&&
       (filter==="all"||filter==="no-show"&&readAttendanceNote(assignment(p.game_id)?.notes).noShow||filter==="assigned"&&[0,1,2].includes(Number(assignment(p.game_id)?.legion))||
-       filter==="unassigned"&&(!assignment(p.game_id)||Number(assignment(p.game_id)?.legion)===-1)||filter==="1"&&Number(assignment(p.game_id)?.legion)===1||
-       filter==="2"&&Number(assignment(p.game_id)?.legion)===2||
+       filter==="unassigned"&&(!assignment(p.game_id)||Number(assignment(p.game_id)?.legion)===-1)||["1","1r","2","2r"].includes(filter)&&slotValue(assignment(p.game_id))===filter||
        filter==="0"&&assignment(p.game_id)&&Number(assignment(p.game_id).legion)===0));
    visible.sort((a,b)=>Number(powerById.get(String(b.game_id))?.power??-1)-Number(powerById.get(String(a.game_id))?.power??-1)||
     String(a.name||"").localeCompare(String(b.name||""),locale()));
@@ -241,10 +243,10 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
      '<p class="small-note">'+esc(t("registration"))+' '+esc(t("planningNote"))+'</p>'+
      drafts.toolbar()+'<div class="fight-filterbar"><input class="control" data-fight-search type="search" value="'+esc(search)+'" placeholder="'+esc(t("search"))+'">'+
        selectOptions([["all",t("all")],["assigned",t("assigned")],["unassigned",t("unassigned")],["no-show",at("filter")],
-        ["1",t("l1")],["2",t("l2")],["0",t("reserve")]],filter,'data-fight-filter')+
+        ["1",t("l1")],["1r",legionName(1,true)],["2",t("l2")],["2r",legionName(2,true)],...(assignments().some(a=>Number(a.legion)===0)?[["0",legionName(0)]]:[])],filter,'data-fight-filter')+
         '<span>'+visible.length+' / '+players().length+'</span></div>'+
-     '<div class="assignment-table-scroll" role="region" aria-label="'+esc(t('plans'))+'" tabindex="0"><table class="assignment-table"><thead><tr><th scope="col">'+esc(t('members'))+'</th><th scope="col">Mystic Trial</th><th scope="col">L1</th><th scope="col">L2</th><th scope="col">'+esc(t('availability'))+' / '+esc(t('note'))+'</th></tr></thead><tbody>'+
-       (visible.length?visible.map(p=>row(p,conflicts)).join(''):'<tr><td colspan="5">'+esc(t('noPlayers'))+'</td></tr>')+'</tbody></table></div></details>';
+     '<div class="assignment-table-scroll" role="region" aria-label="'+esc(t('plans'))+'" tabindex="0"><table class="assignment-table"><thead><tr><th scope="col">'+esc(t('members'))+'</th><th scope="col">Mystic Trial</th><th scope="col">L1</th><th scope="col">L1 '+esc(t('reserve'))+'</th><th scope="col">L2</th><th scope="col">L2 '+esc(t('reserve'))+'</th><th scope="col">'+esc(t('availability'))+' / '+esc(t('note'))+'</th></tr></thead><tbody>'+
+       (visible.length?visible.map(p=>row(p,conflicts)).join(''):'<tr><td colspan="7">'+esc(t('noPlayers'))+'</td></tr>')+'</tbody></table></div></details>';
  }
  function fastAssign(){
    const availPlayers=players();
@@ -261,18 +263,18 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
    const id=root.querySelector("[data-fight-fast-player]")?.value||"";
    if(!id){flash(t("player"),true);return;}
    if(pending.has(id))return;
-   const leg=Number(root.querySelector("[data-fight-fast-legion]")?.value??-1),
+   const {legion:leg,is_reserve:isReserve}=slotFields(root.querySelector("[data-fight-fast-legion]")?.value??-1),
        availability=root.querySelector("[data-fight-fast-availability]")?.value||"full",
        prev=assignment(id),event=eventType,eventDate=date,ticket=generation;
    pending.add(id);
    try{
      const result=await request("bootstrap",{action:"fightclub_save",event_type:event,battle_date:eventDate,
-       game_id:id,legion:leg,availability,combat_role:prev?.combat_role||"flex",notes:prev?.notes||""});
+       game_id:id,legion:leg,is_reserve:isReserve,availability,combat_role:prev?.combat_role||"flex",notes:prev?.notes||""});
      if(!result?.ok)throw Error("save_failed");
      if(ticket!==generation)return;
      state.assignments=state.assignments.filter(x=>!(x.event_type===event&&x.battle_date===eventDate&&String(x.game_id)===id));
      state.assignments.push(result.assignment);
-     if(prev&&Number(prev.legion)!==leg){
+     if(isReserve||(prev&&(Number(prev.legion)!==leg||Boolean(prev.is_reserve)!==isReserve))){
        state.map_assignments=(state.map_assignments||[]).filter(x=>!(x.event_type===event&&x.battle_date===eventDate&&String(x.game_id)===id));
        state.leaders=(state.leaders||[]).filter(x=>!(x.event_type===event&&x.battle_date===eventDate&&String(x.game_id)===id));
      }
@@ -301,8 +303,8 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
      '</section>';
  }
  function readOnlyList(){
-  const people=playerMap(),ps=powers(),rows=assignments().filter(a=>people.has(String(a.game_id))&&(filter==='all'||String(a.legion)===filter)&&(!search||String(people.get(String(a.game_id))?.name+' '+a.game_id).toLowerCase().includes(search.toLowerCase())));
-  return '<section class="card"><div class="fight-heading"><h3>'+esc(t('plans'))+' · '+rows.length+'</h3><button class="ghost" data-fight-export>'+esc(t('copyList'))+'</button></div><div class="fight-switches"><input class="control" type="search" data-fight-search aria-label="'+esc(t('search'))+'" placeholder="'+esc(t('search'))+'" value="'+esc(search)+'">'+selectOptions([['all',t('all')],['1',t('l1')],['2',t('l2')],['0',t('reserve')]],filter,'data-fight-filter aria-label="'+esc(t('legion'))+'"')+'</div><div class="assignment-table-scroll" role="region" aria-label="SSL-Roster" tabindex="0"><table class="assignment-table"><thead><tr><th>'+esc(t('members'))+'</th><th>Mystic Trial</th><th>'+esc(t('legion'))+'</th><th>'+esc(t('availability'))+'</th></tr></thead><tbody>'+rows.map(a=>'<tr><td><strong>'+esc(people.get(String(a.game_id)).name)+'</strong><small>'+esc(a.game_id)+'</small></td><td>'+esc(powerFormat(ps.get(String(a.game_id))?.power))+'</td><td>'+esc(legionName(Number(a.legion)))+'</td><td>'+esc(t(a.availability))+'</td></tr>').join('')+'</tbody></table></div>'+(rows.length?'':'<p class="small-note">'+esc(t('noPlayers'))+'</p>')+'</section>';
+  const people=playerMap(),ps=powers(),rows=assignments().filter(a=>people.has(String(a.game_id))&&(filter==='all'||slotValue(a)===filter)&&(!search||String(people.get(String(a.game_id))?.name+' '+a.game_id).toLowerCase().includes(search.toLowerCase())));
+  return '<section class="card"><div class="fight-heading"><h3>'+esc(t('plans'))+' · '+rows.length+'</h3><button class="ghost" data-fight-export>'+esc(t('copyList'))+'</button></div><div class="fight-switches"><input class="control" type="search" data-fight-search aria-label="'+esc(t('search'))+'" placeholder="'+esc(t('search'))+'" value="'+esc(search)+'">'+selectOptions([['all',t('all')],...optLegion().filter(([v])=>v!=='-1'),...(assignments().some(a=>Number(a.legion)===0)?[['0',legionName(0)]]:[])],filter,'data-fight-filter aria-label="'+esc(t('legion'))+'"')+'</div><div class="assignment-table-scroll" role="region" aria-label="SSL-Roster" tabindex="0"><table class="assignment-table"><thead><tr><th>'+esc(t('members'))+'</th><th>Mystic Trial</th><th>'+esc(t('legion'))+'</th><th>'+esc(t('availability'))+'</th></tr></thead><tbody>'+rows.map(a=>'<tr><td><strong>'+esc(people.get(String(a.game_id)).name)+'</strong><small>'+esc(a.game_id)+'</small></td><td>'+esc(powerFormat(ps.get(String(a.game_id))?.power))+'</td><td>'+esc(legionName(Number(a.legion),a.is_reserve))+'</td><td>'+esc(t(a.availability))+'</td></tr>').join('')+'</tbody></table></div>'+(rows.length?'':'<p class="small-note">'+esc(t('noPlayers'))+'</p>')+'</section>';
  }
  function draw(){
    if(!root||!enabled)return;
@@ -353,8 +355,8 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
   const noteInput=row.querySelector('[data-fight-note]'),noShow=row.querySelector('[data-fight-no-show]');
   try{notes=writeAttendanceNote(noteInput.value,noShow.checked);}catch{noShow.checked=false;flash(at('tooLong'),true);notes=noteInput.value;}
   noteInput.maxLength=attendanceNoteLimit(noShow.checked);row.querySelector('[data-fight-no-show-badge]').hidden=!noShow.checked;
-  const old=storedAssignment(id),base={action:'fightclub_save',event_type:eventType,battle_date:date,game_id:id,legion:old?.legion??-1,availability:old?.availability||'unknown',combat_role:old?.combat_role||'flex',notes:old?.notes||'',remove:false};
-  const payload={...base,legion:remove?-1:Number(row.querySelector('[data-fight-legion]').value),availability:row.querySelector('[data-fight-availability]').value,combat_role:row.querySelector('[data-fight-role]').value,notes,remove};
+  const old=storedAssignment(id),base={action:'fightclub_save',event_type:eventType,battle_date:date,game_id:id,legion:old?.legion??-1,is_reserve:Boolean(old?.is_reserve),availability:old?.availability||'unknown',combat_role:old?.combat_role||'flex',notes:old?.notes||'',remove:false};
+  const payload={...base,...(remove?{legion:-1,is_reserve:false}:slotFields(row.querySelector('[data-fight-legion]').value)),availability:row.querySelector('[data-fight-availability]').value,combat_role:row.querySelector('[data-fight-role]').value,notes,remove};
   drafts.set(id,payload,base);row.toggleAttribute('data-roster-dirty',drafts.has(id));
   const auto=root.querySelector('[data-map-auto-plan]');if(auto)auto.disabled=drafts.count()>0;
   const quick=root.querySelector('[data-fight-fast-save]');if(quick)quick.disabled=drafts.count()>0;
@@ -362,10 +364,10 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
  function exportText(){
    if(!date)return "";
    const people=playerMap(),ps=powers();
-   const groups=[1,2,0].map(l=>{
-     const rows=assignments().filter(a=>Number(a.legion)===l&&people.has(String(a.game_id)))
+   const groups=rosterSlots().map(({legion:l,is_reserve})=>{
+     const rows=assignments().filter(a=>Number(a.legion)===l&&Boolean(a.is_reserve)===is_reserve&&people.has(String(a.game_id)))
        .sort((a,b)=>Number(ps.get(b.game_id)?.power??-1)-Number(ps.get(a.game_id)?.power??-1));
-     return legionName(l)+(l!==0?" · "+minutes(legionTime(l)):"")+"\n"+
+     return legionName(l,is_reserve)+(l!==0?" · "+minutes(legionTime(l)):"")+"\n"+
        (rows.length?rows.map(a=>{
          const p=people.get(String(a.game_id));
          return String(p.name)+" | "+a.game_id+" | "+t(a.availability)+" | "+t(a.combat_role);
@@ -386,7 +388,7 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
      }
      if(el.matches('[data-fight-no-show]')){const row=el.closest('[data-fight-row]');stage(row.dataset.fightRow);if(el.checked)row.querySelector('.fight-row-more').open=true;return;}
      if(el.matches('[data-fight-availability],[data-fight-role]')){stage(el.closest('[data-fight-row]').dataset.fightRow);return;}
-     if(el.matches("[data-fight-fast-legion]")){fastLegion=Number(el.value);return;}
+     if(el.matches("[data-fight-fast-legion]")){fastLegion=el.value;return;}
      if(el.matches("[data-fight-fast-availability]")){fastAvailability=el.value;return;}
      if(el.matches("[data-fight-type]")){if(readOnly())return;eventType=el.value;date="";filter="all";search="";draw();}
      else if(el.matches("[data-fight-date]")){date=el.value;filter="all";search="";draw();}
