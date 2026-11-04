@@ -1,3 +1,4 @@
+import {createLeadershipTools} from "./tools.js?v=20261104-tools-1";
 import {activateMemberApiRefresh,memberApiLabels} from "./member-api-refresh.js?v=20261104-1";
 import {identityOptions,selectedLogin} from "./login-identities.js?v=20261103-integrated-1";
 import {createSslAccessAdmin} from "./ssl-access-admin.js?v=20261103-integrated-1";
@@ -100,13 +101,13 @@ en:{moduleRights:"Module permissions",rightsHelp:"Switch off to revoke a permiss
 fr:{moduleRights:"Autorisations par module",rightsHelp:"Désactivez le bouton pour retirer un droit, puis enregistrez. Application immédiate côté serveur.",undoRights:"Annuler les modifications",clearRights:"Retirer tous les droits",disableStaffAccount:"Bloquer cet accès",rightsSelected:"Choisissez un compte pour gérer ses droits.",rightsCount:"droits actifs",rightsDisabled:"Compte désactivé",rightsProtected:"Administrateur · modification interdite",rightsEnabled:"Compte actif",rightsNone:"Aucun droit",rightsClearConfirm:"Retirer tous les droits de {name} ? Le compte reste actif mais sans accès aux modules.",rightsDisableConfirm:"Bloquer complètement {name} et retirer tous les droits ? Ce compte ne pourra plus se connecter.",rightsCleared:"Tous les droits retirés.",rightsAccountDisabled:"Accès bloqué.",rightsSaved:"Droits enregistrés.",rightsAdminNote:"Les comptes administrateurs sont protégés et disposent de tous les droits.",rolesFuture:"Choisissez un R4/R5 pour gérer ses droits. Les retraits sont appliqués immédiatement après l'enregistrement.",saveR4:"Enregistrer",noStaffSelection:"Choisissez d'abord un R4/R5."},
 es:{moduleRights:"Permisos por módulo",rightsHelp:"Desactiva una opción para quitar su permiso y guarda. Se aplica inmediatamente en el servidor.",undoRights:"Descartar cambios",clearRights:"Quitar todos los permisos",disableStaffAccount:"Bloquear acceso",rightsSelected:"Selecciona una cuenta para editar permisos.",rightsCount:"permisos activos",rightsDisabled:"Cuenta desactivada",rightsProtected:"Administrador · no editable",rightsEnabled:"Cuenta activa",rightsNone:"Sin permisos",rightsClearConfirm:"¿Quitar todos los permisos de {name}? La cuenta seguirá activa, pero sin acceso a módulos.",rightsDisableConfirm:"¿Bloquear por completo la cuenta de {name} y quitar todos los permisos? Ya no podrá iniciar sesión.",rightsCleared:"Permisos retirados.",rightsAccountDisabled:"Cuenta bloqueada.",rightsSaved:"Permisos guardados.",rightsAdminNote:"Las cuentas administradoras están protegidas y tienen acceso completo.",rolesFuture:"Selecciona un R4/R5 para gestionar derechos. Los cambios se aplican inmediatamente al guardar.",saveR4:"Guardar cambios",noStaffSelection:"Primero selecciona un R4/R5."}
 };
-const STAFF_FEATURES=[["ssl_read","sslRead"],["members","roster"],["performance","performance"],["bear","bearManagement"],["fightclub","fightclub"],["participation","participation"],["transfers","transfers"],["laws","laws"],["events","events"],["event_bot","discordBot"],["settings","settings"]];
+const STAFF_FEATURES=[["ssl_read","sslRead"],["members","roster"],["performance","performance"],["bear","bearManagement"],["fightclub","fightclub"],["participation","participation"],["transfers","transfers"],["laws","laws"],["events","events"],["event_bot","discordBot"],["tools","tools"],["settings","settings"]];
 const STAFF_KEYS=STAFF_FEATURES.map(([key])=>key);
-const modulePermission={roster:"members",performance:"performance",bear:"bear",fightclub:"fightclub",participation:"participation"};
-const phase2Labels={de:{performance:"Performance",bearManagement:"Bärenfalle",fightclub:"FightClub",participation:"Event-Teilnahme"},
-en:{performance:"Performance",bearManagement:"Bear Trap",fightclub:"FightClub",participation:"Event participation"},
-fr:{performance:"Performance",bearManagement:"Piège à ours",fightclub:"FightClub",participation:"Participation aux événements"},
-es:{performance:"Rendimiento",bearManagement:"Trampa de oso",fightclub:"FightClub",participation:"Participación en eventos"}};
+const modulePermission={roster:"members",performance:"performance",bear:"bear",fightclub:"fightclub",participation:"participation",tools:"tools"};
+const phase2Labels={de:{tools:"Tools",performance:"Performance",bearManagement:"Bärenfalle",fightclub:"FightClub",participation:"Event-Teilnahme"},
+en:{tools:"Tools",performance:"Performance",bearManagement:"Bear Trap",fightclub:"FightClub",participation:"Event participation"},
+fr:{tools:"Tools",performance:"Performance",bearManagement:"Piège à ours",fightclub:"FightClub",participation:"Participation aux événements"},
+es:{tools:"Tools",performance:"Rendimiento",bearManagement:"Trampa de oso",fightclub:"FightClub",participation:"Participación en eventos"}};
 const t=k=>k==="sslRead"?({de:"SSL · nur lesen",en:"SSL · read only",fr:"SSL · lecture seule",es:"SSL · solo lectura"}[lang]):k==="staffUser"?({de:"Zugang auswählen",en:"Choose account",fr:"Choisir un accès",es:"Elegir acceso"}[lang]):rightsCopy[lang]?.[k]||phase2Labels[lang]?.[k]||rosterDossierError[lang]?.[k]||step6DaysCopy[lang]?.[k]||step6DaysCopy.de[k]||step6Copy[lang]?.[k]||step6Copy.de[k]||step5Copy[lang]?.[k]||lawCategoryLabels[lang]?.[k]||lawUiCopy[lang]?.[k]||manualPhasesCopy[lang]?.[k]||transferUiCopy[lang]?.[k]||powerLabels[lang]?.[k]||rosterLabels[lang]?.[k]||leaderUiCopy[lang]?.[k]||latestModuleCopy[lang]?.[k]||opsUI[lang]?.[k]||groupUI[lang]?.[k]||eventLabels[lang]?.[k]||phase1Labels[lang]?.[k]||staffExtra[lang]?.[k]||copy[lang]?.[k]||lawCategoryLabels.de[k]||lawUiCopy.de[k]||manualPhasesCopy.de[k]||transferUiCopy.de[k]||powerLabels.de[k]||rosterLabels.de[k]||leaderUiCopy.de[k]||latestModuleCopy.de[k]||opsUI.de[k]||groupUI.de[k]||eventLabels.de[k]||phase1Labels.de[k]||staffExtra.de[k]||copy.de[k]||k;
 const locale={de:"de-DE",en:"en-GB",fr:"fr-FR",es:"es-ES"}[lang];
 function txt(obj){return typeof obj==="string"?obj:(obj?.[lang]||obj?.[state?.alliance?.default_language]||obj?.de||obj?.en||"");}
@@ -119,7 +120,7 @@ function patchTranslations(){
 }
 function setTab(name){
  if(state?.staff?.ssl_readonly)name="fightclub";
- if(!["overview","roster","performance","bear","fightclub","participation","transfers","laws","events","discord","settings"].includes(name))return;
+ if(!["overview","roster","performance","bear","fightclub","participation","transfers","laws","events","discord","tools","settings"].includes(name))return;
  if(name==="bear"&&!bearManagement.enabled)return;
  if(name==="fightclub"&&!fightclub.enabled)return;
  if(name==="participation"&&!participation.enabled)return;
@@ -140,6 +141,7 @@ function setTab(name){
   if(name==="participation"&&state)participation.open();
   if(name==="transfers"&&state)eventLoans.open();
   if(name==="events"&&state)announcementEditor.open();
+  if(name==="tools"&&state)leadershipTools.open();
 }
 function flash(message,error=false){
  const el=$("flash");el.textContent=message;el.classList.toggle("error",error);el.hidden=false;
@@ -207,7 +209,9 @@ const fightclub=createFightClub({getState:()=>state,getLanguage:()=>lang,request
 const participation=createEventParticipation({getState:()=>state,getLanguage:()=>lang,request,esc,flash,
   openPlayer:gameId=>openEdit("member",gameId),navigate:name=>setTab(name)});
 const eventLoans=createEventLoans({getState:()=>state,getLanguage:()=>lang,request,esc,flash});
+const leadershipTools=createLeadershipTools({getState:()=>state,getLanguage:()=>lang,request,esc,can});
 function showLogin(message=""){
+ leadershipTools.reset();
  announcementEditor.reset();
  $("liveArea").hidden=true;$("loginArea").hidden=false;$("logoutBtn").hidden=true;
  $("roleChip").textContent="R4 / R5";$("loginError").textContent=message;$("changePasswordBtn").hidden=true;
@@ -599,7 +603,7 @@ async function saveDialog(event){
 }
 q(".nav-item").forEach(el=>el.addEventListener("click",()=>setTab(el.dataset.tab)));
 q("[data-jump]").forEach(el=>el.addEventListener("click",()=>setTab(el.dataset.jump)));
-$("language").addEventListener("change",e=>{lang=e.target.value;localStorage.setItem("nrw_page_lang",lang);if(state){render();if(tab==="performance")performance.render();if(tab==="bear")bearManagement.render();if(tab==="fightclub")fightclub.render();if(tab==="participation")participation.render();if(tab==="transfers")eventLoans.render();}else{patchTranslations();loadLeaderList();$("toggleLegacyLogin").textContent=t(legacyLogin?"normalSignIn":"legacySignIn");}});
+$("language").addEventListener("change",e=>{lang=e.target.value;localStorage.setItem("nrw_page_lang",lang);if(state){render();if(tab==="tools")leadershipTools.open();if(tab==="performance")performance.render();if(tab==="bear")bearManagement.render();if(tab==="fightclub")fightclub.render();if(tab==="participation")participation.render();if(tab==="transfers")eventLoans.render();}else{patchTranslations();loadLeaderList();$("toggleLegacyLogin").textContent=t(legacyLogin?"normalSignIn":"legacySignIn");}});
 $("themeToggle").addEventListener("click",()=>{const next=document.documentElement.dataset.theme==="dark"?"light":"dark";document.documentElement.dataset.theme=next;localStorage.setItem("nrw_theme",next);});
 $("syncPlayerPower").addEventListener("click",()=>syncPlayerPower({allListed:true}));
 $("rosterSearch").addEventListener("input",()=>state&&renderRoster());

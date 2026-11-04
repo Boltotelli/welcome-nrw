@@ -1,4 +1,5 @@
 import { createClient } from "npm:@supabase/supabase-js@2.58.0";
+import {createLeadershipTools} from "./tools.ts";
 
 // AllianceOS pilot API. This function is intentionally isolated from NAP CRUD.
 // All access is checked against aos_staff BEFORE using the service-role client.
@@ -41,7 +42,7 @@ function localized(raw: unknown, max = 10000) {
   return Object.fromEntries(langs.map(l => [l, str(obj[l], max)]).filter(([,v]) => v));
 }
 // Phase 1–5 module access is independent of player-dossier rights.
-const STAFF_PERMISSION_KEYS=["members","performance","bear","fightclub","participation","transfers","laws","events","event_bot","settings","ssl_read"] as const;
+const STAFF_PERMISSION_KEYS=["members","performance","bear","fightclub","participation","transfers","laws","events","event_bot","settings","ssl_read","tools"] as const;
 function permission(staff: any, feature: string) {
   return staff?.is_owner===true || staff?.permissions?.[feature]===true;
 }
@@ -1800,6 +1801,7 @@ async function save(req: Request, alliance: string, userId: string, staff: any, 
   await audit(alliance,userId,entity,String(result.id||alliance),payload.id?"update":"create");
   return json(req,{ok:true,item:result});
 }
+const leadershipTools=createLeadershipTools({db,checked,json,HttpError,permission,audit});
 Deno.serve(async(req: Request)=>{
   try{
     if(req.method==="OPTIONS")return new Response(null,{status:204,headers:headers(req)});
@@ -1818,6 +1820,7 @@ Deno.serve(async(req: Request)=>{
     const body=await req.json().catch(()=>{throw new HttpError("invalid_json",400)});
     if(staff.ssl_readonly&&body?.action!=="fightclub_data")throw new HttpError("permission_denied",403);
     if(body?.action!=="alliance_logo_upload"&&Number(req.headers.get("content-length")||"0")>200000)throw new HttpError("payload_too_large",413);
+    if(["tools_kvk_load","tools_kvk_save","tools_player_lookup"].includes(body?.action))return await leadershipTools.handle(req,alliance,userId,staff,body);
     if(body?.action==="alliance_logo_upload"||body?.action==="alliance_logo_remove")return await updateAllianceLogo(req,alliance,userId,staff,body);
     if(body?.action==="announcement")return await saveAnnouncement(req,alliance,userId,staff,body);
     if(["ssl_viewers_list","ssl_viewer_create","ssl_viewer_toggle","ssl_viewer_reset"].includes(body?.action))return await sslAccess.manage(req,alliance,userId,staff,body);

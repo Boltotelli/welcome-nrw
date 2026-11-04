@@ -15,6 +15,7 @@
 <meta name="description" content="Geschützte Leitungszentrale für Allianzverwaltung, Transfers, Laws und Events.">
 <link rel="icon" href="../assets/nrw-dashboard-icon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="./styles.css?v=20261103-integrated-1">
+<link rel="stylesheet" href="./tools.css?v=20261104-tools-1">
 <!-- Shared leadership design on the approved Pages and production domains. -->
 <script>
   if (["boltotelli.github.io", "welcome-nrw.vercel.app"].includes(location.hostname)) {
@@ -24,7 +25,7 @@
     design.href = "./pages-atelier.css?v=20261021-usability-1";
     document.head.appendChild(design);
     const nav = document.createElement("script");
-    nav.src = "./pages-atelier.js?v=20261021-usability-1";
+    nav.src = "./pages-atelier.js?v=20261104-tools-1";
     document.head.appendChild(nav);
   }
 </script>
@@ -48,6 +49,7 @@
       <button class="nav-item" data-tab="laws"><i>⚖</i><span data-i18n="laws">Laws-Verwaltung</span></button>
       <button class="nav-item" data-tab="events"><i>▣</i><span data-i18n="events">Eventplanung</span></button>
        <button class="nav-item" data-tab="discord"><i>◉</i><span data-i18n="discordBot">Discord Event-Bot</span></button>
+      <button class="nav-item" data-tab="tools" hidden><i aria-hidden="true">⌘</i><span>Tools</span></button>
       <button class="nav-item" data-tab="settings"><i>⚙</i><span data-i18n="settings">Allianz &amp; Rechte</span></button>
     </nav>
     <div class="side-foot"><div class="security-dot">● <span data-i18n="private">Geschützter Bereich</span></div>
@@ -90,6 +92,10 @@
               <div id="nextEventList" class="simple-list"></div></article>
           </div>
           <div class="notice"><b data-i18n="pilotLabel">Pilotstatus</b><p data-i18n="pilotInfo">Spieler werden aus vorhandenen Daten gelesen. Event-Bot, automatische KI-Übersetzungen, bezahlte Abonnements und Discord-Einladungen sind noch nicht angeschlossen. Es werden dafür keine fiktiven Ergebnisse angezeigt.</p></div>
+        </section>
+        <section class="tab-page" data-page="tools" hidden>
+          <div class="page-heading"><div><span class="eyebrow">ALLIANCEOS · TOOLS</span><h2>Tools</h2></div></div>
+          <div id="toolsRoot"></div>
         </section>
         <section class="tab-page" data-page="roster" hidden>
           <div class="page-heading"><div><span class="eyebrow" data-i18n="rosterEyebrow">MITGLIEDER</span><h2 data-i18n="roster">Spielerverwaltung</h2><p data-i18n="rosterDesc">Nur deine Allianz. Spielerdaten sind auf den letzten bekannten Stand begrenzt.</p></div></div>
@@ -261,7 +267,7 @@
                       <label class="staff-permission-toggle"><input type="checkbox" name="laws"><span data-i18n="laws">Laws-Verwaltung</span></label>
                       <label class="staff-permission-toggle"><input type="checkbox" name="events"><span data-i18n="events">Eventplanung</span></label>
                       <label class="staff-permission-toggle"><input type="checkbox" name="event_bot"><span data-i18n="discordBot">Discord Event-Bot</span></label>
-                      </section><section class="staff-permission-group"><h4 data-ux-label="adminGroup">Verwaltung</h4><label class="staff-permission-toggle"><input type="checkbox" name="settings"><span data-i18n="settings">Allianz &amp; Rechte</span></label></section>
+                      </section><section class="staff-permission-group"><h4 data-ux-label="adminGroup">Verwaltung</h4><label class="staff-permission-toggle"><input type="checkbox" name="tools"><span>Tools</span></label><label class="staff-permission-toggle"><input type="checkbox" name="settings"><span data-i18n="settings">Allianz &amp; Rechte</span></label></section>
                     </div>
                     <label class="staff-active-toggle"><input type="checkbox" name="enabled"><span data-i18n="r4Enabled">R4-Zugang aktiviert</span></label>
                   </fieldset>
@@ -474,5 +480,5 @@
 <script src="../bear/combat.js?v=20261020-formation-shared"></script>
 <script src="../bear/own-baseline.js?v=20261020-formation-shared"></script>
 <script src="../bear/formation-core.js?v=20261020-formation-shared"></script>
-<script type="module" src="./app.js?v=20261104-member-api-1"></script>
+<script type="module" src="./app.js?v=20261104-tools-1"></script>
 </body></html>

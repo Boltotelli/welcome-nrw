@@ -15,6 +15,7 @@
     const items=[...nav.querySelectorAll('.nav-item')];
     const paths={overview:'M3 3h7v7H3Zm11 0h7v7h-7ZM3 14h7v7H3Zm11 0h7v7h-7Z',roster:'M3 21v-3a6 6 0 0 1 12 0v3m1-16a3 3 0 0 1 0 6m3 10v-3a5 5 0 0 0-3-4M12 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z',performance:'M4 4v16h17M8 15l4-5 4 3 5-8',bear:'M5 20h14M6 17V8l6-5 6 5v9M9 17v-5h6v5m-5-9h4',fightclub:'m4 3 14 14m-1-4 4 4-4 4-4-4M20 3 6 17m1-4-4 4 4 4 4-4',participation:'M4 4h16v17H4ZM8 2v4m8-4v4M8 13l3 3 5-6',transfers:'M3 7h17l-4-4m4 4-4 4M21 17H4l4-4m-4 4 4 4',laws:'M7 3h12v18H5V5a2 2 0 0 1 2-2ZM5 17h14M9 7h6m-6 4h6',events:'M3 5h18v16H3ZM7 3v4m10-4v4M3 11h18m-13 4h3m3 0h3',discord:'M4 4h16v13H9l-5 4ZM8 9h8m-8 4h5',settings:'M4 6h16M4 12h16M4 18h16M6 4h4v4H6Zm8 6h4v4h-4Zm-6 6h4v4H8Z'};
     // Bear head: rounded ears, face and muzzle; no building/house metaphor.
+    paths.tools='M4 3h16v18H4ZM7 6h10v4H7Zm0 8h2m2 0h2m2 0h2M7 18h2m2 0h2m2 0h2';
     paths.bear='M5 9C2 8 2 3 5.2 3c1.4 0 2.3.8 2.7 2a9 9 0 0 1 8.2 0c.4-1.2 1.3-2 2.7-2C22 3 22 8 19 9c.7 1.1 1 2.4 1 3.8C20 17.7 16.6 21 12 21S4 17.7 4 12.8C4 11.4 4.3 10.1 5 9ZM8.5 11h.01m7 0h.01M8.3 16a3.7 3 0 1 1 7.4 0 3.7 3 0 1 1-7.4 0Zm2.7-1.5h2l-1 1Zm1 1v1.5';
     const iconSVG=tab=>'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="'+(paths[tab]||paths.overview)+'"/></svg>';
     items.forEach(item=>{const icon=item.querySelector('i');if(icon&&paths[item.dataset.tab]){icon.innerHTML=iconSVG(item.dataset.tab);icon.setAttribute('aria-hidden','true');}});
@@ -74,7 +75,7 @@
       const active=items.find(x=>x.classList.contains('active'));
       items.forEach(x=>{if(x===active)x.setAttribute('aria-current','page');else x.removeAttribute('aria-current');});
       groups.forEach(({node,before},i)=>{node.textContent=l[i];node.hidden=before?.hidden===true;});
-      const label=active?.querySelector('[data-i18n]')?.textContent||l[7];heading.textContent=label;header.dataset.tab=active?.dataset.tab||'overview';moduleIcon.innerHTML=iconSVG(active?.dataset.tab||'overview');
+      const label=active?.querySelector('span')?.textContent||l[7];heading.textContent=label;header.dataset.tab=active?.dataset.tab||'overview';moduleIcon.innerHTML=iconSVG(active?.dataset.tab||'overview');
       const breadcrumb=document.getElementById('pageLabel');if(breadcrumb)breadcrumb.textContent=label;
       scope.textContent=l[8];skip.textContent=l[4];toggle.setAttribute('aria-label',l[5]);close.textContent=l[6];menuTitle.textContent=l[7];password.textContent=l[13];password.hidden=document.getElementById('changePasswordBtn')?.hidden!==false;
       shortcuts.forEach(({tab,button},i)=>{button.textContent=l[9+i];button.hidden=nav.querySelector('[data-tab="'+tab+'"]')?.hidden!==false;});actions.hidden=active?.dataset.tab!=='overview';
