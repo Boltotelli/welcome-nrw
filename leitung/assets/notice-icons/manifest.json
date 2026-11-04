@@ -1,0 +1,159 @@
+{
+  "checked": "2026-11-04",
+  "files": [
+    {
+      "file": "item_icon_100001.png",
+      "source": "https://stratforge.tools/kingshot/items/item_icon_100001.png",
+      "bytes": 9717,
+      "sha256": "da4c154766eeec44e7ae13c22a442f3e4a8c1b0149bb3e72fbbc542a4f4c8301",
+      "git_blob_sha1": "8875dbcd5ed6fb98a62bfeab047feb83bd71283e"
+    },
+    {
+      "file": "item_icon_100004.png",
+      "source": "https://stratforge.tools/kingshot/items/item_icon_100004.png",
+      "bytes": 15598,
+      "sha256": "ae45846e6b2b157f1ccb9ecc26e192670ec752a8fd2e3c57abf40576391e80b5",
+      "git_blob_sha1": "abc81ffa775d3868cb7e9aaefde57cfe0b7fcc0b"
+    },
+    {
+      "file": "item_icon_102.png",
+      "source": "https://stratforge.tools/kingshot/resources/item_icon_102.png",
+      "bytes": 10211,
+      "sha256": "cf9bd48468802c7caf190a7c6835324d49f1fa9edeeea3f3bb9d9d2e2e2351df",
+      "git_blob_sha1": "cc483fc234e684aad26014c4139667eced148117"
+    },
+    {
+      "file": "item_icon_103.png",
+      "source": "https://stratforge.tools/kingshot/resources/item_icon_103.png",
+      "bytes": 9480,
+      "sha256": "ea9aea38a2e91d1266490c6504986eeb67baf61581710227083934e4d03cd58e",
+      "git_blob_sha1": "0843c7a62b3d61cff903a266c25b97802e00f1a0"
+    },
+    {
+      "file": "bubble_icon_104.png",
+      "source": "https://stratforge.tools/kingshot/resources/bubble_icon_104.png",
+      "bytes": 2155,
+      "sha256": "7e6428b68504e894b0f569650e65dbf12c63378e4aed19d391386cdbd37a1ea5",
+      "git_blob_sha1": "e9307a8d248a4863998d75ab971c6bd743683ce7"
+    },
+    {
+      "file": "item_icon_100081.png",
+      "source": "https://stratforge.tools/kingshot/resources/item_icon_100081.png",
+      "bytes": 12937,
+      "sha256": "67be396e6f1b01d461490e1b9d6d17fcd6e6e061fc9e35eba7bde78d633c3a74",
+      "git_blob_sha1": "ad624b2374f865c1e61ec4946aee5adcef27f98e"
+    },
+    {
+      "file": "bubble_icon_105.png",
+      "source": "https://stratforge.tools/kingshot/resources/bubble_icon_105.png",
+      "bytes": 2146,
+      "sha256": "2a98ab92b40d4c95b41d0ffce662b49bbb6f48921629218acc12f27718b1ae70",
+      "git_blob_sha1": "41f1425d1f2343387c732da3d32279338b85f16e"
+    },
+    {
+      "file": "item_icon_106.png",
+      "source": "https://stratforge.tools/kingshot/resources/item_icon_106.png",
+      "bytes": 9716,
+      "sha256": "5b8d8213a8ec1b9d48a8522afc131f6a0839b59e0cc376eeb0a594f073913bd0",
+      "git_blob_sha1": "d91b6eee5004500944620c37b013a0d6a060d346"
+    },
+    {
+      "file": "item_icon_107.png",
+      "source": "https://stratforge.tools/kingshot/items/item_icon_107.png",
+      "bytes": 13772,
+      "sha256": "587907bc67fbf529f407bdaea1ba97391113d6eaa05d507cfad265d35037462d",
+      "git_blob_sha1": "a891f9996b5ca54adda06e9a95897b2ce24bf37e"
+    },
+    {
+      "file": "item_icon_500220.png",
+      "source": "https://stratforge.tools/kingshot/items/item_icon_500220.png",
+      "bytes": 8995,
+      "sha256": "bf10529ae1d95b01f76443dd932fff34387a186b2d62e349ecc3f133ff766243",
+      "git_blob_sha1": "a9b0f5c8d7fc5fca9f430d3a875d057a61715e91"
+    },
+    {
+      "file": "item_icon_200201.png",
+      "source": "https://stratforge.tools/kingshot/speedups/item_icon_200201.png",
+      "bytes": 10325,
+      "sha256": "a2830bfc71613887977fe84e71a687767e8794c779e148dffdd5761d6e05cdba",
+      "git_blob_sha1": "ed75fb654f26282d01480b37f79529fb347b21c6"
+    },
+    {
+      "file": "item_icon_200301.png",
+      "source": "https://stratforge.tools/kingshot/speedups/item_icon_200301.png",
+      "bytes": 10407,
+      "sha256": "5ad612f2fc19413d86c3ecf4a7337a7c04032f558c396f7c92a762061a89f925",
+      "git_blob_sha1": "287aaa8f8fa62442c3f5d398a5aab0ac4524ed36"
+    },
+    {
+      "file": "item_icon_200401.png",
+      "source": "https://stratforge.tools/kingshot/speedups/item_icon_200401.png",
+      "bytes": 11761,
+      "sha256": "4a8c17c955d689baedabe10f833e36385933e0e8e6d920a6065a553ed97ff607",
+      "git_blob_sha1": "6889c75506e4a5726f31cbb92e8909cf2e01d65d"
+    },
+    {
+      "file": "item_icon_200101.png",
+      "source": "https://stratforge.tools/kingshot/speedups/item_icon_200101.png",
+      "bytes": 9732,
+      "sha256": "5eb8fc5b215698b2e62666031a4a39a9f989f86cdac8d5a831ffb0282cdf8b87",
+      "git_blob_sha1": "cf517137801744df031178fc197a88626873b3e5"
+    },
+    {
+      "file": "item_icon_500240.png",
+      "source": "https://stratforge.tools/kingshot/items/item_icon_500240.png",
+      "bytes": 12715,
+      "sha256": "a9d86ed4cbbe5cc6eaada8f19d43f721a670d715a6e395b4a937e86dfe116a9b",
+      "git_blob_sha1": "b513f6afd1f624e8b50ceebc65de1d21f0f73603"
+    },
+    {
+      "file": "item_icon_600020.png",
+      "source": "https://stratforge.tools/kingshot/items/item_icon_600020.png",
+      "bytes": 13742,
+      "sha256": "b6d6ff864c3f298542be39a4ce57507b8cb78a2bf46999655aa3459d51abb275",
+      "git_blob_sha1": "d3cedbd00f6b201c23ced0662c65dda54320dad5"
+    },
+    {
+      "file": "item_icon_620116.png",
+      "source": "https://stratforge.tools/kingshot/items/item_icon_620116.png",
+      "bytes": 13046,
+      "sha256": "241ea0943b1316c598542caba308ee6a49d47d383538de739b7bad2cb5355d01",
+      "git_blob_sha1": "2a42e4c91050a2110023d41b66f0b05ca039e6d0"
+    },
+    {
+      "file": "item_icon_620127.png",
+      "source": "https://stratforge.tools/kingshot/items/item_icon_620127.png",
+      "bytes": 16094,
+      "sha256": "e8b80ca0ef53e46f1ab1750986b2ad4e7ca60ec1ccab170d71419077f4f421b8",
+      "git_blob_sha1": "eed04824292eed2293078b2e5032bbf988cf2722"
+    },
+    {
+      "file": "item_icon_620189.png",
+      "source": "https://stratforge.tools/kingshot/items/item_icon_620189.png",
+      "bytes": 10729,
+      "sha256": "e1be3ca9bf55fc94e7c9d5f788f35c52bd42c4166c9be61f420ec0fbad62b660",
+      "git_blob_sha1": "a86da4e3bd0f2baaada2bd987a685379099a4641"
+    },
+    {
+      "file": "item_icon_620197.png",
+      "source": "https://stratforge.tools/kingshot/items/item_icon_620197.png",
+      "bytes": 10244,
+      "sha256": "04c864d32b983f5658141bb1cd20c234ad0c676aa53968dc2f6ddfdaf1166a5d",
+      "git_blob_sha1": "acc42866f731438f3a3ef098c8d5b623563e04ef"
+    },
+    {
+      "file": "item_icon_620302.png",
+      "source": "https://stratforge.tools/kingshot/items/item_icon_620302.png",
+      "bytes": 15013,
+      "sha256": "70357e6df73fc1c8ffb65ed683025f7ec1b8baf8cfd9261fa573446789774846",
+      "git_blob_sha1": "b35e043ef39aba211ae8d84dcfbdf96f076b77e5"
+    },
+    {
+      "file": "item_icon_610002.png",
+      "source": "https://stratforge.tools/kingshot/items/item_icon_610002.png",
+      "bytes": 13721,
+      "sha256": "efd3199418f1ee668f94665e24c2a47ba9b9f5e32a5e6cb9e4aa2ce2409cc5d9",
+      "git_blob_sha1": "fafe6d150bffa71b80582db2fec2c891e1bac9de"
+    }
+  ]
+}

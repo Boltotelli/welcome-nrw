@@ -112,7 +112,7 @@ const root=path.resolve(__dirname,'..'),tags=['NRW','NWO','THM','CWR','PxR','NwO
   await page.locator('[data-wb-icon-search]').fill('zzzz-no-result');assert(await page.locator('[data-wb-icon-empty]').isVisible());assert.equal(await notice.inputValue(),expectedPalette);
   await page.locator('[data-wb-icon-search]').fill('');
   // Lazy previews are checked as they come into view, including the final palette row.
-  for(const image of await page.locator('.wb-icon-grid img').all()){await image.scrollIntoViewIfNeeded();await image.evaluate(el=>el.decode());assert(await image.evaluate(el=>el.naturalWidth>0));}
+  for(const image of await page.locator('.wb-icon-grid img').all()){await image.scrollIntoViewIfNeeded();try{await image.evaluate(el=>el.decode());}catch(e){throw Error('Preview failed: '+await image.getAttribute('src')+'; '+e.message);}assert(await image.evaluate(el=>el.naturalWidth>0));}
   await page.locator('[data-wb-icon-group]').nth(1).locator('summary').click();
   await notice.fill('Hallo NRW!\n\n<b>Gemeinsam bereit für KvK.</b>\n<item_icon_102> Ressourcen sparen\n<item_icon_200301> Beschleuniger bereithalten');await page.evaluate(()=>window.scrollTo(0,0));fs.mkdirSync(path.join(root,'tests/artifacts'),{recursive:true});await page.screenshot({path:path.join(root,'tests/artifacts/notice-palette-desktop.png')});
   await notice.fill('Hallo <b>NRW</b>');await page.locator('[data-wb-action="save"]').click();await page.locator('[data-wb-status]').filter({hasText:'Gemeinsam gespeichert'}).waitFor();

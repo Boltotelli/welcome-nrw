@@ -9,5 +9,6 @@ assert.deepEqual(symbols.map(g=>g.values),expected.symbolGroups);assert.equal(sy
 const all=[...tags,...special];assert.equal(new Set(all.map(i=>i.id)).size,59);assert(all.every(i=>i.label.trim()&&i.reference.trim()));
 const pictures=new Set(all.filter(i=>i.image).map(i=>path.basename(new URL(i.image).pathname)));
 assert.equal(pictures.size,22);
-for(const name of pictures){const bytes=fs.readFileSync(path.join(root,'leitung/assets/notice-icons',name));assert.equal(bytes.subarray(0,8).toString('hex'),'89504e470d0a1a0a',name);}
+const manifest=require('../leitung/assets/notice-icons/manifest.json');assert.equal(manifest.files.length,22);
+for(const name of pictures){const bytes=fs.readFileSync(path.join(root,'leitung/assets/notice-icons',name)),entry=manifest.files.find(f=>f.file===name);assert.equal(bytes.subarray(0,8).toString('hex'),'89504e470d0a1a0a',name);assert.equal(bytes.length,entry.bytes);assert.equal(require('node:crypto').createHash('sha256').update(bytes).digest('hex'),entry.sha256,name);}
 console.log('PASS: parity with independently observed 27 item tags, 32 exact game characters, all 47 symbols and 22 valid local PNG previews; no guessed item or private-use IDs.');

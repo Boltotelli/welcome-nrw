@@ -1,7 +1,7 @@
 // All 27 tags and 32 code points were checked through the reference editor UI.
 // Reference: https://stratforge.tools/dashboard/kingshot/tools/notice-builder
 // Checked 2026-11-04. This verifies editor output, not rendering inside Kingshot.
-const icon=file=>file?new URL('./assets/notice-icons/'+file,import.meta.url).href:null;
+const icon=file=>file?new URL('./assets/notice-icons/'+file+'?v=20261104-notice-palette-2',import.meta.url).href:null;
 const tags=[
  [101,'Diamanten','Gem','item_icon_100001.png'],
  [100004,'Diamantenbeutel','Bag of Gems','item_icon_100004.png'],

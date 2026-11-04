@@ -1,4 +1,4 @@
-import {NOTICE_ITEM_TAGS,NOTICE_SPECIAL_ICONS,NOTICE_SYMBOL_GROUPS} from './tools-notice-palette.js?v=20261104-notice-palette-1';
+import {NOTICE_ITEM_TAGS,NOTICE_SPECIAL_ICONS,NOTICE_SYMBOL_GROUPS} from './tools-notice-palette.js?v=20261104-notice-palette-2';
 import {WORKBENCH_TOOLS,rallyPlan,rallyText,utc,insertText,coordinateTag,OUTPOST_TYPES,outpostSummary} from './tools-workbench-model.js?v=20261104-workbench-1';
 import {TERRITORY_SITES,TERRITORY_SOURCE} from './tools-territory-catalog.js?v=20261104-workbench-1';
 import {rankKvk} from './tools-kvk.js?v=20261104-kvk-order-1';
