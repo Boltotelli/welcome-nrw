@@ -1,3 +1,4 @@
+import {activateMemberApiRefresh,memberApiLabels} from "./member-api-refresh.js?v=20261104-1";
 import {identityOptions,selectedLogin} from "./login-identities.js?v=20261103-integrated-1";
 import {createSslAccessAdmin} from "./ssl-access-admin.js?v=20261103-integrated-1";
 import {createAnnouncementEditor} from "./announcement.js?v=20261103-ssl-1";
@@ -6,7 +7,7 @@ import {createEventHub} from "./event-library.js?v=step6-iteratorfix-1";
 import {createOperations} from "./operations.js?v=pages-4";
 import {createDiscordEventPlanner} from "./discord-events.js?v=eventbot-4lang-20261019";
 import {createEventBotStatusPanel} from "./event-bot-status.js?v=20261021-usability-1";
-import {createMemberRelationships} from "./member-relationships.js?v=20261021-usability-1";
+import {createMemberRelationships} from "./member-relationships.js?v=20261104-member-api-1";
 import {createPerformance} from "./performance.js?v=20261021-usability-1";
 import {createBearManagement} from "./bear-management.js?v=20261103-ssl-1";
 import {createFightClub} from "./fightclub.js?v=20261104-reserves-1";
@@ -482,7 +483,8 @@ function openEdit(entity,id=null,sourcePlayer=null){
     const internal=(state.internalMoves||[]).filter(x=>x.game_id===record.game_id);
     h='<div class="dossier-info"><div>'+(record.avatar_url&&/^https:\/\//i.test(record.avatar_url)?'<img class="dossier-avatar" src="'+esc(record.avatar_url)+'" alt="'+esc(t("photoUnavailable"))+'" loading="lazy" referrerpolicy="no-referrer">':'<span class="dossier-avatar dossier-avatar-initial" aria-label="'+esc(t("photoUnavailable"))+'">'+esc((record.name||"?").slice(0,1))+'</span>')+'<b>'+esc(record.name)+'</b><small>Game-ID '+esc(record.game_id)+' · '+esc(record.rank?"R"+record.rank:"—")+'</small></div>'+
       '<div><small>'+esc(t("cityLevel"))+'</small><b>'+esc(cityLevel(record.tc_level))+'</b></div>'+
-      '<div><small>Mystic Trial</small><b>'+esc(record.mystic_trial==null?'—':fmtInt(record.mystic_trial))+'</b><small>'+esc(record.mystic_trial_fetched_at?dateText(record.mystic_trial_fetched_at):'')+'</small></div><div><small>'+esc(t("strength"))+'</small><b>'+esc(record.power==null?t("noPower"):formattedPower(record.power))+'</b></div></div>'+
+      '<div><small>Mystic Trial</small><b data-member-mystic>'+esc(record.mystic_trial==null?'—':fmtInt(record.mystic_trial))+'</b><small data-member-mystic-at>'+esc(record.mystic_trial_fetched_at?dateText(record.mystic_trial_fetched_at):'')+'</small></div><div><small>'+esc(t("strength"))+'</small><b data-member-api-power>'+esc(record.power==null?t("noPower"):formattedPower(record.power))+'</b></div></div>'+
+      '<div class="external-alt-actions"><button type="button" class="ghost" data-member-api-refresh>'+esc(memberApiLabels(lang).button)+'</button><span class="small-note" data-member-api-status role="status" aria-live="polite"></span></div>'+
       '<p class="small-note">'+esc(t("sourceNote"))+'</p>'+
       select(t("memberStatus"),"member_status",record.member_status,[["active",t("active")],["planned",t("planned")],["left",t("left")]])+
       '<div class="form-grid"><div class="field"><span>'+esc(t("discordPresence"))+'</span><p class="discord-presence '+(record.discord_connected?"connected":"unlinked")+'">'+esc(record.discord_connected?t("yes"):t("no"))+'</p><small>'+esc(record.discord_connected?t("discordLinked"):t("discordUnlinked"))+'</small></div>'+
@@ -539,7 +541,17 @@ function openEdit(entity,id=null,sourcePlayer=null){
  const dialog=$("editDialog");
  if(dialog.open)dialog.close();
  dialog.showModal();
- if(entity==="member"&&record)relationships.activate(record);
+ if(entity==="member"&&record){
+  relationships.activate(record);
+  activateMemberApiRefresh({root:dialog,gameId:record.game_id,getLanguage:()=>lang,request,onValues:p=>{
+   record.mystic_trial=p.mystic_trial;record.mystic_trial_fetched_at=p.mystic_trial_fetched_at;
+   if(record.power_override==null){record.power=p.power;record.power_source=p.source;record.power_observed_at=p.fetched_at;}
+   dialog.querySelector('[data-member-mystic-at]').textContent=record.mystic_trial_fetched_at?dateText(record.mystic_trial_fetched_at):'';
+   dialog.querySelector('[data-member-mystic]').textContent=record.mystic_trial==null?'—':fmtInt(record.mystic_trial);
+   dialog.querySelector('[data-member-api-power]').textContent=record.power==null?t('noPower'):formattedPower(record.power);
+   renderRoster();relationships.refreshHistory(record);
+  }});
+ }
 }
 async function saveDialog(event){
  event.preventDefault();

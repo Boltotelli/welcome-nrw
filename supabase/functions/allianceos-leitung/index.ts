@@ -756,7 +756,10 @@ async function syncListedRosterPower(req:Request,alliance:string,staff:any,body:
  if(!key)throw new HttpError("player_provider_unconfigured",503);
  const config=await checked<any>(db.from("aos_alliances").select("kingdom_id").eq("code",alliance).single());
  const people=await rosterFor(alliance,config.kingdom_id);
- const ids=[...new Set(people.map((p:any)=>String(p.game_id||"")).filter(isId))].sort();
+ const rosterIds=[...new Set(people.map((p:any)=>String(p.game_id||"")).filter(isId))].sort();
+ const requestedId=body?.game_id===undefined?'':String(body.game_id);
+ if(body?.game_id!==undefined&&(!isId(requestedId)||!rosterIds.includes(requestedId)))throw new HttpError("player_not_in_alliance",403);
+ const ids=requestedId?[requestedId]:rosterIds;
  if(!ids.length)throw new HttpError("roster_missing",409);
  const cursor=Number(body?.cursor??0);
  if(!Number.isInteger(cursor)||cursor<0||cursor>=ids.length)throw new HttpError("invalid_sync_cursor",400);
@@ -764,14 +767,14 @@ async function syncListedRosterPower(req:Request,alliance:string,staff:any,body:
  const snapshots=await checked<any[]>(db.from("aos_member_power_snapshot")
   .select("game_id,power,fetched_at,mystic_trial,mystic_trial_fetched_at").eq("alliance_code",alliance).in("game_id",ids).limit(1000));
  const validPower=(n:any)=>n!==null&&n!==undefined&&n!==""&&Number.isSafeInteger(Number(n))&&Number(n)>=0&&Number(n)<=9999999999999;
- const fresh=new Set(snapshots.filter(p=>validPower(p.power)&&Date.now()-Date.parse(p.fetched_at)>=0&&Date.now()-Date.parse(p.fetched_at)<25*60*1000).map(p=>String(p.game_id)));
+ const fresh=new Set(snapshots.filter(p=>!requestedId&&validPower(p.power)&&Date.now()-Date.parse(p.fetched_at)>=0&&Date.now()-Date.parse(p.fetched_at)<25*60*1000).map(p=>String(p.game_id)));
  const values=new Map<string,any>(),failed:any[]=[];let rateLimited=false,providerCalls=0;
  // Retain the existing roster-refresh cache tag (schema enum), regardless of endpoint.
  const snapshotById=new Map(snapshots.map(p=>[String(p.game_id),p]));
  const add=(id:string,power:any)=>{if(allowed.has(id)&&validPower(power))values.set(id,{alliance_code:alliance,game_id:id,power:Number(power),fetched_at:now,source:"mightpulse_roster",mystic_trial:snapshotById.get(id)?.mystic_trial??null,mystic_trial_fetched_at:snapshotById.get(id)?.mystic_trial_fetched_at??null});};
  // One aggregate request covers current NRW members; absent/away/left accounts
  // are subsequently resolved through the player endpoint, irrespective of tag.
- if(cursor===0&&people.some((p:any)=>p.active&&!p.is_event_loan&&!fresh.has(String(p.game_id)))){
+ if(!requestedId&&cursor===0&&people.some((p:any)=>p.active&&!p.is_event_loan&&!fresh.has(String(p.game_id)))){
   try{
    providerCalls++;
    const response=await fetch("https://api.mightpulse.com/v1/alliances/"+encodeURIComponent(String(config.kingdom_id))+"/"+encodeURIComponent(alliance)+"?include=info,roster",{headers:{Accept:"application/json",Authorization:"Bearer "+key},signal:AbortSignal.timeout(30000)});
@@ -782,7 +785,7 @@ async function syncListedRosterPower(req:Request,alliance:string,staff:any,body:
  }
  // Mystic Trial requires per-player ranks; the alliance roster contains power only.
  const scoreFresh=new Set(snapshots.filter(p=>p.mystic_trial!=null&&Date.now()-Date.parse(p.mystic_trial_fetched_at)>=0&&Date.now()-Date.parse(p.mystic_trial_fetched_at)<60*60*1000).map(p=>String(p.game_id)));
- const pending=batch.filter(id=>!scoreFresh.has(id)||(!fresh.has(id)&&!values.has(id)));let index=0;
+ const pending=batch.filter(id=>Boolean(requestedId)||!scoreFresh.has(id)||(!fresh.has(id)&&!values.has(id)));let index=0;
  async function worker(){
   while(index<pending.length){const id=pending[index++];
    if(rateLimited){failed.push({game_id:id,error:"provider_rate_limited"});continue;}
@@ -809,7 +812,7 @@ async function syncListedRosterPower(req:Request,alliance:string,staff:any,body:
   await checked<any>(db.from("aos_member_power_snapshot").upsert(part,{onConflict:"alliance_code,game_id"}).select("game_id"));
  }
  return json(req,{ok:true,source:providerCalls?"mightpulse_mixed":"cache",matched:new Set([...fresh,...values.keys()]).size,updated:updates.length,requested:ids.length,failed,
-  rate_limited:rateLimited,next_cursor:!rateLimited&&cursor+batch.length<ids.length?cursor+batch.length:null,fetched_at:now});
+  rate_limited:rateLimited,next_cursor:!rateLimited&&cursor+batch.length<ids.length?cursor+batch.length:null,fetched_at:now,player:requestedId?values.get(requestedId)||null:undefined});
 }
 
 async function syncRosterPower(req:Request,alliance:string,staff:any){

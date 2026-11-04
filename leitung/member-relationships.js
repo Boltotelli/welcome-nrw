@@ -50,6 +50,8 @@ export function createMemberRelationships({getState,getLanguage,request,esc,flas
   const player=id=>(getState()?.players||[]).find(x=>String(x.game_id)===String(id));
   const externalFor=id=>(getState()?.externalAlts||[]).filter(x=>String(x.main_game_id)===String(id));
   const format=n=>Number(n).toLocaleString({de:"de-DE",en:"en-GB",fr:"fr-FR",es:"es-ES"}[getLanguage()]||"de-DE");
+  const refreshWords=()=>({de:['API-Daten aktualisieren','API-Daten aktualisiert.'],en:['Refresh API data','API data updated.'],fr:['Actualiser les données API','Données API actualisées.'],es:['Actualizar datos API','Datos API actualizados.']}[getLanguage()]||['Refresh API data','API data updated.']);
+  function externalAccountRow(alt){return '<div class="external-alt-row" data-external-row="'+esc(alt.alt_game_id)+'"><span><b>'+esc(alt.display_name||alt.alt_game_id)+'</b> <small>· '+esc(alt.alt_game_id)+(alt.reported_alliance?' · '+esc(alt.reported_alliance):'')+' · '+esc(t("externalType"))+'</small><small data-external-refresh-status role="status"></small></span><div><button type="button" class="ghost" data-refresh-external-alt="'+esc(alt.alt_game_id)+'">'+esc(refreshWords()[0])+'</button> <button type="button" class="ghost" data-remove-external-alt="'+esc(alt.alt_game_id)+'">'+esc(t("externalRemove"))+'</button></div></div>';}
   function rowBadge(p){
     if(!enabled)return "";
     if(p.main_game_id){
@@ -71,8 +73,7 @@ export function createMemberRelationships({getState,getLanguage,request,esc,flas
     }
     const mainOptions=options.map(p=>'<option value="'+esc(p.game_id)+'" '+(p.game_id===record.main_game_id?'selected':'')+'>'+esc(p.name)+' · '+esc(p.game_id)+'</option>').join("");
     const nativeAccounts=related.map(alt=>'<button type="button" class="ghost member-related" data-related-player="'+esc(alt.game_id)+'">'+esc(alt.name)+' <small>· '+esc(alt.game_id)+'</small> ↗</button>').join("");
-    const externalAccounts=external.map(alt=>'<div class="external-alt-row"><span><b>'+esc(alt.display_name||alt.alt_game_id)+'</b> <small>· '+esc(alt.alt_game_id)+(alt.reported_alliance?' · '+esc(alt.reported_alliance):'')+' · '+esc(t("externalType"))+'</small></span>'+
-      '<button type="button" class="ghost" data-remove-external-alt="'+esc(alt.alt_game_id)+'">'+esc(t("externalRemove"))+'</button></div>').join("");
+    const externalAccounts=external.map(externalAccountRow).join('');
     const accounts=nativeAccounts+externalAccounts||( '<p class="muted">'+esc(t("noAlt"))+'</p>');
     const externalEditor='<div class="external-alt-editor"><h4>'+esc(t("externalTitle"))+'</h4><p class="small-note">'+esc(t("externalHelp"))+'</p>'+
       '<div class="form-grid"><label class="field"><span>'+esc(t("externalId"))+'</span><input class="control" name="external_alt_id" pattern="[0-9]{5,20}" inputmode="numeric" maxlength="20" placeholder="123456789"></label>'+
@@ -123,6 +124,9 @@ export function createMemberRelationships({getState,getLanguage,request,esc,flas
     kind.addEventListener("change",update);
     update();
     dialog.dataset.memberGameId=record.game_id;
+    refreshHistory(record);
+  }
+  function refreshHistory(record){const dialog=document.getElementById("editDialog");
     request("bootstrap",{action:"power_history",game_id:record.game_id}).then(data=>{
       if(!dialog.open||dialog.dataset.memberGameId!==record.game_id)return;
       const target=document.getElementById("memberPowerHistory");
@@ -148,6 +152,24 @@ export function createMemberRelationships({getState,getLanguage,request,esc,flas
       delete status.dataset.lookupId;status.textContent=lt("changed");
     });
     dialog.addEventListener("click",async event=>{
+      const refresh=event.target.closest('[data-refresh-external-alt]');
+      if(refresh&&dialog.open){
+       event.preventDefault();if(refresh.disabled)return;
+       const main=dialog.dataset.memberGameId,id=refresh.dataset.refreshExternalAlt,row=refresh.closest('[data-external-row]'),status=row.querySelector('[data-external-refresh-status]');
+       const old=externalFor(main).find(a=>String(a.alt_game_id)===id);if(!old)return;
+       row.querySelectorAll('button').forEach(b=>b.disabled=true);status.textContent=lt('loading');
+       try{
+        const result=await request('bootstrap',{action:'external_alt_lookup',game_id:id}),p=result?.player;
+        if(!p||String(p.game_id)!==id)throw Error('invalid_player_response');
+        if(!dialog.open||dialog.dataset.memberGameId!==main||!row.isConnected)return;
+        const saved=await request('bootstrap',{action:'external_alt_save',command:'save',main_game_id:main,alt_game_id:id,display_name:p.name||old.display_name||'',reported_alliance:p.alliance??old.reported_alliance??''});
+        if(!saved?.ok||!saved.item)throw Error('save_failed');
+        Object.assign(old,saved.item);
+        if(dialog.open&&dialog.dataset.memberGameId===main&&row.isConnected){row.outerHTML=externalAccountRow(old);const updated=[...dialog.querySelectorAll('[data-external-row]')].find(r=>r.dataset.externalRow===id);if(updated)updated.querySelector('[data-external-refresh-status]').textContent=refreshWords()[1];}
+       }catch{if(row.isConnected)status.textContent=lt('failed');}
+       finally{if(row.isConnected)row.querySelectorAll('button').forEach(b=>b.disabled=false);}
+       return;
+      }
       const lookup=event.target.closest("[data-lookup-external-alt]");
       if(lookup&&dialog.open){
         event.preventDefault();if(lookup.disabled)return;
@@ -199,5 +221,5 @@ export function createMemberRelationships({getState,getLanguage,request,esc,flas
     if(!enabled)return;
     data.main_game_id=formData.get("account_kind")==="alt"?String(formData.get("main_game_id")||""):"";
   }
-  return {enabled,rowBadge,editorFields,activate,appendSaveData};
+  return {enabled,rowBadge,editorFields,activate,refreshHistory,appendSaveData};
 }
