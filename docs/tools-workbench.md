@@ -8,7 +8,7 @@ Implemented 2026-11-04 in the existing Tools module. Existing `tools` permission
 
 ## Announcement editor
 
-2,000 UTF-16 code units, separate Alliance/Chat modes, insertion at selection/cursor, bold, italic, color, symbols, coordinate links, plain text preview, clipboard with manual fallback, and shared templates. Game tags are copied as text, never executed as HTML. Format support not validated in Kingshot is labelled. Only the item tag actually observed at the reference (`<item_icon_101>`) is included; no guessed resource IDs. U+E001 is available separately. Other tags can be typed directly. No external community publishing or message sending.
+2,000 UTF-16 code units, separate Alliance/Chat modes, insertion at selection/cursor, bold, italic, color, symbols, coordinate links, plain text preview, clipboard with manual fallback, and shared templates. Game tags are copied as text, never executed as HTML. Format support not validated in Kingshot is labelled. The complete reference palette is included: 27 item tags, 32 private-use game characters and all 47 symbols in five groups. Every item tag and character was checked by clicking its reference button and reading the resulting draft, then restoring the empty reference draft. 22 locally hosted game images provide previews; entries without source images retain their names. German and English names are searchable. No resource or private-use IDs were guessed. No external community publishing or message sending.
 
 ## Rally-Sync
 
@@ -34,6 +34,7 @@ Integration follows the public client's signed form (`cdk`, `fid`, `kid`, Unix-s
 
 ## Verification
 
+- `tests/notice-palette.cjs`: independent reference fixture parity for all 27 tags, 32 code points, 47 symbols and valid local PNGs. The browser suite clicks every icon and checks exact insertion, cursor position, clipboard, search and loaded previews.
 - `tests/tools-workbench-model.cjs`: midnight/stagger math, limits, coordinate validation, duplicate outpost groups, backend input validation, gift request payload, receipt reservation and unknown outcomes.
 - `tests/tools-workbench-ui.cjs`: full leadership app fixtures, cursor formatting, saved templates/plans/weeks, territory phase changes, bulk recipients, uncertainty pause/deliberate retry, no repeats of confirmed success, escaped names, permission visibility, mobile overflow and screenshots.
 - The same browser suite passed using the actual published Vercel HTML/CSS/JS (`TOOLS_LIVE_ASSETS=1`) with all API calls still intercepted by synthetic fixtures. Create-run failures leave the bulk start usable for retry.

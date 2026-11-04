@@ -1,5 +1,5 @@
-import {createToolsWorkbench} from "./tools-workbench.js?v=20261104-workbench-2";
-import {WORKBENCH_TOOLS} from "./tools-workbench-model.js?v=20261104-workbench-2";
+import {createToolsWorkbench} from "./tools-workbench.js?v=20261104-notice-palette-1";
+import {WORKBENCH_TOOLS} from "./tools-workbench-model.js?v=20261104-notice-palette-1";
 import {ALLIANCES,PERIODS,blankKvk,parseInteger,formatInteger,formatScore,rankKvk} from './tools-kvk.js?v=20261104-kvk-order-1';
 import {toolsProfileView} from './tools-player-view.js?v=20261104-tools-history-1';
 const copy={

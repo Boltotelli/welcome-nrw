@@ -84,7 +84,7 @@ const root=path.resolve(__dirname,'..'),tags=['NRW','NWO','THM','CWR','PxR','NwO
 
    if(!fs.existsSync(file))return r.fulfill({status:404,body:''});
 
-   return r.fulfill({body:fs.readFileSync(file),contentType:file.endsWith('.html')?'text/html':file.endsWith('.js')?'application/javascript':file.endsWith('.css')?'text/css':file.endsWith('.json')?'application/json':'image/svg+xml'});
+   return r.fulfill({body:fs.readFileSync(file),contentType:file.endsWith('.html')?'text/html':file.endsWith('.js')?'application/javascript':file.endsWith('.css')?'text/css':file.endsWith('.json')?'application/json':file.endsWith('.png')?'image/png':'image/svg+xml'});
 
   });
 
@@ -100,6 +100,23 @@ const root=path.resolve(__dirname,'..'),tags=['NRW','NWO','THM','CWR','PxR','NwO
 
   await page.locator('[data-wb-field="title"]').fill('Willkommen');await page.locator('[data-wb-action="save"]').click();await page.locator('[data-wb-status]').filter({hasText:'Gemeinsam gespeichert'}).waitFor();assert.equal(documents.length,1);
 
+  assert.equal(await page.locator('[data-wb-icon-type="tag"]').count(),27);assert.equal(await page.locator('[data-wb-icon-type="special"]').count(),32);
+  const reference=require('./fixtures/notice-palette-reference.json'),notice=page.locator('#wb-notice-text');
+  await notice.fill('BEGINEND');await notice.evaluate(el=>{el.focus();el.setSelectionRange(5,5);el.dispatchEvent(new Event('select',{bubbles:true}));});
+  for(const id of reference.itemTagIds)await page.locator('[data-wb-icon="tag-'+id+'"]').click();
+  await page.locator('[data-wb-icon-group]').nth(1).locator('summary').click();
+  for(const code of reference.specialCodepoints)await page.locator('[data-wb-icon="char-'+code+'"]').click();
+  const expectedPalette='BEGIN'+reference.itemTagIds.map(id=>'<item_icon_'+id+'>').join('')+reference.specialCodepoints.map(h=>String.fromCodePoint(parseInt(h,16))).join('')+'END';
+  assert.equal(await notice.inputValue(),expectedPalette);await page.locator('[data-wb-action="copy"]').click();assert.equal(await page.evaluate(()=>navigator.clipboard.readText()),expectedPalette);
+  await page.locator('[data-wb-icon-search]').fill('speedup');assert.equal(await page.locator('[data-wb-icon]:visible').count(),8);
+  await page.locator('[data-wb-icon-search]').fill('zzzz-no-result');assert(await page.locator('[data-wb-icon-empty]').isVisible());assert.equal(await notice.inputValue(),expectedPalette);
+  await page.locator('[data-wb-icon-search]').fill('');
+  // Lazy previews are checked as they come into view, including the final palette row.
+  for(const image of await page.locator('.wb-icon-grid img').all()){await image.scrollIntoViewIfNeeded();await image.evaluate(el=>el.decode());assert(await image.evaluate(el=>el.naturalWidth>0));}
+  await page.locator('[data-wb-icon-group]').nth(1).locator('summary').click();
+  await notice.fill('Hallo NRW!\n\n<b>Gemeinsam bereit für KvK.</b>\n<item_icon_102> Ressourcen sparen\n<item_icon_200301> Beschleuniger bereithalten');await page.evaluate(()=>window.scrollTo(0,0));fs.mkdirSync(path.join(root,'tests/artifacts'),{recursive:true});await page.screenshot({path:path.join(root,'tests/artifacts/notice-palette-desktop.png')});
+  await notice.fill('Hallo <b>NRW</b>');await page.locator('[data-wb-action="save"]').click();await page.locator('[data-wb-status]').filter({hasText:'Gemeinsam gespeichert'}).waitFor();
+  console.log('PASS: all 59 icon buttons insert exact reference output and survive clipboard; search and 22 local previews');
   console.log('Testing next tool');await page.locator('[data-tool="rally"]').click();await page.locator('[data-wb-field="title"]').fill('Burg');await page.locator('[data-wb-field="date"]').fill('2026-11-05');await page.locator('[data-wb-field="time"]').fill('00:01:00');await page.locator('[data-wb-leader-field="name"]').fill('Alpha');await page.locator('[data-wb-leader-field="march"]').fill('01:30');assert((await page.locator('[data-wb-rally-result]').innerText()).includes('2026-11-04 23:54:30 UTC'));
 
   await page.locator('[data-wb-action="add-leader"]').click();await page.locator('[data-wb-leader-field="name"]').nth(1).fill('Beta');await page.locator('[data-wb-field="gap"]').fill('30');assert((await page.locator('[data-wb-rally-result]').innerText()).includes('00:01:30 UTC'));
