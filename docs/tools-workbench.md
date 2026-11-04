@@ -4,7 +4,7 @@ Implemented 2026-11-04 in the existing Tools module. Existing `tools` permission
 
 ## Shared documents
 
-`aos_tools_documents` stores announcement templates, Rally-Sync plans and territory week snapshots. UUID identity, kind and alliance are checked on each request. Updates and deletes match the saved version; stale writers cannot overwrite another officer. Inputs stay in memory when switching tools. Saving, cloning, archive loading, list refresh and explicit deletion are available. Private data is not stored in localStorage. The new screens currently use German copy; the existing translated KvK and player lookup screens remain intact.
+`aos_tools_documents` stores announcement templates, Rally-Sync plans and territory week snapshots. UUID identity, kind and alliance are checked on each request. Updates and deletes match the saved version; stale writers cannot overwrite another officer. Inputs stay in memory when switching tools. Saving, cloning, archive loading, list refresh and explicit deletion are available. Private data is not stored in localStorage. All four new screens use the selected app language (DE/EN/FR/ES), including controlled catalog labels, accessibility text, confirmations, errors, provider statuses and generated chat output. Existing user content, names, game tags and persisted outpost-type values are never translated. The existing KvK and player lookup translations remain intact.
 
 ## Announcement editor
 
@@ -42,3 +42,7 @@ Integration follows the public client's signed form (`cdk`, `fid`, `kid`, Unix-s
 - Live SQL assertions verify duplicate processing/success claims, rolled back with no test receipts remaining. New tables have RLS and no anon/authenticated privileges; the reservation RPC is service-only. Security advisor finding counts match the pre-change baseline; no new workbench findings.
 
 Design follows the existing requested Neumorph shell and typography. The taste-skill app draw selected true-black-flat as a composition reference; its flat-surface prescription was overridden by the user's explicit Neumorph preference. Main content is an editable message, start schedule, allocation table or redemption results, with advanced settings collapsed.
+
+## Four-language release checks
+
+`tools-workbench-locales.js` is the shared DE/EN/FR/ES catalog. `tests/tools-workbench-i18n-model.cjs` verifies key and placeholder parity plus coverage of every icon, reward, outpost type, tool title and validation error. `tests/tools-workbench-i18n-ui.cjs` switches through all four languages in all four screens, checks untranslated UI copy, dialogs/errors/statuses/chat output, unchanged drafts/game tags/IDs, persisted API values, and mobile overflow. The selected UI language also changes during existing work; coordinate/color/filter/selection inputs remain in memory. Published law translations are preferred. The known Law 8/9 text has a controlled translation fallback; changed laws without a translation are shown with an explicit source-language notice instead of claiming an invented translation.

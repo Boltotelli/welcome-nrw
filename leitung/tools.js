@@ -1,5 +1,6 @@
-import {createToolsWorkbench} from "./tools-workbench.js?v=20261104-notice-palette-2";
-import {WORKBENCH_TOOLS} from "./tools-workbench-model.js?v=20261104-notice-palette-2";
+import {workbenchText} from './tools-workbench-locales.js?v=20261104-tools-i18n-1';
+import {createToolsWorkbench} from "./tools-workbench.js?v=20261104-tools-i18n-1";
+import {WORKBENCH_TOOLS} from "./tools-workbench-model.js?v=20261104-tools-i18n-1";
 import {ALLIANCES,PERIODS,blankKvk,parseInteger,formatInteger,formatScore,rankKvk} from './tools-kvk.js?v=20261104-kvk-order-1';
 import {toolsProfileView} from './tools-player-view.js?v=20261104-tools-history-1';
 const copy={
@@ -16,7 +17,7 @@ const extra={
 };
 export function createLeadershipTools({getState,getLanguage,request,esc,can}){
  const root=document.getElementById('toolsRoot');
- const workbench=createToolsWorkbench({root,getState,request,esc,can});
+ const workbench=createToolsWorkbench({root,getState,getLanguage,request,esc,can});
  let data=blankKvk(),version=0,runId=crypto.randomUUID(),runs=[],updatedAt=null,loaded=false,loading=false,dirty=false,saving=false,mode='kvk',period='overall',generation=0,conflict=false,lastLanguage='',lookupResult=null,lookupId='',searching=false,lookupStatus='';
  const t=key=>(copy[getLanguage()]||copy.de)[key]||(extra[getLanguage()]||extra.de)[key];
  const label=p=>p==='overall'?t('overall'):t('day')+' '+p.slice(-1);
@@ -26,7 +27,7 @@ export function createLeadershipTools({getState,getLanguage,request,esc,can}){
  function render(){
   if(!root||!can('tools'))return;
   lastLanguage=getLanguage();
-  root.innerHTML=`<div class="tools-switch" role="group" aria-label="Tools"><button type="button" data-tool="kvk" aria-pressed="${mode==='kvk'}">${esc(t('kvk'))}</button><button type="button" data-tool="lookup" aria-pressed="${mode==='lookup'}">${esc(t('lookup'))}</button>${Object.entries(WORKBENCH_TOOLS).map(([key,label])=>`<button type="button" data-tool="${key}" aria-pressed="${mode===key}">${esc(label)}</button>`).join('')}</div><div data-tool-content></div>`;
+  root.innerHTML=`<div class="tools-switch" role="group" aria-label="Tools"><button type="button" data-tool="kvk" aria-pressed="${mode==='kvk'}">${esc(t('kvk'))}</button><button type="button" data-tool="lookup" aria-pressed="${mode==='lookup'}">${esc(t('lookup'))}</button>${Object.entries(WORKBENCH_TOOLS).map(([key,label])=>`<button type="button" data-tool="${key}" aria-pressed="${mode===key}">${esc(workbenchText(getLanguage(),label))}</button>`).join('')}</div><div data-tool-content></div>`;
   if(WORKBENCH_TOOLS[mode]){workbench.open(root.querySelector('[data-tool-content]'),mode);return;}
   workbench.leave();
   if(mode==='lookup'){renderLookup();return;}

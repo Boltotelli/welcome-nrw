@@ -17,7 +17,7 @@ export function rallyPlan(data){
  });
 }
 export const utc=value=>new Date(value).toISOString().replace('T',' ').slice(0,19)+' UTC';
-export function rallyText(data){return [data.title||'Rally-Sync',...rallyPlan(data).map(r=>`${r.name} · Start ${utc(r.start)} · Abmarsch ${utc(r.depart)} · Ankunft ${utc(r.arrival)}`)].join('\n');}
+export function rallyText(data,labels={title:'Rally-Sync',start:'Start',depart:'Abmarsch',arrival:'Ankunft'}){return [data.title||labels.title,...rallyPlan(data).map(r=>`${r.name} · ${labels.start} ${utc(r.start)} · ${labels.depart} ${utc(r.depart)} · ${labels.arrival} ${utc(r.arrival)}`)].join('\n');}
 export function insertText(text,start,end,before,after=''){
  const insert=before+text.slice(start,end)+after,next=text.slice(0,start)+insert+text.slice(end);
  if(next.length>2000)throw Error('Die Nachricht darf höchstens 2.000 Zeichen enthalten.');

@@ -1,4 +1,4 @@
-import {createLeadershipTools} from "./tools.js?v=20261104-notice-palette-2";
+import {createLeadershipTools} from "./tools.js?v=20261104-tools-i18n-1";
 import {activateMemberApiRefresh,memberApiLabels} from "./member-api-refresh.js?v=20261104-1";
 import {identityOptions,selectedLogin} from "./login-identities.js?v=20261103-integrated-1";
 import {createSslAccessAdmin} from "./ssl-access-admin.js?v=20261103-integrated-1";
@@ -106,8 +106,8 @@ const STAFF_KEYS=STAFF_FEATURES.map(([key])=>key);
 const modulePermission={roster:"members",performance:"performance",bear:"bear",fightclub:"fightclub",participation:"participation",tools:"tools"};
 const phase2Labels={de:{tools:"Tools",performance:"Performance",bearManagement:"Bärenfalle",fightclub:"FightClub",participation:"Event-Teilnahme"},
 en:{tools:"Tools",performance:"Performance",bearManagement:"Bear Trap",fightclub:"FightClub",participation:"Event participation"},
-fr:{tools:"Tools",performance:"Performance",bearManagement:"Piège à ours",fightclub:"FightClub",participation:"Participation aux événements"},
-es:{tools:"Tools",performance:"Rendimiento",bearManagement:"Trampa de oso",fightclub:"FightClub",participation:"Participación en eventos"}};
+fr:{tools:"Outils",performance:"Performance",bearManagement:"Piège à ours",fightclub:"FightClub",participation:"Participation aux événements"},
+es:{tools:"Herramientas",performance:"Rendimiento",bearManagement:"Trampa de oso",fightclub:"FightClub",participation:"Participación en eventos"}};
 const t=k=>k==="sslRead"?({de:"SSL · nur lesen",en:"SSL · read only",fr:"SSL · lecture seule",es:"SSL · solo lectura"}[lang]):k==="staffUser"?({de:"Zugang auswählen",en:"Choose account",fr:"Choisir un accès",es:"Elegir acceso"}[lang]):rightsCopy[lang]?.[k]||phase2Labels[lang]?.[k]||rosterDossierError[lang]?.[k]||step6DaysCopy[lang]?.[k]||step6DaysCopy.de[k]||step6Copy[lang]?.[k]||step6Copy.de[k]||step5Copy[lang]?.[k]||lawCategoryLabels[lang]?.[k]||lawUiCopy[lang]?.[k]||manualPhasesCopy[lang]?.[k]||transferUiCopy[lang]?.[k]||powerLabels[lang]?.[k]||rosterLabels[lang]?.[k]||leaderUiCopy[lang]?.[k]||latestModuleCopy[lang]?.[k]||opsUI[lang]?.[k]||groupUI[lang]?.[k]||eventLabels[lang]?.[k]||phase1Labels[lang]?.[k]||staffExtra[lang]?.[k]||copy[lang]?.[k]||lawCategoryLabels.de[k]||lawUiCopy.de[k]||manualPhasesCopy.de[k]||transferUiCopy.de[k]||powerLabels.de[k]||rosterLabels.de[k]||leaderUiCopy.de[k]||latestModuleCopy.de[k]||opsUI.de[k]||groupUI.de[k]||eventLabels.de[k]||phase1Labels.de[k]||staffExtra.de[k]||copy.de[k]||k;
 const locale={de:"de-DE",en:"en-GB",fr:"fr-FR",es:"es-ES"}[lang];
 function txt(obj){return typeof obj==="string"?obj:(obj?.[lang]||obj?.[state?.alliance?.default_language]||obj?.de||obj?.en||"");}
