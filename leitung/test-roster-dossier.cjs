@@ -4,6 +4,8 @@ const root=path.resolve(__dirname,"..");
 const app=fs.readFileSync(path.join(__dirname,"app.js"),"utf8");
 const api=fs.readFileSync(path.join(root,"supabase/functions/allianceos-leitung/index.ts"),"utf8");
 const html=fs.readFileSync(path.join(__dirname,"index.html"),"utf8");
+const memberApiSource=fs.readFileSync(path.join(__dirname,"member-api-refresh.js"),"utf8").replace(/^export /gm,"");
+const memberApi=new Function(memberApiSource+'\nreturn {memberApiLabels,activateMemberApiRefresh};')();
 assert.match(api,/\.eq\("alliance_code",alliance\)\.not\("game_id","is",null\)/,
   "Roster API must exclude historical placeholders without game IDs");
 assert.match(app,/\$\("rosterRows"\)\.addEventListener\("click"/,
@@ -15,11 +17,12 @@ const start=app.indexOf("function control("),end=app.indexOf("async function sav
 assert.ok(start>=0&&end>start,"Dossier editor source is accessible");
 const code=app.slice(start,end);
 const elements={modalTitle:{textContent:""},modalFields:{innerHTML:""},
- editDialog:{open:false,showModal(){this.open=true;this.opened=(this.opened||0)+1;},close(){this.open=false;}}};
+ editDialog:{open:false,querySelector(){return null;},showModal(){this.open=true;this.opened=(this.opened||0)+1;},close(){this.open=false;}}};
 const valid={game_id:"152394512",name:"Boltotelli",rank:5,tc_level:40,power:1234567,
  languages:["de","en"],member_status:"active",notes:"",discord_connected:true};
 const state={players:[valid],transfers:[],internalMoves:[],alliance:{kingdom_id:1044}};
 const errors=[],deps={
+ ...memberApi,request:()=>{throw new Error('Opening a dossier must not fetch API data');},
  state,LANGS:["de","en","fr","es"],lang:"de",
  NAMES:{de:"Deutsch",en:"English",fr:"Français",es:"Español"},
  playerLangNames:{de:"Deutsch",en:"English",fr:"Français",es:"Español",tr:"Türkçe"},
@@ -47,3 +50,4 @@ assert.equal(errors.length,1,"Missing ID must show a meaningful error");
 test("000000000");
 assert.equal(errors.length,2);
 console.log("Player dossiers: open valid ID, reject invalid IDs with visible errors; shared roster placeholders filtered.");
+
