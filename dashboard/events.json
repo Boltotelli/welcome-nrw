@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "kingdom": 1044,
   "timezone": "UTC",
-  "updatedAt": "2026-11-03T00:15:07Z",
+  "updatedAt": "2026-11-04T00:18:04Z",
   "events": [
     {
       "id": "golden-glaives-prep-2026-09-20",
@@ -869,39 +869,6 @@
       "display": "timeline-only"
     },
     {
-      "id": "halloween-party-2026",
-      "start": "2026-10-27",
-      "end": "2026-11-03",
-      "icon": "🎃",
-      "confidence": "public-timeline",
-      "name": {
-        "de": "Halloween-Party · Hexenzirkel-Kampf",
-        "en": "Halloween Party · Coven Clash",
-        "fr": "Fête d’Halloween · Affrontement du Coven"
-      },
-      "tips": {
-        "de": [
-          "Die Hauptreihe läuft bis 02.11.; der Hexenzirkel-Kampf und die Nutzung der Halloween-Süßigkeiten bleiben bis 03.11. verfügbar.",
-          "Halloween-Süßigkeiten entstehen durch die zugehörigen Eventmissionen und werden im Hexenzirkel-Kampf gegen Kürbislaternen eingesetzt.",
-          "Für Candy Party sind Bestien, Sammeln, Edelsteine und Beschleuniger als Quellen genannt; da keine verlässlichen tagesgenauen Punktwerte veröffentlicht sind, enthält der Feed bewusst keinen Tagesplan.",
-          "Nicht verwendete Halloween-Süßigkeiten werden nach Eventende in gesicherte Ressourcen umgewandelt."
-        ],
-        "en": [
-          "The main event series runs through Nov 2; Coven Clash and the use of Halloween Candy remain available through Nov 3.",
-          "Halloween Candy comes from the related event missions and is used against Jack-O’-Lanterns in Coven Clash.",
-          "Candy Party lists beasts, gathering, Gems and speedups as sources; because no reliable day-specific point values are published, the feed intentionally has no daily plan.",
-          "Unused Halloween Candy is converted into secured resources after the event ends."
-        ],
-        "fr": [
-          "La série principale se déroule jusqu’au 2 novembre ; l’Affrontement du Coven et l’utilisation des Bonbons d’Halloween restent disponibles jusqu’au 3 novembre.",
-          "Les Bonbons d’Halloween proviennent des missions associées et servent à attaquer les citrouilles-lanternes dans l’Affrontement du Coven.",
-          "Candy Party cite les bêtes, la collecte, les Gemmes et les accélérateurs comme sources ; faute de valeurs quotidiennes fiables, aucun plan journalier n’est ajouté.",
-          "Les Bonbons d’Halloween non utilisés sont convertis en ressources sécurisées après la fin de l’événement."
-        ]
-      },
-      "sourceUrl": "https://kingshotwiki.com/sneak-peek/102566583en/"
-    },
-    {
       "id": "kingdom-of-power-2026-11-02",
       "start": "2026-11-02",
       "end": "2026-11-08",
@@ -1669,6 +1636,93 @@
         }
       },
       "sourceUrl": "https://kingshotdata.com/events/alliance-brawl-event/"
+    },
+    {
+      "id": "defeat-nearby-beasts-2026-11-03",
+      "start": "2026-11-03",
+      "end": "2026-11-05",
+      "icon": "🐺",
+      "iconUrl": "https://kingshotdata.com/uploads/2025/04/defeat-nearby-beasts-event-icon.webp",
+      "confidence": "public-timeline",
+      "name": {
+        "de": "Bestien in der Nähe besiegen",
+        "en": "Defeat Nearby Beasts",
+        "fr": "Vaincre les bêtes proches"
+      },
+      "dailyPlans": {
+        "2026-11-04": {
+          "points": {
+            "de": "Bestie besiegen: 1 Punkt · Schrecken-Rally starten und gewinnen: 3 Punkte · Kosten: 10 Ausdauer je Bestie, 25 Ausdauer je gestarteter Schrecken-Rally",
+            "en": "Defeat a Beast: 1 point · Start and win a Terror rally: 3 points · Cost: 10 stamina per Beast, 25 stamina per launched Terror rally",
+            "fr": "Vaincre une Bête : 1 point · Lancer et gagner un rallye contre une Terreur : 3 points · Coût : 10 d’endurance par Bête, 25 par rallye lancé contre une Terreur"
+          },
+          "steps": {
+            "de": [
+              "Nutze zuerst natürliche Ausdauer und prüfe deinen verbleibenden Meilenstein.",
+              "Priorisiere selbst gestartete Schrecken-Rallys: 3 Punkte für 25 Ausdauer sind effizienter als 1 Punkt für 10 Ausdauer bei Bestien.",
+              "Setze Diana nur ein, wenn ihre erste Expeditionsfertigkeit freigeschaltet ist; je nach Fertigkeitsstufe sinken die Ausdauerkosten um 10–20 %.",
+              "Verbrauche Ausdauerkanister nur, wenn der nächste persönliche Meilenstein den Einsatz rechtfertigt; keine Ranglistenjagd auf Kosten der KvK-Vorräte."
+            ],
+            "en": [
+              "Use natural stamina first and check your remaining milestone.",
+              "Prioritize Terror rallies you launch yourself: 3 points for 25 stamina is more efficient than 1 point for 10 stamina on Beasts.",
+              "Use Diana only if her first Expedition Skill is unlocked; depending on its level, stamina cost is reduced by 10–20%.",
+              "Use stamina cans only when the next personal milestone justifies them; do not chase the ranking with KvK reserves."
+            ],
+            "fr": [
+              "Utilise d’abord l’endurance naturelle et vérifie le prochain palier restant.",
+              "Privilégie les rallyes contre les Terreurs que tu lances toi-même : 3 points pour 25 d’endurance sont plus efficaces que 1 point pour 10 d’endurance contre une Bête.",
+              "Utilise Diana uniquement si sa première compétence d’expédition est débloquée ; selon son niveau, le coût d’endurance baisse de 10 à 20 %.",
+              "Utilise les réserves d’endurance seulement si le prochain palier personnel le justifie ; ne vise pas le classement avec les réserves KvK."
+            ]
+          }
+        }
+      },
+      "sourceUrl": "https://kingshotdata.com/events/defeat-nearby-beasts-event/"
+    },
+    {
+      "id": "blizzard-brawl-2026-11-05",
+      "start": "2026-11-05",
+      "end": "2026-11-07",
+      "icon": "❄️",
+      "confidence": "predicted",
+      "name": {
+        "de": "Blizzard Brawl",
+        "en": "Blizzard Brawl",
+        "fr": "Blizzard Brawl"
+      },
+      "sourceUrl": "https://kingshot.net/nexus/1044"
+    },
+    {
+      "id": "cesares-fury-2026-11-07",
+      "start": "2026-11-07",
+      "end": "2026-11-10",
+      "icon": "🗡️",
+      "iconUrl": "https://kingshotdata.com/uploads/2025/03/cesares-fury-event-icon.webp",
+      "confidence": "predicted",
+      "name": {
+        "de": "Cesares’ Zorn",
+        "en": "Cesares Fury",
+        "fr": "Fureur de Cesares"
+      },
+      "tips": {
+        "de": [
+          "Wähle die Schwierigkeit bewusst: Pro Durchlauf ist nur eine Schwierigkeit wählbar; ein erfolgreicher Abschluss schaltet die nächste Stufe für künftige Durchläufe frei.",
+          "Das Aufspüren eines Rebellen kostet 15 Ausdauer, ein Soloangriff weitere 10. Nutze Diana nur mit freigeschalteter erster Expeditionsfertigkeit; sie reduziert Ausdauerkosten je nach Stufe um 10–20 %.",
+          "Für schwere Rebellen bei Level 10, 20, 30, 40 und 50 stehen fünf Cesares-Abkommen für Hilferufe zur Verfügung."
+        ],
+        "en": [
+          "Choose difficulty carefully: only one difficulty can be selected per run; completing it unlocks the next level for future runs.",
+          "Locating a Rebel costs 15 stamina and a solo attack costs another 10. Use Diana only with her first Expedition Skill unlocked; it reduces stamina cost by 10–20% depending on level.",
+          "Five Cesares Accords are available to request help for difficult Rebels at levels 10, 20, 30, 40 and 50."
+        ],
+        "fr": [
+          "Choisis soigneusement la difficulté : une seule difficulté est sélectionnable par session ; la terminer débloque le niveau suivant pour les prochaines sessions.",
+          "Localiser un Rebelle coûte 15 d’endurance et une attaque solo 10 supplémentaires. Utilise Diana uniquement si sa première compétence d’expédition est débloquée ; elle réduit le coût de 10 à 20 % selon son niveau.",
+          "Cinq Accords de Cesares permettent de demander de l’aide contre les Rebelles difficiles aux niveaux 10, 20, 30, 40 et 50."
+        ]
+      },
+      "sourceUrl": "https://kingshotdata.com/events/cesares-fury/"
     }
   ]
 }
