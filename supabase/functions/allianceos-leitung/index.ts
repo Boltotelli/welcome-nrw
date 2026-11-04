@@ -1820,7 +1820,7 @@ Deno.serve(async(req: Request)=>{
     const body=await req.json().catch(()=>{throw new HttpError("invalid_json",400)});
     if(staff.ssl_readonly&&body?.action!=="fightclub_data")throw new HttpError("permission_denied",403);
     if(body?.action!=="alliance_logo_upload"&&Number(req.headers.get("content-length")||"0")>200000)throw new HttpError("payload_too_large",413);
-    if(["tools_kvk_load","tools_kvk_save","tools_player_lookup"].includes(body?.action))return await leadershipTools.handle(req,alliance,userId,staff,body);
+    if(["tools_kvk_load","tools_kvk_save","tools_player_lookup","tools_player_refresh"].includes(body?.action))return await leadershipTools.handle(req,alliance,userId,staff,body);
     if(body?.action==="alliance_logo_upload"||body?.action==="alliance_logo_remove")return await updateAllianceLogo(req,alliance,userId,staff,body);
     if(body?.action==="announcement")return await saveAnnouncement(req,alliance,userId,staff,body);
     if(["ssl_viewers_list","ssl_viewer_create","ssl_viewer_toggle","ssl_viewer_reset"].includes(body?.action))return await sslAccess.manage(req,alliance,userId,staff,body);
