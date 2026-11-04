@@ -1,7 +1,10 @@
 import {createToolsPlayers} from './tools-player.ts';
+import {createToolsWorkbench} from './tools-workbench.ts';
+import {createToolsGifts} from './tools-gifts.ts';
 // Existing tracker records stay read-only; separate Tools runs/profile cache only.
 export function createLeadershipTools({db,checked,json,HttpError,permission,audit}:any){
  const players=createToolsPlayers({db,checked,HttpError});
+ const workbench=createToolsWorkbench({db,checked,json,HttpError,audit}),gifts=createToolsGifts({db,checked,json,HttpError,audit});
  const validRun=(id:any)=>typeof id==='string'&&/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
  const tags=['NRW','NWO','THM','CWR','PxR','NwO'],periods=['day1','day2','day3','day4','day5','overall'];
  function cleanData(raw:any){
@@ -21,6 +24,8 @@ export function createLeadershipTools({db,checked,json,HttpError,permission,audi
  async function handle(req:Request,alliance:string,userId:string,staff:any,body:any){
   // This check precedes every database/RPC operation, including lookups by ID.
   if(alliance!=='NRW'||!permission(staff,'tools')||staff.ssl_readonly)throw new HttpError('permission_denied',403);
+  if(['tools_documents_load','tools_document_save','tools_document_delete'].includes(body.action))return workbench.handle(req,alliance,userId,body);
+  if(['tools_gifts_load','tools_gifts_create','tools_gifts_status','tools_gifts_step'].includes(body.action))return gifts.handle(req,alliance,userId,body);
   if(body.action==='tools_kvk_load'){
    if(body.run_id!=null&&!validRun(body.run_id))throw new HttpError('invalid_tools_run',400);
    let query=db.from('aos_tools_kvk_runs').select('id,data,version,updated_at').eq('alliance_code',alliance);

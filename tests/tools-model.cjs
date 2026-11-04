@@ -11,7 +11,7 @@ let ranking=math.rankKvk(data,'overall');assert(ranking.complete);assert.equal(r
 data.alliances.NRW.scores.day2=0;assert(math.rankKvk(data,'day2').complete);data.alliances.NRW.scores.day2=null;assert(!math.rankKvk(data,'day2').complete);
 
 const source=stripTypeScriptTypes(fs.readFileSync(path.join(root,'supabase/functions/allianceos-leitung/tools.ts'),'utf8'),{mode:'transform'}).replace(/^import .*;\s*$/gm,'').replace(/^export /gm,'');
-const {createLeadershipTools}=new Function('createToolsPlayers',source+';return {createLeadershipTools};')(()=>({lookup:async id=>{rpcs++;return {found:true,game_id:id};},refresh:async id=>{rpcs++;return {player:{found:true,game_id:id},source:'mightpulse'};}}));
+const {createLeadershipTools}=new Function('createToolsWorkbench','createToolsGifts','createToolsPlayers',source+';return {createLeadershipTools};')(()=>({handle:async()=>{throw Error('unexpected workbench call')}}),()=>({handle:async()=>{throw Error('unexpected gift call')}}),()=>({lookup:async id=>{rpcs++;return {found:true,game_id:id};},refresh:async id=>{rpcs++;return {player:{found:true,game_id:id},source:'mightpulse'};}}));
 class HttpError extends Error{constructor(code,status){super(code);this.httpStatus=status;}}
 let reads=0,rpcs=0;const records=[],audits=[];
 const db={from(name){reads++;assert.equal(name,'aos_tools_kvk_runs');let mutation=null,filters={};const q={select(){return q;},eq(k,v){filters[k]=v;return q;},order(){return q;},limit(){return q;},insert(v){mutation={kind:'insert',v};return q;},update(v){mutation={kind:'update',v};return q;},maybeSingle(){return Promise.resolve(run(true));},single(){return Promise.resolve(run(true));},then(resolve,reject){return Promise.resolve(run(false)).then(resolve,reject);}};
@@ -19,7 +19,7 @@ function run(one){if(mutation?.kind==='insert'){if(records.some(r=>r.id===mutati
 const api=createLeadershipTools({db,checked:async p=>{const r=await p;if(r.error)throw Error('db');return r.data;},json:(_,x)=>x,HttpError,permission:(s,k)=>s.is_owner||s.permissions?.[k]===true,audit:async(...args)=>audits.push(args)});
 const allowed={permissions:{tools:true}},a='11111111-1111-4111-8111-111111111111',b='22222222-2222-4222-8222-222222222222';
 (async()=>{
- for(const action of ['tools_kvk_load','tools_kvk_save','tools_player_lookup','tools_player_refresh'])for(const staff of [{permissions:{}},{permissions:{settings:true}},{permissions:{tools:true},ssl_readonly:true}])await assert.rejects(()=>api.handle({},'NRW','actor',staff,{action}),e=>e.httpStatus===403);
+ for(const action of ['tools_kvk_load','tools_kvk_save','tools_player_lookup','tools_player_refresh','tools_documents_load','tools_document_save','tools_document_delete','tools_gifts_load','tools_gifts_create','tools_gifts_status','tools_gifts_step'])for(const staff of [{permissions:{}},{permissions:{settings:true}},{permissions:{tools:true},ssl_readonly:true}])await assert.rejects(()=>api.handle({},'NRW','actor',staff,{action}),e=>e.httpStatus===403);
  assert.equal(reads+rpcs,0,'Permission check precedes all data reads');
  await assert.rejects(()=>api.handle({},'NWO','actor',allowed,{action:'tools_kvk_load'}),e=>e.httpStatus===403);
  await assert.rejects(()=>api.handle({},'NRW','actor',allowed,{action:'tools_player_lookup',game_id:'1) OR true'}),e=>e.httpStatus===400);assert.equal(rpcs,0);
