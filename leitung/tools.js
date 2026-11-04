@@ -1,5 +1,5 @@
-import {workbenchText} from './tools-workbench-locales.js?v=20261104-tools-i18n-1';
-import {createToolsWorkbench} from "./tools-workbench.js?v=20261104-tools-i18n-1";
+import {workbenchText} from './tools-workbench-locales.js?v=20261105-territory-1';
+import {createToolsWorkbench} from "./tools-workbench.js?v=20261105-territory-1";
 import {WORKBENCH_TOOLS} from "./tools-workbench-model.js?v=20261104-tools-i18n-1";
 import {ALLIANCES,PERIODS,blankKvk,parseInteger,formatInteger,formatScore,rankKvk} from './tools-kvk.js?v=20261104-kvk-order-1';
 import {toolsProfileView} from './tools-player-view.js?v=20261104-tools-history-1';

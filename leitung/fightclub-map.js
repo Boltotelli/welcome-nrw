@@ -1,6 +1,6 @@
 import {fightEventName} from './fightclub-events.js?v=20261103-ssl-1';
-import {decodeDeployment} from './deployment-engine.js?v=20261104-reserves-1';
-import {createDeploymentPlanner} from './deployment-planner.js?v=20261104-reserves-1';
+import {decodeDeployment} from './deployment-engine.js?v=20261105-ssl-season-1';
+import {createDeploymentPlanner} from './deployment-planner.js?v=20261105-ssl-season-1';
 /* FightClub battlefield planning: private, date-scoped map objectives for both legions.
  * Maps are planning aids; no Kingshot orders, registration or Discord posts are sent.
  * TriAlliance map illustration credited to its author; pin geometry remains usable
@@ -71,10 +71,11 @@ export function createFightClubMap({getContext,getLanguage,request,flash,esc,onU
  const sites=()=>(getContext()?.eventType==="triforce"?TRI:SWORD).concat([{key:"guerrilla",name:"GUERILLA",group:"guerrilla",virtual:true}],getContext()?.eventType==="triforce"?[{key:"safe-zone",name:"SECURE · Safe Zone",group:"safe",virtual:true}]:[]);
  const ctx=()=>getContext()||{};
  const readOnly=()=>ctx().readOnly===true;
+ const inMatch=(row,key=ctx().ssl_match_key)=>(row.ssl_match_key||null)===(key||null);
  const roster=()=>ctx().assignments||[];
- const mapRows=()=>(ctx().mapAssignments||[]).filter(m=>m.event_type===ctx().eventType&&m.battle_date===ctx().date).map(m=>{const d=decodeDeployment(m.location_key,sites());return {...m,location_key:d.location,deployment_group:d.group};});
+ const mapRows=()=>(ctx().mapAssignments||[]).filter(m=>m.event_type===ctx().eventType&&m.battle_date===ctx().date&&inMatch(m)).map(m=>{const d=decodeDeployment(m.location_key,sites());return {...m,location_key:d.location,deployment_group:d.group};});
  const planner=createDeploymentPlanner({getContext:()=>({...ctx(),legion}),getSites:sites,getLanguage,request,esc,onUpdated});
- const leaders=()=>ctx().state?.leaders?.filter(l=>l.event_type===ctx().eventType&&l.battle_date===ctx().date)||[];
+ const leaders=()=>ctx().state?.leaders?.filter(l=>l.event_type===ctx().eventType&&l.battle_date===ctx().date&&inMatch(l))||[];
  const leaderFor=lg=>leaders().find(l=>Number(l.legion)===lg)?.game_id||"";
  const siteList=()=>sites().map(s=>s.key);
  const activeLegion=()=>roster().filter(x=>Number(x.legion)===legion&&!x.is_reserve&&x.availability!=="unavailable");
@@ -84,7 +85,7 @@ export function createFightClubMap({getContext,getLanguage,request,flash,esc,onU
  const sortedPlayers=()=>activeLegion().slice().sort((a,b)=>playerName(a.game_id).localeCompare(playerName(b.game_id)));
  const renderedAssigned=()=>mapRows().filter(m=>activeLegion().some(a=>String(a.game_id)===String(m.game_id)));
  function resetIfScope(){
-  const key=ctx().eventType+"|"+ctx().date;
+  const key=ctx().eventType+"|"+ctx().date+"|"+(ctx().ssl_match_key||"");
   if(scope!==key){scope=key;selected=ctx().eventType==="triforce"?"A24":"shrine";legion=1;selectedPlayer="";unassignedOpen=false;}
   if(!siteList().includes(selected))selected=siteList()[0];
  }
@@ -189,13 +190,13 @@ export function createFightClubMap({getContext,getLanguage,request,flash,esc,onU
  async function saveLeader(team){
   if(readOnly()||busy)return;
   const gameId=leaderChoice[team]??leaderFor(team);
-  const {eventType,date}=ctx();busy=true;onUpdated();
+  const {eventType,date,ssl_match_key}=ctx();busy=true;onUpdated();
   try{
-   const result=await request("bootstrap",{action:"fightclub_leader_save",event_type:eventType,battle_date:date,legion:team,game_id:gameId||""});
+   const result=await request("bootstrap",{action:"fightclub_leader_save",event_type:eventType,battle_date:date,...(ssl_match_key?{ssl_match_key}:{}),legion:team,game_id:gameId||""});
    if(!result?.ok)throw Error("save_failed");
    const state=ctx().state;
    if(state){
-    state.leaders=(state.leaders||[]).filter(x=>!(x.event_type===eventType&&x.battle_date===date&&Number(x.legion)===team));
+    state.leaders=(state.leaders||[]).filter(x=>!(x.event_type===eventType&&x.battle_date===date&&inMatch(x,ssl_match_key)&&Number(x.legion)===team));
     if(!result.removed)state.leaders.push(result.leader);
    }
    leaderChoice[team]="";flash(t("leaderSave"));
@@ -242,19 +243,19 @@ export function createFightClubMap({getContext,getLanguage,request,flash,esc,onU
  }
  async function save(gameId,remove=false){
   if(readOnly())return;
-  const {eventType,date}=ctx();
+  const {eventType,date,ssl_match_key}=ctx();
   if(!date){flash(t("noDate"),true);return;}
   if(busy)return;
   if(!gameId){flash(t("none"),true);return;}
   const locationKey=selected;
   busy=true;onUpdated();
   try{
-   const result=await request("bootstrap",{action:"fightclub_map_save",event_type:eventType,battle_date:date,
+   const result=await request("bootstrap",{action:"fightclub_map_save",event_type:eventType,battle_date:date,...(ssl_match_key?{ssl_match_key}:{}),
      game_id:String(gameId),location_key:locationKey,remove});
    if(!result?.ok)throw Error("save_failed");
    const data=ctx().state;if(data){
      if(!Array.isArray(data.map_assignments))data.map_assignments=[];
-     data.map_assignments=data.map_assignments.filter(x=>!(x.event_type===eventType&&x.battle_date===date&&String(x.game_id)===String(gameId)));
+     data.map_assignments=data.map_assignments.filter(x=>!(x.event_type===eventType&&x.battle_date===date&&inMatch(x,ssl_match_key)&&String(x.game_id)===String(gameId)));
      if(!result.removed)data.map_assignments.push(result.assignment);
    }
    selectedPlayer="";flash(remove?t("remove"):t("save"));

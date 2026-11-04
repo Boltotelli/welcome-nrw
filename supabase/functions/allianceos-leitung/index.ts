@@ -1053,9 +1053,11 @@ async function saveBearPlanningSettings(req:Request,alliance:string,userId:strin
 }
 // FightClub Phase 4: isolated draft rosters. Historical Discord event cycles
 // and timestamps are read-only. Manual planning dates are NOT official dates.
+import {createSslSeason} from './ssl-season.ts';
 import {createSslAccess} from './ssl-access.ts';
 import {createSslGuests} from './fightclub-ssl.ts';
-const sslAccess=createSslAccess({db,auth,checked,HttpError,json,audit,temporaryPassword});
+const sslSeason=createSslSeason({db,checked,HttpError,json,audit,permission,locationValid:(key:string)=>fightMapLocationValid("swordland_summit",key)});
+const sslAccess=createSslAccess({db,auth,checked,HttpError,json,audit,temporaryPassword,sslSeason});
 const sslGuests=createSslGuests({db,checked,permission,HttpError,json,audit});
 // Protected FightClub battlefield objectives. Map links are private planning
 // records, never registered automatically in Kingshot or the Discord bot.
@@ -1144,10 +1146,11 @@ async function fightClubData(req:Request,alliance:string,staff:any){
    verified.set(p.game_id,{game_id:p.game_id,power:n,fetched_at:p.fetched_at,source:p.source,mystic_trial:p.mystic_trial??null,mystic_trial_fetched_at:p.mystic_trial_fetched_at??null});
   }
  }
- return json(req,{ok:true,cycles:cycles.map(c=>({
+ const result={ok:true,cycles:cycles.map(c=>({
   event_type:c.event_type,battle_date:c.battle_date,
   times:legionTimes.filter(l=>l.cycle_id===c.id).map(l=>({legion:l.legion,starts_at:l.starts_at}))
- })),assignments,powers:[...verified.values()],map_assignments:mapAssignments,leaders,guests:await sslGuests.list(alliance),since});
+ })),assignments,powers:[...verified.values()],map_assignments:mapAssignments,leaders,guests:await sslGuests.list(alliance),since};
+ return json(req,alliance==="NRW"?sslSeason.merge(result,await sslSeason.data(alliance)):result);
 }
 async function saveFightClub(req:Request,alliance:string,userId:string,staff:any,body:any){
  if(!permission(staff,"fightclub"))throw new HttpError("permission_denied",403);
@@ -1839,6 +1842,8 @@ Deno.serve(async(req: Request)=>{
     if(body?.action==="bear_management")return await bearManagement(req,alliance,staff);
     if(body?.action==="bear_assignment")return await saveBearAssignment(req,alliance,userId,staff,body);
     if(body?.action==="bear_settings_save")return await saveBearPlanningSettings(req,alliance,userId,staff,body);
+    if(body?.action==="ssl_pool_save")return await sslSeason.poolSave(req,alliance,userId,staff,body);
+    if(alliance==="NRW"&&body?.event_type==="swordland_summit"&&["fightclub_save","fightclub_map_save","fightclub_leader_save"].includes(body?.action)&&(body?.ssl_match_key||sslSeason.applies(String(body?.battle_date||""))))return await sslSeason.handle(req,alliance,userId,staff,body);
     if(body?.action==="fightclub_data")return await fightClubData(req,alliance,staff);
     if(["ssl_guest_search","ssl_guest_lookup","ssl_guest_add","ssl_guest_remove"].includes(body?.action))return await sslGuests.handle(req,alliance,userId,staff,body);
     if(body?.action==="fightclub_save")return await saveFightClub(req,alliance,userId,staff,body);

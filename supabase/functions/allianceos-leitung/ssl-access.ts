@@ -1,4 +1,4 @@
-export function createSslAccess({db,auth,checked,HttpError,json,audit,temporaryPassword}:any){
+export function createSslAccess({db,auth,checked,HttpError,json,audit,temporaryPassword,sslSeason}:any){
  const fields='user_id,name,login_name,enabled,ssl_read,created_at';
  const event='swordland_summit';
  async function manage(req:Request,alliance:string,actor:string,staff:any,body:any){
@@ -53,7 +53,8 @@ export function createSslAccess({db,auth,checked,HttpError,json,audit,temporaryP
    players=ids.map(id=>{const g=guests.find((p:any)=>p.game_id===id),m=members.find((p:any)=>p.game_id===id);return {game_id:id,name:g?.name||m?.name||id,home_alliance:g?.home_alliance||'NRW',mystic_trial:g?.mystic_trial??scores.find((p:any)=>p.game_id===id)?.mystic_trial??null,active:true,member_status:'active'};});
   }
   const has=(x:any)=>assignments.some((a:any)=>a.game_id===x.game_id&&a.battle_date===x.battle_date&&!a.is_reserve);
-  return {ok:true,cycles:[],assignments,players,powers:players.map(p=>({game_id:p.game_id,power:null,mystic_trial:p.mystic_trial})),guests:[],map_assignments:mapAssignments.filter(has),leaders:leaders.filter(has)};
+  const result={ok:true,cycles:[],assignments,players,powers:players.map(p=>({game_id:p.game_id,power:null,mystic_trial:p.mystic_trial})),guests:[],map_assignments:mapAssignments.filter(has),leaders:leaders.filter(has)};
+  return sslSeason?sslSeason.merge(result,await sslSeason.data(alliance,true),true):result;
  }
  async function bootstrap(req:Request,alliance:string,staff:any){
   const data=await fightData(req,alliance,staff),config=await checked(db.from('aos_alliances').select('code,name,kingdom_id,logo_url,default_language,languages').eq('code',alliance).single());

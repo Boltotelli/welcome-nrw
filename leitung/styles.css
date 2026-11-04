@@ -727,3 +727,15 @@
 
 .ssl-access-list{display:grid;gap:12px;margin-top:24px}.ssl-access-row{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;padding:16px 0;border-top:1px solid var(--line,#46515b)}.ssl-access-row small{display:block;margin-top:6px;overflow-wrap:anywhere}.ssl-access-row>div{min-width:0}
 .staff-permission-toggle[hidden],.staff-permission-group[hidden]{display:none!important}
+
+/* A single registration pool feeds independent SSL matches. */
+.ssl-season-status {font-size:.8rem;color:var(--accent,#dfbc72);max-width:100%;}
+.ssl-season-pool summary {cursor:pointer;min-height:44px;padding:12px 0;font-weight:700;}
+.ssl-season-pool label {display:grid;gap:6px;margin:12px 0;}
+.ssl-season-pool .assignment-table-scroll {max-height:420px;overflow:auto;overscroll-behavior:contain;}
+.ssl-season-pool table {width:100%;border-collapse:collapse;}
+.ssl-season-pool th,.ssl-season-pool td {padding:10px 12px;text-align:left;border-bottom:1px solid #ffffff14;}
+.ssl-season-pool td small {display:block;opacity:.65;}
+.ssl-season-pool input[type=checkbox] {width:22px;height:22px;cursor:pointer;}
+.ssl-season-pool .tools-actions {display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;}
+@media(max-width:600px){.ssl-season .fight-heading{align-items:flex-start;flex-direction:column;gap:8px}.ssl-season-pool th,.ssl-season-pool td{padding:8px 6px}.ssl-season-pool td{overflow-wrap:anywhere}}

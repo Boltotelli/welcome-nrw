@@ -1,0 +1,78 @@
+{
+  "source": "https://kingshotwiki.com/alliance-ruins/ruins/",
+  "retrieved": "2026-11-05",
+  "images": [
+    {
+      "file": "Conquest-Books.png",
+      "bytes": 9598,
+      "sha256": "47107ee908739c10a9c62fff8a8de13256670264eb717c38338ee6de6b732b5c",
+      "gitBlob": "b1ace594d3611f153c8cdc4c3af664a44c591aaa"
+    },
+    {
+      "file": "Damage-Buff.png",
+      "bytes": 10527,
+      "sha256": "e4264aed30fd5163aa6d78d1f83c24af72704ccba84fc095522501bfce129328",
+      "gitBlob": "d7924e489ad6be979c34b6de5b66b71a501b2a01"
+    },
+    {
+      "file": "Deployment-Boost.png",
+      "bytes": 10822,
+      "sha256": "2ed1283782db706c131f44a756462a143f029abe616400e059c4727bb659a69b",
+      "gitBlob": "da421583b4911efa48c9e98a1c3ddb3e1d898649"
+    },
+    {
+      "file": "Epic-Shards.png",
+      "bytes": 11144,
+      "sha256": "aa088bf07e14cd85cf3593a141a649a266db958f0aaed06876491f69d58a0d39",
+      "gitBlob": "394339cec80fcf368a0b5e23052e4c8da376154c"
+    },
+    {
+      "file": "Expedition-Manuals.png",
+      "bytes": 9266,
+      "sha256": "c9787a70d4bb3ac3e77c274894cc74cdbdaa2da0aea65ef8ebd5c98a0688e3ae",
+      "gitBlob": "5a4a4254ac4d8cc97a50167ffbe91f88ac8f0b03"
+    },
+    {
+      "file": "Health-Buff.png",
+      "bytes": 10803,
+      "sha256": "f3fe07429af6414629f55691a43d5b00dca222f2bf2a24b2aa8e640412405e3a",
+      "gitBlob": "8bae7563df09a4c5a5130d252662b5e3633986e7"
+    },
+    {
+      "file": "Jabel-Shards.png",
+      "bytes": 10918,
+      "sha256": "7312434f98c602ceb975f3e9d9351df0c723f198027d089fe73d4ffba0abd45e",
+      "gitBlob": "2a9b4d523b737f495b453017a7ebf3e892f2f483"
+    },
+    {
+      "file": "Saul-Shards.png",
+      "bytes": 10995,
+      "sha256": "e3638c3bd1a18ce44a6aa27222e3fe1a7fdfb02326117a6d7e9f3ef538cc22da",
+      "gitBlob": "baaf55096f76892585eb5a35d6083b39d9f0ef7b"
+    },
+    {
+      "file": "Slice-1-15.png",
+      "bytes": 10375,
+      "sha256": "a7248f78d8680bc12d7a99bca0fd65b49b48f1aaec2424a6290ef06c0fc274f6",
+      "gitBlob": "483606a2dc3167f2f0fa027270ddf09d60777894"
+    },
+    {
+      "file": "Speedups.png",
+      "bytes": 9983,
+      "sha256": "59e974bf70b58addd9957a9ac8c690ef58fceaf63229a52b7f2defabb970fe48",
+      "gitBlob": "d7d738278722655c265e9f5c1ae4d6a1df90b072"
+    },
+    {
+      "file": "Teleports.png",
+      "bytes": 11102,
+      "sha256": "e7fdf4ccb6d650333def619a666199c3e6c282c75ab3eff67eb2bb5b4ed1ba4e",
+      "gitBlob": "79e1e684d7a5b4b6f75ecaf773293bc8684cd7ad"
+    },
+    {
+      "file": "XP-Hero.png",
+      "bytes": 11089,
+      "sha256": "e38b03d9afd6b598ad754001e74fdb0504d1f8fcce30213ab7447fabdeb53d50",
+      "gitBlob": "1739c199437534f8d1231fdd94793e09365ef25c"
+    }
+  ]
+}

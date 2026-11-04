@@ -13,7 +13,7 @@ export function deploymentTargets(eventType,sites,side=''){
  const midpoint=eventType==='triforce'&&list.length?(Math.min(...list.map(s=>s.y))+Math.max(...list.map(s=>s.y)))/2:50;
  return {north:list.filter(s=>s.y<midpoint),south:list.filter(s=>s.y>=midpoint)};
 }
-export function buildDeployment({players,assignments,mapAssignments,powers,sites,eventType,date,legion,settings}){
+export function buildDeployment({players,assignments,mapAssignments,powers,sites,eventType,date,legion,settings,ssl_match_key}){
  const integer=(v,min,max)=>Number.isInteger(Number(v))&&Number(v)>=min&&Number(v)<=max;
  if(![1,2].includes(Number(legion))||!integer(settings.guerrilla,0,50)||!integer(settings.secure,0,100)||!integer(settings.northPercent,0,100)||!integer(settings.priorityCount,1,50))throw Error('invalid_settings');
  if(eventType==='triforce'&&!['A','B','C'].includes(settings.side))throw Error('choose_side');
@@ -21,8 +21,8 @@ export function buildDeployment({players,assignments,mapAssignments,powers,sites
  if(!targets.north.some(s=>s.key===settings.northTarget)||!targets.south.some(s=>s.key===settings.southTarget))throw Error('choose_targets');
  const people=new Map(players.filter(p=>p.active&&p.member_status!=='left').map(p=>[String(p.game_id),p]));
  const power=new Map(powers.filter(p=>p.power!=null&&Number.isSafeInteger(Number(p.power))&&Number(p.power)>0).map(p=>[String(p.game_id),Number(p.power)]));
- const roster=[...new Map(assignments.filter(a=>a.event_type===eventType&&a.battle_date===date&&Number(a.legion)===Number(legion)&&!a.is_reserve).map(a=>[String(a.game_id),a])).values()];
- const maps=new Map(mapAssignments.filter(a=>a.event_type===eventType&&a.battle_date===date).map(a=>[String(a.game_id),a]));
+ const roster=[...new Map(assignments.filter(a=>a.event_type===eventType&&a.battle_date===date&&(a.ssl_match_key||null)===(ssl_match_key||null)&&Number(a.legion)===Number(legion)&&!a.is_reserve).map(a=>[String(a.game_id),a])).values()];
+ const maps=new Map(mapAssignments.filter(a=>a.event_type===eventType&&a.battle_date===date&&(a.ssl_match_key||null)===(ssl_match_key||null)).map(a=>[String(a.game_id),a]));
  const excluded=[],rows=[],pool=[],families=new Set();
  const item=a=>{const id=String(a.game_id),p=people.get(id);return{game_id:id,name:p?.name||id,family:String(p?.main_game_id||id),power:power.get(id)??null};};
  // Keep open objectives, but replan closed starting objectives in the preview.
@@ -60,5 +60,5 @@ export function buildDeployment({players,assignments,mapAssignments,powers,sites
   const secondary=targets[group].filter(s=>s.key!==focus);if(!secondary.length)secondary.push(targets[group].find(s=>s.key===focus));
   for(const p of remaining){const target=secondary.slice().sort((a,b)=>loads.get(a.key)-loads.get(b.key)||a.key.localeCompare(b.key))[0];add(p,group,target.key);loads.set(target.key,loads.get(target.key)+p.power);}
  }
- return {eventType,date,legion:Number(legion),rows,excluded,changes:rows.filter(p=>!p.locked&&maps.get(p.game_id)?.location_key!==p.location_key),groups:Object.fromEntries(['north','south','secure','guerrilla'].map(g=>[g,{count:rows.filter(p=>p.group===g).length,known:rows.filter(p=>p.group===g&&p.power!==null).length,power:rows.filter(p=>p.group===g).reduce((n,p)=>n+(p.power||0),0)}]))};
+ return {eventType,date,...(ssl_match_key?{ssl_match_key}:{}),legion:Number(legion),rows,excluded,changes:rows.filter(p=>!p.locked&&maps.get(p.game_id)?.location_key!==p.location_key),groups:Object.fromEntries(['north','south','secure','guerrilla'].map(g=>[g,{count:rows.filter(p=>p.group===g).length,known:rows.filter(p=>p.group===g&&p.power!==null).length,power:rows.filter(p=>p.group===g).reduce((n,p)=>n+(p.power||0),0)}]))};
 }

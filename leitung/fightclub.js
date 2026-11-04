@@ -1,11 +1,12 @@
+import {createSslSeasonPanel,sslMatchName,sslSeasonText,sslPoolPlayers} from './ssl-season.js?v=20261105-ssl-season-1';
 /* AllianceOS Phase 4 – GitHub Pages only: FightClub draft rosters.
  * Distinguishes confirmed source schedules from a manually chosen planning date.
  * No Discord role/slot/bot changes, no automatic player assignments. */
-import {createFightClubMap} from "./fightclub-map.js?v=20261104-reserves-1";
+import {createFightClubMap} from "./fightclub-map.js?v=20261105-ssl-season-1";
 import {createRosterDrafts} from "./roster-drafts.js?v=20261103-ssl-1";
 import {readAttendanceNote,writeAttendanceNote,attendanceNoteLimit} from "./fightclub-attendance.js?v=20261103-ssl-1";
 import {SSL_EVENT,fightEventName,mergeFightPlayers} from "./fightclub-events.js?v=20261103-ssl-1";
-import {createFightclubGuests} from "./fightclub-guests.js?v=20261103-ssl-1";
+import {createFightclubGuests} from "./fightclub-guests.js?v=20261105-ssl-season-1";
 export function createFightClub({getState,getLanguage,request,flash,esc,openPlayer}){
  const readOnly=()=>getState()?.staff?.permissions?.ssl_read===true&&getState()?.staff?.is_owner!==true&&getState()?.staff?.permissions?.fightclub!==true;
  const canDossier=()=>getState()?.staff?.is_owner===true||getState()?.staff?.permissions?.members===true;
@@ -120,31 +121,40 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
    const diff=Date.parse(v+"T00:00:00Z")-Date.now();
    return diff>=-120*86400000 && diff<=540*86400000;
  };
- let state=null,loading=null,generation=0,eventType="swordland",date="",search="",filter="all",pending=new Set(),warning="",fastLegion=1,fastAvailability="full",rosterExpanded=true;
- function players(){return mergeFightPlayers((readOnly()?state?.players:getState()?.players)||[],state?.guests||[],state?.assignments||[],eventType,date).filter(p=>p.active&&p.member_status!=="left"&&/^[0-9]{1,20}$/.test(String(p.game_id||""))).slice().sort((a,b)=>String(a.name||"").localeCompare(String(b.name||""),locale()));}
+ let state=null,loading=null,generation=0,eventType="swordland",sslMatchKey="",date="",search="",filter="all",pending=new Set(),warning="",fastLegion=1,fastAvailability="full",rosterExpanded=true;
+ const sslText=(key,values)=>sslSeasonText(getLanguage(),key,values);
+ const sslPayload=()=>eventType===SSL_EVENT&&state?.ssl_season?{ssl_match_key:sslMatchKey}:{};
+ const sameScope=(a,b)=>a.event_type===b.event_type&&a.battle_date===b.battle_date&&(b.ssl_match_key?a.ssl_match_key===b.ssl_match_key:!a.ssl_match_key);
+ function ensureSslMatch(){if(eventType!==SSL_EVENT||!state?.ssl_season)return;const matches=state.ssl_season.matches;const match=matches.find(m=>m.match_key===sslMatchKey)||matches.find(m=>m.stage==='qualifier')||matches[0];if(match){sslMatchKey=match.match_key;date=match.battle_date;}}
+ function players(){const list=mergeFightPlayers((readOnly()?state?.players:getState()?.players)||[],state?.guests||[],state?.assignments||[],eventType,date);return (eventType===SSL_EVENT&&state?.ssl_season?sslPoolPlayers(list,state.ssl_season.pool):list).filter(p=>p.active&&p.member_status!=="left"&&/^[0-9]{1,20}$/.test(String(p.game_id||""))).slice().sort((a,b)=>String(a.name||"").localeCompare(String(b.name||""),locale()));}
  const playerMap=()=>new Map(players().map(p=>[String(p.game_id),p]));
  const scorePowers=()=>{
   const ids=new Set((getState()?.players||[]).filter(p=>p.active&&p.member_status!=='left').map(p=>String(p.game_id))),guestPowers=eventType===SSL_EVENT?(state?.guests||[]).filter(p=>!ids.has(String(p.game_id))):[];
   return [...(state?.powers||[]),...guestPowers].map(p=>({...p,power:p.mystic_trial??null}));
  };
  const powers=()=>new Map(scorePowers().map(p=>[String(p.game_id),p]));
- const assignments=()=>state?.assignments?.filter(a=>a.event_type===eventType&&a.battle_date===date)||[];
+ const assignments=()=>state?.assignments?.filter(a=>a.event_type===eventType&&a.battle_date===date&&(!sslPayload().ssl_match_key||a.ssl_match_key===sslMatchKey))||[];
  const mapUI=createFightClubMap({
-  getContext:()=>({readOnly:readOnly(),eventType,date,assignments:assignments(),mapAssignments:state?.map_assignments||[],powers:scorePowers(),players:players(),state,allianceState:getState()}),
+  getContext:()=>({readOnly:readOnly(),eventType,date,...sslPayload(),assignments:assignments(),mapAssignments:state?.map_assignments||[],powers:scorePowers(),players:players(),state,allianceState:getState()}),
   getLanguage,request,flash,esc,onUpdated:()=>draw()
  });
  const storedAssignment=id=>assignments().find(a=>String(a.game_id)===String(id));
  const assignment=id=>drafts.get(id)?.remove?null:drafts.get(id)||storedAssignment(id);
- const drafts=createRosterDrafts({root,scope:()=>eventType+'|'+date,getLanguage,esc,request,flash,redraw:()=>draw(),onSaved:(body,result)=>{
-  const id=body.game_id,old=state.assignments.find(a=>a.event_type===body.event_type&&a.battle_date===body.battle_date&&String(a.game_id)===id);
-  const same=a=>a.event_type===body.event_type&&a.battle_date===body.battle_date&&String(a.game_id)===id;
+ const drafts=createRosterDrafts({root,scope:()=>eventType+'|'+(sslPayload().ssl_match_key||date),getLanguage,esc,request,flash,redraw:()=>draw(),onSaved:(body,result)=>{
+  const id=body.game_id,old=state.assignments.find(a=>sameScope(a,body)&&String(a.game_id)===id);
+  const same=a=>sameScope(a,body)&&String(a.game_id)===id;
   state.assignments=state.assignments.filter(a=>!same(a));if(!result.removed)state.assignments.push(result.assignment);
   if(result.removed||body.is_reserve||(old&&(Number(old.legion)!==body.legion||Boolean(old.is_reserve)!==Boolean(body.is_reserve)))){
    state.map_assignments=(state.map_assignments||[]).filter(a=>!same(a));state.leaders=(state.leaders||[]).filter(a=>!same(a));
   }
  }});
+ const seasonUI=createSslSeasonPanel({getContext:()=>({state,eventType,readOnly:readOnly(),players:(readOnly()?state?.players:getState()?.players)||[]}),getLanguage,request,esc,onUpdated:()=>draw(),canMutate:()=>!readOnly()&&!drafts.count()&&!drafts.isBusy(),onSaved:value=>{
+  state.ssl_season=value.ssl_season;
+  const keep=a=>a.event_type!==SSL_EVENT||a.battle_date<'2026-11-08'||a.battle_date>'2026-12-13';
+  for(const key of ['assignments','map_assignments','leaders'])state[key]=[...(state[key]||[]).filter(keep),...value[key]];
+ }});
  const cycles=()=>state?.cycles?.filter(c=>c.event_type===eventType)||[];
- const cycle=()=>cycles().find(c=>c.battle_date===date);
+ const cycle=()=>cycles().find(c=>c.battle_date===date&&(!sslPayload().ssl_match_key||c.ssl_match_key===sslMatchKey));
  const legionName=(v,reserve=false)=>(v===1?t("l1"):v===2?t("l2"):v===0?t("reserve")+" · "+({de:"ohne Legion",en:"no legion",fr:"sans légion",es:"sin legión"}[getLanguage()]||"no legion"):t("empty"))+(reserve?' '+t('reserve'):'');
  const slotValue=a=>a&&[1,2].includes(Number(a.legion))?String(a.legion)+(a.is_reserve?'r':''):String(a?.legion??-1);
  const slotFields=value=>({legion:['1','1r','2','2r','0'].includes(String(value))?Number(String(value)[0]):-1,is_reserve:['1r','2r'].includes(String(value))});
@@ -212,7 +222,7 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
   const main=p.main_game_id?playerMap().get(String(p.main_game_id))?.name||p.main_game_id:null;
   return '<tr data-fight-row="'+esc(p.game_id)+'" '+(drafts.has(p.game_id)?'data-roster-dirty':'')+'><td>'+
    '<div class="fight-player-top"><button type="button" data-fight-profile="'+esc(p.game_id)+'" class="fight-player-name" '+(!canDossier()||p.is_ssl_guest?'disabled':'')+'>'+esc(p.name)+'</button>'+
-    '<small>'+esc(p.game_id)+(p.is_ssl_guest?' · SSL Gast · '+esc(p.home_alliance||'—'):'')+(main?' · '+esc(t("alts"))+' '+esc(main):'')+'</small><span class="fight-no-show-badge" data-fight-no-show-badge '+(attendance.noShow?'':'hidden')+'>'+esc(at('badge'))+'</span>'+
+    '<small>'+esc(p.game_id)+(p.is_ssl_guest?' · '+esc(sslText('guest'))+' · '+esc(p.home_alliance||'—'):'')+(main?' · '+esc(t("alts"))+' '+esc(main):'')+'</small><span class="fight-no-show-badge" data-fight-no-show-badge '+(attendance.noShow?'':'hidden')+'>'+esc(at('badge'))+'</span>'+
     '</div></td><td>'+esc(pw?.power==null?'—':powerFormat(pw.power))+'</td>'+
    [['1','L1'],['1r','L1 '+t('reserve')],['2','L2'],['2r','L2 '+t('reserve')]].map(([v,label])=>'<td class="assignment-check-cell"><label class="assignment-check"><input type="checkbox" data-fight-check="'+v+'" aria-label="'+esc(p.name+' · '+label)+'" '+(val===v?'checked ':'')+(pending.has(String(p.game_id))?'disabled':'')+'><span class="sr-only">'+esc(label)+'</span></label></td>').join('')+'<td>'+
    '<div class="fight-player-fields">'+
@@ -265,18 +275,18 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
    if(pending.has(id))return;
    const {legion:leg,is_reserve:isReserve}=slotFields(root.querySelector("[data-fight-fast-legion]")?.value??-1),
        availability=root.querySelector("[data-fight-fast-availability]")?.value||"full",
-       prev=assignment(id),event=eventType,eventDate=date,ticket=generation;
+       prev=assignment(id),event=eventType,eventDate=date,ticket=generation,sslData=sslPayload();
    pending.add(id);
    try{
-     const result=await request("bootstrap",{action:"fightclub_save",event_type:event,battle_date:eventDate,
+     const result=await request("bootstrap",{action:"fightclub_save",event_type:event,battle_date:eventDate,...sslData,
        game_id:id,legion:leg,is_reserve:isReserve,availability,combat_role:prev?.combat_role||"flex",notes:prev?.notes||""});
      if(!result?.ok)throw Error("save_failed");
      if(ticket!==generation)return;
-     state.assignments=state.assignments.filter(x=>!(x.event_type===event&&x.battle_date===eventDate&&String(x.game_id)===id));
+     state.assignments=state.assignments.filter(x=>!(sameScope(x,{event_type:event,battle_date:eventDate,...sslData})&&String(x.game_id)===id));
      state.assignments.push(result.assignment);
      if(isReserve||(prev&&(Number(prev.legion)!==leg||Boolean(prev.is_reserve)!==isReserve))){
-       state.map_assignments=(state.map_assignments||[]).filter(x=>!(x.event_type===event&&x.battle_date===eventDate&&String(x.game_id)===id));
-       state.leaders=(state.leaders||[]).filter(x=>!(x.event_type===event&&x.battle_date===eventDate&&String(x.game_id)===id));
+       state.map_assignments=(state.map_assignments||[]).filter(x=>!(sameScope(x,{event_type:event,battle_date:eventDate,...sslData})&&String(x.game_id)===id));
+       state.leaders=(state.leaders||[]).filter(x=>!(sameScope(x,{event_type:event,battle_date:eventDate,...sslData})&&String(x.game_id)===id));
      }
      flash(t("saved"));draw();
    }catch(e){flash(t("error")+" ("+String(e?.message||e)+")",true);}
@@ -284,6 +294,9 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
  }
 
  function dateBar(){
+   if(eventType===SSL_EVENT&&state?.ssl_season){const matches=state.ssl_season.matches;
+    return seasonUI.render()+'<section class="card fight-dates"><div class="fight-heading"><h3>'+esc(sslText('match'))+'</h3><button class="ghost" type="button" data-fight-refresh>'+esc(t('refresh'))+'</button></div><div class="fight-switches"><label>'+esc(t('type'))+selectOptions(readOnly()?[[SSL_EVENT,fightEventName(SSL_EVENT,getLanguage())]]:[["swordland",t("swordland")],["triforce",t("triforce")],[SSL_EVENT,fightEventName(SSL_EVENT,getLanguage())]],eventType,'data-fight-type')+'</label><label>'+esc(sslText('match'))+'<select class="control" data-fight-ssl-match>'+['qualifier','points','championship'].map(stage=>'<optgroup label="'+esc(sslText(stage))+'">'+matches.filter(m=>m.stage===stage).map(m=>'<option value="'+esc(m.match_key)+'" '+(m.match_key===sslMatchKey?'selected':'')+'>'+esc(sslMatchName(m,getLanguage()))+'</option>').join('')+'</optgroup>').join('')+'</select></label></div><p class="small-note">'+esc(sslText('schedule'))+'</p></section>';
+   }
    const known=cycles();
    const saved=[...new Set((state?.assignments||[]).filter(x=>x.event_type===eventType).map(x=>x.battle_date))];
    const options=[...new Set([...known.map(c=>c.battle_date),...saved])].sort().reverse();
@@ -312,8 +325,9 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
    const subtitle=document.getElementById("fightclubSubtitle");
    if(subtitle)subtitle.textContent=readOnly()?fightEventName(SSL_EVENT,getLanguage())+" · "+({de:"Nur lesen",en:"Read only",fr:"Lecture seule",es:"Solo lectura"}[getLanguage()]||"Read only"):"Swordland · TriAlliance · SSL — "+t("intro");
    if(!state){root.textContent=loading?t("loading"):t("error");return;}
+   ensureSslMatch();
    let html=dateBar();
-   if(eventType===SSL_EVENT)html+='<p class="small-note">'+esc(getLanguage()==='de'?'SSL: Den tatsächlichen Spieltermin wählen. Spielzeiten und Anmeldung richten sich nach der Gipfel-Liga; SL-Termine werden nicht übernommen.':'SSL: Choose the actual match date. League registration and match times are separate from regular Swordland.')+'</p>';
+   if(eventType===SSL_EVENT&&!state.ssl_season)html+='<p class="small-note">'+esc(sslText('schedule'))+'</p>';
    if(date&&!nextDateValid(date)&&!readOnly()){
      html+='<p class="fight-conflict">'+esc(t("selectDate"))+'</p>';
    }else if(date){
@@ -328,6 +342,7 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
    if(drafts.isBusy())root.querySelectorAll('input,select,button').forEach(el=>{el.disabled=true;});
    if(drafts.count()){const quick=root.querySelector('[data-fight-fast-save]');if(quick)quick.disabled=true;}
    const auto=root.querySelector('[data-map-auto-plan]');if(auto&&drafts.count())auto.disabled=true;
+   root.querySelector('[data-ssl-season-pool]')?.addEventListener('toggle',e=>seasonUI.setExpanded(e.target.open));
    const expanded=root.querySelector(".fight-roster-collapsible");
    expanded?.addEventListener("toggle",()=>{rosterExpanded=expanded.open;});
    pending.forEach(id=>{const b=root.querySelector('[data-fight-save="'+id+'"]');if(b){b.disabled=true;b.textContent=t("saving");}});
@@ -355,7 +370,7 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
   const noteInput=row.querySelector('[data-fight-note]'),noShow=row.querySelector('[data-fight-no-show]');
   try{notes=writeAttendanceNote(noteInput.value,noShow.checked);}catch{noShow.checked=false;flash(at('tooLong'),true);notes=noteInput.value;}
   noteInput.maxLength=attendanceNoteLimit(noShow.checked);row.querySelector('[data-fight-no-show-badge]').hidden=!noShow.checked;
-  const old=storedAssignment(id),base={action:'fightclub_save',event_type:eventType,battle_date:date,game_id:id,legion:old?.legion??-1,is_reserve:Boolean(old?.is_reserve),availability:old?.availability||'unknown',combat_role:old?.combat_role||'flex',notes:old?.notes||'',remove:false};
+  const old=storedAssignment(id),base={action:'fightclub_save',event_type:eventType,battle_date:date,...sslPayload(),game_id:id,legion:old?.legion??-1,is_reserve:Boolean(old?.is_reserve),availability:old?.availability||'unknown',combat_role:old?.combat_role||'flex',notes:old?.notes||'',remove:false};
   const payload={...base,...(remove?{legion:-1,is_reserve:false}:slotFields(row.querySelector('[data-fight-legion]').value)),availability:row.querySelector('[data-fight-availability]').value,combat_role:row.querySelector('[data-fight-role]').value,notes,remove};
   drafts.set(id,payload,base);row.toggleAttribute('data-roster-dirty',drafts.has(id));
   const auto=root.querySelector('[data-map-auto-plan]');if(auto)auto.disabled=drafts.count()>0;
@@ -378,6 +393,8 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
  if(root){
    root.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.matches('[data-ssl-query]')){e.preventDefault();e.target.closest('.ssl-guests').querySelector('[data-ssl-search]')?.click();}});
    root.addEventListener("change",e=>{
+     if(seasonUI.change(e))return;
+     if(e.target.matches('[data-fight-ssl-match]')){sslMatchKey=e.target.value;ensureSslMatch();filter='all';search='';draw();return;}
      if(mapUI.change(e))return;
      const el=e.target;
      if(el.matches('[data-fight-check]')){
@@ -390,11 +407,12 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
      if(el.matches('[data-fight-availability],[data-fight-role]')){stage(el.closest('[data-fight-row]').dataset.fightRow);return;}
      if(el.matches("[data-fight-fast-legion]")){fastLegion=el.value;return;}
      if(el.matches("[data-fight-fast-availability]")){fastAvailability=el.value;return;}
-     if(el.matches("[data-fight-type]")){if(readOnly())return;eventType=el.value;date="";filter="all";search="";draw();}
-     else if(el.matches("[data-fight-date]")){date=el.value;filter="all";search="";draw();}
+     if(el.matches("[data-fight-type]")){if(readOnly())return;eventType=el.value;sslMatchKey="";date="";filter="all";search="";draw();}
+     else if(el.matches("[data-fight-date]")){if(eventType===SSL_EVENT&&state?.ssl_season)return;date=el.value;filter="all";search="";draw();}
      else if(el.matches("[data-fight-filter]")){filter=el.value;draw();}
    });
    root.addEventListener("input",e=>{
+     if(seasonUI.input(e))return;
      if(guestUI.input(e))return;
      if(e.target.matches('[data-fight-note]')){stage(e.target.closest('[data-fight-row]').dataset.fightRow);return;}
      if(!e.target.matches("[data-fight-search]"))return;
@@ -403,6 +421,8 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
      if(Number.isInteger(pos))input?.setSelectionRange(pos,pos);
    });
    root.addEventListener("click",async e=>{
+     if(await seasonUI.click(e))return;
+     if(e.target.closest('[data-fight-ssl-match]'))return;
      if(readOnly()){
       if(await mapUI.click(e))return;
       if(e.target.closest('[data-fight-refresh]')){load(true);return;}
@@ -429,6 +449,6 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
      }
    });
  }
- function reset(){guestUI.reset();drafts.reset();fastLegion=1;fastAvailability="full";rosterExpanded=true;mapUI.reset();generation++;state=null;loading=null;pending.clear();date="";search="";filter="all";eventType="swordland";if(root){root.innerHTML="";root.textContent="";}}
+ function reset(){seasonUI.reset();sslMatchKey="";guestUI.reset();drafts.reset();fastLegion=1;fastAvailability="full";rosterExpanded=true;mapUI.reset();generation++;state=null;loading=null;pending.clear();date="";search="";filter="all";eventType="swordland";if(root){root.innerHTML="";root.textContent="";}}
  return {enabled,open:load,render:draw,reset};
 }

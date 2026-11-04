@@ -1,4 +1,4 @@
-import {createLeadershipTools} from "./tools.js?v=20261104-tools-i18n-1";
+import {createLeadershipTools} from "./tools.js?v=20261105-territory-1";
 import {activateMemberApiRefresh,memberApiLabels} from "./member-api-refresh.js?v=20261104-1";
 import {identityOptions,selectedLogin} from "./login-identities.js?v=20261103-integrated-1";
 import {createSslAccessAdmin} from "./ssl-access-admin.js?v=20261103-integrated-1";
@@ -11,7 +11,7 @@ import {createEventBotStatusPanel} from "./event-bot-status.js?v=20261021-usabil
 import {createMemberRelationships} from "./member-relationships.js?v=20261104-member-api-1";
 import {createPerformance} from "./performance.js?v=20261021-usability-1";
 import {createBearManagement} from "./bear-management.js?v=20261104-bear-time-1";
-import {createFightClub} from "./fightclub.js?v=20261104-reserves-1";
+import {createFightClub} from "./fightclub.js?v=20261105-ssl-season-1";
 import {createEventParticipation} from "./event-participation.js?v=vercel-release-20261020-1";
 import {createEventLoans} from "./event-loans.js?v=20261021-usability-1";
 
