@@ -10,7 +10,7 @@ const players=[{game_id:'10001',name:'Alexandra · NRW',active:true},{game_id:'1
 const data={ok:true,cycles:[],assignments:[],powers:[{game_id:'10001',power:999999999,mystic_trial:54321},{game_id:'10002',power:999}],map_assignments:[],leaders:[]};
 window.data=data;window.bearData={ok:true,slots:[{slot_key:'bear-1',slot_label:'BT1',start_time:'17:00:00'},{slot_key:'bear-2',slot_label:'BT2',start_time:'18:30:00'}],assignments:[],powers:[],profiles:[],settings:{}};
 const request=async(_,body)=>{calls.push(body);if(body.action==='fightclub_data')return structuredClone(data);if(body.action==='bear_management')return structuredClone(bearData);await new Promise(r=>setTimeout(r,30));if(window.fail||window.failId===body.game_id)throw Error('test failure');const store=body.action==='bear_assignment'?bearData:data;store.assignments=store.assignments.filter(a=>!(a.game_id===body.game_id&&(body.action==='bear_assignment'||a.event_type===body.event_type&&a.battle_date===body.battle_date)));const removed=body.remove||body.action==='bear_assignment'&&!body.slot_key;if(!removed)store.assignments.push(body);return {ok:true,removed,assignment:body};};
-const args={getState:()=>({players,staff:{is_owner:true}}),getLanguage:()=>'de',request,flash:()=>{},esc,openPlayer:()=>{}};
+window.planningState={players,staff:{is_owner:true},eventCycles:[]};const args={getState:()=>planningState,getLanguage:()=>'de',request,flash:()=>{},esc,openPlayer:()=>{}};
 window.fight=(await import('/leitung/fightclub.js')).createFightClub(args);window.bear=(await import('/leitung/bear-management.js')).createBearManagement(args);await fight.open();await bear.open();
 });
 await page.locator('[data-fight-date]').fill('2026-10-30');await page.locator('[data-fight-date]').press('Tab');await page.locator('.fight-roster-collapsible').evaluate(e=>e.open=true);await page.locator('[data-bear-roster]').evaluate(e=>e.open=true);
@@ -39,6 +39,10 @@ await fc.locator('[data-fight-check="1"]').uncheck();await saveAll(fight);assert
 await bc.locator('[data-bear-check="bear-1"]').check();await bc.locator('[data-bear-check="bear-2"]').check();assert(!(await bc.locator('[data-bear-check="bear-1"]').isChecked()));
 await bc2.locator('[data-bear-check="bear-1"]').check();const before=(await writes()).length;
 await bc.locator('[data-bear-role]').check();await bc.locator('.bear-row-more').evaluate(e=>e.open=true);await bc.locator('[data-bear-note]').fill('BT2 Entwurf');
+await page.evaluate(async()=>{planningState.eventCycles=[{group_key:'bear-2',enabled:true,override_schedule:true,start_time_utc:'19:30:00',anchor_date:'2026-09-13',updated_at:'2026-11-04T10:00:00Z'}];await bear.open();});
+assert((await bear.locator('.bear-count-card').nth(1).innerText()).includes('19:30 UTC'),'Cached Bear planner immediately applies a saved event-planning time');assert.equal(await bc.locator('[data-bear-note]').inputValue(),'BT2 Entwurf');assert(await bc.locator('[data-bear-check="bear-2"]').isChecked());assert.equal((await writes()).length,before,'Time update does not rewrite player assignments');
+await page.evaluate(async()=>{bearData.cycles=[{group_key:'bear-2',enabled:true,override_schedule:true,start_time_utc:'19:45:00',updated_at:'2026-11-04T11:00:00Z'}];await bear.open(true);});
+assert((await bear.locator('.bear-count-card').nth(1).innerText()).includes('19:45 UTC'),'A fresh API schedule wins over an older bootstrap copy');assert.equal(await bc.locator('[data-bear-note]').inputValue(),'BT2 Entwurf');
 await bear.locator('[data-bear-search]').fill('Score fehlt');assert.equal((await writes()).length,before,'Bear edits do not write');
 await page.evaluate(()=>window.failId='10002');await saveAll(bear);assert.equal((await writes()).length,before+2);assert.equal(await bear.locator('[data-roster-dirty]').count(),1);
 await page.evaluate(()=>window.failId=null);await saveAll(bear);assert.equal((await writes()).length,before+3);

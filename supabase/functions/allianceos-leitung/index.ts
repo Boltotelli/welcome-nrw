@@ -940,7 +940,7 @@ async function bearManagement(req:Request,alliance:string,staff:any){
    .eq("alliance_code",alliance).not("game_id","is",null).limit(250));
  const allIds=[...new Set(roster.map(p=>String(p.game_id||"")).filter(isId))];
  const activeIds=new Set(roster.filter(p=>p.active).map(p=>String(p.game_id)));
- const [slots,assignments,plannerConfig,powers]=await Promise.all([
+ const [slots,assignments,plannerConfig,powers,cycles]=await Promise.all([
    checked<any[]>(db.from("discord_bear_slots")
      .select("slot_key,slot_label,start_time,timezone,active,anchor_date")
      .eq("alliance_code",alliance).eq("active",true).order("start_time",{ascending:true}).limit(20)),
@@ -950,7 +950,9 @@ async function bearManagement(req:Request,alliance:string,staff:any){
    checked<any>(db.from("aos_bear_planning_settings")
      .select("strong_power_threshold").eq("alliance_code",alliance).maybeSingle()),
    checked<any[]>(db.from("aos_member_power_snapshot")
-     .select("game_id,power,fetched_at,source,mystic_trial,mystic_trial_fetched_at").eq("alliance_code",alliance).limit(500))
+     .select("game_id,power,fetched_at,source,mystic_trial,mystic_trial_fetched_at").eq("alliance_code",alliance).limit(500)),
+   checked<any[]>(db.from("aos_event_cycles").select("group_key,start_time_utc,enabled,override_schedule,anchor_date,updated_at")
+     .eq("alliance_code",alliance).in("group_key",["bear-1","bear-2","bear-3"]))
  ]);
  const rawProfiles:any[]=[];
  for(let i=0;i<allIds.length;i+=100){
@@ -1001,7 +1003,7 @@ async function bearManagement(req:Request,alliance:string,staff:any){
      }
    };
  });
- return json(req,{ok:true,slots,assignments:assignments.filter(a=>allIds.includes(a.game_id)),
+ return json(req,{ok:true,slots,cycles,assignments:assignments.filter(a=>allIds.includes(a.game_id)),
    profiles,settings:{strong_power_threshold:plannerConfig?.strong_power_threshold??null},
    powers:powers.filter(p=>activeIds.has(String(p.game_id))&&Number.isFinite(Number(p.power))&&Number(p.power)>=0)
      .map(p=>({game_id:p.game_id,power:Number(p.power),fetched_at:p.fetched_at})),

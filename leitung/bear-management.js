@@ -1,4 +1,5 @@
 import {createRosterDrafts} from "./roster-drafts.js?v=20261030-bulk-1";
+import {bearScheduleSlots} from "./bear-schedule.js?v=20261104-bear-time-1";
 /* AllianceOS Phase 3 – Leadership Bear Trap planner (GitHub Pages pilot).
    Source schedule and optimizer profiles are read-only; this only saves AllianceOS
    participation, attendance, role, and leadership notes by immutable game ID. */
@@ -8,7 +9,7 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
  const enabled=true; // Released for both GitHub Pages and Vercel; access is enforced by server-side module permissions.
  const messages={
  de:{no:"Keine Teilnahme",strong:"Stark",weak:"Unter Grenze",power:"Kraft",threshold:"Stark ab Kraft",thresholdUnset:"Schwelle nicht festgelegt",saveThreshold:"Grenze speichern",meanPower:"Ø Kraft",meanStarter:"Ø Starter-Formation",validStarter:"Optimierte Starter-Formation (Modell)",noStarter:"Keine vollständige Modellberechnung",countModels:"Profile",quick:"Schnell einteilen",noAttendees:"Keine Teilnahme",showAll:"Erweitert",intro:"Wer spielt welche Bärenfalle? Teilnehmer zuordnen und gespeicherte Optimierer-Werte einsehen.",
-  source:"Fallenzeiten aus der bestehenden Discord-Rotation (UTC), schreibgeschützt. Diese Planung verändert keine Bot-Zeiten oder Minister.",
+  source:"Fallenzeiten aus der Eventplanung (UTC), mit Discord-Zeiten als Rückfall. Spielerzuordnungen bleiben beim Ändern der Uhrzeit erhalten.",
   unavailable:"Für NRW sind derzeit keine aktiven Bärenzeiten hinterlegt.",assignment:"Teilnehmerplanung",
   summary:"Belegung der Fallen",confirmed:"Bestätigt",tentative:"Unsicher",starter:"Starter",joiner:"Joiner",flex:"Flexibel",
   empty:"Nicht zugeordnet",all:"Alle",role:"Rolle",attendance:"Teilnahme",time:"Bärenfalle",player:"Spieler",
@@ -29,7 +30,7 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
   noteSource:"Anmeldestatus ist eine Eingabe der Leitung, keine vom Spieler bestätigte Discord-Rückmeldung.",
   altInfo:"Alt-Account",mainInfo:"Main",allCount:"Aktive Spieler"},
  en:{no:"Not participating",strong:"Strong",weak:"Below threshold",power:"Power",threshold:"Strong from power",thresholdUnset:"Threshold not set",saveThreshold:"Save threshold",meanPower:"Avg power",meanStarter:"Avg starter formation",validStarter:"Optimized starter formation (model)",noStarter:"No complete model calculation",countModels:"Profiles",quick:"Quick assignment",noAttendees:"Not participating",showAll:"Advanced",intro:"Assign members to Bear Traps and review their saved optimizer values.",
-  source:"UTC Bear times from the existing Discord rotation (read-only). This planner does not alter bot schedules or ministers.",
+  source:"UTC Bear times from event planning, with Discord times as fallback. Changing times preserves player assignments.",
   unavailable:"No active Bear Trap times are configured for this alliance.",assignment:"Member planning",
   summary:"Bear Trap attendance",confirmed:"Confirmed",tentative:"Tentative",starter:"Starter",joiner:"Joiner",flex:"Flexible",
   empty:"Unassigned",all:"All",role:"Role",attendance:"Attendance",time:"Bear Trap",player:"Player",
@@ -50,7 +51,7 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
   noteSource:"Attendance is entered by leadership; it is not a confirmed Discord response from the player.",
   altInfo:"Alt account",mainInfo:"Main",allCount:"Active players"},
  fr:{no:"Ne participe pas",strong:"Fort",weak:"Sous le seuil",power:"Puissance",threshold:"Fort à partir de",thresholdUnset:"Seuil non défini",saveThreshold:"Enregistrer le seuil",meanPower:"Puissance moyenne",meanStarter:"Formation de départ moyenne",validStarter:"Formation de départ optimisée (modèle)",noStarter:"Calcul du modèle incomplet",countModels:"Profils",quick:"Affectation rapide",noAttendees:"Ne participe pas",showAll:"Avancé",intro:"Répartir les joueurs entre les pièges à ours et consulter les valeurs enregistrées.",
-  source:"Heures UTC de la rotation Discord existante (lecture seule). Aucun horaire du bot ou ministre n'est modifié.",
+  source:"Horaires UTC du calendrier, avec les horaires Discord en secours. Les affectations sont conservées lors des changements d’heure.",
   unavailable:"Aucun horaire actif de piège à ours.",assignment:"Organisation des membres",
   summary:"Participation aux pièges",confirmed:"Confirmé",tentative:"Incertain",starter:"Lanceur",joiner:"Participant",flex:"Flexible",
   empty:"Non attribué",all:"Tous",role:"Rôle",attendance:"Participation",time:"Piège à ours",player:"Joueur",
@@ -107,7 +108,8 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
   cache.assignments=cache.assignments.filter(a=>String(a.game_id)!==body.game_id);if(!result.removed)cache.assignments.push(result.assignment);
  }});
  function profile(id){return (cache?.profiles||[]).find(x=>String(x.game_id)===String(id));}
- function slot(id){return (cache?.slots||[]).find(x=>x.slot_key===id);}
+ const effectiveSlots=()=>bearScheduleSlots(cache?.slots||[],cache?.cycles||[],getState()?.eventCycles||[]);
+ function slot(id){return effectiveSlots().find(x=>x.slot_key===id);}
  function slotLabel(s){return (s.slot_label?s.slot_label+" · ":"")+hhmm(s.start_time)+" UTC";}
  function select(options,value,extra=""){return '<select class="control" '+extra+'>'+options.map(([v,label])=>
   '<option value="'+esc(v)+'" '+(v===value?'selected':'')+'>'+esc(label)+'</option>').join("")+'</select>';}
@@ -178,7 +180,7 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
  function counters(){
   const activeIds=new Set(active().map(p=>String(p.game_id)));
   const assigned=(cache?.assignments||[]).filter(x=>activeIds.has(String(x.game_id))&&x.attendance!=="no");
-  return (cache?.slots||[]).map(slot=>{
+  return effectiveSlots().map(slot=>{
    const rows=assigned.filter(x=>x.slot_key===slot.slot_key);
    const starter=rows.filter(x=>x.role!=="joiner"),joiner=rows.filter(x=>x.role==="joiner");
    const powersInfo=powerSummary(rows),average=averageFormation(starter);
@@ -204,10 +206,10 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
    '<span class="bear-opt-flag '+(strong(p)?'ready':'')+'">'+esc(pow?fmt(pow.power):"—")+
      (threshold()===null?'':' · '+esc(t(strong(p)?"strong":"weak")))+'</span>'+
    (readyFormation?'<span class="bear-formation-badge" title="'+esc(t("validStarter"))+'">🐻 '+esc(formationText(readyFormation))+'</span>':"")+
-   '</div></td>'+(cache.slots||[]).map(sl=>'<td class="assignment-check-cell"><label class="assignment-check"><input type="checkbox" data-bear-check="'+esc(sl.slot_key)+'" aria-label="'+esc(p.name+' · '+slotLabel(sl))+'" '+(!no&&a.slot_key===sl.slot_key?'checked ':'')+(pending.has(String(p.game_id))?'disabled':'')+'></label></td>').join('')+'<td><div class="bear-fields">'+
+   '</div></td>'+effectiveSlots().map(sl=>'<td class="assignment-check-cell"><label class="assignment-check"><input type="checkbox" data-bear-check="'+esc(sl.slot_key)+'" aria-label="'+esc(p.name+' · '+slotLabel(sl))+'" '+(!no&&a.slot_key===sl.slot_key?'checked ':'')+(pending.has(String(p.game_id))?'disabled':'')+'></label></td>').join('')+'<td><div class="bear-fields">'+
    '<label hidden><span>'+esc(t("time"))+'</span>'+ // Checkbox columns edit this existing save field.
 
-      select([["",t("empty")],...(cache.slots||[]).map(slot=>[slot.slot_key,slotLabel(slot)])],a.slot_key||"",'data-bear-slot')+'</label>'+
+      select([["",t("empty")],...effectiveSlots().map(slot=>[slot.slot_key,slotLabel(slot)])],a.slot_key||"",'data-bear-slot')+'</label>'+
    '<label><span>'+esc(t("attendance"))+'</span>'+
       select([["tentative",t("tentative")],["confirmed",t("confirmed")],["no",t("no")]],a.attendance||"tentative",'data-bear-attendance')+'</label>'+
    '<label class="bear-switch-label"><span>'+esc(t("role"))+'</span>'+
@@ -239,7 +241,7 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
    return '<section class="card bear-fast-assign"><h3>⚡ '+esc(t("quick"))+'</h3><div class="bear-fast-form">'+
      '<label>'+esc(t("player"))+'<select class="control" data-bear-quick-player><option value="">—</option>'+
        active().map(p=>'<option value="'+esc(p.game_id)+'">'+esc(p.name)+' · '+esc(p.game_id)+'</option>').join("")+'</select></label>'+
-     '<label>'+esc(t("time"))+select([["",t("empty")],...(cache.slots||[]).map(sl=>[sl.slot_key,slotLabel(sl)])],quickSlot,'data-bear-quick-slot')+'</label>'+
+     '<label>'+esc(t("time"))+select([["",t("empty")],...effectiveSlots().map(sl=>[sl.slot_key,slotLabel(sl)])],quickSlot,'data-bear-quick-slot')+'</label>'+
      '<label>'+esc(t("attendance"))+select([["confirmed",t("confirmed")],["tentative",t("tentative")],["no",t("no")]],quickAttendance,'data-bear-quick-attendance')+'</label>'+
      '<label class="bear-switch-label">'+esc(t("role"))+' <span class="bear-switch"><span>'+esc(t("starter"))+'</span><input type="checkbox" role="switch" data-bear-quick-role '+(quickJoiner?'checked':'')+'><span>'+esc(t("joiner"))+'</span></span></label>'+
      '<button type="button" class="primary" data-bear-quick-save>'+esc(t("save"))+'</button></div></section>';
@@ -284,7 +286,7 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
   if(!root||!enabled)return;
   const sub=document.getElementById("bearManagementSubtitle");if(sub)sub.textContent=t("intro");
   if(!cache){root.textContent=loading?t("loading"):t("error");return;}
-  const slots=cache.slots||[];
+  const slots=effectiveSlots();
   if(!slots.length){root.innerHTML='<div class="notice">'+esc(t("unavailable"))+'</div>';return;}
   if(filter!=="all"&&filter!=="unassigned"&&filter!=="optimizer"&&!slots.some(s=>s.slot_key===filter))filter="all";
   const all=eligible();
@@ -301,7 +303,7 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
       ...slots.map(s=>[s.slot_key,slotLabel(s)])].map(([value,label])=>
        '<option value="'+esc(value)+'" '+(filter===value?'selected':'')+'>'+esc(label)+'</option>').join("")+'</select>'+
      '<span class="counter">'+all.length+' / '+active().length+'</span></div>'+
-     '<div class="assignment-table-scroll" role="region" aria-label="'+esc(t('assignment'))+'" tabindex="0"><table class="assignment-table"><thead><tr><th scope="col">'+esc(t('player'))+'</th>'+(cache.slots||[]).map((sl,i)=>'<th scope="col" title="'+esc(slotLabel(sl))+'">'+esc(i<2?'BT'+(i+1):slotLabel(sl))+'</th>').join('')+'<th scope="col">'+esc(t('attendance'))+' / '+esc(t('role'))+'</th></tr></thead><tbody>'+(all.length?all.map(row).join(''):'<tr><td colspan="'+(2+cache.slots.length)+'">'+esc(t('noPlayers'))+'</td></tr>')+'</tbody></table></div></details>';
+     '<div class="assignment-table-scroll" role="region" aria-label="'+esc(t('assignment'))+'" tabindex="0"><table class="assignment-table"><thead><tr><th scope="col">'+esc(t('player'))+'</th>'+effectiveSlots().map((sl,i)=>'<th scope="col" title="'+esc(slotLabel(sl))+'">'+esc(sl.slot_number?'BT'+sl.slot_number:slotLabel(sl))+'</th>').join('')+'<th scope="col">'+esc(t('attendance'))+' / '+esc(t('role'))+'</th></tr></thead><tbody>'+(all.length?all.map(row).join(''):'<tr><td colspan="'+(2+effectiveSlots().length)+'">'+esc(t('noPlayers'))+'</td></tr>')+'</tbody></table></div></details>';
   if(drafts.isBusy())root.querySelectorAll('input,select,button').forEach(el=>{el.disabled=true;});
   if(drafts.count()){const quick=root.querySelector('[data-bear-quick-save]');if(quick)quick.disabled=true;}
   const details=root.querySelector("[data-bear-roster]");
@@ -336,7 +338,7 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
  }
  function exportText(){
   const ids=new Set(active().map(p=>String(p.game_id))),people=byId();
-  const groups=(cache?.slots||[]).map(slot=>{
+  const groups=effectiveSlots().map(slot=>{
    const rows=(cache?.assignments||[]).filter(a=>a.slot_key===slot.slot_key&&a.attendance!=="no"&&ids.has(String(a.game_id)))
      .sort((a,b)=>String(people.get(a.game_id)?.name||a.game_id).localeCompare(String(people.get(b.game_id)?.name||b.game_id),locale()));
    return slotLabel(slot)+"\n"+(rows.length?rows.map(a=>{
