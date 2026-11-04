@@ -36,6 +36,7 @@ Integration follows the public client's signed form (`cdk`, `fid`, `kid`, Unix-s
 
 - `tests/tools-workbench-model.cjs`: midnight/stagger math, limits, coordinate validation, duplicate outpost groups, backend input validation, gift request payload, receipt reservation and unknown outcomes.
 - `tests/tools-workbench-ui.cjs`: full leadership app fixtures, cursor formatting, saved templates/plans/weeks, territory phase changes, bulk recipients, uncertainty pause/deliberate retry, no repeats of confirmed success, escaped names, permission visibility, mobile overflow and screenshots.
+- The same browser suite passed using the actual published Vercel HTML/CSS/JS (`TOOLS_LIVE_ASSETS=1`) with all API calls still intercepted by synthetic fixtures. Create-run failures leave the bulk start usable for retry.
 - Existing `tests/tools-model.cjs`, `tests/tools-ui.cjs`, `tests/tools-player.cjs` pass. New actions are included in the permission-before-I/O tests.
 - Live SQL assertions verify duplicate processing/success claims, rolled back with no test receipts remaining. New tables have RLS and no anon/authenticated privileges; the reservation RPC is service-only. Security advisor finding counts match the pre-change baseline; no new workbench findings.
 

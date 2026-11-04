@@ -10,7 +10,7 @@ const root=path.resolve(__dirname,'..'),tags=['NRW','NWO','THM','CWR','PxR','NwO
 
   const context=await browser.newContext({viewport:{width:1440,height:1100},permissions:['clipboard-read','clipboard-write']}),page=await context.newPage(),errors=[],calls=[];
 
-  page.setDefaultTimeout(12000);page.on('pageerror',e=>{errors.push(e.message);console.log('BROWSER ERROR',e.message)});const documents=[],giftRuns=[],giftReceipts=[];let giftUnknown=true;const archive=[];let saved=null,conflict=false,allowed=true,searchError=false,apiError=false;
+  page.setDefaultTimeout(12000);page.on('pageerror',e=>{errors.push(e.message);console.log('BROWSER ERROR',e.message)});const documents=[],giftRuns=[],giftReceipts=[];let giftUnknown=true,giftCreateError=true;const archive=[];let saved=null,conflict=false,allowed=true,searchError=false,apiError=false;
 
   await page.addInitScript(()=>localStorage.setItem('nrw_theme','dark'));
 
@@ -64,7 +64,7 @@ const root=path.resolve(__dirname,'..'),tags=['NRW','NWO','THM','CWR','PxR','NwO
 
    if(body?.action==='tools_gifts_load')result={ok:true,runs:giftRuns,candidates:[{game_id:'111',name:'Alpha <script>',kingdom_id:1044,external:false},{game_id:'222',name:'Beta',kingdom_id:1044,external:false},{game_id:'333',name:'External Alt',kingdom_id:null,external:true}]};
 
-   if(body?.action==='tools_gifts_create'){const item={id:'11111111-1111-4111-8111-111111111111',code:body.code,recipients:body.recipients,created_at:'2026-11-04T20:00:00Z'};giftRuns.push(item);result={ok:true,item};}
+   if(body?.action==='tools_gifts_create'){if(giftCreateError){giftCreateError=false;return r.fulfill({status:503,contentType:'application/json',body:'{"error":"gift_test_unavailable"}'});}const item={id:'11111111-1111-4111-8111-111111111111',code:body.code,recipients:body.recipients,created_at:'2026-11-04T20:00:00Z'};giftRuns.push(item);result={ok:true,item};}
 
    if(body?.action==='tools_gifts_status')result={ok:true,item:giftRuns.find(x=>x.id===body.run_id),receipts:giftReceipts};
 
@@ -78,7 +78,7 @@ const root=path.resolve(__dirname,'..'),tags=['NRW','NWO','THM','CWR','PxR','NwO
 
   });
 
-  await page.route('https://welcome-nrw.vercel.app/**',r=>{
+  if(!process.env.TOOLS_LIVE_ASSETS)await page.route('https://welcome-nrw.vercel.app/**',r=>{
 
    let file=path.join(root,new URL(r.request().url()).pathname);if(fs.existsSync(file)&&fs.statSync(file).isDirectory())file=path.join(file,'index.html');
 
@@ -120,7 +120,7 @@ const root=path.resolve(__dirname,'..'),tags=['NRW','NWO','THM','CWR','PxR','NwO
 
   console.log('Testing next tool');await page.locator('[data-tool="gifts"]').click();await page.locator('[data-wb-gift-recipient="111"]').waitFor();assert(await page.locator('[data-wb-gift-recipient="111"]').isChecked());assert(!await page.locator('[data-wb-gift-recipient="333"]').isChecked());assert.equal(await page.locator('.wb-gift-recipients script').count(),0);
 
-  await page.locator('[data-wb-gift-code]').fill('TEST-ONLY');await page.locator('[data-wb-action="gift-start"]').click();await page.locator('[data-wb-status]').filter({hasText:'pausiert'}).waitFor();await page.locator('[data-wb-action="gift-unknown-retry"]').waitFor();assert.equal(calls.filter(c=>c.action==='tools_gifts_step').length,2);
+  await page.locator('[data-wb-gift-code]').fill('TEST-ONLY');await page.locator('[data-wb-action="gift-start"]').click();await page.locator('[data-wb-status]').filter({hasText:'Aktion fehlgeschlagen'}).waitFor();assert(await page.locator('[data-wb-action="gift-start"]').isEnabled());await page.locator('[data-wb-action="gift-start"]').click();await page.locator('[data-wb-status]').filter({hasText:'pausiert'}).waitFor();await page.locator('[data-wb-action="gift-unknown-retry"]').waitFor();assert.equal(calls.filter(c=>c.action==='tools_gifts_step').length,2);
 
   await page.locator('[data-wb-action="gift-unknown-retry"]:not([disabled])').click();await page.locator('[data-wb-gift-progress]').filter({hasText:'2 / 2 bestätigt'}).waitFor();assert.equal(calls.filter(c=>c.action==='tools_gifts_step').length,3);assert.equal(calls.filter(c=>c.action==='tools_gifts_step'&&c.game_id==='111').length,1);
 
