@@ -1,5 +1,5 @@
 // Law 9: use the unscaled integer values shown in the game throughout.
-export const ALLIANCES=['NRW','NWO','THM','CWR','PxR','NwO'];
+export const ALLIANCES=['NWO','THM','NRW','CWR','PxR','NwO'];
 export const PERIODS=['day1','day2','day3','day4','day5','overall'];
 export function parseInteger(raw){
  const text=String(raw??'').trim();

@@ -7,7 +7,7 @@ const data=math.blankKvk();assert(!math.rankKvk(data,'overall').complete);
 for(const tag of math.ALLIANCES){data.alliances[tag]={power:1000000000,members:100,scores:Object.fromEntries(math.PERIODS.map(p=>[p,1000000]))};}
 const one=1000000/(1000000000**0.7*100**0.3);assert.equal(math.rankKvk(data,'overall').rows[0].score,one);
 data.alliances.NWO.scores.overall=3000000;data.alliances.NwO.scores.overall=2000000;
-let ranking=math.rankKvk(data,'overall');assert(ranking.complete);assert.equal(ranking.rows[0].tag,'NWO');assert.equal(ranking.rows[1].tag,'NwO');assert.match(ranking.text,/1\. NWO - \d+,\d{3}/);assert.equal(math.rankKvk(data,'day1').rows[0].tag,'NRW','Overall is independent of daily points');
+let ranking=math.rankKvk(data,'overall');assert(ranking.complete);assert.equal(ranking.rows[0].tag,'NWO');assert.equal(ranking.rows[1].tag,'NwO');assert.match(ranking.text,/1\. NWO - \d+,\d{3}/);assert.equal(math.rankKvk(data,'day1').rows[0].tag,'NWO','Overall is independent of daily points');
 data.alliances.NRW.scores.day2=0;assert(math.rankKvk(data,'day2').complete);data.alliances.NRW.scores.day2=null;assert(!math.rankKvk(data,'day2').complete);
 
 const source=stripTypeScriptTypes(fs.readFileSync(path.join(root,'supabase/functions/allianceos-leitung/tools.ts'),'utf8'),{mode:'transform'}).replace(/^import .*;\s*$/gm,'').replace(/^export /gm,'');
