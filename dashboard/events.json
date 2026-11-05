@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "kingdom": 1044,
   "timezone": "UTC",
-  "updatedAt": "2026-11-04T00:18:04Z",
+  "updatedAt": "2026-11-05T00:10:27Z",
   "events": [
     {
       "id": "golden-glaives-prep-2026-09-20",
@@ -1685,7 +1685,7 @@
       "start": "2026-11-05",
       "end": "2026-11-07",
       "icon": "❄️",
-      "confidence": "predicted",
+      "confidence": "public-timeline",
       "name": {
         "de": "Blizzard Brawl",
         "en": "Blizzard Brawl",
@@ -1699,7 +1699,7 @@
       "end": "2026-11-10",
       "icon": "🗡️",
       "iconUrl": "https://kingshotdata.com/uploads/2025/03/cesares-fury-event-icon.webp",
-      "confidence": "predicted",
+      "confidence": "public-timeline",
       "name": {
         "de": "Cesares’ Zorn",
         "en": "Cesares Fury",
@@ -1723,6 +1723,355 @@
         ]
       },
       "sourceUrl": "https://kingshotdata.com/events/cesares-fury/"
+    },
+    {
+      "id": "hero-roulette-2026-11-03",
+      "start": "2026-11-03",
+      "end": "2026-11-06",
+      "icon": "🎡",
+      "iconUrl": "https://kingshotdata.com/uploads/2025/03/hero-roulette-event-icon.webp",
+      "confidence": "public-timeline",
+      "name": {
+        "de": "Helden-Roulette",
+        "en": "Hero Roulette",
+        "fr": "Roulette des héros"
+      },
+      "sourceUrl": "https://kingshotdata.com/events/hero-roulette/"
+    },
+    {
+      "id": "sanctuary-battle-2026-11-03",
+      "start": "2026-11-03",
+      "end": "2026-11-07",
+      "icon": "🏛️",
+      "iconUrl": "https://kingshot.net/images/events/sanctuary-battle.png",
+      "confidence": "public-timeline",
+      "name": {
+        "de": "Heiligtumsschlacht",
+        "en": "Sanctuary Battle",
+        "fr": "Bataille du sanctuaire"
+      },
+      "sourceUrl": "https://kingshot.net/calendar?kingdom=1044"
+    },
+    {
+      "id": "alliance-championship-2026-11-02",
+      "start": "2026-11-02",
+      "end": "2026-11-09",
+      "icon": "🏆",
+      "iconUrl": "https://kingshot.net/images/events/alliance-championship.png",
+      "confidence": "public-timeline",
+      "name": {
+        "de": "Allianzmeisterschaft",
+        "en": "Alliance Championship",
+        "fr": "Championnat d’alliance"
+      },
+      "sourceUrl": "https://kingshot.net/calendar?kingdom=1044"
+    },
+    {
+      "id": "hero-rally-2026-10-26",
+      "start": "2026-10-26",
+      "end": "2026-11-09",
+      "icon": "🦸",
+      "iconUrl": "https://kingshot.net/images/events/hero-rally.png",
+      "confidence": "public-timeline",
+      "name": {
+        "de": "Helden-Rally · Generation 6",
+        "en": "Hero Rally · Generation 6",
+        "fr": "Rallye des héros · Génération 6"
+      },
+      "sourceUrl": "https://kingshot.net/calendar?kingdom=1044"
+    },
+    {
+      "id": "treasure-cove-2026-11-02",
+      "start": "2026-11-02",
+      "end": "2026-11-09",
+      "icon": "🏴‍☠️",
+      "iconUrl": "https://kingshot.net/images/events/treasure-cove.png",
+      "confidence": "public-timeline",
+      "name": {
+        "de": "Schatzbucht",
+        "en": "Treasure Cove",
+        "fr": "Crique aux trésors"
+      },
+      "sourceUrl": "https://kingshot.net/calendar?kingdom=1044"
+    },
+    {
+      "id": "swordland-summit-league-2026-10-30",
+      "start": "2026-10-30",
+      "end": "2026-12-15",
+      "icon": "⚔️",
+      "iconUrl": "https://kingshot.net/images/events/swordland-summit-league.png",
+      "confidence": "public-timeline",
+      "name": {
+        "de": "Swordland Summit League",
+        "en": "Swordland Summit League",
+        "fr": "Swordland Summit League"
+      },
+      "sourceUrl": "https://kingshot.net/calendar?kingdom=1044"
+    },
+    {
+      "id": "armament-competition-2026-11-09",
+      "start": "2026-11-09",
+      "end": "2026-11-11",
+      "icon": "⚒️",
+      "iconUrl": "https://kingshotdata.com/uploads/2025/04/city-development-event-icon.webp",
+      "confidence": "public-timeline",
+      "name": {
+        "de": "Rüstungswettbewerb · Handwerkervision",
+        "en": "Armament Competition · Artisan’s Vision",
+        "fr": "Compétition d’armement · Vision d’artisan"
+      },
+      "dailyPlans": {
+        "2026-11-09": {
+          "points": {
+            "de": "Gouverneursausrüstungswert +1: 3 · Truegold: 100 · Truegold-Staub: 50 (nur mit Kriegsakademie) · gehärtetes Truegold: 1.500 (nur ab TG8) · Heldensplitter selten/episch/mythisch: 15/50/125 · Meisteremblem: 200 · Meistermanuskript: 2 · Bau-, Forschung-, Trainings-/Beförderungs- oder Meister-Skill-Speedup: 1 je Minute",
+            "en": "Governor Gear score +1: 3 · Truegold: 100 · Truegold Dust: 50 (War Academy required) · Tempered Truegold: 1,500 (TG8 required) · rare/epic/mythic Hero Shard: 15/50/125 · Master Emblem: 200 · Master’s Manuscript: 2 · construction, research, training/promotion or Master Skill speedup: 1 per minute",
+            "fr": "Score d’équipement du gouverneur +1 : 3 · Truegold : 100 · poussière de Truegold : 50 (Académie de guerre requise) · Truegold trempé : 1 500 (TG8 requis) · fragment rare/épique/mythique : 15/50/125 · Emblème de Maître : 200 · Manuscrit de Maître : 2 · accélérateur de construction, recherche, entraînement/promotion ou compétence de Maître : 1 par minute"
+          },
+          "prepare": {
+            "title": {
+              "de": "Punkteaktionen bis zum Reset zurückhalten",
+              "en": "Hold scoring actions until reset",
+              "fr": "Conserver les actions à points jusqu’au reset"
+            },
+            "status": {
+              "de": "VOR RESET",
+              "en": "BEFORE RESET",
+              "fr": "AVANT RESET"
+            },
+            "steps": {
+              "de": [
+                "Truegold-, Forschungs-, Ausrüstungs-, Helden- und Meister-Upgrades vor dem Reset nicht abschließen.",
+                "Speedups erst nach dem Reset einsetzen, wenn der Rüstungswettbewerb im Spiel aktiv angezeigt wird.",
+                "Vor dem Einsatz prüfen, welche Aktionen zugleich in der aktuellen Allianzgemenge-Phase punkten."
+              ],
+              "en": [
+                "Do not complete Truegold, research, Gear, Hero or Master upgrades before reset.",
+                "Use speedups only after reset once the Armament Competition is shown as active in game.",
+                "Before spending, check which actions also score in the current Alliance Brawl stage."
+              ],
+              "fr": [
+                "Ne termine pas les améliorations de Truegold, recherche, équipement, héros ou Maître avant le reset.",
+                "Utilise les accélérateurs seulement après le reset, lorsque la Compétition d’armement est affichée comme active en jeu.",
+                "Avant toute dépense, vérifie quelles actions rapportent aussi dans la phase actuelle de l’Alliance Brawl."
+              ]
+            }
+          },
+          "steps": {
+            "de": [
+              "Beginne mit ohnehin geplanten Aktionen, die zugleich im Allianzgemenge punkten.",
+              "Nutze Truegold-Staub nur mit freigeschalteter Kriegsakademie und gehärtetes Truegold nur ab TG8; andernfalls entstehen dafür keine Punkte.",
+              "Verbrauche Helden-, Ausrüstungs- oder Meistermaterialien nicht nur für die Rangliste; persönliche Meilensteine und NRW-Absprachen haben Vorrang."
+            ],
+            "en": [
+              "Start with already planned actions that also score in Alliance Brawl.",
+              "Use Truegold Dust only with War Academy unlocked and Tempered Truegold only from TG8; otherwise those actions do not score.",
+              "Do not spend Hero, Gear or Master materials solely for ranking; personal milestones and NRW coordination take priority."
+            ],
+            "fr": [
+              "Commence par les actions déjà prévues qui rapportent aussi dans l’Alliance Brawl.",
+              "Utilise la poussière de Truegold uniquement avec l’Académie de guerre débloquée et le Truegold trempé seulement à partir de TG8 ; sinon ces actions ne rapportent pas de points.",
+              "Ne dépense pas de matériaux de héros, d’équipement ou de Maître uniquement pour le classement ; les paliers personnels et la coordination NRW restent prioritaires."
+            ]
+          }
+        },
+        "2026-11-10": {
+          "points": {
+            "de": "Gouverneursausrüstungswert +1: 3 · Truegold: 100 · Truegold-Staub: 50 (nur mit Kriegsakademie) · gehärtetes Truegold: 1.500 (nur ab TG8) · Heldensplitter selten/episch/mythisch: 15/50/125 · Meisteremblem: 200 · Meistermanuskript: 2 · Bau-, Forschung-, Trainings-/Beförderungs- oder Meister-Skill-Speedup: 1 je Minute",
+            "en": "Governor Gear score +1: 3 · Truegold: 100 · Truegold Dust: 50 (War Academy required) · Tempered Truegold: 1,500 (TG8 required) · rare/epic/mythic Hero Shard: 15/50/125 · Master Emblem: 200 · Master’s Manuscript: 2 · construction, research, training/promotion or Master Skill speedup: 1 per minute",
+            "fr": "Score d’équipement du gouverneur +1 : 3 · Truegold : 100 · poussière de Truegold : 50 (Académie de guerre requise) · Truegold trempé : 1 500 (TG8 requis) · fragment rare/épique/mythique : 15/50/125 · Emblème de Maître : 200 · Manuscrit de Maître : 2 · accélérateur de construction, recherche, entraînement/promotion ou compétence de Maître : 1 par minute"
+          },
+          "prepare": {
+            "title": {
+              "de": "Punkteaktionen bis zum Reset zurückhalten",
+              "en": "Hold scoring actions until reset",
+              "fr": "Conserver les actions à points jusqu’au reset"
+            },
+            "status": {
+              "de": "VOR RESET",
+              "en": "BEFORE RESET",
+              "fr": "AVANT RESET"
+            },
+            "steps": {
+              "de": [
+                "Truegold-, Forschungs-, Ausrüstungs-, Helden- und Meister-Upgrades vor dem Reset nicht abschließen.",
+                "Speedups erst nach dem Reset einsetzen, wenn der Rüstungswettbewerb im Spiel aktiv angezeigt wird.",
+                "Vor dem Einsatz prüfen, welche Aktionen zugleich in der aktuellen Allianzgemenge-Phase punkten."
+              ],
+              "en": [
+                "Do not complete Truegold, research, Gear, Hero or Master upgrades before reset.",
+                "Use speedups only after reset once the Armament Competition is shown as active in game.",
+                "Before spending, check which actions also score in the current Alliance Brawl stage."
+              ],
+              "fr": [
+                "Ne termine pas les améliorations de Truegold, recherche, équipement, héros ou Maître avant le reset.",
+                "Utilise les accélérateurs seulement après le reset, lorsque la Compétition d’armement est affichée comme active en jeu.",
+                "Avant toute dépense, vérifie quelles actions rapportent aussi dans la phase actuelle de l’Alliance Brawl."
+              ]
+            }
+          },
+          "steps": {
+            "de": [
+              "Beginne mit ohnehin geplanten Aktionen, die zugleich im Allianzgemenge punkten.",
+              "Nutze Truegold-Staub nur mit freigeschalteter Kriegsakademie und gehärtetes Truegold nur ab TG8; andernfalls entstehen dafür keine Punkte.",
+              "Verbrauche Helden-, Ausrüstungs- oder Meistermaterialien nicht nur für die Rangliste; persönliche Meilensteine und NRW-Absprachen haben Vorrang."
+            ],
+            "en": [
+              "Start with already planned actions that also score in Alliance Brawl.",
+              "Use Truegold Dust only with War Academy unlocked and Tempered Truegold only from TG8; otherwise those actions do not score.",
+              "Do not spend Hero, Gear or Master materials solely for ranking; personal milestones and NRW coordination take priority."
+            ],
+            "fr": [
+              "Commence par les actions déjà prévues qui rapportent aussi dans l’Alliance Brawl.",
+              "Utilise la poussière de Truegold uniquement avec l’Académie de guerre débloquée et le Truegold trempé seulement à partir de TG8 ; sinon ces actions ne rapportent pas de points.",
+              "Ne dépense pas de matériaux de héros, d’équipement ou de Maître uniquement pour le classement ; les paliers personnels et la coordination NRW restent prioritaires."
+            ]
+          }
+        }
+      },
+      "sourceUrl": "https://kingshotdata.com/events/armament-competition/"
+    },
+    {
+      "id": "champagne-fair-2026-11-09",
+      "start": "2026-11-09",
+      "end": "2026-11-11",
+      "icon": "🥂",
+      "iconUrl": "https://kingshot.net/images/events/champagne-fair.png",
+      "confidence": "public-timeline",
+      "name": {
+        "de": "Champagnermesse",
+        "en": "Champagne Fair",
+        "fr": "Foire au champagne"
+      },
+      "sourceUrl": "https://kingshot.net/calendar?kingdom=1044"
+    },
+    {
+      "id": "merchant-empire-2026-11-09",
+      "start": "2026-11-09",
+      "end": "2026-11-15",
+      "icon": "🚚",
+      "iconUrl": "https://kingshotdata.com/uploads/2025/07/merchant-empire-event-icon.webp",
+      "confidence": "public-timeline",
+      "name": {
+        "de": "Handelsimperium",
+        "en": "Merchant Empire",
+        "fr": "Empire marchand"
+      },
+      "tips": {
+        "de": [
+          "Pro 24 Stunden können vier Karawanen gesendet werden, höchstens zwei gleichzeitig; jede Fahrt dauert ungefähr 3,5 Stunden.",
+          "Jede Karawane hat eine kostenlose Qualitätsaktualisierung. Nach der sechsten Aktualisierung ist SSR garantiert; bezahlte Aktualisierungen kosten danach zunehmend Edelsteine.",
+          "Bis zu vier erfolgreiche Überfälle pro Tag sind möglich. Fehlversuche verbrauchen keinen Versuch; prüfe vor dem Angriff Beute und vorhandene Feuer-Symbole."
+        ],
+        "en": [
+          "Four caravans can be sent per 24 hours, with at most two running at once; each trip takes about 3.5 hours.",
+          "Each caravan has one free quality refresh. SSR is guaranteed after the sixth refresh; paid refreshes then consume increasing amounts of gems.",
+          "Up to four successful raids are available per day. Failed raids do not consume an attempt; check the loot and existing fire icons before attacking."
+        ],
+        "fr": [
+          "Quatre caravanes peuvent être envoyées par période de 24 heures, avec deux maximum en même temps ; chaque trajet dure environ 3,5 heures.",
+          "Chaque caravane dispose d’une actualisation gratuite de qualité. Une SSR est garantie après la sixième actualisation ; les suivantes consomment de plus en plus de gemmes.",
+          "Jusqu’à quatre raids réussis sont possibles par jour. Un échec ne consomme pas de tentative ; vérifie le butin et les icônes de feu avant d’attaquer."
+        ]
+      },
+      "sourceUrl": "https://kingshotdata.com/events/merchant-empire-event/"
+    },
+    {
+      "id": "alliance-championship-2026-11-09",
+      "start": "2026-11-09",
+      "end": "2026-11-16",
+      "icon": "🏆",
+      "iconUrl": "https://kingshot.net/images/events/alliance-championship.png",
+      "confidence": "public-timeline",
+      "name": {
+        "de": "Allianzmeisterschaft",
+        "en": "Alliance Championship",
+        "fr": "Championnat d’alliance"
+      },
+      "sourceUrl": "https://kingshot.net/calendar?kingdom=1044"
+    },
+    {
+      "id": "swordland-showdown-2026-11-09",
+      "start": "2026-11-09",
+      "end": "2026-11-16",
+      "icon": "⚔️",
+      "iconUrl": "https://kingshot.net/images/events/swordland-showdown.png",
+      "confidence": "public-timeline",
+      "name": {
+        "de": "Swordland Showdown",
+        "en": "Swordland Showdown",
+        "fr": "Swordland Showdown"
+      },
+      "sourceUrl": "https://kingshot.net/calendar?kingdom=1044"
+    },
+    {
+      "id": "hero-rally-2026-11-09",
+      "start": "2026-11-09",
+      "end": "2026-11-23",
+      "icon": "🦸",
+      "iconUrl": "https://kingshot.net/images/events/hero-rally.png",
+      "confidence": "public-timeline",
+      "name": {
+        "de": "Helden-Rally · Generation 6",
+        "en": "Hero Rally · Generation 6",
+        "fr": "Rallye des héros · Génération 6"
+      },
+      "sourceUrl": "https://kingshot.net/calendar?kingdom=1044"
+    },
+    {
+      "id": "fishing-tournament-2026-11-10",
+      "start": "2026-11-10",
+      "end": "2026-11-13",
+      "icon": "🎣",
+      "iconUrl": "https://kingshot.net/images/events/fishing-tournament.png",
+      "confidence": "public-timeline",
+      "name": {
+        "de": "Angelturnier",
+        "en": "Fishing Tournament",
+        "fr": "Tournoi de pêche"
+      },
+      "sourceUrl": "https://kingshot.net/calendar?kingdom=1044"
+    },
+    {
+      "id": "sanctuary-battle-2026-11-10",
+      "start": "2026-11-10",
+      "end": "2026-11-14",
+      "icon": "🏛️",
+      "iconUrl": "https://kingshot.net/images/events/sanctuary-battle.png",
+      "confidence": "public-timeline",
+      "name": {
+        "de": "Heiligtumsschlacht",
+        "en": "Sanctuary Battle",
+        "fr": "Bataille du sanctuaire"
+      },
+      "sourceUrl": "https://kingshot.net/calendar?kingdom=1044"
+    },
+    {
+      "id": "officer-project-2026-11-11",
+      "start": "2026-11-11",
+      "end": "2026-11-13",
+      "icon": "🎖️",
+      "iconUrl": "https://kingshot.net/images/events/officer-project.png",
+      "confidence": "public-timeline",
+      "name": {
+        "de": "Offiziersprojekt",
+        "en": "Officer Project",
+        "fr": "Projet d’officier"
+      },
+      "sourceUrl": "https://kingshot.net/calendar?kingdom=1044"
+    },
+    {
+      "id": "champions-way-2026-11-11",
+      "start": "2026-11-11",
+      "end": "2026-11-14",
+      "icon": "🛡️",
+      "iconUrl": "https://kingshot.net/images/events/champions-way.png",
+      "confidence": "public-timeline",
+      "name": {
+        "de": "Weg des Champions",
+        "en": "Champion’s Way",
+        "fr": "Voie du champion"
+      },
+      "sourceUrl": "https://kingshot.net/calendar?kingdom=1044"
     }
   ]
 }
