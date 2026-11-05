@@ -1,5 +1,5 @@
 import {ADMIN_ACCOUNT_COPY} from './admin-account-copy.js?v=20261105-cleanup-1';
-import {createLeadershipTools} from "./tools.js?v=20261105-territory-season-1";
+import {createLeadershipTools} from "./tools.js?v=20261105-gift-queue-1";
 import {activateMemberApiRefresh,memberApiLabels} from "./member-api-refresh.js?v=20261104-1";
 import {identityOptions,selectedLogin} from "./login-identities.js?v=20261105-cleanup-1";
 import {createSslAccessAdmin} from "./ssl-access-admin.js?v=20261105-cleanup-1";
@@ -152,7 +152,7 @@ async function request(mode="bootstrap",payload=null){
  const {data:{session}}=await supabase.auth.getSession();
  if(!session?.access_token)throw new Error("authentication_required");
  const options={headers:{Authorization:"Bearer "+session.access_token,"Content-Type":"application/json",apikey:"sb_publishable_8i1ismeQtj9WM-xVN_Vm0w_Tj7AvVtL"},cache:"no-store"};
- if(payload){options.method="POST";options.body=JSON.stringify(payload);}
+ if(payload){options.method="POST";options.body=JSON.stringify(payload);if(payload.action==='tools_gifts_step')options.signal=AbortSignal.timeout(30000);}
  const pageMatch=/^discord-bot:(\d+)$/.exec(mode);
   const queryMode=pageMatch?"discord-bot":mode;
   const suffix=pageMatch?"&page="+pageMatch[1]:"";
