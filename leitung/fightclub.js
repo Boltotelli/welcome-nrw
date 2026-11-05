@@ -1,4 +1,4 @@
-import {createSslSeasonPanel,sslMatchName,sslSeasonText,sslPoolPlayers} from './ssl-season.js?v=20261105-cleanup-1';
+import {createSslSeasonPanel,sslMatchName,sslSeasonText,sslPoolPlayers} from './ssl-season.js?v=20261105-followup-1';
 /* AllianceOS Phase 4 – GitHub Pages only: FightClub draft rosters.
  * Distinguishes confirmed source schedules from a manually chosen planning date.
  * No Discord role/slot/bot changes, no automatic player assignments. */

@@ -1,5 +1,13 @@
 // Columns: German source, English, French, Spanish. No translation of user content.
 const rows=[
+ ["Aktive Codes werden geladen …", "Loading active codes …", "Chargement des codes actifs …", "Cargando códigos activos …"],
+ ["Aktive Codes konnten nicht aktualisiert werden. Letzte geladene Codes und eigene Einträge bleiben verfügbar.", "Active codes could not be refreshed. Previously loaded codes and your own entries remain available.", "Impossible d’actualiser les codes actifs. Les derniers codes chargés et vos propres entrées restent disponibles.", "No se pudieron actualizar los códigos activos. Los últimos códigos cargados y tus entradas siguen disponibles."],
+ ["Aktive Codes aus derselben Liste wie im Player Dashboard.", "Active codes from the same list as the Player Dashboard.", "Codes actifs issus de la même liste que le tableau de bord des joueurs.", "Códigos activos de la misma lista que el panel de jugadores."],
+ ["Aktuell keine aktiven Codes im Player Dashboard.", "No active codes in the Player Dashboard right now.", "Aucun code actif dans le tableau de bord des joueurs actuellement.", "Actualmente no hay códigos activos en el panel de jugadores."],
+ ["Aktiv im Player Dashboard", "Active in the Player Dashboard", "Actif dans le tableau de bord des joueurs", "Activo en el panel de jugadores"],
+ ["Zuletzt als aktiv geladen", "Last loaded as active", "Chargé précédemment comme actif", "Cargado por última vez como activo"],
+ ["Für Auswahl einlösen", "Redeem for selection", "Échanger pour la sélection", "Canjear para la selección"],
+
  ["Kopieren","Copy","Copier","Copiar"],
  ["Ein Code. Für dein ganzes Team.", "One code. For your whole team.", "Un code. Pour toute l’équipe.", "Un código. Para todo tu equipo."],
  ["Empfänger ausgewählt", "recipients selected", "destinataires sélectionnés", "destinatarios seleccionados"],

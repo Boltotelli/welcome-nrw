@@ -1,4 +1,4 @@
-import {sslPoolPlayers} from './ssl-season.js?v=20261105-cleanup-1';
+import {sslPoolPlayers} from './ssl-season.js?v=20261105-followup-1';
 import {fightEventName,mergeFightPlayers} from './fightclub-events.js?v=20261103-ssl-1';
 import {buildDeployment,deploymentTargets,isClosedStartingObjective,decodeDeployment} from './deployment-engine.js?v=20261105-ssl-season-1';
 

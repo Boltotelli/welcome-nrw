@@ -128,6 +128,8 @@ async function fetchSource(source) {
 }
 
 module.exports = async function handler(req, res) {
+  // Public feed is also consumed by our leadership console on GitHub Pages.
+  res.setHeader('Access-Control-Allow-Origin', 'https://boltotelli.github.io');
   if (req.method !== 'GET') {
     res.setHeader('Allow', 'GET');
     return res.status(405).json({ error: 'method_not_allowed' });
