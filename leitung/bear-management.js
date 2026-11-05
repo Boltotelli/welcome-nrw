@@ -99,9 +99,9 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
  const pct=n=>n===null||n===undefined||n===""?"–":Number(n).toLocaleString(locale(),{maximumFractionDigits:2})+"%";
  const when=raw=>raw?new Date(raw).toLocaleDateString(locale()):"–";
  const hhmm=s=>String(s||"").slice(0,5);
- let cache=null,loading=null,generation=0,filter="all",query="",pending=new Set(),recommendations=new Map(),settingsBusy=false,quickSlot="",quickAttendance="confirmed",quickJoiner=false,rosterExpanded=true;
+ let cache=null,loading=null,generation=0,filter="all",query="",sort="name",pending=new Set(),recommendations=new Map(),settingsBusy=false,quickSlot="",quickAttendance="confirmed",quickJoiner=false,rosterExpanded=true;
  const byId=()=>new Map((getState()?.players||[]).map(p=>[String(p.game_id),p]));
- function active(){return (getState()?.players||[]).filter(p=>p.active&&p.member_status!=="left"&&/^[0-9]{1,20}$/.test(String(p.game_id||""))).slice().sort((a,b)=>String(a.name).localeCompare(String(b.name),locale()));}
+ function active(){const scores=powers();return (getState()?.players||[]).filter(p=>p.active&&p.member_status!=="left"&&/^[0-9]{1,20}$/.test(String(p.game_id||""))).slice().sort((a,b)=>(sort==="rank"?Number(b.alliance_rank||0)-Number(a.alliance_rank||0):sort==="power"?(Number(scores.get(String(b.game_id))?.power)||-1)-(Number(scores.get(String(a.game_id))?.power)||-1):0)||String(a.name).localeCompare(String(b.name),locale()));}
  function storedAssignment(id){return (cache?.assignments||[]).find(x=>String(x.game_id)===String(id));}
  function assignment(id){return drafts.get(id)||storedAssignment(id);}
  const drafts=createRosterDrafts({root,scope:()=>"bear",getLanguage,esc,request,flash,redraw:()=>render(),onSaved:(body,result)=>{
@@ -237,15 +237,6 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
       ' <input class="control" type="number" min="1" max="9999999999999" step="1" data-bear-threshold value="'+esc(limit===null?"":limit)+'" placeholder="'+esc(t("thresholdUnset"))+'"></label>'+
       '<button type="button" class="ghost" data-bear-threshold-save '+(settingsBusy?"disabled":"")+'>'+esc(t("saveThreshold"))+'</button></div>';
  }
- function quickPanel(){
-   return '<section class="card bear-fast-assign"><h3>⚡ '+esc(t("quick"))+'</h3><div class="bear-fast-form">'+
-     '<label>'+esc(t("player"))+'<select class="control" data-bear-quick-player><option value="">—</option>'+
-       active().map(p=>'<option value="'+esc(p.game_id)+'">'+esc(p.name)+' · '+esc(p.game_id)+'</option>').join("")+'</select></label>'+
-     '<label>'+esc(t("time"))+select([["",t("empty")],...effectiveSlots().map(sl=>[sl.slot_key,slotLabel(sl)])],quickSlot,'data-bear-quick-slot')+'</label>'+
-     '<label>'+esc(t("attendance"))+select([["confirmed",t("confirmed")],["tentative",t("tentative")],["no",t("no")]],quickAttendance,'data-bear-quick-attendance')+'</label>'+
-     '<label class="bear-switch-label">'+esc(t("role"))+' <span class="bear-switch"><span>'+esc(t("starter"))+'</span><input type="checkbox" role="switch" data-bear-quick-role '+(quickJoiner?'checked':'')+'><span>'+esc(t("joiner"))+'</span></span></label>'+
-     '<button type="button" class="primary" data-bear-quick-save>'+esc(t("save"))+'</button></div></section>';
- }
  async function saveThreshold(){
    if(settingsBusy)return;
    const raw=root.querySelector("[data-bear-threshold]")?.value||"";
@@ -259,29 +250,6 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
    }catch(e){flash(t("error")+" ("+String(e?.message||e)+")",true);}
    finally{settingsBusy=false;}
  }
- async function quickSave(){
-   if(drafts.count()||drafts.isBusy())return;
-   const id=root.querySelector("[data-bear-quick-player]")?.value||"";
-   if(!id){flash(t("player"),true);return;}
-   if(pending.has(id))return;
-   const slotKey=root.querySelector("[data-bear-quick-slot]")?.value||"";
-   const attendance=root.querySelector("[data-bear-quick-attendance]")?.value||"confirmed";
-   const role=root.querySelector("[data-bear-quick-role]")?.checked?"joiner":"starter";
-   if(attendance!=="no"&&!slotKey){flash(t("required"),true);return;}
-   pending.add(id);
-   const old=assignment(id),ticket=generation;
-   try{
-     const result=await request("bootstrap",{action:"bear_assignment",game_id:id,
-       slot_key:attendance==="no"?"":slotKey,attendance,role,notes:old?.notes||""});
-     if(ticket!==generation)return;
-     if(!result?.ok)throw Error("save_failed");
-     cache.assignments=cache.assignments.filter(x=>String(x.game_id)!==String(id));
-     if(!result.removed)cache.assignments.push(result.assignment);
-     flash(t("saved"));render();
-   }catch(e){if(ticket===generation)flash(t("error")+" ("+String(e?.message||e)+")",true);}
-   finally{pending.delete(id);}
- }
-
  function render(){
   if(!root||!enabled)return;
   const sub=document.getElementById("bearManagementSubtitle");if(sub)sub.textContent=t("intro");
@@ -293,7 +261,7 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
   root.innerHTML='<section class="bear-intro"><p>'+esc(t("source"))+'</p><p>'+esc(t("management"))+'</p></section>'+
    '<section class="bear-slot-summary"><div class="bear-section-heading"><h3>'+esc(t("summary"))+'</h3>'+
    '<button type="button" class="ghost" data-bear-refresh>'+esc(t("refresh"))+' ↻</button></div>'+
-   settingsPanel()+'<div class="bear-count-grid">'+counters()+'</div></section>'+quickPanel()+
+   settingsPanel()+'<div class="bear-count-grid">'+counters()+'</div></section>'+ 
    '<details class="card bear-roster-card bear-roster-collapsible" data-bear-roster '+(rosterExpanded?'open':'')+'><summary>'+esc(t("assignment"))+' · '+all.length+' / '+active().length+'</summary><div class="bear-section-heading"><h3>'+esc(t("assignment"))+'</h3>'+
    '<button type="button" class="ghost" data-bear-copy>'+esc(t("export"))+' ↗</button></div>'+
    '<p class="small-note">'+esc(t("noteSource"))+' '+esc(t("activeOnly"))+'</p>'+
@@ -302,7 +270,7 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
      [["all",t("all")],["unassigned",t("empty")],["optimizer",t("withProfile")],
       ...slots.map(s=>[s.slot_key,slotLabel(s)])].map(([value,label])=>
        '<option value="'+esc(value)+'" '+(filter===value?'selected':'')+'>'+esc(label)+'</option>').join("")+'</select>'+
-     '<span class="counter">'+all.length+' / '+active().length+'</span></div>'+
+     '<label class="bear-sort">'+esc(({de:'Sortieren nach',en:'Sort by',fr:'Trier par',es:'Ordenar por'}[getLanguage()]))+select([['name',({de:'Name',en:'Name',fr:'Nom',es:'Nombre'}[getLanguage()])],['rank',({de:'Rang',en:'Rank',fr:'Rang',es:'Rango'}[getLanguage()])],['power',t('power')]],sort,'data-bear-sort')+'</label><span class="counter">'+all.length+' / '+active().length+'</span></div>'+
      '<div class="assignment-table-scroll" role="region" aria-label="'+esc(t('assignment'))+'" tabindex="0"><table class="assignment-table"><thead><tr><th scope="col">'+esc(t('player'))+'</th>'+effectiveSlots().map((sl,i)=>'<th scope="col" title="'+esc(slotLabel(sl))+'">'+esc(sl.slot_number?'BT'+sl.slot_number:slotLabel(sl))+'</th>').join('')+'<th scope="col">'+esc(t('attendance'))+' / '+esc(t('role'))+'</th></tr></thead><tbody>'+(all.length?all.map(row).join(''):'<tr><td colspan="'+(2+effectiveSlots().length)+'">'+esc(t('noPlayers'))+'</td></tr>')+'</tbody></table></div></details>';
   if(drafts.isBusy())root.querySelectorAll('input,select,button').forEach(el=>{el.disabled=true;});
   if(drafts.count()){const quick=root.querySelector('[data-bear-quick-save]');if(quick)quick.disabled=true;}
@@ -356,7 +324,6 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
    if(drafts.click(e))return;
    const target=e.target;
    if(target.closest("[data-bear-threshold-save]")){await saveThreshold();return;}
-   if(target.closest("[data-bear-quick-save]")){await quickSave();return;}
    const refresh=target.closest("[data-bear-refresh]");
    if(refresh){open(true);return;}
    const copy=target.closest("[data-bear-copy]");
@@ -376,7 +343,7 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
      stage(row.dataset.bearRow);return;
    }
    if(el.matches("[data-bear-filter]")){filter=el.value;render();}
-   if(el.matches("[data-bear-quick-slot]"))quickSlot=el.value;
+   if(el.matches("[data-bear-sort]")){sort=el.value;render();return;}
    if(el.matches("[data-bear-quick-attendance]"))quickAttendance=el.value;
    if(el.matches("[data-bear-quick-role]"))quickJoiner=el.checked;
    if(el.matches('[data-bear-attendance],[data-bear-role]')){
@@ -393,6 +360,6 @@ export function createBearManagement({getState,getLanguage,request,esc,openPlaye
    next?.focus();if(Number.isInteger(pos))next?.setSelectionRange(pos,pos);
   });
  }
- function reset(){drafts.reset();generation++;cache=null;loading=null;pending.clear();recommendations.clear();quickSlot="";quickAttendance="confirmed";quickJoiner=false;rosterExpanded=true;filter="all";query="";if(root){root.innerHTML="";root.textContent="";}}
+ function reset(){drafts.reset();generation++;cache=null;loading=null;pending.clear();recommendations.clear();quickSlot="";quickAttendance="confirmed";quickJoiner=false;rosterExpanded=true;filter="all";query="";sort="name";if(root){root.innerHTML="";root.textContent="";}}
  return {enabled,open,render,reset};
 }

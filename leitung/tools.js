@@ -1,6 +1,7 @@
-import {workbenchText} from './tools-workbench-locales.js?v=20261105-territory-1';
-import {createToolsWorkbench} from "./tools-workbench.js?v=20261105-territory-1";
-import {WORKBENCH_TOOLS} from "./tools-workbench-model.js?v=20261104-tools-i18n-1";
+import {kvkChart} from './kvk-chart.js?v=20261105-cleanup-1';
+import {workbenchText} from './tools-workbench-locales.js?v=20261105-cleanup-1';
+import {createToolsWorkbench} from "./tools-workbench.js?v=20261105-cleanup-1";
+import {WORKBENCH_TOOLS} from "./tools-workbench-model.js?v=20261105-cleanup-1";
 import {ALLIANCES,PERIODS,blankKvk,parseInteger,formatInteger,formatScore,rankKvk} from './tools-kvk.js?v=20261104-kvk-order-1';
 import {toolsProfileView} from './tools-player-view.js?v=20261104-tools-history-1';
 const copy={
@@ -37,13 +38,14 @@ export function createLeadershipTools({getState,getLanguage,request,esc,can}){
   target.innerHTML=`${archiveHtml()}<div class="tools-toolbar"><div><span class="eyebrow">${esc(t('shared'))}</span><p class="small-note" data-tools-save-state></p></div><div class="tools-actions"><button type="button" class="ghost" data-tools-reload>${esc(t('reload'))}</button><button type="button" class="primary" data-tools-save>${esc(t('save'))}</button></div></div><p data-tools-message class="small-note" role="status" aria-live="polite"></p>
   <details class="card tools-snapshot" ${ready<6?'open':''}><summary><span><b>01</b> ${esc(t('snapshot'))}</span><small data-snapshot-count>${ready} ${esc(t('snapshotReady'))}</small></summary><div class="tools-snapshot-body"><p class="small-note">${esc(t('snapshotHelp'))}</p><div class="tools-metadata"><label>${esc(t('title'))}<input class="control" name="kvk-title" maxlength="100" value="${esc(data.title)}"></label><label>${esc(t('date'))}<input class="control" name="kvk-date" type="date" value="${esc(data.snapshot_date)}"></label></div><div class="tools-snapshot-scroll"><table><thead><tr><th>${esc(t('alliance'))}</th><th>${esc(t('power'))}</th><th>${esc(t('members'))}</th></tr></thead><tbody>${ALLIANCES.map(tag=>`<tr><th scope="row">${tag}</th><td>${field(tag,'power',data.alliances[tag].power)}</td><td>${field(tag,'members',data.alliances[tag].members)}</td></tr>`).join('')}</tbody></table></div></div></details>
   <div class="tools-kvk-layout"><article class="card tools-points"><header><span class="eyebrow">02 · ${esc(t('points'))}</span><h3>${esc(label(period))}</h3><p class="small-note">${esc(t('pointsHelp'))}</p></header><div class="tools-periods" role="group" aria-label="${esc(t('points'))}">${PERIODS.map(p=>`<button type="button" data-kvk-period="${p}" aria-pressed="${p===period}">${esc(label(p))}</button>`).join('')}</div><div class="tools-points-table"><table><thead><tr><th>${esc(t('alliance'))}</th><th>${esc(t('points'))}</th></tr></thead><tbody>${ALLIANCES.map(tag=>`<tr><th scope="row">${tag}</th><td>${field(tag,'score',data.alliances[tag].scores[period])}</td></tr>`).join('')}</tbody></table></div>${period==='overall'?`<p class="small-note">${esc(t('independent'))}</p>`:''}</article>
-  <article class="card tools-output"><span class="eyebrow">03 · ${esc(t('output'))}</span><h3 data-ranking-title>${esc(label(period))}</h3><div data-kvk-ranking></div><p data-kvk-hint class="small-note" role="status"></p><button type="button" class="primary" data-kvk-copy>${esc(t('copy'))}</button><textarea class="control tools-copy-fallback" readonly hidden aria-label="${esc(t('output'))}"></textarea><p data-kvk-copy-status class="small-note" role="status" aria-live="polite"></p></article></div>`;
+  <article class="card tools-output"><span class="eyebrow">03 · ${esc(t('output'))}</span><h3 data-ranking-title>${esc(label(period))}</h3><div data-kvk-chart></div><div data-kvk-ranking></div><p data-kvk-hint class="small-note" role="status"></p><button type="button" class="primary" data-kvk-copy>${esc(t('copy'))}</button><textarea class="control tools-copy-fallback" readonly hidden aria-label="${esc(t('output'))}"></textarea><p data-kvk-copy-status class="small-note" role="status" aria-live="polite"></p></article></div>`;
   if(conflict)root.querySelector('[data-tools-message]').textContent=t('conflict');
   updateOutput();
  }
  function updateOutput(){
   if(!root.querySelector('[data-kvk-ranking]'))return;
   const result=rankKvk(data,period),invalid=!!root.querySelector('[aria-invalid="true"]');
+  root.querySelector('[data-kvk-chart]').innerHTML=kvkChart(invalid?[]:result.rows,getLanguage(),esc);
   root.querySelector('[data-kvk-ranking]').innerHTML=result.rows.length?`<table><thead><tr><th>${esc(t('rank'))}</th><th>${esc(t('alliance'))}</th><th>${esc(t('score'))}</th></tr></thead><tbody>${result.rows.map(r=>`<tr class="${r.tag==='NRW'?'tools-nrw':''}"><td>${r.rank}</td><th scope="row">${r.tag}</th><td>${formatScore(r.score)}</td></tr>`).join('')}</tbody></table>`:`<p class="tools-empty">${esc(t('noResults'))}</p>`;
   root.querySelector('[data-kvk-hint]').textContent=invalid?t('invalid'):result.complete?'':t('incomplete');
   root.querySelector('[data-kvk-copy]').disabled=invalid||!result.complete;

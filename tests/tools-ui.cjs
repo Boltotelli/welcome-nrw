@@ -37,7 +37,7 @@ const root=path.resolve(__dirname,'..'),tags=['NRW','NWO','THM','CWR','PxR','NwO
   for(let i=0;i<tags.length;i++)await page.locator(`[data-kvk-tag="${tags[i]}"][data-kvk-key="score"]`).fill(String(points[i]));
   await page.locator('[name="kvk-title"]').fill('KvK 20');await page.locator('[name="kvk-date"]').fill('2026-11-02');
   assert.equal(await page.locator('[data-kvk-tag="NRW"][data-kvk-key="score"]').inputValue(),'32.000.000');
-  assert.equal(await page.locator('[data-kvk-ranking] tbody tr').first().locator('th').innerText(),'NWO');
+  assert.equal(await page.locator('[data-kvk-ranking] tbody tr').first().locator('th').innerText(),'NWO');assert.equal(await page.locator('[data-chart-alliance]').count(),6);const beforeChart=await page.locator('[data-kvk-chart]').innerHTML();
   await page.locator('[data-kvk-copy]').click();const copied=await page.evaluate(()=>navigator.clipboard.readText());assert(copied.startsWith('1. NWO - '));assert.equal(copied.split('\n').length,6);assert.match(copied,/6\. NwO - \d+,\d{3}/);
   await page.locator('[data-tools-save]').click();await page.locator('[data-tools-save-state]').filter({hasText:'Gemeinsam gespeichert'}).waitFor();assert.equal(saved.data.alliances.NRW.power,1000000000);
   const firstId=saved.id;
@@ -47,7 +47,7 @@ const root=path.resolve(__dirname,'..'),tags=['NRW','NWO','THM','CWR','PxR','NwO
   await page.locator('[data-kvk-tag="NRW"][data-kvk-key="score"]').fill('0');assert(await page.locator('[data-kvk-copy]').isDisabled());
   await page.locator('[data-kvk-period="overall"]').click();assert.equal(await page.locator('[data-kvk-tag="NRW"][data-kvk-key="score"]').inputValue(),'32.000.000');
   await page.locator('[data-kvk-tag="NRW"][data-kvk-key="score"]').fill('1,234');assert(await page.locator('[data-tools-save]').isDisabled());assert(await page.locator('[data-kvk-copy]').isDisabled());
-  await page.locator('[data-kvk-tag="NRW"][data-kvk-key="score"]').fill('33000000');
+  await page.locator('[data-kvk-tag="NRW"][data-kvk-key="score"]').fill('33000000');assert.notEqual(await page.locator('[data-kvk-chart]').innerHTML(),beforeChart);
   conflict=true;await page.locator('[data-tools-save]').click();await page.locator('[data-tools-message]').filter({hasText:'inzwischen geändert'}).waitFor();assert.equal(await page.locator('[data-kvk-tag="NRW"][data-kvk-key="score"]').inputValue(),'33.000.000');assert(await page.locator('[data-tools-save]').isDisabled());
   page.once('dialog',d=>d.accept());await page.locator('[data-tools-reload]').click();await page.locator('[data-kvk-copy]').waitFor();assert.equal(await page.locator('[data-kvk-tag="NRW"][data-kvk-key="score"]').inputValue(),'32.000.000');
   await page.locator('.tools-snapshot summary').click();

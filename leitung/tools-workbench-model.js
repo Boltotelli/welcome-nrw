@@ -33,3 +33,9 @@ export function outpostSummary(rows){
  return {active:owned.size,disconnected:rows.filter(r=>r.owned&&!r.connected).length,
   missing:OUTPOST_TYPES.flatMap(type=>[1,2,3,4].filter(level=>!owned.has(type+'|'+level)).map(level=>({type,level})))};
 }
+
+export function territoryGameText(sites){
+ const label=(kind,n)=>`${kind==='fort'?'Fort #':'Sanc '}${n}- ${String(sites[`${kind}-${n}`]?.assigned||'—').trim()}`;
+ const pairs=(kind,n)=>Array.from({length:n/2},(_,i)=>label(kind,i*2+1)+'     '+label(kind,i*2+2));
+ return pairs('fort',4).join('\n')+'\n\n'+pairs('sanc',12).join('\n');
+}

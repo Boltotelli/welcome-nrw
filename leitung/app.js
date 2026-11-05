@@ -1,7 +1,8 @@
-import {createLeadershipTools} from "./tools.js?v=20261105-territory-1";
+import {ADMIN_ACCOUNT_COPY} from './admin-account-copy.js?v=20261105-cleanup-1';
+import {createLeadershipTools} from "./tools.js?v=20261105-cleanup-1";
 import {activateMemberApiRefresh,memberApiLabels} from "./member-api-refresh.js?v=20261104-1";
-import {identityOptions,selectedLogin} from "./login-identities.js?v=20261103-integrated-1";
-import {createSslAccessAdmin} from "./ssl-access-admin.js?v=20261103-integrated-1";
+import {identityOptions,selectedLogin} from "./login-identities.js?v=20261105-cleanup-1";
+import {createSslAccessAdmin} from "./ssl-access-admin.js?v=20261105-cleanup-1";
 import {createAnnouncementEditor} from "./announcement.js?v=20261103-ssl-1";
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.58.0/+esm";
 import {createEventHub} from "./event-library.js?v=step6-iteratorfix-1";
@@ -10,8 +11,8 @@ import {createDiscordEventPlanner} from "./discord-events.js?v=eventbot-4lang-20
 import {createEventBotStatusPanel} from "./event-bot-status.js?v=20261021-usability-1";
 import {createMemberRelationships} from "./member-relationships.js?v=20261104-member-api-1";
 import {createPerformance} from "./performance.js?v=20261021-usability-1";
-import {createBearManagement} from "./bear-management.js?v=20261104-bear-time-1";
-import {createFightClub} from "./fightclub.js?v=20261105-ssl-season-1";
+import {createBearManagement} from "./bear-management.js?v=20261105-cleanup-1";
+import {createFightClub} from "./fightclub.js?v=20261105-cleanup-1";
 import {createEventParticipation} from "./event-participation.js?v=vercel-release-20261020-1";
 import {createEventLoans} from "./event-loans.js?v=20261021-usability-1";
 
@@ -108,7 +109,7 @@ const phase2Labels={de:{tools:"Tools",performance:"Performance",bearManagement:"
 en:{tools:"Tools",performance:"Performance",bearManagement:"Bear Trap",fightclub:"FightClub",participation:"Event participation"},
 fr:{tools:"Outils",performance:"Performance",bearManagement:"Piège à ours",fightclub:"FightClub",participation:"Participation aux événements"},
 es:{tools:"Herramientas",performance:"Rendimiento",bearManagement:"Trampa de oso",fightclub:"FightClub",participation:"Participación en eventos"}};
-const t=k=>k==="sslRead"?({de:"SSL · nur lesen",en:"SSL · read only",fr:"SSL · lecture seule",es:"SSL · solo lectura"}[lang]):k==="staffUser"?({de:"Zugang auswählen",en:"Choose account",fr:"Choisir un accès",es:"Elegir acceso"}[lang]):rightsCopy[lang]?.[k]||phase2Labels[lang]?.[k]||rosterDossierError[lang]?.[k]||step6DaysCopy[lang]?.[k]||step6DaysCopy.de[k]||step6Copy[lang]?.[k]||step6Copy.de[k]||step5Copy[lang]?.[k]||lawCategoryLabels[lang]?.[k]||lawUiCopy[lang]?.[k]||manualPhasesCopy[lang]?.[k]||transferUiCopy[lang]?.[k]||powerLabels[lang]?.[k]||rosterLabels[lang]?.[k]||leaderUiCopy[lang]?.[k]||latestModuleCopy[lang]?.[k]||opsUI[lang]?.[k]||groupUI[lang]?.[k]||eventLabels[lang]?.[k]||phase1Labels[lang]?.[k]||staffExtra[lang]?.[k]||copy[lang]?.[k]||lawCategoryLabels.de[k]||lawUiCopy.de[k]||manualPhasesCopy.de[k]||transferUiCopy.de[k]||powerLabels.de[k]||rosterLabels.de[k]||leaderUiCopy.de[k]||latestModuleCopy.de[k]||opsUI.de[k]||groupUI.de[k]||eventLabels.de[k]||phase1Labels.de[k]||staffExtra.de[k]||copy.de[k]||k;
+const t=k=>ADMIN_ACCOUNT_COPY[lang]?.[k]||(k==="sslRead"?({de:"SSL · nur lesen",en:"SSL · read only",fr:"SSL · lecture seule",es:"SSL · solo lectura"}[lang]):k==="staffUser"?({de:"Zugang auswählen",en:"Choose account",fr:"Choisir un accès",es:"Elegir acceso"}[lang]):rightsCopy[lang]?.[k]||phase2Labels[lang]?.[k]||rosterDossierError[lang]?.[k]||step6DaysCopy[lang]?.[k]||step6DaysCopy.de[k]||step6Copy[lang]?.[k]||step6Copy.de[k]||step5Copy[lang]?.[k]||lawCategoryLabels[lang]?.[k]||lawUiCopy[lang]?.[k]||manualPhasesCopy[lang]?.[k]||transferUiCopy[lang]?.[k]||powerLabels[lang]?.[k]||rosterLabels[lang]?.[k]||leaderUiCopy[lang]?.[k]||latestModuleCopy[lang]?.[k]||opsUI[lang]?.[k]||groupUI[lang]?.[k]||eventLabels[lang]?.[k]||phase1Labels[lang]?.[k]||staffExtra[lang]?.[k]||copy[lang]?.[k]||lawCategoryLabels.de[k]||lawUiCopy.de[k]||manualPhasesCopy.de[k]||transferUiCopy.de[k]||powerLabels.de[k]||rosterLabels.de[k]||leaderUiCopy.de[k]||latestModuleCopy.de[k]||opsUI.de[k]||groupUI.de[k]||eventLabels.de[k]||phase1Labels.de[k]||staffExtra.de[k]||copy.de[k]||k);
 const locale={de:"de-DE",en:"en-GB",fr:"fr-FR",es:"es-ES"}[lang];
 function txt(obj){return typeof obj==="string"?obj:(obj?.[lang]||obj?.[state?.alliance?.default_language]||obj?.de||obj?.en||"");}
 function patchTranslations(){
@@ -351,7 +352,7 @@ function renderEvents(){
  const list=state.events.slice().sort((a,b)=>Date.parse(a.start_at)-Date.parse(b.start_at));
  $("eventList").innerHTML=list.length?list.map(x=>'<article class="list-card"><div><span class="eyebrow">'+esc(localTime(x.start_at))+' <span class="muted">· '+esc(new Date(x.start_at).toISOString().slice(11,16))+' UTC</span></span><h3>'+esc(txt(x.title))+'</h3><p>'+esc(txt(x.description)||x.requirements||"")+'</p></div><div class="card-actions">'+badge(x.status)+'<button data-edit="event" data-id="'+esc(x.id)+'" class="ghost" '+(!can("events")?"disabled":"")+'>'+esc(t("edit"))+'</button></div></article>').join(""):'<div class="card empty">'+esc(t("noEvents"))+'</div>';
 }
-const sslAccessAdmin=createSslAccessAdmin({root:$("sslAccessAdmin"),request,esc,flash,showCredentials,onChanged:async()=>{await refresh();setTab("settings");}});
+const sslAccessAdmin=createSslAccessAdmin({root:$("sslAccessAdmin"),request,esc,flash,showCredentials,getLanguage:()=>lang,onChanged:async()=>{await refresh();setTab("settings");}});
 function renderSettings(){
  const config=state.alliance, form=$("settingsForm");
  for(const name of ["name","capacity","discord_invite_url"]){form.elements[name].value=config[name]??"";}
@@ -364,33 +365,31 @@ function renderSettings(){
  $("defaultLanguage").value=config.default_language;
  const options=STAFF_FEATURES.map(([key,label])=>[key,t(label)]);
  const grants=(state.staffMembers||[]).filter(x=>x.ssl_readonly||/^leader-[0-9]+@accounts\.allianceos\.invalid$/i.test(x.email||""));
- $("permissionTable").innerHTML='<div><strong>'+esc(t("permissions"))+'</strong><b>R4/R5</b></div>'+
-   options.map(([feature,label])=>'<div><span>'+esc(label)+'</span><b>'+
-     esc(state.staff.is_owner?(grants.filter(x=>x.enabled&&(x.is_admin||x.permissions?.[feature]===true)).length+" / "+grants.length):(can(feature)?"✓":"—"))+
-     '</b></div>').join("")+'<p class="small-note">'+esc(t("individualRights"))+'</p>';
  $("staffControls").hidden=!state.staff.is_owner;
  if(state.staff.is_owner)sslAccessAdmin.load();
  const members=(state.staffMembers||[]).filter(x=>x.email);
+ const manualSelect=$("manualAccountModule"),oldModule=manualSelect.value;manualSelect.innerHTML=options.map(([key,label])=>'<option value="'+key+'">'+esc(label)+'</option>').join("");if(options.some(([key])=>key===oldModule))manualSelect.value=oldModule;
  const lookupName=email=>{
-    const guest=(state.staffMembers||[]).find(m=>m.email===email&&m.ssl_readonly);if(guest)return guest.name;
+    const named=(state.staffMembers||[]).find(m=>m.email===email&&m.name);if(named)return named.name;
     const m=/^leader-([0-9]+)@accounts\.allianceos\.invalid$/i.exec(email||"");
     const p=m&&state.players.find(x=>String(x.game_id)===m[1]);
     return p?String(p.name):t("legacyAdmin");
  };
  $("staffList").innerHTML=members.length?'<p class="eyebrow">'+esc(t("staffList"))+'</p>'+
- members.map(m=>{
-   const protectedAccount=m.is_admin||m.protected_account||(!m.ssl_readonly&&!/^leader-[0-9]+@accounts\.allianceos\.invalid$/i.test(m.email||""));
+ members.map((m,index)=>{
+   const protectedAccount=m.is_admin||m.protected_account||(!m.ssl_readonly&&!/^(?:leader-[0-9]+|manual-[a-f0-9]{24})@accounts\.allianceos\.invalid$/i.test(m.email||""));
    const activeCount=protectedAccount?STAFF_KEYS.length:STAFF_KEYS.filter(k=>m.permissions?.[k]===true).length;
    const status=protectedAccount?t("rightsProtected"):m.enabled?t("rightsEnabled"):t("rightsDisabled");
-   return '<button type="button" class="staff-row staff-access-row'+(selectedStaffEmail===m.email?" selected":"")+'" data-staff-email="'+esc(m.email)+'" aria-pressed="'+(selectedStaffEmail===m.email)+'" '+
-     (protectedAccount?"disabled":"")+'><span><b>'+esc(lookupName(m.email))+'</b><small>'+esc(m.rank)+' · '+esc(status)+'</small></span>'+
+   const modules=STAFF_FEATURES.filter(([key])=>protectedAccount||m.permissions?.[key]===true).map(([,label])=>t(label));
+   return '<div class="staff-access-item" '+(protectedAccount?'tabindex="0"':'')+'><button aria-describedby="staff-modules-'+index+'" type="button" class="staff-row staff-access-row'+(selectedStaffEmail===m.email?" selected":"")+'" data-staff-email="'+esc(m.email)+'" aria-pressed="'+(selectedStaffEmail===m.email)+'" '+
+     (protectedAccount?"disabled":"")+'><span><b>'+esc(lookupName(m.email))+'</b><small>'+esc(/^manual-/.test(m.email)?t("manualAccount"):m.rank)+' · '+esc(status)+'</small></span>'+
      '<span class="staff-rights-count">'+(protectedAccount?"★":activeCount+" / "+STAFF_KEYS.length)+
-       '<small>'+esc(t("rightsCount"))+'</small></span></button>';
+       '<small>'+esc(t("rightsCount"))+'</small></span></button><div class="staff-module-tooltip" id="staff-modules-'+index+'" role="tooltip"><strong>'+esc(t('manualModules'))+'</strong><ul>'+(modules.length?modules.map(label=>'<li>'+esc(label)+'</li>').join(''):'<li>'+esc(t('manualNone'))+'</li>')+'</ul></div></div>';
  }).join(""):"";
  const sel=$("staffAccountSelect");
  sel.innerHTML='<option value="">'+esc(t("chooseLeader"))+'</option>'+
- members.filter(x=>x.ssl_readonly||/^leader-/.test(x.email||"")).map(x=>
-   '<option value="'+esc(x.email)+'" '+(x.is_admin||x.protected_account?"disabled":"")+'>'+esc(lookupName(x.email))+" · "+esc(x.rank)+(x.is_admin?" · "+esc(t("rightsProtected")):"")+'</option>').join("");
+ members.filter(x=>x.ssl_readonly||/^(leader-|manual-)/.test(x.email||"")).map(x=>
+   '<option value="'+esc(x.email)+'" '+(x.is_admin||x.protected_account?"disabled":"")+'>'+esc(lookupName(x.email))+" · "+esc(/^manual-/.test(x.email)?t("manualAccount"):x.rank)+(x.is_admin?" · "+esc(t("rightsProtected")):"")+'</option>').join("");
  const selected=members.find(m=>m.email===selectedStaffEmail&&!m.is_admin&&!m.protected_account);
  if(!selected)selectedStaffEmail="";
  sel.value=selectedStaffEmail;
@@ -399,10 +398,10 @@ function renderSettings(){
  for(const key of STAFF_KEYS){permissionForm.elements[key].checked=selected?.permissions?.[key]===true;permissionForm.elements[key].disabled=Boolean(selected?.ssl_readonly&&key!=="ssl_read");}
  q(".staff-permission-toggle",rights).forEach(el=>el.hidden=Boolean(selected?.ssl_readonly&&!el.querySelector('[name="ssl_read"]')));
  q(".staff-permission-group",rights).forEach(el=>el.hidden=Boolean(selected?.ssl_readonly&&!el.querySelector('[name="ssl_read"]')));
- permissionForm.querySelector('[data-i18n="r4Enabled"]').textContent=selected?.ssl_readonly?"Gastzugang aktiviert":t("r4Enabled");
+ permissionForm.querySelector('[data-i18n="r4Enabled"]').textContent=selected?.ssl_readonly?t("guestEnabled"):/^manual-/.test(selected?.email||"")?t("accountEnabled"):t("r4Enabled");
  permissionForm.elements.enabled.checked=selected?.enabled===true;
  $("staffSelectionInfo").textContent=selected?
-  lookupName(selected.email)+" · "+selected.rank+" · "+(selected.enabled?t("rightsEnabled"):t("rightsDisabled")):
+  lookupName(selected.email)+" · "+(/^manual-/.test(selected.email)?t("manualAccount"):selected.rank)+" · "+(selected.enabled?t("rightsEnabled"):t("rightsDisabled")):
   t("rightsSelected");
  for(const id of ["staffSaveRights","staffUndoRights","staffClearRights","staffDisableAccount"]){
    $(id).disabled=!selected||(id==="staffDisableAccount"&&!selected.enabled);
@@ -645,10 +644,14 @@ $("cancelDialog").addEventListener("click",()=>$("editDialog").close());
 $("editForm").addEventListener("submit",saveDialog);
 function chooseStaffAccount(email,scroll=false){
  const member=(state?.staffMembers||[]).find(m=>m.email===email);
- selectedStaffEmail=member&&!member.is_admin&&!member.protected_account&&(member.ssl_readonly||/^leader-/.test(email))?email:"";
+ selectedStaffEmail=member&&!member.is_admin&&!member.protected_account&&(member.ssl_readonly||/^(leader-|manual-)/.test(email))?email:"";
  renderSettings();
  if(scroll&&selectedStaffEmail)$("r4Form").scrollIntoView({behavior:"smooth",block:"center"});
 }
+$("manualAccountForm").addEventListener('submit',async e=>{e.preventDefault();if(!state?.staff?.is_owner)return;const form=e.currentTarget,button=form.querySelector('button'),name=form.elements.name.value,module=form.elements.module.value;button.disabled=true;try{const result=await request('bootstrap',{action:'manual_account_create',name,module});if(!result.ok||!result.password||!/^manual-[a-f0-9]{24}$/.test(result.login_name))throw Error('invalid_response');selectedStaffEmail=result.login_name+'@accounts.allianceos.invalid';showCredentials([t('manualAccount'),t('manualLogin')+': '+result.login_name,t('manualPassword')+': '+result.password],t('manualCreated'));form.reset();await refresh();setTab('settings');await loadLeaderList();}catch{$('manualAccountStatus').textContent=t('manualFailed');}finally{button.disabled=false;}});
+$('staffList').addEventListener('keydown',e=>{if(e.key==='Escape')e.target.closest('.staff-access-item')?.classList.add('tooltip-dismissed');});
+$('staffList').addEventListener('pointerover',e=>{if(!e.relatedTarget||!e.target.closest('.staff-access-item')?.contains(e.relatedTarget))e.target.closest('.staff-access-item')?.classList.remove('tooltip-dismissed');});
+$('staffList').addEventListener('focusin',e=>e.target.closest('.staff-access-item')?.classList.remove('tooltip-dismissed'));
 $("staffList").addEventListener("click",e=>{
  const item=e.target.closest("[data-staff-email]");
  if(item)chooseStaffAccount(item.dataset.staffEmail,true);
@@ -845,6 +848,7 @@ $("provisionLeaders").addEventListener("click",async()=>{
  finally{btn.disabled=false;}
 });
 $("resetLeaderPassword").addEventListener("click",async()=>{
+ if(/^manual-/.test(selectedStaffEmail)){if(!state?.staff?.is_owner||$('resetLeaderPassword').disabled)return;if(!confirm(t('resetConfirm')))return;$('resetLeaderPassword').disabled=true;try{const r=await request('bootstrap',{action:'manual_account_reset',email:selectedStaffEmail});showCredentials([t('manualLogin')+': '+r.login_name,t('manualPassword')+': '+r.password],t('credentialReset'));}catch{flash(t('manualResetFailed'),true);}finally{$('resetLeaderPassword').disabled=false;}return;}
  if(!state?.staff?.is_owner)return;
  const value=$("staffAccountSelect").value,match=/^leader-([0-9]+)@accounts\.allianceos\.invalid$/i.exec(value);
  if(!match){flash(t("noLeaderSelected"),true);return;}

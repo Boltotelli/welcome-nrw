@@ -13,7 +13,7 @@ const request=async(_,body)=>{calls.push(body);if(body.action==='fightclub_data'
 window.planningState={players,staff:{is_owner:true},eventCycles:[]};const args={getState:()=>planningState,getLanguage:()=>'de',request,flash:()=>{},esc,openPlayer:()=>{}};
 window.fight=(await import('/leitung/fightclub.js')).createFightClub(args);window.bear=(await import('/leitung/bear-management.js')).createBearManagement(args);await fight.open();await bear.open();
 });
-await page.locator('[data-fight-date]').fill('2026-10-30');await page.locator('[data-fight-date]').press('Tab');await page.locator('.fight-roster-collapsible').evaluate(e=>e.open=true);await page.locator('[data-bear-roster]').evaluate(e=>e.open=true);
+await page.locator('[data-fight-date]').fill('2026-10-30');await page.locator('[data-fight-date]').press('Tab');assert.equal(await page.locator('details.fight-roster').count(),0,'Roster stays visible without another disclosure');await page.locator('[data-bear-roster]').evaluate(e=>e.open=true);
 
 const fight=page.locator('#fightclubRoot'),bear=page.locator('#bearManagementRoot');
 const fc=page.locator('[data-fight-row="10001"]'),fc2=page.locator('[data-fight-row="10002"]'),bc=page.locator('[data-bear-row="10001"]'),bc2=page.locator('[data-bear-row="10002"]');
@@ -53,5 +53,6 @@ await page.setViewportSize({width:390,height:844});assert.equal(await page.evalu
 const keyboardBefore=(await writes()).length;await fc.locator('[data-fight-check="1"]').focus();await page.keyboard.press('Space');assert.equal((await writes()).length,keyboardBefore,'Keyboard also stages changes');await saveAll(fight);assert.equal((await writes()).length,keyboardBefore+1);
 await fc.locator('[data-fight-check="2"]').check();await fc.locator('[data-fight-check="1"]').check();assert(await fight.locator('[data-roster-save-all]').isDisabled(),'Returning to saved selection clears draft');
 fs.mkdirSync(path.join(root,'test-results/oct30-bulk'),{recursive:true});await fight.locator('.fight-roster').screenshot({path:path.join(root,'test-results/oct30-bulk/mobile.png')});
+assert.equal(await page.locator('.fight-fast-assign,.fight-suggestions,.bear-fast-assign').count(),0);await page.evaluate(()=>{planningState.players[0].alliance_rank=4;planningState.players[1].alliance_rank=5;bearData.powers=[{game_id:'10001',power:900},{game_id:'10002',power:100}];});await bear.locator('[data-bear-sort]').selectOption('rank');assert.equal(await bear.locator('[data-bear-row]').first().getAttribute('data-bear-row'),'10002');await bear.locator('[data-bear-sort]').selectOption('power');assert.equal(await bear.locator('[data-bear-row]').first().getAttribute('data-bear-row'),'10001');await bear.locator('[data-bear-sort]').selectOption('name');assert.equal(await bear.locator('[data-bear-row]').first().getAttribute('data-bear-row'),'10001');
 assert.deepEqual(errors,[]);console.log('PASS: no writes while editing; save all including filtered rows; partial failure and retry; notes/roles; event-scoped drafts; refresh/discard; Bear matrix; keyboard/mobile; no browser errors');
 }finally{await browser.close();}})().catch(e=>{console.error(e);process.exitCode=1});

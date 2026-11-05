@@ -1,3 +1,4 @@
+import {createManualAccounts,isManualEmail} from './manual-accounts.ts';
 import { createClient } from "npm:@supabase/supabase-js@2.58.0";
 import {createLeadershipTools} from "./tools.ts";
 
@@ -254,8 +255,9 @@ async function publicLeaders(req:Request,alliance:string){
  const leaders=await checked<any[]>(db.from("players")
    .select("game_id,name,alliance_rank").eq("alliance_code",alliance)
    .eq("active",true).in("alliance_rank",[4,5]).order("name",{ascending:true}).limit(50));
+ const [manual,removed]=await Promise.all([manualAccounts.publicList(alliance),manualAccounts.removedLeaderIds(alliance)]);
  const guests=await checked<any[]>(db.from('aos_ssl_viewers').select('name,login_name').eq('alliance_code',alliance).eq('enabled',true).eq('ssl_read',true).order('name').limit(100));
- return json(req,{guests,leaders:leaders.filter(x=>/^[0-9]{5,20}$/.test(x.game_id||""))
+ return json(req,{manual,guests,leaders:leaders.filter(x=>/^[0-9]{5,20}$/.test(x.game_id||"")&&!removed.includes(x.game_id))
    .map(x=>({game_id:x.game_id,name:x.name,rank:"R"+x.alliance_rank}))});
 }
 async function provisionLeaders(req:Request,alliance:string,userId:string,staff:any){
@@ -633,7 +635,7 @@ async function eventLoanSave(req:Request,alliance:string,userId:string,staff:any
    if(!identity)throw new HttpError("leader_account_not_found",409);
    const leader=await checked<any>(db.from("aos_staff").select("rank,enabled,disabled_reason")
       .eq("user_id",identity.id).eq("alliance_code",alliance).maybeSingle());
-   if(!leader||!["R4","R5"].includes(leader.rank)||leader.disabled_reason==="manual")
+   if(!leader||!["R4","R5"].includes(leader.rank)||["manual","removed"].includes(leader.disabled_reason))
      throw new HttpError("leader_loan_protection_denied",403);
    originalRank=Number(leader.rank.slice(1));
    if(home?.alliance_rank&&Number(home.alliance_rank)!==originalRank)
@@ -700,10 +702,10 @@ async function bootstrap(req: Request, alliance: string, staff: any) {
   let staffMembers:any[]=[];
   if(staff.is_owner){
     const assigned=await checked<any[]>(db.from("aos_staff")
-      .select("user_id,rank,permissions,enabled,is_admin").eq("alliance_code",alliance).limit(100));
-    staffMembers=await Promise.all(assigned.map(async (entry:any)=>{
+      .select("user_id,rank,permissions,enabled,is_admin,disabled_reason").eq("alliance_code",alliance).limit(100));
+    staffMembers=await Promise.all(assigned.filter((entry:any)=>entry.disabled_reason!=="removed").map(async (entry:any)=>{
       const {data,error}=await db.auth.admin.getUserById(entry.user_id);
-      return {user_id:entry.user_id,email:error?"":data?.user?.email||"",rank:entry.rank,
+      return {user_id:entry.user_id,name:isManualEmail(data?.user?.email||"")?String(data?.user?.app_metadata?.display_name||"").slice(0,60):undefined,email:error?"":data?.user?.email||"",rank:entry.rank,
         permissions:entry.permissions,enabled:entry.enabled,is_admin:entry.is_admin===true,
         protected_account:entry.is_admin===true || data?.user?.email?.toLowerCase()==="admin@nap-tracker.invalid"};
     }));
@@ -712,11 +714,12 @@ async function bootstrap(req: Request, alliance: string, staff: any) {
   if(permission(staff,"transfers")){
     const staffRows=await checked<any[]>(db.from("aos_staff").select("user_id,rank,enabled")
       .eq("alliance_code",alliance).eq("enabled",true).in("rank",["R4","R5"]).limit(50));
-    transferContacts=await Promise.all(staffRows.map(async (entry:any)=>{
+    transferContacts=(await Promise.all(staffRows.map(async (entry:any)=>{
       const {data,error}=await db.auth.admin.getUserById(entry.user_id);
+      if(isManualEmail(data?.user?.email||""))return null;
       return {user_id:entry.user_id,rank:entry.rank,
         label:error?"":(data?.user?.email||"")};
-    }));
+    }))).filter(Boolean);
   }
   return json(req,{alliance:config,staff:{rank:staff.rank,permissions:staff.permissions,is_owner:staff.is_owner},staffMembers:staff.is_owner?[...staffMembers,...await sslAccess.grants(alliance)]:staffMembers,transferContacts,externalAlts,
     players:permission(staff,"members")?players:
@@ -1056,6 +1059,7 @@ async function saveBearPlanningSettings(req:Request,alliance:string,userId:strin
 import {createSslSeason} from './ssl-season.ts';
 import {createSslAccess} from './ssl-access.ts';
 import {createSslGuests} from './fightclub-ssl.ts';
+const manualAccounts=createManualAccounts({db,checked,HttpError,json,audit,temporaryPassword,permissionKeys:STAFF_PERMISSION_KEYS});
 const sslSeason=createSslSeason({db,checked,HttpError,json,audit,permission,locationValid:(key:string)=>fightMapLocationValid("swordland_summit",key)});
 const sslAccess=createSslAccess({db,auth,checked,HttpError,json,audit,temporaryPassword,sslSeason});
 const sslGuests=createSslGuests({db,checked,permission,HttpError,json,audit});
@@ -1833,6 +1837,7 @@ Deno.serve(async(req: Request)=>{
     if(body?.action==="event_loan_data")return await eventLoanData(req,alliance,staff);
     if(body?.action==="event_loan_save")return await eventLoanSave(req,alliance,userId,staff,body);
     if(body?.action==="external_alt_save")return await saveExternalAlt(req,alliance,userId,staff,body);
+    if(["manual_account_create","manual_account_reset"].includes(body?.action))return await manualAccounts.handle(req,alliance,userId,staff,body);
     if(body?.action==="provision_leaders")return await provisionLeaders(req,alliance,userId,staff);
     if(body?.action==="reset_leader_password")return await rotateLeaderPassword(req,alliance,userId,staff,body);
     if(body?.action==="player_lookup"||body?.action==="external_alt_lookup")return await lookupTransferPlayer(req,alliance,staff,body);

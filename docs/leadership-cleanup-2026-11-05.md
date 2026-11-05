@@ -1,0 +1,12 @@
+# Leadership workflow cleanup
+
+- Territory chat output uses the supplied paired Fort/Sanc game-label template. Saved assignments remain authoritative; no weekly allocation is hardcoded. Alliance tag case is preserved.
+- FightClub keeps one visible roster and tactical map. The SSL pool opens by default and contains the guest search. Duplicate quick-assignment and Mystic Trial candidate areas are removed; attendance notes and batch saves remain.
+- Bear quick assignment is removed. Participant sorting supports name, descending rank and descending power, with name tie-breaks. Existing staged edits survive sorting.
+- The KvK chart updates from normalized Prep scores, uses the selected day/overall period, and labels incomplete/zero data. It never changes the calculation or archived entries.
+- Gift codes use a focused bulk-entry banner, recipient selection, cards for codes from existing saved runs, and redemption history. No global code validity, unclaimed-total estimate or new automatic redemption is invented. Existing receipt claims, pause/retry handling and confirmation remain.
+- Settings remove the aggregate permission matrix and duplicate audit display. The account overview is open, with module details available on hover and keyboard focus. Account actions follow the overview, before SSL guest accounts.
+- Owner-only manual accounts support external people. Names live in server-written Auth app metadata; actual authority remains in `aos_staff`. Each account starts as internal R4 with exactly one whitelisted module. That internal role does not create an NRW player or in-game rank. Later rights use the existing editor; passwords appear once and are never persisted in frontend storage, staff rows or audit text. Manual accounts have separate public login-name entries, and cannot acquire ownership from metadata. Owner-only password reset preserves the normal protected-account rules.
+- The four explicitly named, already disabled leadership identities are marked `removed` in the NRW staff register and omitted from the account overview. Player rows and plans are retained. Removed entries cannot gain protected-loan status or be automatically restored as rank-loss cases.
+
+DE/EN/FR/ES labels, errors and draft preservation are covered by model/browser tests, including the SSL guest administration labels. Functional verification uses isolated data; no gift code is redeemed and no real account is created for testing.

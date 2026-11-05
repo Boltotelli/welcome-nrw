@@ -1,4 +1,4 @@
-import {createSslSeasonPanel,sslMatchName,sslSeasonText,sslPoolPlayers} from './ssl-season.js?v=20261105-ssl-season-1';
+import {createSslSeasonPanel,sslMatchName,sslSeasonText,sslPoolPlayers} from './ssl-season.js?v=20261105-cleanup-1';
 /* AllianceOS Phase 4 – GitHub Pages only: FightClub draft rosters.
  * Distinguishes confirmed source schedules from a manually chosen planning date.
  * No Discord role/slot/bot changes, no automatic player assignments. */
@@ -6,7 +6,7 @@ import {createFightClubMap} from "./fightclub-map.js?v=20261105-ssl-season-1";
 import {createRosterDrafts} from "./roster-drafts.js?v=20261103-ssl-1";
 import {readAttendanceNote,writeAttendanceNote,attendanceNoteLimit} from "./fightclub-attendance.js?v=20261103-ssl-1";
 import {SSL_EVENT,fightEventName,mergeFightPlayers} from "./fightclub-events.js?v=20261103-ssl-1";
-import {createFightclubGuests} from "./fightclub-guests.js?v=20261105-ssl-season-1";
+import {createFightclubGuests} from "./fightclub-guests.js?v=20261105-cleanup-1";
 export function createFightClub({getState,getLanguage,request,flash,esc,openPlayer}){
  const readOnly=()=>getState()?.staff?.permissions?.ssl_read===true&&getState()?.staff?.is_owner!==true&&getState()?.staff?.permissions?.fightclub!==true;
  const canDossier=()=>getState()?.staff?.is_owner===true||getState()?.staff?.permissions?.members===true;
@@ -121,7 +121,7 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
    const diff=Date.parse(v+"T00:00:00Z")-Date.now();
    return diff>=-120*86400000 && diff<=540*86400000;
  };
- let state=null,loading=null,generation=0,eventType="swordland",sslMatchKey="",date="",search="",filter="all",pending=new Set(),warning="",fastLegion=1,fastAvailability="full",rosterExpanded=true;
+ let state=null,loading=null,generation=0,eventType="swordland",sslMatchKey="",date="",search="",filter="all",pending=new Set(),warning="",rosterExpanded=true;
  const sslText=(key,values)=>sslSeasonText(getLanguage(),key,values);
  const sslPayload=()=>eventType===SSL_EVENT&&state?.ssl_season?{ssl_match_key:sslMatchKey}:{};
  const sameScope=(a,b)=>a.event_type===b.event_type&&a.battle_date===b.battle_date&&(b.ssl_match_key?a.ssl_match_key===b.ssl_match_key:!a.ssl_match_key);
@@ -194,24 +194,6 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
       '</article>';
    }).join("");
  }
- function candidateLists(){
-   const powerById=powers(),listed=assignments();
-   const free=players().filter(p=>!listed.some(a=>String(a.game_id)===String(p.game_id)&&[1,2].includes(Number(a.legion))));
-   const candidates=(availability)=>free.filter(p=>{
-     const a=assignment(p.game_id);
-     return a?.availability===availability && powerById.get(String(p.game_id))?.power!=null;
-   }).sort((a,b)=>Number(powerById.get(String(b.game_id))?.power)-Number(powerById.get(String(a.game_id))?.power)).slice(0,8);
-   const build=(status,key)=>{
-     const sorted=candidates(status);
-     return '<div class="fight-candidate-group"><strong>'+esc(t(key))+'</strong>'+
-       (sorted.length?sorted.map(p=>'<div><span>'+esc(p.name)+'</span><b>'+
-          esc(powerFormat(powerById.get(String(p.game_id)).power))+'</b></div>').join(""):
-          '<p class="small-note">'+esc(t("none"))+'</p>')+'</div>';
-   };
-   return '<details class="fight-suggestions"><summary>'+esc(t("suggestions"))+'</summary>'+
-     '<p class="small-note">'+esc(t("suggestionHint"))+'</p>'+
-     '<div class="fight-suggestion-grid">'+build("full","l1Candidates")+build("partial","l2Candidates")+'</div></details>';
- }
  const attendanceWords={de:{label:'Angemeldet, nicht erschienen',badge:'Nicht erschienen',filter:'Nicht erschienen',note:'Optional: Grund oder Rückmeldung',tooLong:'Bitte die Notiz auf höchstens 490 Zeichen kürzen, damit der Teilnahmevermerk mitgespeichert werden kann.'},en:{label:'Registered, did not attend',badge:'No-show',filter:'No-shows',note:'Optional: reason or response',tooLong:'Shorten the note to 490 characters so the attendance annotation fits.'},fr:{label:'Inscrit, absent',badge:'Absent',filter:'Inscrits absents',note:'Facultatif : motif ou retour',tooLong:'Réduisez la note à 490 caractères pour ajouter la mention.'},es:{label:'Inscrito, no asistió',badge:'No asistió',filter:'Inscritos ausentes',note:'Opcional: motivo o respuesta',tooLong:'Reduce la nota a 490 caracteres para añadir la anotación.'}};
  const at=k=>(attendanceWords[getLanguage()]||attendanceWords.en)[k];
  const guestUI=createFightclubGuests({getContext:()=>({eventType,state}),getLanguage,request,esc,onUpdated:()=>draw(),flash,canMutate:()=>!drafts.count()&&!drafts.isBusy()});
@@ -248,7 +230,7 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
        filter==="0"&&assignment(p.game_id)&&Number(assignment(p.game_id).legion)===0));
    visible.sort((a,b)=>Number(powerById.get(String(b.game_id))?.power??-1)-Number(powerById.get(String(a.game_id))?.power??-1)||
     String(a.name||"").localeCompare(String(b.name||""),locale()));
-   return '<details class="card fight-roster fight-roster-collapsible" '+(rosterExpanded?'open':'')+'><summary>'+esc(t("plans"))+' · '+visible.length+' / '+players().length+'</summary><div class="fight-heading">'+
+   return '<section class="card fight-roster"><div class="fight-heading">'+
        '<button class="ghost" type="button" data-fight-export>'+esc(t("copyList"))+' ↗</button></div>'+
      '<p class="small-note">'+esc(t("registration"))+' '+esc(t("planningNote"))+'</p>'+
      drafts.toolbar()+'<div class="fight-filterbar"><input class="control" data-fight-search type="search" value="'+esc(search)+'" placeholder="'+esc(t("search"))+'">'+
@@ -256,46 +238,11 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
         ["1",t("l1")],["1r",legionName(1,true)],["2",t("l2")],["2r",legionName(2,true)],...(assignments().some(a=>Number(a.legion)===0)?[["0",legionName(0)]]:[])],filter,'data-fight-filter')+
         '<span>'+visible.length+' / '+players().length+'</span></div>'+
      '<div class="assignment-table-scroll" role="region" aria-label="'+esc(t('plans'))+'" tabindex="0"><table class="assignment-table"><thead><tr><th scope="col">'+esc(t('members'))+'</th><th scope="col">Mystic Trial</th><th scope="col">L1</th><th scope="col">L1 '+esc(t('reserve'))+'</th><th scope="col">L2</th><th scope="col">L2 '+esc(t('reserve'))+'</th><th scope="col">'+esc(t('availability'))+' / '+esc(t('note'))+'</th></tr></thead><tbody>'+
-       (visible.length?visible.map(p=>row(p,conflicts)).join(''):'<tr><td colspan="7">'+esc(t('noPlayers'))+'</td></tr>')+'</tbody></table></div></details>';
+       (visible.length?visible.map(p=>row(p,conflicts)).join(''):'<tr><td colspan="7">'+esc(t('noPlayers'))+'</td></tr>')+'</tbody></table></div></section>';
  }
- function fastAssign(){
-   const availPlayers=players();
-   return '<section class="card fight-fast-assign"><h3>⚡ '+esc(getLanguage()==="de"?"Schnell zuweisen":getLanguage()==="fr"?"Affectation rapide":getLanguage()==="es"?"Asignación rápida":"Quick assignment")+'</h3>'+
-    '<div class="fight-fast-form"><label>'+esc(t("player"))+'<select class="control" data-fight-fast-player>'+
-    '<option value="">—</option>'+availPlayers.map(p=>'<option value="'+esc(p.game_id)+'">'+esc(p.name)+' · '+esc(p.game_id)+'</option>').join("")+'</select></label>'+
-    '<label>'+esc(t("legion"))+selectOptions(optLegion(),String(fastLegion),'data-fight-fast-legion')+'</label>'+
-    '<label>'+esc(t("availability"))+selectOptions(optAvailability(),fastAvailability,'data-fight-fast-availability')+'</label>'+
-    '<button type="button" class="primary" data-fight-fast-save>'+esc(t("save"))+'</button></div></section>';
- }
- async function fastSave(){
-   if(drafts.count()||drafts.isBusy())return;
-   if(!date||!nextDateValid(date)){flash(t("selectDate"),true);return;}
-   const id=root.querySelector("[data-fight-fast-player]")?.value||"";
-   if(!id){flash(t("player"),true);return;}
-   if(pending.has(id))return;
-   const {legion:leg,is_reserve:isReserve}=slotFields(root.querySelector("[data-fight-fast-legion]")?.value??-1),
-       availability=root.querySelector("[data-fight-fast-availability]")?.value||"full",
-       prev=assignment(id),event=eventType,eventDate=date,ticket=generation,sslData=sslPayload();
-   pending.add(id);
-   try{
-     const result=await request("bootstrap",{action:"fightclub_save",event_type:event,battle_date:eventDate,...sslData,
-       game_id:id,legion:leg,is_reserve:isReserve,availability,combat_role:prev?.combat_role||"flex",notes:prev?.notes||""});
-     if(!result?.ok)throw Error("save_failed");
-     if(ticket!==generation)return;
-     state.assignments=state.assignments.filter(x=>!(sameScope(x,{event_type:event,battle_date:eventDate,...sslData})&&String(x.game_id)===id));
-     state.assignments.push(result.assignment);
-     if(isReserve||(prev&&(Number(prev.legion)!==leg||Boolean(prev.is_reserve)!==isReserve))){
-       state.map_assignments=(state.map_assignments||[]).filter(x=>!(sameScope(x,{event_type:event,battle_date:eventDate,...sslData})&&String(x.game_id)===id));
-       state.leaders=(state.leaders||[]).filter(x=>!(sameScope(x,{event_type:event,battle_date:eventDate,...sslData})&&String(x.game_id)===id));
-     }
-     flash(t("saved"));draw();
-   }catch(e){flash(t("error")+" ("+String(e?.message||e)+")",true);}
-   finally{pending.delete(id);}
- }
-
  function dateBar(){
    if(eventType===SSL_EVENT&&state?.ssl_season){const matches=state.ssl_season.matches;
-    return seasonUI.render()+'<section class="card fight-dates"><div class="fight-heading"><h3>'+esc(sslText('match'))+'</h3><button class="ghost" type="button" data-fight-refresh>'+esc(t('refresh'))+'</button></div><div class="fight-switches"><label>'+esc(t('type'))+selectOptions(readOnly()?[[SSL_EVENT,fightEventName(SSL_EVENT,getLanguage())]]:[["swordland",t("swordland")],["triforce",t("triforce")],[SSL_EVENT,fightEventName(SSL_EVENT,getLanguage())]],eventType,'data-fight-type')+'</label><label>'+esc(sslText('match'))+'<select class="control" data-fight-ssl-match>'+['qualifier','points','championship'].map(stage=>'<optgroup label="'+esc(sslText(stage))+'">'+matches.filter(m=>m.stage===stage).map(m=>'<option value="'+esc(m.match_key)+'" '+(m.match_key===sslMatchKey?'selected':'')+'>'+esc(sslMatchName(m,getLanguage()))+'</option>').join('')+'</optgroup>').join('')+'</select></label></div><p class="small-note">'+esc(sslText('schedule'))+'</p></section>';
+    return seasonUI.render().replace('<!--ssl-guests-->',readOnly()?'':guestUI.render())+'<section class="card fight-dates"><div class="fight-heading"><h3>'+esc(sslText('match'))+'</h3><button class="ghost" type="button" data-fight-refresh>'+esc(t('refresh'))+'</button></div><div class="fight-switches"><label>'+esc(t('type'))+selectOptions(readOnly()?[[SSL_EVENT,fightEventName(SSL_EVENT,getLanguage())]]:[["swordland",t("swordland")],["triforce",t("triforce")],[SSL_EVENT,fightEventName(SSL_EVENT,getLanguage())]],eventType,'data-fight-type')+'</label><label>'+esc(sslText('match'))+'<select class="control" data-fight-ssl-match>'+['qualifier','points','championship'].map(stage=>'<optgroup label="'+esc(sslText(stage))+'">'+matches.filter(m=>m.stage===stage).map(m=>'<option value="'+esc(m.match_key)+'" '+(m.match_key===sslMatchKey?'selected':'')+'>'+esc(sslMatchName(m,getLanguage()))+'</option>').join('')+'</optgroup>').join('')+'</select></label></div><p class="small-note">'+esc(sslText('schedule'))+'</p></section>';
    }
    const known=cycles();
    const saved=[...new Set((state?.assignments||[]).filter(x=>x.event_type===eventType).map(x=>x.battle_date))];
@@ -336,7 +283,7 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
        '<p>'+esc(t("snapshotHint"))+' '+esc(t("noAutomatic"))+'</p></div>'+
        '<section class="fight-overview"><h3>'+esc(t("head"))+'</h3><div class="fight-summary-grid">'+summary()+'</div></section>'+
        (conflicts.size?'<div class="fight-conflict">⚠ '+esc(t("familyHint"))+'</div>':'')+
-       (readOnly()?readOnlyList():guestUI.render()+list()+fastAssign()+candidateLists())+mapUI.render();
+       (readOnly()?readOnlyList():list())+mapUI.render();
    }
    root.innerHTML=html;
    if(drafts.isBusy())root.querySelectorAll('input,select,button').forEach(el=>{el.disabled=true;});
@@ -405,8 +352,6 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
      }
      if(el.matches('[data-fight-no-show]')){const row=el.closest('[data-fight-row]');stage(row.dataset.fightRow);if(el.checked)row.querySelector('.fight-row-more').open=true;return;}
      if(el.matches('[data-fight-availability],[data-fight-role]')){stage(el.closest('[data-fight-row]').dataset.fightRow);return;}
-     if(el.matches("[data-fight-fast-legion]")){fastLegion=el.value;return;}
-     if(el.matches("[data-fight-fast-availability]")){fastAvailability=el.value;return;}
      if(el.matches("[data-fight-type]")){if(readOnly())return;eventType=el.value;sslMatchKey="";date="";filter="all";search="";draw();}
      else if(el.matches("[data-fight-date]")){if(eventType===SSL_EVENT&&state?.ssl_season)return;date=el.value;filter="all";search="";draw();}
      else if(el.matches("[data-fight-filter]")){filter=el.value;draw();}
@@ -432,7 +377,6 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
      if(drafts.click(e))return;
      if(await guestUI.click(e))return;
      if(await mapUI.click(e))return;
-     if(e.target.closest("[data-fight-fast-save]")){await fastSave();return;}
      const target=e.target;
      if(target.closest("[data-fight-refresh]")){load(true);return;}
      const known=target.closest("[data-fight-known]");
@@ -449,6 +393,6 @@ export function createFightClub({getState,getLanguage,request,flash,esc,openPlay
      }
    });
  }
- function reset(){seasonUI.reset();sslMatchKey="";guestUI.reset();drafts.reset();fastLegion=1;fastAvailability="full";rosterExpanded=true;mapUI.reset();generation++;state=null;loading=null;pending.clear();date="";search="";filter="all";eventType="swordland";if(root){root.innerHTML="";root.textContent="";}}
+ function reset(){seasonUI.reset();sslMatchKey="";guestUI.reset();drafts.reset();rosterExpanded=true;mapUI.reset();generation++;state=null;loading=null;pending.clear();date="";search="";filter="all";eventType="swordland";if(root){root.innerHTML="";root.textContent="";}}
  return {enabled,open:load,render:draw,reset};
 }

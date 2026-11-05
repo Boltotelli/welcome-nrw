@@ -1,5 +1,16 @@
 // Columns: German source, English, French, Spanish. No translation of user content.
 const rows=[
+ ["Kopieren","Copy","Copier","Copiar"],
+ ["Ein Code. Für dein ganzes Team.", "One code. For your whole team.", "Un code. Pour toute l’équipe.", "Un código. Para todo tu equipo."],
+ ["Empfänger ausgewählt", "recipients selected", "destinataires sélectionnés", "destinatarios seleccionados"],
+ ["Jetzt für alle Ausgewählten einlösen", "Redeem for everyone selected", "Échanger pour tous les joueurs sélectionnés", "Canjear para todos los seleccionados"],
+ ["Deine Code-Bibliothek", "Your code library", "Votre bibliothèque de codes", "Tu biblioteca de códigos"],
+ ["gespeicherte Sammelläufe", "saved bulk runs", "campagnes enregistrées", "lotes guardados"],
+ ["Sammellauf vorbereiten", "Prepare bulk run", "Préparer une campagne", "Preparar lote"],
+ ["Deine eingelösten Codes erscheinen hier.", "Your redeemed codes will appear here.", "Vos codes échangés apparaîtront ici.", "Tus códigos canjeados aparecerán aquí."],
+ ["Einlöse-Verlauf", "Redemption history", "Historique des échanges", "Historial de canjes"],
+ ["Bitte den Code manuell kopieren.", "Please copy the code manually.", "Veuillez copier le code manuellement.", "Copia el código manualmente."],
+
  ['Aktuelle Referenz: Phase {phase} · {date}','Current reference: phase {phase} · {date}','Référence actuelle : phase {phase} · {date}','Referencia actual: fase {phase} · {date}'],
  ['Sanctuaries & Forts','Sanctuaries & fortresses','Sanctuaires et forteresses','Santuarios y fortalezas'],
  ['Sanctuary-Auswahl','Sanctuary selection','Sélection des sanctuaires','Elección de santuarios'],

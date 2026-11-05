@@ -730,6 +730,9 @@
 
 /* A single registration pool feeds independent SSL matches. */
 .ssl-season-status {font-size:.8rem;color:var(--accent,#dfbc72);max-width:100%;}
+.ssl-season-pool .ssl-guests{margin-top:24px;padding:20px 0 0;border:0;border-top:1px solid var(--border);box-shadow:none;background:transparent}
+.staff-access-item{position:relative}.staff-access-item .staff-access-row{width:100%}.staff-module-tooltip{display:none;position:absolute;z-index:12;left:12px;right:12px;top:calc(100% - 8px);padding:16px;background:var(--panel);color:var(--text);box-shadow:0 12px 30px #0005;border-radius:12px;pointer-events:none}.staff-module-tooltip ul{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 16px;list-style:none;padding:10px 0 0;margin:0;font-size:12px}.staff-access-item:hover .staff-module-tooltip,.staff-access-item:focus-within .staff-module-tooltip{display:block}.staff-list{overflow:visible;max-height:none}.manual-account-form{display:grid;gap:12px;margin:24px 0;padding:20px 0;border-top:1px solid var(--border)}.manual-account-form h4,.manual-account-form p{margin:0}.manual-account-form button{justify-self:start}.bear-sort{display:grid;gap:4px;font-size:12px}.bear-filter-row{align-items:end}.fight-summary-grid{margin-bottom:18px}
+@media(max-width:600px){.staff-module-tooltip{left:0;right:0}.staff-module-tooltip ul{grid-template-columns:1fr}.bear-sort{width:100%}}
 .ssl-season-pool summary {cursor:pointer;min-height:44px;padding:12px 0;font-weight:700;}
 .ssl-season-pool label {display:grid;gap:6px;margin:12px 0;}
 .ssl-season-pool .assignment-table-scroll {max-height:420px;overflow:auto;overscroll-behavior:contain;}
@@ -739,3 +742,7 @@
 .ssl-season-pool input[type=checkbox] {width:22px;height:22px;cursor:pointer;}
 .ssl-season-pool .tools-actions {display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;}
 @media(max-width:600px){.ssl-season .fight-heading{align-items:flex-start;flex-direction:column;gap:8px}.ssl-season-pool th,.ssl-season-pool td{padding:8px 6px}.ssl-season-pool td{overflow-wrap:anywhere}}
+
+.ux-account-admin .manual-account-form{flex-basis:100%;width:100%}
+
+.staff-access-item.tooltip-dismissed .staff-module-tooltip{display:none}
