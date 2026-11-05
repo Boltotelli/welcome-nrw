@@ -7,6 +7,7 @@ const B=window.NRW_BEAR_BRIDGE,C=window.NRW_BEAR_CATALOG;
 const I18N=window.NRW_BEAR_I18N;
 const PROFILES=window.NRW_BEAR_PROFILES,HELP=window.NRW_BEAR_HELP;
 const T=text=>I18N?.tr?.(text)??text;
+const copy=(de,en,fr,es)=>({de,en,fr,es}[I18N?.language?.()||'en']||en);
 if(!B||!C)return;
 const CL=['infantry','cavalry','archer'],LABEL=['Infanterie','Kavallerie','Bogenschützen'];
 const heroList=C.heroes||[],heroNames=new Set(heroList.map(h=>h.name));
@@ -1083,11 +1084,20 @@ function languageSwitcher(){
  return div;
 }
 function landing(){
- const head=el('div','bear-name-landing');head.append(el('p','bear-name-eyebrow','🐻 NRW · BÄREN-OPTIMIERER'),
-  title('Deine Bear-Formation. Ohne Screenshot-Marathon.','h1'),
-  el('p','bear-name-muted','Spielername suchen, ein gemeinsames Profil ansehen und eigene Favoriten speichern.'));
+ const head=el('div','bear-name-landing');
+ const mast=el('div','bear-warroom-brand');
+ const logo=el('img');logo.src='../assets/nrw-banner.svg';logo.alt='NRW United';
+ mast.append(logo,el('span','','NRW United · Kingshot #1044'),languageSwitcher());
+ const intro=el('div','bear-warroom-intro');
+ intro.append(title(copy('Jeder Marsch zählt.','Every march matters.','Chaque marche compte.','Cada marcha cuenta.'),'h1'),
+  el('p','bear-name-muted',copy('Deine Helden. Deine Truppen. Dein Plan für die Bärenfalle.','Your heroes. Your troops. Your plan for the Bear Trap.','Tes héros. Tes troupes. Ton plan pour la chasse à l’ours.','Tus héroes. Tus tropas. Tu plan para la trampa del oso.')));
+ const art=el('img','bear-warroom-bear');art.src='./assets/warroom-bear.png';art.alt='';
+ intro.append(art);head.append(mast,intro);
+ head.append(title(copy('Bear Trap Optimizer','Bear Trap Optimizer','Bear Trap Optimizer','Bear Trap Optimizer'),'h2'),
+  el('p','bear-name-muted',copy('Profil öffnen, Starter und Joiner planen – mit nachvollziehbaren Empfehlungen aus deinen gespeicherten Werten.','Open your profile, plan starters and joiners, and understand recommendations based on your saved values.','Ouvre ton profil, prépare tes lanceurs et renforts et comprends les recommandations selon tes données.','Abre tu perfil, organiza líderes y apoyos y entiende las recomendaciones basadas en tus datos.')));
  const input=el('input','bear-name-input');
  input.placeholder=T('Dein Kingshot-Name');input.maxLength=50;input.autocomplete='off';
+ input.enterKeyHint='search';input.autocapitalize='none';input.spellcheck=false;
  input.setAttribute('aria-label',T('Dein Kingshot-Name'));
  const results=el('div','bear-name-search-results');
  let timer=null,token=0;
@@ -1118,7 +1128,14 @@ function landing(){
   else showStatus('Bitte einen Namen mit mindestens zwei Zeichen eingeben.',true);
  },'bear-name-btn primary'));
  head.append(el('p','bear-name-muted','Gemeinsame Profile sind einsehbar. Bearbeiten kannst du sie mit einer selbst gewählten 4- bis 6-stelligen Zahlen-PIN. Favoriten bleiben lokal.'));
- head.prepend(languageSwitcher());box.append(head);
+ const paths=el('div','bear-warroom-paths');
+ paths.append(el('p','',copy('Schnellmodus · Helden & Formationen','Quick mode · Heroes & formations','Mode rapide · Héros et formations','Modo rápido · Héroes y formaciones')),
+  el('p','',copy('Erweitert · Kampfwerte & Schadensmodell','Advanced · Combat stats & damage model','Avancé · Statistiques et modèle de dégâts','Avanzado · Estadísticas y modelo de daño')));
+ head.append(paths);box.append(head);
+ const nav=el('nav','bear-warroom-links');nav.setAttribute('aria-label','NRW');
+ for(const [href,label] of [['https://welcome-nrw.vercel.app/dashboard/',copy('Spielerübersicht','Player dashboard','Tableau des joueurs','Panel de jugadores')],['https://welcome-nrw.vercel.app/leitung/',copy('NRW-Leitung','NRW leadership','Direction NRW','Dirección NRW')]]){
+  const a=el('a','',label);a.href=href;nav.append(a);
+ }box.append(nav);
  const saved=PROFILES?.ordered()||[];
  const legacy=(()=>{
   try{return JSON.parse(localStorage.getItem('nrw_bear_name_list_v1')||'[]');}catch{return [];}
