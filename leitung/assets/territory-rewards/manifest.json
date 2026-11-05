@@ -73,6 +73,13 @@
       "bytes": 11089,
       "sha256": "e38b03d9afd6b598ad754001e74fdb0504d1f8fcce30213ab7447fabdeb53d50",
       "gitBlob": "1739c199437534f8d1231fdd94793e09365ef25c"
+    },
+    {
+      "file": "season-8-phase-4.png",
+      "bytes": 205555,
+      "sha256": "1cbf546f9f25dd4f557a22205960bd22bed8530e03e271110e5bc8d4726ef854",
+      "gitBlob": "e2a76c354528087d9bced66e5362f7abcb75804b",
+      "source": "Leadership-provided in-game capture, season 8 / phase 4, 2026-11-05"
     }
   ]
 }

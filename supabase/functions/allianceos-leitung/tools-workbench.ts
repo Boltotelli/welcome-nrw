@@ -1,3 +1,4 @@
+import {OUTPOST_CATALOG} from './outpost-catalog.js';
 // Separate documents, no writes to players, laws, bot schedules or existing KvKs.
 export function createToolsWorkbench({db,checked,json,HttpError,audit}:any){
  const uuid=(s:any)=>typeof s==='string'&&/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s);
@@ -15,9 +16,23 @@ export function createToolsWorkbench({db,checked,json,HttpError,audit}:any){
    data={date:date(d.date),time:d.time,gap:Number(d.gap),leaders:d.leaders.map((r:any)=>{const name=text(r.name,80).trim(),gather=text(r.gather,6),march=text(r.march,6);if(!name||![gather,march].every(v=>/^\d{1,3}:[0-5]\d$/.test(v)))throw new HttpError('invalid_tools_document',400);return {name,gather,march};})};
   }
   if(body.kind==='territory'){
-   if(d.phase!==''&&(!Number.isInteger(Number(d.phase))||Number(d.phase)<1||Number(d.phase)>8)||!d.sites||Array.isArray(d.sites)||typeof d.sites!=='object'||!Array.isArray(d.outposts)||d.outposts.length>200)throw new HttpError('invalid_tools_document',400);
+   if(d.phase!==''&&(!Number.isInteger(Number(d.phase))||Number(d.phase)<1||Number(d.phase)>8)||!d.sites||Array.isArray(d.sites)||typeof d.sites!=='object'||!Array.isArray(d.outposts)||d.outposts.length>500)throw new HttpError('invalid_tools_document',400);
    const sites=Object.fromEntries(Object.entries(d.sites).map(([key,s]:any)=>{if(!/^(sanc-([1-9]|1[0-2])|fort-[1-4])$/.test(key)||!s||typeof s!=='object')throw new HttpError('invalid_tools_document',400);return [key,{assigned:text(s.assigned??'',40),holder:text(s.holder??'',40),reward:text(s.reward??'',300)}];}));
-   data={date:date(d.date),phase:d.phase===''?'':Number(d.phase),lawNote:text(d.lawNote,1000),selectionOrder:text(d.selectionOrder,500),sites,outposts:d.outposts.map((o:any)=>{if(!['Angriff','Verteidigung','Ausbildung','Sammeln','Forschung','Marsch','Produktion'].includes(o.type)||![1,2,3,4].includes(o.level)||typeof o.owned!=='boolean'||typeof o.connected!=='boolean')throw new HttpError('invalid_tools_document',400);return {name:text(o.name,100),type:o.type,level:o.level,owned:o.owned,connected:o.connected};})};
+   const season=d.season===undefined||d.season===''?'':Number(d.season);
+   if(season!==''&&(!Number.isInteger(season)||season<1||season>99))throw new HttpError('invalid_tools_document',400);
+   let overrides:any=undefined;
+   if(d.rewardOverrides!==undefined){if(!d.rewardOverrides||typeof d.rewardOverrides!=='object'||Array.isArray(d.rewardOverrides)||Object.keys(d.rewardOverrides).length>64)throw new HttpError('invalid_tools_document',400);
+    overrides=Object.fromEntries(Object.entries(d.rewardOverrides).map(([scope,value]:any)=>{if(!/^(unknown|[1-9][0-9]?):(unknown|[1-8])$/.test(scope)||!value||typeof value!=='object'||Array.isArray(value)||Object.keys(value).length>16)throw new HttpError('invalid_tools_document',400);return [scope,Object.fromEntries(Object.entries(value).map(([key,reward])=>{if(!/^(sanc-([1-9]|1[0-2])|fort-[1-4])$/.test(key))throw new HttpError('invalid_tools_document',400);return [key,text(reward,300)];}))];}));
+   }
+   const seen=new Set();
+   const outposts=d.outposts.map((o:any)=>{
+    if(!['Angriff','Verteidigung','Ausbildung','Sammeln','Forschung','Marsch','Produktion','Bau'].includes(o.type)||![1,2,3,4].includes(o.level)||typeof o.owned!=='boolean'||typeof o.connected!=='boolean')throw new HttpError('invalid_tools_document',400);
+    const row:any={name:text(o.name,100),type:o.type,level:o.level,owned:o.owned,connected:o.connected};
+    if(o.id!==undefined){const id=text(o.id,80),ref=OUTPOST_CATALOG.find((r:any)=>r.id===id);if(!ref||seen.has(id)||ref.type!==o.type||ref.level!==o.level||ref.x!==o.x||ref.y!==o.y)throw new HttpError('invalid_tools_document',400);seen.add(id);row.id=id;}
+    if(o.x!==undefined||o.y!==undefined){if(![o.x,o.y].every(v=>Number.isInteger(v)&&v>=0&&v<=1199))throw new HttpError('invalid_tools_document',400);row.x=o.x;row.y=o.y;}
+    return row;
+   });
+   data={date:date(d.date),season,phase:d.phase===''?'':Number(d.phase),lawNote:text(d.lawNote,1000),selectionOrder:text(d.selectionOrder,500),sites,outposts,...(overrides===undefined?{}:{rewardOverrides:overrides})};
   }
   return {title:body.title.trim(),data};
  }

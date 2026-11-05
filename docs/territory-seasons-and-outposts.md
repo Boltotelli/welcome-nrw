@@ -1,0 +1,13 @@
+# Territory seasons and fixed outpost checklist
+
+New territory snapshots default to season 8 / phase 4, per leadership's November 5 instruction. Season and phase are separate persisted fields. The exact sixteen reward quantities and images come from the in-game capture supplied in this chat. The original image is shipped unchanged and its item areas are displayed through CSS clipping; no incorrect 600-book icon is used for a 300-book reward. Hero/buff names that are not identifiable from the capture retain neutral descriptions rather than inferred names.
+
+The older Wiki rotation is no longer used as a fallback for a different season. Unrecorded combinations are explicitly marked. Manual reward descriptions are scoped by season and phase; changing the selectors does not overwrite another combination. Legacy documents without a season remain unassigned, and their existing reward notes are migrated once into that unknown-season scope.
+
+Outpost reference: https://www.kingshot.wiki/alliance/outpost/outpost (checked November 5, 2026). Eight factual tables contain 74 distinct positions: construction 12, research 12, training 8, production 8, gathering 8, march 4, attack 11, defense 11. These are reference coordinates, not an API confirmation of kingdom 1044 ownership. Officers maintain held/connected independently. Only both flags activate a bonus group; duplicate type/level groups count once. Missing groups are compared with actual catalog combinations, replacing the previous assumption that every type has levels 1–4.
+
+The coordinate plot uses X horizontally and Y vertically, with labelled axes. Point selection opens the corresponding row; type and coordinate search filter the checklist. Mobile rows keep both checkboxes visible. Legacy custom rows are retained and can still be edited or removed; catalog rows are fixed entries. No ownership or connection is inferred from the map.
+
+The existing protected JSON document store is reused. No table migration is required. Server validation preserves the season, scoped reward descriptions, canonical IDs and coordinates, and rejects altered/duplicate catalog identities. The server's factual catalog mirrors the client catalog exactly.
+
+Validation: `territory-seasons.cjs`, `territory-ui.cjs`, shared workbench tests and four-language parity checks. Browser fixtures pass through the actual server cleaner for save/reload and cover unknown historical seasons, notes across selector changes, all 74 positions, independent flags, non-stacking groups, keyboard point selection and mobile visibility. Live shared documents are not changed by tests.

@@ -27,11 +27,11 @@ export function coordinateTag(k,x,y){
  if(!/^\d{1,6}$/.test(String(k))||Number(k)<1||![x,y].every(v=>/^\d{1,4}$/.test(String(v))&&Number(v)<=1199))throw Error('Königreich und Koordinaten (0–1199) prüfen.');
  return `<hyl=1>[#${Number(k)} X: ${Number(x)}, Y: ${Number(y)}]</hyl>`;
 }
-export const OUTPOST_TYPES=['Angriff','Verteidigung','Ausbildung','Sammeln','Forschung','Marsch','Produktion'];
-export function outpostSummary(rows){
- const known=rows.filter(r=>r.owned&&r.connected),owned=new Set(known.map(r=>r.type+'|'+r.level));
+export const OUTPOST_TYPES=['Angriff','Verteidigung','Ausbildung','Sammeln','Forschung','Marsch','Produktion','Bau'];
+export function outpostSummary(rows,available=null){
+ const known=rows.filter(r=>r.owned&&r.connected&&(!available||available.some(a=>a.type===r.type&&a.level===r.level))),owned=new Set(known.map(r=>r.type+'|'+r.level));
  return {active:owned.size,disconnected:rows.filter(r=>r.owned&&!r.connected).length,
-  missing:OUTPOST_TYPES.flatMap(type=>[1,2,3,4].filter(level=>!owned.has(type+'|'+level)).map(level=>({type,level})))};
+  missing:(available?[...new Map(available.map(r=>[r.type+'|'+r.level,{type:r.type,level:r.level}])).values()].filter(r=>!owned.has(r.type+'|'+r.level)):OUTPOST_TYPES.flatMap(type=>[1,2,3,4].filter(level=>!owned.has(type+'|'+level)).map(level=>({type,level}))))};
 }
 
 export function territoryGameText(sites){
