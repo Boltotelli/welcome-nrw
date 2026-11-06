@@ -1,7 +1,7 @@
 import {OUTPOST_CATALOG,OUTPOST_SOURCE} from './tools-outpost-catalog.js?v=20261105-territory-season-1';
 import {prepareTerritory,rewardScope,manualReward} from './territory-state.js?v=20261105-territory-season-1';
 import {loadActiveGiftCodes} from './gift-feed.js?v=20261105-followup-1';
-import {workbenchText,hasWorkbenchText} from './tools-workbench-locales.js?v=20261106-outpost-rollover-1';
+import {workbenchText,hasWorkbenchText} from './tools-workbench-locales.js?v=20261106-territory-holder-1';
 import {NOTICE_ITEM_TAGS,NOTICE_SPECIAL_ICONS,NOTICE_SYMBOL_GROUPS} from './tools-notice-palette.js?v=20261104-tools-i18n-1';
 import {WORKBENCH_TOOLS,rallyPlan,rallyText,utc,insertText,coordinateTag,OUTPOST_TYPES,outpostSummary,territoryGameText} from './tools-workbench-model.js?v=20261105-territory-season-1';
 import {TERRITORY_SITES,TERRITORY_SOURCE,CURRENT_TERRITORY_PHASE,territoryReward} from './tools-territory-catalog.js?v=20261105-territory-season-1';
@@ -72,6 +72,12 @@ export function createToolsWorkbench({root,getState,getAccountId=()=>null,getLan
   drafts.territory={...latest,data:prepareTerritory(latest.data),dirty:false};
   territoryChosen=true;
   return true;
+ }
+ function previousHolders(sites){
+  return Object.fromEntries(Object.entries(sites).flatMap(([key,site])=>{
+   const holder=site.holder?.trim()||site.assigned?.trim();
+   return holder?[[key,{holder}]]:[];
+  }));
  }
  const localDraftLabel=()=>t(territoryBackedUp?'Entwurf in diesem Browser gesichert. Mit Speichern für die Allianz übernehmen.':'Entwurf noch nicht gesichert. Bitte vor dem Schließen speichern.');
  function header(){const current=d();return `<div class="wb-heading"><div><span class="eyebrow">${esc(t("NRW · TOOLS"))}</span><h3>${esc(t(WORKBENCH_TOOLS[mode]))}</h3></div><div class="tools-actions">${button('new',t('Neu'))}${button('clone',t('Kopie anlegen'))}${button('save',busy?t('Speichert …'):t('Speichern'),'primary',busy||!current.dirty?'disabled':'')}</div></div><p class="small-note" data-wb-status role="status" aria-live="polite">${esc(t(message)||(!loaded?t('Gespeicherte Stände werden geladen …'):current.dirty?t('Ungespeicherte Änderungen'):current.version?t('Gemeinsam gespeichert'):t('Neuer Entwurf')))}</p>${mode==='territory'?`<p class="small-note" data-wb-local-draft ${current.dirty?'':'hidden'}>${esc(localDraftLabel())}</p>`:''}<div class="wb-archive"><label>${esc(t(mode==='notice'?t('Gespeicherte Vorlagen'):t('Gespeicherte Stände')))}<select class="control" data-wb-archive ${busy?'disabled':''}><option value="">${current.version?t('Gespeicherten Stand wählen'):t('Neuer Entwurf')}</option>${documents.filter(x=>x.kind===mode).map(x=>`<option value="${x.id}" ${x.id===current.id?'selected':''}>${esc(x.title)} · ${esc(x.updated_at.slice(0,10))}</option>`).join('')}</select></label>${button('reload',t('Liste aktualisieren'))}${current.version?button('delete',t('Löschen')):''}</div>${input(mode==='notice'?t('Vorlagenname'):t('Bezeichnung'),'title',current.title,'text','maxlength="100"')}`;}
@@ -188,6 +194,7 @@ export function createToolsWorkbench({root,getState,getAccountId=()=>null,getLan
   if(el.matches('[data-wb-outpost-search]')){outpostQuery=el.value;const pos=el.selectionStart;render();const next=target.querySelector('[data-wb-outpost-search]');next?.focus();if(pos!=null)next?.setSelectionRange(pos,pos);return;}
   if(mode==='gifts')return;
   if(el.id==='wb-notice-text'){d().data.text=el.value;selection={start:el.selectionStart,end:el.selectionEnd};dirty();paintCounter();return;}
+  if(el.matches('[data-wb-field="phase"],[data-wb-field="season"]'))return;
   if(el.dataset.wbField){if(el.dataset.wbField==='title')d().title=el.value;else d().data[el.dataset.wbField]=el.value;dirty();if(mode==='rally')paintRally();return;}
   const leader=el.closest('[data-wb-leader]');if(leader&&el.dataset.wbLeaderField){d().data.leaders[Number(leader.dataset.wbLeader)][el.dataset.wbLeaderField]=el.value;dirty();paintRally();return;}
   const site=el.closest('[data-wb-site]');if(site&&el.dataset.wbSiteField){const key=site.dataset.wbSite;d().data.sites[key]??={};if(el.dataset.wbSiteField==='reward'){const scope=rewardScope(d().data);d().data.rewardOverrides[scope]??={};d().data.rewardOverrides[scope][key]=el.value;}else d().data.sites[key][el.dataset.wbSiteField]=el.value;dirty();return;}
@@ -196,7 +203,14 @@ export function createToolsWorkbench({root,getState,getAccountId=()=>null,getLan
  root.addEventListener('change',async e=>{
   const el=e.target;if(!target?.contains(el)||!can('tools'))return;
   if(el.matches('[data-wb-kvk]')){selectedKvk=el.value;return;}
-  if(el.matches('[data-wb-field="phase"],[data-wb-field="season"]')){d().data[el.dataset.wbField]=el.value===''?'':Number(el.value);dirty();render();return;}
+  if(el.matches('[data-wb-field="phase"],[data-wb-field="season"]')){
+   const territory=d().data,field=el.dataset.wbField,value=el.value===''?'':Number(el.value);
+   if(Number(territory[field])>0&&Number(value)>Number(territory[field])){
+    for(const [key,{holder}] of Object.entries(previousHolders(territory.sites)))territory.sites[key].holder=holder;
+   }
+   territory[field]=value;
+   dirty();render();return;
+  }
   if(el.matches('[data-wb-outpost-type]')){outpostFilter=el.value;render();return;}
   if(el.matches('[data-wb-archive]')&&el.value){if(d().dirty&&!confirm(t('Ungespeicherte Änderungen verwerfen und diesen Stand laden?'))){el.value=d().version?d().id:'';return;}const found=documents.find(x=>x.id===el.value&&x.kind===mode);if(found){if(mode==='territory'){territoryChosen=true;clearTerritoryDraft();}drafts[mode]={...structuredClone(found),data:mode==='territory'?prepareTerritory(found.data):structuredClone(found.data),dirty:false};message='';render();}}
   if(el.matches('[data-wb-gift-run]')){gifts.running=false;gifts.run=gifts.runs.find(r=>r.id===el.value)||null;gifts.receipts=[];render();if(gifts.run)try{await giftStatus();}catch{setMessage(t('Ergebnisse konnten nicht geladen werden.'));}}
@@ -229,7 +243,7 @@ export function createToolsWorkbench({root,getState,getAccountId=()=>null,getLan
      clearTerritoryDraft();
      // An edit to an older week should not become the starting point for the next week.
      const latest=documents.filter(item=>item.kind==='territory').sort((a,b)=>b.data.date.localeCompare(a.data.date))[0];
-     if(latest)next.data=prepareTerritory({...next.data,outposts:latest.data.outposts});
+     if(latest)next.data=prepareTerritory({...next.data,outposts:latest.data.outposts,sites:previousHolders(latest.data.sites)});
     }
     drafts[mode]=next;
     message='';
