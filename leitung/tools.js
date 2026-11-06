@@ -1,6 +1,6 @@
 import {kvkChart} from './kvk-chart.js?v=20261105-cleanup-1';
-import {workbenchText} from './tools-workbench-locales.js?v=20261105-gift-queue-1';
-import {createToolsWorkbench} from "./tools-workbench.js?v=20261105-gift-queue-1";
+import {workbenchText} from './tools-workbench-locales.js?v=20261106-territory-draft-1';
+import {createToolsWorkbench} from "./tools-workbench.js?v=20261106-territory-draft-1";
 import {WORKBENCH_TOOLS} from "./tools-workbench-model.js?v=20261105-territory-season-1";
 import {ALLIANCES,PERIODS,blankKvk,parseInteger,formatInteger,formatScore,rankKvk} from './tools-kvk.js?v=20261104-kvk-order-1';
 import {toolsProfileView} from './tools-player-view.js?v=20261104-tools-history-1';
@@ -16,9 +16,9 @@ const extra={
  fr:{archive:'KvK enregistrés',newKvk:'Nouveau KvK',newDraft:'Nouveau KvK · non enregistré',unnamed:'KvK sans titre',switchConfirm:'Abandonner les modifications et changer de KvK ?',apiLoading:'Consultation MightPulse …',apiDone:'Données MightPulse enregistrées.',apiCache:'Données récentes chargées.',apiFail:'Échec API. Les données sont conservées.',apiNotFound:'MightPulse ne connaît pas cet ID.',apiLimit:'Limite API atteinte. Réessayez plus tard.'},
  es:{archive:'KvK guardados',newKvk:'Nuevo KvK',newDraft:'Nuevo KvK · sin guardar',unnamed:'KvK sin título',switchConfirm:'¿Descartar cambios y cambiar de KvK?',apiLoading:'Consultando MightPulse …',apiDone:'Datos MightPulse guardados.',apiCache:'Datos recientes cargados.',apiFail:'Error API. Se conservan los datos.',apiNotFound:'MightPulse no conoce este ID.',apiLimit:'Límite API alcanzado. Reinténtalo más tarde.'}
 };
-export function createLeadershipTools({getState,getLanguage,request,esc,can}){
+export function createLeadershipTools({getState,getAccountId,getLanguage,request,esc,can}){
  const root=document.getElementById('toolsRoot');
- const workbench=createToolsWorkbench({root,getState,getLanguage,request,esc,can});
+ const workbench=createToolsWorkbench({root,getState,getAccountId,getLanguage,request,esc,can});
  let data=blankKvk(),version=0,runId=crypto.randomUUID(),runs=[],updatedAt=null,loaded=false,loading=false,dirty=false,saving=false,mode='kvk',period='overall',generation=0,conflict=false,lastLanguage='',lookupResult=null,lookupId='',searching=false,lookupStatus='';
  const t=key=>(copy[getLanguage()]||copy.de)[key]||(extra[getLanguage()]||extra.de)[key];
  const label=p=>p==='overall'?t('overall'):t('day')+' '+p.slice(-1);

@@ -1,7 +1,7 @@
 import {OUTPOST_CATALOG,OUTPOST_SOURCE} from './tools-outpost-catalog.js?v=20261105-territory-season-1';
 import {prepareTerritory,rewardScope,manualReward} from './territory-state.js?v=20261105-territory-season-1';
 import {loadActiveGiftCodes} from './gift-feed.js?v=20261105-followup-1';
-import {workbenchText,hasWorkbenchText} from './tools-workbench-locales.js?v=20261105-gift-queue-1';
+import {workbenchText,hasWorkbenchText} from './tools-workbench-locales.js?v=20261106-territory-draft-1';
 import {NOTICE_ITEM_TAGS,NOTICE_SPECIAL_ICONS,NOTICE_SYMBOL_GROUPS} from './tools-notice-palette.js?v=20261104-tools-i18n-1';
 import {WORKBENCH_TOOLS,rallyPlan,rallyText,utc,insertText,coordinateTag,OUTPOST_TYPES,outpostSummary,territoryGameText} from './tools-workbench-model.js?v=20261105-territory-season-1';
 import {TERRITORY_SITES,TERRITORY_SOURCE,CURRENT_TERRITORY_PHASE,territoryReward} from './tools-territory-catalog.js?v=20261105-territory-season-1';
@@ -14,9 +14,10 @@ function blank(kind){
  const data=kind==='notice'?{mode:'alliance',text:''}:kind==='rally'?{date:today(),time:'19:00:00',gap:0,leaders:[{name:'',gather:'05:00',march:'01:00'}]}:prepareTerritory({date:today(),season:CURRENT_TERRITORY_PHASE.season,phase:CURRENT_TERRITORY_PHASE.phase,lawNote:'',selectionOrder:'',sites:{},outposts:[]});
  return {id:crypto.randomUUID(),kind,title:'',data,version:0,dirty:false};
 }
-export function createToolsWorkbench({root,getState,getLanguage=()=>'de',request,esc,can}){
+export function createToolsWorkbench({root,getState,getAccountId=()=>null,getLanguage=()=>'de',request,esc,can}){
  let mode='',target=null,documents=[],laws=[],loaded=false,busy=false,message='',epoch=0,timer=null,docsLoading=false,giftLoop=0,paletteQuery='',noticeUi={color:'#d4ae62',kingdom:'1044',x:'',y:''},kvkRuns=[],selectedKvk='',giftAudienceOpen=false,outpostFilter='all',outpostQuery='',selectedOutpost='';
  let drafts={notice:blank('notice'),rally:blank('rally'),territory:blank('territory')};
+ let territoryInitialized=false,territoryChosen=false,localSnapshot=null,territoryBackedUp=false;
  let gifts={loaded:false,candidates:[],runs:[],selected:new Set(),kingdoms:{},code:'',run:null,receipts:[],running:false,activeCodes:[],feedLoading:false,feedError:false,feedUpdatedAt:null};
  const language=()=>getLanguage(),t=(key,values)=>workbenchText(language(),key,values);
  const siteName=site=>t(site.key.startsWith('sanc-')?t('Sanctuary {n}'):t('Fort {n}'),{n:site.key.split('-')[1]});
@@ -26,7 +27,54 @@ export function createToolsWorkbench({root,getState,getLanguage=()=>'de',request
  const d=()=>drafts[mode],call=(action,body={})=>request('bootstrap',{action,...body});
  const input=(label,name,value,type='text',extra='')=>`<label>${esc(t(label))}<input class="control" data-wb-field="${name}" type="${type}" value="${esc(value??'')}" ${extra}></label>`;
  const button=(action,label,cls='ghost',extra='')=>`<button type="button" class="${cls}" data-wb-action="${action}" ${extra}>${esc(t(label))}</button>`;
- function header(){const current=d();return `<div class="wb-heading"><div><span class="eyebrow">${esc(t("NRW · TOOLS"))}</span><h3>${esc(t(WORKBENCH_TOOLS[mode]))}</h3></div><div class="tools-actions">${button('new',t('Neu'))}${button('clone',t('Kopie anlegen'))}${button('save',busy?t('Speichert …'):t('Speichern'),'primary',busy||!current.dirty?'disabled':'')}</div></div><p class="small-note" data-wb-status role="status" aria-live="polite">${esc(t(message)||(!loaded?t('Gespeicherte Stände werden geladen …'):current.dirty?t('Ungespeicherte Änderungen'):current.version?t('Gemeinsam gespeichert'):t('Neuer Entwurf')))}</p><div class="wb-archive"><label>${esc(t(mode==='notice'?t('Gespeicherte Vorlagen'):t('Gespeicherte Stände')))}<select class="control" data-wb-archive ${busy?'disabled':''}><option value="">${current.version?t('Gespeicherten Stand wählen'):t('Neuer Entwurf')}</option>${documents.filter(x=>x.kind===mode).map(x=>`<option value="${x.id}" ${x.id===current.id?'selected':''}>${esc(x.title)} · ${esc(x.updated_at.slice(0,10))}</option>`).join('')}</select></label>${button('reload',t('Liste aktualisieren'))}${current.version?button('delete',t('Löschen')):''}</div>${input(mode==='notice'?t('Vorlagenname'):t('Bezeichnung'),'title',current.title,'text','maxlength="100"')}`;}
+ function territoryDraftKey(){
+  const account=getAccountId(),alliance=getState()?.alliance?.code;
+  return account&&alliance?'aos:territory-draft:v1:'+alliance+':'+account:null;
+ }
+ function restoreTerritoryDraft(){
+  if(territoryInitialized)return;
+  territoryInitialized=true;
+  const key=territoryDraftKey();
+  if(!key)return;
+  try{
+   const raw=localStorage.getItem(key);
+   if(!raw)return;
+   const saved=JSON.parse(raw);
+   if(saved?.kind!=='territory'||!saved.dirty||!saved.id||!saved.data)return;
+   drafts.territory={...saved,data:prepareTerritory(saved.data)};
+   territoryChosen=true;
+   localSnapshot=raw;
+   territoryBackedUp=true;
+  }catch{/* Storage may be disabled. Shared saves are still available. */}
+ }
+ function persistTerritoryDraft(){
+  const key=territoryDraftKey();
+  territoryBackedUp=false;
+  if(!key)return false;
+  try{
+   const snapshot=JSON.stringify(drafts.territory);
+   localStorage.setItem(key,snapshot);
+   localSnapshot=snapshot;
+   territoryBackedUp=true;
+   return true;
+  }catch{return false;}
+ }
+ function clearTerritoryDraft(){
+  const key=territoryDraftKey();
+  try{if(key&&localSnapshot&&localStorage.getItem(key)===localSnapshot)localStorage.removeItem(key);}catch{}
+  localSnapshot=null;
+  territoryBackedUp=false;
+ }
+ function loadLatestTerritory(){
+  if(territoryChosen||drafts.territory.dirty||drafts.territory.version)return false;
+  const latest=documents.find(item=>item.kind==='territory');
+  if(!latest)return false;
+  drafts.territory={...latest,data:prepareTerritory(latest.data),dirty:false};
+  territoryChosen=true;
+  return true;
+ }
+ const localDraftLabel=()=>t(territoryBackedUp?'Entwurf in diesem Browser gesichert. Mit Speichern für die Allianz übernehmen.':'Entwurf noch nicht gesichert. Bitte vor dem Schließen speichern.');
+ function header(){const current=d();return `<div class="wb-heading"><div><span class="eyebrow">${esc(t("NRW · TOOLS"))}</span><h3>${esc(t(WORKBENCH_TOOLS[mode]))}</h3></div><div class="tools-actions">${button('new',t('Neu'))}${button('clone',t('Kopie anlegen'))}${button('save',busy?t('Speichert …'):t('Speichern'),'primary',busy||!current.dirty?'disabled':'')}</div></div><p class="small-note" data-wb-status role="status" aria-live="polite">${esc(t(message)||(!loaded?t('Gespeicherte Stände werden geladen …'):current.dirty?t('Ungespeicherte Änderungen'):current.version?t('Gemeinsam gespeichert'):t('Neuer Entwurf')))}</p>${mode==='territory'?`<p class="small-note" data-wb-local-draft ${current.dirty?'':'hidden'}>${esc(localDraftLabel())}</p>`:''}<div class="wb-archive"><label>${esc(t(mode==='notice'?t('Gespeicherte Vorlagen'):t('Gespeicherte Stände')))}<select class="control" data-wb-archive ${busy?'disabled':''}><option value="">${current.version?t('Gespeicherten Stand wählen'):t('Neuer Entwurf')}</option>${documents.filter(x=>x.kind===mode).map(x=>`<option value="${x.id}" ${x.id===current.id?'selected':''}>${esc(x.title)} · ${esc(x.updated_at.slice(0,10))}</option>`).join('')}</select></label>${button('reload',t('Liste aktualisieren'))}${current.version?button('delete',t('Löschen')):''}</div>${input(mode==='notice'?t('Vorlagenname'):t('Bezeichnung'),'title',current.title,'text','maxlength="100"')}`;}
  function render(){
   if(!target||!can('tools'))return;
   target.innerHTML=`<section class="wb" data-wb-mode="${mode}">${mode==='gifts'?giftHtml():header()+(mode==='notice'?noticeHtml():mode==='rally'?rallyHtml():territoryHtml())}</section>`;
@@ -66,8 +114,12 @@ export function createToolsWorkbench({root,getState,getLanguage=()=>'de',request
  <section class="wb-gift-history"><h4>${esc(t('Einlöse-Verlauf'))}</h4><label>${esc(t("Gespeicherte Sammelläufe"))}<select class="control" data-wb-gift-run ${g.running?'disabled':''}><option value="">${esc(t("Sammellauf auswählen"))}</option>${g.runs.map(r=>`<option value="${r.id}" ${r.id===g.run?.id?'selected':''}>${esc(r.code)} · ${r.created_at.slice(0,10)} · ${r.recipients.length} ${esc(t('Spieler'))}</option>`).join('')}</select></label><div data-wb-gift-progress></div><div class="tools-actions">${g.running&&!g.creating?button('gift-pause',t('Nach diesem Spieler pausieren')):!g.running&&g.run?button('gift-resume',t('Offene fortsetzen'),'primary'):''}${g.run&&!g.running?button('gift-retry',t('Fehlgeschlagene erneut versuchen')):''}</div><div data-wb-gift-results></div></section>`;}
  function paintGiftProgress(){if(mode!=='gifts'||!gifts.run||!target?.querySelector('[data-wb-gift-progress]'))return;const g=gifts,receipts=new Map(g.receipts.map(r=>[r.game_id,r])),done=g.run.recipients.filter(p=>['success','already'].includes(receipts.get(p.game_id)?.status)).length;const processed=g.run.recipients.filter(p=>['success','already','failed','unknown'].includes(receipts.get(p.game_id)?.status)).length;target.querySelector('[data-wb-gift-progress]').innerHTML=`<h4>${esc(t('{done} / {total} bestätigt',{done,total:g.run.recipients.length}))}</h4><progress max="${g.run.recipients.length}" value="${processed}" aria-label="${esc(t('{done} / {total} bearbeitet',{done:processed,total:g.run.recipients.length}))}"></progress><small>${esc(t('{done} / {total} bearbeitet',{done:processed,total:g.run.recipients.length}))}</small>`;target.querySelector('[data-wb-gift-results]').innerHTML=`<div class="wb-table-scroll"><table><thead><tr><th>${esc(t("Spieler"))}</th><th>${esc(t("Ergebnis"))}</th></tr></thead><tbody>${g.run.recipients.map(p=>{const r=receipts.get(p.game_id);return `<tr><th>${esc(p.name)}<small>${p.game_id} · #${p.kingdom_id}</small></th><td>${esc(t(statusLabels[r?.status||'pending']))}${r?.provider_code?`<small>${esc(providerLabels[r.provider_code]?t(providerLabels[r.provider_code]):t('Anbieter-Antwort {code}',{code:r.provider_code}))}</small>`:''}${r?.status==='unknown'?button('gift-unknown-retry',t('Bewusst erneut versuchen'),'ghost',`data-id="${p.game_id}" ${g.running?'disabled':''}`):''}</td></tr>`;}).join('')}</tbody></table></div>`;}
  function setMessage(text){message=text;const el=target?.querySelector('[data-wb-status]');if(el)el.textContent=t(text);}
- function dirty(){d().dirty=true;setMessage(t('Ungespeicherte Änderungen'));const b=target.querySelector('[data-wb-action="save"]');if(b)b.disabled=busy;}
- async function loadDocs(){if(docsLoading)return;docsLoading=true;const token=epoch;try{const r=await call('tools_documents_load');if(token!==epoch||!can('tools'))return;documents=r.documents; laws=r.laws;loaded=true;const lawTarget=target?.querySelector('[data-wb-laws]');if(lawTarget)lawTarget.innerHTML=lawHtml();setMessage(t('Gespeicherte Stände geladen. Aktuelle Eingaben bleiben erhalten.'));const select=target?.querySelector('[data-wb-archive]');if(select&&mode!=='gifts'){const list=documents.filter(x=>x.kind===mode);select.innerHTML=`<option value="">${esc(t("Gespeicherten Stand wählen"))}</option>`+list.map(x=>`<option value="${x.id}" ${x.id===d().id?'selected':''}>${esc(x.title)}</option>`).join('');}}catch{if(token===epoch)setMessage(t('Gespeicherte Stände konnten nicht geladen werden. Bitte erneut versuchen.'));}finally{if(token===epoch)docsLoading=false;}}
+ function dirty(){d().dirty=true;if(mode==='territory'){
+   territoryChosen=true;persistTerritoryDraft();
+   const hint=target.querySelector('[data-wb-local-draft]');
+   if(hint){hint.hidden=false;hint.textContent=localDraftLabel();}
+  }setMessage(t('Ungespeicherte Änderungen'));const b=target.querySelector('[data-wb-action="save"]');if(b)b.disabled=busy;}
+ async function loadDocs(){if(docsLoading)return;docsLoading=true;const token=epoch;try{const r=await call('tools_documents_load');if(token!==epoch||!can('tools'))return;documents=r.documents; laws=r.laws;loaded=true;if(mode==='territory'&&loadLatestTerritory()){message='';render();return;}const lawTarget=target?.querySelector('[data-wb-laws]');if(lawTarget)lawTarget.innerHTML=lawHtml();setMessage(t('Gespeicherte Stände geladen. Aktuelle Eingaben bleiben erhalten.'));const select=target?.querySelector('[data-wb-archive]');if(select&&mode!=='gifts'){const list=documents.filter(x=>x.kind===mode);select.innerHTML=`<option value="">${esc(t("Gespeicherten Stand wählen"))}</option>`+list.map(x=>`<option value="${x.id}" ${x.id===d().id?'selected':''}>${esc(x.title)}</option>`).join('');}}catch{if(token===epoch)setMessage(t('Gespeicherte Stände konnten nicht geladen werden. Bitte erneut versuchen.'));}finally{if(token===epoch)docsLoading=false;}}
  async function giftStatus(){const token=epoch,loop=giftLoop,id=gifts.run?.id;if(!id)return;const r=await call('tools_gifts_status',{run_id:id});if(token===epoch&&loop===giftLoop&&id===gifts.run?.id&&can('tools')){gifts.run=r.item;const saved=new Set(r.receipts.map(x=>x.game_id));gifts.receipts=[...r.receipts,...gifts.receipts.filter(x=>x.provisional&&!saved.has(x.game_id))];paintGiftProgress();}}
  async function giftLoad(){const token=epoch;gifts.feedLoading=true;if(mode==='gifts')render();
   const [bulk,feed]=await Promise.allSettled([call('tools_gifts_load'),loadActiveGiftCodes()]);if(token!==epoch||!can('tools'))return;
@@ -117,6 +169,9 @@ export function createToolsWorkbench({root,getState,getLanguage=()=>'de',request
   }finally{if(current()){gifts.running=false;gifts.stopRequested=false;if(mode==='gifts')render();}}
  }
  let selection={start:0,end:0};
+ window.addEventListener('beforeunload',event=>{
+  if(drafts.territory.dirty&&!territoryBackedUp){event.preventDefault();event.returnValue='';}
+ });
  root.addEventListener('toggle',e=>{if(e.target.isConnected&&e.target.matches('.wb-gift-audience'))giftAudienceOpen=e.target.open;},true);
  root.addEventListener('keydown',e=>{if(['Enter',' '].includes(e.key)&&e.target.matches('[data-wb-outpost-focus]')){e.preventDefault();e.target.dispatchEvent(new MouseEvent('click',{bubbles:true}));}});
  root.addEventListener('select',e=>{if(e.target.id==='wb-notice-text')selection={start:e.target.selectionStart,end:e.target.selectionEnd};});
@@ -143,7 +198,7 @@ export function createToolsWorkbench({root,getState,getLanguage=()=>'de',request
   if(el.matches('[data-wb-kvk]')){selectedKvk=el.value;return;}
   if(el.matches('[data-wb-field="phase"],[data-wb-field="season"]')){d().data[el.dataset.wbField]=el.value===''?'':Number(el.value);dirty();render();return;}
   if(el.matches('[data-wb-outpost-type]')){outpostFilter=el.value;render();return;}
-  if(el.matches('[data-wb-archive]')&&el.value){if(d().dirty&&!confirm(t('Ungespeicherte Änderungen verwerfen und diesen Stand laden?'))){el.value=d().version?d().id:'';return;}const found=documents.find(x=>x.id===el.value&&x.kind===mode);if(found){drafts[mode]={...structuredClone(found),data:mode==='territory'?prepareTerritory(found.data):structuredClone(found.data),dirty:false};message='';render();}}
+  if(el.matches('[data-wb-archive]')&&el.value){if(d().dirty&&!confirm(t('Ungespeicherte Änderungen verwerfen und diesen Stand laden?'))){el.value=d().version?d().id:'';return;}const found=documents.find(x=>x.id===el.value&&x.kind===mode);if(found){if(mode==='territory'){territoryChosen=true;clearTerritoryDraft();}drafts[mode]={...structuredClone(found),data:mode==='territory'?prepareTerritory(found.data):structuredClone(found.data),dirty:false};message='';render();}}
   if(el.matches('[data-wb-gift-run]')){gifts.running=false;gifts.run=gifts.runs.find(r=>r.id===el.value)||null;gifts.receipts=[];render();if(gifts.run)try{await giftStatus();}catch{setMessage(t('Ergebnisse konnten nicht geladen werden.'));}}
  });
  root.addEventListener('click',async e=>{
@@ -151,16 +206,23 @@ export function createToolsWorkbench({root,getState,getLanguage=()=>'de',request
   const a=b.dataset.wbAction,token=epoch;
   try{
    if(a==='save'){
-    const current=d();if(!current.title.trim())throw Error(t('Bitte eine Bezeichnung eingeben.'));if(mode==='rally')rallyPlan(current.data);
+    const current=d();
+    if(mode==='territory'&&!current.title.trim()){
+     current.title=t('Gebietskontrolle')+' · '+(current.data.date||today());
+     persistTerritoryDraft();
+    }
+    if(!current.title.trim())throw Error(t('Bitte eine Bezeichnung eingeben.'));if(mode==='rally')rallyPlan(current.data);
     const sent=JSON.stringify(current),payload=structuredClone(current);busy=true;render();
-    try{const r=await call('tools_document_save',payload);if(token!==epoch)return;documents=documents.filter(x=>x.id!==r.item.id);documents.unshift(r.item);current.version=r.item.version;current.dirty=JSON.stringify({...current,version:payload.version})!==sent;message=current.dirty?t('Gespeichert; weitere Änderungen sind noch offen.'):t('Gemeinsam gespeichert.');}
+    try{const r=await call('tools_document_save',payload);if(token!==epoch)return;documents=documents.filter(x=>x.id!==r.item.id);documents.unshift(r.item);current.version=r.item.version;current.dirty=JSON.stringify({...current,version:payload.version})!==sent;if(current.kind==='territory'&&drafts.territory===current){
+      if(current.dirty)persistTerritoryDraft();else clearTerritoryDraft();
+    }message=current.dirty?t('Gespeichert; weitere Änderungen sind noch offen.'):t('Gemeinsam gespeichert.');}
     catch(err){message=String(err.message).includes('conflict')?t('Dieser Stand wurde inzwischen geändert. Deine Eingaben bleiben erhalten. Als Kopie speichern oder nach Aktualisieren neu laden.'):t('Speichern fehlgeschlagen. Deine Eingaben bleiben erhalten.');}
     finally{if(token===epoch){busy=false;render();}}return;
    }
    if(a==='reload'){await loadDocs();return;}
-   if(a==='new'){if(d().dirty&&!confirm(t('Ungespeicherte Änderungen verwerfen?')))return;drafts[mode]=blank(mode);message='';render();return;}
-   if(a==='clone'){Object.assign(d(),{id:crypto.randomUUID(),version:0,title:(d().title+' · '+t('Kopie')).slice(0,100),dirty:true});message=t('Neue Kopie – zum Übernehmen speichern.');render();return;}
-   if(a==='delete'){if(!confirm(t('Diesen gespeicherten Stand löschen?')))return;await call('tools_document_delete',d());if(token!==epoch)return;documents=documents.filter(x=>x.id!==d().id);drafts[mode]=blank(mode);message=t('Gelöscht.');render();return;}
+   if(a==='new'){if(d().dirty&&!confirm(t('Ungespeicherte Änderungen verwerfen?')))return;if(mode==='territory'){territoryChosen=true;clearTerritoryDraft();}drafts[mode]=blank(mode);message='';render();return;}
+   if(a==='clone'){Object.assign(d(),{id:crypto.randomUUID(),version:0,title:(d().title+' · '+t('Kopie')).slice(0,100),dirty:true});if(mode==='territory'){territoryChosen=true;persistTerritoryDraft();}message=t('Neue Kopie – zum Übernehmen speichern.');render();return;}
+   if(a==='delete'){if(!confirm(t('Diesen gespeicherten Stand löschen?')))return;await call('tools_document_delete',d());if(token!==epoch)return;documents=documents.filter(x=>x.id!==d().id);if(mode==='territory')clearTerritoryDraft();drafts[mode]=blank(mode);message=t('Gelöscht.');render();return;}
    if(['insert','wrap','color','coords'].includes(a)){
     const text=target.querySelector('#wb-notice-text');let before=b.dataset.value??b.dataset.before??'',after=b.dataset.after??'';
     if(a==='color'){before='<color='+target.querySelector('[data-wb-color]').value+'>';after='</color>';}
@@ -199,8 +261,8 @@ export function createToolsWorkbench({root,getState,getLanguage=()=>'de',request
  });
  window.addEventListener('beforeunload',e=>{if(Object.values(drafts).some(d=>d.dirty)||gifts.running){e.preventDefault();e.returnValue='';}});
  return {
-  open(el,next){if(!can('tools'))return;target=el;if(mode!==next&&gifts.running){giftLoop++;gifts.running=false;}if(mode!==next)message='';mode=next;render();clearInterval(timer);timer=mode==='rally'?setInterval(tick,1000):null;if(!loaded)loadDocs();if(mode==='gifts'&&!gifts.loaded)giftLoad().catch(()=>setMessage(t('Sammelläufe konnten nicht geladen werden. Bitte aktualisieren.')));},
+  open(el,next){if(!can('tools'))return;target=el;if(mode!==next&&gifts.running){giftLoop++;gifts.running=false;}if(mode!==next)message='';mode=next;if(mode==='territory'){restoreTerritoryDraft();if(loaded)loadLatestTerritory();}render();clearInterval(timer);timer=mode==='rally'?setInterval(tick,1000):null;if(!loaded)loadDocs();if(mode==='gifts'&&!gifts.loaded)giftLoad().catch(()=>setMessage(t('Sammelläufe konnten nicht geladen werden. Bitte aktualisieren.')));},
   leave(){giftLoop++;gifts.running=false;clearInterval(timer);},
-  reset(){epoch++;giftLoop++;paletteQuery='';noticeUi={color:'#d4ae62',kingdom:'1044',x:'',y:''};kvkRuns=[];selectedKvk='';clearInterval(timer);gifts.running=false;mode='';target=null;documents=[];laws=[];loaded=false;busy=false;docsLoading=false;message='';drafts={notice:blank('notice'),rally:blank('rally'),territory:blank('territory')};gifts={loaded:false,candidates:[],runs:[],selected:new Set(),kingdoms:{},code:'',run:null,receipts:[],running:false,activeCodes:[],feedLoading:false,feedError:false,feedUpdatedAt:null};}
+  reset(){epoch++;giftLoop++;territoryInitialized=false;territoryChosen=false;localSnapshot=null;territoryBackedUp=false;paletteQuery='';noticeUi={color:'#d4ae62',kingdom:'1044',x:'',y:''};kvkRuns=[];selectedKvk='';clearInterval(timer);gifts.running=false;mode='';target=null;documents=[];laws=[];loaded=false;busy=false;docsLoading=false;message='';drafts={notice:blank('notice'),rally:blank('rally'),territory:blank('territory')};gifts={loaded:false,candidates:[],runs:[],selected:new Set(),kingdoms:{},code:'',run:null,receipts:[],running:false,activeCodes:[],feedLoading:false,feedError:false,feedUpdatedAt:null};}
  };
 }

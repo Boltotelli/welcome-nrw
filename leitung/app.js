@@ -1,5 +1,5 @@
 import {ADMIN_ACCOUNT_COPY} from './admin-account-copy.js?v=20261105-cleanup-1';
-import {createLeadershipTools} from "./tools.js?v=20261105-gift-queue-1";
+import {createLeadershipTools} from "./tools.js?v=20261106-territory-draft-1";
 import {activateMemberApiRefresh,memberApiLabels} from "./member-api-refresh.js?v=20261104-1";
 import {identityOptions,selectedLogin} from "./login-identities.js?v=20261105-cleanup-1";
 import {createSslAccessAdmin} from "./ssl-access-admin.js?v=20261105-cleanup-1";
@@ -48,6 +48,7 @@ const phase1Labels={
  es:{spokenSeparateTitle:"Los idiomas del jugador van por separado",spokenSeparateText:"Los idiomas hablados se editan en cada ficha. Aquí solo se configuran los idiomas y el idioma predeterminado del sitio.",toDossiers:"→ Abrir fichas",pageLanguageNote:"Los idiomas DE/EN/FR activos y el predeterminado controlan también las páginas públicas.",invited:"Invitado",pilotFree:"NRW seguirá siendo gratuito y sin anuncios.",dossier:"Ficha del jugador",joined:"Fecha de ingreso",responsibilities:"Responsabilidades",spoken:"Idiomas hablados",otherSpoken:"Otros idiomas (separados por comas)",serverTransfer:"Planear transferencia",serverMoves:"Cambios internos en 1044 (registro)",internalHistoryNote:"Historial de solo lectura con NRW.",noMoves:"Sin cambios",worldTransfers:"Transferencias de reino",noHistory:"Sin historial",targetKingdom:"Reino de destino",priority:"Prioridad",invitation:"Tipo de invitación",high:"Alta",normal:"Normal",low:"Baja",inviteOpen:"Sin asignar",inviteNormal:"Invitación normal",inviteSpecial:"Invitación especial",externalNote:"Entre reinos: entradas a #1044, salidas desde #1044. Cambios internos separados.",sourceNote:"Datos principales conservados en el registro existente.",arrived:"Llegada detectada",notArrived:"Llegada no confirmada"}
 };
 let lang=LANGS.includes(localStorage.getItem("nrw_page_lang"))?localStorage.getItem("nrw_page_lang"):"de";
+let toolsAccountId=null;
 let state=null, tab="overview", editing=null, selectedStaffEmail="";
 const eventLabels={
  de:{leadershipGuidance:"NRW-Anweisungen im Player Dashboard",guidanceInfo:"Veröffentlicht ergänzt dieser Hinweis die vorhandenen Eventinformationen am ausgewählten Tag. Die Original-Guides bleiben unverändert.",saveGuidance:"Hinweis speichern / veröffentlichen",guidancePublished:"Veröffentlicht: Im Player Dashboard sichtbar.",guidanceDraft:"Entwurf: Nur für die Leitung sichtbar.",guidanceNotSupported:"Nur bestehende Kalenderevents können im Dashboard überschrieben werden.",canonicalEvents:"Bestehende Events & Guides",canonicalNote:"Direkt aus dem Player Dashboard – keine doppelte Pflege.",eventSearch:"Event / Guide suchen …",eventUpcoming:"Aktuell / nächste 8 Wochen",eventPast:"Vergangene Termine",eventGuideCatalog:"Alle Event-Guides",eventAll:"Alle Termine",customEvents:"Weitere Allianztermine",customEventsNote:"Zusätzliche, separat bearbeitbare Sondertermine.",libraryDay:"Eventtag",ingameChat:"Allianzchat · maximal 512 Zeichen",ingameNotice:"Allianznotiz · maximal 300 Zeichen",copyChat:"📋 Chat kopieren",copyNote:"📋 Notiz kopieren",saveMessages:"Nachrichten für diesen Tag speichern",libraryLoadError:"Eventquellen nicht verfügbar.",manualSource:"Eingetragener Termin",rhythmSource:"28-Tage-Rotation",customSource:"Allianztermin",guideSource:"Event-Guide",catalogSource:"Event-Katalog",guideOnly:"Nachschlagewerk",notConfirmed:"Voraussichtlich",showEvent:"Öffnen / Kopieren",dailyPoints:"Punkte / Ziele",dailySteps:"Tagesaufgaben",eventNote:"Hinweis",eventPrepare:"Vorbereitung",dailyDetails:"Weitere Details",eventTips:"NRW-Tipps",guideObjective:"Eventziel",guideNrwRule:"NRW-Regeln",eventLimits:"Grenzwert der Quelle",sourceLink:"Originalquelle",guideConnected:"Verknüpfter Guide",rawSource:"Vollständige Quelldaten",rawDaily:"Vollständige Tagesinformationen",customTextSaved:"Eigene Nachricht gespeichert – pro Tag und Sprache.",generatedFromGuide:"Automatisch aus den vorhandenen Hinweisen erstellt. Vor dem Versenden überprüfen.",invalidMessage:"Text leer oder Zeichenlimit überschritten.",copiedText:"Text kopiert.",copySelect:"Text markiert. Bitte Strg+C drücken."},
@@ -151,6 +152,7 @@ function flash(message,error=false){
 async function request(mode="bootstrap",payload=null){
  const {data:{session}}=await supabase.auth.getSession();
  if(!session?.access_token)throw new Error("authentication_required");
+ if(mode==="bootstrap"&&!payload)toolsAccountId=session.user?.id??null;
  const options={headers:{Authorization:"Bearer "+session.access_token,"Content-Type":"application/json",apikey:"sb_publishable_8i1ismeQtj9WM-xVN_Vm0w_Tj7AvVtL"},cache:"no-store"};
  if(payload){options.method="POST";options.body=JSON.stringify(payload);if(payload.action==='tools_gifts_step')options.signal=AbortSignal.timeout(30000);}
  const pageMatch=/^discord-bot:(\d+)$/.exec(mode);
@@ -210,8 +212,9 @@ const fightclub=createFightClub({getState:()=>state,getLanguage:()=>lang,request
 const participation=createEventParticipation({getState:()=>state,getLanguage:()=>lang,request,esc,flash,
   openPlayer:gameId=>openEdit("member",gameId),navigate:name=>setTab(name)});
 const eventLoans=createEventLoans({getState:()=>state,getLanguage:()=>lang,request,esc,flash});
-const leadershipTools=createLeadershipTools({getState:()=>state,getLanguage:()=>lang,request,esc,can});
+const leadershipTools=createLeadershipTools({getState:()=>state,getAccountId:()=>toolsAccountId,getLanguage:()=>lang,request,esc,can});
 function showLogin(message=""){
+ toolsAccountId=null;
  leadershipTools.reset();
  announcementEditor.reset();
  $("liveArea").hidden=true;$("loginArea").hidden=false;$("logoutBtn").hidden=true;
