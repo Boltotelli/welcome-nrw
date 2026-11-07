@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "kingdom": 1044,
   "timezone": "UTC",
-  "updatedAt": "2026-11-06T00:17:42Z",
+  "updatedAt": "2026-11-07T00:11:21Z",
   "events": [
     {
       "id": "golden-glaives-prep-2026-09-20",
@@ -1606,20 +1606,6 @@
       "sourceUrl": "https://kingshotdata.com/events/cesares-fury/"
     },
     {
-      "id": "hero-roulette-2026-11-03",
-      "start": "2026-11-03",
-      "end": "2026-11-06",
-      "icon": "🎡",
-      "iconUrl": "https://kingshotdata.com/uploads/2025/03/hero-roulette-event-icon.webp",
-      "confidence": "public-timeline",
-      "name": {
-        "de": "Helden-Roulette",
-        "en": "Hero Roulette",
-        "fr": "Roulette des héros"
-      },
-      "sourceUrl": "https://kingshotdata.com/events/hero-roulette/"
-    },
-    {
       "id": "sanctuary-battle-2026-11-03",
       "start": "2026-11-03",
       "end": "2026-11-07",
@@ -2081,6 +2067,128 @@
         }
       },
       "sourceUrl": "https://kingshotdata.com/events/armament-competition/"
+    },
+    {
+      "id": "all-out-2026-11-07",
+      "start": "2026-11-07",
+      "end": "2026-11-09",
+      "icon": "🔥",
+      "iconUrl": "https://kingshotdata.com/uploads/2025/03/all-out-event-icon.webp",
+      "confidence": "predicted",
+      "name": {
+        "de": "All Out · Kill Event",
+        "en": "All Out · Kill Event",
+        "fr": "All Out · Événement d’élimination"
+      },
+      "dailyPlans": {
+        "2026-11-07": {
+          "points": {
+            "de": "Feindliche Truppe besiegen oder schwer verwunden · T1/T2: 1 · T3: 2 · T4: 3 · T5: 4 · T6: 5 · T7: 7 · T8: 9 · T9: 11 · T10: 13 Punkte je Truppe",
+            "en": "Defeat or severely injure enemy troops · T1/T2: 1 · T3: 2 · T4: 3 · T5: 4 · T6: 5 · T7: 7 · T8: 9 · T9: 11 · T10: 13 points per troop",
+            "fr": "Vaincre ou blesser gravement des troupes ennemies · T1/T2 : 1 · T3 : 2 · T4 : 3 · T5 : 4 · T6 : 5 · T7 : 7 · T8 : 9 · T9 : 11 · T10 : 13 points par troupe"
+          },
+          "prepare": {
+            "title": {
+              "de": "KvK-Kampfstart vorbereiten",
+              "en": "Prepare for the KvK battle start",
+              "fr": "Préparer le début du combat KvK"
+            },
+            "status": {
+              "de": "VOR 10:00 UTC",
+              "en": "BEFORE 10:00 UTC",
+              "fr": "AVANT 10:00 UTC"
+            },
+            "steps": {
+              "de": [
+                "Discord-Anweisungen, Schild und Teleporter vor dem Kampfstart prüfen.",
+                "Wenn du nicht aktiv am KvK teilnimmst, rechtzeitig geschützt bleiben; keine Kämpfe nur für All-Out-Punkte beginnen."
+              ],
+              "en": [
+                "Check Discord instructions, shield and teleporters before the battle starts.",
+                "If you are not actively participating in KvK, stay shielded in time; do not start fights solely for All Out points."
+              ],
+              "fr": [
+                "Vérifie les consignes Discord, le bouclier et les téléporteurs avant le début du combat.",
+                "Si tu ne participes pas activement au KvK, reste protégé à temps ; ne lance pas de combats uniquement pour les points All Out."
+              ]
+            }
+          },
+          "steps": {
+            "de": [
+              "Ab 10:00 UTC ausschließlich gemäß der zugewiesenen KvK-Rolle und den Discord-Anweisungen handeln.",
+              "All-Out-Punkte entstehen automatisch, wenn feindliche Truppen besiegt oder schwer verwundet werden; höhere Truppenstufen bringen mehr Punkte.",
+              "Keine zusätzlichen Angriffe außerhalb der Serverstrategie nur für die Rangliste ausführen.",
+              "Für diese Punktequelle ist keine bestätigte Pet-Fähigkeit oder Cooldown-Kombination erforderlich."
+            ],
+            "en": [
+              "From 10:00 UTC, act only according to your assigned KvK role and Discord instructions.",
+              "All Out points are earned automatically when enemy troops are defeated or severely injured; higher troop tiers give more points.",
+              "Do not launch additional attacks outside the server strategy solely for ranking.",
+              "No confirmed Pet skill or cooldown combination is required for this scoring source."
+            ],
+            "fr": [
+              "À partir de 10:00 UTC, agis uniquement selon ton rôle KvK attribué et les consignes Discord.",
+              "Les points All Out sont gagnés automatiquement lorsque des troupes ennemies sont vaincues ou gravement blessées ; les niveaux supérieurs rapportent davantage.",
+              "Ne lance pas d’attaques supplémentaires hors de la stratégie du serveur uniquement pour le classement.",
+              "Aucune compétence de Familier ni combinaison de temps de recharge confirmée n’est requise pour cette source de points."
+            ]
+          }
+        },
+        "2026-11-08": {
+          "points": {
+            "de": "Feindliche Truppe besiegen oder schwer verwunden · T1/T2: 1 · T3: 2 · T4: 3 · T5: 4 · T6: 5 · T7: 7 · T8: 9 · T9: 11 · T10: 13 Punkte je Truppe",
+            "en": "Defeat or severely injure enemy troops · T1/T2: 1 · T3: 2 · T4: 3 · T5: 4 · T6: 5 · T7: 7 · T8: 9 · T9: 11 · T10: 13 points per troop",
+            "fr": "Vaincre ou blesser gravement des troupes ennemies · T1/T2 : 1 · T3 : 2 · T4 : 3 · T5 : 4 · T6 : 5 · T7 : 7 · T8 : 9 · T9 : 11 · T10 : 13 points par troupe"
+          },
+          "prepare": {
+            "title": {
+              "de": "Schutz und Serverregeln prüfen",
+              "en": "Check protection and server rules",
+              "fr": "Vérifier la protection et les règles du serveur"
+            },
+            "status": {
+              "de": "VOR RESET",
+              "en": "BEFORE RESET",
+              "fr": "AVANT RESET"
+            },
+            "steps": {
+              "de": [
+                "Vor dem Reset prüfen, ob dein Schild über den geplanten Offline-Zeitraum hinaus aktiv bleibt.",
+                "Keine Märsche oder Angriffe vorbereiten, die gegen aktuelle Server- oder Allianzregeln verstoßen."
+              ],
+              "en": [
+                "Before reset, make sure your shield remains active for the period you plan to be offline.",
+                "Do not prepare marches or attacks that conflict with current server or alliance rules."
+              ],
+              "fr": [
+                "Avant le reset, vérifie que ton bouclier reste actif pendant toute ta période d’absence prévue.",
+                "Ne prépare aucune marche ni attaque contraire aux règles actuelles du serveur ou de l’alliance."
+              ]
+            }
+          },
+          "steps": {
+            "de": [
+              "Nur nach Abstimmung und innerhalb der geltenden Server- und Allianzregeln kämpfen.",
+              "Punkte entstehen ausschließlich durch besiegte oder schwer verwundete feindliche Truppen; vermeide unnötige Verluste für Ranglistenpunkte.",
+              "Wenn keine freigegebene Kampfaktion besteht, geschützt bleiben und das Event nicht erzwingen.",
+              "Für diese Punktequelle ist keine bestätigte Pet-Fähigkeit oder Cooldown-Kombination erforderlich."
+            ],
+            "en": [
+              "Fight only after coordination and within the applicable server and alliance rules.",
+              "Points come only from defeated or severely injured enemy troops; avoid unnecessary losses for ranking points.",
+              "If no combat action has been approved, stay protected and do not force the event.",
+              "No confirmed Pet skill or cooldown combination is required for this scoring source."
+            ],
+            "fr": [
+              "Combats uniquement après coordination et dans le respect des règles du serveur et de l’alliance.",
+              "Les points proviennent uniquement des troupes ennemies vaincues ou gravement blessées ; évite les pertes inutiles pour le classement.",
+              "Si aucune action de combat n’est autorisée, reste protégé et ne force pas l’événement.",
+              "Aucune compétence de Familier ni combinaison de temps de recharge confirmée n’est requise pour cette source de points."
+            ]
+          }
+        }
+      },
+      "sourceUrl": "https://kingshotdata.com/events/all-out-event/"
     }
   ]
 }
